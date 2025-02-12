@@ -1,23 +1,30 @@
+import { useSelect } from "@/data/store/storeHelpers";
+import { useAuthStore } from "@/features/authentication/auth.store";
+import { ensureUserQueryData } from "@/features/authentication/user-query";
 import {
   AuthStatuses,
   useAccountsStore,
 } from "@/features/multi-inbox/multi-inbox.store";
-
-import { useSelect } from "@/data/store/storeHelpers";
-import { MultiInboxClientRestorationStates } from "@/features/multi-inbox/multi-inbox-client.types";
+import { useEffect } from "react";
 
 export const useAuthStatus = () => {
-  const { authStatus, multiInboxClientRestorationState } = useAccountsStore(
-    useSelect(["authStatus", "multiInboxClientRestorationState"])
+  const { multiInboxClientRestorationState } = useAccountsStore(
+    useSelect(["multiInboxClientRestorationState"])
   );
 
-  const isRestored =
-    multiInboxClientRestorationState ===
-    MultiInboxClientRestorationStates.restored;
+  const authStatus = useAuthStore((state) => state.status);
+
+  const isRestored = multiInboxClientRestorationState === "restored";
 
   const isRestoring =
-    multiInboxClientRestorationState ===
-    MultiInboxClientRestorationStates.restoring;
+    multiInboxClientRestorationState === "restoring" || authStatus === "idle";
+
+  // useEffect(() => {
+  //   ensureUserQueryData({
+  //     privy
+  //     caller: "useAuthStatus",
+  //   });
+  // }, [ensureUserQueryData]);
 
   const hasNotAuthenticated =
     [

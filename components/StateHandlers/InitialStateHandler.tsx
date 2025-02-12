@@ -1,14 +1,12 @@
-import { setAndroidColors } from "@styles/colors/helpers";
 import * as Linking from "expo-linking";
 import { useEffect, useRef } from "react";
-import { useColorScheme } from "react-native";
 
+import { useAuthStatus } from "@/features/authentication/useAuthStatus.hook";
+import logger from "@utils/logger";
 import { useAppStore } from "../../data/store/appStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import { getSchemedURLFromUniversalURL } from "../../utils/navigation";
 import { hideSplashScreen } from "../../utils/splash/splash";
-import logger from "@utils/logger";
-import { useAuthStatus } from "@/features/authentication/useAuthStatus.hook";
 
 const isDevelopmentClientURL = (url: string) => {
   return url.includes("expo-development-client");
@@ -17,8 +15,6 @@ const isDevelopmentClientURL = (url: string) => {
 export let initialURL = "";
 
 export function InitialStateHandler() {
-  const colorScheme = useColorScheme();
-
   const { setSplashScreenHidden, hydrationDone } = useAppStore(
     useSelect(["setSplashScreenHidden", "hydrationDone"])
   );
@@ -26,10 +22,6 @@ export function InitialStateHandler() {
   const { isRestoring } = useAuthStatus();
 
   const splashScreenHidden = useRef(false);
-
-  useEffect(() => {
-    setAndroidColors(colorScheme);
-  }, [colorScheme]);
 
   useEffect(() => {
     const handleInitialDeeplink = async () => {

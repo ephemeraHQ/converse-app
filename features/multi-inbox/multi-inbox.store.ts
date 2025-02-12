@@ -2,13 +2,11 @@ import { create, StoreApi, UseBoundStore } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import logger from "@utils/logger";
 import mmkv, { zustandMMKVStorage } from "../../utils/mmkv";
-import { ChatStoreType, initChatStore } from "../../data/store/chatStore";
 import {
   GroupStatus,
   initSettingsStore,
   SettingsStoreType,
 } from "../../data/store/settingsStore";
-import { initWalletStore, WalletStoreType } from "../../data/store/walletStore";
 import {
   CurrentSender,
   MultiInboxClientRestorationState,
@@ -17,8 +15,6 @@ import {
 
 type AccountStoreDataType = {
   settings: SettingsStoreType;
-  chat: ChatStoreType;
-  wallet: WalletStoreType;
 };
 
 type AccountStoreType = {
@@ -39,8 +35,6 @@ export const initStores = (account: string) => {
     // the deletion method in deleteStores
     storesByAccount[account] = {
       settings: initSettingsStore(account),
-      chat: initChatStore(account),
-      wallet: initWalletStore(account),
     };
   }
 };
@@ -48,25 +42,10 @@ export const initStores = (account: string) => {
 export const deleteStores = (account: string) => {
   logger.debug(`[multi-inbox store] Deleting account ${account}`);
   delete storesByAccount[account];
-  mmkv.delete(`store-${account}-chat`);
   mmkv.delete(`store-${account}-settings`);
-  mmkv.delete(`store-${account}-wallet`);
 };
 
-export const AuthStatuses = {
-  signingUp: "signingUp",
-  signingIn: "signingIn",
-  restoring: "restoring",
-  signedIn: "signedIn",
-  signedOut: "signedOut",
-  undetermined: "undetermined",
-} as const;
-
-type AuthStatus = (typeof AuthStatuses)[keyof typeof AuthStatuses];
-
 type AccountsStoreStype = {
-  authStatus: AuthStatus;
-  setAuthStatus: (status: AuthStatus) => void;
   multiInboxClientRestorationState: MultiInboxClientRestorationState;
   setMultiInboxClientRestorationState: (
     state: MultiInboxClientRestorationState
@@ -85,9 +64,6 @@ type AccountsStoreStype = {
 export const useAccountsStore = create<AccountsStoreStype>()(
   persist(
     (set, get) => ({
-      authStatus: AuthStatuses.signedOut,
-      setAuthStatus: (status: AuthStatus) => set({ authStatus: status }),
-
       currentSender: undefined,
 
       setCurrentAccount: ({ ethereumAddress }: { ethereumAddress: string }) => {
@@ -283,9 +259,6 @@ const currentAccountStoreHook = <T extends keyof AccountStoreDataType>(
 export const useSettingsStore = currentAccountStoreHook("settings");
 export const getSettingsStore = (account: string) =>
   getAccountStore(account).settings;
-export const useChatStore = currentAccountStoreHook("chat");
-export const getWalletStore = (account: string) =>
-  getAccountStore(account).wallet;
 
 // Group status helper
 export const setGroupStatus = (groupStatus: GroupStatus) => {

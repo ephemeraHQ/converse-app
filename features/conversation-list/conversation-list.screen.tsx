@@ -34,7 +34,7 @@ import { ContextMenuView } from "@/design-system/context-menu/context-menu";
 
 type IConversationListProps = NativeStackScreenProps<
   NavigationParamList,
-  "Chats"
+  "ConversationsList"
 >;
 
 export function ConversationListScreen(props: IConversationListProps) {

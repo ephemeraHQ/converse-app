@@ -160,6 +160,14 @@ export const authLogger = {
     logger.error("[AUTH]", ...args),
 };
 
+export const apiLogger = {
+  ...logger,
+  debug: (...args: Parameters<logMethodType>) => logger.debug("[API]", ...args),
+  info: (...args: Parameters<logMethodType>) => logger.info("[API]", ...args),
+  warn: (...args: Parameters<logMethodType>) => logger.warn("[API]", ...args),
+  error: (...args: Parameters<logMethodType>) => logger.error("[API]", ...args),
+};
+
 /**
  * @deprecated Use { logger } instead
  */

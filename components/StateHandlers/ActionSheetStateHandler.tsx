@@ -8,9 +8,10 @@ import { useAppStore } from "../../data/store/appStore";
 
 export let showActionSheetWithOptions: ActionSheetProps["showActionSheetWithOptions"];
 
-export default function ActionSheetStateHandler() {
+export function ActionSheetStateHandler() {
   const { showActionSheetWithOptions: _showActionSheetWithOptions } =
     useActionSheet();
+
   showActionSheetWithOptions = (
     options: ActionSheetOptions,
     callback: (i?: number | undefined) => void | Promise<void>
@@ -27,5 +28,6 @@ export default function ActionSheetStateHandler() {
       }
     });
   };
+
   return null;
 }

@@ -1,13 +1,13 @@
 import { create } from "zustand";
 import {
-  persist,
   createJSONStorage,
+  persist,
   subscribeWithSelector,
 } from "zustand/middleware";
 
-import { zustandMMKVStorage } from "../../utils/mmkv";
 import logger from "@/utils/logger";
 import { wait } from "@/utils/wait";
+import { zustandMMKVStorage } from "../../utils/mmkv";
 
 // A app-wide store to store settings that don't depend on
 // an account like if notifications are accepted
@@ -22,9 +22,6 @@ type AppStoreType = {
   setAddressBookPermissionStatus: (
     status: AppStoreType["addressBookPermissionStatus"]
   ) => void;
-
-  splashScreenHidden: boolean;
-  setSplashScreenHidden: (hidden: true) => void;
 
   isInternetReachable: boolean;
   setIsInternetReachable: (reachable: boolean) => void;
@@ -57,11 +54,6 @@ export const useAppStore = create<AppStoreType>()(
           set(() => ({
             addressBookPermissionStatus: status,
           })),
-
-        // On web no splash screen at all
-        splashScreenHidden: false,
-        setSplashScreenHidden: (hidden) =>
-          set(() => ({ splashScreenHidden: hidden })),
 
         isInternetReachable: false,
         setIsInternetReachable: (reachable) =>

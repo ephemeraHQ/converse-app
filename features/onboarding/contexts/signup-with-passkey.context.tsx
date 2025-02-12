@@ -1,4 +1,11 @@
-import { createContext, useContext, useEffect, useMemo, useRef } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   useLoginWithPasskey as usePrivyLoginWithPasskey,
   useSignupWithPasskey as usePrivySignupWithPasskey,

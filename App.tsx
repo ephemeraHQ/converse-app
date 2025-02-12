@@ -1,18 +1,18 @@
 import { PrivyProvider } from "@privy-io/expo";
-import { DevToolsBubble } from "react-native-react-query-devtools";
 import * as Clipboard from "expo-clipboard";
+import { DevToolsBubble } from "react-native-react-query-devtools";
 // This is a requirement for Privy to work, does not make any sense
 // To test run yarn start --no-dev --minify
 
+import { ActionSheetStateHandler } from "@/components/StateHandlers/ActionSheetStateHandler";
+import NetworkStateHandler from "@/components/StateHandlers/NetworkStateHandler";
+import {
+  // MultiInboxClient,
+  useInitializeMultiInboxClient,
+} from "@/features/multi-inbox/multi-inbox.client";
+import { $globalStyles } from "@/theme/styles";
 import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
 import { DebugButton } from "@components/DebugButton";
-import {
-  AppState,
-  Platform,
-  StyleSheet,
-  View,
-  useColorScheme,
-} from "react-native";
 import { Snackbars } from "@components/Snackbar/Snackbars";
 import { BottomSheetModalProvider } from "@design-system/BottomSheet/BottomSheetModalProvider";
 import { useReactQueryDevTools } from "@dev-plugins/react-query";
@@ -20,13 +20,11 @@ import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { SmartWalletsProvider } from "@privy-io/expo/smart-wallets";
 import { queryClient } from "@queries/queryClient";
 import { MaterialDarkTheme, MaterialLightTheme } from "@styles/colors";
-import { focusManager, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { useThemeProvider } from "@theme/useAppTheme";
-import { setupAppAttest } from "@utils/appCheck";
-import { useCoinbaseWalletListener } from "@utils/coinbaseWallet";
-import { converseEventEmitter } from "@utils/events";
 import "expo-dev-client";
-import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import React, { useMemo } from "react";
+import { Platform, useColorScheme } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
@@ -36,18 +34,11 @@ import {
 } from "react-native-reanimated";
 import { ThirdwebProvider } from "thirdweb/react";
 import { config } from "./config";
-import { Main } from "./screens/Main";
+import { AppNavigator } from "./screens/app-navigator";
 import { initSentry } from "./utils/sentry";
-import { saveApiURI } from "./utils/sharedData";
 import { preventSplashScreenAutoHide } from "./utils/splash/splash";
-import { setupStreamingSubscriptions } from "@/features/streams/streams";
-import {
-  // MultiInboxClient,
-  useInitializeMultiInboxClient,
-} from "@/features/multi-inbox/multi-inbox.client";
 // import { useAppStateHandlers } from "./hooks/useAppStateHandlers";
 // import { useInstalledWallets } from "@/features/wallets/use-installed-wallets.hook";
-import logger from "./utils/logger";
 // import { useAccountsStore } from "./features/multi-inbox/multi-inbox.store";
 // import { AuthenticateWithPasskeyProvider } from "./features/onboarding/contexts/signup-with-passkey.context";
 // import { PrivyPlaygroundLandingScreen } from "./features/privy-playground/privy-playground-landing.screen";
@@ -111,58 +102,13 @@ configureCoinbase({
 
 initSentry();
 
-saveApiURI();
-
-const coinbaseUrl = new URL(`https://${config.websiteDomain}/coinbase`);
-
-const App = () => {
-  const styles = useStyles();
-  const debugRef = useRef();
-
-  useEffect(() => {
-    setupAppAttest();
-    setupStreamingSubscriptions();
-  }, []);
-
-  const coinbaseUrl = new URL(`https://${config.websiteDomain}/coinbase`);
-  useCoinbaseWalletListener(true, coinbaseUrl);
-
-  const showDebugMenu = useCallback(() => {
-    if (!debugRef.current || !(debugRef.current as any).showDebugMenu) {
-      return;
-    }
-    (debugRef.current as any).showDebugMenu();
-  }, []);
-
-  useEffect(() => {
-    converseEventEmitter.on("showDebugMenu", showDebugMenu);
-    return () => {
-      converseEventEmitter.off("showDebugMenu", showDebugMenu);
-    };
-  }, [showDebugMenu]);
-  useEffect(() => {
-    AppState.addEventListener("change", (state) => {
-      logger.debug("[App] AppState changed to", state);
-      focusManager.setFocused(state === "active");
-    });
-  }, []);
-
-  // For now we use persit with zustand to get the accounts when the app launch so here is okay to see if we're logged in or not
-
-  return (
-    <View style={styles.safe}>
-      <Main />
-      <DebugButton ref={debugRef} />
-    </View>
-  );
-};
-
 // On Android we use the default keyboard "animation"
 const AppKeyboardProvider =
   Platform.OS === "ios" ? KeyboardProvider : React.Fragment;
+
 // import { DevToolsBubble } from "react-native-react-query-devtools";
 
-export function AppWithProviders() {
+export function App() {
   useInitializeMultiInboxClient();
   const colorScheme = useColorScheme();
 
@@ -201,13 +147,16 @@ export function AppWithProviders() {
               <ActionSheetProvider>
                 <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
                   <PaperProvider theme={paperTheme}>
-                    <GestureHandlerRootView style={{ flex: 1 }}>
+                    <GestureHandlerRootView style={$globalStyles.flex1}>
                       <BottomSheetModalProvider>
-                        <App />
+                        <AppNavigator />
                         {/* <AuthenticateWithPasskeyProvider>
                           <PrivyPlaygroundLandingScreen />
                         </AuthenticateWithPasskeyProvider> */}
                         {__DEV__ && <DevToolsBubble onCopy={onCopy} />}
+                        <ActionSheetStateHandler />
+                        <NetworkStateHandler />
+                        <DebugButton />
                         <Snackbars />
                       </BottomSheetModalProvider>
                     </GestureHandlerRootView>
@@ -221,15 +170,3 @@ export function AppWithProviders() {
     </QueryClientProvider>
   );
 }
-
-const useStyles = () => {
-  return useMemo(
-    () =>
-      StyleSheet.create({
-        safe: {
-          flex: 1,
-        },
-      }),
-    []
-  );
-};

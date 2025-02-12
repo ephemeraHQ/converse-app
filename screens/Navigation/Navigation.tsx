@@ -57,7 +57,7 @@ export type NavigationParamList = {
   // Main
   FakeScreen: undefined;
   Blocked: undefined;
-  Chats: undefined;
+  ConversationsList: undefined;
   ChatsRequests: undefined;
   Conversation: ConversationNavParams;
   CreateConversation: undefined;

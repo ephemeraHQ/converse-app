@@ -5,6 +5,9 @@ import type {
 } from "@xmtp/react-native-sdk";
 
 export enum QueryKeys {
+  // User
+  USER = "user",
+
   // Conversations
   CONVERSATIONS_SYNC_ALL = "conversation-sync-all",
   CONVERSATIONS_ALLOWED_CONSENT = "conversations-allowed-consent",
@@ -47,6 +50,12 @@ export enum QueryKeys {
   // Profile Socials
   PROFILE_SOCIALS = "profile-socials",
 }
+
+// User
+export const getUserQueryKey = (args: { privyId: string }) => [
+  QueryKeys.USER,
+  args.privyId,
+];
 
 // InboxId
 export const getInboxIdForAccountQueryKey = (account: string) => [

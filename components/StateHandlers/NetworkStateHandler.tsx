@@ -37,5 +37,6 @@ export default function NetworkStateHandler() {
       unsubscribeNetworkInfo();
     };
   }, [setIsInternetReachable]);
+
   return null;
 }
