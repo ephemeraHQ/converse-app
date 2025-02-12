@@ -1,3 +1,5 @@
+import "@thirdweb-dev/react-native-adapter";
+
 import { PrivyProvider } from "@privy-io/expo";
 import { DevToolsBubble } from "react-native-react-query-devtools";
 import * as Clipboard from "expo-clipboard";
