@@ -54,7 +54,6 @@ export const AppSettingsScreen = memo(function AppSettingsScreen() {
       >
         <SettingsList rows={generalSettings} />
         <OtaUpdatesList />
-        <Text>test</Text>
       </VStack>
     </Screen>
   );

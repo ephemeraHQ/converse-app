@@ -161,7 +161,7 @@ export const authLogger = {
 };
 
 /**
- * @deprecated Use { logger } instead
+ * @deprecated Use { logger } instead or create your own logger instance
  */
 export default logger;
 
