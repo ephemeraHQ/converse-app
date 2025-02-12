@@ -5,12 +5,12 @@
   "scripts": {
     "start": "expo start",
     "android": "expo run:android",
-    "android:clean": "expo prebuild --clean -p android && yarn android",
+    "android:clean": "yarn reinstall:nodemodules && expo prebuild --clean -p android && yarn android",
     "android:build:dev": "npx eas-cli build -p android --profile development --local",
     "android:reverse": "adb reverse tcp:8081 tcp:8081 && adb reverse tcp:9875 tcp:9875",
     "android:sendApk": "./scripts/android/send-apk.sh",
     "ios": "expo run:ios",
-    "ios:clean": "expo prebuild --clean -p ios && yarn ios",
+    "ios:clean": "yarn reinstall:nodemodules && expo prebuild --clean -p ios && yarn ios",
     "env:pull:dev": "npx eas-cli env:pull --environment=development",
     "env:pull:preview": "npx eas-cli env:pull --environment=preview",
     "env:pull:prod": "npx eas-cli env:pull --environment=production",
@@ -21,7 +21,9 @@
     "test:perf:baseline": "echo \"➜ Running tests with performance...\" && echo \"➜ Capture baseline performance tests...\" && yarn reassure --baseline && echo \"➜ Running current performance tests...\"",
     "test:perf": "echo \"➜ Running tests with performance...\" && echo \"➜ Capturing performance tests...\" && yarn reassure && echo \"➜ Running current performance tests...\"",
     "test-deep-linking": "node scripts/test-deep-linking.js",
-    "postinstall": "patch-package && husky install && cross-os postinstall"
+    "postinstall": "patch-package && husky install && cross-os postinstall",
+    "remove:nodemodules": "osascript -e 'tell application \"Finder\" to if exists POSIX file \"'\"$PWD/node_modules\"'\" then delete POSIX file \"'\"$PWD/node_modules\"'\"'",
+    "reinstall:nodemodules": "yarn remove:nodemodules && yarn install"
   },
   "dependencies": {
     "@azure/core-asynciterator-polyfill": "^1.0.2",
