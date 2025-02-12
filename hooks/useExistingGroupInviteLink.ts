@@ -1,4 +1,4 @@
-import { useChatStore } from "@data/store/accountsStore";
+import { useChatStore } from "@/features/multi-inbox/multi-inbox.store";
 import { useShallow } from "zustand/react/shallow";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 

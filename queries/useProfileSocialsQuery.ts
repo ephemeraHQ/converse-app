@@ -1,14 +1,20 @@
 import { IProfileSocials } from "@/features/profiles/profile.types";
-import { QueryKey, useQueries, useQuery } from "@tanstack/react-query";
 import { getProfilesForAddresses } from "@/utils/api/profiles";
 import {
+  QueryKey,
+  queryOptions,
+  skipToken,
+  useQueries,
+  useQuery,
+} from "@tanstack/react-query";
+import {
   create,
-  windowedFiniteBatchScheduler,
   indexedResolver,
+  windowedFiniteBatchScheduler,
 } from "@yornaath/batshit";
 
-import { queryClient } from "./queryClient";
 import mmkv from "@/utils/mmkv";
+import { queryClient } from "./queryClient";
 
 type ProfileSocialsData = IProfileSocials | null | undefined;
 
@@ -47,28 +53,32 @@ const fetchProfileSocials = async (peerAddress: string) => {
   return data;
 };
 
-const profileSocialsQueryConfig = (peerAddress: string) => ({
-  queryKey: profileSocialsQueryKey(peerAddress),
-  queryFn: () => fetchProfileSocials(peerAddress),
-  // Store for 30 days
-  gcTime: 1000 * 60 * 60 * 24 * 30,
-  refetchIntervalInBackground: false,
-  refetchOnWindowFocus: false,
-  // We really just want a 24 hour cache here
-  // And automatic retries if there was an error fetching
-  refetchOnMount: false,
-  staleTime: 1000 * 60 * 60 * 24,
-  initialData: (): ProfileSocialsData => {
-    if (mmkv.contains(profileSocialsQueryStorageKey(peerAddress))) {
-      const data = JSON.parse(
-        mmkv.getString(profileSocialsQueryStorageKey(peerAddress))!
-      ) as ProfileSocialsData;
-      return data;
-    }
-  },
-  initialDataUpdatedAt: 0,
-  // persister: reactQueryPersister,
-});
+const profileSocialsQueryConfig = (peerAddress: string) => {
+  const enabled = !!peerAddress;
+  return queryOptions({
+    enabled,
+    queryKey: profileSocialsQueryKey(peerAddress),
+    queryFn: enabled ? () => fetchProfileSocials(peerAddress) : skipToken,
+    // Store for 30 days
+    gcTime: 1000 * 60 * 60 * 24 * 30,
+    refetchIntervalInBackground: false,
+    refetchOnWindowFocus: false,
+    // We really just want a 24 hour cache here
+    // And automatic retries if there was an error fetching
+    refetchOnMount: false,
+    staleTime: 1000 * 60 * 60 * 24,
+    initialData: (): ProfileSocialsData => {
+      if (mmkv.contains(profileSocialsQueryStorageKey(peerAddress))) {
+        const data = JSON.parse(
+          mmkv.getString(profileSocialsQueryStorageKey(peerAddress))!
+        ) as ProfileSocialsData;
+        return data;
+      }
+    },
+    initialDataUpdatedAt: 0,
+    // persister: reactQueryPersister,
+  });
+};
 
 /**
  * @deprecated Use the one from inbox instead
@@ -142,9 +152,16 @@ export const setProfileRecordSocialsQueryData = (
  * @deprecated Use the one from inbox instead
  */
 export const getProfileSocialsQueryData = (peerAddress: string) => {
-  return queryClient.getQueryData<ProfileSocialsData>(
+  return queryClient.getQueryData(
     profileSocialsQueryConfig(peerAddress).queryKey
   );
+};
+
+/**
+ * @deprecated Use the one from inbox instead
+ */
+export const ensureProfileSocialsQueryData = (peerAddress: string) => {
+  return queryClient.ensureQueryData(profileSocialsQueryConfig(peerAddress));
 };
 
 /**

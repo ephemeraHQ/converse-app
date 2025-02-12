@@ -1,6 +1,5 @@
 import { humanize } from "@/utils/human-hash";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Dimensions, PixelRatio, TextInput } from "react-native";
+import { Dimensions } from "react-native";
 
 export const shortDisplayName = (displayName: string | undefined): string => {
   if (!displayName) return "";
@@ -32,76 +31,6 @@ export const addressPrefix = (address: string) =>
 export const formatGroupName = (topic: string, groupName?: string) =>
   groupName ||
   capitalize(humanize(topic.slice(14, 46), { numWords: 3, separator: " " }));
-
-export const formatEphemeralUsername = (address: string, username?: string) =>
-  username || humanize(address.slice(2, 42), { numWords: 2, separator: "" });
-
-export const formatEphemeralDisplayName = (
-  address: string,
-  displayName?: string
-) =>
-  displayName || humanize(address.slice(2, 42), { numWords: 2, separator: "" });
-
-export const formatRandoDisplayName = (address: string) =>
-  humanize(address.slice(2, 42), { numWords: 2, separator: " " });
-
-export const getTitleFontScale = (): number => {
-  let titleFontScale = 1;
-  const fontScale = PixelRatio.getFontScale();
-  if (fontScale > 1) {
-    titleFontScale = Math.min(fontScale, 1.235);
-  }
-  return titleFontScale;
-};
-
-export type TextInputWithValue = TextInput & { currentValue: string };
-
-export const strByteSize = (str: string) => new Blob([str]).size;
-
-export const useLoopTxt = (
-  intervalMs: number,
-  options: string[],
-  active: boolean,
-  loop: boolean = true
-) => {
-  const [step, setStep] = useState(0);
-  const interval = useRef<NodeJS.Timeout | undefined>();
-
-  const stopInterval = useCallback(() => {
-    if (interval.current) {
-      clearInterval(interval.current);
-      interval.current = undefined;
-    }
-  }, []);
-
-  const startInterval = useCallback(() => {
-    if (interval.current) return;
-    setStep(0);
-    interval.current = setInterval(() => {
-      setStep((s) => {
-        if (!loop && s === options.length - 1) {
-          stopInterval();
-          return s;
-        }
-        return s + 1;
-      });
-    }, intervalMs);
-  }, [intervalMs, loop, stopInterval, options.length]);
-
-  useEffect(() => {
-    return stopInterval;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    if (active) {
-      startInterval();
-    } else {
-      stopInterval();
-    }
-  }, [active, startInterval, stopInterval]);
-  return options[step % options.length];
-};
 
 export function normalizeString(str: string) {
   return str.toLowerCase().trim();

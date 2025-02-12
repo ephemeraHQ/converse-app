@@ -1,4 +1,3 @@
-import { getCurrentAccount } from "@/data/store/accountsStore";
 import { doesSocialsMatchTextQuery } from "@/features/profiles/utils/does-socials-match-text-query";
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm";
 import { getSearchExistingDmsQueryKey } from "@/queries/QueryKeys";
@@ -6,9 +5,10 @@ import { getAllowedConsentConversationsQueryData } from "@/queries/conversations
 import { ensureDmPeerInboxIdQueryData } from "@/queries/use-dm-peer-inbox-id-query";
 import { ensureGroupMembersQueryData } from "@/queries/useGroupMembersQuery";
 import { ensureInboxProfileSocialsQueryData } from "@/queries/useInboxProfileSocialsQuery";
-import { normalizeString } from "@/utils/str";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
+import { getCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { normalizeString } from "@/utils/str";
 
 export async function searchExistingDms(args: {
   searchQuery: string;

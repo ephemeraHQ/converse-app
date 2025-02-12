@@ -1,10 +1,6 @@
 import { useState } from "react";
-import { useCurrentAccount, useSettingsStore } from "@data/store/accountsStore";
-import { useSelect } from "@data/store/storeHelpers";
-import {
-  formatEphemeralDisplayName,
-  formatEphemeralUsername,
-} from "@utils/str";
+import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import {} from "@utils/str";
 import { useProfileSocials } from "@/hooks/useProfileSocials";
 import { ProfileType } from "../types/onboarding.types";
 import { config } from "@/config";
@@ -15,32 +11,15 @@ export function useProfile() {
   const { data: socials } = useProfileSocials(currentAccount);
   const currentUserUsername = socials?.userNames?.find((u) => u.isPrimary);
 
-  const { ephemeralAccount } = useSettingsStore(
-    useSelect(["ephemeralAccount"])
-  );
-
   const usernameWithoutSuffix = currentUserUsername?.name?.replace(
     config.usernameSuffix,
     ""
   );
 
-  const defaultEphemeralUsername = formatEphemeralUsername(
-    currentAccount,
-    usernameWithoutSuffix
-  );
-  const defaultEphemeralDisplayName = formatEphemeralDisplayName(
-    currentAccount,
-    currentUserUsername?.displayName
-  );
-
   const [profile, setProfile] = useState<ProfileType>({
-    username: ephemeralAccount
-      ? defaultEphemeralUsername
-      : usernameWithoutSuffix || "",
+    username: usernameWithoutSuffix || "",
     avatar: currentUserUsername?.avatar || "",
-    displayName: ephemeralAccount
-      ? defaultEphemeralDisplayName
-      : currentUserUsername?.displayName || "",
+    displayName: currentUserUsername?.displayName || "",
   });
 
   return { profile, setProfile };

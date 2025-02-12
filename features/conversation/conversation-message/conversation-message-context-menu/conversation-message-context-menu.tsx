@@ -1,4 +1,3 @@
-import { getCurrentAccount } from "@/data/store/accountsStore";
 import { AnimatedVStack, VStack } from "@/design-system/VStack";
 import { useDropdownMenuCustomStyles } from "@/design-system/dropdown-menu/dropdown-menu-custom";
 import { ConversationMessage } from "@/features/conversation/conversation-message/conversation-message";
@@ -30,6 +29,7 @@ import Animated from "react-native-reanimated";
 import { MessageContextMenuAboveMessageReactions } from "./conversation-message-context-menu-above-message-reactions";
 import { MessageContextMenuContainer } from "./conversation-message-context-menu-container";
 import { useMessageContextMenuItems } from "./conversation-message-context-menu.utils";
+import { getSafeCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
 
 export const ConversationMessageContextMenu = memo(
   function ConversationMessageContextMenu() {
@@ -68,7 +68,7 @@ const Content = memo(function Content(props: {
     })!; // ! Because if we are inside this component it's because we selected a message and it exists for sure
 
     const messages = getConversationMessagesQueryData({
-      account: getCurrentAccount()!,
+      account: getSafeCurrentSender().ethereumAddress,
       topic,
     });
 

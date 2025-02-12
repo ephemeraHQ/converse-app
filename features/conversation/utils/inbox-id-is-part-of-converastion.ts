@@ -1,4 +1,7 @@
-import { getCurrentAccount } from "@/data/store/accountsStore";
+import {
+  getCurrentAccount,
+  getSafeCurrentSender,
+} from "@/features/multi-inbox/multi-inbox.store";
 import {
   ensureDmPeerInboxIdQueryData,
   getDmPeerInboxIdQueryData,
@@ -16,12 +19,12 @@ export function inboxIdIsPartOfConversationUsingCacheData(args: {
   const { inboxId, conversationTopic } = args;
 
   const members = getGroupMembersQueryData({
-    account: getCurrentAccount()!,
+    account: getSafeCurrentSender().ethereumAddress,
     topic: conversationTopic,
   });
 
   const peerInboxId = getDmPeerInboxIdQueryData({
-    account: getCurrentAccount()!,
+    account: getSafeCurrentSender().ethereumAddress,
     topic: conversationTopic,
   });
 
@@ -37,7 +40,7 @@ export async function inboxIdIsPartOfConversationUsingEnsure(args: {
 }) {
   const { inboxId, conversationTopic } = args;
 
-  const account = getCurrentAccount()!;
+  const account = getSafeCurrentSender().ethereumAddress;
 
   const [members, peerInboxId] = await Promise.all([
     ensureGroupMembersQueryData({

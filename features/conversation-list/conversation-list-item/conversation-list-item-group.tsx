@@ -8,7 +8,7 @@ import { useToggleReadStatus } from "@/features/conversation-list/hooks/use-togg
 import { useMessagePlainText } from "@/features/conversation-list/hooks/use-message-plain-text";
 import { useGroupNameForCurrentAccount } from "@/hooks/useGroupName";
 import { useGroupQuery } from "@/queries/useGroupQuery";
-import { useCurrentAccount } from "@data/store/accountsStore";
+import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { useRouter } from "@navigation/useNavigation";
 import { getCompactRelativeTime } from "@utils/date";
 import { ConversationTopic } from "@xmtp/react-native-sdk";

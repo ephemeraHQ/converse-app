@@ -1,4 +1,4 @@
-import { api } from "@/utils/api/api";
+import { oldApi } from "@/utils/api/api";
 
 import { JoinGroupClient } from "../../features/GroupInvites/joinGroup/JoinGroup.client";
 
@@ -7,11 +7,11 @@ export type Environment = {
 };
 
 export const LiveEnvironment = (): Environment => ({
-  joinGroupClient: JoinGroupClient.live({ api }),
+  joinGroupClient: JoinGroupClient.live({ api: oldApi }),
 });
 
 export const QaEnvironment = (): Environment => ({
-  joinGroupClient: JoinGroupClient.live({ api }),
+  joinGroupClient: JoinGroupClient.live({ api: oldApi }),
 });
 
 export const UnimplementedEnvironment: Environment = {

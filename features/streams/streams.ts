@@ -1,6 +1,9 @@
-import { getAccountsList, useAccountsStore } from "@/data/store/accountsStore";
+import {
+  getAccountsList,
+  useAccountsStore,
+  AuthStatuses,
+} from "@/features/multi-inbox/multi-inbox.store";
 import { useAppStore } from "@/data/store/appStore";
-import { useAppState } from "@/data/store/use-app-state-store";
 import { captureError } from "@/utils/capture-error";
 import { stopStreamingConversations } from "@/utils/xmtpRN/xmtp-conversations/xmtp-conversations-stream";
 import { stopStreamingAllMessage } from "@/utils/xmtpRN/xmtp-messages/xmtp-messages-stream";
@@ -16,13 +19,15 @@ export function setupStreamingSubscriptions() {
   useAppStore.subscribe(
     (state) => state.hydrationDone,
     (hydrationDone) => {
-      if (hydrationDone) {
-        logger.debug(`[Streaming] Hydration done changed: ${hydrationDone}`);
-        const { isInternetReachable } = useAppStore.getState();
-        if (isInternetReachable) {
-          startStreaming(getAccountsList());
-        }
+      const isInternetReachable = useAppStore.getState().isInternetReachable;
+      logger.debug(
+        `[Streaming] Hydration done changed: ${hydrationDone}, isInternetReachable: ${isInternetReachable}`
+      );
+      if (!isInternetReachable || !hydrationDone) {
+        return;
       }
+
+      startStreaming(getAccountsList());
     }
   );
 
@@ -30,17 +35,23 @@ export function setupStreamingSubscriptions() {
   useAppStore.subscribe(
     (state) => state.isInternetReachable,
     (isInternetReachable) => {
-      logger.debug(
-        `[Streaming] Internet reachability changed: ${isInternetReachable}`
-      );
       const { hydrationDone } = useAppStore.getState();
-      if (isInternetReachable && hydrationDone) {
-        startStreaming(getAccountsList());
+      logger.debug(
+        `[Streaming] Internet reachability changed: ${isInternetReachable}, hydrationDone: ${hydrationDone}`
+      );
+      if (!isInternetReachable || !hydrationDone) {
+        return;
       }
+
+      startStreaming(getAccountsList());
     }
   );
 
   // Start/Stop streaming when accounts change
+  // todo(lustig) I believe this should be handled immediately when
+  // an account is added (removing has not been implemented yet)
+  // I'm not going to play with this right now though, but we should
+  // come back to it and simplify it if possible.
   useAccountsStore.subscribe((state, previousState) => {
     const { hydrationDone, isInternetReachable } = useAppStore.getState();
 
@@ -48,8 +59,10 @@ export function setupStreamingSubscriptions() {
       return;
     }
 
-    const previousAccounts = previousState?.accounts || [];
-    const currentAccounts = state.accounts || [];
+    const previousAccounts =
+      previousState?.senders?.map((sender) => sender.ethereumAddress) || [];
+    const currentAccounts =
+      state.senders?.map((sender) => sender.ethereumAddress) || [];
 
     // Handle new accounts
     const newAccounts = currentAccounts.filter(
@@ -71,6 +84,12 @@ export function setupStreamingSubscriptions() {
 
 async function startStreaming(accountsToStream: string[]) {
   const store = useStreamingStore.getState();
+  const isSignedIn =
+    useAccountsStore.getState().authStatus === AuthStatuses.signedIn;
+  if (!isSignedIn) {
+    logger.info("[Streaming] Not signed in, skipping startStreaming");
+    return;
+  }
 
   for (const account of accountsToStream) {
     const streamingState = store.accountStreamingStates[account];

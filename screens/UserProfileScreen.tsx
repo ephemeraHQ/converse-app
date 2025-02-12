@@ -36,10 +36,6 @@ export const UserProfileScreen = memo(function UserProfileScreen(
 
   const { profile, setProfile } = useProfile();
 
-  // Was called when someone go back, maybe we put this in the GetStarted screen in useEffect ?
-  // const logout = useLogoutFromConverse(address);
-  // const loadingSubtitle = useLoopTxt(2000, LOADING_SENTENCES, loading, false);
-
   const { createOrUpdateProfile, loading, errorMessage } =
     useCreateOrUpdateProfileInfo();
 

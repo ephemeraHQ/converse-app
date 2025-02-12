@@ -1,41 +1,30 @@
 import { prefetchConversationMetadataQuery } from "@/queries/conversation-metadata-query";
 import { fetchAllowedConsentConversationsQuery } from "@/queries/conversations-allowed-consent-query";
-import { ensureInboxId } from "@/queries/inbox-id-query";
 import { captureError } from "@/utils/capture-error";
-import { HydrationError } from "@/utils/error";
-import { getAccountsList, useAccountsStore } from "@data/store/accountsStore";
 import { useAppStore } from "@data/store/appStore";
 import logger from "@utils/logger";
 import { Conversation } from "@xmtp/react-native-sdk";
+import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 import { useEffect } from "react";
+import { useAccountsStore } from "@/features/multi-inbox/multi-inbox.store";
+import { MultiInboxClientRestorationStates } from "@/features/multi-inbox/multi-inbox-client.types";
 
-export default function HydrationStateHandler() {
+export function HydrationStateHandler() {
+  const multiInboxClientRestorationState = useAccountsStore(
+    (state) => state.multiInboxClientRestorationState
+  );
+  const haveInboxesBeenRestored =
+    multiInboxClientRestorationState ===
+    MultiInboxClientRestorationStates.restored;
+
   useEffect(() => {
+    if (!haveInboxesBeenRestored) {
+      return;
+    }
+
     const hydrate = async () => {
       const startTime = new Date().getTime();
-      const accounts = getAccountsList();
-
-      // Critical queries
-      try {
-        await Promise.all(
-          // We need the inboxId for each account since we use them so much
-          accounts.map(async (account): Promise<void> => {
-            try {
-              await ensureInboxId({ account });
-            } catch (error) {
-              captureError(
-                new HydrationError(
-                  `Failed to get inboxId for account ${account}, removing account`,
-                  error
-                )
-              );
-              useAccountsStore.getState().removeAccount(account);
-            }
-          })
-        );
-      } catch (error) {
-        captureError(error);
-      }
+      const accounts = MultiInboxClient.instance.allEthereumAccountAddresses;
 
       // Non critical queries
       for (const account of accounts) {
@@ -62,8 +51,9 @@ export default function HydrationStateHandler() {
         } seconds total`
       );
     };
+
     hydrate();
-  }, []);
+  }, [haveInboxesBeenRestored]);
 
   return null;
 }

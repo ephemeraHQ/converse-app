@@ -7,6 +7,19 @@ export const en = {
       subtext: "Simple · Secure · Universal",
       createContactCard: "Create a Contact Card",
     },
+    contactCard: {
+      subtitle: "A secure identity",
+      body: "Add and edit Contact Cards anytime,",
+      bodyPressable: "or go Rando for extra privacy.",
+      randoTitle: "Go Rando",
+      randoSubtitle: "Chat using random contact info",
+      randoBody: "For everyday conversations,",
+      randoPressable: "use your personal Contact Card.",
+      import: "Import",
+      name: "Name",
+      namePlaceholder: "How you'll show up in chat",
+      continue: "Continue",
+    },
     notifications: {
       title: "Good vibrations only",
       subtitle:
@@ -416,6 +429,27 @@ export const en = {
   // Wallet selector
   no_wallet_detected: "No wallet detected",
 
+  // Profile
+  view_removed_chats: "View removed chats",
+  change_or_add_account: "Change or add account",
+  profile: {
+    modify_profile: "Modify profile",
+    edit: "Edit",
+    block: {
+      title: "Block user",
+      message: "Are you sure you want to block {{name}}?",
+    },
+    save: "Save",
+    done: "Done",
+    names: "Names",
+    copied: "Copied",
+    settings: {
+      notifications: "Notifications",
+      archive: "Archive",
+      keep_messages: "Keep messages",
+    },
+  },
+
   // Revocation
   current_installation_revoked: "Logged out",
   current_installation_revoked_description:
@@ -579,12 +613,6 @@ export const en = {
     member_removed: "{{userName}} removed {{memberName}} from the group",
     member_removed_unknown: "{{userName}} removed a member from the group",
     members_removed: "{{userName}} removed {{count}} members from the group",
-  },
-
-  debug: {
-    converse_log_session: "Converse Log Session",
-    libxmtp_log_session: "LibXMTP Log Session",
-    converse_version: "Converse v{{version}} ({{buildNumber}})",
   },
 
   file_preview: "File preview",

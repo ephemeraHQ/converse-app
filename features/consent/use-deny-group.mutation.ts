@@ -1,4 +1,4 @@
-import { updateConsentForGroupsForAccount } from "@/utils/xmtpRN/xmtp-consent/update-consent-for-groups-for-account";
+import { updateConsentForGroupsForAccount } from "@/features/consent/update-consent-for-groups-for-account";
 import {
   addConversationToUnknownConsentConversationsQuery,
   removeConversationFromUnknownConsentConversationsQueryData,

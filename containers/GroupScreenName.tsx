@@ -1,7 +1,7 @@
 import { useGroupNameForCurrentAccount } from "@/hooks/useGroupName";
 import { translate } from "@/i18n";
 import { captureErrorWithToast } from "@/utils/capture-error";
-import { useCurrentAccount } from "@data/store/accountsStore";
+import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { useGroupMembers } from "@hooks/useGroupMembers";
 import { useGroupPermissions } from "@hooks/useGroupPermissions";
 import { textPrimaryColor } from "@styles/colors";

@@ -1,14 +1,14 @@
 import { showSnackbar } from "@/components/Snackbar/Snackbar.service";
 import { useAllowGroupMutation } from "@/features/consent/use-allow-group.mutation";
 import { useDenyGroupMutation } from "@/features/consent/use-deny-group.mutation";
+import { updateInboxIdsConsentForAccount } from "@/features/consent/update-inbox-ids-consent-for-account";
 import { translate } from "@/i18n";
 import { useGroupCreatorQuery } from "@/queries/useGroupCreatorQuery";
-import { currentAccount } from "@data/store/accountsStore";
 import { getGroupQueryOptions, useGroupQuery } from "@queries/useGroupQuery";
 import { useQuery } from "@tanstack/react-query";
 import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
-import { updateInboxIdsConsentForAccount } from "../../utils/xmtpRN/xmtp-consent/update-inbox-ids-consent-for-account";
+import { useSafeCurrentSender } from "../multi-inbox/multi-inbox.store";
 
 export type IGroupConsentOptions = {
   includeCreator?: boolean;
@@ -16,7 +16,8 @@ export type IGroupConsentOptions = {
 };
 
 export const useGroupConsentForCurrentAccount = (topic: ConversationTopic) => {
-  const account = currentAccount();
+  const currentSender = useSafeCurrentSender();
+  const account = currentSender.ethereumAddress;
 
   const { data: group, isLoading: isGroupLoading } = useGroupQuery({
     account,
@@ -50,13 +51,13 @@ export const useGroupConsentForCurrentAccount = (topic: ConversationTopic) => {
       }
 
       await allowGroupMutation({
-        account,
+        account: currentSender.ethereumAddress,
         topic,
         includeAddedBy,
         includeCreator,
       });
     },
-    [allowGroupMutation, group, account, topic]
+    [allowGroupMutation, group, currentSender, topic]
   );
 
   const denyGroup = useCallback(

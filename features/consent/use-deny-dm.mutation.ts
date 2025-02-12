@@ -1,7 +1,7 @@
 import {
   getCurrentAccount,
   useCurrentAccount,
-} from "@/data/store/accountsStore";
+} from "@/features/multi-inbox/multi-inbox.store";
 import { getConversationQueryData } from "@/queries/conversation-query";
 import {
   addConversationToAllowedConsentConversationsQuery,
@@ -23,8 +23,8 @@ import {
   ConversationTopic,
   InboxId,
 } from "@xmtp/react-native-sdk";
-import { updateConsentForGroupsForAccount } from "../../utils/xmtpRN/xmtp-consent/update-consent-for-groups-for-account";
-import { updateInboxIdsConsentForAccount } from "../../utils/xmtpRN/xmtp-consent/update-inbox-ids-consent-for-account";
+import { updateInboxIdsConsentForAccount } from "@/features/consent/update-inbox-ids-consent-for-account";
+import { updateConsentForGroupsForAccount } from "@/features/consent/update-consent-for-groups-for-account";
 
 export function useDenyDmMutation() {
   const currentAccount = useCurrentAccount()!;

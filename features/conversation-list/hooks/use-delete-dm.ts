@@ -1,5 +1,5 @@
 import { showActionSheetWithOptions } from "@/components/StateHandlers/ActionSheetStateHandler";
-import { useCurrentAccount } from "@/data/store/accountsStore";
+import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { useDenyDmMutation } from "@/features/consent/use-deny-dm.mutation";
 import { usePreferredInboxName } from "@/hooks/usePreferredInboxName";
 import { translate } from "@/i18n";

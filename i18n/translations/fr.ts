@@ -415,6 +415,27 @@ export const fr = {
   // Wallet selector
   no_wallet_detected: "Aucun portefeuille détecté",
 
+  // Profile
+  view_removed_chats: "Afficher les conversations supprimées",
+  change_or_add_account: "Changer ou ajouter un compte",
+  profile: {
+    block: {
+      title: "Bloquer l'utilisateur",
+      message: "Êtes-vous sûr de vouloir bloquer {{name}} ?",
+    },
+    modify_profile: "Modifier le profil",
+    edit: "Modifier",
+    save: "Enregistrer",
+    done: "Valider",
+    names: "Names",
+    copied: "Copié",
+    settings: {
+      notifications: "Notifications",
+      archive: "Archive",
+      keep_messages: "Conserver les messages",
+    },
+  },
+
   // Revocation
   current_installation_revoked: "Déconnecté",
   current_installation_revoked_description:

@@ -1,6 +1,6 @@
 import { showActionSheetWithOptions } from "@/components/StateHandlers/ActionSheetStateHandler";
-import { useCurrentAccount } from "@/data/store/accountsStore";
-import { updateInboxIdsConsentForAccount } from "@/utils/xmtpRN/xmtp-consent/update-inbox-ids-consent-for-account";
+import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { updateInboxIdsConsentForAccount } from "@/features/consent/update-inbox-ids-consent-for-account";
 import { translate } from "@/i18n";
 import {
   getConversationMetadataQueryData,

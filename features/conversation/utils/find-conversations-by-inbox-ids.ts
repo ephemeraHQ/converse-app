@@ -1,4 +1,4 @@
-import { getCurrentAccount } from "@/data/store/accountsStore";
+import { getCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm";
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
 import { getAllowedConsentConversationsQueryOptions } from "@/queries/conversations-allowed-consent-query";

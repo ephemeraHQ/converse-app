@@ -2,7 +2,7 @@ import { GroupAvatar } from "@/components/group-avatar";
 import { Center } from "@/design-system/Center";
 import { useGroupMembersInfoForCurrentAccount } from "@/hooks/use-group-members-info-for-current-account";
 import Button from "@components/Button/Button";
-import { useCurrentAccount } from "@data/store/accountsStore";
+import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { useGroupMembers } from "@hooks/useGroupMembers";
 import { useGroupPermissions } from "@hooks/useGroupPermissions";
 import { useGroupPhoto } from "@hooks/useGroupPhoto";

@@ -146,19 +146,151 @@ import { IConversationMembershipSearchResult } from "../../../features/search/se
 
 ## React Query Principles
 
-- Avoid destructuring rest operators with useQuery.
+## React Query Best Practices
 
-  - Be explicit about which properties you need from useQuery
-  - to prevent excessive re-rendering and performance issues.
-  -
-  - @example
-  - // ❌ Bad: Causes unnecessary re-renders
-  - const { data: conversations, ...rest } = useQuery()
-  -
-  - // ✅ Good: Explicit property usage
-  - const { data: conversations, isLoading, error } = useQuery()
+### Query Key Management
 
-- Use object parameters for query options.
+- All query keys must be defined in `QueryKeys.ts` using factory functions
+- Follow naming pattern: `<entity>QueryKey` for key factories
+- Use query key factory functions from `QueryKeys.ts` when accessing query keys
+
+@example
+// queries/QueryKeys.ts
+export const conversationsQueryKey = (account: string) => [
+QueryKeys.CONVERSATIONS,
+account?.toLowerCase(),
+];
+
+// queries/use-conversations-query.ts
+export const getConversationsQueryOptions = (args: IArgs) => ({
+queryKey: conversationsQueryKey(args.account),
+queryFn: () => getConversations(args),
+enabled: !!args.account
+});
+
+### Query Options Encapsulation
+
+- Use React Query's `queryOptions` helper for type safety
+- Export query options generators for cross-component usage
+- Handle conditional fetching with `enabled` and `skipToken`
+- Create an `enabled` variable before returning query options to avoid duplicating logic
+-
+
+@example
+// queries/use-conversation-messages-query.ts
+import { queryOptions, skipToken } from "@tanstack/react-query";
+export const getConversationMessagesQueryOptions = (args: {
+account: string;
+topic: ConversationTopic;
+caller?: string;
+}) => {
+const enabled = !!args.account && !!args.topic;
+return queryOptions({
+queryKey: conversationMessagesQueryKey(args.account, args.topic),
+queryFn: enabled ? () => conversationMessagesQueryFn(args) : skipToken,
+enabled,
+});
+};
+
+### Mutation Patterns
+
+- Follow mutation structure with optimistic updates and error rollbacks
+- Use service functions for API calls
+- Maintain query cache consistency through direct updates
+
+@example
+// features/conversation-list/hooks/use-pin-or-unpin-conversation.tsx
+const { mutateAsync: pinConversationAsync } = useMutation({
+mutationFn: () =>
+pinTopicService({
+account: currentAccount,
+topic: conversationTopic,
+}),
+
+onMutate: async () => {
+const previousData = getConversationMetadataQueryData({
+account,
+topic
+});
+updateConversationMetadataOptimistically({ isPinned: true });
+return { previousData };
+},
+
+onError: (error, variables, context) => {
+logger.error(`Failed to pin conversation: ${error}`);
+rollbackConversationMetadata(context.previousData);
+},
+
+onSettled: () => {
+queryClient.invalidateQueries({
+queryKey: conversationMetadataQueryKey(account, topic)
+});
+}
+});
+
+// Service function in api/conversations.ts
+export const pinTopicService = async (args: {
+account: string;
+topic: string;
+}) => {
+const response = await fetch(`${API_URL}/pin`, {
+method: "POST",
+body: JSON.stringify(args),
+});
+return PinResponseSchema.parse(await response.json());
+};
+
+### Cache Management
+
+- Use atomic updates with queryClient methods
+- Export cache update helpers with their related query
+- Access query keys through query options getters rather than directly using key factories
+- Let TypeScript infer types from query options instead of manually specifying generics
+
+@example
+// queries/use-conversations-query.ts
+export function updateConversationInCache(args: {
+account: string;
+topic: string;
+update: Partial<ConversationType>;
+}) {
+const queryOptions = getConversationsQueryOptions({ account: args.account });
+
+queryClient.setQueryData<ConversationType[]>(
+queryOptions.queryKey,
+(prev) => prev?.map(conv =>
+conv.topic === args.topic ? { ...conv, ...args.update } : conv
+)
+);
+}
+
+### Query Key Access
+
+- Always retrieve query keys through their associated query options
+- Avoid direct usage of query key factories in cache management functions
+- Leverage query options' built-in type inference instead of manual type assertions
+
+@example
+// Correct pattern using query options
+const options = getConversationsQueryOptions({ account });
+queryClient.getQueryData(options.queryKey);
+
+// ❌ Avoid direct key factory usage
+queryClient.getQueryData(conversationsQueryKey(account));
+
+## React Query Implementation Principles
+
+- Avoid destructuring rest operators with useQuery
+  - Be explicit about which properties you need from useQuery - to prevent excessive re-rendering and performance issues.
+-
+- @example
+- // ❌ Bad: Causes unnecessary re-renders
+- const { data: conversations, ...rest } = useQuery()
+-
+- // ✅ Good: Explicit property usage
+- const { data: conversations, isLoading, error } = useQuery()
+
+* Use object parameters for query options.
   - Pass query options as objects for better maintainability
   - and clearer intention.
   -

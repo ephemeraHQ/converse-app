@@ -1,4 +1,4 @@
-import { getCurrentAccount } from "@/data/store/accountsStore";
+import { getCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { getConversationForCurrentAccount } from "@/features/conversation/utils/get-conversation-for-current-account";
 import { getCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import {

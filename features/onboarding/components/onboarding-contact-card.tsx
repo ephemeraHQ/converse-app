@@ -1,19 +1,17 @@
-import { AnimatedVStack, VStack } from "@/design-system/VStack";
-import {
-  ONBOARDING_ENTERING_DELAY,
-  ONBOARDING_ENTERING_DURATION,
-} from "../constants/animation-constants";
+import { Button } from "@/design-system/Button/Button";
+import { Center } from "@/design-system/Center";
+import { HStack } from "@/design-system/HStack";
+import { IconButton } from "@/design-system/IconButton/IconButton";
+import { Pressable } from "@/design-system/Pressable";
+import { Text } from "@/design-system/Text";
+import { TextField } from "@/design-system/TextField/TextField";
+import { VStack } from "@/design-system/VStack";
+import { ProfileContactCardContainer } from "@/features/profiles/components/profile-contact-card/profile-contact-card-container";
+import { translate } from "@/i18n";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { memo, useCallback, useState } from "react";
-import { Center } from "@/design-system/Center";
-import { TextField } from "@/design-system/TextField/TextField";
 import { ViewStyle } from "react-native";
-import { Pressable } from "@/design-system/Pressable";
 import { OnboardingEditableAvatar } from "./onboarding-editable-avatar";
-import { translate } from "@/i18n";
-import { IconButton } from "@/design-system/IconButton/IconButton";
-import { Text } from "@/design-system/Text";
-import { ProfileContactCardContainer } from "@/features/profiles/components/profile-contact-card/profile-contact-card-container";
 
 type IOnboardingContactCardProps = {
   displayName?: string;
@@ -21,6 +19,7 @@ type IOnboardingContactCardProps = {
   addPFP: () => void;
   pfpUri?: string;
   editable?: boolean;
+  onImportPress: () => void;
 };
 
 export const OnboardingCreateContactCard = memo(
@@ -29,10 +28,11 @@ export const OnboardingCreateContactCard = memo(
     setDisplayName,
     addPFP,
     pfpUri,
+    onImportPress,
     editable = true,
   }: IOnboardingContactCardProps) {
     const { theme } = useAppTheme();
-    const { spacing, borderRadius, borderWidth, colors, animation } = theme;
+    const { spacing, borderRadius, borderWidth, colors } = theme;
 
     const clearName = useCallback(() => {
       setDisplayName("");
@@ -50,9 +50,16 @@ export const OnboardingCreateContactCard = memo(
 
     return (
       <ProfileContactCardContainer>
-        <Pressable disabled={!editable} onPress={addPFP}>
-          <OnboardingEditableAvatar uri={pfpUri} name={displayName} />
-        </Pressable>
+        <HStack
+          style={{
+            justifyContent: "space-between",
+          }}
+        >
+          <Pressable disabled={!editable} onPress={addPFP}>
+            <OnboardingEditableAvatar uri={pfpUri} name={displayName} />
+          </Pressable>
+          <Button text="Import" onPress={onImportPress} />
+        </HStack>
         {editable ? (
           <TextField
             containerStyle={{

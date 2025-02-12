@@ -1,7 +1,7 @@
 import {
   getCurrentAccount,
   useCurrentAccount,
-} from "@/data/store/accountsStore";
+} from "@/features/multi-inbox/multi-inbox.store";
 import { InboxId } from "@xmtp/react-native-sdk";
 import {
   getInboxIdFromQueryData,

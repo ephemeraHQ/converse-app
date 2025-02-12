@@ -14,15 +14,16 @@ import {
 } from "@/features/profiles/profile-me.store";
 import { validateProfileName } from "@/features/profiles/utils/validate-profile-name";
 import { useSafeCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
-import { useDisconnectActionSheet } from "@/hooks/useDisconnectActionSheet";
 import { usePreferredInboxAvatar } from "@/hooks/usePreferredInboxAvatar";
 import { usePreferredInboxName } from "@/hooks/usePreferredInboxName";
 import { translate } from "@/i18n";
 import { useInboxProfileSocialsQuery } from "@/queries/useInboxProfileSocialsQuery";
 import { useAppTheme } from "@/theme/useAppTheme";
+import { useLogout } from "@/utils/logout";
 import { useRouter } from "@navigation/useNavigation";
 import { InboxId } from "@xmtp/react-native-sdk";
 import React, { memo, useCallback, useEffect, useState } from "react";
+import { Alert } from "react-native";
 
 export function ProfileMe(props: { inboxId: InboxId }) {
   const { inboxId } = props;
@@ -31,7 +32,7 @@ export function ProfileMe(props: { inboxId: InboxId }) {
 
   const router = useRouter();
 
-  const showDisconnectActionSheet = useDisconnectActionSheet();
+  const { logout } = useLogout();
 
   const editMode = useProfileMeStoreValue(inboxId, (state) => state.editMode);
 
@@ -79,8 +80,7 @@ export function ProfileMe(props: { inboxId: InboxId }) {
               {
                 label: translate("log_out"),
                 isWarning: true,
-                onPress: () =>
-                  showDisconnectActionSheet(theme.isDark ? "dark" : "light"),
+                onPress: () => logout(),
               },
             ]}
           />

@@ -5,7 +5,10 @@ import {
 } from "@/utils/api/api-groups/api-groups";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import logger from "@/utils/logger";
-import { useChatStore, useCurrentAccount } from "@data/store/accountsStore";
+import {
+  useChatStore,
+  useCurrentAccount,
+} from "@/features/multi-inbox/multi-inbox.store";
 import { useSelect } from "@data/store/storeHelpers";
 import { Icon } from "@design-system/Icon/Icon";
 import { useExistingGroupInviteLink } from "@hooks/useExistingGroupInviteLink";

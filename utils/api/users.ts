@@ -1,40 +1,25 @@
-import {
-  analyticsAppVersion,
-  analyticsBuildNumber,
-  analyticsPlatform,
-} from "../analytics";
+import { Platform } from "react-native";
 import { api } from "./api";
 import { getXmtpApiHeaders } from "./auth";
+import * as Device from "expo-device";
 
-const lastSaveUser: { [address: string]: number } = {};
-
-export const saveUser = async (args: { address: string }) => {
-  const { address } = args;
-  const now = new Date().getTime();
-  const last = lastSaveUser[address] || 0;
-  if (now - last < 3000) {
-    // Avoid race condition when changing account at same
-    // time than coming back on the app.
-    return;
-  }
-  lastSaveUser[address] = now;
+export const createUser = async (args: {
+  privyUserId: string;
+  smartContractWalletAddress: string;
+  inboxId: string;
+}) => {
+  const { privyUserId, smartContractWalletAddress, inboxId } = args;
 
   await api.post(
-    "/api/user",
+    "/api/user/create",
     {
-      address,
-      platform: analyticsPlatform,
-      version: analyticsAppVersion,
-      build: analyticsBuildNumber,
+      inboxId,
+      address: smartContractWalletAddress,
+      privyId: privyUserId,
+      deviceName:
+        /* todo get we get the ios entgitlement to get "vivians iphone"*/ Device.modelId,
+      os: Platform.OS.toLowerCase(),
     },
-    { headers: await getXmtpApiHeaders(address) }
+    { headers: await getXmtpApiHeaders(smartContractWalletAddress) }
   );
-};
-
-export const getSendersSpamScores = async (sendersAddresses: string[]) => {
-  if (!sendersAddresses || sendersAddresses.length === 0) return {};
-  const { data } = await api.post("/api/spam/senders/batch", {
-    sendersAddresses: sendersAddresses.filter((s) => !!s),
-  });
-  return data as { [senderAddress: string]: number };
 };

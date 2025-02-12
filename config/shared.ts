@@ -1,3 +1,5 @@
+// @ts-nocheck note(lustig) env types aren't working for me OOTB
+
 import { IConfig, ILoggerColorScheme } from "@/config/config.types";
 import Constants from "expo-constants";
 
@@ -31,7 +33,8 @@ export const shared = {
     "light",
   debugMenu: false,
   xmtpEnv: (process.env.EXPO_PUBLIC_XMTP_ENV || "dev") as IConfig["xmtpEnv"],
-  apiURI: maybeReplaceLocalhost(process.env.EXPO_PUBLIC_API_URI),
+  apiURI: maybeReplaceLocalhost(process.env.EXPO_PUBLIC_CONVOS_API_URI),
+  deprecatedApiURI: maybeReplaceLocalhost(process.env.EXPO_PUBLIC_API_URI),
   debugAddresses:
     process.env.EXPO_PUBLIC_DEBUG_ADDRESSES?.toLowerCase().split(",") || [],
   lensApiDomain: "api.lens.dev",
@@ -54,4 +57,4 @@ export const shared = {
     clientId: process.env.EXPO_PUBLIC_PRIVY_CLIENT_ID,
   },
   thirdwebClientId: process.env.EXPO_PUBLIC_THIRDWEB_CLIENT_ID,
-} satisfies Partial<IConfig>;
+} as const satisfies Partial<IConfig>;

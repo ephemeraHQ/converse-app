@@ -11,7 +11,6 @@ import {
   ConversationWithCodecsType,
   GroupData,
   GroupsDataEntity,
-  GroupWithCodecsType,
 } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import {
   Conversation,
@@ -209,7 +208,9 @@ export class JoinGroupClient {
       // and to make this client more flexible. This allows the tests to run
       // without mocking these dependencies, which would be necessary if they
       // were imported at the top level of this module.
-      const { setGroupStatus } = await import("@data/store/accountsStore");
+      const { setGroupStatus } = await import(
+        "@/features/multi-inbox/multi-inbox.store"
+      );
       const { createAllowGroupMutationObserver } = await import(
         "@/features/consent/use-allow-group.mutation"
       );

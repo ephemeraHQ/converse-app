@@ -3,7 +3,7 @@
  * MIGHT NEED TO DELETE AND USE THE SAME HOOK AS THE ONBOARDING ONE.
  *
  */
-import { useCurrentAccount } from "@/data/store/accountsStore";
+import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { ProfileType } from "@/features/onboarding/types/onboarding.types";
 import { refetchInboxProfileSocialsQuery } from "@/queries/useInboxProfileSocialsQuery";
 import { invalidateProfileSocialsQuery } from "@/queries/useProfileSocialsQuery";

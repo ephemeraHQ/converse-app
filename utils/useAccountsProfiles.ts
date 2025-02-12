@@ -1,5 +1,5 @@
-import { useAccountsList } from "../data/store/accountsStore";
 import { usePreferredNames } from "@/hooks/usePreferredNames";
+import { useAccountsList } from "@/features/multi-inbox/multi-inbox.store";
 
 export const useAccountsProfiles = () => {
   const accounts = useAccountsList();
