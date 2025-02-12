@@ -76,27 +76,3 @@ async function getLensOwner(handle: string) {
   }
   return null;
 }
-
-/**
- * Resolves a Coinbase ID to an Ethereum address using ENS resolution
- * @param cbId The Coinbase ID to resolve (e.g. "username.cb.id")
- * @returns The resolved Ethereum address or null if resolution fails
- */
-export async function resolveCoinbaseId(cbId: string): Promise<string | null> {
-  try {
-    if (!cbId.endsWith(".cb.id")) {
-      throw new Error("Invalid Coinbase ID format. Must end with .cb.id");
-    }
-
-    const provider = new ethers.providers.StaticJsonRpcProvider({
-      url: config.evm.rpcEndpoint,
-      skipFetchSetup: true,
-    });
-
-    const address = await provider.resolveName(cbId);
-    return address;
-  } catch (error) {
-    logger.error(`Failed to resolve Coinbase ID ${cbId}:`, error);
-    return null;
-  }
-}

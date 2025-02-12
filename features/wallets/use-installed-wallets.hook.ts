@@ -15,7 +15,7 @@ import {
   zora,
 } from "thirdweb/chains";
 import { WalletId } from "thirdweb/wallets";
-type ISupportedWallet = {
+export type ISupportedWallet = {
   name: string;
   iconURL: string;
   customScheme: string;
