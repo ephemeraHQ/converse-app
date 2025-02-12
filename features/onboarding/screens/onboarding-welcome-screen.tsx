@@ -12,6 +12,7 @@ import { useAuthenticateWithPasskey } from "@/features/onboarding/contexts/signu
 import { useNavigation } from "@react-navigation/native";
 import { useLogout } from "@/utils/logout";
 import { ConnectWalletBottomSheet } from "@/features/wallets/connect-wallet.bottom-sheet";
+import { logger } from "@/utils/logger";
 const $subtextStyle: TextStyle = {
   textAlign: "center",
 };
@@ -50,13 +51,21 @@ const OnboardingWelcomeScreenContent = memo(
         contentContainerStyle={$screenContainer}
         preset="scroll"
       >
-        {/* <ConnectWalletBottomSheet
+        <ConnectWalletBottomSheet
           isVisible={isVisible}
           onClose={() => {
             setIsVisible(false);
           }}
-          onWalletConnect={() => {}}
-        /> */}
+          onWalletImported={(stuff) => {
+            logger.debug(
+              `[OnboardingWelcomeScreen] Wallet imported: ${JSON.stringify(
+                stuff,
+                null,
+                2
+              )}`
+            );
+          }}
+        />
         <Center style={$titleContainer}>
           <VStack>
             <OnboardingSubtitle>Welcome to Convos</OnboardingSubtitle>

@@ -173,6 +173,10 @@ export function PrivyPlaygroundLandingScreen() {
     logger.debug("Splash screen hidden");
   }, []);
 
+  if (privyUser) {
+    return <PrivyPlaygroundUserScreen />;
+  }
+
   // if (authStatus !== AuthStatuses.signedIn) {
   //   return <PrivyPlaygroundLoginScreen />;
   // }

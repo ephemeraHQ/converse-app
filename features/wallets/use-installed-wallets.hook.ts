@@ -1,5 +1,5 @@
 import { config } from "@/config";
-import logger from "@/utils/logger";
+import { logger } from "@/utils/logger";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import * as Linking from "expo-linking";
 

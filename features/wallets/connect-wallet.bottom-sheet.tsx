@@ -21,76 +21,8 @@ import {
 import { Button } from "@/design-system/Button/Button";
 import { InboxSigner } from "../multi-inbox/multi-inbox-client.types";
 import { base } from "thirdweb/chains";
-import { IProfileSocials } from "@/utils/api/profiles";
+import { hasNoProfiles, IProfileSocials } from "@/utils/api/profiles";
 import { useConnect } from "thirdweb/react";
-
-const BottomSheetStates = {
-  loadingClients: {
-    type: "loadingClients" as const,
-  },
-  loadingWallets: {
-    type: "loadingWallets" as const,
-  },
-  noWalletsInstalled: {
-    type: "noWalletsInstalled" as const,
-  },
-  walletsReady: (installedWallets: ISupportedWallet[]) => ({
-    type: "walletsReady" as const,
-    installedWallets,
-  }),
-  connectingToWallet: (
-    walletType: WalletId,
-    installedWallets: ISupportedWallet[]
-  ) => ({
-    type: "connectingToWallet" as const,
-    walletType,
-    installedWallets,
-  }),
-  selectingSocialIdentity: (socialData: IProfileSocials) => ({
-    type: "selectingSocialIdentity" as const,
-    socialData,
-  }),
-  socialIdentitySelected: (username: string) => ({
-    type: "socialIdentitySelected" as const,
-    username,
-  }),
-  connectedToWalletAndNotOnXmtp: (address: string) => ({
-    type: "connectedToWalletAndNotOnXmtp" as const,
-    address,
-  }),
-  connectedToWalletAndOnXmtp: (address: string) => ({
-    type: "connectedToWalletAndOnXmtp" as const,
-    address,
-  }),
-  walletConnectedSuccessfully: (address: string) => ({
-    type: "walletConnectedSuccessfully" as const,
-    address,
-  }),
-  error: {
-    type: "error" as const,
-  },
-} as const;
-
-type ValueOf<T> = T[keyof T];
-type ReturnTypeOrValue<T> = T extends (...args: any[]) => any
-  ? ReturnType<T>
-  : T;
-type BottomSheetState = ReturnTypeOrValue<ValueOf<typeof BottomSheetStates>>;
-type BottomSheetStateType = BottomSheetState["type"];
-let foo: BottomSheetState = undefined as any as BottomSheetState;
-
-if (foo.type === "walletsReady") {
-  foo.installedWallets;
-} else if (foo.type === "noWalletsInstalled") {
-  foo;
-} else if (foo.type === "connectingToWallet") {
-  foo.walletType;
-  foo.installedWallets;
-} else if (foo.type === "selectingSocialIdentity") {
-  foo.socialData;
-} else if (foo.type === "socialIdentitySelected") {
-  foo.username;
-}
 
 type InstalledWalletsListProps = {
   installedWallets: ISupportedWallet[];
@@ -99,6 +31,28 @@ type InstalledWalletsListProps = {
   isDisabled: boolean;
   loadingWalletId: WalletId | undefined;
 };
+
+type SocialIdentityListProps = {
+  socialData: IProfileSocials;
+  onSocialIdentityTapped: (socialIdentity: string) => void;
+};
+
+function SocialIdentityList({
+  socialData,
+  onSocialIdentityTapped,
+}: SocialIdentityListProps) {
+  return (
+    <>
+      {socialData?.map((social) => (
+        <Button
+          key={social.id}
+          text={social.name}
+          onPress={() => onSocialIdentityTapped(social.id)}
+        />
+      ))}
+    </>
+  );
+}
 
 function InstalledWalletsList({
   installedWallets,
@@ -134,14 +88,64 @@ function InstalledWalletsList({
 type ConnectWalletBottomSheetProps = {
   isVisible: boolean;
   onClose: () => void;
-  onWalletConnect: (something: string) => void;
+  onWalletImported: ({
+    address,
+    username,
+    avatarUri,
+  }: {
+    address: string;
+    username: string | undefined;
+    avatarUri: string | undefined;
+  }) => void;
 };
 
 const coinbaseUrl = new URL(`https://${config.websiteDomain}/coinbase`);
+
+type ListShowing = "wallets" | "socials";
+
+type ConnectWalletBottomSheetState = {
+  walletThatIsConnecting: WalletId | undefined;
+  socialData: IProfileSocials | undefined;
+  listShowing: ListShowing | undefined;
+};
+
+type ConnectWalletBottomSheetActions =
+  | { type: "SetConnectingWallet"; walletId: WalletId }
+  | { type: "SocialDataLoaded"; data: IProfileSocials }
+  | { type: "Reset" };
+
+function reducer(
+  state: ConnectWalletBottomSheetState,
+  action: ConnectWalletBottomSheetActions
+): ConnectWalletBottomSheetState {
+  switch (action.type) {
+    case "SetConnectingWallet":
+      return {
+        ...state,
+        walletThatIsConnecting: action.walletId,
+        socialData: undefined,
+      };
+    case "SocialDataLoaded":
+      return {
+        ...state,
+        socialData: action.data,
+        walletThatIsConnecting: undefined,
+      };
+    case "Reset":
+      return {
+        ...state,
+        walletThatIsConnecting: undefined,
+        socialData: undefined,
+      };
+    default:
+      return state;
+  }
+}
+
 export function ConnectWalletBottomSheet({
   isVisible,
   onClose,
-  onWalletConnect,
+  onWalletImported,
 }: ConnectWalletBottomSheetProps) {
   const { theme } = useAppTheme();
   const insets = useSafeAreaInsets();
@@ -150,46 +154,93 @@ export function ConnectWalletBottomSheet({
     useInstalledWallets();
   const { connect } = useConnect();
 
+  const hasInstalledWallets = installedWallets && installedWallets.length > 0;
+
   const bottomSheetRef = useBottomSheetModalRef();
   const currentSender = useAccountsStore((state) => state.currentSender);
-  const isInboxClientInitiated =
-    !!MultiInboxClient.instance.getInboxClientForAddress({
-      ethereumAddress: currentSender!.ethereumAddress,
-    })!;
+  // const isInboxClientInitiated =
+  //   !!MultiInboxClient.instance.getInboxClientForAddress({
+  //     ethereumAddress: currentSender!.ethereumAddress,
+  //   })!;
 
-  const handleConnectWalletTapped = (
-    walletType: WalletId,
-    // eslint-disable-next-line typescript-eslint/no-explicit-any
-    options?: /** only used for coinbase wallet - will add better typing if this needs to be more dynamic */ any
-  ) => {
-    if (!isInboxClientInitiated) {
-      throw new Error(
-        `[ConnectWalletBottomSheet] Inbox client not initiated for address ${
-          currentSender!.ethereumAddress
-        } when attempting to connect wallet ${walletType}`
-      );
-    }
+  // function getInitialShowingList(
+  //   installedWallets: ISupportedWallet[],
+  //   isInboxClientInitiated: boolean
+  // ): ListShowing | undefined {
+  //   if (!isInboxClientInitiated) {
+  //     return "wallets";
+  //   }
 
-    setBottomSheetState(
-      BottomSheetStates.connectingToWallet(walletType, installedWallets)
-    );
+  //   if (installedWallets.length === 0) {
+  //     return "socials";
+  //   }
+
+  //   return undefined;
+  // }
+
+  const initialState: ConnectWalletBottomSheetState = {
+    listShowing: "wallets",
+    walletThatIsConnecting: undefined,
+    socialData: undefined,
+  };
+
+  const [state, dispatch] = React.useReducer(reducer, initialState);
+  const { walletThatIsConnecting, socialData, listShowing } = state;
+
+  const isShowingWalletList = listShowing === "wallets";
+  const isWalletListDisabled = walletThatIsConnecting !== undefined;
+
+  const isShowingSocialIdentityList =
+    listShowing === "socials" && socialData !== undefined;
+  const isShowingNoSocialsMessage =
+    listShowing === "socials" && socialData === undefined;
+
+  const handleConnectWalletTapped = (walletType: WalletId, options?: any) => {
+    // if (!isInboxClientInitiated) {
+    //   throw new Error(
+    //     `[ConnectWalletBottomSheet] Inbox client not initiated for address ${
+    //       currentSender!.ethereumAddress
+    //     } when attempting to connect wallet ${walletType}`
+    //   );
+    // }
+
+    dispatch({ type: "SetConnectingWallet", walletId: walletType });
+
     logger.debug(
       `[ConnectWalletBottomSheet] Handling connect wallet tapped for ${walletType}`
     );
 
     connect(async () => {
+      logger.debug(
+        `[ConnectWalletBottomSheet] Creating wallet of type ${walletType}`
+      );
       const w = createWallet(walletType, options);
+
+      logger.debug(
+        `[ConnectWalletBottomSheet] Connecting wallet to thirdweb client`
+      );
       const walletAccount = await w.connect({
         client: thirdwebClient,
       });
 
       const addressToLink = walletAccount.address;
+      logger.debug(
+        `[ConnectWalletBottomSheet] Got wallet address: ${addressToLink}`
+      );
 
+      logger.debug(
+        `[ConnectWalletBottomSheet] Getting inbox client for current sender: ${
+          currentSender!.ethereumAddress
+        }`
+      );
       const currentInboxClient =
         MultiInboxClient.instance.getInboxClientForAddress({
           ethereumAddress: currentSender!.ethereumAddress,
         })!;
 
+      logger.debug(
+        `[ConnectWalletBottomSheet] Checking if address ${addressToLink} can be messaged`
+      );
       const resultsMap = await currentInboxClient.canMessage([addressToLink]);
       logger.debug(
         `[ConnectWalletBottomSheet] Results map: ${JSON.stringify(
@@ -199,86 +250,79 @@ export function ConnectWalletBottomSheet({
         )}`
       );
       const isOnXmtp = resultsMap[addressToLink];
-      setBottomSheetState(
-        isOnXmtp
-          ? BottomSheetStates.connectedToWalletAndOnXmtp(addressToLink)
-          : BottomSheetStates.connectedToWalletAndNotOnXmtp(addressToLink)
-      );
 
       logger.debug(
         `[ConnectWalletBottomSheet] Is on XMTP? ${isOnXmtp} for address ${addressToLink}`
       );
 
       if (isOnXmtp) {
+        logger.debug(
+          `[ConnectWalletBottomSheet] Address ${addressToLink} is already on XMTP`
+        );
         alert(
           `You are already on XMTP with address ${addressToLink}. We're going to handle this carefully according to https://xmtp-labs.slack.com/archives/C07NSHXK693/p1739215446331469?thread_ts=1739212558.484059&cid=C07NSHXK693.`
         );
       } else {
-        // todo load the profile stuff for this address and see the names
-        // return;
+        logger.debug(
+          `[ConnectWalletBottomSheet] Creating signer for address ${addressToLink}`
+        );
         const signer: InboxSigner = {
           getAddress: async () => addressToLink,
           getChainId: () => base.id,
           getBlockNumber: () => undefined,
           walletType: () => "EOA",
           signMessage: async (message: string) => {
+            logger.debug(
+              `[ConnectWalletBottomSheet] Signing message for address ${addressToLink}`
+            );
             const signature = await walletAccount.signMessage({ message });
             return signature;
           },
         };
 
+        logger.debug(
+          `[ConnectWalletBottomSheet] Adding account to inbox client`
+        );
         await currentInboxClient.addAccount(signer);
         alert(
           `You've sucesfully connected ${addressToLink} to your inbox. You won't see anything in the UI yet, but we're working on that now.`
         );
 
-        const socialData = await ensureProfileSocialsQueryData(addressToLink);
         logger.debug(
-          `[ConnectWalletBottomSheet] Social data for address ${addressToLink}:`,
-          JSON.stringify(socialData, null, 2)
+          `[ConnectWalletBottomSheet] Getting social data for address ${addressToLink}`
         );
+        const socialData = await ensureProfileSocialsQueryData(addressToLink);
+        if (hasNoProfiles(socialData as IProfileSocials)) {
+          logger.debug(
+            `[ConnectWalletBottomSheet] No social profiles found for address ${addressToLink}`
+          );
+          onWalletImported({
+            address: addressToLink,
+            username: undefined,
+            avatarUri: undefined,
+          });
+        } else {
+          logger.debug(
+            `[ConnectWalletBottomSheet] Social data for address ${addressToLink}:`,
+            JSON.stringify(socialData, null, 2)
+          );
 
-        setBottomSheetState(
-          BottomSheetStates.selectingSocialIdentity(
-            socialData as IProfileSocials
-          )
-        );
+          dispatch({
+            type: "SocialDataLoaded",
+            data: socialData as IProfileSocials,
+          });
+        }
 
-        onWalletConnect(addressToLink);
-        setBottomSheetState(
-          BottomSheetStates.walletConnectedSuccessfully(addressToLink)
-        );
+        // onWalletImported({
+        //   address: addressToLink,
+        //   username: socialData.ensNames?.[0]?.name,
+        //   avatarUri: socialData.ensNames?.[0]?.avatar,
+        // });
       }
 
       return w;
     });
   };
-
-  const initialStatus = !isInboxClientInitiated
-    ? BottomSheetStates.loadingClients
-    : areInstalledWalletsLoading
-    ? BottomSheetStates.loadingWallets
-    : installedWallets?.length === 0
-    ? BottomSheetStates.noWalletsInstalled
-    : BottomSheetStates.walletsReady(installedWallets ?? []);
-
-  const [bottomSheetState, setBottomSheetState] =
-    React.useState<BottomSheetState>(initialStatus);
-
-  const statesShowingWalletList: BottomSheetStateType[] = [
-    "walletsReady",
-    "connectingToWallet",
-  ];
-  const isShowingWalletList = statesShowingWalletList.includes(
-    bottomSheetState.type
-  );
-
-  const walletThatIsLoading =
-    bottomSheetState.type === "connectingToWallet"
-      ? bottomSheetState.walletType
-      : undefined;
-
-  const isWalletListDisabled = walletThatIsLoading !== undefined;
 
   React.useEffect(() => {
     if (isVisible) {
@@ -309,11 +353,22 @@ export function ConnectWalletBottomSheet({
         >
           {isShowingWalletList && (
             <InstalledWalletsList
-              installedWallets={installedWallets}
+              installedWallets={installedWallets ?? []}
               onWalletTapped={handleConnectWalletTapped}
               coinbaseCallbackUrl={coinbaseUrl.toString()}
               isDisabled={isWalletListDisabled}
-              loadingWalletId={walletThatIsLoading}
+              loadingWalletId={walletThatIsConnecting}
+            />
+          )}
+
+          {isShowingNoSocialsMessage && (
+            <Text>No social identities found for this address.</Text>
+          )}
+
+          {isShowingSocialIdentityList && (
+            <SocialIdentityList
+              socialData={socialData}
+              onSocialIdentityTapped={handleSocialIdentityTapped}
             />
           )}
 
