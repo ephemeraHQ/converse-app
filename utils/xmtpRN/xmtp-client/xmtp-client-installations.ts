@@ -1,8 +1,9 @@
 import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
+import { toHex } from "viem";
 
 export type InstallationSignature = {
   installationPublicKey: string;
-  installationKeySignature: string;
+  appCheckTokenSignature: string;
 };
 
 export async function getInstallationKeySignature(
@@ -15,10 +16,11 @@ export async function getInstallationKeySignature(
 
   if (!client) throw new Error("Client not found");
 
-  const raw = await client.signWithInstallationKey(message);
+  const rawAppCheckTokenSignatureByteArray =
+    await client.signWithInstallationKey(appCheckToken);
 
   return {
-    installationPublicKey: client.installationId,
-    installationKeySignature: Buffer.from(raw).toString("hex"),
+    installationPublicKey: account,
+    appCheckTokenSignature: toHex(rawAppCheckTokenSignatureByteArray),
   };
 }

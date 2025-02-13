@@ -13,12 +13,15 @@ export const createUser = async (args: {
   await api.post(
     "/api/user/create",
     {
-      inboxId,
-      address: smartContractWalletAddress,
-      privyId: privyUserId,
-      deviceName:
-        /* todo get we get the ios entgitlement to get "vivians iphone"*/ Device.modelId,
-      os: Platform.OS.toLowerCase(),
+      privyUserId,
+      deviceIdentity: {
+        privyAddress: smartContractWalletAddress,
+        xmtpId: inboxId,
+      },
+      device: {
+        name: Device.modelId,
+        os: Platform.OS.toLowerCase(),
+      },
     },
     { headers: await getXmtpApiHeaders(smartContractWalletAddress) }
   );

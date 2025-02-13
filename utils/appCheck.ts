@@ -8,15 +8,21 @@ import { firebase } from "@react-native-firebase/app-check";
 
 const appCheck = firebase.appCheck();
 
-export const tryGetAppCheckToken = async () => {
+export const tryGetAppCheckToken = async ({
+  extraSecurity = false,
+}: {
+  extraSecurity?: boolean;
+} = {}) => {
   try {
     // App Check FAQ:
     // Do we need/want to use the limited use token?
 
     // What endpoints are protected with app check?
     // @see https://github.com/ephemeraHQ/converse-backend/blob/main/api/middlewares.ts#L27
-    const { token } = await appCheck.getLimitedUseToken();
-    // const { token } = await appCheck.getToken();
+    const token = extraSecurity
+      ? await appCheck.getLimitedUseToken()
+      : await appCheck.getToken();
+
     return token;
   } catch (error) {
     captureError(

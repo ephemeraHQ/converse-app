@@ -10,12 +10,14 @@ import { oldApi } from "./api";
 import {
   CONVERSE_ACCESS_TOKEN_STORAGE_KEY,
   CONVERSE_REFRESH_TOKEN_STORAGE_KEY,
-  FIREBASE_APP_CHECK_HEADER_KEY,
+  FIREBASE_APP_CHECK_TOKEN_HEADER_KEY,
   XMTP_API_ADDRESS_HEADER_KEY,
   XMTP_IDENTITY_KEY,
 } from "./api.constants";
 import { createDedupedFetcher } from "./api.utils";
 import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
+import { Client } from "@xmtp/react-native-sdk";
+import { toHex } from "viem";
 
 export type AuthResponse = {
   accessToken: string;
@@ -36,10 +38,25 @@ export const xmtpSignatureByAccount: {
   [account: string]: InstallationSignature;
 } = {};
 
+const client: Client = undefined as any as Client;
+// client.installationId
+
 export type XmtpApiHeaders = {
-  [XMTP_API_ADDRESS_HEADER_KEY]: string;
-  [FIREBASE_APP_CHECK_HEADER_KEY]: string;
-  authorization: `Bearer ${string}`;
+  // string plaintext
+  ["X-XMTP-InstallationId"]: string;
+  // client.installationId
+
+  ["X-XMTP-InboxId"]: string;
+  // client.inboxId
+
+  // string plaintext
+  ["X-Firebase-AppCheck"]: string;
+  // firebase.appCheck.getLimitedUseToken()
+
+  // string plaintext
+  ["X-XMTP-Signature"]: string;
+
+  // string plaintext
 };
 
 export async function fetchAccessToken({
@@ -64,7 +81,7 @@ export async function fetchAccessToken({
       {
         headers: {
           [XMTP_API_ADDRESS_HEADER_KEY]: account,
-          [FIREBASE_APP_CHECK_HEADER_KEY]: appCheckToken,
+          [FIREBASE_APP_CHECK_TOKEN_HEADER_KEY]: appCheckToken,
         },
       }
     )
@@ -179,7 +196,7 @@ export async function getXmtpApiHeaders(
 
   return {
     [XMTP_API_ADDRESS_HEADER_KEY]: account,
-    [FIREBASE_APP_CHECK_HEADER_KEY]: appCheckToken,
+    [FIREBASE_APP_CHECK_TOKEN_HEADER_KEY]: appCheckToken,
     authorization: `Bearer ${accessToken}`,
   };
 }
