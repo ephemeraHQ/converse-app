@@ -109,6 +109,10 @@ function formatName(args: { name: string; options: IFormatOptions }) {
 - Avoid enums, use string literals instead.
 - Prefer type inference when possible.
 - Avoid explicit Promise return types - let TypeScript infer them.
+- Use functional components with TypeScript types.
+- Prefer inferring types if possible over explicit typing.
+- Prefer type assertions on return objects (`return {...} satisfies IType`) over function return type annotations (`function(): IType`) if we have to put a type because the inferring is not working well.
+- Avoid explicit return types on functions.
 
 ```typescript
 // ❌ Bad: Explicit Promise return types

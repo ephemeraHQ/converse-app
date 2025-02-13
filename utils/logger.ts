@@ -122,6 +122,18 @@ export const streamLogger = createPrefixedLogger("STREAM")
 export const apiLogger = createPrefixedLogger("API")
 export const xmtpLogger = createPrefixedLogger("XMTP")
 
+export const notificationsLogger = {
+  ...logger,
+  debug: (...args: Parameters<logMethodType>) =>
+    logger.debug("[NOTIFICATIONS]", ...args),
+  info: (...args: Parameters<logMethodType>) =>
+    logger.info("[NOTIFICATIONS]", ...args),
+  warn: (...args: Parameters<logMethodType>) =>
+    logger.warn("[NOTIFICATIONS]", ...args),
+  error: (...args: Parameters<logMethodType>) =>
+    logger.error("[NOTIFICATIONS]", ...args),
+};
+
 /**
  * @deprecated Use { logger } instead
  */
