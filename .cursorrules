@@ -43,6 +43,7 @@
 - Use functional components with TypeScript types.
 - Prefer inferring types if possible over explicit typing.
 - Prefer type assertions on return objects (`return {...} satisfies IType`) over function return type annotations (`function(): IType`) if we have to put a type because the inferring is not working well.
+- Avoid explicit return types on functions.
 
 ## Function Patterns
 

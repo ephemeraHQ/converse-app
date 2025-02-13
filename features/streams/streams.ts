@@ -9,10 +9,10 @@ import { stopStreamingConversations } from "@/utils/xmtpRN/xmtp-conversations/xm
 import { stopStreamingAllMessage } from "@/utils/xmtpRN/xmtp-messages/xmtp-messages-stream";
 import { stopStreamingConsent } from "@/utils/xmtpRN/xmtp-preferences/xmtp-preferences-stream";
 import logger from "@utils/logger";
-import { startConsentStreaming } from "./stream-consent";
 import { startConversationStreaming } from "./stream-conversations";
 import { startMessageStreaming } from "./stream-messages";
 import { useStreamingStore } from "./stream-store";
+import { startConsentStreaming } from "@/features/consent/stream-consent";
 
 export function setupStreamingSubscriptions() {
   // Start streaming when hydration is done
