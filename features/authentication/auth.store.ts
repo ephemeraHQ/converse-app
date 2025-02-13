@@ -4,8 +4,6 @@ export const AuthStatuses = {
   undetermined: "undetermined",
   signedIn: "signedIn",
   signedOut: "signedOut",
-  signingIn: "signingIn",
-  signingUp: "signingUp",
 } as const;
 
 type IAuthStatus = (typeof AuthStatuses)[keyof typeof AuthStatuses];

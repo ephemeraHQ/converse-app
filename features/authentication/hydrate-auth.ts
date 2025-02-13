@@ -6,7 +6,7 @@ import { captureError } from "@/utils/capture-error";
 export const hydrateAuth = async () => {
   try {
     const currentUser = await ensureCurrentUserQueryData({
-      caller: "MultiInboxClient.initialize",
+      caller: "hydrateAuth",
     });
 
     if (!currentUser) {

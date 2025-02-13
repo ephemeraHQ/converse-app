@@ -1,14 +1,12 @@
-import {
-  AuthStatuses,
-  useAuthStore,
-} from "@/features/authentication/auth.store";
-import { useExecuteOnceWhenReady } from "@/hooks/use-execute-once-when-ready";
+import { useAuthStore } from "@/features/authentication/auth.store";
 import { createUser } from "@/utils/api/users";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import logger from "@/utils/logger";
-import { useEmbeddedEthereumWallet, usePrivy } from "@privy-io/expo";
+import { useEmbeddedEthereumWallet } from "@privy-io/expo";
 import { useSignupWithPasskey as usePrivySignupWithPasskey } from "@privy-io/expo/passkey";
 import { useSmartWallets } from "@privy-io/expo/smart-wallets";
+import type { PrivySmartWalletAccount } from "@privy-io/public-api";
+import { base } from "thirdweb/chains";
 import {
   RELYING_PARTY,
   createInboxWithSigner,
@@ -17,13 +15,55 @@ import {
 
 export function useSignupWithPasskey() {
   const { create: createEmbeddedWallet } = useEmbeddedEthereumWallet();
-  const { client: smartWalletClient } = useSmartWallets();
-  const { user: privyUser } = usePrivy();
+  const { getClientForChain } = useSmartWallets();
 
   const { signupWithPasskey: privySignupWithPasskey } =
     usePrivySignupWithPasskey({
-      onSuccess: () => {
-        createEmbeddedWallet();
+      onSuccess: async () => {
+        try {
+          // Create embedded wallet first
+          const { user: privyUser } = await createEmbeddedWallet();
+
+          const smartWalletAccount = privyUser.linked_accounts.find(
+            (account): account is PrivySmartWalletAccount =>
+              account.type === "smart_wallet"
+          );
+
+          if (!smartWalletAccount) {
+            throw new Error("Smart wallet account not found");
+          }
+
+          // Get smart wallet client for the chain
+          const smartWalletClient = await getClientForChain({
+            chainId: base.id, // Not sure
+          });
+
+          if (!smartWalletClient) {
+            throw new Error("Smart wallet client not ready");
+          }
+
+          // Create signer
+          const signer = createSmartWalletSigner(smartWalletClient);
+
+          // Create inbox
+          const { inboxId } = await createInboxWithSigner(signer);
+
+          const smartContractWalletAddress = await signer.getAddress();
+
+          // Create user in database
+          await createUser({
+            privyUserId: privyUser.id,
+            smartContractWalletAddress,
+            inboxId,
+          });
+
+          useAuthStore.getState().actions.setStatus("signedIn");
+        } catch (error) {
+          logger.error(
+            `[signup-with-passkey] Error in onSuccess handler: ${error}`
+          );
+          captureErrorWithToast(error);
+        }
       },
       onError: (error) => {
         logger.error(`[signup-with-passkey] Error signing up: ${error}`);
@@ -31,37 +71,7 @@ export function useSignupWithPasskey() {
       },
     });
 
-  const isSigningUp = useAuthStore(
-    (state) => state.status === AuthStatuses.signingUp
-  );
-
-  useExecuteOnceWhenReady({
-    callback: async (smartWalletClient, privyUser) => {
-      try {
-        const signer = createSmartWalletSigner(smartWalletClient);
-        const { inboxId } = await createInboxWithSigner(signer);
-        const smartContractWalletAddress = await signer.getAddress();
-
-        // Creating user in our database
-        await createUser({
-          privyUserId: privyUser.id,
-          smartContractWalletAddress,
-          inboxId,
-        });
-
-        useAuthStore.getState().actions.setStatus("signedIn");
-      } catch (error) {
-        logger.error(
-          `[signup-with-passkey] Error handling smart wallet ready: ${error}`
-        );
-        captureErrorWithToast(error);
-      }
-    },
-    deps: [smartWalletClient, privyUser, isSigningUp],
-  });
-
   const signup = async () => {
-    useAuthStore.getState().actions.setStatus("signingUp");
     await privySignupWithPasskey({
       relyingParty: RELYING_PARTY,
     });

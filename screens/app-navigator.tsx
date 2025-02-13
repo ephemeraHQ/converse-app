@@ -131,15 +131,6 @@ const AppStack = () => {
       )}
     </NativeStack.Navigator>
   );
-
-  // Show idle navigation during signup/signin/restoration
-  // if (isRestoring) {
-  //   return <IdleNavigation />;
-  // } else if (isSignedOut) {
-  //   return <SignedOutNavigation />;
-  // } else if (isSignedIn) {
-  //   return <SignedInNavigation />;
-  // }
 };
 
 // Bunch of handlers. Not really react components
