@@ -152,6 +152,28 @@ const handleConversationLink = ({
   return `conversation?${queryString}`;
 };
 
+const setOpenedConversationText = ({
+  text,
+  navigationName,
+}: {
+  text?: string | null;
+  navigationName: string;
+}) => {
+  if (text) {
+    // If navigating but no group or peer, we can still prefill message for current convo
+    const navigationState = navigationStates[navigationName];
+    const currentRoutes = navigationState?.state.routes || [];
+    if (
+      currentRoutes.length > 0 &&
+      currentRoutes[currentRoutes.length - 1].name === "Conversation"
+    ) {
+      // TODO: Fix this so that we prefill the message in the input
+      // Probably need to pass the prefilled text in the nav params instead
+      // converseEventEmitter.emit("setCurrentConversationInputValue", text);
+    }
+  }
+};
+
 export const getConverseInitialURL = () => {
   return initialURL;
 };
