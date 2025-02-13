@@ -1,6 +1,5 @@
 import type { GroupInvite } from "./api-group.types";
 import logger from "../../logger";
-import { getXmtpApiHeaders } from "../auth";
 import { oldApi } from "../api";
 
 export type GroupLink = {
@@ -52,32 +51,18 @@ export const getGroupLink = async (groupLinkId: string) => {
   return data as GroupLink;
 };
 
-export const joinGroupFromLink = async (
-  userAddress: string,
-  groupLinkId: string
-) => {
-  const { data } = await oldApi.post(
-    `/api/groups/join`,
-    { groupLinkId },
-    {
-      headers: await getXmtpApiHeaders(userAddress),
-    }
-  );
+export const joinGroupFromLink = async (groupLinkId: string) => {
+  const { data } = await oldApi.post(`/api/groups/join`, { groupLinkId });
   return data as JoinGroupLinkResult;
 };
 
-export const createGroupInvite = async (
-  account: string,
-  inputs: {
-    groupName: string;
-    description?: string;
-    imageUrl?: string;
-    groupId: string;
-  }
-): Promise<CreateGroupInviteResult> => {
-  const { data } = await oldApi.post("/api/groupInvite", inputs, {
-    headers: await getXmtpApiHeaders(account),
-  });
+export const createGroupInvite = async (inputs: {
+  groupName: string;
+  description?: string;
+  imageUrl?: string;
+  groupId: string;
+}): Promise<CreateGroupInviteResult> => {
+  const { data } = await oldApi.post("/api/groupInvite", inputs);
   return data;
 };
 
@@ -92,22 +77,14 @@ export const deleteGroupInvite = async (
   account: string,
   inviteId: string
 ): Promise<void> => {
-  await oldApi.delete(`/api/groupInvite/${inviteId}`, {
-    headers: await getXmtpApiHeaders(account),
-  });
+  await oldApi.delete(`/api/groupInvite/${inviteId}`);
 };
 
 export const createGroupJoinRequest = async (
   account: string,
   inviteId: string
 ): Promise<Pick<GroupJoinRequest, "id">> => {
-  const { data } = await oldApi.post(
-    "/api/groupJoinRequest",
-    { inviteId },
-    {
-      headers: await getXmtpApiHeaders(account),
-    }
-  );
+  const { data } = await oldApi.post("/api/groupJoinRequest", { inviteId });
   logger.debug("[API] Group join request created", data);
   return data;
 };
@@ -120,44 +97,29 @@ export const getGroupJoinRequest = async (
 };
 
 export const updateGroupJoinRequestStatus = async (
-  account: string,
   id: string,
   status: GroupJoinRequest["status"]
 ): Promise<Pick<GroupJoinRequest, "status" | "id">> => {
-  const { data } = await oldApi.put(
-    `/api/groupJoinRequest/${id}`,
-    { status },
-    {
-      headers: await getXmtpApiHeaders(account),
-    }
-  );
+  const { data } = await oldApi.put(`/api/groupJoinRequest/${id}`, { status });
   return data;
 };
 
-export const getPendingGroupJoinRequests = async (
-  account: string
-): Promise<{ joinRequests: PendingGroupJoinRequest[] }> => {
-  const { data } = await oldApi.get("/api/groupJoinRequest/pending", {
-    headers: await getXmtpApiHeaders(account),
-  });
+export const getPendingGroupJoinRequests = async (): Promise<{
+  joinRequests: PendingGroupJoinRequest[];
+}> => {
+  const { data } = await oldApi.get("/api/groupJoinRequest/pending");
   return data;
 };
 
 export const putGroupInviteRequest = async ({
-  account,
   status,
   joinRequestId,
 }: {
-  account: string;
   status: string;
   joinRequestId: string;
 }): Promise<void> => {
-  const { data } = await oldApi.put(
-    `/api/groupJoinRequest/${joinRequestId}`,
-    { status },
-    {
-      headers: await getXmtpApiHeaders(account),
-    }
-  );
+  const { data } = await oldApi.put(`/api/groupJoinRequest/${joinRequestId}`, {
+    status,
+  });
   return data;
 };

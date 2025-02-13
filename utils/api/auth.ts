@@ -1,154 +1,36 @@
 import { tryGetAppCheckToken } from "../appCheck";
-import logger, { authLogger } from "../logger";
-import { getSecureMmkvForAccount } from "../mmkv";
-import {
-  InstallationSignature,
-  getInstallationKeySignature,
-} from "../xmtpRN/xmtp-client/xmtp-client-installations";
-import { getInboxId } from "../xmtpRN/signIn";
-import { oldApi } from "./api";
-import {
-  CONVERSE_ACCESS_TOKEN_STORAGE_KEY,
-  CONVERSE_REFRESH_TOKEN_STORAGE_KEY,
-  FIREBASE_APP_CHECK_TOKEN_HEADER_KEY,
-  XMTP_API_ADDRESS_HEADER_KEY,
-  XMTP_IDENTITY_KEY,
-} from "./api.constants";
-import { createDedupedFetcher } from "./api.utils";
 import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
-import { Client } from "@xmtp/react-native-sdk";
+import {
+  getSafeCurrentSender,
+  useAccountsStore,
+} from "@/features/multi-inbox/multi-inbox.store";
+import { MultiInboxClientRestorationStates } from "@/features/multi-inbox/multi-inbox-client.types";
 import { toHex } from "viem";
 
-export type AuthResponse = {
-  accessToken: string;
-  refreshToken: string;
-};
-
-type AuthParams = {
-  inboxId: string;
-  installationPublicKey: string;
-  installationKeySignature: string;
-  appCheckToken: string;
-  account: string;
-};
-
-const { fetch: dedupedFetch } = createDedupedFetcher();
-
-export const xmtpSignatureByAccount: {
-  [account: string]: InstallationSignature;
-} = {};
-
-const client: Client = undefined as any as Client;
-// client.installationId
+export const XMTP_INSTALLATION_ID_HEADER_KEY = "X-XMTP-InstallationId";
+export const XMTP_INBOX_ID_HEADER_KEY = "X-XMTP-InboxId";
+export const FIREBASE_APP_CHECK_HEADER_KEY = "X-Firebase-AppCheck";
+export const XMTP_SIGNATURE_HEADER_KEY = "X-XMTP-Signature";
 
 export type XmtpApiHeaders = {
-  // string plaintext
-  ["X-XMTP-InstallationId"]: string;
-  // client.installationId
+  [XMTP_INSTALLATION_ID_HEADER_KEY]: string;
 
-  ["X-XMTP-InboxId"]: string;
-  // client.inboxId
+  [XMTP_INBOX_ID_HEADER_KEY]: string;
 
-  // string plaintext
-  ["X-Firebase-AppCheck"]: string;
-  // firebase.appCheck.getLimitedUseToken()
+  [FIREBASE_APP_CHECK_HEADER_KEY]: string;
 
-  // string plaintext
-  ["X-XMTP-Signature"]: string;
-
-  // string plaintext
+  [XMTP_SIGNATURE_HEADER_KEY]: string;
 };
 
-export async function fetchAccessToken({
-  inboxId,
-  installationPublicKey,
-  installationKeySignature,
-  appCheckToken,
-  account,
-}: AuthParams): Promise<AuthResponse> {
-  authLogger.debug(
-    `Creating access token for account: ${account} with inboxId: ${inboxId}`
-  );
-  const { data } = await dedupedFetch("/api/authenticate" + inboxId, () =>
-    oldApi.post<AuthResponse>(
-      "/api/authenticate",
-      {
-        inboxId,
-        installationKeySignature,
-        installationPublicKey,
-        appCheckToken,
-      },
-      {
-        headers: {
-          [XMTP_API_ADDRESS_HEADER_KEY]: account,
-          [FIREBASE_APP_CHECK_TOKEN_HEADER_KEY]: appCheckToken,
-        },
-      }
-    )
-  );
-
-  if (!data.accessToken) {
-    throw new Error("No access token in auth response");
-  }
-  if (!data.refreshToken) {
-    throw new Error("No refresh token in auth response");
-  }
-  authLogger.debug(`Successfully created access token for account: ${account}`);
-  return data;
-}
-
-export async function rotateAccessToken(
-  account: string,
-  refreshToken: string | undefined
-): Promise<AuthResponse> {
-  logger.debug(`Rotating access token for account ${account}`);
-
-  if (!refreshToken) {
-    throw new Error("Can't request new access token without refresh token");
-  }
-
-  const { data } = await dedupedFetch(
-    `/api/authenticate/token-${account}`,
-    () =>
-      oldApi.post<AuthResponse>("/api/authenticate/token", {
-        token: refreshToken,
-      })
-  );
-
-  if (!data?.accessToken) {
-    throw new Error(`Failed to rotate access token for account ${account}`);
-  }
-
-  const secureMmkv = await getSecureMmkvForAccount(account);
-  secureMmkv.set(CONVERSE_ACCESS_TOKEN_STORAGE_KEY, data.accessToken);
-
-  if (data.refreshToken) {
-    secureMmkv.set(CONVERSE_REFRESH_TOKEN_STORAGE_KEY, data.refreshToken);
-  } else {
-    logger.warn("No refresh token in token rotate response");
-  }
-
-  logger.debug(`Successfully rotated access token for account ${account}`);
-  return data;
-}
-
-export async function getXmtpApiHeaders(
-  account: string
-): Promise<XmtpApiHeaders> {
-  if (!account) {
-    throw new Error("[getXmtpApiHeaders] No account provided");
-  }
-  const inboxClient = MultiInboxClient.instance.getInboxClientForAddress({
-    ethereumAddress: account,
-  });
-
-  if (!inboxClient) {
-    throw new Error("[getXmtpApiHeaders] No inbox client found for account");
-  }
-
-  const secureMmkv = await getSecureMmkvForAccount(account);
+export async function getConvosApiHeaders(): Promise<XmtpApiHeaders> {
+  const currentEthereumAddress = getSafeCurrentSender().ethereumAddress;
+  const areInboxesRestored =
+    useAccountsStore.getState().multiInboxClientRestorationState ===
+    MultiInboxClientRestorationStates.idle;
   const appCheckToken = await tryGetAppCheckToken();
-  let accessToken = secureMmkv.getString(CONVERSE_ACCESS_TOKEN_STORAGE_KEY);
+  const inboxClient = MultiInboxClient.instance.getInboxClientForAddress({
+    ethereumAddress: currentEthereumAddress,
+  });
 
   if (!appCheckToken) {
     throw new Error(
@@ -156,47 +38,25 @@ export async function getXmtpApiHeaders(
     );
   }
 
-  if (!accessToken) {
-    const installationKeySignature =
-      xmtpSignatureByAccount[account] ||
-      (await getInstallationKeySignature(account, XMTP_IDENTITY_KEY));
-
-    // Cache signature for future use
-    if (!xmtpSignatureByAccount[account]) {
-      xmtpSignatureByAccount[account] = installationKeySignature;
-    }
-
-    const inboxId = await getInboxId(account);
-    const authTokensResponse = await fetchAccessToken({
-      inboxId,
-      account,
-      appCheckToken,
-      ...installationKeySignature,
-    });
-
-    if (!authTokensResponse) {
-      throw new Error("Could not create access token");
-    }
-
-    // Store tokens and update local access token
-    secureMmkv.set(
-      CONVERSE_ACCESS_TOKEN_STORAGE_KEY,
-      authTokensResponse.accessToken
+  if (!areInboxesRestored) {
+    throw new Error(
+      "[getConvosApiHeaders] Inboxes not restored; cannot create headers"
     );
-    secureMmkv.set(
-      CONVERSE_REFRESH_TOKEN_STORAGE_KEY,
-      authTokensResponse.refreshToken
-    );
-    accessToken = authTokensResponse.accessToken;
   }
 
-  if (!accessToken) {
-    throw new Error("No access token");
+  if (!inboxClient) {
+    throw new Error("[getConvosApiHeaders] No inbox client found for account");
   }
+
+  const rawAppCheckTokenSignature = await inboxClient.signWithInstallationKey(
+    appCheckToken
+  );
+  const appCheckTokenSignatureHexString = toHex(rawAppCheckTokenSignature);
 
   return {
-    [XMTP_API_ADDRESS_HEADER_KEY]: account,
-    [FIREBASE_APP_CHECK_TOKEN_HEADER_KEY]: appCheckToken,
-    authorization: `Bearer ${accessToken}`,
+    [XMTP_INSTALLATION_ID_HEADER_KEY]: inboxClient.installationId,
+    [XMTP_INBOX_ID_HEADER_KEY]: inboxClient.inboxId,
+    [FIREBASE_APP_CHECK_HEADER_KEY]: appCheckToken,
+    [XMTP_SIGNATURE_HEADER_KEY]: appCheckTokenSignatureHexString,
   };
 }

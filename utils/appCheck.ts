@@ -12,18 +12,18 @@ export const tryGetAppCheckToken = async ({
   extraSecurity = false,
 }: {
   extraSecurity?: boolean;
-} = {}) => {
+} = {}): Promise<string | undefined> => {
   try {
     // App Check FAQ:
     // Do we need/want to use the limited use token?
 
     // What endpoints are protected with app check?
     // @see https://github.com/ephemeraHQ/converse-backend/blob/main/api/middlewares.ts#L27
-    const token = extraSecurity
+    const appCheckTokenResult = extraSecurity
       ? await appCheck.getLimitedUseToken()
       : await appCheck.getToken();
 
-    return token;
+    return appCheckTokenResult.token;
   } catch (error) {
     captureError(
       new GenericError({

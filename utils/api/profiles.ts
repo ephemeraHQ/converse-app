@@ -1,10 +1,8 @@
-import { getCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import type { ProfileType } from "@/features/onboarding/types/onboarding.types";
 import { logger } from "@/utils/logger";
 import type { InboxId } from "@xmtp/react-native-sdk";
 import { z } from "zod";
 import { oldApi } from "./api";
-import { getXmtpApiHeaders } from "./auth";
 import { IProfileSocials } from "@/features/profiles/profile-types";
 
 const LensHandleSchema = z.object({
@@ -126,9 +124,7 @@ type IProfileSearchResponse = z.infer<typeof ProfileSearchResponseSchema>;
 export const searchProfilesForCurrentAccount = async (
   query: string
 ): Promise<IProfileSearchResponse> => {
-  const currentAccount = getCurrentAccount()!;
   const { data } = await oldApi.get("/api/profile/search", {
-    headers: await getXmtpApiHeaders(currentAccount),
     params: { query },
   });
   const parseResult = ProfileSearchResponseSchema.safeParse(data);
@@ -153,9 +149,7 @@ export const claimProfile = async ({
   account: string;
   profile: ProfileType;
 }) => {
-  const { data } = await oldApi.post("/api/profile/username", profile, {
-    headers: await getXmtpApiHeaders(account),
-  });
+  const { data } = await oldApi.post("/api/profile/username", profile);
   logger.debug("[API PROFILES] claimProfile response:", data);
   const parseResult = ClaimProfileResponseSchema.safeParse(data);
   if (!parseResult.success) {
