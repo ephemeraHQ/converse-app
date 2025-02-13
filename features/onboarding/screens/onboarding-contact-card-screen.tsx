@@ -180,7 +180,7 @@ export function OnboardingContactCardScreen() {
       <ConnectWalletBottomSheet
         isVisible={isConnectWalletBottomSheetVisible}
         onClose={() => setIsConnectWalletBottomSheetVisible(false)}
-        onWalletConnect={(something) => {
+        onWalletImported={(something) => {
           logger.debug(
             "[OnboardingContactCardScreen] Wallet connect:",
             something

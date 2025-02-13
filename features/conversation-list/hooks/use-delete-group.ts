@@ -24,7 +24,6 @@ export const useDeleteGroup = (args: { groupTopic: ConversationTopic }) => {
   const { mutateAsync: deleteGroupAsync } = useMutation({
     mutationFn: () =>
       deleteTopic({
-        account: currentAccount,
         topic: groupTopic,
       }),
     onMutate: () => {

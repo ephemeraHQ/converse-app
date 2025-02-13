@@ -2,8 +2,7 @@ import type { ProfileType } from "@/features/onboarding/types/onboarding.types";
 import { logger } from "@/utils/logger";
 import type { InboxId } from "@xmtp/react-native-sdk";
 import { z } from "zod";
-import { oldApi } from "./api";
-import { IProfileSocials } from "@/features/profiles/profile-types";
+import { api } from "./api";
 
 const LensHandleSchema = z.object({
   profileId: z.string(),
@@ -68,24 +67,6 @@ const deprecatedProfileResponseSchema = z.record(
   ProfileSocialsSchema
 );
 
-export const hasNoProfiles = (profileSocials: IProfileSocials) => {
-  const allProfilesWithoutAddress = Object.keys(profileSocials)
-    // all properties other than address are profile lists
-    .filter((key) => key !== "address")
-    // now that address is gone, all other entries are profile lists
-    // for a given web3 identity provider
-    .map((key) => profileSocials[key as keyof IProfileSocials])
-    // is every list is empty, the user has no profiles
-    .every((profiles) => profiles && profiles.length === 0);
-  logger.debug(
-    "[API PROFILES] hasNoProfiles",
-    JSON.stringify(profileSocials),
-    allProfilesWithoutAddress
-  );
-
-  return allProfilesWithoutAddress;
-};
-
 export const getProfilesForAddresses = async (addresses: string[]) => {
   const { data } = await oldApi.post("/api/profile/batch", {
     addresses,
@@ -143,7 +124,6 @@ const ClaimProfileResponseSchema = z.object({
 });
 
 export const claimProfile = async ({
-  account,
   profile,
 }: {
   account: string;
@@ -187,63 +167,4 @@ export const checkUsernameValid = async ({
     );
   }
   return parseResult.success ? parseResult.data.success : false;
-};
-
-const EnsResolveResponseSchema = z.object({
-  address: z.string().nullable(),
-});
-type IEnsResolveResponse = z.infer<typeof EnsResolveResponseSchema>;
-
-export const resolveEnsName = async (
-  name: string
-): Promise<IEnsResolveResponse> => {
-  const { data } = await oldApi.get("/api/profile/ens", { params: { name } });
-  const parseResult = EnsResolveResponseSchema.safeParse(data);
-  if (!parseResult.success) {
-    logger.error(
-      "[API PROFILES] resolveEnsName parse error:",
-      JSON.stringify(parseResult.error)
-    );
-  }
-  return parseResult.success
-    ? { address: parseResult.data.address ?? null }
-    : { address: null };
-};
-
-const UnsResolveResponseSchema = z.object({
-  address: z.string().nullable(),
-});
-
-export const resolveUnsDomain = async (domain: string) => {
-  const { data } = await oldApi.get("/api/profile/uns", { params: { domain } });
-  const parseResult = UnsResolveResponseSchema.safeParse(data);
-  if (!parseResult.success) {
-    logger.error(
-      "[API PROFILES] resolveUnsDomain parse error:",
-      JSON.stringify(parseResult.error)
-    );
-  }
-  return parseResult.success
-    ? { address: parseResult.data.address ?? null }
-    : { address: null };
-};
-
-const FarcasterResolveResponseSchema = z.object({
-  address: z.string().nullable(),
-});
-
-export const resolveFarcasterUsername = async (username: string) => {
-  const { data } = await oldApi.get("/api/profile/farcaster", {
-    params: { username },
-  });
-  const parseResult = FarcasterResolveResponseSchema.safeParse(data);
-  if (!parseResult.success) {
-    logger.error(
-      "[API PROFILES] resolveFarcasterUsername parse error:",
-      JSON.stringify(parseResult.error)
-    );
-  }
-  return parseResult.success
-    ? { address: parseResult.data.address ?? null }
-    : { address: null };
 };

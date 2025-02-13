@@ -6,25 +6,20 @@ import { VStack } from "@/design-system/VStack";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { useBottomSheetModalRef } from "@/design-system/BottomSheet/BottomSheet.utils";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { createWallet, WalletId } from "thirdweb/wallets";
-import { thirdwebClient } from "@/utils/thirdweb";
+import { WalletId } from "thirdweb/wallets";
 import { config } from "@/config";
 import { useAccountsStore } from "../multi-inbox/multi-inbox.store";
 import { MultiInboxClient } from "../multi-inbox/multi-inbox.client";
 import { logger } from "@/utils/logger";
 import { Text } from "@/design-system/Text";
-import { ensureProfileSocialsQueryData } from "@/queries/useProfileSocialsQuery";
 import {
   ISupportedWallet,
   useInstalledWallets,
 } from "@/features/wallets/use-installed-wallets.hook";
 import { Button } from "@/design-system/Button/Button";
-import { InboxSigner } from "../multi-inbox/multi-inbox-client.types";
-import { base } from "thirdweb/chains";
-import { SocialProfile, useConnect, useSocialProfiles } from "thirdweb/react";
-import { IProfileSocials } from "../profiles/profile-types";
-import { hasNoProfiles } from "@/utils/api/profiles";
+import { SocialProfile, useConnect } from "thirdweb/react";
 import { getSocialProfilesForAddress } from "@/utils/api/social-lookup.api";
+
 type InstalledWalletsListProps = {
   installedWallets: ISupportedWallet[];
   onWalletTapped: (walletId: WalletId, options?: any) => void;

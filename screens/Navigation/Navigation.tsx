@@ -22,17 +22,12 @@ import {
 import React, { memo, useEffect } from "react";
 import { Platform, useColorScheme, Text, Button } from "react-native";
 import { IdleScreen } from "../IdleScreen";
-import GroupNav, { GroupNavParams } from "./GroupNav";
 import WebviewPreviewNav, {
   WebviewPreviewNavParams,
 } from "./WebviewPreviewNav";
 import { screenListeners, stackGroupScreenOptions } from "./navHelpers";
 import { AuthenticateWithPasskeyProvider } from "@/features/onboarding/contexts/signup-with-passkey.context";
-import {
-  getSafeCurrentSender,
-  useAccountsStore,
-  useCurrentSender,
-} from "@/features/multi-inbox/multi-inbox.store";
+import { useCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
 import { Center } from "@/design-system/Center";
 import { VStack } from "@/design-system/VStack";
 import { useLogout } from "@/utils/logout";
@@ -43,7 +38,6 @@ import { ConversationListScreen } from "@/features/conversation-list/conversatio
 import { BlockedConversationsScreen } from "@/features/blocked-conversations/blocked-conversations.screen";
 import { ConversationRequestsListNav } from "@/features/conversation-requests-list/conversation-requests-list.nav";
 import { ShareProfileNav } from "./ShareProfileNav";
-import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 
 export type NavigationParamList = {
   Idle: undefined;
@@ -67,7 +61,6 @@ export type NavigationParamList = {
   ShareProfile: undefined;
   TopUp: undefined;
   Profile: ProfileNavParams;
-  Group: GroupNavParams;
   InviteUsersToExistingGroup: InviteUsersToExistingGroupParams;
   GroupInvite: JoinGroupNavigationParams;
   UserProfile: undefined;
@@ -150,7 +143,6 @@ export function SignedInNavigation() {
           {ShareProfileNav()}
           {WebviewPreviewNav()}
           {ProfileNav()}
-          {GroupNav()}
           {InviteUsersToExistingGroupNav()}
           {JoinGroupNavigation()}
         </NativeStack.Group>

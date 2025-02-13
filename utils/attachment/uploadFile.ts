@@ -14,7 +14,7 @@ export const uploadFile = async ({
   if (!filePath) {
     throw new Error("filePath needed to upload file from mobile");
   }
-  const { url } = await getPresignedUriForUpload(account, contentType);
+  const { url } = await getPresignedUriForUpload(contentType);
   await RNFetchBlob.fetch(
     "PUT",
     url,

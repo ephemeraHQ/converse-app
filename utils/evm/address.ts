@@ -12,6 +12,8 @@ import { ethers } from "ethers";
 import logger from "@/utils/logger";
 
 export const isSupportedPeer = (peer: string) => {
+  // new backend is going to do all of this for us
+  return false;
   const is0x = isAddress(peer.toLowerCase());
   const isUserName = peer.endsWith(config.usernameSuffix);
   const isENS = peer.endsWith(".eth");
@@ -32,6 +34,8 @@ export const isSupportedPeer = (peer: string) => {
 };
 
 export const getAddressForPeer = async (peer: string) => {
+  // new backend is going to do all of this for us
+  return undefined;
   if (!isSupportedPeer(peer)) {
     throw new Error(`Peer ${peer} is invalid`);
   }

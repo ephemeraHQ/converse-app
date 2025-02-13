@@ -92,17 +92,11 @@ export const useProfileSocialsQueries = (peerAddresses: string[]) => {
   });
 };
 
-export const prefetchProfileSocialsQuery = (
-  account: string,
-  peerAddress: string
-) => {
+export const prefetchProfileSocialsQuery = (peerAddress: string) => {
   return queryClient.prefetchQuery(profileSocialsQueryConfig(peerAddress));
 };
 
-export const fetchProfileSocialsQuery = (
-  account: string,
-  peerAddress: string
-) => {
+export const fetchProfileSocialsQuery = (peerAddress: string) => {
   return queryClient.fetchQuery<IProfileSocials | null>(
     profileSocialsQueryConfig(peerAddress)
   );

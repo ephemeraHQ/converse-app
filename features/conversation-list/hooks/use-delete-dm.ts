@@ -46,7 +46,6 @@ export const useDeleteDm = ({ topic }: { topic: ConversationTopic }) => {
   const { mutateAsync: deleteDmAsync } = useMutation({
     mutationFn: () =>
       deleteTopic({
-        account: currentAccount,
         topic,
       }),
     onMutate: () => {

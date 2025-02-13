@@ -14,9 +14,7 @@ export function useMarkConversationAsUnread(args: {
 
   const { mutateAsync: markAsUnreadAsync } = useMutation({
     mutationFn: async () => {
-      const currentAccount = getCurrentAccount()!;
       await markTopicAsUnread({
-        account: currentAccount,
         topic,
       });
     },

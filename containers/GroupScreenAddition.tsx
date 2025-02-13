@@ -118,7 +118,7 @@ export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
       groupName,
       topic,
     });
-    createGroupInvite(currentAccount, {
+    createGroupInvite({
       groupName: groupName ?? translate("group_invite_default_group_name"),
       imageUrl: groupPhoto,
       description: groupDescription,
@@ -140,14 +140,7 @@ export const GroupScreenAddition: FC<GroupScreenAdditionProps> = ({
           message: translate("group_opertation_an_error_occurred"),
         });
       });
-  }, [
-    currentAccount,
-    groupDescription,
-    groupName,
-    groupPhoto,
-    setGroupInviteLink,
-    topic,
-  ]);
+  }, [groupDescription, groupName, groupPhoto, setGroupInviteLink, topic]);
 
   const onDeleteInviteLink = useCallback(() => {
     logger.debug("[GroupScreenAddition] Deleting invite link");

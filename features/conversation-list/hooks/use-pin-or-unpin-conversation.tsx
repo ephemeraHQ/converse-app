@@ -15,9 +15,7 @@ export function usePinOrUnpinConversation(args: {
 
   const { mutateAsync: pinConversationAsync } = useMutation({
     mutationFn: () => {
-      const currentAccount = getCurrentAccount()!;
       return pinTopic({
-        account: currentAccount,
         topic: conversationTopic,
       });
     },
@@ -48,9 +46,7 @@ export function usePinOrUnpinConversation(args: {
 
   const { mutateAsync: unpinConversationAsync } = useMutation({
     mutationFn: () => {
-      const currentAccount = getCurrentAccount()!;
       return unpinTopic({
-        account: currentAccount,
         topic: conversationTopic,
       });
     },

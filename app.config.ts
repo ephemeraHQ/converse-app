@@ -1,5 +1,6 @@
 import { ExpoConfig } from "expo/config";
 import { version } from "./package.json";
+import * as dotenv from "@env";
 
 type Environment = "development" | "preview" | "production";
 
@@ -53,7 +54,7 @@ const settings: Record<Environment, EnvironmentConfig> = {
     appDomainGetConverse: "dev.getconverse.app",
     appName: "Converse DEV",
     icon: "./assets/icon-preview.png",
-    alchemyApiKey: process.env.EXPO_PUBLIC_ALCHEMY_API_KEY || "",
+    alchemyApiKey: dotenv.EXPO_PUBLIC_ALCHEMY_API_KEY || "",
   },
   preview: {
     scheme: "converse-preview",
@@ -80,7 +81,7 @@ const settings: Record<Environment, EnvironmentConfig> = {
     appDomainGetConverse: "preview.getconverse.app",
     appName: "Converse PREVIEW",
     icon: "./assets/icon-preview.png",
-    alchemyApiKey: process.env.EXPO_PUBLIC_ALCHEMY_API_KEY || "",
+    alchemyApiKey: dotenv.EXPO_PUBLIC_ALCHEMY_API_KEY || "",
   },
   production: {
     scheme: "converse",
@@ -107,7 +108,7 @@ const settings: Record<Environment, EnvironmentConfig> = {
     appDomainGetConverse: "getconverse.app",
     appName: "Converse",
     icon: "./assets/icon.png",
-    alchemyApiKey: process.env.EXPO_PUBLIC_ALCHEMY_API_KEY || "",
+    alchemyApiKey: dotenv.EXPO_PUBLIC_ALCHEMY_API_KEY || "",
   },
 };
 

@@ -3,7 +3,7 @@ import { getSearchConvosUsersQueryKey } from "@/queries/QueryKeys";
 import { searchProfilesForCurrentAccount } from "@/utils/api/profiles";
 import { captureError } from "@/utils/capture-error";
 import { GenericError } from "@/utils/error";
-import { getAddressForPeer, isSupportedPeer } from "@/utils/evm/address";
+import { isSupportedPeer } from "@/utils/evm/address";
 import { getCleanAddress } from "@/utils/evm/getCleanAddress";
 import { isEmptyObject } from "@/utils/objects";
 import { shortAddress } from "@/utils/strings/shortAddress";
@@ -65,14 +65,12 @@ async function searchConvosUsers({ searchQuery }: { searchQuery: string }) {
 }
 
 async function handlePeerSearch(searchQuery: string) {
-  const resolvedAddress = await getAddressForPeer(searchQuery);
-
-  if (!resolvedAddress) {
-    return {
-      inboxIds: [],
-      message: "No address has been set for this domain.",
-    };
-  }
+  // if (!resolvedAddress) {
+  return {
+    inboxIds: [],
+    message: "resolving an ethereum address from a peer is under construction",
+  };
+  // }
 
   const address = getCleanAddress(resolvedAddress);
 
