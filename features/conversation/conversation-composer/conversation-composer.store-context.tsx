@@ -1,7 +1,7 @@
 import { useCurrentConversationTopic } from "@/features/conversation/conversation.store-context";
 import { usePrevious } from "@/hooks/use-previous-value";
 import { LocalAttachment } from "@/utils/attachment/types";
-import { zustandMMKVStorage } from "@utils/mmkv";
+import { zustandMMKVStorage } from "@/utils/storage/zustand-storage";
 import {
   ConversationTopic,
   MessageId,

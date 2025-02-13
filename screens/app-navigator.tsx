@@ -90,26 +90,29 @@ const AppStack = () => {
   const authStatus = useAuthStore((state) => state.status);
 
   useAuthHydrate();
-  // const hasHiddenSplashRef = useRef(false);
 
-  // useEffect(() => {
-  //   if (authStatus !== "idle" && !hasHiddenSplashRef.current) {
-  //     hasHiddenSplashRef.current = true;
-  //     hideSplashScreen().catch(captureError);
-  //   }
-  // }, [authStatus]);
+  // Will hide the splash screen once the auth status is determined
+  const hasHiddenSplashRef = useRef(false);
+  useEffect(() => {
+    if (authStatus !== "undetermined" && !hasHiddenSplashRef.current) {
+      hasHiddenSplashRef.current = true;
+      hideSplashScreen().catch(captureError);
+    }
+  }, [authStatus]);
 
   useEffect(() => {
     // Hydrate the stuff, so we need to make sure we have
   }, []);
 
-  const isIdle = authStatus === "idle";
+  const isUndetermined = authStatus === "undetermined";
   const isSignedIn = authStatus === "signedIn";
   const isSignedOut = authStatus === "signedOut";
 
   return (
     <NativeStack.Navigator>
-      {isIdle && <NativeStack.Screen name="Idle" component={IdleScreen} />}
+      {isUndetermined && (
+        <NativeStack.Screen name="Idle" component={IdleScreen} />
+      )}
 
       {isSignedIn && (
         // Signed in

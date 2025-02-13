@@ -1,4 +1,4 @@
-import { getCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { getCurrentAccountEthAddress } from "@/features/authentication/account.store";
 import {
   getConversationMetadataQueryData,
   updateConversationMetadataQueryData,
@@ -15,14 +15,14 @@ export function usePinOrUnpinConversation(args: {
 
   const { mutateAsync: pinConversationAsync } = useMutation({
     mutationFn: () => {
-      const currentAccount = getCurrentAccount()!;
+      const currentAccount = getCurrentAccountEthAddress()!;
       return pinTopic({
         account: currentAccount,
         topic: conversationTopic,
       });
     },
     onMutate: () => {
-      const currentAccount = getCurrentAccount()!;
+      const currentAccount = getCurrentAccountEthAddress()!;
       const previousIsPinned = getConversationMetadataQueryData({
         account: currentAccount,
         topic: conversationTopic,
@@ -37,7 +37,7 @@ export function usePinOrUnpinConversation(args: {
       return { previousIsPinned };
     },
     onError: (error, _, context) => {
-      const currentAccount = getCurrentAccount()!;
+      const currentAccount = getCurrentAccountEthAddress()!;
       updateConversationMetadataQueryData({
         account: currentAccount,
         topic: conversationTopic,
@@ -48,14 +48,14 @@ export function usePinOrUnpinConversation(args: {
 
   const { mutateAsync: unpinConversationAsync } = useMutation({
     mutationFn: () => {
-      const currentAccount = getCurrentAccount()!;
+      const currentAccount = getCurrentAccountEthAddress()!;
       return unpinTopic({
         account: currentAccount,
         topic: conversationTopic,
       });
     },
     onMutate: () => {
-      const currentAccount = getCurrentAccount()!;
+      const currentAccount = getCurrentAccountEthAddress()!;
       const previousIsPinned = getConversationMetadataQueryData({
         account: currentAccount,
         topic: conversationTopic,
@@ -70,7 +70,7 @@ export function usePinOrUnpinConversation(args: {
       return { previousIsPinned };
     },
     onError: (error, _, context) => {
-      const currentAccount = getCurrentAccount()!;
+      const currentAccount = getCurrentAccountEthAddress()!;
       updateConversationMetadataQueryData({
         account: currentAccount,
         topic: conversationTopic,
@@ -80,7 +80,7 @@ export function usePinOrUnpinConversation(args: {
   });
 
   const pinOrUnpinConversationAsync = useCallback(async () => {
-    const currentAccount = getCurrentAccount()!;
+    const currentAccount = getCurrentAccountEthAddress()!;
     const isPinned = getConversationMetadataQueryData({
       account: currentAccount,
       topic: conversationTopic,

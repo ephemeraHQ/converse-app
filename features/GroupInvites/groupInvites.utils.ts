@@ -1,4 +1,4 @@
-import mmkv from "@utils/mmkv";
+import mmkv from "@/utils/storage/storage";
 
 const GROUP_INVITE_LINKS_STORAGE_KEY_PREFIX = "group-invites-link-";
 const INVITE_ID_BY_GROUP_ID_STORAGE_KEY_PREFIX = "invite-id-by-group-id-";

@@ -1,7 +1,7 @@
 import { Platform } from "react-native";
 
-import { useSettingsStore } from "../multi-inbox/multi-inbox.store";
-import { useAppStore } from "../../data/store/appStore";
+import { useSettingsStore } from "@/data/store/settings-store";
+import { useAppStore } from "../../data/store/app-store";
 import { getCurrentAccountPrimaryProfile } from "@utils/profile/getCurrentAccountPrimaryProfile";
 
 export function isMissingConverseProfile() {

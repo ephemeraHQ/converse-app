@@ -8,7 +8,7 @@ import { getGroupQueryOptions, useGroupQuery } from "@queries/useGroupQuery";
 import { useQuery } from "@tanstack/react-query";
 import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
-import { useSafeCurrentSender } from "../multi-inbox/multi-inbox.store";
+import { useSafeCurrentSender } from "../authentication/account.store";
 
 export type IGroupConsentOptions = {
   includeCreator?: boolean;

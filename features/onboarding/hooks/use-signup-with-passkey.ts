@@ -1,3 +1,7 @@
+import {
+  AuthStatuses,
+  useAuthStore,
+} from "@/features/authentication/auth.store";
 import { useExecuteOnceWhenReady } from "@/hooks/use-execute-once-when-ready";
 import { createUser } from "@/utils/api/users";
 import { captureErrorWithToast } from "@/utils/capture-error";
@@ -5,13 +9,11 @@ import logger from "@/utils/logger";
 import { useEmbeddedEthereumWallet, usePrivy } from "@privy-io/expo";
 import { useSignupWithPasskey as usePrivySignupWithPasskey } from "@privy-io/expo/passkey";
 import { useSmartWallets } from "@privy-io/expo/smart-wallets";
-import { useCallback } from "react";
 import {
   RELYING_PARTY,
   createInboxWithSigner,
   createSmartWalletSigner,
 } from "../utils/passkey-utils";
-import { useAuthStore } from "@/features/authentication/auth.store";
 
 export function useSignupWithPasskey() {
   const { create: createEmbeddedWallet } = useEmbeddedEthereumWallet();
@@ -28,6 +30,10 @@ export function useSignupWithPasskey() {
         captureErrorWithToast(error);
       },
     });
+
+  const isSigningUp = useAuthStore(
+    (state) => state.status === AuthStatuses.signingUp
+  );
 
   useExecuteOnceWhenReady({
     callback: async (smartWalletClient, privyUser) => {
@@ -51,14 +57,15 @@ export function useSignupWithPasskey() {
         captureErrorWithToast(error);
       }
     },
-    deps: [smartWalletClient, privyUser],
+    deps: [smartWalletClient, privyUser, isSigningUp],
   });
 
-  const signup = useCallback(async () => {
+  const signup = async () => {
+    useAuthStore.getState().actions.setStatus("signingUp");
     await privySignupWithPasskey({
       relyingParty: RELYING_PARTY,
     });
-  }, [privySignupWithPasskey]);
+  };
 
   return { signup };
 }

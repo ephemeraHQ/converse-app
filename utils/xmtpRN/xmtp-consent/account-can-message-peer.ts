@@ -1,5 +1,5 @@
 import { getXmtpClient } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
-import logger from "@utils/logger";
+import { logger } from "@utils/logger";
 
 type AccountCanMessagePeerArgs = {
   account: string;

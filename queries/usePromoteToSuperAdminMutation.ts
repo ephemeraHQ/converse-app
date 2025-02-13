@@ -1,6 +1,6 @@
 import { captureError } from "@/utils/capture-error";
 import { useMutation } from "@tanstack/react-query";
-import logger from "@utils/logger";
+import { logger } from "@utils/logger";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
 import { promoteSuperAdminMutationKey } from "./MutationKeys";

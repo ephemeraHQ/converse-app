@@ -1,4 +1,4 @@
-import { getCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { getCurrentAccountEthAddress } from "@/features/authentication/account.store";
 import { getConversationForCurrentAccount } from "@/features/conversation/utils/get-conversation-for-current-account";
 import { getCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import {
@@ -34,7 +34,7 @@ export function useReactOnMessage(props: { topic: ConversationTopic }) {
       });
     },
     onMutate: (variables) => {
-      const currentAccount = getCurrentAccount()!;
+      const currentAccount = getCurrentAccountEthAddress()!;
       const currentUserInboxId = getCurrentAccountInboxId()!;
       const conversation = getConversationForCurrentAccount(topic);
 
@@ -60,7 +60,7 @@ export function useReactOnMessage(props: { topic: ConversationTopic }) {
       }
     },
     onError: (error) => {
-      const currentAccount = getCurrentAccount()!;
+      const currentAccount = getCurrentAccountEthAddress()!;
       refetchConversationMessages({
         account: currentAccount,
         topic,

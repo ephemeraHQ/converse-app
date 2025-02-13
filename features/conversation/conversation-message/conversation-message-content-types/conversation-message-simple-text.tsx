@@ -1,4 +1,4 @@
-import { useSelect } from "@/data/store/storeHelpers";
+import { useSelect } from "@/data/store/store.utils";
 import {
   BubbleContainer,
   BubbleContentContainer,

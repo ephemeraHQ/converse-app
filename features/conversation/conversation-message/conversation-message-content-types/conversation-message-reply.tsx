@@ -1,4 +1,4 @@
-import { useSelect } from "@/data/store/storeHelpers";
+import { useSelect } from "@/data/store/store.utils";
 import { AttachmentRemoteImage } from "@/features/conversation/conversation-attachment/conversation-attachment-remote-image";
 import {
   BubbleContainer,

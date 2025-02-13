@@ -1,6 +1,6 @@
 import { getConversationMessageQueryOptions } from "@/queries/useConversationMessage";
 import { useConversationMessagesQuery } from "@/queries/conversation-messages-query";
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { useCurrentAccount } from "@/features/authentication/account.store";
 import { useQuery } from "@tanstack/react-query";
 import { ConversationTopic, MessageId } from "@xmtp/react-native-sdk";
 

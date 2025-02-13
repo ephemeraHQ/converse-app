@@ -2,7 +2,7 @@ import { isConversationDm } from "@/features/conversation/utils/is-conversation-
 import { queryClient } from "@/queries/queryClient";
 import { Optional } from "@/types/general";
 import logger from "@/utils/logger";
-import { reactQueryPersister } from "@/utils/mmkv";
+import { reactQueryPersister } from "@/utils/reactQueryPersister";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { type ConversationTopic } from "@xmtp/react-native-sdk";
 import { dmPeerInboxIdQueryKey } from "./QueryKeys";

@@ -1,10 +1,10 @@
 import NetInfo from "@react-native-community/netinfo";
-import logger from "@utils/logger";
+import { logger } from "@utils/logger";
 import { useEffect, useRef } from "react";
 
 import { config } from "../../config";
-import { useAppStore } from "../../data/store/appStore";
-import { useSelect } from "../../data/store/storeHelpers";
+import { useAppStore } from "../../data/store/app-store";
+import { useSelect } from "../../data/store/store.utils";
 
 NetInfo.configure({
   reachabilityUrl: `${config.deprecatedApiURI}/api/admin/healthcheck`,

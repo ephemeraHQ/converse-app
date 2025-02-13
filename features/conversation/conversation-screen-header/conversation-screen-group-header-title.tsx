@@ -7,7 +7,7 @@ import { useProfilesSocials } from "@/hooks/useProfilesSocials";
 import { useGroupMembersQuery } from "@/queries/useGroupMembersQuery";
 import { copyToClipboard } from "@/utils/clipboard";
 import { getPreferredAvatar, getPreferredName } from "@/utils/profile";
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { useCurrentAccount } from "@/features/authentication/account.store";
 import { translate } from "@i18n";
 import { useRouter } from "@navigation/useNavigation";
 import { ConversationTopic } from "@xmtp/react-native-sdk";

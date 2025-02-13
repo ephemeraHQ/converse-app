@@ -12,9 +12,9 @@ import { useRouter } from "@/navigation/useNavigation";
 import { needToShowNotificationsPermissions } from "../Onboarding.utils";
 import {
   AuthStatuses,
-  useAccountsStore,
-  useCurrentSender,
+  useMultiInboxClientStore,
 } from "@/features/multi-inbox/multi-inbox.store";
+import { useCurrentSender } from "@/features/authentication/account.store";
 import { OnboardingCreateContactCard } from "@/features/onboarding/components/onboarding-contact-card";
 import { OnboardingContactCardThemeProvider } from "@/features/onboarding/components/onboarding-contact-card-provider";
 import logger from "@/utils/logger";
@@ -48,7 +48,7 @@ const $subtitleStyle: ThemedStyle<TextStyle> = ({ spacing }) => ({
 
 export function OnboardingContactCardScreen() {
   const router = useRouter();
-  const setAuthStatus = useAccountsStore((s) => s.setAuthStatus);
+  const setAuthStatus = useMultiInboxClientStore((s) => s.setAuthStatus);
 
   const currentSender = useCurrentSender();
   logger.debug(

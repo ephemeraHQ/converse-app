@@ -1,4 +1,4 @@
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { useCurrentAccount } from "../authentication/account.store";
 import { Center } from "@/design-system/Center";
 import { AnimatedHStack, HStack } from "@/design-system/HStack";
 import { AnimatedVStack } from "@/design-system/VStack";

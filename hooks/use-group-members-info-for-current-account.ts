@@ -1,4 +1,4 @@
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { useCurrentAccount } from "@/features/authentication/account.store";
 import { useGroupMembersQuery } from "@queries/useGroupMembersQuery";
 import { getInboxProfileSocialsQueryConfig } from "@queries/useInboxProfileSocialsQuery";
 import { useQueries } from "@tanstack/react-query";

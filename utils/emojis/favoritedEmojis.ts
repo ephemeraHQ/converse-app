@@ -1,4 +1,4 @@
-import mmkv from "@utils/mmkv";
+import mmkv from "@/utils/storage/storage";
 
 const FAVORITED_EMOJIS = "favoritedEmojis";
 

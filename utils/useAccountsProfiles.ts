@@ -1,5 +1,5 @@
 import { usePreferredNames } from "@/hooks/usePreferredNames";
-import { useAccountsList } from "@/features/multi-inbox/multi-inbox.store";
+import { useAccountsList } from "@/features/authentication/account.store";
 
 export const useAccountsProfiles = () => {
   const accounts = useAccountsList();

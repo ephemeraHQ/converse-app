@@ -1,5 +1,5 @@
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import { useCurrentAccount } from "../features/multi-inbox/multi-inbox.store";
+import { useCurrentAccount } from "@/features/authentication/account.store";
 import { useGroupPhotoMutation } from "../queries/useGroupPhotoMutation";
 import { useGroupPhotoQuery } from "../queries/useGroupPhotoQuery";
 

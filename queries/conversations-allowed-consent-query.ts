@@ -20,7 +20,7 @@ import { queryClient } from "./queryClient";
 import { ensureGroupMembersQueryData } from "./useGroupMembersQuery";
 import {
   AuthStatuses,
-  useAccountsStore,
+  useMultiInboxClientStore,
 } from "@/features/multi-inbox/multi-inbox.store";
 
 export type IAllowedConsentConversationsQuery = Awaited<
@@ -165,7 +165,7 @@ export const getAllowedConsentConversationsQueryOptions = (
   args: Optional<IArgsWithCaller, "caller">
 ) => {
   const isSignedIn =
-    useAccountsStore.getState().authStatus === AuthStatuses.signedIn;
+    useMultiInboxClientStore.getState().authStatus === AuthStatuses.signedIn;
   const { account, caller } = args;
   const enabled = !!account && isSignedIn;
   return queryOptions({

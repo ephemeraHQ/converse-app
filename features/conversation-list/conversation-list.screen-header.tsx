@@ -1,9 +1,9 @@
 import { Avatar } from "@/components/Avatar";
+import { useMultiInboxClientStore } from "@/features/multi-inbox/multi-inbox.store";
 import {
   useAccountsList,
-  useAccountsStore,
   useCurrentAccount,
-} from "@/features/multi-inbox/multi-inbox.store";
+} from "../authentication/account.store";
 import { Center } from "@/design-system/Center";
 import { HStack } from "@/design-system/HStack";
 import { HeaderAction } from "@/design-system/Header/HeaderAction";
@@ -73,7 +73,9 @@ function HeaderTitle() {
   const preferredName = usePreferredName(currentAccount!);
   const accountsProfilesNames = useAccountsProfiles();
   const accounts = useAccountsList();
-  const setCurrentAccount = useAccountsStore((s) => s.setCurrentAccount);
+  const setCurrentAccount = useMultiInboxClientStore(
+    (s) => s.setCurrentAccount
+  );
 
   const onDropdownPress = useCallback(
     (actionId: string) => {

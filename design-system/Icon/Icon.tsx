@@ -1,5 +1,5 @@
 import { useAppTheme } from "@theme/useAppTheme";
-import logger from "@utils/logger";
+import { logger } from "@utils/logger";
 import { useMemo } from "react";
 import { SFSymbol } from "react-native-sfsymbols";
 import { IIconName, IIconProps } from "./Icon.types";
@@ -104,8 +104,8 @@ export function Icon(props: IIconProps) {
   const iconName = icon
     ? iconRegistry[icon]
     : picto
-    ? iconRegistry[picto]
-    : null;
+      ? iconRegistry[picto]
+      : null;
 
   if (!iconName) {
     logger.warn(

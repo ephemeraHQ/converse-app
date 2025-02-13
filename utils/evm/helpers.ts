@@ -1,12 +1,10 @@
 import { Wallet, ethers } from "ethers";
 
-import {
-  getSafeCurrentSender,
-  getWalletStore,
-} from "../../features/multi-inbox/multi-inbox.store";
-import { getSecureItemAsync } from "../keychain";
+import { getWalletStore } from "../../features/multi-inbox/multi-inbox.store";
+import { getSafeCurrentSender } from "@/features/authentication/account.store";
+import { getSecureItemAsync } from "../storage/secure-storage";
 
-import logger from "@utils/logger";
+import { logger } from "@utils/logger";
 
 export const getCurrentAccountSigner = async () => {
   const account = getSafeCurrentSender().ethereumAddress;

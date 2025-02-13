@@ -1,4 +1,4 @@
-import { useSelect } from "@/data/store/storeHelpers";
+import { useSelect } from "@/data/store/store.utils";
 import { useMessageContextStoreContext } from "@/features/conversation/conversation-message/conversation-message.store-context";
 import { AnimatedHStack, HStack } from "@design-system/HStack";
 import { Text } from "@design-system/Text";

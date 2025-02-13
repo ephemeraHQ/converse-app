@@ -18,10 +18,10 @@ import { captureError } from "@/utils/capture-error";
 import { useAppTheme } from "@theme/useAppTheme";
 import {
   AuthStatuses,
-  useAccountsStore,
-  useCurrentAccount,
-  useSettingsStore,
+  useMultiInboxClientStore,
 } from "@/features/multi-inbox/multi-inbox.store";
+import { useSettingsStore } from "@/data/store/settings-store";
+import { useCurrentAccount } from "@/features/authentication/account.store";
 import { NavigationParamList } from "@/screens/Navigation/Navigation";
 
 const $screenContainer: ViewStyle = {
@@ -50,7 +50,7 @@ export function OnboardingNotificationsScreen(
 
   const displayName = usePreferredName(currentAccount);
 
-  const setAuthStatus = useAccountsStore((s) => s.setAuthStatus);
+  const setAuthStatus = useMultiInboxClientStore((s) => s.setAuthStatus);
   const handleEnableNotifications = () => {
     try {
       // TODO

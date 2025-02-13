@@ -1,4 +1,4 @@
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { useCurrentAccount } from "@/features/authentication/account.store";
 import {
   isGroupUpdatedMessage,
   isRemoteAttachmentMessage,
@@ -13,7 +13,7 @@ import {
 import { captureError } from "@/utils/capture-error";
 import { getPreferredInboxName } from "@/utils/profile";
 import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
-import logger from "@utils/logger";
+import { logger } from "@utils/logger";
 import {
   DecodedMessage,
   GroupUpdatedCodec,

@@ -1,6 +1,6 @@
 import {
   AuthStatuses,
-  useAccountsStore,
+  useMultiInboxClientStore,
 } from "@/features/multi-inbox/multi-inbox.store";
 import { conversationSyncAllQueryKey } from "@/queries/QueryKeys";
 import { queryClient } from "@/queries/queryClient";
@@ -16,7 +16,7 @@ type IArgs = {
 
 export function getConversationSyncAllQueryOptions(args: IArgs) {
   const isSignedIn =
-    useAccountsStore.getState().authStatus === AuthStatuses.signedIn;
+    useMultiInboxClientStore.getState().authStatus === AuthStatuses.signedIn;
   const enabled = !!args.ethAddress && isSignedIn;
   return queryOptions({
     enabled,

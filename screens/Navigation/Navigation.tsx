@@ -28,11 +28,11 @@ import WebviewPreviewNav, {
 } from "./WebviewPreviewNav";
 import { screenListeners, stackGroupScreenOptions } from "./navHelpers";
 import { AuthenticateWithPasskeyProvider } from "@/features/onboarding/contexts/signup-with-passkey.context";
+import { useMultiInboxClientStore } from "@/features/multi-inbox/multi-inbox.store";
 import {
   getSafeCurrentSender,
-  useAccountsStore,
   useCurrentSender,
-} from "@/features/multi-inbox/multi-inbox.store";
+} from "@/features/authentication/account.store";
 import { Center } from "@/design-system/Center";
 import { VStack } from "@/design-system/VStack";
 import { useLogout } from "@/utils/logout";

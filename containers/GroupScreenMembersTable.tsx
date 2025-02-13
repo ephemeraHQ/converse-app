@@ -4,7 +4,7 @@ import { captureErrorWithFriendlyToast } from "@/utils/capture-error";
 import { GroupWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { showActionSheetWithOptions } from "@components/StateHandlers/ActionSheetStateHandler";
 import { TableViewPicto } from "@components/TableView/TableViewImage";
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { useCurrentAccount } from "@/features/authentication/account.store";
 import { useGroupMembers } from "@hooks/useGroupMembers";
 import { translate } from "@i18n";
 import { useGroupPermissionPolicyQuery } from "@queries/useGroupPermissionPolicyQuery";
@@ -18,7 +18,7 @@ import {
 } from "@utils/groupUtils/adminUtils";
 import { getGroupMemberActions } from "@utils/groupUtils/getGroupMemberActions";
 import { sortGroupMembersByAdminStatus } from "@utils/groupUtils/sortGroupMembersByAdminStatus";
-import logger from "@utils/logger";
+import { logger } from "@utils/logger";
 import { navigate } from "@utils/navigation";
 import { getPreferredInboxName } from "@utils/profile";
 import type { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";

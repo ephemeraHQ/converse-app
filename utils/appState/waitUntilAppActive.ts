@@ -1,4 +1,4 @@
-import logger from "@utils/logger";
+import { logger } from "@utils/logger";
 import { AppState } from "react-native";
 
 /*

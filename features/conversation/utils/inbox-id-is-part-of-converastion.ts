@@ -1,5 +1,5 @@
-import { getCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
-import { getSafeCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
+import { getCurrentAccountEthAddress } from "@/features/authentication/account.store";
+import { getSafeCurrentSender } from "@/features/authentication/account.store";
 import {
   ensureDmPeerInboxIdQueryData,
   getDmPeerInboxIdQueryData,

@@ -16,9 +16,9 @@ import {
 } from "react-native";
 
 import { invalidateProfileSocialsQuery } from "@/queries/useProfileSocialsQuery";
-import { useAccountsStore } from "../features/multi-inbox/multi-inbox.store";
-import { useAppStore } from "../data/store/appStore";
-import { useSelect } from "../data/store/storeHelpers";
+import { useMultiInboxClientStore } from "../features/multi-inbox/multi-inbox.store";
+import { useAppStore } from "../data/store/app-store";
+import { useSelect } from "../data/store/store.utils";
 import { useRouter } from "../navigation/useNavigation";
 import { navigate } from "../utils/navigation";
 import Picto from "./Picto/Picto";
@@ -41,7 +41,7 @@ export default function AccountSettingsButton({ account }: Props) {
     ])
   );
 
-  const { setCurrentAccount } = useAccountsStore(
+  const { setCurrentAccount } = useMultiInboxClientStore(
     useSelect(["setCurrentAccount"])
   );
 

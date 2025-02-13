@@ -1,4 +1,4 @@
-import { useSelect } from "@/data/store/storeHelpers";
+import { useSelect } from "@/data/store/store.utils";
 import { HStack } from "@/design-system/HStack";
 import { AnimatedVStack, VStack } from "@/design-system/VStack";
 import { ConversationMessageSender } from "@/features/conversation/conversation-message/conversation-message-sender";

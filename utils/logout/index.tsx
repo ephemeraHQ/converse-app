@@ -1,7 +1,7 @@
 import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 import {
   AuthStatuses,
-  useAccountsStore,
+  useMultiInboxClientStore,
 } from "@/features/multi-inbox/multi-inbox.store";
 import { queryClient } from "@/queries/queryClient";
 import { usePrivy, usePrivyClient } from "@privy-io/expo";
@@ -11,7 +11,7 @@ import { useCallback } from "react";
 import logger from "../logger";
 
 export const useLogout = () => {
-  const { setAuthStatus } = useAccountsStore();
+  const { setAuthStatus } = useMultiInboxClientStore();
   const privy = usePrivy();
   const privyClient = usePrivyClient();
 

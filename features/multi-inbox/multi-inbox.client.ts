@@ -1,15 +1,10 @@
 import { config } from "@/config";
-import {
-  AuthStatuses,
-  useAccountsStore,
-} from "@/features/multi-inbox/multi-inbox.store";
+import { useMultiInboxClientStore } from "@/features/multi-inbox/multi-inbox.store";
 import { setInboxIdQueryData } from "@/queries/inbox-id-query";
-import { captureError } from "@/utils/capture-error";
-import { getDbEncryptionKey } from "@/utils/keychain";
-import logger from "@/utils/logger";
+import { getDbEncryptionKey } from "@/utils/xmtp-db-encryption-key";
+import { multiInboxLogger } from "@/utils/logger";
 import { codecs } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
-import { Client as XmtpClient } from "@xmtp/react-native-sdk";
-import { useEffect } from "react";
+import { InboxId, Client as XmtpClient } from "@xmtp/react-native-sdk";
 import {
   ClientWithInvalidInstallation,
   CurrentSender,
@@ -38,20 +33,21 @@ import {
 export class MultiInboxClient {
   get isRestored() {
     return (
-      useAccountsStore.getState().multiInboxClientRestorationState ===
+      useMultiInboxClientStore.getState().multiInboxClientRestorationState ===
       MultiInboxClientRestorationStates.restored
     );
   }
 
   get isRestoring() {
     return (
-      useAccountsStore.getState().multiInboxClientRestorationState ===
+      useMultiInboxClientStore.getState().multiInboxClientRestorationState ===
       MultiInboxClientRestorationStates.restoring
     );
   }
 
   get isError() {
-    const state = useAccountsStore.getState().multiInboxClientRestorationState;
+    const state =
+      useMultiInboxClientStore.getState().multiInboxClientRestorationState;
     if (typeof state === "string") {
       return false;
     }
@@ -62,12 +58,9 @@ export class MultiInboxClient {
     [ethereumAddress: string]: XmtpClient;
   } = {};
 
-  private get xmtpClientInboxIdToAddressMap() {
-    return useAccountsStore.getState().senders.reduce((acc, sender) => {
-      acc[sender.inboxId] = sender.ethereumAddress;
-      return acc;
-    }, {} as { [inboxId: string]: string });
-  }
+  private xmtpClientInboxIdToEthereumAddressMap: {
+    [inboxId: string]: string;
+  } = {};
 
   private static _instance: MultiInboxClient;
 
@@ -78,77 +71,26 @@ export class MultiInboxClient {
     return this._instance;
   }
 
-  get currentSender(): CurrentSender | undefined {
-    return useAccountsStore.getState().currentSender;
-  }
-
-  get allEthereumAccountAddresses() {
-    return useAccountsStore
-      .getState()
-      .senders.map((sender) => sender.ethereumAddress);
-  }
-
-  async initialize() {
-    if (this.isRestoring) {
-      logger.debug("[initialize] Already restoring, skipping");
-      return;
-    }
-
-    if (this.isRestored) {
-      logger.debug("[initialize] Already restored, skipping");
-      return;
-    }
-
-    const wasSignedInLastSession =
-      useAccountsStore.getState().authStatus === AuthStatuses.signedIn;
-
-    logger.debug(
-      `[initialize] Was signed in last session: ${wasSignedInLastSession}`
-    );
-
-    if (wasSignedInLastSession) {
-      useAccountsStore
-        .getState()
-        .setMultiInboxClientRestorationState(
-          MultiInboxClientRestorationStates.restoring
-        );
-      logger.debug(
-        "[initialize] Restoring previously created inboxes for device"
-      );
-      await this.restorePreviouslyCreatedInboxesForDevice();
-      logger.debug(
-        "[initialize] Successfully restored previously created inboxes"
-      );
-    }
-
-    logger.debug(
-      "[initialize] Setting multi-inbox client restoration state to restored"
-    );
-    useAccountsStore
-      .getState()
-      .setMultiInboxClientRestorationState(
-        MultiInboxClientRestorationStates.restored
-      );
-    logger.debug("[initialize] Initialization complete");
-  }
-
-  private constructor() {
-    logger.debug("[constructor] Initializing MultiInboxClient");
-    this.initialize();
-    logger.debug("[constructor] MultiInboxClient initialization started");
-  }
+  private constructor() {}
 
   private async performInboxCreationFromInboxSigner(
     inboxSigner: InboxSigner
   ): Promise<InboxClient> {
     try {
-      logger.debug("[createXmtpClient] Getting database encryption key");
+      multiInboxLogger.debug(
+        "[createXmtpClient] Getting database encryption key"
+      );
       const dbEncryptionKey = await getDbEncryptionKey().catch((error) => {
-        logger.error("[createXmtpClient] Error getting database config", error);
+        multiInboxLogger.error(
+          "[createXmtpClient] Error getting database config",
+          error
+        );
         throw error;
       });
 
-      logger.debug("[createXmtpClient] Got database config successfully");
+      multiInboxLogger.debug(
+        "[createXmtpClient] Got database config successfully"
+      );
 
       const options = {
         env: config.xmtpEnv,
@@ -157,26 +99,34 @@ export class MultiInboxClient {
         codecs,
       };
 
-      logger.debug("[createXmtpClient] Creating XMTP client");
+      multiInboxLogger.debug("[createXmtpClient] Creating XMTP client");
       const client = await XmtpClient.create(inboxSigner, options).catch(
         (error) => {
-          logger.error("[createXmtpClient] Error creating XMTP client", error);
+          multiInboxLogger.error(
+            "[createXmtpClient] Error creating XMTP client",
+            error
+          );
           throw error;
         }
       );
-      logger.debug("[createXmtpClient] XMTP client created successfully");
+      multiInboxLogger.debug(
+        "[createXmtpClient] XMTP client created successfully"
+      );
 
       return client;
     } catch (error) {
-      logger.error("[createXmtpClient] Fatal error in client creation", error);
+      multiInboxLogger.error(
+        "[createXmtpClient] Fatal error in client creation",
+        error
+      );
       throw error;
     }
   }
 
   private setErrorState(error: string) {
-    useAccountsStore
+    useMultiInboxClientStore
       .getState()
-      .setMultiInboxClientRestorationState(
+      .actions.setMultiInboxClientRestorationState(
         MultiInboxClientRestorationStates.error(error)
       );
   }
@@ -206,7 +156,7 @@ export class MultiInboxClient {
     }
 
     try {
-      logger.debug(
+      multiInboxLogger.debug(
         "[addInbox] Starting to add inbox with inboxSigner with address",
         await inboxSigner.getAddress()
       );
@@ -214,32 +164,26 @@ export class MultiInboxClient {
       const signerEthereumAddress = await inboxSigner.getAddress();
 
       try {
-        logger.debug(
+        multiInboxLogger.debug(
           `[addInbox] Checking if inbox exists for address: ${signerEthereumAddress}`
         );
+
         const clientExistsForAddress =
           this.ethereumSmartWalletAddressToXmtpInboxClientMap[
             signerEthereumAddress.toLowerCase()
           ];
+
         if (clientExistsForAddress) {
           throw new Error(
             `[addInbox] Found existing inbox for address: ${signerEthereumAddress}`
           );
         }
-        logger.debug(
+        multiInboxLogger.debug(
           `[addInbox] No existing inbox found for address: ${signerEthereumAddress}, creating new one`
         );
 
-        const xmtpInboxClient = await this.performInboxCreationFromInboxSigner(
-          inboxSigner
-        );
-
-        if (!useAccountsStore.getState().currentSender) {
-          useAccountsStore.getState().setCurrentSender({
-            ethereumAddress: signerEthereumAddress,
-            inboxId: xmtpInboxClient.inboxId,
-          });
-        }
+        const xmtpInboxClient =
+          await this.performInboxCreationFromInboxSigner(inboxSigner);
 
         const clientInboxId = xmtpInboxClient.inboxId;
         setInboxIdQueryData({
@@ -247,7 +191,7 @@ export class MultiInboxClient {
           inboxId: clientInboxId,
         });
 
-        useAccountsStore.getState().addSender({
+        useMultiInboxClientStore.getState().addSender({
           ethereumAddress: signerEthereumAddress,
           inboxId: clientInboxId,
         });
@@ -262,16 +206,18 @@ export class MultiInboxClient {
         this.xmtpClientInboxIdToAddressMap[clientInboxId] =
           lowercaseClientLinkedEthereumAddress;
 
-        logger.debug("[addInbox] Successfully created new XMTP inbox");
+        multiInboxLogger.debug(
+          "[addInbox] Successfully created new XMTP inbox"
+        );
         return {
           inboxId: clientInboxId,
         };
       } catch (error) {
-        logger.error(
+        multiInboxLogger.error(
           `[addInbox] Error creating XMTP inbox for address ${signerEthereumAddress}:`,
           error
         );
-        useAccountsStore
+        useMultiInboxClientStore
           .getState()
           .setMultiInboxClientRestorationState(
             MultiInboxClientRestorationStates.error(
@@ -281,30 +227,40 @@ export class MultiInboxClient {
         throw error;
       }
     } catch (error) {
-      logger.error("[addInbox] Error adding XMTP inbox:", error);
+      multiInboxLogger.error("[addInbox] Error adding XMTP inbox:", error);
       throw error;
     } finally {
-      logger.debug("[addInbox] Add inbox operation completed");
+      multiInboxLogger.debug("[addInbox] Add inbox operation completed");
     }
   }
 
-  private async restorePreviouslyCreatedInboxesForDevice() {
-    const previouslyCreatedInboxes = useAccountsStore.getState().senders;
+  async restorePreviouslyCreatedInboxesForDevice(args: {
+    inboxes: { inboxId: InboxId; ethereumAddress: string }[];
+  }) {
+    const previouslyCreatedInboxes = args.inboxes;
 
-    const authStatus = useAccountsStore.getState().authStatus;
-    const wasSignedInLastSession = authStatus === AuthStatuses.signedIn;
-    const hasNoInboxesToRestore = previouslyCreatedInboxes.length === 0;
-    const isInNoInboxButLoggedInErrorState =
-      wasSignedInLastSession && hasNoInboxesToRestore;
+    if (this.isRestoring) {
+      multiInboxLogger.debug(
+        "[restorePreviouslyCreatedInboxesForDevice] Already restoring inboxes"
+      );
+      return;
+    }
 
-    if (isInNoInboxButLoggedInErrorState) {
+    if (this.isRestored) {
+      multiInboxLogger.debug(
+        "[restorePreviouslyCreatedInboxesForDevice] Already restored inboxes"
+      );
+      return;
+    }
+
+    if (!previouslyCreatedInboxes.length) {
       throw new Error(
-        "[restorePreviouslyCreatedInboxesForDevice] The user was signed in but there are no inboxes to restore. This is an invalid state."
+        "[restorePreviouslyCreatedInboxesForDevice] No inboxes to restore"
       );
     }
 
     try {
-      logger.debug(
+      multiInboxLogger.debug(
         "[restorePreviouslyCreatedInboxesForDevice] Starting restore"
       );
 
@@ -312,11 +268,11 @@ export class MultiInboxClient {
         XmtpClient | ClientWithInvalidInstallation
       > = await Promise.all(
         previouslyCreatedInboxes.map(async ({ ethereumAddress, inboxId }) => {
-          logger.debug(
+          multiInboxLogger.debug(
             `[restorePreviouslyCreatedInboxesForDevice] Restoring inbox for address: ${ethereumAddress}`
           );
           try {
-            logger.debug(
+            multiInboxLogger.debug(
               `[restorePreviouslyCreatedInboxesForDevice] Checking if client exists for address: ${ethereumAddress}`
             );
             const clientExistsForAddress =
@@ -328,12 +284,12 @@ export class MultiInboxClient {
               //   `[restorePreviouslyCreatedInboxesForDevice] Found existing client for address: ${ethereumAddress} during restore. This shouldnt happen...`
               // );
 
-              logger.debug(
+              multiInboxLogger.debug(
                 `[restorePreviouslyCreatedInboxesForDevice] Found existing client for address: ${ethereumAddress} during restore. This shouldnt happen...`
               );
               return clientExistsForAddress;
             }
-            logger.debug(
+            multiInboxLogger.debug(
               `[restorePreviouslyCreatedInboxesForDevice] No existing client found for address: ${ethereumAddress}, (this is expected during restore) building XMTP client`
             );
 
@@ -349,12 +305,11 @@ export class MultiInboxClient {
               inboxId
             );
 
-            const isInstallationValid = await this.isClientInstallationValid(
-              xmtpInboxClient
-            );
+            const isInstallationValid =
+              await this.isClientInstallationValid(xmtpInboxClient);
 
             if (!isInstallationValid) {
-              logger.warn(
+              multiInboxLogger.warn(
                 `[restorePreviouslyCreatedInboxesForDevice] Installation is invalid for address ${ethereumAddress}`
               );
               alert(
@@ -363,25 +318,15 @@ export class MultiInboxClient {
               return undefined;
             }
 
-            const clientInboxId = xmtpInboxClient.inboxId;
-            setInboxIdQueryData({
-              account: ethereumAddress,
-              inboxId: clientInboxId,
-            });
-
-            useAccountsStore.getState().addSender({
-              ethereumAddress,
-              inboxId: clientInboxId,
-            });
             return xmtpInboxClient;
           } catch (error) {
-            logger.error(
+            multiInboxLogger.error(
               `[restorePreviouslyCreatedInboxesForDevice] Error building XMTP inbox client for address ${ethereumAddress}:`,
               error
             );
-            useAccountsStore
+            useMultiInboxClientStore
               .getState()
-              .setMultiInboxClientRestorationState(
+              .actions.setMultiInboxClientRestorationState(
                 MultiInboxClientRestorationStates.error(
                   `[restorePreviouslyCreatedInboxesForDevice] Error building XMTP inbox client for address ${ethereumAddress}:${error}`
                 )
@@ -391,15 +336,10 @@ export class MultiInboxClient {
         })
       );
 
-      const validInstallationXmtpInboxClients = xmtpInboxClients.filter(
-        (xmtpClient) => xmtpClient !== undefined
-      );
+      const validInstallationXmtpInboxClients =
+        xmtpInboxClients.filter(Boolean);
 
       validInstallationXmtpInboxClients.forEach((xmtpClient) => {
-        if (!xmtpClient) {
-          logger.error("[MultiInboxClient] XMTP client is undefined");
-          return;
-        }
         const clientInboxId = xmtpClient.inboxId;
         const lowercaseClientLinkedEthereumAddress =
           xmtpClient.address.toLowerCase();
@@ -412,27 +352,30 @@ export class MultiInboxClient {
           lowercaseClientLinkedEthereumAddress;
       });
 
-      useAccountsStore
+      useMultiInboxClientStore
         .getState()
-        .setMultiInboxClientRestorationState(
+        .actions.setMultiInboxClientRestorationState(
           MultiInboxClientRestorationStates.restored
         );
-      logger.debug(
+
+      multiInboxLogger.debug(
         "[restorePreviouslyCreatedInboxesForDevice] Successfully restored XMTP clients"
       );
     } catch (error) {
-      logger.error(
+      multiInboxLogger.error(
         "[restorePreviouslyCreatedInboxesForDevice] Error restoring XMTP clients: THROWING",
         error
       );
+
       // Reset initialization state on error
-      useAccountsStore
+      useMultiInboxClientStore
         .getState()
-        .setMultiInboxClientRestorationState(
+        .actions.setMultiInboxClientRestorationState(
           MultiInboxClientRestorationStates.error(
             `[restorePreviouslyCreatedInboxesForDevice] Error restoring XMTP clients:${error}`
           )
         );
+
       this.clearAllCachedClients();
       throw error;
     }
@@ -486,27 +429,24 @@ export class MultiInboxClient {
         ];
       }
     );
-    useAccountsStore.getState().logoutAllSenders();
   }
 
   private async isClientInstallationValid(client: XmtpClient) {
     const inboxState = await client.inboxState(true);
     const installationsIds = inboxState.installations.map((i) => i.id);
-    logger.debug(
+    multiInboxLogger.debug(
       `Current installation id : ${client.installationId} - All installation ids : ${installationsIds}`
     );
     if (!installationsIds.includes(client.installationId)) {
-      logger.warn(`Installation ${client.installationId} has been revoked`);
+      multiInboxLogger.warn(
+        `Installation ${client.installationId} has been revoked`
+      );
       return false;
     } else {
-      logger.debug(`Installation ${client.installationId} is not revoked`);
+      multiInboxLogger.debug(
+        `Installation ${client.installationId} is not revoked`
+      );
       return true;
     }
   }
 }
-
-export const useInitializeMultiInboxClient = () => {
-  useEffect(() => {
-    MultiInboxClient.instance.initialize().catch(captureError);
-  }, []);
-};

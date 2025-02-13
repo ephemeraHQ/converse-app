@@ -1,7 +1,7 @@
 import {
-  getCurrentAccount,
+  getCurrentAccountEthAddress,
   useCurrentAccount,
-} from "@/features/multi-inbox/multi-inbox.store";
+} from "../authentication/account.store";
 import { getConversationQueryData } from "@/queries/conversation-query";
 import {
   addConversationToAllowedConsentConversationsQuery,
@@ -39,7 +39,7 @@ export function useDenyDmMutation() {
       if (!peerInboxId) {
         throw new Error("Peer inbox id not found");
       }
-      const currentAccount = getCurrentAccount()!;
+      const currentAccount = getCurrentAccountEthAddress()!;
       await Promise.all([
         updateConsentForGroupsForAccount({
           account: currentAccount,

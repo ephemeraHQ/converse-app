@@ -4,7 +4,7 @@ import {
   useActionSheet,
 } from "@expo/react-native-action-sheet";
 
-import { useAppStore } from "../../data/store/appStore";
+import { useAppStore } from "../../data/store/app-store";
 
 export let showActionSheetWithOptions: ActionSheetProps["showActionSheetWithOptions"];
 

@@ -1,17 +1,18 @@
 import { Screen } from "@/components/Screen/ScreenComp/Screen";
 import { AnimatedText } from "@/design-system/Text";
-import { OnboardingTitle } from "@/features/onboarding/components/onboarding-title";
 import { OnboardingSubtitle } from "@/features/onboarding/components/onboarding-subtitle";
-
-import { VStack } from "@/design-system/VStack";
-import { memo, useState } from "react";
-import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
+import { OnboardingTitle } from "@/features/onboarding/components/onboarding-title";
 import { Center } from "@/design-system/Center";
-import { Button, TextStyle, ViewStyle } from "react-native";
-import { useAuthenticateWithPasskey } from "@/features/onboarding/contexts/signup-with-passkey.context";
-import { useNavigation } from "@react-navigation/native";
+import { VStack } from "@/design-system/VStack";
+import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
 import { useLogout } from "@/utils/logout";
-import { ConnectWalletBottomSheet } from "@/features/wallets/connect-wallet.bottom-sheet";
+import { useNavigation } from "@react-navigation/native";
+import { memo, useState } from "react";
+import { Button, TextStyle, ViewStyle } from "react-native";
+import { useLoginWithPasskey } from "@/features/onboarding/hooks/use-login-with-passkey";
+import { useSignupWithPasskey } from "@/features/onboarding/hooks/use-signup-with-passkey";
+import { captureErrorWithToast } from "@/utils/capture-error";
+
 const $subtextStyle: TextStyle = {
   textAlign: "center",
 };
@@ -38,8 +39,9 @@ const OnboardingWelcomeScreenContent = memo(
     const { themed } = useAppTheme();
     const { logout } = useLogout();
 
-    const { signupWithPasskey, loginWithPasskey } =
-      useAuthenticateWithPasskey();
+    const { signup } = useSignupWithPasskey();
+    const { login } = useLoginWithPasskey();
+
     const navigation = useNavigation();
 
     const [isVisible, setIsVisible] = useState(true);
@@ -72,11 +74,11 @@ const OnboardingWelcomeScreenContent = memo(
         <Button
           onPress={async () => {
             try {
-              await signupWithPasskey();
+              await signup();
               // @ts-ignore
               navigation.replace("OnboardingCreateContactCard");
             } catch (error) {
-              console.log("error", error);
+              captureErrorWithToast(error);
             }
           }}
           title="Signup with Passkey"
@@ -85,9 +87,9 @@ const OnboardingWelcomeScreenContent = memo(
         <Button
           onPress={async () => {
             try {
-              await loginWithPasskey();
+              await login();
             } catch (error) {
-              console.log("error", error);
+              captureErrorWithToast(error);
             }
           }}
           title="Sign in with passkey"

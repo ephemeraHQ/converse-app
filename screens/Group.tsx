@@ -21,7 +21,7 @@ import { GroupScreenImage } from "../containers/GroupScreenImage";
 import { GroupScreenMembersTable } from "../containers/GroupScreenMembersTable";
 import { GroupScreenName } from "../containers/GroupScreenName";
 import { NavigationParamList } from "./Navigation/Navigation";
-import { useCurrentAccount } from "../features/multi-inbox/multi-inbox.store";
+import { useCurrentAccount } from "@/features/authentication/account.store";
 import { useGroupQuery } from "@queries/useGroupQuery";
 
 export default function GroupScreen({

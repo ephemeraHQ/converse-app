@@ -9,7 +9,7 @@ import { queryOptions, skipToken } from "@tanstack/react-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { queryClient } from "./queryClient";
 import {
-  useAccountsStore,
+  useMultiInboxClientStore,
   AuthStatuses,
 } from "@/features/multi-inbox/multi-inbox.store";
 
@@ -171,7 +171,7 @@ export function getUnknownConsentConversationsQueryOptions(args: {
 }) {
   const { account, caller } = args;
   const isSignedIn =
-    useAccountsStore.getState().authStatus === AuthStatuses.signedIn;
+    useMultiInboxClientStore.getState().authStatus === AuthStatuses.signedIn;
   const enabled = !!account && isSignedIn;
   return queryOptions({
     enabled,

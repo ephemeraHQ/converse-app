@@ -6,10 +6,6 @@ import { DevToolsBubble } from "react-native-react-query-devtools";
 
 import { ActionSheetStateHandler } from "@/components/StateHandlers/ActionSheetStateHandler";
 import NetworkStateHandler from "@/components/StateHandlers/NetworkStateHandler";
-import {
-  // MultiInboxClient,
-  useInitializeMultiInboxClient,
-} from "@/features/multi-inbox/multi-inbox.client";
 import { $globalStyles } from "@/theme/styles";
 import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
 import { DebugButton } from "@components/DebugButton";
@@ -109,7 +105,6 @@ const AppKeyboardProvider =
 // import { DevToolsBubble } from "react-native-react-query-devtools";
 
 export function App() {
-  useInitializeMultiInboxClient();
   const colorScheme = useColorScheme();
 
   const paperTheme = useMemo(() => {

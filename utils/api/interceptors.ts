@@ -4,7 +4,7 @@ import {
 } from "@/utils/api/api.constants";
 import { rotateAccessToken } from "@/utils/api/auth";
 import { AxiosError, AxiosInstance } from "axios";
-import { getSecureMmkvForAccount } from "../mmkv";
+import { getSecureStorageForUser } from "../storage/secure-storage-by-user";
 
 type PatchedAxiosError = Omit<AxiosError, "config"> & {
   config: AxiosError["config"] & { _retry: boolean };
@@ -52,7 +52,7 @@ export function oldsSetupApiInterceptors(oldApi: AxiosInstance) {
       }
 
       // Token refresh logic
-      const secureMmkv = await getSecureMmkvForAccount(account);
+      const secureMmkv = await getSecureStorageForUser(account);
       const refreshToken = secureMmkv.getString(
         CONVERSE_REFRESH_TOKEN_STORAGE_KEY
       );

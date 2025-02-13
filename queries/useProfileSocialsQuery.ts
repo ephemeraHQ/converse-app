@@ -14,7 +14,7 @@ import {
 } from "@yornaath/batshit";
 
 import { queryClient } from "./queryClient";
-import mmkv from "@/utils/mmkv";
+import mmkv from "@/utils/storage/storage";
 
 type ProfileSocialsData = IProfileSocials | null | undefined;
 

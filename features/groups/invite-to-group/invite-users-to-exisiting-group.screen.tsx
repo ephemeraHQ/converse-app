@@ -36,7 +36,7 @@ import { isEmptyObject } from "@/utils/objects";
 import { getPreferredName } from "@/utils/profile";
 import { accountCanMessagePeer } from "@/utils/xmtpRN/xmtp-consent/account-can-message-peer";
 import { ActivityIndicator } from "@/design-system/activity-indicator";
-import { getSafeCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
+import { getSafeCurrentSender } from "@/features/authentication/account.store";
 export function InviteUsersToExistingGroupScreen({
   route,
   navigation,

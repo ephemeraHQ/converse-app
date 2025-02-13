@@ -1,7 +1,7 @@
 import {
-  getCurrentAccount,
+  getCurrentAccountEthAddress,
   useCurrentAccount,
-} from "@/features/multi-inbox/multi-inbox.store";
+} from "@/features/authentication/account.store";
 import { InboxId } from "@xmtp/react-native-sdk";
 import {
   getInboxIdFromQueryData,
@@ -19,7 +19,7 @@ export function useSafeCurrentAccountInboxId() {
 }
 
 export function getCurrentAccountInboxId() {
-  const currentAccount = getCurrentAccount()!;
+  const currentAccount = getCurrentAccountEthAddress()!;
   return getInboxIdFromQueryData({ account: currentAccount });
 }
 

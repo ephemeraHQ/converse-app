@@ -7,7 +7,7 @@ import { ViewStyle, StyleSheet } from "react-native";
 import { Avatar } from "./Avatar";
 import { usePreferredName } from "@/hooks/usePreferredName";
 import { usePreferredAvatarUri } from "@/hooks/usePreferredAvatarUri";
-import { useSafeCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
+import { useSafeCurrentSender } from "@/features/authentication/account.store";
 
 type ICurrentAccountProps = {
   style?: ViewStyle;

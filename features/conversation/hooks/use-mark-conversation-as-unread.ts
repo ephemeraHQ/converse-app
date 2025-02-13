@@ -1,4 +1,4 @@
-import { getCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { getCurrentAccountEthAddress } from "@/features/authentication/account.store";
 import {
   getConversationMetadataQueryData,
   updateConversationMetadataQueryData,
@@ -14,14 +14,14 @@ export function useMarkConversationAsUnread(args: {
 
   const { mutateAsync: markAsUnreadAsync } = useMutation({
     mutationFn: async () => {
-      const currentAccount = getCurrentAccount()!;
+      const currentAccount = getCurrentAccountEthAddress()!;
       await markTopicAsUnread({
         account: currentAccount,
         topic,
       });
     },
     onMutate: () => {
-      const currentAccount = getCurrentAccount()!;
+      const currentAccount = getCurrentAccountEthAddress()!;
       const previousData = getConversationMetadataQueryData({
         account: currentAccount,
         topic,
@@ -38,7 +38,7 @@ export function useMarkConversationAsUnread(args: {
       return { previousData };
     },
     onError: (error, _, context) => {
-      const currentAccount = getCurrentAccount()!;
+      const currentAccount = getCurrentAccountEthAddress()!;
       updateConversationMetadataQueryData({
         account: currentAccount,
         topic,

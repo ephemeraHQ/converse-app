@@ -1,6 +1,6 @@
 import { Center } from "@/design-system/Center";
 import { Avatar } from "@components/Avatar";
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { useCurrentAccount } from "@/features/authentication/account.store";
 import { HStack } from "@design-system/HStack";
 import { Pressable } from "@design-system/Pressable";
 import { ITextProps, Text } from "@design-system/Text";

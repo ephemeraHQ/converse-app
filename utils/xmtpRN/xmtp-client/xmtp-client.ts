@@ -2,8 +2,8 @@ import { config } from "@/config";
 import { captureError } from "@/utils/capture-error";
 import { getCleanEthAddress } from "@/utils/evm/address";
 import { ConverseXmtpClientType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
-import { getDbEncryptionKey } from "@/utils/keychain";
-import logger from "@utils/logger";
+import { getDbEncryptionKey } from "@/utils/xmtp-db-encryption-key";
+import { logger } from "@utils/logger";
 import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-reference";
 import {
   Client,

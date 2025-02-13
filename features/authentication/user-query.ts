@@ -1,14 +1,14 @@
 import { getUserQueryKey } from "@/queries/QueryKeys";
 import { queryClient } from "@/queries/queryClient";
 import { Optional } from "@/types/general";
-import { getUser, type IUser } from "@/utils/api/users";
+import { getUserByPrivyUserId, type IUser } from "@/utils/api/users";
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 
 export type UserQueryData = IUser;
 
 type IGetUserArgs = {
-  privyId: string;
+  privyUserId: string;
 };
 
 type IGetUserArgsWithCaller = IGetUserArgs & { caller: string };
@@ -20,24 +20,24 @@ export const useUserQuery = (args: IGetUserArgsWithCaller) => {
 export function getUserQueryOptions(
   args: Optional<IGetUserArgsWithCaller, "caller">
 ) {
-  const { privyId, caller } = args;
+  const { privyUserId, caller } = args;
   return queryOptions({
     meta: {
       caller,
     },
-    queryKey: getUserQueryKey({ privyId }),
-    queryFn: () => getUser({ privyId }),
-    enabled: !!privyId,
+    queryKey: getUserQueryKey({ privyUserId }),
+    queryFn: () => getUserByPrivyUserId({ privyUserId }),
+    enabled: !!privyUserId,
   });
 }
 
 export const setUserQueryData = (
   args: IGetUserArgs & { user: UserQueryData }
 ) => {
-  const { privyId, user } = args;
+  const { privyUserId, user } = args;
   queryClient.setQueryData(
     getUserQueryOptions({
-      privyId,
+      privyUserId,
     }).queryKey,
     user
   );

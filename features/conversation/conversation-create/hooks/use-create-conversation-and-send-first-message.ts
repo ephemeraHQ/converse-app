@@ -1,4 +1,4 @@
-import { getCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { getCurrentAccountEthAddress } from "@/features/authentication/account.store";
 import { getCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import {
   allowedConsentConversationsQueryKey,
@@ -128,7 +128,7 @@ export function useCreateConversationAndSendFirstMessage() {
         throw new Error("No inboxIds provided");
       }
 
-      const currentAccount = getCurrentAccount()!;
+      const currentAccount = getCurrentAccountEthAddress()!;
 
       if (!currentAccount) {
         throw new Error("No current account");

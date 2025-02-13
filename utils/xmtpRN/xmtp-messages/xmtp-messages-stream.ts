@@ -1,6 +1,6 @@
 import { XMTPError } from "@/utils/error";
 import { isProd } from "@/utils/getEnv";
-import logger from "@utils/logger";
+import { logger } from "@utils/logger";
 import { getXmtpClient } from "../xmtp-client/xmtp-client";
 import { DecodedMessageWithCodecsType } from "../xmtp-client/xmtp-client.types";
 

@@ -1,7 +1,7 @@
 import { getGroupMembersQueryOptions } from "@/queries/useGroupMembersQuery";
 import { useQuery } from "@tanstack/react-query";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import { useCurrentAccount } from "../features/multi-inbox/multi-inbox.store";
+import { useCurrentAccount } from "@/features/authentication/account.store";
 import { useGroupNameMutation } from "../queries/useGroupNameMutation";
 import { useGroupNameQuery } from "../queries/useGroupNameQuery";
 import { usePreferredNames } from "./usePreferredNames";

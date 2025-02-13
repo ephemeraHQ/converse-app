@@ -1,8 +1,8 @@
-import { getCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { getCurrentAccountEthAddress } from "@/features/authentication/account.store";
 import { getProfileSocialsQueryData } from "@/queries/useProfileSocialsQuery";
 
 export function getCurrentAccountPrimaryProfile() {
-  const userAddress = getCurrentAccount();
+  const userAddress = getCurrentAccountEthAddress();
 
   if (!userAddress) {
     return undefined;

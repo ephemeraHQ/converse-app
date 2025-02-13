@@ -1,4 +1,4 @@
-import { getCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { getCurrentAccountEthAddress } from "@/features/authentication/account.store";
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm";
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
 import { getAllowedConsentConversationsQueryOptions } from "@/queries/conversations-allowed-consent-query";
@@ -13,7 +13,7 @@ export async function findConversationByInboxIds(args: {
 }) {
   const { inboxIds } = args;
 
-  const account = getCurrentAccount();
+  const account = getCurrentAccountEthAddress();
 
   if (!account) {
     throw new Error("No account found");

@@ -9,7 +9,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { createWallet, WalletId } from "thirdweb/wallets";
 import { thirdwebClient } from "@/utils/thirdweb";
 import { config } from "@/config";
-import { useAccountsStore } from "../multi-inbox/multi-inbox.store";
+import { useMultiInboxClientStore } from "../multi-inbox/multi-inbox.store";
 import { MultiInboxClient } from "../multi-inbox/multi-inbox.client";
 import logger from "@/utils/logger";
 import { Text } from "@/design-system/Text";
@@ -41,7 +41,9 @@ export function ConnectWalletBottomSheet({
   const { installedWallets, isLoading: areInstalledWalletsLoading } =
     useInstalledWallets();
   const bottomSheetRef = useBottomSheetModalRef();
-  const currentSender = useAccountsStore((state) => state.currentSender);
+  const currentSender = useMultiInboxClientStore(
+    (state) => state.currentSender
+  );
   const isInboxClientInitiated = currentSender?.inboxId;
 
   React.useEffect(() => {

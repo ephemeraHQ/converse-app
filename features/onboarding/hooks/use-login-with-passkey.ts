@@ -1,3 +1,7 @@
+import {
+  AuthStatuses,
+  useAuthStore,
+} from "@/features/authentication/auth.store";
 import { useExecuteOnceWhenReady } from "@/hooks/use-execute-once-when-ready";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import logger from "@/utils/logger";
@@ -14,6 +18,10 @@ export function useLoginWithPasskey() {
   const { loginWithPasskey: privyLoginWithPasskey } =
     usePrivyLoginWithPasskey();
 
+  const isSigningIn = useAuthStore(
+    (state) => state.status === AuthStatuses.signingIn
+  );
+
   useExecuteOnceWhenReady({
     callback: async (smartWalletClient) => {
       try {
@@ -26,10 +34,11 @@ export function useLoginWithPasskey() {
         captureErrorWithToast(error);
       }
     },
-    deps: [smartWalletClient],
+    deps: [smartWalletClient, isSigningIn],
   });
 
   const login = async () => {
+    useAuthStore.getState().actions.setStatus("signingIn");
     await privyLoginWithPasskey({
       relyingParty: RELYING_PARTY,
     });

@@ -16,7 +16,7 @@ import logger from "@/utils/logger";
 import * as SplashScreen from "expo-splash-screen";
 import {
   AuthStatuses,
-  useAccountsStore,
+  useMultiInboxClientStore,
 } from "../multi-inbox/multi-inbox.store";
 import { useSocialProfiles } from "thirdweb/react";
 import { thirdwebClient } from "@/utils/thirdweb";
@@ -316,7 +316,7 @@ const ReverseResolver = ({ address }: { address: string }) => {
 export function PrivyPlaygroundLandingScreen() {
   logger.info("PrivyPlaygroundLandingScreen");
   const { user } = usePrivy();
-  const { currentSender, authStatus } = useAccountsStore();
+  const { currentSender, authStatus } = useMultiInboxClientStore();
   const mycbidaddress = "0x0aF849d2778f6ccE4A2641438B6207DC4750a82B";
 
   useEffect(() => {

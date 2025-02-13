@@ -7,7 +7,7 @@ import { ensureGroupMembersQueryData } from "@/queries/useGroupMembersQuery";
 import { ensureInboxProfileSocialsQueryData } from "@/queries/useInboxProfileSocialsQuery";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
-import { getCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { getCurrentAccountEthAddress } from "@/features/authentication/account.store";
 import { normalizeString } from "@/utils/str";
 
 export async function searchExistingDms(args: {
@@ -15,7 +15,7 @@ export async function searchExistingDms(args: {
   inboxId: InboxId;
 }) {
   const { searchQuery, inboxId } = args;
-  const currentAccount = getCurrentAccount()!;
+  const currentAccount = getCurrentAccountEthAddress()!;
   const conversations = getAllowedConsentConversationsQueryData({
     account: currentAccount,
   });

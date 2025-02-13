@@ -1,4 +1,4 @@
-import { getSafeCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
+import { getSafeCurrentSender } from "@/features/authentication/account.store";
 /**
  * Checks if the provided address belongs to the current user
  * @param address Ethereum address to check

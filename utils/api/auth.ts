@@ -1,12 +1,12 @@
 import { tryGetAppCheckToken } from "../appCheck";
 import logger, { authLogger } from "../logger";
-import { getSecureMmkvForAccount } from "../mmkv";
+import { getSecureStorageForUser } from "../storage/secure-storage-by-user";
 import {
   InstallationSignature,
   getInstallationKeySignature,
 } from "../xmtpRN/xmtp-client/xmtp-client-installations";
 import { getInboxId } from "../xmtpRN/signIn";
-import { oldApi } from "./api";
+import { api } from "./api";
 import {
   CONVERSE_ACCESS_TOKEN_STORAGE_KEY,
   CONVERSE_REFRESH_TOKEN_STORAGE_KEY,
@@ -25,7 +25,7 @@ export type AuthResponse = {
 type AuthParams = {
   inboxId: string;
   installationPublicKey: string;
-  installationKeySignature: string;
+  appCheckTokenSignature: string;
   appCheckToken: string;
   account: string;
 };
@@ -45,7 +45,7 @@ export type XmtpApiHeaders = {
 export async function fetchAccessToken({
   inboxId,
   installationPublicKey,
-  installationKeySignature,
+  appCheckTokenSignature,
   appCheckToken,
   account,
 }: AuthParams): Promise<AuthResponse> {
@@ -53,11 +53,11 @@ export async function fetchAccessToken({
     `Creating access token for account: ${account} with inboxId: ${inboxId}`
   );
   const { data } = await dedupedFetch("/api/authenticate" + inboxId, () =>
-    oldApi.post<AuthResponse>(
+    api.post<AuthResponse>(
       "/api/authenticate",
       {
         inboxId,
-        installationKeySignature,
+        appCheckTokenSignature,
         installationPublicKey,
         appCheckToken,
       },
@@ -93,7 +93,7 @@ export async function rotateAccessToken(
   const { data } = await dedupedFetch(
     `/api/authenticate/token-${account}`,
     () =>
-      oldApi.post<AuthResponse>("/api/authenticate/token", {
+      api.post<AuthResponse>("/api/authenticate/token", {
         token: refreshToken,
       })
   );
@@ -102,7 +102,7 @@ export async function rotateAccessToken(
     throw new Error(`Failed to rotate access token for account ${account}`);
   }
 
-  const secureMmkv = await getSecureMmkvForAccount(account);
+  const secureMmkv = await getSecureStorageForUser(account);
   secureMmkv.set(CONVERSE_ACCESS_TOKEN_STORAGE_KEY, data.accessToken);
 
   if (data.refreshToken) {
@@ -129,7 +129,7 @@ export async function getXmtpApiHeaders(
     throw new Error("[getXmtpApiHeaders] No inbox client found for account");
   }
 
-  const secureMmkv = await getSecureMmkvForAccount(account);
+  const secureMmkv = await getSecureStorageForUser(account);
   const appCheckToken = await tryGetAppCheckToken();
   let accessToken = secureMmkv.getString(CONVERSE_ACCESS_TOKEN_STORAGE_KEY);
 
@@ -140,13 +140,13 @@ export async function getXmtpApiHeaders(
   }
 
   if (!accessToken) {
-    const installationKeySignature =
+    const appCheckTokenSignature =
       xmtpSignatureByAccount[account] ||
-      (await getInstallationKeySignature(account, XMTP_IDENTITY_KEY));
+      (await getInstallationKeySignature(account, appCheckToken));
 
     // Cache signature for future use
     if (!xmtpSignatureByAccount[account]) {
-      xmtpSignatureByAccount[account] = installationKeySignature;
+      xmtpSignatureByAccount[account] = appCheckTokenSignature;
     }
 
     const inboxId = await getInboxId(account);
@@ -154,7 +154,7 @@ export async function getXmtpApiHeaders(
       inboxId,
       account,
       appCheckToken,
-      ...installationKeySignature,
+      ...appCheckTokenSignature,
     });
 
     if (!authTokensResponse) {

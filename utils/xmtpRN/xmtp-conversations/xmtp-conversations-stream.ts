@@ -1,5 +1,5 @@
 import { ConversationWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
-import logger from "@utils/logger";
+import { logger } from "@utils/logger";
 import { getXmtpClient } from "../xmtp-client/xmtp-client";
 
 export async function streamConversations(args: {

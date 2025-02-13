@@ -1,273 +1,63 @@
-import { create, StoreApi, UseBoundStore } from "zustand";
-import { createJSONStorage, persist } from "zustand/middleware";
-import logger from "@utils/logger";
-import mmkv, { zustandMMKVStorage } from "../../utils/mmkv";
 import {
-  GroupStatus,
-  initSettingsStore,
-  SettingsStoreType,
-} from "../../data/store/settingsStore";
-import {
-  CurrentSender,
   MultiInboxClientRestorationState,
   MultiInboxClientRestorationStates,
 } from "@/features/multi-inbox/multi-inbox-client.types";
+import { StoreApi, UseBoundStore, create } from "zustand";
+import { SettingsStoreType } from "../../data/store/settings-store";
 
-type AccountStoreDataType = {
+export type AccountStoreDataType = {
   settings: SettingsStoreType;
 };
 
-type AccountStoreType = {
+export type AccountStoreType = {
   [K in keyof AccountStoreDataType]: UseBoundStore<
     StoreApi<AccountStoreDataType[K]>
   >;
 };
 
-const storesByAccount: {
-  [account: string]: AccountStoreType;
-} = {};
-
-// Store initialization
-export const initStores = (account: string) => {
-  if (!(account in storesByAccount)) {
-    logger.debug(`[multi-inbox store] Initiating account ${account}`);
-    // If adding a persisted store here, please add
-    // the deletion method in deleteStores
-    storesByAccount[account] = {
-      settings: initSettingsStore(account),
-    };
-  }
-};
-
-export const deleteStores = (account: string) => {
-  logger.debug(`[multi-inbox store] Deleting account ${account}`);
-  delete storesByAccount[account];
-  mmkv.delete(`store-${account}-settings`);
-};
-
-type AccountsStoreStype = {
+type IMultiInboxClientStore = {
   multiInboxClientRestorationState: MultiInboxClientRestorationState;
-  setMultiInboxClientRestorationState: (
-    state: MultiInboxClientRestorationState
-  ) => void;
-  currentSender: CurrentSender | undefined;
+  actions: {
+    setMultiInboxClientRestorationState: (
+      state: MultiInboxClientRestorationState
+    ) => void;
+  };
 
-  setCurrentAccount: ({ ethereumAddress }: { ethereumAddress: string }) => void;
+  // currentSender: CurrentSender | undefined;
 
-  setCurrentSender: (sender: CurrentSender | undefined) => void;
-  addSender: (sender: CurrentSender) => void;
+  // setCurrentSender: (sender: CurrentSender | undefined) => void;
+  // addSender: (sender: CurrentSender) => void;
   // setCurrentAccount: (ethereumAddress: string) => void;
-  senders: CurrentSender[];
-  logoutAllSenders: () => void;
+  // senders: CurrentSender[];
+  // logoutAllSenders: () => void;
 };
 
 // Main accounts store
-export const useAccountsStore = create<AccountsStoreStype>()(
-  persist(
-    (set, get) => ({
-      currentSender: undefined,
+export const useMultiInboxClientStore = create<IMultiInboxClientStore>()(
+  (set, get) => ({
+    multiInboxClientRestorationState: MultiInboxClientRestorationStates.idle,
 
-      setCurrentAccount: ({ ethereumAddress }: { ethereumAddress: string }) => {
-        const senders = get().senders;
-        const sender = senders.find(
-          (sender) => sender.ethereumAddress === ethereumAddress
-        );
-        if (!sender) {
-          throw new Error("Sender not found");
-        }
-        set({ currentSender: sender });
-      },
-
-      setCurrentSender: (sender: CurrentSender | undefined) =>
-        set({ currentSender: sender }),
-      multiInboxClientRestorationState: MultiInboxClientRestorationStates.idle,
+    actions: {
       setMultiInboxClientRestorationState: (
         state: MultiInboxClientRestorationState
       ) => set({ multiInboxClientRestorationState: state }),
-      addSender: (sender: CurrentSender) =>
-        set((state) => {
-          if (!storesByAccount[sender.ethereumAddress]) {
-            initStores(sender.ethereumAddress);
-          }
-          const senderExists = state.senders.some(
-            (existingSender) =>
-              existingSender.ethereumAddress === sender.ethereumAddress &&
-              existingSender.inboxId === sender.inboxId
-          );
-          if (senderExists) return state;
-          return { senders: [...state.senders, sender] };
-        }),
-      senders: [],
-      logoutAllSenders: () => {
-        set({ senders: [], currentSender: undefined });
-      },
-    }),
-    {
-      name: "store-accounts",
-      storage: createJSONStorage(() => zustandMMKVStorage),
-      partialize: (state) => {
-        const partializedState = {
-          ...state,
-          multiInboxClientRestorationState:
-            MultiInboxClientRestorationStates.idle,
-        };
-        return partializedState;
-      },
-
-      onRehydrateStorage: () => {
-        return (state, error) => {
-          if (error) {
-            logger.warn(
-              `[multi-inbox.store#onRehydrationStorage] An error happened during hydration: ${error}`
-            );
-          } else {
-            logger.debug(
-              `[multi-inbox.store#onRehydrationStorage] State hydrated successfully: ${JSON.stringify(
-                state
-              )}`
-            );
-            if (state?.senders && state.senders.length > 0) {
-              logger.debug(
-                `[multi-inbox.store#onRehydrationStorage] Found ${state.senders.length} accounts in hydration, initializing stores`
-              );
-              state.senders.map((sender) => {
-                if (!storesByAccount[sender.ethereumAddress]) {
-                  logger.debug(
-                    `[multi-inbox.store#onRehydrationStorage] Initializing store for account: ${sender.ethereumAddress}`
-                  );
-                  initStores(sender.ethereumAddress);
-                } else {
-                  logger.debug(
-                    `[multi-inbox.store#onRehydrationStorage] Store already exists for account: ${sender.ethereumAddress}`
-                  );
-                }
-              });
-            } else {
-              logger.debug(
-                "[multi-inbox.store#onRehydrationStorage] No accounts found in hydrated state"
-              );
-            }
-          }
-        };
-      },
-    }
-  )
+    },
+    // addSender: (sender: CurrentSender) =>
+    //   set((state) => {
+    //     if (!storesByAccount[sender.ethereumAddress]) {
+    //       initStores(sender.ethereumAddress);
+    //     }
+    //     const senderExists = state.senders.some(
+    //       (existingSender) =>
+    //         existingSender.ethereumAddress === sender.ethereumAddress &&
+    //         existingSender.inboxId === sender.inboxId
+    //     );
+    //     if (senderExists) return state;
+    //     return { senders: [...state.senders, sender] };
+    //   }),
+    // senders: [],
+    // logoutAllSenders: () => {
+    //   set({ senders: [], currentSender: undefined });
+    // },
+  })
 );
-
-const getAccountStore = (account: string) => {
-  if (!account) {
-    throw new Error("No account provided");
-  }
-
-  if (account in storesByAccount) {
-    return storesByAccount[account];
-  }
-  throw new Error(`No account store found for ${account}`);
-};
-
-export const getAccountsList = () =>
-  useAccountsStore.getState().senders.map((sender) => sender.ethereumAddress);
-
-/**
- * @deprecated We should index by ID instead of ethereum address
- */
-export const useAccountsList = () => {
-  const senders = useAccountsStore((state) => state.senders);
-  return senders
-    .filter((sender) => Boolean(sender.ethereumAddress))
-    .map((sender) => sender.ethereumAddress);
-};
-
-export const useCurrentAccount = () => {
-  const currentSender = useCurrentSender();
-  return currentSender?.ethereumAddress;
-};
-
-export const getSafeCurrentSender = (): CurrentSender => {
-  const currentSender = useAccountsStore.getState().currentSender;
-  if (!currentSender) {
-    throw new Error("No current sender");
-  }
-  return currentSender;
-};
-export const useSafeCurrentSender = (): CurrentSender => {
-  const currentSender = useCurrentSender();
-
-  if (!currentSender) {
-    throw new Error("No current sender");
-  }
-  return currentSender;
-};
-
-export const useCurrentSender: () => CurrentSender | undefined = () => {
-  return useAccountsStore((s) => s.currentSender);
-};
-
-export function getCurrentAccount() {
-  const currentSender = useAccountsStore.getState().currentSender;
-
-  return currentSender?.ethereumAddress;
-}
-
-const currentAccountStoreHook = <T extends keyof AccountStoreDataType>(
-  key: T
-) => {
-  const _useStore = <U>(selector: (state: AccountStoreDataType[T]) => U) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const currentSender = useAccountsStore((s) => s.currentSender);
-    const currentEthereumAddress = currentSender?.ethereumAddress;
-    if (!currentEthereumAddress) {
-      // throw new Error("No current sender");
-      return {
-        getState: () => {
-          return {
-            [key]: {} as AccountStoreDataType[T],
-          };
-        },
-      };
-    }
-    const accountStore = getAccountStore(currentEthereumAddress);
-    if (!accountStore) {
-      // throw new Error("No account store found");
-      return {
-        getState: () => {
-          return {
-            [key]: {} as AccountStoreDataType[T],
-          };
-        },
-      };
-    }
-    return accountStore[key](selector);
-  };
-
-  const use = _useStore as AccountStoreType[T];
-
-  use.getState = () => {
-    const currentAccountState = useAccountsStore.getState();
-    const currentEthereumAddress =
-      currentAccountState.currentSender?.ethereumAddress;
-    if (!currentEthereumAddress) {
-      throw new Error("No current sender");
-    }
-    const accountStore = getAccountStore(currentEthereumAddress);
-    return accountStore[key].getState();
-  };
-
-  return use;
-};
-
-// Store exports
-export const useSettingsStore = currentAccountStoreHook("settings");
-export const getSettingsStore = (account: string) =>
-  getAccountStore(account).settings;
-
-// Group status helper
-export const setGroupStatus = (groupStatus: GroupStatus) => {
-  const account = getCurrentAccount();
-  if (!account) {
-    logger.warn("[setGroupStatus] No current account");
-    return;
-  }
-  const setGroupStatus = getSettingsStore(account).getState().setGroupStatus;
-  setGroupStatus(groupStatus);
-};

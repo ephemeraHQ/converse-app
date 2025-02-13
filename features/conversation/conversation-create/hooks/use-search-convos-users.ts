@@ -1,4 +1,4 @@
-import { getCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { getCurrentAccountEthAddress } from "@/features/authentication/account.store";
 import { getSearchConvosUsersQueryKey } from "@/queries/QueryKeys";
 import { searchProfilesForCurrentAccount } from "@/utils/api/profiles";
 import { captureError } from "@/utils/capture-error";
@@ -77,7 +77,7 @@ async function handlePeerSearch(searchQuery: string) {
   const address = getCleanAddress(resolvedAddress);
 
   const inboxId = await getInboxIdFromAddress({
-    currentUserAddress: getCurrentAccount()!,
+    currentUserAddress: getCurrentAccountEthAddress()!,
     targetEthAddress: address,
   });
 
@@ -109,7 +109,7 @@ async function handleGeneralSearch(searchQuery: string) {
       Object.keys(profiles).map(async (address) => {
         try {
           return getInboxIdFromAddress({
-            currentUserAddress: getCurrentAccount()!,
+            currentUserAddress: getCurrentAccountEthAddress()!,
             targetEthAddress: address,
           });
         } catch (error) {

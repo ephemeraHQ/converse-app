@@ -168,6 +168,18 @@ export const apiLogger = {
   error: (...args: Parameters<logMethodType>) => logger.error("[API]", ...args),
 };
 
+export const multiInboxLogger = {
+  ...logger,
+  debug: (...args: Parameters<logMethodType>) =>
+    logger.debug("[MULTI-INBOX]", ...args),
+  info: (...args: Parameters<logMethodType>) =>
+    logger.info("[MULTI-INBOX]", ...args),
+  warn: (...args: Parameters<logMethodType>) =>
+    logger.warn("[MULTI-INBOX]", ...args),
+  error: (...args: Parameters<logMethodType>) =>
+    logger.error("[MULTI-INBOX]", ...args),
+};
+
 /**
  * @deprecated Use { logger } instead
  */

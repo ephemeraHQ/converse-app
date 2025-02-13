@@ -2,7 +2,7 @@ import { conversationIsUnreadForInboxId } from "@/features/conversation/utils/co
 import { useCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { getConversationMetadataQueryOptions } from "@/queries/conversation-metadata-query";
 import { getConversationQueryOptions } from "@/queries/conversation-query";
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { useCurrentAccount } from "@/features/authentication/account.store";
 import { useQuery } from "@tanstack/react-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { useMemo } from "react";

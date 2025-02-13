@@ -1,4 +1,4 @@
-import { getCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { getCurrentAccountEthAddress } from "@/features/authentication/account.store";
 import type { ProfileType } from "@/features/onboarding/types/onboarding.types";
 import logger from "@/utils/logger";
 import type { InboxId } from "@xmtp/react-native-sdk";
@@ -107,7 +107,7 @@ type IProfileSearchResponse = z.infer<typeof ProfileSearchResponseSchema>;
 export const searchProfilesForCurrentAccount = async (
   query: string
 ): Promise<IProfileSearchResponse> => {
-  const currentAccount = getCurrentAccount()!;
+  const currentAccount = getCurrentAccountEthAddress()!;
   const { data } = await oldApi.get("/api/profile/search", {
     headers: await getXmtpApiHeaders(currentAccount),
     params: { query },

@@ -7,7 +7,7 @@ import {
 
 import logger from "@/utils/logger";
 import { wait } from "@/utils/wait";
-import { zustandMMKVStorage } from "../../utils/mmkv";
+import { zustandMMKVStorage } from "@/utils/storage/zustand-storage";
 
 // A app-wide store to store settings that don't depend on
 // an account like if notifications are accepted

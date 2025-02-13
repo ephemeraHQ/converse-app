@@ -1,5 +1,5 @@
 import { getPendingGroupJoinRequests } from "@/utils/api/api-groups/api-groups";
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { useCurrentAccount } from "@/features/authentication/account.store";
 import { useQuery } from "@tanstack/react-query";
 
 import { pendingJoinRequestsQueryKey } from "./QueryKeys";

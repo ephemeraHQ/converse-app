@@ -13,9 +13,10 @@ import { useLogout } from "@/utils/logout";
 import {
   AuthStatuses,
   deleteStores,
-  useAccountsStore,
+  useMultiInboxClientStore,
 } from "@/features/multi-inbox/multi-inbox.store";
-import mmkv, { zustandMMKVStorage } from "@/utils/mmkv";
+import mmkv from "@/utils/storage/storage";
+import { zustandMMKVStorage } from "@/utils/storage/zustand-storage";
 
 export function PrivyPlaygroundLoginScreen() {
   const { signupWithPasskey, loginWithPasskey } = useAuthenticateWithPasskey();
@@ -63,7 +64,8 @@ export function PrivyPlaygroundLoginScreen() {
       <Button
         title="Delete Everything"
         onPress={async () => {
-          const currentAccount = useAccountsStore.getState().currentSender;
+          const currentAccount =
+            useMultiInboxClientStore.getState().currentSender;
           if (currentAccount) {
             deleteStores(currentAccount.ethereumAddress);
           }

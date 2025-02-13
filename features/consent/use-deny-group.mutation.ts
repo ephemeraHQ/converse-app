@@ -11,7 +11,7 @@ import { getGroupQueryData, setGroupQueryData } from "@/queries/useGroupQuery";
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
 import { useMutation } from "@tanstack/react-query";
 import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
-import logger from "@utils/logger";
+import { logger } from "@utils/logger";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { blockGroupMutationKey } from "../../queries/MutationKeys";
 

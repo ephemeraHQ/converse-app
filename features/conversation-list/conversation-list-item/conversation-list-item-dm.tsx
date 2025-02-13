@@ -13,7 +13,7 @@ import { useConversationQuery } from "@/queries/conversation-query";
 import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { captureErrorWithToast } from "@/utils/capture-error";
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { useCurrentAccount } from "@/features/authentication/account.store";
 import { usePreferredInboxAvatar } from "@hooks/usePreferredInboxAvatar";
 import { usePreferredInboxName } from "@hooks/usePreferredInboxName";
 import { getCompactRelativeTime } from "@utils/date";

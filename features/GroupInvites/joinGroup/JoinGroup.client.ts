@@ -5,7 +5,7 @@ import {
 } from "@/utils/api/api-groups/api-groups";
 import { GroupInvite } from "@/utils/api/api-groups/api-group.types";
 import { getV3IdFromTopic } from "@/utils/groupUtils/groupId";
-import logger from "@utils/logger";
+import { logger } from "@utils/logger";
 import {
   ConversationDataEntity,
   ConversationWithCodecsType,

@@ -1,14 +1,14 @@
 import {
-  getAccountsList,
-  useAccountsStore,
+  useMultiInboxClientStore,
   AuthStatuses,
 } from "@/features/multi-inbox/multi-inbox.store";
-import { useAppStore } from "@/data/store/appStore";
+import { getAccountsList } from "../authentication/account.store";
+import { useAppStore } from "@/data/store/app-store";
 import { captureError } from "@/utils/capture-error";
 import { stopStreamingConversations } from "@/utils/xmtpRN/xmtp-conversations/xmtp-conversations-stream";
 import { stopStreamingAllMessage } from "@/utils/xmtpRN/xmtp-messages/xmtp-messages-stream";
 import { stopStreamingConsent } from "@/utils/xmtpRN/xmtp-preferences/xmtp-preferences-stream";
-import logger from "@utils/logger";
+import { logger } from "@utils/logger";
 import { startConsentStreaming } from "./stream-consent";
 import { startConversationStreaming } from "./stream-conversations";
 import { startMessageStreaming } from "./stream-messages";
@@ -52,7 +52,7 @@ export function setupStreamingSubscriptions() {
   // an account is added (removing has not been implemented yet)
   // I'm not going to play with this right now though, but we should
   // come back to it and simplify it if possible.
-  useAccountsStore.subscribe((state, previousState) => {
+  useMultiInboxClientStore.subscribe((state, previousState) => {
     const { hydrationDone, isInternetReachable } = useAppStore.getState();
 
     if (!hydrationDone || !isInternetReachable) {
@@ -85,7 +85,7 @@ export function setupStreamingSubscriptions() {
 async function startStreaming(accountsToStream: string[]) {
   const store = useStreamingStore.getState();
   const isSignedIn =
-    useAccountsStore.getState().authStatus === AuthStatuses.signedIn;
+    useMultiInboxClientStore.getState().authStatus === AuthStatuses.signedIn;
   if (!isSignedIn) {
     logger.info("[Streaming] Not signed in, skipping startStreaming");
     return;

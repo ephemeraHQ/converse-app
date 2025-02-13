@@ -6,7 +6,7 @@ import { usePromoteToSuperAdminMutation } from "../queries/usePromoteToSuperAdmi
 import { useRemoveFromGroupMutation } from "../queries/useRemoveFromGroupMutation";
 import { useRevokeAdminMutation } from "../queries/useRevokeAdminMutation";
 import { useRevokeSuperAdminMutation } from "../queries/useRevokeSuperAdminMutation";
-import { getSafeCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
+import { getSafeCurrentSender } from "@/features/authentication/account.store";
 
 export const useGroupMembers = (topic: ConversationTopic) => {
   const account = getSafeCurrentSender().ethereumAddress;

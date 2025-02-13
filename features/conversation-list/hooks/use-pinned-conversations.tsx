@@ -1,6 +1,6 @@
 import { getConversationMetadataQueryOptions } from "@/queries/conversation-metadata-query";
 import { useAllowedConsentConversationsQuery } from "@/queries/conversations-allowed-consent-query";
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { useCurrentAccount } from "@/features/authentication/account.store";
 import { useQueries } from "@tanstack/react-query";
 import { useMemo } from "react";
 

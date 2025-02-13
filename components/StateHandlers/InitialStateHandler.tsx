@@ -2,9 +2,9 @@ import * as Linking from "expo-linking";
 import { useEffect, useRef } from "react";
 
 import { useAuthHydrate } from "@/features/authentication/use-auth-hydrate";
-import logger from "@utils/logger";
-import { useAppStore } from "../../data/store/appStore";
-import { useSelect } from "../../data/store/storeHelpers";
+import { logger } from "@utils/logger";
+import { useAppStore } from "../../data/store/app-store";
+import { useSelect } from "../../data/store/store.utils";
 import { getSchemedURLFromUniversalURL } from "../../utils/navigation";
 import { hideSplashScreen } from "../../utils/splash/splash";
 

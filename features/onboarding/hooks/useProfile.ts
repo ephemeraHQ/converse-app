@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { useCurrentAccount } from "@/features/authentication/account.store";
 import {} from "@utils/str";
 import { useProfileSocials } from "@/hooks/useProfileSocials";
 import { ProfileType } from "../types/onboarding.types";

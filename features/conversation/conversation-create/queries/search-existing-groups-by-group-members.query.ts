@@ -8,7 +8,7 @@ import { captureError } from "@/utils/capture-error";
 import { normalizeString } from "@/utils/str";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
-import { getSafeCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
+import { getSafeCurrentSender } from "@/features/authentication/account.store";
 
 export async function searchExistingGroupsByGroupMembers(args: {
   searchQuery: string;

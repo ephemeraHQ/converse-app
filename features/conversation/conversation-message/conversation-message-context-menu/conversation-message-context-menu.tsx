@@ -29,7 +29,7 @@ import Animated from "react-native-reanimated";
 import { MessageContextMenuAboveMessageReactions } from "./conversation-message-context-menu-above-message-reactions";
 import { MessageContextMenuContainer } from "./conversation-message-context-menu-container";
 import { useMessageContextMenuItems } from "./conversation-message-context-menu.utils";
-import { getSafeCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
+import { getSafeCurrentSender } from "@/features/authentication/account.store";
 
 export const ConversationMessageContextMenu = memo(
   function ConversationMessageContextMenu() {
@@ -82,17 +82,17 @@ const Content = memo(function Content(props: {
       : undefined;
 
     const nextMessage = nextMessageId
-      ? getMessageById({
+      ? (getMessageById({
           messageId: nextMessageId,
           topic,
-        }) ?? undefined
+        }) ?? undefined)
       : undefined;
 
     const previousMessage = previousMessageId
-      ? getMessageById({
+      ? (getMessageById({
           messageId: previousMessageId,
           topic,
-        }) ?? undefined
+        }) ?? undefined)
       : undefined;
 
     return {

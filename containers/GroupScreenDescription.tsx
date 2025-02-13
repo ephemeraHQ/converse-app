@@ -1,5 +1,5 @@
 import { captureErrorWithToast } from "@/utils/capture-error";
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { useCurrentAccount } from "@/features/authentication/account.store";
 import { useGroupDescription } from "@hooks/useGroupDescription";
 import { useGroupMembers } from "@hooks/useGroupMembers";
 import { useGroupPermissions } from "@hooks/useGroupPermissions";

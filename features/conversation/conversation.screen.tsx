@@ -19,7 +19,7 @@ import { useConversationQuery } from "@/queries/conversation-query";
 import { NavigationParamList } from "@/screens/Navigation/Navigation";
 import { $globalStyles } from "@/theme/styles";
 import { useAppTheme } from "@/theme/useAppTheme";
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { useCurrentAccount } from "../authentication/account.store";
 import { useRouter } from "@navigation/useNavigation";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { memo } from "react";

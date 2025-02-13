@@ -1,7 +1,7 @@
 import { Center } from "@/design-system/Center";
 import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu";
 import { useConversationComposerStore } from "@/features/conversation/conversation-composer/conversation-composer.store-context";
-import { getCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { getCurrentAccountEthAddress } from "@/features/authentication/account.store";
 import { Icon, iconRegistry } from "@design-system/Icon/Icon";
 import { translate } from "@i18n";
 import { useAppTheme } from "@theme/useAppTheme";
@@ -53,7 +53,7 @@ export function AddAttachmentButton() {
           }
         }
 
-        const currentAccount = getCurrentAccount()!;
+        const currentAccount = getCurrentAccountEthAddress()!;
 
         const encryptedAttachment = await encryptRemoteAttachment(
           currentAccount,

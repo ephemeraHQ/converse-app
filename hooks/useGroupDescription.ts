@@ -1,7 +1,7 @@
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { useGroupDescriptionMutation } from "../queries/useGroupDescriptionMutation";
 import { useGroupDescriptionQuery } from "../queries/useGroupDescriptionQuery";
-import { getSafeCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
+import { getSafeCurrentSender } from "@/features/authentication/account.store";
 
 export const useGroupDescription = (topic: ConversationTopic) => {
   const account = getSafeCurrentSender().ethereumAddress;
