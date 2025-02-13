@@ -1,14 +1,16 @@
 import { config } from "@/config";
 import { JoinGroupScreenConfig } from "@/features/GroupInvites/joinGroup/JoinGroupNavigation";
 import { useAuthStore } from "@/features/authentication/auth.store";
+import { hydrateAuth } from "@/features/authentication/hydrate-auth";
 import { ConversationListScreen } from "@/features/conversation-list/conversation-list.screen";
 import { OnboardingWelcomeScreen } from "@/features/onboarding/screens/onboarding-welcome-screen";
 import { ProfileScreenConfig } from "@/features/profiles/profile.nav";
 import { setupStreamingSubscriptions } from "@/features/streams/streams";
 import { IdleScreen } from "@/screens/IdleScreen";
 import { setupAppAttest } from "@/utils/appCheck";
+import { captureError } from "@/utils/capture-error";
 import { useCoinbaseWalletListener } from "@/utils/coinbaseWallet";
-import { HydrationStateHandler } from "@components/StateHandlers/HydrationStateHandler";
+import { hideSplashScreen } from "@/utils/splash/splash";
 import { InitialStateHandler } from "@components/StateHandlers/InitialStateHandler";
 import { ConversationScreenConfig } from "@features/conversation/conversation.nav";
 import { LinkingOptions, NavigationContainer } from "@react-navigation/native";
@@ -17,7 +19,7 @@ import { useThemeProvider } from "@theme/useAppTheme";
 import { converseNavigatorRef } from "@utils/navigation";
 import * as Linking from "expo-linking";
 import { StatusBar } from "expo-status-bar";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import { Platform, useColorScheme } from "react-native";
 import { GroupScreenConfig } from "./Navigation/GroupNav";
 import { NativeStack, NavigationParamList } from "./Navigation/Navigation";
@@ -27,10 +29,6 @@ import {
   getConverseInitialURL,
   getConverseStateFromPath,
 } from "./Navigation/navHelpers";
-import { hideSplashScreen } from "@/utils/splash/splash";
-import { captureError } from "@/utils/capture-error";
-import { getUserQueryData } from "@/features/authentication/user-query";
-import { useAuthHydrate } from "@/features/authentication/use-auth-hydrate";
 const prefix = Linking.createURL("/");
 
 const linking: LinkingOptions<NavigationParamList> = {
@@ -63,6 +61,7 @@ export function AppNavigator() {
   useEffect(() => {
     setupAppAttest();
     setupStreamingSubscriptions();
+    hydrateAuth();
   }, []);
 
   const coinbaseUrl = new URL(`https://${config.websiteDomain}/coinbase`);
@@ -89,20 +88,14 @@ const AppStack = () => {
 
   const authStatus = useAuthStore((state) => state.status);
 
-  useAuthHydrate();
-
-  // Will hide the splash screen once the auth status is determined
-  const hasHiddenSplashRef = useRef(false);
+  // Hide splash screen when auth status is determined
   useEffect(() => {
-    if (authStatus !== "undetermined" && !hasHiddenSplashRef.current) {
-      hasHiddenSplashRef.current = true;
-      hideSplashScreen().catch(captureError);
+    if (authStatus === "undetermined") {
+      return;
     }
-  }, [authStatus]);
 
-  useEffect(() => {
-    // Hydrate the stuff, so we need to make sure we have
-  }, []);
+    hideSplashScreen().catch(captureError);
+  }, [authStatus]);
 
   const isUndetermined = authStatus === "undetermined";
   const isSignedIn = authStatus === "signedIn";
@@ -155,7 +148,6 @@ const Initializer = () => {
 
   return (
     <>
-      <HydrationStateHandler />
       <InitialStateHandler />
       {Platform.OS === "android" && (
         <StatusBar backgroundColor={backgroundColor(colorScheme)} />

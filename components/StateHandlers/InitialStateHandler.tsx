@@ -1,7 +1,7 @@
 import * as Linking from "expo-linking";
 import { useEffect, useRef } from "react";
 
-import { useAuthHydrate } from "@/features/authentication/use-auth-hydrate";
+import { hydrateAuth } from "@/features/authentication/hydrate-auth";
 import { logger } from "@utils/logger";
 import { useAppStore } from "../../data/store/app-store";
 import { useSelect } from "../../data/store/store.utils";
@@ -19,7 +19,7 @@ export function InitialStateHandler() {
     useSelect(["setSplashScreenHidden", "hydrationDone"])
   );
 
-  const { isRestoring } = useAuthHydrate();
+  const { isRestoring } = hydrateAuth();
 
   const splashScreenHidden = useRef(false);
 

@@ -1,3 +1,7 @@
+import {
+  getSafeCurrentSender,
+  useAccountStore,
+} from "@/features/authentication/account.store";
 import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 
 export type InstallationSignature = {
@@ -6,11 +10,12 @@ export type InstallationSignature = {
 };
 
 export async function getInstallationKeySignature(
-  account: string,
   appCheckToken: string
 ): Promise<InstallationSignature> {
+  const currentSender = getSafeCurrentSender();
+
   const client = MultiInboxClient.instance.getInboxClientForAddress({
-    ethereumAddress: account,
+    ethereumAddress: currentSender.ethereumAddress,
   });
 
   if (!client) throw new Error("Client not found");
@@ -18,7 +23,7 @@ export async function getInstallationKeySignature(
   const raw = await client.signWithInstallationKey(appCheckToken);
 
   return {
-    installationPublicKey: account,
+    installationPublicKey: currentSender.ethereumAddress,
     appCheckTokenSignature: Buffer.from(raw).toString("hex"),
   };
 }

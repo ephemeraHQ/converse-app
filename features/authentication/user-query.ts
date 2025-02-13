@@ -1,56 +1,41 @@
-import { getUserQueryKey } from "@/queries/QueryKeys";
+import { getCurrentUserQueryKey } from "@/queries/QueryKeys";
 import { queryClient } from "@/queries/queryClient";
-import { Optional } from "@/types/general";
-import { getUserByPrivyUserId, type IUser } from "@/utils/api/users";
+import { IGetCurrentUserResponse, getCurrentUser } from "@/utils/api/users";
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 
-export type UserQueryData = IUser;
+export type UserQueryData = IGetCurrentUserResponse;
 
-type IGetUserArgs = {
-  privyUserId: string;
+type IGetCurrentUserArgs = {
+  caller?: string;
 };
 
-type IGetUserArgsWithCaller = IGetUserArgs & { caller: string };
-
-export const useUserQuery = (args: IGetUserArgsWithCaller) => {
-  return useQuery(getUserQueryOptions(args));
+export const useCurrentUserQuery = (args: IGetCurrentUserArgs = {}) => {
+  return useQuery(getCurrentUserQueryOptions(args));
 };
 
-export function getUserQueryOptions(
-  args: Optional<IGetUserArgsWithCaller, "caller">
-) {
-  const { privyUserId, caller } = args;
+export function getCurrentUserQueryOptions(args: IGetCurrentUserArgs = {}) {
+  const { caller } = args;
   return queryOptions({
     meta: {
       caller,
     },
-    queryKey: getUserQueryKey({ privyUserId }),
-    queryFn: () => getUserByPrivyUserId({ privyUserId }),
-    enabled: !!privyUserId,
+    queryKey: getCurrentUserQueryKey(),
+    queryFn: getCurrentUser,
   });
 }
 
-export const setUserQueryData = (
-  args: IGetUserArgs & { user: UserQueryData }
-) => {
-  const { privyUserId, user } = args;
-  queryClient.setQueryData(
-    getUserQueryOptions({
-      privyUserId,
-    }).queryKey,
-    user
-  );
+export const setCurrentUserQueryData = (args: { user: UserQueryData }) => {
+  const { user } = args;
+  queryClient.setQueryData(getCurrentUserQueryOptions().queryKey, user);
 };
 
-export function updateUserQueryData(
-  args: IGetUserArgs & {
-    userUpdate: Partial<UserQueryData>;
-  }
-) {
+export function updateCurrentUserQueryData(args: {
+  userUpdate: Partial<UserQueryData>;
+}) {
   const { userUpdate } = args;
   queryClient.setQueryData(
-    getUserQueryOptions(args).queryKey,
+    getCurrentUserQueryOptions().queryKey,
     (previousUser) => {
       if (!previousUser) {
         return undefined;
@@ -60,18 +45,18 @@ export function updateUserQueryData(
   );
 }
 
-export const getUserQueryData = (args: IGetUserArgs) => {
-  return queryClient.getQueryData(getUserQueryOptions(args).queryKey);
+export const getCurrentUserQueryData = () => {
+  return queryClient.getQueryData(getCurrentUserQueryOptions().queryKey);
 };
 
-export function getOrFetchUser(args: IGetUserArgsWithCaller) {
-  return queryClient.ensureQueryData(getUserQueryOptions(args));
+export function getOrFetchCurrentUser(args: IGetCurrentUserArgs = {}) {
+  return queryClient.ensureQueryData(getCurrentUserQueryOptions(args));
 }
 
-export function ensureUserQueryData(args: IGetUserArgsWithCaller) {
-  return queryClient.ensureQueryData(getUserQueryOptions(args));
+export function ensureCurrentUserQueryData(args: IGetCurrentUserArgs = {}) {
+  return queryClient.ensureQueryData(getCurrentUserQueryOptions(args));
 }
 
-export function fetchUserQueryData(args: IGetUserArgsWithCaller) {
-  return queryClient.fetchQuery(getUserQueryOptions(args));
+export function fetchCurrentUserQueryData(args: IGetCurrentUserArgs = {}) {
+  return queryClient.fetchQuery(getCurrentUserQueryOptions(args));
 }

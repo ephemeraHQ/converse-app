@@ -133,3 +133,7 @@ export const currentAccountStoreHook = <T extends keyof AccountStoreDataType>(
 
   return use;
 };
+
+export function getCurrentSender() {
+  return useAccountStore.getState().currentSender;
+}

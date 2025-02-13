@@ -1,21 +1,20 @@
+import { getSecureItemAsync } from "@/utils/storage/secure-storage";
 import { tryGetAppCheckToken } from "../appCheck";
 import logger, { authLogger } from "../logger";
 import { getSecureStorageForUser } from "../storage/secure-storage-by-user";
+import { getInboxId } from "../xmtpRN/signIn";
 import {
   InstallationSignature,
   getInstallationKeySignature,
 } from "../xmtpRN/xmtp-client/xmtp-client-installations";
-import { getInboxId } from "../xmtpRN/signIn";
 import { api } from "./api";
 import {
   CONVERSE_ACCESS_TOKEN_STORAGE_KEY,
   CONVERSE_REFRESH_TOKEN_STORAGE_KEY,
   FIREBASE_APP_CHECK_HEADER_KEY,
   XMTP_API_ADDRESS_HEADER_KEY,
-  XMTP_IDENTITY_KEY,
 } from "./api.constants";
 import { createDedupedFetcher } from "./api.utils";
-import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 
 export type AuthResponse = {
   accessToken: string;
@@ -115,23 +114,12 @@ export async function rotateAccessToken(
   return data;
 }
 
-export async function getXmtpApiHeaders(
-  account: string
-): Promise<XmtpApiHeaders> {
-  if (!account) {
-    throw new Error("[getXmtpApiHeaders] No account provided");
-  }
-  const inboxClient = MultiInboxClient.instance.getInboxClientForAddress({
-    ethereumAddress: account,
-  });
-
-  if (!inboxClient) {
-    throw new Error("[getXmtpApiHeaders] No inbox client found for account");
-  }
-
-  const secureMmkv = await getSecureStorageForUser(account);
+export async function getXmtpApiHeaders(): Promise<XmtpApiHeaders> {
   const appCheckToken = await tryGetAppCheckToken();
-  let accessToken = secureMmkv.getString(CONVERSE_ACCESS_TOKEN_STORAGE_KEY);
+
+  let accessToken = getSecureItemAsync(CONVERSE_ACCESS_TOKEN_STORAGE_KEY);
+
+  // Deocde the access token to get the ethAddress
 
   if (!appCheckToken) {
     throw new Error(
@@ -140,16 +128,10 @@ export async function getXmtpApiHeaders(
   }
 
   if (!accessToken) {
-    const appCheckTokenSignature =
-      xmtpSignatureByAccount[account] ||
-      (await getInstallationKeySignature(account, appCheckToken));
+    const appCheckTokenSignature = await getInstallationKeySignature(
+      appCheckToken
+    );
 
-    // Cache signature for future use
-    if (!xmtpSignatureByAccount[account]) {
-      xmtpSignatureByAccount[account] = appCheckTokenSignature;
-    }
-
-    const inboxId = await getInboxId(account);
     const authTokensResponse = await fetchAccessToken({
       inboxId,
       account,

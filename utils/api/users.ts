@@ -5,7 +5,7 @@ import { z } from "zod";
 import { api } from "./api";
 import { getXmtpApiHeaders } from "./auth";
 
-const GetUserByPrivyUserIdResponseSchema = z.object({
+const GetCurrentUserResponseSchema = z.object({
   userId: z.string(),
   inboxes: z.array(
     z.object({
@@ -15,23 +15,17 @@ const GetUserByPrivyUserIdResponseSchema = z.object({
   ),
 });
 
-export type IGetUserByPrivyUserIdResponse = z.infer<
-  typeof GetUserByPrivyUserIdResponseSchema
+export type IGetCurrentUserResponse = z.infer<
+  typeof GetCurrentUserResponseSchema
 >;
 
-export async function getUserByPrivyUserId(args: { privyId: string }) {
-  apiLogger.debug(`[API USERS] getUser for privyId: ${args.privyId}`);
-  const { privyId } = args;
-
-  if (!privyId) {
-    throw new Error("PrivyId is required");
-  }
-
-  const { data } = await api.get(`/api/users/privy/${privyId}`, {
-    headers: await getXmtpApiHeaders(privyId),
+export async function getCurrentUser() {
+  const { data } = await api.get(`/users/current`, {
+    headers: await getXmtpApiHeaders(),
   });
 
-  const parseResult = GetUserByPrivyUserIdResponseSchema.safeParse(data);
+  const parseResult = GetCurrentUserResponseSchema.safeParse(data);
+
   if (!parseResult.success) {
     apiLogger.error(
       "[API USERS] getUser parse error:",

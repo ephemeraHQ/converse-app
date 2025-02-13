@@ -6,7 +6,7 @@ import type {
 
 export enum QueryKeys {
   // User
-  USER = "user",
+  CURRENT_USER = "current-user",
 
   // Conversations
   CONVERSATIONS_SYNC_ALL = "conversation-sync-all",
@@ -52,10 +52,7 @@ export enum QueryKeys {
 }
 
 // User
-export const getUserQueryKey = (args: { privyId: string }) => [
-  QueryKeys.USER,
-  args.privyId,
-];
+export const getCurrentUserQueryKey = () => [QueryKeys.CURRENT_USER];
 
 // InboxId
 export const getInboxIdForAccountQueryKey = (account: string) => [

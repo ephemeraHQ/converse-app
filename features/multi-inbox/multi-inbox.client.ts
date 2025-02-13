@@ -1,13 +1,15 @@
 import { config } from "@/config";
+import {
+  getCurrentSender,
+  useAccountStore,
+} from "@/features/authentication/account.store";
 import { useMultiInboxClientStore } from "@/features/multi-inbox/multi-inbox.store";
-import { setInboxIdQueryData } from "@/queries/inbox-id-query";
-import { getDbEncryptionKey } from "@/utils/xmtp-db-encryption-key";
 import { multiInboxLogger } from "@/utils/logger";
+import { getDbEncryptionKey } from "@/utils/xmtp-db-encryption-key";
 import { codecs } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
 import { InboxId, Client as XmtpClient } from "@xmtp/react-native-sdk";
 import {
   ClientWithInvalidInstallation,
-  CurrentSender,
   InboxClient,
   InboxSigner,
   MultiInboxClientRestorationStates,
@@ -182,19 +184,17 @@ export class MultiInboxClient {
           `[addInbox] No existing inbox found for address: ${signerEthereumAddress}, creating new one`
         );
 
-        const xmtpInboxClient =
-          await this.performInboxCreationFromInboxSigner(inboxSigner);
+        const xmtpInboxClient = await this.performInboxCreationFromInboxSigner(
+          inboxSigner
+        );
 
-        const clientInboxId = xmtpInboxClient.inboxId;
-        setInboxIdQueryData({
-          account: signerEthereumAddress,
-          inboxId: clientInboxId,
-        });
-
-        useMultiInboxClientStore.getState().addSender({
-          ethereumAddress: signerEthereumAddress,
-          inboxId: clientInboxId,
-        });
+        const currentSender = getCurrentSender();
+        if (!currentSender) {
+          useAccountStore.getState().actions.setCurrentSender({
+            ethereumAddress: signerEthereumAddress,
+            inboxId: xmtpInboxClient.inboxId,
+          });
+        }
 
         const lowercaseClientLinkedEthereumAddress =
           xmtpInboxClient.address.toLowerCase();
@@ -203,14 +203,15 @@ export class MultiInboxClient {
           lowercaseClientLinkedEthereumAddress
         ] = xmtpInboxClient;
 
-        this.xmtpClientInboxIdToAddressMap[clientInboxId] =
+        this.xmtpClientInboxIdToEthereumAddressMap[xmtpInboxClient.inboxId] =
           lowercaseClientLinkedEthereumAddress;
 
         multiInboxLogger.debug(
           "[addInbox] Successfully created new XMTP inbox"
         );
+
         return {
-          inboxId: clientInboxId,
+          inboxId: xmtpInboxClient.inboxId,
         };
       } catch (error) {
         multiInboxLogger.error(
@@ -305,8 +306,9 @@ export class MultiInboxClient {
               inboxId
             );
 
-            const isInstallationValid =
-              await this.isClientInstallationValid(xmtpInboxClient);
+            const isInstallationValid = await this.isClientInstallationValid(
+              xmtpInboxClient
+            );
 
             if (!isInstallationValid) {
               multiInboxLogger.warn(
