@@ -1,10 +1,11 @@
 import { getCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import type { ProfileType } from "@/features/onboarding/types/onboarding.types";
-import logger from "@/utils/logger";
+import { logger } from "@/utils/logger";
 import type { InboxId } from "@xmtp/react-native-sdk";
 import { z } from "zod";
 import { oldApi } from "./api";
 import { getXmtpApiHeaders } from "./auth";
+import { IProfileSocials } from "@/features/profiles/profile-types";
 
 const LensHandleSchema = z.object({
   profileId: z.string(),
@@ -68,6 +69,24 @@ const deprecatedProfileResponseSchema = z.record(
   z.string(),
   ProfileSocialsSchema
 );
+
+export const hasNoProfiles = (profileSocials: IProfileSocials) => {
+  const allProfilesWithoutAddress = Object.keys(profileSocials)
+    // all properties other than address are profile lists
+    .filter((key) => key !== "address")
+    // now that address is gone, all other entries are profile lists
+    // for a given web3 identity provider
+    .map((key) => profileSocials[key as keyof IProfileSocials])
+    // is every list is empty, the user has no profiles
+    .every((profiles) => profiles && profiles.length === 0);
+  logger.debug(
+    "[API PROFILES] hasNoProfiles",
+    JSON.stringify(profileSocials),
+    allProfilesWithoutAddress
+  );
+
+  return allProfilesWithoutAddress;
+};
 
 export const getProfilesForAddresses = async (addresses: string[]) => {
   const { data } = await oldApi.post("/api/profile/batch", {

@@ -50,13 +50,13 @@ const OnboardingWelcomeScreenContent = memo(
         contentContainerStyle={$screenContainer}
         preset="scroll"
       >
-        {/* <ConnectWalletBottomSheet
+        <ConnectWalletBottomSheet
           isVisible={isVisible}
           onClose={() => {
             setIsVisible(false);
           }}
-          onWalletConnect={() => {}}
-        /> */}
+          onWalletImported={() => {}}
+        />
         <Center style={$titleContainer}>
           <VStack>
             <OnboardingSubtitle>Welcome to Convos</OnboardingSubtitle>
