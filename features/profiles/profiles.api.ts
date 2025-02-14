@@ -28,11 +28,13 @@ export const getProfile = async (id: string): Promise<IProfile> => {
   return ProfileSchema.parse(data);
 };
 
-export const searchProfiles = async (
-  query: string
-): Promise<ISearchProfilesResult[]> => {
+export const searchProfiles = async ({
+  searchQuery,
+}: {
+  searchQuery: string;
+}): Promise<ISearchProfilesResult[]> => {
   const { data } = await api.get("/api/v1/profiles/search", {
-    params: { query },
+    params: { query: searchQuery },
   });
   return z.array(SearchProfilesResultSchema).parse(data);
 };
@@ -61,12 +63,7 @@ const ClaimProfileResponseSchema = z.object({
   message: z.string(),
 });
 
-export const claimProfile = async ({
-  profile,
-}: {
-  account: string;
-  profile: ProfileType;
-}) => {
+export const claimProfile = async ({ profile }: { profile: ProfileType }) => {
   const { data } = await api.post("/api/profile/username", profile);
   logger.debug("[API PROFILES] claimProfile response:", data);
   return ClaimProfileResponseSchema.parse(data);

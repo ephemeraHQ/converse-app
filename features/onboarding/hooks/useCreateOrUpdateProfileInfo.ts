@@ -4,12 +4,14 @@ import { useCallback, useState } from "react";
 import { uploadFile } from "@utils/attachment/uploadFile";
 import { getCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { compressAndResizeImage } from "@utils/media";
-import { invalidateProfileSocialsQuery } from "@/queries/useProfileSocialsQuery";
 import {
   CreateOrUpdateProfileResponse,
   ProfileType,
 } from "../types/onboarding.types";
-import { checkCanClaimUsername, claimProfile } from "@/utils/api/profiles";
+import {
+  checkCanClaimUsername,
+  claimProfile,
+} from "@/features/profiles/profiles.api";
 
 type ValidationCheck = {
   check: () => boolean;
@@ -76,7 +78,6 @@ export function useCreateOrUpdateProfileInfo() {
 
       try {
         await checkCanClaimUsername({
-          address,
           username: profile.username,
         });
       } catch (e: any) {
@@ -124,10 +125,8 @@ export function useCreateOrUpdateProfileInfo() {
 
       try {
         await claimProfile({
-          account: address,
           profile: { ...profile, avatar: publicAvatar },
         });
-        await invalidateProfileSocialsQuery(address);
         return { success: true };
       } catch (e: any) {
         logger.error(e, { context: "UserProfile: claiming and refreshing" });

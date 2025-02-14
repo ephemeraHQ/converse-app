@@ -12,11 +12,11 @@ const profileQueryConfig = (profileId: string | undefined) => {
     enabled,
     queryKey: profileQueryKey(profileId!),
     queryFn: enabled ? () => getProfile(profileId!) : skipToken,
-    gcTime: DateUtils.days.toMillis(30),
+    gcTime: DateUtils.days.toMilliseconds(30),
     refetchIntervalInBackground: false,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    staleTime: DateUtils.days.toMillis(1),
+    staleTime: DateUtils.days.toMilliseconds(1),
     persister: reactQueryPersister,
   });
 };

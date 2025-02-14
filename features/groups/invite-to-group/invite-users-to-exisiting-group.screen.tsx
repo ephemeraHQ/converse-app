@@ -24,12 +24,9 @@ import { SearchBar } from "@/components/SearchBar";
 import TableView from "@/components/TableView/TableView";
 import { TableViewPicto } from "@/components/TableView/TableViewImage";
 import { config } from "@/config";
-import { IProfileSocials } from "@/features/profiles/profile-types";
 import { useGroupMembers } from "@/hooks/useGroupMembers";
 import { translate } from "@/i18n";
-import { setProfileRecordSocialsQueryData } from "@/queries/useProfileSocialsQuery";
 import { NavigationParamList } from "@/screens/Navigation/Navigation";
-import { searchProfilesForCurrentAccount } from "@/utils/api/profiles";
 import { getAddressForPeer, isSupportedPeer } from "@/utils/evm/address";
 import { getCleanAddress } from "@/utils/evm/getCleanAddress";
 import { isEmptyObject } from "@/utils/objects";
@@ -37,6 +34,11 @@ import { getPreferredName } from "@/utils/profile";
 import { accountCanMessagePeer } from "@/utils/xmtpRN/xmtp-consent/account-can-message-peer";
 import { ActivityIndicator } from "@/design-system/activity-indicator";
 import { getSafeCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
+import {
+  ISearchProfilesResult,
+  searchProfiles,
+} from "@/features/profiles/profiles.api";
+
 export function InviteUsersToExistingGroupScreen({
   route,
   navigation,
@@ -44,7 +46,7 @@ export function InviteUsersToExistingGroupScreen({
   const colorScheme = useColorScheme();
   const [group, setGroup] = useState({
     enabled: !!route.params?.addingToGroupTopic,
-    members: [] as (IProfileSocials & { address: string })[],
+    members: [] as (ISearchProfilesResult & { address: string })[],
   });
 
   const { addMembers, members } = useGroupMembers(
@@ -119,7 +121,7 @@ export function InviteUsersToExistingGroupScreen({
     loading: false,
     error: "",
     inviteToConverse: "",
-    profileSearchResults: {} as { [address: string]: IProfileSocials },
+    profileSearchResults: {} as { [address: string]: ISearchProfilesResult },
   });
 
   const debounceDelay = 500;
@@ -184,16 +186,20 @@ export function InviteUsersToExistingGroupScreen({
             if (searchingForValue.current === value) {
               if (addressIsOnXmtp) {
                 // Let's search with the exact address!
-                const profiles = await searchProfilesForCurrentAccount(address);
+                const profiles = await searchProfiles({
+                  searchQuery: address,
+                });
 
                 if (!isEmptyObject(profiles)) {
                   // Let's save the profiles for future use
-                  setProfileRecordSocialsQueryData(profiles);
                   setStatus({
                     loading: false,
                     error: "",
                     inviteToConverse: "",
-                    profileSearchResults: profiles,
+                    profileSearchResults: profiles.reduce((acc, profile) => {
+                      acc[profile.xmtpId] = profile;
+                      return acc;
+                    }, {} as { [address: string]: ISearchProfilesResult }),
                   });
                 } else {
                   setStatus({
@@ -221,16 +227,20 @@ export function InviteUsersToExistingGroupScreen({
             profileSearchResults: {},
           });
 
-          const profiles = await searchProfilesForCurrentAccount(value);
+          const profiles = await searchProfiles({
+            searchQuery: value,
+          });
 
           if (!isEmptyObject(profiles)) {
             // Let's save the profiles for future use
-            setProfileRecordSocialsQueryData(profiles);
             setStatus({
               loading: false,
               error: "",
               inviteToConverse: "",
-              profileSearchResults: profiles,
+              profileSearchResults: profiles.reduce((acc, profile) => {
+                acc[profile.xmtpId] = profile;
+                return acc;
+              }, {} as { [address: string]: ISearchProfilesResult }),
             });
           } else {
             setStatus({

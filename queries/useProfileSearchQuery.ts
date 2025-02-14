@@ -5,6 +5,11 @@ import {
   useQuery,
 } from "@tanstack/react-query";
 import { queryClient } from "./queryClient";
+import {
+  ISearchProfilesResult,
+  searchProfiles,
+} from "@/features/profiles/profiles.api";
+import { DateUtils } from "@/utils/time.utils";
 
 const profileSearchQueryKey = (query: string): QueryKey => [
   "profileSearch",
@@ -17,9 +22,8 @@ const profileSearchQueryConfig = (query: string | undefined) => {
     enabled,
     queryKey: profileSearchQueryKey(query!),
     queryFn: enabled ? () => searchProfiles(query!) : skipToken,
-    // Only cache for 5 minutes since search results can change frequently
-    gcTime: 1000 * 60 * 5,
-    staleTime: 1000 * 60 * 5,
+    gcTime: DateUtils.minutes.toMilliseconds(5),
+    staleTime: DateUtils.minutes.toMilliseconds(5),
   });
 };
 
