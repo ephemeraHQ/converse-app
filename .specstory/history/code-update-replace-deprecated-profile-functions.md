@@ -141,6 +141,7 @@ _**Assistant**_
 
 I'll refactor the code to use profiles directly instead of creating an intermediate membersSocials mapping.
 
+<<<<<<< HEAD
 ```typescript:features/conversation/conversation-message/conversation-message-reactions/use-conversation-message-reactions-rolled-up.tsx
 import { useConversationMessageReactions } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { isCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
@@ -242,6 +243,9 @@ Key changes made:
 6. Added `inboxIds` to the dependency array of `useMemo`
 
 This version should be more direct and type-safe. Let me know if you need any adjustments or if there are other profile fields we should be using.
+=======
+```typescript:features/conversation/conversation
+>>>>>>> f1f1f153 (wip)
 
 ---
 
