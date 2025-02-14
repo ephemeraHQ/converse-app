@@ -160,6 +160,7 @@ we should separate the memberInboxIds removed and added and have 2 useProfilesQu
 
 _**Assistant**_
 
+<<<<<<< HEAD
 Yes, that's a good suggestion. It will make the code clearer and prevent potential indexing issues. Here's how we can update the code:
 
 ```typescript:features/conversation-list/hooks/use-message-plain-text.ts
@@ -250,6 +251,9 @@ Key changes made:
 4. Updated the dependency array in the final useMemo to include both profile arrays
 
 This change makes the code more maintainable and prevents potential bugs from incorrect array indexing when trying to access removed member profiles.
+=======
+
+>>>>>>> af720e95 (wip)
 
 ---
 

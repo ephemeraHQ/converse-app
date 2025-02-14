@@ -254,6 +254,7 @@ export function useMessagePlainText(
   }, [message]);
 
   const { data: memberProfiles } = useProfilesQueries({
+<<<<<<< HEAD
     inboxIds: memberInboxIds,
     enabled: memberInboxIds.length > 0,
   });
@@ -334,6 +335,8 @@ Key changes:
 5. Added memberProfiles to the final useMemo dependencies
 
 This restructuring avoids using hooks inside the useMemo callback while maintaining the same functionality. The profiles are now fetched at the component level and passed down to the text generation functions.
+=======
+>>>>>>> af720e95 (wip)
 
 ---
 
