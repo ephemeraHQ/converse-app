@@ -3,7 +3,7 @@ import {
   getConversationMetadataQueryData,
   updateConversationMetadataQueryData,
 } from "@/queries/conversation-metadata-query";
-import { markTopicAsRead } from "@/utils/api/topics";
+import { markTopicAsRead } from "@/utils/api/conversation-metadata";
 import { useMutation } from "@tanstack/react-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 

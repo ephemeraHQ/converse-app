@@ -1,5 +1,5 @@
 import { conversationMetadataQueryKey } from "@/queries/QueryKeys";
-import { getTopics } from "@/utils/api/topics";
+import { getConversationsMetadata } from "@/utils/api/conversation-metadata";
 import logger from "@/utils/logger";
 import { queryOptions, skipToken } from "@tanstack/react-query";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
@@ -100,7 +100,7 @@ const batchedGetConversationMetadata = create({
 
     const results = await Promise.all(
       Object.entries(accountGroups).map(async ([account, groupArgs]) => {
-        const conversationsData = await getTopics({
+        const conversationsData = await getConversationsMetadata({
           account,
           topics: groupArgs.map((arg) => arg.topic),
         });

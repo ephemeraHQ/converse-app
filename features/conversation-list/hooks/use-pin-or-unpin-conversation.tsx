@@ -3,7 +3,7 @@ import {
   getConversationMetadataQueryData,
   updateConversationMetadataQueryData,
 } from "@/queries/conversation-metadata-query";
-import { pinTopic, unpinTopic } from "@/utils/api/topics";
+import { pinTopic, unpinTopic } from "@/utils/api/conversation-metadata";
 import { useMutation } from "@tanstack/react-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";

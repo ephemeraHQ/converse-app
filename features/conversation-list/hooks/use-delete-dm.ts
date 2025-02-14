@@ -11,7 +11,7 @@ import { getConversationQueryOptions } from "@/queries/conversation-query";
 import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query";
 import { actionSheetColors } from "@/styles/colors";
 import { useAppTheme } from "@/theme/useAppTheme";
-import { deleteTopic } from "@/utils/api/topics";
+import { deleteTopic } from "@/utils/api/conversation-metadata";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
