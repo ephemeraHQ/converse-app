@@ -3,7 +3,6 @@ import {
   getConversationMessagesQueryData,
   useConversationMessagesQuery,
 } from "@/queries/conversation-messages-query";
-import logger from "@/utils/logger";
 import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { CoinbaseMessagingPaymentCodec } from "@/utils/xmtpRN/xmtp-content-types/xmtp-coinbase-payment";
 import { getMessageContentType } from "@/utils/xmtpRN/xmtp-content-types/xmtp-content-types";
@@ -11,7 +10,6 @@ import {
   getCurrentAccount,
   useCurrentAccount,
 } from "@/features/multi-inbox/multi-inbox.store";
-import { getReadableProfile } from "@utils/getReadableProfile";
 import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-reference";
 import {
   ConversationTopic,
@@ -86,16 +84,6 @@ export function isCoinbasePaymentMessage(
   message: DecodedMessageWithCodecsType
 ): message is DecodedMessage<CoinbaseMessagingPaymentCodec> {
   return getMessageContentType(message.contentTypeId) === "coinbasePayment";
-}
-
-export function useMessageSenderReadableProfile(
-  message: DecodedMessageWithCodecsType
-) {
-  const currentAccountAdress = useCurrentAccount();
-  if (!currentAccountAdress) {
-    return "";
-  }
-  return getReadableProfile(message.senderInboxId);
 }
 
 export function getMessageById({

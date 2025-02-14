@@ -129,13 +129,11 @@ Always import using the @alias as examplified below:
 // ✅ Good: Using the @ to simplify imports
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm";
-import { getReadableProfile } from "@/utils/getReadableProfile";
 import { IConversationMembershipSearchResult } from "@/features/search/search.types";
 
 // ❌ Bad: Using relative paths
 import { isConversationGroup } from "../../../features/conversation/utils/is-conversation-group";
 import { isConversationDm } from "../../../features/conversation/utils/is-conversation-dm";
-import { getReadableProfile } from "../../../../utils/getReadableProfile";
 import { IConversationMembershipSearchResult } from "../../../features/search/search.types";
 
 ## Theming & Styling
@@ -174,7 +172,16 @@ enabled: !!args.account
 - Export query options generators for cross-component usage
 - Handle conditional fetching with `enabled` and `skipToken`
 - Create an `enabled` variable before returning query options to avoid duplicating logic
--
+- Never create a conditional queryKey:
+  @example
+  // ❌ conditional queryKey
+  queryKey: enabled ? queryKeyFactory(args) : ["profile"],
+
+// ✅ Good: Explicit property usage
+queryKey: queryKeyFactory(args),
+
+- Always use a ternary checking enabled to return liveQueryFn if enabled is true and skipToken if enabled is false
+  - queryFn: enabled ? () => liveQueryFn(args) : skipToken,
 
 @example
 // queries/use-conversation-messages-query.ts

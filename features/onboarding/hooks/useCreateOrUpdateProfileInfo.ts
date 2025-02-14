@@ -9,7 +9,7 @@ import {
   CreateOrUpdateProfileResponse,
   ProfileType,
 } from "../types/onboarding.types";
-import { checkUsernameValid, claimProfile } from "@/utils/api/profiles";
+import { checkCanClaimUsername, claimProfile } from "@/utils/api/profiles";
 
 type ValidationCheck = {
   check: () => boolean;
@@ -75,7 +75,7 @@ export function useCreateOrUpdateProfileInfo() {
       setLoading(true);
 
       try {
-        await checkUsernameValid({
+        await checkCanClaimUsername({
           address,
           username: profile.username,
         });

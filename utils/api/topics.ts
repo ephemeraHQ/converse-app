@@ -1,4 +1,4 @@
-import { oldApi } from "@/utils/api/api";
+import { api } from "@/utils/api/api";
 import logger from "@/utils/logger";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { z } from "zod";
@@ -25,7 +25,7 @@ export async function getTopics(args: { topics: ConversationTopic[] }) {
   const { topics } = args;
 
   // Doing POST because we need to pass in the topics array
-  const { data } = await oldApi.post(`/api/topics`, { topics });
+  const { data } = await api.post(`/api/topics`, { topics });
 
   const parseResult = z.record(TopicSchema).safeParse(data);
   if (!parseResult.success) {
@@ -39,7 +39,7 @@ export async function getTopics(args: { topics: ConversationTopic[] }) {
 }
 
 export async function getAllTopics() {
-  const { data } = await oldApi.get(`/api/topics`);
+  const { data } = await api.get(`/api/topics`);
 
   const parseResult = z.record(TopicSchema).safeParse(data);
   if (!parseResult.success) {
@@ -55,7 +55,7 @@ export async function getAllTopics() {
 export async function getTopic(args: { topic: ConversationTopic }) {
   const { topic } = args;
 
-  const { data } = await oldApi.post(`/api/topics/details`, { topic });
+  const { data } = await api.post(`/api/topics/details`, { topic });
 
   const parseResult = TopicSchema.safeParse(data);
   if (!parseResult.success) {
@@ -77,7 +77,7 @@ export async function markTopicAsRead(args: {
   );
   const { topic, readUntil } = args;
 
-  const { data } = await oldApi.put(`/api/topics/read`, {
+  const { data } = await api.put(`/api/topics/read`, {
     topics: [topic],
     readUntil,
   });
@@ -96,7 +96,7 @@ export async function markTopicAsUnread(args: { topic: ConversationTopic }) {
   logger.debug(`[API TOPICS] markTopicAsUnread for topic: ${args.topic}`);
   const { topic } = args;
 
-  const { data } = await oldApi.put(`/api/topics/unread`, { topics: [topic] });
+  const { data } = await api.put(`/api/topics/unread`, { topics: [topic] });
 
   const parseResult = MessageResponseSchema.safeParse(data);
   if (!parseResult.success) {
@@ -112,7 +112,7 @@ export async function pinTopic(args: { topic: ConversationTopic }) {
   logger.debug(`[API TOPICS] pinTopic for topic: ${args.topic}`);
   const { topic } = args;
 
-  const { data } = await oldApi.put(`/api/topics/pin`, { topics: [topic] });
+  const { data } = await api.put(`/api/topics/pin`, { topics: [topic] });
 
   const parseResult = MessageResponseSchema.safeParse(data);
   if (!parseResult.success) {
@@ -128,7 +128,7 @@ export async function unpinTopic(args: { topic: ConversationTopic }) {
   logger.debug(`[API TOPICS] unpinTopic for topic: ${args.topic}`);
   const { topic } = args;
 
-  const { data } = await oldApi.put(`/api/topics/unpin`, { topics: [topic] });
+  const { data } = await api.put(`/api/topics/unpin`, { topics: [topic] });
 
   const parseResult = MessageResponseSchema.safeParse(data);
   if (!parseResult.success) {
@@ -144,7 +144,7 @@ export async function restoreTopic(args: { topic: ConversationTopic }) {
   logger.debug(`[API TOPICS] restoreTopic for topic: ${args.topic}`);
   const { topic } = args;
 
-  const { data } = await oldApi.put(`/api/topics/restore`, { topics: [topic] });
+  const { data } = await api.put(`/api/topics/restore`, { topics: [topic] });
 
   const parseResult = MessageResponseSchema.safeParse(data);
   if (!parseResult.success) {
@@ -160,7 +160,7 @@ export async function deleteTopic(args: { topic: ConversationTopic }) {
   logger.debug(`[API TOPICS] deleteTopic for topic: ${args.topic}`);
   const { topic } = args;
 
-  const { data } = await oldApi.delete(`/api/topics`, {
+  const { data } = await api.delete(`/api/topics`, {
     data: { topics: [topic] },
   });
 

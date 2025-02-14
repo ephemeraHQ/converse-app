@@ -60,6 +60,7 @@ export const reactQueryPersister = experimental_createPersister({
     },
     setItem: (key: string, value: string) => {
       // Deleting before setting to avoid memory leak
+      // relevant only until we upgrade to v3 of react-native-mmkv https://github.com/mrousavy/react-native-mmkv/issues/440#issuecomment-2345737896
       // https://github.com/mrousavy/react-native-mmkv/issues/440
       reactQueryMMKV.delete(key);
       if (value) {
