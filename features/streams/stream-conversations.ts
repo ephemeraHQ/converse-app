@@ -1,13 +1,9 @@
-import { maybeReplaceOptimisticConversationWithReal } from "@/features/conversation/conversation-create/hooks/use-create-conversation-and-send-first-message";
 import { isConversationAllowed } from "@/features/conversation/utils/is-conversation-allowed";
 import { isConversationConsentUnknown } from "@/features/conversation/utils/is-conversation-consent-unknown";
-import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm";
 import { startMessageStreaming } from "@/features/streams/stream-messages";
 import { setConversationQueryData } from "@/queries/conversation-query";
 import { addConversationToAllowedConsentConversationsQuery } from "@/queries/conversations-allowed-consent-query";
 import { addConversationToUnknownConsentConversationsQuery } from "@/queries/conversations-unknown-consent-query";
-import { ensureInboxId } from "@/queries/inbox-id-query";
-import { ensureDmPeerInboxIdQueryData } from "@/queries/use-dm-peer-inbox-id-query";
 import { ensureGroupMembersQueryData } from "@/queries/useGroupMembersQuery";
 import { captureError } from "@/utils/capture-error";
 import { ConversationWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";

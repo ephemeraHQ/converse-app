@@ -160,6 +160,18 @@ export const authLogger = {
     logger.error("[AUTH]", ...args),
 };
 
+export const notificationsLogger = {
+  ...logger,
+  debug: (...args: Parameters<logMethodType>) =>
+    logger.debug("[NOTIFICATIONS]", ...args),
+  info: (...args: Parameters<logMethodType>) =>
+    logger.info("[NOTIFICATIONS]", ...args),
+  warn: (...args: Parameters<logMethodType>) =>
+    logger.warn("[NOTIFICATIONS]", ...args),
+  error: (...args: Parameters<logMethodType>) =>
+    logger.error("[NOTIFICATIONS]", ...args),
+};
+
 /**
  * @deprecated Use { logger } instead
  */

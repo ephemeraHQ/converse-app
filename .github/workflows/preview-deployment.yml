@@ -63,7 +63,7 @@ jobs:
         run: |
           if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.force_native_build }}" == "true" ]]; then
             echo "has_native_changes=true" >> $GITHUB_OUTPUT
-          elif git diff --name-only HEAD^ HEAD | grep -E "package.json|app.config.ts|patches/|google-services/|yarn.lock"; then
+          elif git diff --name-only HEAD^ HEAD | grep -E "package.json|app.config.ts|patches/|google-services/|yarn.lock|eas.json"; then
             echo "has_native_changes=true" >> $GITHUB_OUTPUT
           else
             echo "has_native_changes=false" >> $GITHUB_OUTPUT

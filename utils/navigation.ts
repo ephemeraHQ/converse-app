@@ -38,10 +38,6 @@ export const navigate = async <T extends keyof NavigationParamList>(
   converseNavigatorRef.navigate(screen, params);
 };
 
-export const navigateToTopic = async (topic: ConversationTopic) => {
-  navigate("Conversation", { topic });
-};
-
 export const getSchemedURLFromUniversalURL = (url: string) => {
   // Handling universal links by saving a schemed URI
   for (const prefix of config.universalLinks) {
