@@ -432,6 +432,7 @@ ok great can you create a new branch and create a PR that will fix this issue?
 
 _**Assistant**_
 
+<<<<<<< HEAD
 I'll help you create a new branch and submit a PR for this fix. Let's do this step by step:
 
 1. First, let's create a new branch:
@@ -489,6 +490,9 @@ I've completed all the steps to create a PR for the message attachment border fi
 The PR has been created and is ready for review. You can find it at: https://github.com/ephemeraHQ/converse-app/pull/1615
 
 Would you like me to make any adjustments to the PR or add any additional information?
+=======
+
+>>>>>>> cd898fe8 (wip)
 
 ---
 

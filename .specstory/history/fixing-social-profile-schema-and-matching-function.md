@@ -466,6 +466,7 @@ export function useConsent() {
   };
 
   return {
+<<<<<<< HEAD
     allowContact,
     denyContact,
     getConsentState,
@@ -598,6 +599,9 @@ function ConsentManager({ contactAddress }: { contactAddress: string }) {
 ```
 
 This implementation follows XMTP's best practices for consent management and subscription handling, including proper error handling and logging.
+=======
+    allow
+>>>>>>> cd898fe8 (wip)
 
 ---
 
