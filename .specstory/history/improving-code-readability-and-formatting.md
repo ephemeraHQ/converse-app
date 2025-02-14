@@ -442,6 +442,7 @@ const UserRole = {
   USER: 'USER'
 } as const;
 
+<<<<<<< HEAD
 type IUserRole = typeof UserRole[keyof typeof UserRole];
 ```
 ```
@@ -483,6 +484,9 @@ function Button({ children }) {
 ```
 
 These examples are now more concise, focused, and demonstrate clear good vs bad patterns. Each example shows a common mistake and its proper implementation, making it easier for developers to understand and follow the guidelines.
+=======
+type
+>>>>>>> 398693d3 (wip)
 
 ---
 

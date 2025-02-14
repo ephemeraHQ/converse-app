@@ -553,6 +553,7 @@ create all the .md files!
 
 _**Assistant**_
 
+<<<<<<< HEAD
 I'll help you create all the .md files with their descriptions and content. Here's how we should create each one:
 
 ````markdown:.cursor/rules/core-principles.md
@@ -909,6 +910,9 @@ queryClient.getQueryData(conversationsQueryKey(account));
 ````
 
 These files should be created in the `.cursor/rules/` directory. Each file contains a description of when to use the rules and the complete set of guidelines for that category. Would you like me to modify any of the files or add additional content to any of them?
+=======
+
+>>>>>>> 398693d3 (wip)
 
 ---
 

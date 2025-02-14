@@ -933,6 +933,7 @@ don't do any of ```. When therE's code just wrap the code with like "CODE START"
 
 _**Assistant**_
 
+<<<<<<< HEAD
 Let me help you with the correct format. Here's how to update example.md:
 
 ```markdown:.cursor/rules/example.md
@@ -1152,6 +1153,9 @@ UserCard.Info = function Info({ name, bio }: { name: string; bio: string }) {
 </UserCard>
 CODE END
 ```
+=======
+
+>>>>>>> 398693d3 (wip)
 
 ---
 
