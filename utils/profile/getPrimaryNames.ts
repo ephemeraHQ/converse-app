@@ -1,4 +1,4 @@
-import { type IProfileSocials } from "@/features/profiles/profile-types";
+import { type IProfileSocials } from "@/features/profiles/profile.types";
 
 export function getPrimaryNames(
   socials: IProfileSocials | undefined

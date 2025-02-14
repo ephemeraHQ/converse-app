@@ -101,7 +101,7 @@ export function ChatGroupMemberLeft({ inboxId }: IChatGroupMemberLeftProps) {
         style={themed($pressableContent)}
         onPress={() => {
           navigate("Profile", {
-            address: firstSocials.address ?? "",
+            inboxId,
           });
         }}
       >
@@ -151,7 +151,7 @@ function ChatGroupMemberJoined({ inboxId }: IChatGroupMemberJoinedProps) {
       <Pressable
         onPress={() => {
           navigate("Profile", {
-            address: firstSocials.address ?? "",
+            inboxId,
           });
         }}
         style={themed($pressableContent)}
@@ -225,7 +225,7 @@ function ChatGroupMetadataUpdate({
       <Pressable
         onPress={() => {
           navigate("Profile", {
-            address: firstSocials.address ?? "",
+            inboxId: initiatorInboxId,
           });
         }}
         style={themed($pressableContent)}

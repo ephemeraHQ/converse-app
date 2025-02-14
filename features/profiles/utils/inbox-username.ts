@@ -1,4 +1,4 @@
-import { IProfileSocials } from "@/features/profiles/profile-types";
+import { IProfileSocials } from "@/features/profiles/profile.types";
 import { formatConverseUsername } from "@/features/profiles/utils/format-converse-username";
 import {
   getInboxProfileSocialsQueryConfig,

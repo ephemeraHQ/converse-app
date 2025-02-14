@@ -63,7 +63,7 @@ export const useLogout = () => {
     } catch (error) {
       logger.error("[useLogout] Error logging out", error);
     }
-  }, [privy, setAuthStatus, privyClient]);
+  }, [privy, setAuthStatus]);
 
   return { logout };
 };

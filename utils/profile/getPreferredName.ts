@@ -1,5 +1,5 @@
-// import { type IProfileSocials } from "@/features/profiles/profile-types";
-// import { shortAddress } from "@utils/strings/shortAddress";
+import { type IProfileSocials } from "@/features/profiles/profile.types";
+import { shortAddress } from "@utils/strings/shortAddress";
 
 // export function getPreferredName(
 //   socials: IProfileSocials | undefined | null,

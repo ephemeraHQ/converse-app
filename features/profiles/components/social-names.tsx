@@ -21,9 +21,15 @@ type ISocialNamesProps = {
   };
 };
 
+/**
+ * Generic presentation component for displaying social names.
+ * Handles the rendering and interaction (copy to clipboard) of social names.
+ * Kept separate from filtering logic to maintain reusability in different contexts.
+ */
 export function SocialNames({ socials }: ISocialNamesProps) {
   const { theme, themed } = useAppTheme();
 
+  // Early return if no socials data
   if (
     !socials ||
     ((socials.userNames?.length ?? 0) === 0 &&
@@ -34,8 +40,9 @@ export function SocialNames({ socials }: ISocialNamesProps) {
   }
 
   const handleNamePress = (name: string) => {
+    // Copy name to clipboard
     Clipboard.setString(name);
-    Alert.alert(translate("profile.copied"));
+    Alert.alert(translate("userProfile.copied"));
   };
 
   const renderSocialChips = (
@@ -53,14 +60,12 @@ export function SocialNames({ socials }: ISocialNamesProps) {
 
   return (
     <VStack style={{ paddingVertical: theme.spacing.sm }}>
-      <Text>{translate("profile.names")}</Text>
+      <Text>{translate("userProfile.names")}</Text>
       <HStack style={themed($chipContainer)}>
         {renderSocialChips(socials.userNames ?? [], (item) => item.name)}
         {renderSocialChips(socials.ensNames ?? [], (item) => item.name)}
         {renderSocialChips(
-          (socials.unstoppableDomains ?? []).filter(
-            (d) => d.domain && !d.domain.toLowerCase().endsWith(".eth")
-          ),
+          socials.unstoppableDomains ?? [],
           (item) => item.domain!
         )}
       </HStack>

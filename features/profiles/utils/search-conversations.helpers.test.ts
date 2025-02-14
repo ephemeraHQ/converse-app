@@ -1,4 +1,4 @@
-import type { IProfileSocials } from "@/features/profiles/profile-types";
+import type { IProfileSocials } from "@/features/profiles/profile.types";
 import { doesSocialsMatchTextQuery } from "./does-socials-match-text-query";
 
 describe("search-helpers", () => {

@@ -1,4 +1,4 @@
-import { IProfileSocials } from "@/features/profiles/profile-types";
+import { IProfileSocials } from "@/features/profiles/profile.types";
 import { GroupMembersSelectData } from "@/queries/useGroupMembersQuery";
 import { getInboxProfileSocialsQueryConfig } from "@/queries/useInboxProfileSocialsQuery";
 import { useQueries } from "@tanstack/react-query";

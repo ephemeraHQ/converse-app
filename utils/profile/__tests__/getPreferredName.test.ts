@@ -1,5 +1,5 @@
 import { getPreferredName } from "../getPreferredName";
-import { type IProfileSocials } from "@/features/profiles/profile-types";
+import { type IProfileSocials } from "@/features/profiles/profile.types";
 
 describe("getPreferredName", () => {
   const testAddress = "0x1234567890123456789012345678901234567890";

@@ -1,5 +1,5 @@
 import { getPreferredInboxName } from "../getPreferredInboxName";
-import { type IProfileSocials } from "@/features/profiles/profile-types";
+import { type IProfileSocials } from "@/features/profiles/profile.types";
 
 describe("getPreferredInboxName", () => {
   it("should return shortened address when no socials provided", () => {

@@ -7,38 +7,106 @@ export const fr = {
       subtext: "Simple · Sécurisé · Universel",
       createContactCard: "Créer une carte de contact",
     },
-    contactCard: {
-      title: "Complétez votre carte de contact",
-      subtitle: "Une identité sécurisée",
-      body: "Ajoutez et modifiez vos cartes de contact à tout moment,",
-      bodyPressable:
-        "ou optez pour le mode Rando pour plus de confidentialité.",
-      randoTitle: "Mode Rando",
-      randoSubtitle:
-        "Discutez en utilisant des informations de contact aléatoires",
-      randoBody: "Pour des conversations quotidiennes,",
-      randoPressable: "utilisez votre carte de contact personnelle.",
-      import: "Importer",
-      name: "Nom",
-      namePlaceholder: "Comment vous apparaîtrez dans le chat",
-      continue: "Continuer",
-    },
     notifications: {
       title: "Rien que de bonnes vibrations",
       subtitle:
         "La plupart des choses ne sont pas urgentes. Protégez votre attention en limitant vos notifications.",
       essentials: "Essentiels",
       essentialsDescription:
-        "Me notifier lorsque mes contacts approuvés m’envoient des messages",
+        "Me notifier lorsque mes contacts approuvés m'envoient des messages",
       mentionsOnly: "Mentions uniquement",
       mentionsOnlyDescription:
         "Dans les grands groupes, ne me notifier que si je suis mentionné(e)",
       cash: "Argent",
       cashDescription:
-        "Me notifier immédiatement lorsque je reçois de l’argent",
+        "Me notifier immédiatement lorsque je reçois de l'argent",
       comingSoon: "Bientôt disponible",
       enableNotifications: "Activer les notifications",
       later: "Plus tard",
+    },
+  },
+  // Contact Card (used in Onboarding and Profile)
+  contactCard: {
+    title: "Complétez votre carte de contact",
+    subtitle: "Une identité sécurisée",
+    body: "Ajoutez et modifiez vos cartes de contact à tout moment,",
+    bodyPressable: "ou optez pour le mode Rando pour plus de confidentialité.",
+    randoTitle: "Mode Rando",
+    randoSubtitle:
+      "Discutez en utilisant des informations de contact aléatoires",
+    randoBody: "Pour des conversations quotidiennes,",
+    randoPressable: "utilisez votre carte de contact personnelle.",
+    import: "Importer",
+    name: "Nom",
+    namePlaceholder: "Comment vous apparaîtrez dans le chat",
+    continue: "Continuer",
+  },
+  userProfile: {
+    title: {
+      profile: "Profil",
+    },
+    buttons: {
+      continue: "Continuer",
+      logout: "Se déconnecter de {{address}}",
+      cancel: "Annuler",
+      addProfilePicture: "Ajouter une photo de profil",
+      changeProfilePicture: "Changer la photo de profil",
+    },
+    inputs: {
+      username: {
+        placeholder: "Nom d'utilisateur",
+      },
+      usernameSuffix: ".converse.xyz",
+      displayName: {
+        placeholder: "Entrez votre nom",
+        errors: {
+          noDots: "Le nom ne peut pas contenir de points",
+        },
+      },
+    },
+    errors: {
+      displayNameLength:
+        "Les noms d'affichage doivent comprendre entre 2 et 32 caractères et ne pas inclure d'extensions de nom de domaine",
+      usernameAlphanumeric:
+        "Votre nom d'utilisateur ne peut contenir que des lettres et des chiffres",
+      usernameLength:
+        "Votre nom d'utilisateur doit comporter entre 3 et 30 caractères",
+    },
+    converseProfiles:
+      "Réclamez votre identité dans l'espace de noms ENS de Converse. Ce nom sera publiquement consultable.",
+    instructions:
+      "Réclamez votre identité dans l'espace de noms ENS de Converse. Ce nom sera publiquement consultable.",
+    loadingSentences: {
+      claimingIdentity: "Réclamation de votre identité",
+      connectingENS: "Connexion à ENS",
+      confirmingAvailability: "Confirmation de la disponibilité",
+      enablingCCIP: "Activation de CCIP",
+      registering: "Enregistrement en cours",
+      configuringResolver: "Configuration du résolveur hors chaîne",
+      wrappingUp: "Finalisation",
+    },
+    mediaOptions: {
+      takePhoto: "Prendre une photo",
+      chooseFromLibrary: "Choisir dans la bibliothèque",
+      cancel: "Annuler",
+    },
+    modify: "Modifier le profil",
+    edit: "Modifier",
+    done: "Terminer",
+    block: {
+      title: "Bloquer l'utilisateur",
+      message: "Êtes-vous sûr de vouloir bloquer {{name}} ?",
+    },
+    unblock: {
+      title: "Débloquer l'utilisateur",
+      message: "Êtes-vous sûr de vouloir débloquer {{name}} ?",
+    },
+    names: "Names",
+    copied: "Copié",
+    settings: {
+      notifications: "Activer les notifications",
+      archive: "Archive",
+      keep_messages: "Conserver les messages",
     },
   },
   walletSelector: {
@@ -107,7 +175,7 @@ export const fr = {
     subtitle:
       "Entrez la clé privée de l'adresse à laquelle vous vous connectez.\n\nVotre clé privée n'est pas stockée.",
     storage: {
-      ios: "l’Enclave Sécurisée de votre iPhone",
+      ios: "l'Enclave Sécurisée de votre iPhone",
       android: "le système Android Keystore",
     },
     connectButton: "Se connecter",
@@ -126,12 +194,12 @@ export const fr = {
       e2eEncryption: {
         title: "Chiffré de bout en bout avec MLS",
         subtitle:
-          "Cryptographie conforme aux standards de l’IETF offrant le niveau de sécurité de Signal à chaque conversation.",
+          "Cryptographie conforme aux standards de l'IETF offrant le niveau de sécurité de Signal à chaque conversation.",
       },
       ownCommunications: {
         title: "Possédez vos communications — pour toujours",
         subtitle:
-          "Vos messages vous appartiennent. Vous les contrôlez entièrement, pas l’application.",
+          "Vos messages vous appartiennent. Vous les contrôlez entièrement, pas l'application.",
       },
       chatSecurely: {
         title: "Invitez vos amis",
@@ -146,53 +214,6 @@ export const fr = {
       message: "Ce compte est déjà connecté à Converse.",
     },
   },
-  userProfile: {
-    title: {
-      profile: "Profil",
-    },
-    buttons: {
-      continue: "Continuer",
-      logout: "Se déconnecter de {{address}}",
-      cancel: "Annuler",
-      addProfilePicture: "Ajouter une photo de profil",
-      changeProfilePicture: "Changer la photo de profil",
-    },
-    inputs: {
-      username: {
-        placeholder: "Nom d'utilisateur",
-      },
-      usernameSuffix: ".converse.xyz",
-      displayName: {
-        placeholder: "Nom d'affichage (optionnel)",
-      },
-    },
-    errors: {
-      displayNameLength:
-        "Les noms d'affichage doivent comprendre entre 2 et 32 caractères et ne pas inclure d'extensions de nom de domaine",
-      usernameAlphanumeric:
-        "Votre nom d'utilisateur ne peut contenir que des lettres et des chiffres",
-      usernameLength:
-        "Votre nom d'utilisateur doit comporter entre 3 et 30 caractères",
-    },
-    converseProfiles:
-      "Réclamez votre identité dans l'espace de noms ENS de Converse. Ce nom sera publiquement consultable.",
-    instructions:
-      "Réclamez votre identité dans l'espace de noms ENS de Converse. Ce nom sera publiquement consultable.",
-    loadingSentences: {
-      claimingIdentity: "Réclamation de votre identité",
-      connectingENS: "Connexion à ENS",
-      confirmingAvailability: "Confirmation de la disponibilité",
-      enablingCCIP: "Activation de CCIP",
-      registering: "Enregistrement en cours",
-      configuringResolver: "Configuration du résolveur hors chaîne",
-      wrappingUp: "Finalisation",
-    },
-    mediaOptions: {
-      takePhoto: "Prendre une photo",
-      chooseFromLibrary: "Choisir dans la bibliothèque",
-      cancel: "Annuler",
-    },
-  },
   onboarding_error:
     "Une erreur s'est produite lors de votre connexion. Veuillez réessayer.",
   termsText: "En vous connectant, vous acceptez nos",
@@ -203,9 +224,9 @@ export const fr = {
   delete_chat_with: "Supprimer la conversation avec",
   delete_and_block: "Supprimer et bloquer",
   remove: "Retirer",
-  remove_and_block_inviter: "Retirer et bloquer l’invitant",
+  remove_and_block_inviter: "Retirer et bloquer l'invitant",
   restore: "Restaurer",
-  restore_and_unblock_inviter: "Restaurer et débloquer l’invitant",
+  restore_and_unblock_inviter: "Restaurer et débloquer l'invitant",
   unblock_and_restore: "Débloquer et restaurer",
   cancel: "Annuler",
   back: "Retour",
@@ -299,7 +320,7 @@ export const fr = {
   social: "RÉSEAUX SOCIAUX",
   address: "ADRESSE",
   youre_the_og: "VOUS ÊTES LE PREMIER",
-  app_version: "VERSION DE L’APPLICATION",
+  app_version: "VERSION DE L'APPLICATION",
   security: "SÉCURITÉ",
   xmtp_wrong_signer: "Mauvais portefeuille",
   xmtp_wrong_signer_description:
@@ -310,8 +331,17 @@ export const fr = {
   remove_member: "Retirer du groupe",
   invite_more_friends: "Inviter plus d'amis",
   top_up_your_account: "Approvisionner votre compte",
-  your_balance_usdc: "Votre solde (USDC)",
   you_parentheses: " (vous)",
+  log_out: "Se déconnecter",
+  disconnect_delete_local_data:
+    "Se déconnecter et supprimer les données locales",
+  disconnect_this_account: "Se déconnecter de ce compte",
+  disconnect_account_description:
+    "Vos discussions de groupe seront chiffrées et sauvegardées sur votre appareil jusqu'à ce que vous supprimiez Converse. Vos messages privés seront sauvegardés par le réseau XMTP.",
+  your_profile_page: "Votre page de profil",
+  copy_wallet_address: "Copier l'adresse du portefeuille",
+  attachment_message_error_download:
+    "Impossible de télécharger la pièce jointe",
 
   // Context Menu
   reply: "Répondre",
@@ -340,7 +370,7 @@ export const fr = {
   group_join_error: "Une erreur s'est produite",
   group_join_invite_invalid: "Cette invitation n'est plus valable",
   group_finished_polling_unsuccessfully:
-    "Votre demande a été envoyée. Attendez l'approbation par l’administrateur",
+    "Votre demande a été envoyée. Attendez l'approbation par l'administrateur",
   group_already_joined: "Cette invitation a déjà été acceptée",
   group_invite_default_group_name: "Nouveau groupe",
   open_conversation: "Ouvrir la conversation",
@@ -405,15 +435,6 @@ export const fr = {
       keep_messages: "Conserver les messages",
     },
   },
-  log_out: "Se déconnecter",
-  disconnect_delete_local_data:
-    "Se déconnecter et supprimer les données locales",
-  disconnect_this_account: "Se déconnecter de ce compte",
-  your_profile_page: "Votre page de profil",
-  copy_wallet_address: "Copier l'adresse du portefeuille",
-  turn_on_notifications: "Activer les notifications",
-  attachment_message_error_download:
-    "Impossible de télécharger la pièce jointe",
 
   // Revocation
   current_installation_revoked: "Déconnecté",
