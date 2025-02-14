@@ -1,7 +1,7 @@
 import { GroupAvatar } from "@/components/group-avatar";
 import { Text } from "@/design-system/Text";
 import { ConversationHeaderTitle } from "@/features/conversation/conversation-screen-header/conversation-screen-header-title";
-import { useGroupNameForCurrentAccount } from "@/hooks/useGroupName";
+import { useGroupName } from "@/hooks/useGroupName";
 import { useGroupPendingRequests } from "@/hooks/useGroupPendingRequests";
 import { useGroupMembersQuery } from "@/queries/useGroupMembersQuery";
 import { copyToClipboard } from "@/utils/clipboard";
@@ -25,8 +25,9 @@ export const GroupConversationTitle = memo(
       topic: conversationTopic,
     });
 
-    const { groupName, isLoading: groupNameLoading } =
-      useGroupNameForCurrentAccount({ conversationTopic });
+    const { groupName, isLoading: groupNameLoading } = useGroupName({
+      conversationTopic,
+    });
 
     const navigation = useRouter();
 

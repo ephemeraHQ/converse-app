@@ -3,7 +3,7 @@ import { PinnedConversationAvatar } from "@/features/conversation-list/conversat
 import { useConversationIsUnread } from "@/features/conversation-list/hooks/use-conversation-is-unread";
 import { useGroupConversationContextMenuViewProps } from "@/features/conversation-list/hooks/use-conversation-list-item-context-menu-props";
 import { isTextMessage } from "@/features/conversation/conversation-message/conversation-message.utils";
-import { useGroupNameForCurrentAccount } from "@/hooks/useGroupName";
+import { useGroupName } from "@/hooks/useGroupName";
 import { GroupWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { navigate } from "@utils/navigation";
 import { useCallback } from "react";
@@ -27,7 +27,7 @@ export const ConversationListPinnedConversationGroup = ({
     navigate("Conversation", { topic: group.topic });
   }, [group.topic]);
 
-  const { groupName } = useGroupNameForCurrentAccount({
+  const { groupName } = useGroupName({
     conversationTopic: groupConversationTopic,
   });
 

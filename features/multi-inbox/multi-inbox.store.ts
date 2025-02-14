@@ -89,7 +89,7 @@ export const useAccountsStore = create<AccountsStoreStype>()(
       setAuthStatus: (status: AuthStatus) => set({ authStatus: status }),
 
       currentSender: undefined,
-
+      signedInUserId: undefined,
       setCurrentAccount: ({ ethereumAddress }: { ethereumAddress: string }) => {
         const senders = get().senders;
         const sender = senders.find(

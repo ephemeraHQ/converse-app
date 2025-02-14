@@ -3,10 +3,38 @@ import { useConversationStore } from "@/features/conversation/conversation.store
 import { useInboxUsername } from "@/features/profiles/utils/inbox-username";
 import { ConversationSearchResultsListItem } from "@/features/conversation/conversation-create/components/conversation-create-search-result-list-item";
 import { usePreferredInboxAvatar } from "@/hooks/usePreferredInboxAvatar";
-import { usePreferredInboxName } from "@/hooks/usePreferredInboxName";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { shortAddress } from "@/utils/strings/shortAddress";
 import { useCallback } from "react";
+import { getAllProfilesForUser } from "@/features/profiles/profiles.api";
+import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
+
+const getAllProfilesForSignedInUserQueryOptions = () => {
+  const signedInUserId = getSignedInUserId();
+  if (!signedInUserId) {
+    throw new Error(
+      "You called getAllProfilesForSignedInUserQueryOptions but you are not signed in"
+    );
+  }
+  return queryOptions({
+    queryKey: ["profiles", signedInUserId],
+    queryFn: () => getAllProfilesForUser({ convosUserId: signedInUserId }),
+    staleTime: Infinity,
+    refetchOnWindowFocus: true,
+  });
+};
+
+function useGetAllProfilesForUserQuery(convosUserId: string) {
+  const { data: profiles } = useQuery(
+    getAllProfilesForUserQueryOptions(convosUserId)
+  );
+}
+
+function useProfilesForUser() {
+  const { data: profiles } = useGetAllProfilesForUserQuery({
+    convosUserId: convosUserId,
+  });
+}
 
 type UserSearchResultListItemProps = {
   inboxId: string;

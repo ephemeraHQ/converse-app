@@ -28,6 +28,15 @@ export const getProfile = async (id: string): Promise<IProfile> => {
   return ProfileSchema.parse(data);
 };
 
+export const getAllProfilesForUser = async ({
+  convosUserId,
+}: {
+  convosUserId: string;
+}): Promise<IProfile[]> => {
+  const { data } = await api.get(`/api/v1/profiles/user/${convosUserId}`);
+  return z.array(ProfileSchema).parse(data);
+};
+
 export const searchProfiles = async ({
   searchQuery,
 }: {

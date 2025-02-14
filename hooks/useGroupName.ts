@@ -1,12 +1,15 @@
 import { getGroupMembersQueryOptions } from "@/queries/useGroupMembersQuery";
 import { useQuery } from "@tanstack/react-query";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import { useCurrentAccount } from "../features/multi-inbox/multi-inbox.store";
-import { useGroupNameMutation } from "../queries/useGroupNameMutation";
-import { useGroupNameQuery } from "../queries/useGroupNameQuery";
-import { usePreferredNames } from "./usePreferredNames";
+import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { useGroupNameMutation } from "@/queries/useGroupNameMutation";
+import { useGroupNameQuery } from "@/queries/useGroupNameQuery";
 
-export const useGroupNameForCurrentAccount = (args: {
+export function useProfileNames(inboxIds: InboxId[] | undefined) {
+
+
+
+export const useGroupName = (args: {
   conversationTopic: ConversationTopic;
 }) => {
   const { conversationTopic } = args;
