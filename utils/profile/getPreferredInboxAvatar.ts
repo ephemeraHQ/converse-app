@@ -1,4 +1,4 @@
-import { type IProfileSocials } from "@/features/profiles/profile-types";
+import { type IProfileSocials } from "@/features/profiles/profile.types";
 import { getPreferredAvatar } from "./getPreferredAvatar";
 
 /**

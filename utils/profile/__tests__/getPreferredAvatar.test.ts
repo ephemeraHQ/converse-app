@@ -1,5 +1,5 @@
 import { getPreferredAvatar } from "../getPreferredAvatar";
-import { type IProfileSocials } from "@/features/profiles/profile-types";
+import { type IProfileSocials } from "@/features/profiles/profile.types";
 
 describe("getPreferredAvatar", () => {
   it("should return undefined when no socials provided", () => {

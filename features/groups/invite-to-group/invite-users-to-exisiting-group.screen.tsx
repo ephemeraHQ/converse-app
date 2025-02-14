@@ -24,7 +24,9 @@ import { SearchBar } from "@/components/SearchBar";
 import TableView from "@/components/TableView/TableView";
 import { TableViewPicto } from "@/components/TableView/TableViewImage";
 import { config } from "@/config";
-import { IProfileSocials } from "@/features/profiles/profile-types";
+import { ActivityIndicator } from "@/design-system/activity-indicator";
+import { getSafeCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
+import { IProfileSocials } from "@/features/profiles/profile.types";
 import { useGroupMembers } from "@/hooks/useGroupMembers";
 import { translate } from "@/i18n";
 import { setProfileRecordSocialsQueryData } from "@/queries/useProfileSocialsQuery";
@@ -35,8 +37,6 @@ import { getCleanAddress } from "@/utils/evm/getCleanAddress";
 import { isEmptyObject } from "@/utils/objects";
 import { getPreferredName } from "@/utils/profile";
 import { accountCanMessagePeer } from "@/utils/xmtpRN/xmtp-consent/account-can-message-peer";
-import { ActivityIndicator } from "@/design-system/activity-indicator";
-import { getSafeCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
 export function InviteUsersToExistingGroupScreen({
   route,
   navigation,

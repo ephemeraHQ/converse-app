@@ -27,9 +27,9 @@ export function ConversationSenderAvatar({
 
   const openProfile = useCallback(() => {
     if (address) {
-      navigate("Profile", { address });
+      navigate("Profile", { inboxId });
     }
-  }, [address]);
+  }, [address, inboxId]);
 
   return (
     <TouchableOpacity onPress={openProfile}>

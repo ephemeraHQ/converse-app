@@ -1,5 +1,5 @@
 import { getPreferredInboxAddress } from "../getPreferredInboxAddress";
-import { type IProfileSocials } from "@/features/profiles/profile-types";
+import { type IProfileSocials } from "@/features/profiles/profile.types";
 
 describe("getPreferredInboxAddress", () => {
   it("should return undefined when no socials provided", () => {

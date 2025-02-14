@@ -1,28 +1,27 @@
-import React, { memo, PropsWithChildren } from "react";
-import { Dimensions } from "react-native";
-import { useAppTheme, useThemeProvider } from "@/theme/useAppTheme";
+import React, { memo } from "react";
+import { Dimensions, ViewStyle } from "react-native";
+import { useAppTheme } from "@/theme/useAppTheme";
 import Animated, {
   useAnimatedStyle,
   withSpring,
   useSharedValue,
 } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import logger from "@/utils/logger";
-
-type IContactCardContainerProps = PropsWithChildren;
+import { IAnimatedVStackProps } from "@/design-system/VStack";
 
 /**
- * ContactCardContainer Component
+ * AnimatedCardContainer Component
  *
- * A component that holds the contact card, wraps the contact card in a gesture detector, and animates the card when swiped
- * ather than passing a bunch of inverted props around, just creating a mini theme provider for it specifically
+ * A component that provides 3D card animation with gesture detection.
+ * Uses theme's inverted colors to create a dark card on light background.
  */
-const ContactCardContainerWithoutThemeProvider = memo(
-  function ContactCardContainerWithoutThemeProvider({
+export const ProfileContactCardContainer = memo(
+  function ProfileContactCardContainer({
     children,
-  }: IContactCardContainerProps) {
+    style,
+    ...props
+  }: IAnimatedVStackProps) {
     const { theme } = useAppTheme();
-
     const { width: screenWidth } = Dimensions.get("window");
 
     const rotateX = useSharedValue(0);
@@ -30,18 +29,18 @@ const ContactCardContainerWithoutThemeProvider = memo(
     const shadowOffsetX = useSharedValue(0);
     const shadowOffsetY = useSharedValue(6);
 
-    const baseStyle = {
-      backgroundColor: theme.colors.fill.inverted.primary,
+    const baseStyle: ViewStyle = {
+      backgroundColor: theme.colors.fill.primary,
       borderRadius: theme.borderRadius.xxs,
-      padding: theme.spacing.xl,
+      padding: theme.spacing.lg,
       marginTop: theme.spacing.xs,
       marginBottom: theme.spacing.lg,
-      shadowColor: theme.colors.fill.inverted.primary,
+      shadowColor: theme.colors.fill.primary,
       shadowOpacity: 0.25,
       shadowRadius: 12,
       elevation: 5,
       // Maintains credit card aspect ratio
-      height: (screenWidth - 2 * theme.spacing.lg) * 0.628,
+      height: (screenWidth - 2 * theme.spacing.lg) * 0.64,
     };
 
     const animatedStyle = useAnimatedStyle(() => ({
@@ -54,7 +53,6 @@ const ContactCardContainerWithoutThemeProvider = memo(
         width: shadowOffsetX.value,
         height: shadowOffsetY.value,
       },
-      ...baseStyle,
     }));
 
     const panGesture = Gesture.Pan()
@@ -79,26 +77,10 @@ const ContactCardContainerWithoutThemeProvider = memo(
 
     return (
       <GestureDetector gesture={panGesture}>
-        <Animated.View style={animatedStyle}>{children}</Animated.View>
+        <Animated.View style={[baseStyle, animatedStyle, style]} {...props}>
+          {children}
+        </Animated.View>
       </GestureDetector>
     );
   }
 );
-
-export const ContactCardContainer = memo(function ContactCardContainer({
-  children,
-}: IContactCardContainerProps) {
-  const { themeScheme, setThemeContextOverride, ThemeProvider } =
-    useThemeProvider();
-  const invertedTheme = themeScheme === "light" ? "dark" : "light";
-
-  return (
-    <ThemeProvider
-      value={{ themeScheme: invertedTheme, setThemeContextOverride }}
-    >
-      <ContactCardContainerWithoutThemeProvider>
-        {children}
-      </ContactCardContainerWithoutThemeProvider>
-    </ThemeProvider>
-  );
-});

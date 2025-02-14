@@ -1,4 +1,4 @@
-import { type IProfileSocials } from "@/features/profiles/profile-types";
+import { type IProfileSocials } from "@/features/profiles/profile.types";
 
 export function getPreferredAvatar(
   socials: IProfileSocials | undefined | null

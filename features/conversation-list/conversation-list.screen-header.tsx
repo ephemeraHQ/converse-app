@@ -137,7 +137,6 @@ function HeaderTitle() {
 function ProfileAvatar() {
   const { theme, themed } = useAppTheme();
   const navigation = useNavigation();
-  const currentAccount = useCurrentAccount();
   const currentAccountInboxId = useSafeCurrentAccountInboxId();
   const { data: preferredName } = usePreferredInboxName({
     inboxId: currentAccountInboxId,
@@ -154,7 +153,7 @@ function ProfileAvatar() {
     <Pressable
       onPress={() => {
         navigation.navigate("Profile", {
-          address: currentAccount!,
+          inboxId: currentAccountInboxId,
         });
       }}
       hitSlop={theme.spacing.sm}
