@@ -1,8 +1,4 @@
 import {
-  JoinGroupNavigation,
-  JoinGroupNavigationParams,
-} from "@/features/GroupInvites/joinGroup/JoinGroupNavigation";
-import {
   ConversationNav,
   ConversationNavParams,
 } from "@/features/conversation/conversation.nav";
@@ -62,7 +58,6 @@ export type NavigationParamList = {
   TopUp: undefined;
   Profile: ProfileNavParams;
   InviteUsersToExistingGroup: InviteUsersToExistingGroupParams;
-  GroupInvite: JoinGroupNavigationParams;
   UserProfile: undefined;
   WebviewPreview: WebviewPreviewNavParams;
 
@@ -133,7 +128,8 @@ export function SignedInNavigation() {
     >
       <NativeStack.Group>
         <NativeStack.Group screenOptions={stackGroupScreenOptions(colorScheme)}>
-          <NativeStack.Screen name="Chats" component={ConversationListScreen} />
+          <></>
+          {/* <NativeStack.Screen name="Chats" component={ConversationListScreen} />
           <NativeStack.Screen
             name="Blocked"
             component={BlockedConversationsScreen}
@@ -144,7 +140,6 @@ export function SignedInNavigation() {
           {WebviewPreviewNav()}
           {ProfileNav()}
           {InviteUsersToExistingGroupNav()}
-          {JoinGroupNavigation()}
         </NativeStack.Group>
         <NativeStack.Group>
           <NativeStack.Screen
@@ -159,7 +154,7 @@ export function SignedInNavigation() {
           <NativeStack.Screen
             name="AppSettings"
             component={AppSettingsScreen}
-          />
+          /> */}
         </NativeStack.Group>
       </NativeStack.Group>
     </NativeStack.Navigator>

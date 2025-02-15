@@ -5,13 +5,12 @@ import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { useGroupNameMutation } from "@/queries/useGroupNameMutation";
 import { useGroupNameQuery } from "@/queries/useGroupNameQuery";
 
-export function useProfileNames(inboxIds: InboxId[] | undefined) {
-
-
+// export function useProfileNames(inboxIds: InboxId[] | undefined) {
 
 export const useGroupName = (args: {
   conversationTopic: ConversationTopic;
 }) => {
+  return "toodo: group name";
   const { conversationTopic } = args;
 
   const account = useCurrentAccount()!;

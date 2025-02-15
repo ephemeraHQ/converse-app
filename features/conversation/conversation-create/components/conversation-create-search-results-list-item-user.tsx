@@ -8,7 +8,11 @@ import { shortAddress } from "@/utils/strings/shortAddress";
 import { useCallback } from "react";
 import { getAllProfilesForUser } from "@/features/profiles/profiles.api";
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
+import { useAccountsStore } from "@/features/multi-inbox/multi-inbox.store";
 
+function getSignedInUserId() {
+  const signedInUserId = useAccountsStore.getState().signedInUserId;
+}
 const getAllProfilesForSignedInUserQueryOptions = () => {
   const signedInUserId = getSignedInUserId();
   if (!signedInUserId) {

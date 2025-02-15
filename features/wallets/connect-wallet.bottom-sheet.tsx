@@ -18,7 +18,10 @@ import {
 } from "@/features/wallets/use-installed-wallets.hook";
 import { Button } from "@/design-system/Button/Button";
 import { SocialProfile, useConnect } from "thirdweb/react";
-import { getSocialProfilesForAddress } from "@/utils/api/social-lookup.api";
+import {
+  getSocialProfilesQueryData,
+  ensureSocialProfilesQueryData,
+} from "@/features/social-profiles/social-lookup.query";
 
 type InstalledWalletsListProps = {
   installedWallets: ISupportedWallet[];
@@ -264,7 +267,7 @@ export function ConnectWalletBottomSheet({
     const debugSocialProfiles = async () => {
       const mycbidaddress = "0x0aF849d2778f6ccE4A2641438B6207DC4750a82B";
       const addressToLink = mycbidaddress;
-      const socialProfiles = await getSocialProfilesForAddress(addressToLink);
+      const socialProfiles = await ensureSocialProfilesQueryData(addressToLink);
       logger.debug(
         `[ConnectWalletBottomSheet]convos ry is awesome Social profiles: ${JSON.stringify(
           socialProfiles,
