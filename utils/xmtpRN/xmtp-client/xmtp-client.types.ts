@@ -1,3 +1,4 @@
+// todo(lustig) we'll be able to remove these once multi inbox client has more functionality
 import { EntityObject } from "@queries/entify";
 import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-reference";
 import {
@@ -6,7 +7,6 @@ import {
   Dm,
   Group,
   GroupUpdatedCodec,
-  Member,
   ReactionCodec,
   RemoteAttachmentCodec,
   ReplyCodec,
@@ -63,18 +63,6 @@ export type GroupData = Pick<
   | "description"
   | "state"
 >;
-
-// export type ConversationData = Pick<
-//   ConversationWithCodecsType,
-//   "conversationVersion"
-//   // | "createdAt"
-//   // | "members"
-//   // | "topic"
-//   // | "addedByInboxId"
-//   // | "imageUrlSquare"
-//   // | "description"
-//   // | "state"
-// >;
 
 export type GroupsDataEntity = EntityObject<GroupData>;
 

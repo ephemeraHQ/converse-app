@@ -14,22 +14,16 @@ import { PrivyPlaygroundUserScreen } from "./privy-playground-user.screen";
 import { getConfig } from "@/config";
 import logger from "@/utils/logger";
 import * as SplashScreen from "expo-splash-screen";
-import {
-  AuthStatuses,
-  useAccountsStore,
-} from "../multi-inbox/multi-inbox.store";
-import { useSocialProfiles } from "thirdweb/react";
-import { thirdwebClient } from "@/utils/thirdweb";
+import { useAccountsStore } from "../multi-inbox/multi-inbox.store";
 import { ethers, utils as ethersUtils } from "ethers";
 import { usePrivy } from "@privy-io/expo";
-
+import { useSocialProfilesForAddress } from "../social-profiles/social-lookup.query";
 const AddressDebugger = ({ address }: { address: string }) => {
   const {
     data: profiles,
     status,
     error,
-  } = useSocialProfiles({
-    client: thirdwebClient,
+  } = useSocialProfilesForAddress({
     address,
   });
 

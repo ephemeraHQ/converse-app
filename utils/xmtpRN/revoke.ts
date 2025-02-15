@@ -1,6 +1,6 @@
 import { translate } from "@i18n";
 import { awaitableAlert } from "@utils/alert";
-import logger from "@utils/logger";
+import { logger } from "@utils/logger";
 import { Client } from "@xmtp/react-native-sdk";
 import { Signer } from "ethers";
 

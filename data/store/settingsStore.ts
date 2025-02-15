@@ -1,4 +1,4 @@
-import logger from "@utils/logger";
+import { logger } from "@utils/logger";
 import { InboxId } from "@xmtp/react-native-sdk";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";

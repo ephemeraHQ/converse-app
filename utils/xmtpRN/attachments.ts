@@ -1,7 +1,6 @@
+import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 import { RemoteAttachmentContent } from "@xmtp/react-native-sdk";
 import RNFS from "react-native-fs";
-import { ConverseXmtpClientType } from "./xmtp-client/xmtp-client.types";
-import { getXmtpClient } from "./xmtp-client/xmtp-client";
 
 export const MAX_AUTOMATIC_DOWNLOAD_ATTACHMENT_SIZE = 10000000; // 10MB
 
@@ -10,8 +9,8 @@ export const encryptRemoteAttachment = async (
   fileUri: string,
   mimeType: string | undefined
 ) => {
-  const client = await getXmtpClient({
-    address: account,
+  const client = MultiInboxClient.instance.getInboxClientForAddress({
+    ethereumAddress: account,
   });
   const encryptedAttachment = await client.encryptAttachment({
     fileUri,
@@ -36,8 +35,8 @@ export const fetchAndDecodeRemoteAttachment = async (args: {
     toFile: encryptedLocalFileUri,
   }).promise;
 
-  const client = await getXmtpClient({
-    address: account,
+  const client = MultiInboxClient.instance.getInboxClientForAddress({
+    ethereumAddress: account,
   });
 
   const decryptedContent = await client.decryptAttachment({

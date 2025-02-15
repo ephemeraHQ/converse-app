@@ -29,11 +29,9 @@ export const useGroupName = (args: {
     enabled: !groupName && !!conversationTopic && !!account, // If we have the group name, we don't need to fetch the members
   });
 
-  const memberAddresses = members?.ids
-    .map((id) => members?.byId[id]?.addresses[0])
-    .filter((address) => address !== account);
-
-  const names = usePreferredNames(memberAddresses ?? []);
+  // const names = useProfileNamesFromInboxIds(memberAddresses ?? []);
+  // get all profiles for inbox ids list and map over them to get the names, dead simple
+  const profiles = useProfilesFromInboxIds(members.ids);
 
   const { mutateAsync } = useGroupNameMutation({
     account,

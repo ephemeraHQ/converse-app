@@ -1,6 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useAppTheme } from "@theme/useAppTheme";
-import logger from "@utils/logger";
+import { logger } from "@utils/logger";
 
 import { StyleProp, TextStyle } from "react-native";
 import { IIconName, IIconProps } from "./Icon.types";

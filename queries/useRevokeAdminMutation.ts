@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import logger from "@utils/logger";
+import { logger } from "@utils/logger";
 import { sentryTrackError } from "@utils/sentry";
 import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
 

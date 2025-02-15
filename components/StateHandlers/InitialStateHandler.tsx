@@ -7,7 +7,7 @@ import { useAppStore } from "../../data/store/appStore";
 import { useSelect } from "../../data/store/storeHelpers";
 import { getSchemedURLFromUniversalURL } from "../../utils/navigation";
 import { hideSplashScreen } from "../../utils/splash/splash";
-import logger from "@utils/logger";
+import { logger } from "@utils/logger";
 import { useAuthStatus } from "@/features/authentication/useAuthStatus.hook";
 
 const isDevelopmentClientURL = (url: string) => {

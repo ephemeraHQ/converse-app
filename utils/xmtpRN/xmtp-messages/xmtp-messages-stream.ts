@@ -1,7 +1,7 @@
 import { XMTPError } from "@/utils/error";
 import { isProd } from "@/utils/getEnv";
-import logger from "@utils/logger";
-import { getXmtpClient } from "../xmtp-client/xmtp-client";
+import { logger } from "@utils/logger";
+import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 import { DecodedMessageWithCodecsType } from "../xmtp-client/xmtp-client.types";
 
 export const streamAllMessages = async (args: {
@@ -13,7 +13,9 @@ export const streamAllMessages = async (args: {
   // Stop before restarting just to be sure
   await stopStreamingAllMessage({ ethAddress: account });
 
-  const client = await getXmtpClient({ address: account });
+  const client = MultiInboxClient.instance.getInboxClientForAddress({
+    ethereumAddress: account,
+  });
 
   logger.debug(
     `[XMTP - streamAllMessages] Streaming messages for ${client.address}`
@@ -39,8 +41,8 @@ export const streamAllMessages = async (args: {
 export const stopStreamingAllMessage = async (args: { ethAddress: string }) => {
   const { ethAddress } = args;
 
-  const client = await getXmtpClient({
-    address: ethAddress,
+  const client = MultiInboxClient.instance.getInboxClientForAddress({
+    ethereumAddress: ethAddress,
   });
 
   try {

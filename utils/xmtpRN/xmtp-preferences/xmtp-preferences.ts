@@ -1,8 +1,10 @@
 import { XMTPError } from "@/utils/error";
-import { getXmtpClient } from "../xmtp-client/xmtp-client";
+import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 
 export const syncConsent = async (account: string) => {
-  const client = await getXmtpClient({ address: account });
+  const client = MultiInboxClient.instance.getInboxClientForAddress({
+    ethereumAddress: account,
+  });
   try {
     await client.preferences.syncConsent();
   } catch (error) {

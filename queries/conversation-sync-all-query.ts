@@ -5,7 +5,7 @@ import {
 import { conversationSyncAllQueryKey } from "@/queries/QueryKeys";
 import { queryClient } from "@/queries/queryClient";
 import { captureError } from "@/utils/capture-error";
-import { getXmtpClient } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
+import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 import { queryOptions, skipToken } from "@tanstack/react-query";
 import { ConsentState } from "@xmtp/react-native-sdk";
 
@@ -31,8 +31,8 @@ export function getConversationSyncAllQueryOptions(args: IArgs) {
             throw new Error("consentStates is required");
           }
 
-          const client = await getXmtpClient({
-            address: args.ethAddress,
+          const client = MultiInboxClient.instance.getInboxClientForAddress({
+            ethereumAddress: args.ethAddress,
           });
 
           const beforeSync = new Date().getTime();

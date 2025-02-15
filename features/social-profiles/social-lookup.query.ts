@@ -8,7 +8,7 @@ import { queryClient } from "@/queries/queryClient";
 const socialProfilesQueryKey = (address: string) =>
   ["socialProfiles", address] as const;
 
-export type UseSocialProfilesForAddressOptions = {
+export type UseSocialProfilesForAddressArgs = {
   address?: string;
 };
 
@@ -35,7 +35,7 @@ const getSocialProfilesQueryOptions = (address: string | undefined) => {
 
 export const useSocialProfilesForAddress = ({
   address,
-}: UseSocialProfilesForAddressOptions) => {
+}: UseSocialProfilesForAddressArgs) => {
   return useQuery(getSocialProfilesQueryOptions(address));
 };
 

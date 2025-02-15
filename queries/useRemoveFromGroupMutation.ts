@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import logger from "@utils/logger";
+import { logger } from "@utils/logger";
 import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
 
 import { useGroupQuery } from "@queries/useGroupQuery";

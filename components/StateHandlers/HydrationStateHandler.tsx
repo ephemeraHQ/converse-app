@@ -2,7 +2,7 @@ import { prefetchConversationMetadataQuery } from "@/queries/conversation-metada
 import { fetchAllowedConsentConversationsQuery } from "@/queries/conversations-allowed-consent-query";
 import { captureError } from "@/utils/capture-error";
 import { useAppStore } from "@data/store/appStore";
-import logger from "@utils/logger";
+import { logger } from "@utils/logger";
 import { Conversation } from "@xmtp/react-native-sdk";
 import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 import { useEffect } from "react";

@@ -1,5 +1,5 @@
 import { ObjectTyped } from "@/utils/object-typed";
-import logger from "@utils/logger";
+import { logger } from "@utils/logger";
 
 export const contentTypesPrefixes = {
   text: "xmtp.org/text:",

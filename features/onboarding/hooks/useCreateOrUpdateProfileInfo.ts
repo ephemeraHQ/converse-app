@@ -1,4 +1,4 @@
-import logger from "@utils/logger";
+import { logger } from "@utils/logger";
 import { useCallback, useState } from "react";
 
 import { uploadFile } from "@utils/attachment/uploadFile";
