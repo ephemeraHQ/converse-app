@@ -49,7 +49,7 @@ export function ConversationSearchResultsListItemUser({
 }: UserSearchResultListItemProps) {
   const { theme } = useAppTheme();
 
-  const { data: preferredName } = usePreferredInboxName({
+  const { data: preferredName } = useInboxName({
     inboxId,
   });
 

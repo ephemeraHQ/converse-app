@@ -6,7 +6,7 @@ import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query";
 import { DmWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { usePreferredInboxAvatar } from "@hooks/usePreferredInboxAvatar";
-import { usePreferredInboxName } from "@hooks/usePreferredInboxName";
+import { useInboxName } from "@hooks/useInboxName";
 import { navigate } from "@utils/navigation";
 import { useCallback } from "react";
 import { isTextMessage } from "../../conversation/conversation-message/conversation-message.utils";
@@ -30,7 +30,7 @@ export const ConversationListPinnedConversationDm = ({
     caller: "ConversationListPinnedConversationDm",
   });
 
-  const { data: preferredName } = usePreferredInboxName({
+  const { data: preferredName } = useInboxName({
     inboxId: peerInboxId,
   });
 

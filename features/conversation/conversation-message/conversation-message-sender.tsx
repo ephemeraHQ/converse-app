@@ -1,5 +1,5 @@
 import { Text } from "@design-system/Text";
-import { usePreferredInboxName } from "@hooks/usePreferredInboxName";
+import { useInboxName } from "@hooks/useInboxName";
 import { InboxId } from "@xmtp/react-native-sdk";
 
 type IConversationMessageSenderProps = {
@@ -10,7 +10,7 @@ export function ConversationMessageSender(
   args: IConversationMessageSenderProps
 ) {
   const { inboxId } = args;
-  const { data: name } = usePreferredInboxName({
+  const { data: name } = useInboxName({
     inboxId,
   });
 

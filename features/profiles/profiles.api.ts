@@ -23,6 +23,7 @@ const SearchProfilesResultSchema = z.object({
 
 export type ISearchProfilesResult = z.infer<typeof SearchProfilesResultSchema>;
 
+// todo get profile needs to use xmtpId i believe
 export const getProfile = async (id: string): Promise<IProfile> => {
   const { data } = await api.get(`/api/v1/profiles/${id}`);
   return ProfileSchema.parse(data);

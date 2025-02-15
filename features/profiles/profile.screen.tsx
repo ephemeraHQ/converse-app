@@ -15,9 +15,9 @@
 // import { ContactCard } from "@/features/profiles/components/contact-card";
 // import { SocialNames } from "@/features/profiles/components/social-names";
 // import { formatConverseUsername } from "@/features/profiles/utils/format-converse-username";
-// import { usePreferredAvatarUri } from "@/hooks/usePreferredAvatarUri";
-// import { usePreferredName } from "@/hooks/usePreferredName";
-// import { usePreferredUsername } from "@/hooks/usePreferredUsername";
+// import { useInboxAvatar } from "@/hooks/useInboxAvatar";
+// import { useInboxName } from "@/hooks/useInboxName";
+// import { useInboxName } from "@/hooks/useInboxName";
 // import { useProfileSocials } from "@/hooks/useProfileSocials";
 // import { translate } from "@/i18n";
 // import { useHeader } from "@/navigation/use-header";
@@ -44,9 +44,9 @@
 //   const setPeersStatus = useSettingsStore((s) => s.setPeersStatus);
 //   const { data: socials } = useProfileSocials(peerAddress);
 
-//   const userName = usePreferredUsername(peerAddress);
-//   const displayName = usePreferredName(peerAddress);
-//   const preferredAvatarUri = usePreferredAvatarUri(peerAddress);
+//   const userName = useInboxName(peerAddress);
+//   const displayName = useInboxName(peerAddress);
+//   const preferredAvatarUri = useInboxAvatar(peerAddress);
 
 //   const handleChatPress = useCallback(() => {
 //     router.dispatch(StackActions.popToTop());

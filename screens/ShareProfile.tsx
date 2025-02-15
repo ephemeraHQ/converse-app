@@ -29,10 +29,9 @@ import { Screen } from "../components/Screen/ScreenComp/Screen";
 import { config } from "../config";
 import { useCurrentAccount } from "../features/multi-inbox/multi-inbox.store";
 import { NavigationParamList } from "./Navigation/Navigation";
-import { usePreferredAvatarUri } from "@/hooks/usePreferredAvatarUri";
-import { usePreferredName } from "@/hooks/usePreferredName";
+import { useInboxAvatar } from "@/hooks/useInboxAvatar";
+import { useInboxName } from "@/hooks/useInboxName";
 import { translate } from "@/i18n";
-import { usePreferredUsername } from "@/hooks/usePreferredUsername";
 
 const ShareProfileContent = ({
   userAddress,
@@ -141,9 +140,9 @@ export default function ShareProfileScreen({
   navigation,
 }: NativeStackScreenProps<NavigationParamList, "ShareProfile">) {
   const userAddress = useCurrentAccount() as string;
-  const username = usePreferredUsername(userAddress);
-  const displayName = usePreferredName(userAddress);
-  const avatar = usePreferredAvatarUri(userAddress);
+  const username = useInboxName(userAddress);
+  const displayName = useInboxName(userAddress);
+  const avatar = useInboxAvatar(userAddress);
 
   useEffect(() => {
     navigation.setOptions({

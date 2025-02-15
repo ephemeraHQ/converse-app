@@ -3,7 +3,7 @@ import { usePreferredInboxAvatar } from "@/hooks/usePreferredInboxAvatar";
 import { navigate } from "@/utils/navigation";
 import { Avatar } from "@components/Avatar";
 import { usePreferredInboxAddress } from "@hooks/usePreferredInboxAddress";
-import { usePreferredInboxName } from "@hooks/usePreferredInboxName";
+import { useInboxName } from "@hooks/useInboxName";
 import { InboxId } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
 import { TouchableOpacity } from "react-native";
@@ -18,7 +18,7 @@ export function ConversationSenderAvatar({
   const { senderAvatarSize } = useConversationMessageStyles();
 
   const { data: address } = usePreferredInboxAddress({ inboxId });
-  const { data: name } = usePreferredInboxName({
+  const { data: name } = useInboxName({
     inboxId,
   });
   const { data: avatarUri } = usePreferredInboxAvatar({

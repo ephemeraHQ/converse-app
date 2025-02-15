@@ -1,7 +1,7 @@
 import { ConversationHeaderTitle } from "@/features/conversation/conversation-screen-header/conversation-screen-header-title";
 import { Avatar } from "@components/Avatar";
-import { usePreferredAvatarUri } from "@hooks/usePreferredAvatarUri";
-import { usePreferredName } from "@hooks/usePreferredName";
+import { useInboxAvatar } from "@hooks/useInboxAvatar";
+import { useInboxName } from "@hooks/useInboxName";
 import { useProfileSocials } from "@hooks/useProfileSocials";
 import { useRouter } from "@navigation/useNavigation";
 import { useAppTheme } from "@theme/useAppTheme";
@@ -26,9 +26,9 @@ export const NewConversationTitle = ({
 
   const { isLoading } = useProfileSocials(peerAddress ?? "");
 
-  const preferredName = usePreferredName(peerAddress ?? "");
+  const preferredName = useInboxName(peerAddress ?? "");
 
-  const preferredAvatarUri = usePreferredAvatarUri(peerAddress ?? "");
+  const preferredAvatarUri = useInboxAvatar(peerAddress ?? "");
 
   const displayAvatar = !isLoading;
 

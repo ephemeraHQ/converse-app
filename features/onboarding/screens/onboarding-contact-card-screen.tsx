@@ -23,7 +23,7 @@ import { formatRandomUserName } from "@/features/onboarding/utils/format-random-
 import { useAddPfp } from "../hooks/useAddPfp";
 import { ProfileType } from "../types/onboarding.types";
 import { useCreateOrUpdateProfileInfo } from "../hooks/useCreateOrUpdateProfileInfo";
-import { useProfile } from "../hooks/useProfile";
+// import { useProfile } from "../hooks/useProfile";
 import { ConnectWalletBottomSheet } from "@/features/wallets/connect-wallet.bottom-sheet";
 import { useCoinbaseWalletListener } from "@/utils/coinbaseWallet";
 import { config } from "@/config";
@@ -62,8 +62,8 @@ export function OnboardingContactCardScreen() {
     `[OnboardingContactCardScreen] Initializing with address: ${currentSender?.ethereumAddress}`
   );
 
-  const { profile, setProfile } = useProfile();
-  logger.debug(`[OnboardingContactCardScreen] Current profile:`, profile);
+  // const { profile, setProfile } = useProfile();
+  // logger.debug(`[OnboardingContactCardScreen] Current profile:`, profile);
   const { createOrUpdateProfile, loading, errorMessage } =
     useCreateOrUpdateProfileInfo();
   logger.debug(
@@ -85,44 +85,44 @@ export function OnboardingContactCardScreen() {
   const { addPFP, asset } = useAddPfp();
   logger.debug(`[OnboardingContactCardScreen] Current PFP asset:`, asset);
 
-  const handleRealContinue = useCallback(async () => {
-    logger.debug("[OnboardingContactCardScreen] Starting real continue flow");
-    try {
-      const profileUserName = formatRandomUserName(profile.displayName ?? "");
-      const newProfile: ProfileType = {
-        ...profile,
-        username: profileUserName,
-        avatar: asset?.uri,
-      };
-      logger.debug(
-        "[OnboardingContactCardScreen] Creating real profile:",
-        newProfile
-      );
-      const { success } = await createOrUpdateProfile({ profile: newProfile });
-      logger.debug(
-        `[OnboardingContactCardScreen] Real profile creation success: ${success}`
-      );
-      if (success) {
-        if (needToShowNotificationsPermissions()) {
-          logger.debug(
-            "[OnboardingContactCardScreen] Navigating to notifications permissions"
-          );
-          router.push("OnboardingNotifications");
-        } else {
-          logger.debug(
-            "[OnboardingContactCardScreen] Setting auth status to signedIn"
-          );
-          setAuthStatus(AuthStatuses.signedIn);
-        }
-      }
-    } catch (error) {
-      logger.error(
-        "[OnboardingContactCardScreen] Error in real continue:",
-        error
-      );
-      captureErrorWithToast(error as Error);
-    }
-  }, [createOrUpdateProfile, profile, router, asset?.uri, setAuthStatus]);
+  // const handleRealContinue = useCallback(async () => {
+  //   logger.debug("[OnboardingContactCardScreen] Starting real continue flow");
+  //   try {
+  //     const profileUserName = formatRandomUserName(profile.displayName ?? "");
+  //     const newProfile: ProfileType = {
+  //       ...profile,
+  //       username: profileUserName,
+  //       avatar: asset?.uri,
+  //     };
+  //     logger.debug(
+  //       "[OnboardingContactCardScreen] Creating real profile:",
+  //       newProfile
+  //     );
+  //     const { success } = await createOrUpdateProfile({ profile: newProfile });
+  //     logger.debug(
+  //       `[OnboardingContactCardScreen] Real profile creation success: ${success}`
+  //     );
+  //     if (success) {
+  //       if (needToShowNotificationsPermissions()) {
+  //         logger.debug(
+  //           "[OnboardingContactCardScreen] Navigating to notifications permissions"
+  //         );
+  //         router.push("OnboardingNotifications");
+  //       } else {
+  //         logger.debug(
+  //           "[OnboardingContactCardScreen] Setting auth status to signedIn"
+  //         );
+  //         setAuthStatus(AuthStatuses.signedIn);
+  //       }
+  //     }
+  //   } catch (error) {
+  //     logger.error(
+  //       "[OnboardingContactCardScreen] Error in real continue:",
+  //       error
+  //     );
+  //     captureErrorWithToast(error as Error);
+  //   }
+  // }, [createOrUpdateProfile, profile, router, asset?.uri, setAuthStatus]);
 
   const [
     isConnectWalletBottomSheetVisible,
@@ -156,7 +156,7 @@ export function OnboardingContactCardScreen() {
               Choose how you show up
             </OnboardingSubtitle>
 
-            <OnboardingContactCardThemeProvider>
+            {/* <OnboardingContactCardThemeProvider>
               <OnboardingCreateContactCard
                 onImportPress={handleImportPress}
                 addPFP={addPFP}
@@ -166,15 +166,15 @@ export function OnboardingContactCardScreen() {
                   setProfile({ ...profile, displayName })
                 }
               />
-            </OnboardingContactCardThemeProvider>
+            </OnboardingContactCardThemeProvider> */}
           </VStack>
         </Center>
-        <OnboardingFooter
+        {/* <OnboardingFooter
           text={"Continue"}
           iconName="chevron.right"
           onPress={handleRealContinue}
           disabled={loading || !profile.displayName}
-        />
+        /> */}
       </Screen>
 
       <ConnectWalletBottomSheet

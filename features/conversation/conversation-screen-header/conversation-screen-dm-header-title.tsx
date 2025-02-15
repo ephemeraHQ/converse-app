@@ -1,7 +1,6 @@
 import { ConversationHeaderTitle } from "@/features/conversation/conversation-screen-header/conversation-screen-header-title";
 import { usePreferredInboxAddress } from "@/hooks/usePreferredInboxAddress";
 import { usePreferredInboxAvatar } from "@/hooks/usePreferredInboxAvatar";
-import { usePreferredInboxName } from "@/hooks/usePreferredInboxName";
 import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query";
 import { copyToClipboard } from "@/utils/clipboard";
 import { Avatar } from "@components/Avatar";
@@ -10,6 +9,7 @@ import { useRouter } from "@navigation/useNavigation";
 import { useAppTheme } from "@theme/useAppTheme";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
+import { useInboxName } from "@/features/inbox/inbox.api";
 
 type DmConversationTitleProps = {
   topic: ConversationTopic;
@@ -43,7 +43,7 @@ export const DmConversationTitle = ({ topic }: DmConversationTitleProps) => {
   }, [topic]);
 
   const { data: preferredInboxName, isLoading: isLoadingPreferredInboxName } =
-    usePreferredInboxName({
+    useInboxName({
       inboxId: peerInboxId!,
     });
 

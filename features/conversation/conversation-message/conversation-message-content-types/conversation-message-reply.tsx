@@ -17,7 +17,7 @@ import {
   useConversationStore,
   useCurrentConversationTopicSafe,
 } from "@/features/conversation/conversation.store-context";
-import { usePreferredInboxName } from "@/hooks/usePreferredInboxName";
+import { useInboxName } from "@/hooks/useInboxName";
 import { captureError } from "@/utils/capture-error";
 import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { HStack } from "@design-system/HStack";
@@ -124,7 +124,7 @@ const MessageReplyReference = memo(function MessageReplyReference(props: {
     conversationTopic: topic,
   });
 
-  const { data: inboxName } = usePreferredInboxName({
+  const { data: inboxName } = useInboxName({
     inboxId: referencedMessage?.senderInboxId,
   });
 

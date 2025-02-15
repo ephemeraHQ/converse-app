@@ -15,7 +15,7 @@ import { useAppTheme } from "@/theme/useAppTheme";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { usePreferredInboxAvatar } from "@hooks/usePreferredInboxAvatar";
-import { usePreferredInboxName } from "@hooks/usePreferredInboxName";
+import { useInboxName } from "@hooks/useInboxName";
 import { getCompactRelativeTime } from "@utils/date";
 import { navigate } from "@utils/navigation";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
@@ -50,7 +50,7 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
 
   // Peer info hooks
   const { data: preferredName, isLoading: isLoadingPreferredName } =
-    usePreferredInboxName({
+    useInboxName({
       inboxId: peerInboxId,
     });
   const { data: avatarUri } = usePreferredInboxAvatar({

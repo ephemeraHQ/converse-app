@@ -9,7 +9,7 @@ import {
   useConversationStoreContext,
 } from "@/features/conversation/conversation.store-context";
 import { usePreferredInboxAvatar } from "@/hooks/usePreferredInboxAvatar";
-import { usePreferredInboxName } from "@/hooks/usePreferredInboxName";
+// import { useInboxName } from "@/hooks/useInboxName";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { Haptics } from "@/utils/haptics";
 import { InboxId } from "@xmtp/react-native-sdk";
@@ -168,7 +168,8 @@ const UserChip = memo(function UserChip(props: { inboxId: InboxId }) {
   const { inboxId } = props;
 
   const { data: avatarUri } = usePreferredInboxAvatar({ inboxId });
-  const { data: name } = usePreferredInboxName({ inboxId });
+  // const { data: name } = useInboxName({ inboxId });
+  const name = "todo username inbox lookup";
   const selectedChipInboxId = useStore((state) => state.selectedChipInboxId);
 
   const handlePress = useCallback(() => {
