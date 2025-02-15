@@ -1,6 +1,5 @@
 import { ExpoConfig } from "expo/config";
 import { version } from "./package.json";
-import * as dotenv from "@env";
 
 type Environment = "development" | "preview" | "production";
 
@@ -26,6 +25,12 @@ type EnvironmentConfig = {
     googleServicesFile: string;
   };
   alchemyApiKey: string;
+};
+
+// Type assertion for process.env to include our Expo public variables
+const env = process.env as {
+  EXPO_PUBLIC_ALCHEMY_API_KEY?: string;
+  EXPO_ENV?: string;
 };
 
 const settings: Record<Environment, EnvironmentConfig> = {
@@ -54,7 +59,7 @@ const settings: Record<Environment, EnvironmentConfig> = {
     appDomainGetConverse: "dev.getconverse.app",
     appName: "Converse DEV",
     icon: "./assets/icon-preview.png",
-    alchemyApiKey: dotenv.EXPO_PUBLIC_ALCHEMY_API_KEY || "",
+    alchemyApiKey: env.EXPO_PUBLIC_ALCHEMY_API_KEY || "",
   },
   preview: {
     scheme: "converse-preview",
@@ -81,7 +86,7 @@ const settings: Record<Environment, EnvironmentConfig> = {
     appDomainGetConverse: "preview.getconverse.app",
     appName: "Converse PREVIEW",
     icon: "./assets/icon-preview.png",
-    alchemyApiKey: dotenv.EXPO_PUBLIC_ALCHEMY_API_KEY || "",
+    alchemyApiKey: env.EXPO_PUBLIC_ALCHEMY_API_KEY || "",
   },
   production: {
     scheme: "converse",
@@ -108,14 +113,13 @@ const settings: Record<Environment, EnvironmentConfig> = {
     appDomainGetConverse: "getconverse.app",
     appName: "Converse",
     icon: "./assets/icon.png",
-    alchemyApiKey: dotenv.EXPO_PUBLIC_ALCHEMY_API_KEY || "",
+    alchemyApiKey: env.EXPO_PUBLIC_ALCHEMY_API_KEY || "",
   },
 };
 
 // eslint-disable-next-line import/no-default-export
 export default (): ExpoConfig => {
-  // @ts-expect-error note(lustig) env types aren't working for me OOTB
-  const expoEnv = (process.env.EXPO_ENV || "development") as Environment;
+  const expoEnv = (env.EXPO_ENV || "development") as Environment;
   const config = settings[expoEnv];
 
   return {
