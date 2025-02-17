@@ -24,15 +24,11 @@ import { SearchBar } from "@/components/SearchBar";
 import TableView from "@/components/TableView/TableView";
 import { TableViewPicto } from "@/components/TableView/TableViewImage";
 
-import { config } from "@/config";
 import { ActivityIndicator } from "@/design-system/activity-indicator";
-import { getSafeCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
-import { IProfileSocials } from "@/features/profiles/profile.types";
 import { useGroupMembers } from "@/hooks/useGroupMembers";
 import { translate } from "@/i18n";
 import { NavigationParamList } from "@/screens/Navigation/Navigation";
 import { isEmptyObject } from "@/utils/objects";
-import { accountCanMessagePeer } from "@/utils/xmtpRN/xmtp-consent/account-can-message-peer";
 import {
   ISearchProfilesResult,
   searchProfiles,
@@ -168,13 +164,10 @@ export function InviteUsersToExistingGroupScreen({
             loading: false,
             error: "",
             inviteToConverse: "",
-            profileSearchResults: profiles.reduce(
-              (acc, profile) => {
-                acc[profile.xmtpId] = profile;
-                return acc;
-              },
-              {} as { [address: string]: ISearchProfilesResult }
-            ),
+            profileSearchResults: profiles.reduce((acc, profile) => {
+              acc[profile.xmtpId] = profile;
+              return acc;
+            }, {} as { [address: string]: ISearchProfilesResult }),
           });
         } else {
           setStatus({
