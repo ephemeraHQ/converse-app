@@ -1,6 +1,6 @@
 import { XMTPError } from "@/utils/error";
 import logger from "@/utils/logger";
-import { getXmtpClient } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
+import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 import { InboxId } from "@xmtp/react-native-sdk";
 
 export async function getXmtpDmByInboxId(args: {
@@ -11,9 +11,8 @@ export async function getXmtpDmByInboxId(args: {
   const startTime = Date.now();
 
   try {
-    const client = await getXmtpClient({
-      address: ethAccountAddress,
-      inboxId,
+    const client = MultiInboxClient.instance.getInboxClientForAddress({
+      ethereumAddress: ethAccountAddress,
     });
 
     const conversation = await client.conversations.findDmByInboxId(inboxId);
@@ -40,8 +39,8 @@ export async function createXmtpDm(args: {
 }) {
   const { senderEthAddress, peerInboxId } = args;
   try {
-    const client = await getXmtpClient({
-      address: senderEthAddress,
+    const client = MultiInboxClient.instance.getInboxClientForAddress({
+      ethereumAddress: senderEthAddress,
     });
 
     const startTime = Date.now();

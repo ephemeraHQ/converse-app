@@ -1,17 +1,17 @@
-import { getXmtpClient } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
-import logger from "@utils/logger";
+import { logger } from "@/utils/logger";
+import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 
-type AccountCanMessagePeerArgs = {
-  account: string;
+export type AccountCanMessagePeerArgs = {
   peer: string;
+  account: string;
 };
 
 export const accountCanMessagePeer = async (
   args: AccountCanMessagePeerArgs
 ) => {
   const { peer, account } = args;
-  const client = await getXmtpClient({
-    address: account,
+  const client = MultiInboxClient.instance.getInboxClientForAddress({
+    ethereumAddress: account,
   });
 
   if (!client) {

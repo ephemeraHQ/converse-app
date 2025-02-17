@@ -8,7 +8,7 @@ import { captureError } from "@/utils/capture-error";
 import { stopStreamingConversations } from "@/utils/xmtpRN/xmtp-conversations/xmtp-conversations-stream";
 import { stopStreamingAllMessage } from "@/utils/xmtpRN/xmtp-messages/xmtp-messages-stream";
 import { stopStreamingConsent } from "@/utils/xmtpRN/xmtp-preferences/xmtp-preferences-stream";
-import logger from "@utils/logger";
+import { logger } from "@utils/logger";
 import { startConsentStreaming } from "./stream-consent";
 import { startConversationStreaming } from "./stream-conversations";
 import { startMessageStreaming } from "./stream-messages";

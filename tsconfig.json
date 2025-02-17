@@ -8,6 +8,12 @@
     "moduleResolution": "Bundler",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "skipLibCheck": true,
+    "types": ["node", "jest"],
+    "typeRoots": ["./node_modules/@types", "./types"],
+    // Allow accessing process.env
+    "allowJs": true,
+    "resolveJsonModule": true,
     "paths": {
       "@/*": ["./*"],
       "@components/*": ["./components/*"],

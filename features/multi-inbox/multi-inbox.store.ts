@@ -1,6 +1,6 @@
 import { create, StoreApi, UseBoundStore } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import logger from "@utils/logger";
+import { logger } from "@utils/logger";
 import mmkv, { zustandMMKVStorage } from "../../utils/mmkv";
 import { ChatStoreType, initChatStore } from "../../data/store/chatStore";
 import {
@@ -89,7 +89,7 @@ export const useAccountsStore = create<AccountsStoreStype>()(
       setAuthStatus: (status: AuthStatus) => set({ authStatus: status }),
 
       currentSender: undefined,
-
+      signedInUserId: undefined,
       setCurrentAccount: ({ ethereumAddress }: { ethereumAddress: string }) => {
         const senders = get().senders;
         const sender = senders.find(

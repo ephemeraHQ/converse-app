@@ -6,7 +6,6 @@ import { ensureConversationSyncAllQuery } from "@/queries/conversation-sync-all-
 import { Optional } from "@/types/general";
 import { captureError } from "@/utils/capture-error";
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
-import { getXmtpClient } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
 import { ConversationWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { allowedConsentConversationsQueryKey } from "@queries/QueryKeys";
 import {
@@ -22,6 +21,7 @@ import {
   AuthStatuses,
   useAccountsStore,
 } from "@/features/multi-inbox/multi-inbox.store";
+import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 
 export type IAllowedConsentConversationsQuery = Awaited<
   ReturnType<typeof getAllowedConsentConversations>
@@ -120,8 +120,8 @@ const getAllowedConsentConversations = async (args: IArgs) => {
     consentStates: ["allowed"],
   });
 
-  const client = await getXmtpClient({
-    address: account,
+  const client = MultiInboxClient.instance.getInboxClientForAddress({
+    ethereumAddress: account,
   });
 
   const conversations = await client.conversations.list(

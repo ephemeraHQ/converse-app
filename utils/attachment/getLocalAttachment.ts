@@ -1,4 +1,4 @@
-import logger from "@utils/logger";
+import { logger } from "@utils/logger";
 import RNFS from "react-native-fs";
 import { isImageMimetype } from "../media";
 import {

@@ -1,7 +1,7 @@
 import { ensureConversationSyncAllQuery } from "@/queries/conversation-sync-all-query";
 import { captureError } from "@/utils/capture-error";
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
-import { getXmtpClient } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
+import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { conversationQueryKey } from "./QueryKeys";
@@ -48,8 +48,8 @@ async function getConversation(args: IGetConversationArgs) {
     }),
   ]);
 
-  const client = await getXmtpClient({
-    address: account,
+  const client = MultiInboxClient.instance.getInboxClientForAddress({
+    ethereumAddress: account,
   });
 
   const conversation = (

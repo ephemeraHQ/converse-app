@@ -1,7 +1,18 @@
-import logger from "@/utils/logger";
-import { Client as XmtpClient } from "@xmtp/react-native-sdk";
+import { logger } from "@/utils/logger";
+import {
+  RemoteAttachmentCodec,
+  ReplyCodec,
+  GroupUpdatedCodec,
+  TextCodec,
+  ReadReceiptCodec,
+  ReactionCodec,
+  StaticAttachmentCodec,
+  Client as XmtpClient,
+} from "@xmtp/react-native-sdk";
+import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-reference";
+import { CoinbaseMessagingPaymentCodec } from "@/utils/xmtpRN/xmtp-content-types/xmtp-coinbase-payment";
+
 import { config } from "@/config";
-import { codecs } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
 import {
   AuthStatuses,
   useAccountsStore,
@@ -16,6 +27,8 @@ import {
 import { setInboxIdQueryData } from "@/queries/inbox-id-query";
 import { getDbEncryptionKey } from "@/utils/keychain";
 import { useEffect } from "react";
+import { captureError } from "@/utils/capture-error";
+import { ConverseXmtpClientType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 
 /**
  * Client for managing multiple XMTP inboxes and their lifecycle.
@@ -288,6 +301,7 @@ export class MultiInboxClient {
   }
 
   private async restorePreviouslyCreatedInboxesForDevice() {
+    const startTime = Date.now();
     const previouslyCreatedInboxes = useAccountsStore.getState().senders;
 
     const authStatus = useAccountsStore.getState().authStatus;
@@ -416,12 +430,23 @@ export class MultiInboxClient {
         .setMultiInboxClientRestorationState(
           MultiInboxClientRestorationStates.restored
         );
+
+      const duration = Date.now() - startTime;
       logger.debug(
-        "[restorePreviouslyCreatedInboxesForDevice] Successfully restored XMTP clients"
+        `[restorePreviouslyCreatedInboxesForDevice] Successfully restored XMTP clients (took ${duration}ms)`
       );
+
+      if (duration > 1000) {
+        captureError(
+          new Error(
+            `[restorePreviouslyCreatedInboxesForDevice] Restoring XMTP clients took more than 1 second (${duration}ms)`
+          )
+        );
+      }
     } catch (error) {
+      const duration = Date.now() - startTime;
       logger.error(
-        "[restorePreviouslyCreatedInboxesForDevice] Error restoring XMTP clients: THROWING",
+        `[restorePreviouslyCreatedInboxesForDevice] Error restoring XMTP clients after ${duration}ms: THROWING`,
         error
       );
       // Reset initialization state on error
@@ -442,7 +467,11 @@ export class MultiInboxClient {
    * so we don't have to remove our client usage from the entire
    * codebase at once, but we will be doing so gradually
    */
-  getInboxClientForAddress({ ethereumAddress }: { ethereumAddress: string }) {
+  getInboxClientForAddress({
+    ethereumAddress,
+  }: {
+    ethereumAddress: string;
+  }): ConverseXmtpClientType {
     return this.ethereumSmartWalletAddressToXmtpInboxClientMap[
       ethereumAddress.toLowerCase()
     ];
@@ -517,3 +546,15 @@ export const useInitializeMultiInboxClient = () => {
     }
   }, [restored]);
 };
+
+export const codecs = [
+  new TextCodec(),
+  new ReactionCodec(),
+  new ReadReceiptCodec(),
+  new GroupUpdatedCodec(),
+  new ReplyCodec(),
+  new RemoteAttachmentCodec(),
+  new StaticAttachmentCodec(),
+  new TransactionReferenceCodec(),
+  new CoinbaseMessagingPaymentCodec(),
+];

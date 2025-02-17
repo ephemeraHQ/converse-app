@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import logger from "@utils/logger";
+import { logger } from "@utils/logger";
 
 import { captureError } from "@/utils/capture-error";
 import { useGroupQuery } from "@queries/useGroupQuery";

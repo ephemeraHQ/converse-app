@@ -143,10 +143,10 @@ export function ConversationSearchResultsList() {
     );
 
     // 4. Add user profiles that aren't already in DMs
-    const profilesNotInDms = searchConvosUsersData?.inboxIds
-      .map((inboxId) => ({
+    const profilesNotInDms = searchConvosUsersData
+      ?.map((profile) => ({
         type: "profile" as const,
-        inboxId,
+        inboxId: profile.xmtpId,
       }))
       .filter(({ inboxId }) => {
         const addedDms = items.filter(searchResultIsDm);
@@ -192,8 +192,9 @@ export function ConversationSearchResultsList() {
             ) : searchQuery ? (
               <EmptyState
                 description={
-                  searchConvosUsersData?.message ||
-                  `Couldn't find what you are looking for`
+                  searchConvosUsersData?.length === 0
+                    ? "No results found"
+                    : `Couldn't find what you are looking for`
                 }
               />
             ) : null}

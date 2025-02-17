@@ -1,6 +1,6 @@
 import { XMTPError } from "@/utils/error";
 import logger from "@/utils/logger";
-import { getXmtpClient } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
+import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 import { InboxId } from "@xmtp/react-native-sdk";
 import { PermissionPolicySet } from "@xmtp/react-native-sdk/build/lib/types/PermissionPolicySet";
 
@@ -12,7 +12,6 @@ const defaultPermissionPolicySet: PermissionPolicySet = {
   updateGroupNamePolicy: "allow",
   updateGroupDescriptionPolicy: "allow",
   updateGroupImagePolicy: "allow",
-  // @ts-expect-error todo fixme
   updateMessageDisappearingPolicy: "allow",
 };
 
@@ -36,8 +35,8 @@ export async function createXmtpGroup(args: {
 
     const startTime = Date.now();
 
-    const client = await getXmtpClient({
-      address: account,
+    const client = await MultiInboxClient.instance.getInboxClientForAddress({
+      ethereumAddress: account,
     });
 
     const group =

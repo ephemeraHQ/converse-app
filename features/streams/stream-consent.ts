@@ -2,7 +2,7 @@ import {
   stopStreamingConsent,
   streamConsent,
 } from "@/utils/xmtpRN/xmtp-preferences/xmtp-preferences-stream";
-import logger from "@utils/logger";
+import { logger } from "@utils/logger";
 
 export async function startConsentStreaming(account: string) {
   try {

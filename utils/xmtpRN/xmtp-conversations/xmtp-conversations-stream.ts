@@ -1,6 +1,6 @@
 import { ConversationWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
-import logger from "@utils/logger";
-import { getXmtpClient } from "../xmtp-client/xmtp-client";
+import { logger } from "@utils/logger";
+import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 
 export async function streamConversations(args: {
   ethAddress: string;
@@ -13,8 +13,8 @@ export async function streamConversations(args: {
   // Stop before restarting just to be sure
   await stopStreamingConversations({ ethAddress });
 
-  const client = await getXmtpClient({
-    address: ethAddress,
+  const client = MultiInboxClient.instance.getInboxClientForAddress({
+    ethereumAddress: ethAddress,
   });
 
   logger.debug(
@@ -31,8 +31,14 @@ export async function streamConversations(args: {
 
 export async function stopStreamingConversations(args: { ethAddress: string }) {
   const { ethAddress } = args;
-  const client = await getXmtpClient({
-    address: ethAddress,
+
+  const client = MultiInboxClient.instance.getInboxClientForAddress({
+    ethereumAddress: ethAddress,
   });
-  return client.conversations.cancelStream();
+
+  await client.conversations.cancelStream();
+
+  logger.debug(
+    `[XMTP - stopStreamingConversations] Stopped streaming conversations for account: ${ethAddress}`
+  );
 }

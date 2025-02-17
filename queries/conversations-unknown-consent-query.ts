@@ -3,7 +3,6 @@ import { setConversationQueryData } from "@/queries/conversation-query";
 import { ensureConversationSyncAllQuery } from "@/queries/conversation-sync-all-query";
 import logger from "@/utils/logger";
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
-import { getXmtpClient } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
 import { ConversationWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { queryOptions, skipToken } from "@tanstack/react-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
@@ -12,6 +11,7 @@ import {
   useAccountsStore,
   AuthStatuses,
 } from "@/features/multi-inbox/multi-inbox.store";
+import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 
 export type IUnknownConversationsQuery = Awaited<
   ReturnType<typeof getUnknownConversations>
@@ -29,8 +29,8 @@ async function getUnknownConversations(args: { account: string }) {
     consentStates: ["unknown"],
   });
 
-  const client = await getXmtpClient({
-    address: account,
+  const client = MultiInboxClient.instance.getInboxClientForAddress({
+    ethereumAddress: account,
   });
 
   const conversations = await client.conversations.list(

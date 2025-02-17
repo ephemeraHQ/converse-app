@@ -1,5 +1,5 @@
 import NetInfo from "@react-native-community/netinfo";
-import logger from "@utils/logger";
+import { logger } from "@utils/logger";
 import { useEffect, useRef } from "react";
 
 import { config } from "../../config";

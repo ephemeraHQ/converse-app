@@ -1,7 +1,7 @@
 import { showActionSheetWithOptions } from "@/components/StateHandlers/ActionSheetStateHandler";
 import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { useDenyDmMutation } from "@/features/consent/use-deny-dm.mutation";
-import { usePreferredInboxName } from "@/hooks/usePreferredInboxName";
+import { useInboxName } from "@/hooks/useInboxName";
 import { translate } from "@/i18n";
 import {
   getConversationMetadataQueryData,
@@ -39,14 +39,13 @@ export const useDeleteDm = ({ topic }: { topic: ConversationTopic }) => {
 
   const { mutateAsync: denyDmConsentAsync } = useDenyDmMutation();
 
-  const { data: preferredName } = usePreferredInboxName({
+  const { data: preferredName } = useInboxName({
     inboxId: peerInboxId!,
   });
 
   const { mutateAsync: deleteDmAsync } = useMutation({
     mutationFn: () =>
       deleteTopic({
-        account: currentAccount,
         topic,
       }),
     onMutate: () => {

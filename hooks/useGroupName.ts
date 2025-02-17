@@ -1,14 +1,16 @@
 import { getGroupMembersQueryOptions } from "@/queries/useGroupMembersQuery";
 import { useQuery } from "@tanstack/react-query";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import { useCurrentAccount } from "../features/multi-inbox/multi-inbox.store";
-import { useGroupNameMutation } from "../queries/useGroupNameMutation";
-import { useGroupNameQuery } from "../queries/useGroupNameQuery";
-import { usePreferredNames } from "./usePreferredNames";
+import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { useGroupNameMutation } from "@/queries/useGroupNameMutation";
+import { useGroupNameQuery } from "@/queries/useGroupNameQuery";
 
-export const useGroupNameForCurrentAccount = (args: {
+// export function useProfileNames(inboxIds: InboxId[] | undefined) {
+
+export const useGroupName = (args: {
   conversationTopic: ConversationTopic;
 }) => {
+  return "toodo: group name";
   const { conversationTopic } = args;
 
   const account = useCurrentAccount()!;
@@ -27,11 +29,9 @@ export const useGroupNameForCurrentAccount = (args: {
     enabled: !groupName && !!conversationTopic && !!account, // If we have the group name, we don't need to fetch the members
   });
 
-  const memberAddresses = members?.ids
-    .map((id) => members?.byId[id]?.addresses[0])
-    .filter((address) => address !== account);
-
-  const names = usePreferredNames(memberAddresses ?? []);
+  // const names = useProfileNamesFromInboxIds(memberAddresses ?? []);
+  // get all profiles for inbox ids list and map over them to get the names, dead simple
+  const profiles = useProfilesFromInboxIds(members.ids);
 
   const { mutateAsync } = useGroupNameMutation({
     account,

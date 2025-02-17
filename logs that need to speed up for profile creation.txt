@@ -7,7 +7,7 @@
 
  LOG  10:02:15 AM | DEBUG : [OnboardingContactCardScreen] Profile update loading: true, error: An unknown error occurred 
  LOG  10:02:15 AM | DEBUG : [OnboardingContactCardScreen] Current PFP asset: Undefined Message
- LOG  10:02:16 AM | DEBUG : [API PROFILES] checkUsernameValid response: 
+ LOG  10:02:16 AM | DEBUG : [API PROFILES] checkCanClaimUsername response: 
 {
   "success": true,
   "message": "Could claim username"

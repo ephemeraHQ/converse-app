@@ -3,7 +3,7 @@ import { ConversationSearchResultsListItem } from "@/features/conversation/conve
 import { useConversationStore } from "@/features/conversation/conversation.store-context";
 import { useInboxesUsername } from "@/features/profiles/utils/inbox-username";
 import { useGroupMembers } from "@/hooks/useGroupMembers";
-import { useGroupNameForCurrentAccount } from "@/hooks/useGroupName";
+import { useGroupName } from "@/hooks/useGroupName";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { memo, useCallback } from "react";
 
@@ -15,7 +15,7 @@ export const ConversationSearchResultsListItemGroup = memo(
   }) {
     const { members } = useGroupMembers(conversationTopic);
 
-    const { groupName } = useGroupNameForCurrentAccount({
+    const { groupName } = useGroupName({
       conversationTopic,
     });
 

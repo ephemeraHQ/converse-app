@@ -13,8 +13,7 @@ import { Text } from "@/design-system/Text";
 import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu";
 import { useSafeCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { usePreferredInboxAvatar } from "@/hooks/usePreferredInboxAvatar";
-import { usePreferredInboxName } from "@/hooks/usePreferredInboxName";
-import { usePreferredName } from "@/hooks/usePreferredName";
+import { useInboxName } from "@/hooks/useInboxName";
 import { translate } from "@/i18n";
 import { useHeader } from "@/navigation/use-header";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
@@ -70,7 +69,7 @@ function HeaderTitle() {
   const { theme, themed } = useAppTheme();
   const navigation = useNavigation();
   const currentAccount = useCurrentAccount();
-  const preferredName = usePreferredName(currentAccount!);
+  const preferredName = useInboxName(currentAccount!);
   const accountsProfilesNames = useAccountsProfiles();
   const accounts = useAccountsList();
   const setCurrentAccount = useAccountsStore((s) => s.setCurrentAccount);
@@ -138,7 +137,7 @@ function ProfileAvatar() {
   const { theme, themed } = useAppTheme();
   const navigation = useNavigation();
   const currentAccountInboxId = useSafeCurrentAccountInboxId();
-  const { data: preferredName } = usePreferredInboxName({
+  const { data: preferredName } = useInboxName({
     inboxId: currentAccountInboxId,
   });
   const { data: avatarUri } = usePreferredInboxAvatar({

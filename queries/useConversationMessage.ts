@@ -1,5 +1,5 @@
-import logger from "@/utils/logger";
-import { getXmtpClient } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
+import { logger } from "@/utils/logger";
+import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 import { queryOptions } from "@tanstack/react-query";
 import { MessageId } from "@xmtp/react-native-sdk";
 import { conversationMessageQueryKey } from "./QueryKeys";
@@ -25,8 +25,8 @@ async function getConversationMessage(args: IArgs) {
     `[useConversationMessage] Fetching message ${messageId} for account ${account}`
   );
 
-  const xmtpClient = await getXmtpClient({
-    address: account,
+  const xmtpClient = MultiInboxClient.instance.getInboxClientForAddress({
+    ethereumAddress: account,
   });
 
   if (!xmtpClient) {

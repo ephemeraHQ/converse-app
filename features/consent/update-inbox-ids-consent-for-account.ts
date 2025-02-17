@@ -1,4 +1,4 @@
-import logger from "@utils/logger";
+import { logger } from "@utils/logger";
 import { InboxId } from "@xmtp/react-native-sdk";
 import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 

@@ -5,7 +5,7 @@ import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-cl
 import { contentTypesPrefixes } from "@/utils/xmtpRN/xmtp-content-types/xmtp-content-types";
 import { isSupportedMessage } from "@/utils/xmtpRN/xmtp-messages/xmtp-messages";
 import { queryOptions, useQuery } from "@tanstack/react-query";
-import logger from "@utils/logger";
+import { logger } from "@utils/logger";
 import {
   InboxId,
   type ConversationTopic,

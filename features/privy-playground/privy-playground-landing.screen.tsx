@@ -14,22 +14,16 @@ import { PrivyPlaygroundUserScreen } from "./privy-playground-user.screen";
 import { getConfig } from "@/config";
 import logger from "@/utils/logger";
 import * as SplashScreen from "expo-splash-screen";
-import {
-  AuthStatuses,
-  useAccountsStore,
-} from "../multi-inbox/multi-inbox.store";
-import { useSocialProfiles } from "thirdweb/react";
-import { thirdwebClient } from "@/utils/thirdweb";
+import { useAccountsStore } from "../multi-inbox/multi-inbox.store";
 import { ethers, utils as ethersUtils } from "ethers";
 import { usePrivy } from "@privy-io/expo";
-
+import { useSocialProfilesForAddress } from "../social-profiles/social-lookup.query";
 const AddressDebugger = ({ address }: { address: string }) => {
   const {
     data: profiles,
     status,
     error,
-  } = useSocialProfiles({
-    client: thirdwebClient,
+  } = useSocialProfilesForAddress({
     address,
   });
 
@@ -334,32 +328,7 @@ export function PrivyPlaygroundLandingScreen() {
     <SafeAreaView>
       <ScrollView style={{ borderColor: "rgba(0,0,0,0.1)", borderWidth: 1 }}>
         <View style={{ padding: 20 }}>
-          <NameResolver />
-
           {/* Add reverse resolution */}
-          <View style={{ marginTop: 20 }}>
-            <Text style={{ fontWeight: "bold", marginBottom: 10 }}>
-              Reverse Resolution Testing
-            </Text>
-            <ReverseResolver address="0x0aF849d2778f6ccE4A2641438B6207DC4750a82B" />
-          </View>
-
-          <Text style={{ fontWeight: "bold", marginBottom: 10, marginTop: 20 }}>
-            Debug All Available Addresses
-          </Text>
-
-          {/* Debug linked accounts */}
-          {user?.linked_accounts?.map(
-            (account: any) =>
-              account.address && (
-                <View key={account.address}>
-                  <Text style={{ fontWeight: "bold", marginTop: 10 }}>
-                    Linked Account ({account.type}):
-                  </Text>
-                  <AddressDebugger address={account.address} />
-                </View>
-              )
-          )}
 
           {/* Debug your hardcoded Coinbase address */}
           <Text style={{ fontWeight: "bold", marginTop: 10 }}>

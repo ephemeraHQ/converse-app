@@ -1,7 +1,7 @@
-import { getXmtpClient } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
-import logger from "@utils/logger";
+import { logger } from "@/utils/logger";
+import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 
-type UpdateConsentForAddressesForAccountParams = {
+export type UpdateConsentForAddressesForAccountParams = {
   account: string;
   addresses: string[];
   consent: "allow" | "deny";
@@ -12,8 +12,8 @@ export const updateConsentForAddressesForAccount = async ({
   addresses,
   consent,
 }: UpdateConsentForAddressesForAccountParams) => {
-  const client = await getXmtpClient({
-    address: account,
+  const client = MultiInboxClient.instance.getInboxClientForAddress({
+    ethereumAddress: account,
   });
 
   if (!client) {

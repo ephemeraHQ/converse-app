@@ -1,5 +1,5 @@
 import type { Storage as PrivyStorage } from "@privy-io/js-sdk-core";
-import logger from "@utils/logger";
+import { logger } from "@utils/logger";
 import { createHash } from "crypto";
 import { getRandomBytesAsync } from "expo-crypto";
 import * as SecureStore from "expo-secure-store";

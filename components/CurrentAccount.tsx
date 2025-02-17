@@ -5,9 +5,8 @@ import { spacing } from "@theme/spacing";
 import { ViewStyle, StyleSheet } from "react-native";
 
 import { Avatar } from "./Avatar";
-import { usePreferredName } from "@/hooks/usePreferredName";
-import { usePreferredAvatarUri } from "@/hooks/usePreferredAvatarUri";
 import { useSafeCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
+import { useInboxAvatar, useInboxName } from "@/features/inbox/inbox.api";
 
 type ICurrentAccountProps = {
   style?: ViewStyle;
@@ -19,9 +18,11 @@ const styles = StyleSheet.create({
 });
 
 export function CurrentAccount(props: ICurrentAccountProps) {
-  const account = useSafeCurrentSender().ethereumAddress;
-  const name = usePreferredName(account);
-  const avatarUri = usePreferredAvatarUri(account);
+  const inboxId = useSafeCurrentSender().inboxId;
+  const { data: name, isLoading } = useInboxName({ inboxId });
+  const { data: avatarUri, isLoading: isAvatarLoading } = useInboxAvatar({
+    inboxId,
+  });
 
   return (
     <HStack style={[styles.container, props.style]}>

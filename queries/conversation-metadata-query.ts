@@ -101,7 +101,6 @@ const batchedGetConversationMetadata = create({
     const results = await Promise.all(
       Object.entries(accountGroups).map(async ([account, groupArgs]) => {
         const conversationsData = await getTopics({
-          account,
           topics: groupArgs.map((arg) => arg.topic),
         });
 

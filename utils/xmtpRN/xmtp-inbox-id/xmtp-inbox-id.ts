@@ -1,6 +1,6 @@
 import { XMTPError } from "@/utils/error";
 import logger from "@/utils/logger";
-import { getXmtpClient } from "@/utils/xmtpRN/xmtp-client/xmtp-client";
+import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 import { InboxId } from "@xmtp/react-native-sdk";
 
 export function isSameInboxId(inboxId1: InboxId, inboxId2: InboxId) {
@@ -15,8 +15,8 @@ export async function getInboxIdFromAddress(args: {
   const startTime = Date.now();
   try {
     const clientStartTime = Date.now();
-    const client = await getXmtpClient({
-      address: currentUserAddress,
+    const client = MultiInboxClient.instance.getInboxClientForAddress({
+      ethereumAddress: currentUserAddress,
     });
     const clientDuration = Date.now() - clientStartTime;
 

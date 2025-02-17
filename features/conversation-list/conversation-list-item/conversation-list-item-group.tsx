@@ -6,7 +6,7 @@ import { useConversationIsUnread } from "@/features/conversation-list/hooks/use-
 import { useDeleteGroup } from "@/features/conversation-list/hooks/use-delete-group";
 import { useToggleReadStatus } from "@/features/conversation-list/hooks/use-toggle-read-status";
 import { useMessagePlainText } from "@/features/conversation-list/hooks/use-message-plain-text";
-import { useGroupNameForCurrentAccount } from "@/hooks/useGroupName";
+import { useGroupName } from "@/hooks/useGroupName";
 import { useGroupQuery } from "@/queries/useGroupQuery";
 import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { useRouter } from "@navigation/useNavigation";
@@ -37,7 +37,7 @@ export const ConversationListItemGroup = memo(
       topic: conversationTopic,
     });
 
-    const { groupName } = useGroupNameForCurrentAccount({
+    const { groupName } = useGroupName({
       conversationTopic,
     });
 

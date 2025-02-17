@@ -2,6 +2,7 @@ import { getOrFetchConversation } from "@/queries/conversation-query";
 import {
   queryOptions as reactQueryOptions,
   useQuery,
+  skipToken,
 } from "@tanstack/react-query";
 import { getCleanAddress } from "@utils/evm/getCleanAddress";
 import { ConversationTopic, Member } from "@xmtp/react-native-sdk";
@@ -58,16 +59,17 @@ export const getGroupMembersQueryOptions = (
   args: Optional<IGroupMembersArgsWithCaller, "caller">
 ) => {
   const { account, topic, caller } = args;
-  const isEnabled = !!topic;
+  const enabled = !!topic;
   return reactQueryOptions({
     meta: {
       caller,
     },
     // eslint-disable-next-line @tanstack/query/exhaustive-deps
     queryKey: groupMembersQueryKey({ account, topic }),
-    queryFn: () =>
-      fetchGroupMembers({ account, topic, caller: caller ?? "unknown" }),
-    enabled: isEnabled,
+    queryFn: enabled
+      ? () => fetchGroupMembers({ account, topic, caller: caller ?? "unknown" })
+      : skipToken,
+    enabled,
     /**
      * We can't really have an empty group...
      * And when a group is created on the SDK, the members are added in a separate call

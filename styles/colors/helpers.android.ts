@@ -1,4 +1,4 @@
-import logger from "@utils/logger";
+import { logger } from "@utils/logger";
 import { ColorSchemeName } from "react-native";
 
 import { backgroundColor } from ".";

@@ -6,7 +6,7 @@ import {
 } from "../../features/multi-inbox/multi-inbox.store";
 import { getSecureItemAsync } from "../keychain";
 
-import logger from "@utils/logger";
+import { logger } from "@utils/logger";
 
 export const getCurrentAccountSigner = async () => {
   const account = getSafeCurrentSender().ethereumAddress;

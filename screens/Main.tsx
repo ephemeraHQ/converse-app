@@ -1,5 +1,4 @@
 import { config } from "@/config";
-import { JoinGroupScreenConfig } from "@/features/GroupInvites/joinGroup/JoinGroupNavigation";
 import { ProfileScreenConfig } from "@/features/profiles/profile.nav";
 import ActionSheetStateHandler from "@components/StateHandlers/ActionSheetStateHandler";
 import { HydrationStateHandler } from "@components/StateHandlers/HydrationStateHandler";
@@ -14,7 +13,6 @@ import * as Linking from "expo-linking";
 import { StatusBar } from "expo-status-bar";
 import React from "react";
 import { Platform, useColorScheme } from "react-native";
-import { GroupScreenConfig } from "./Navigation/GroupNav";
 import {
   IdleNavigation,
   NavigationParamList,
@@ -38,8 +36,6 @@ const linking: LinkingOptions<NavigationParamList> = {
       Chats: "/",
       Conversation: ConversationScreenConfig,
       Profile: ProfileScreenConfig,
-      Group: GroupScreenConfig,
-      GroupInvite: JoinGroupScreenConfig,
       ShareProfile: ShareProfileScreenConfig,
       WebviewPreview: WebviewPreviewScreenConfig,
     },
