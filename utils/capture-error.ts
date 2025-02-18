@@ -1,5 +1,5 @@
 import { showSnackbar } from "@/components/Snackbar/Snackbar.service";
-import logger from "@/utils/logger";
+import { logger } from "@/utils/logger";
 
 export function captureError(error: unknown) {
   if (error instanceof Error && error.cause) {

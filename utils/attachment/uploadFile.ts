@@ -2,11 +2,9 @@ import { getPresignedUriForUpload } from "@/utils/api/upload";
 import RNFetchBlob from "rn-fetch-blob";
 
 export const uploadFile = async ({
-  account,
   filePath,
   contentType,
 }: {
-  account: string;
   filePath?: string | undefined;
   blob?: Blob | undefined;
   contentType?: string | undefined;
