@@ -13,9 +13,7 @@ import {
   useProfileMeStoreValue,
 } from "@/features/profiles/profile-me.store";
 import { validateProfileName } from "@/features/profiles/utils/validate-profile-name";
-import { useSafeCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
-import { usePreferredInboxAvatar } from "@/hooks/usePreferredInboxAvatar";
-import { usePreferredInboxName } from "@/hooks/usePreferredInboxName";
+
 import { translate } from "@/i18n";
 import { useInboxProfileSocialsQuery } from "@/queries/useInboxProfileSocialsQuery";
 import { useAppTheme } from "@/theme/useAppTheme";
@@ -23,7 +21,7 @@ import { useLogout } from "@/utils/logout";
 import { useRouter } from "@navigation/useNavigation";
 import { InboxId } from "@xmtp/react-native-sdk";
 import React, { memo, useCallback, useEffect, useState } from "react";
-import { Alert } from "react-native";
+import { useCurrentSender } from "../multi-inbox/multi-inbox.store";
 
 export function ProfileMe(props: { inboxId: InboxId }) {
   const { inboxId } = props;
@@ -36,9 +34,7 @@ export function ProfileMe(props: { inboxId: InboxId }) {
 
   const editMode = useProfileMeStoreValue(inboxId, (state) => state.editMode);
 
-  const currentAccountInboxId = useSafeCurrentAccountInboxId();
-
-  const isMyProfile = currentAccountInboxId === inboxId;
+  const isMyProfile = useCurrentSender()?.inboxId === inboxId;
 
   const { data: socials } = useInboxProfileSocialsQuery({
     inboxId,

@@ -1,8 +1,7 @@
-import { getCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { getSafeCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
 import { useMarkConversationAsRead } from "@/features/conversation/hooks/use-mark-conversation-as-read";
 import { useMarkConversationAsUnread } from "@/features/conversation/hooks/use-mark-conversation-as-unread";
 import { conversationIsUnreadForInboxId } from "@/features/conversation/utils/conversation-is-unread-by-current-account";
-import { getCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { getConversationMetadataQueryData } from "@/queries/conversation-metadata-query";
 import { getConversationQueryData } from "@/queries/conversation-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
@@ -21,14 +20,14 @@ export const useToggleReadStatus = ({ topic }: UseToggleReadStatusProps) => {
   });
 
   const toggleReadStatusAsync = useCallback(async () => {
-    const currentAccount = getCurrentAccount()!;
-    const currentAccountInboxId = getCurrentAccountInboxId();
+    const { ethereumAddress: currentEthereumAddress, inboxId: currentInboxId } =
+      getSafeCurrentSender();
     const conversationData = getConversationMetadataQueryData({
-      account: currentAccount,
+      account: currentEthereumAddress,
       topic,
     });
     const conversation = getConversationQueryData({
-      account: currentAccount,
+      account: currentEthereumAddress,
       topic,
     });
 
@@ -36,7 +35,7 @@ export const useToggleReadStatus = ({ topic }: UseToggleReadStatusProps) => {
       lastMessageSent: conversation?.lastMessage?.sentNs ?? null,
       lastMessageSenderInboxId:
         conversation?.lastMessage?.senderInboxId ?? null,
-      consumerInboxId: currentAccountInboxId!,
+      consumerInboxId: currentInboxId,
       readUntil: conversationData?.readUntil ?? 0,
       markedAsUnread: conversationData?.markedAsUnread ?? false,
     });

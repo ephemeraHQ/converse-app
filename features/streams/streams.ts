@@ -14,6 +14,8 @@ import { startConversationStreaming } from "./stream-conversations";
 import { startMessageStreaming } from "./stream-messages";
 import { useStreamingStore } from "./stream-store";
 
+// todo move this to multi-inbox-client
+// when clients are added and removed; start and stop respective streams
 export function setupStreamingSubscriptions() {
   // Start streaming when hydration is done
   useAppStore.subscribe(

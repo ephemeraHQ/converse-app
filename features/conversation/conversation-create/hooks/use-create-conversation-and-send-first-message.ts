@@ -1,5 +1,4 @@
 import { getCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
-import { getCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import {
   allowedConsentConversationsQueryKey,
   conversationMessagesQueryKey,
@@ -157,7 +156,7 @@ export function useCreateConversationAndSendFirstMessage() {
       return { conversation, messageId };
     },
     // onMutate: ({ inboxIds, content }) => {
-    //   const currentAccountInboxId = getCurrentAccountInboxId()!;
+    //   const currentAccountInboxId = getSafeCurrentSender().inboxId;
     //   const currentAccount = getCurrentAccount()!;
 
     //   logger.debug(

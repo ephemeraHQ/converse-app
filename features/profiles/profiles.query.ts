@@ -11,6 +11,10 @@ import {
   IConvosProfileForInbox,
 } from "@/features/profiles/profiles.api";
 import { DateUtils } from "@/utils/time.utils";
+import {
+  useAccountsList,
+  useSafeCurrentSender,
+} from "@/features/multi-inbox/multi-inbox.store";
 
 const profileQueryKey = ({ xmtpId }: { xmtpId: string }) =>
   ["profile", xmtpId] as const;

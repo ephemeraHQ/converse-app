@@ -11,15 +11,11 @@ import { Text } from "@/design-system/Text";
 import { OnboardingNotificationRow } from "@/features/onboarding/components/onboarding-notification-row";
 import { OnboardingSubtitle } from "@/features/onboarding/components/onboarding-subtitle";
 import { OnboardingTitle } from "@/features/onboarding/components/onboarding-title";
-import { useInboxAvatar } from "@/hooks/useInboxAvatar";
-import { useInboxName } from "@/hooks/useInboxName";
-import { translate } from "@/i18n";
 import { captureError } from "@/utils/capture-error";
 import { useAppTheme } from "@theme/useAppTheme";
 import {
   AuthStatuses,
   useAccountsStore,
-  useCurrentAccount,
   useSettingsStore,
 } from "@/features/multi-inbox/multi-inbox.store";
 import { NavigationParamList } from "@/screens/Navigation/Navigation";
@@ -40,15 +36,13 @@ export function OnboardingNotificationsScreen(
 ) {
   const { theme } = useAppTheme();
 
-  const currentAccount = useCurrentAccount()!;
-
   const setNotificationsSettings = useSettingsStore(
     (s) => s.setNotificationsSettings
   );
 
-  const avatarUri = useInboxAvatar(currentAccount);
+  // const avatarUri = useInboxAvatar(currentAccount);
 
-  const displayName = useInboxName(currentAccount);
+  // const displayName = useInboxName(currentAccount);
 
   const setAuthStatus = useAccountsStore((s) => s.setAuthStatus);
   const handleEnableNotifications = () => {

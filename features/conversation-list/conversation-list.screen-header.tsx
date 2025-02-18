@@ -1,8 +1,9 @@
 import { Avatar } from "@/components/Avatar";
 import {
-  useAccountsList,
   useAccountsStore,
-  useCurrentAccount,
+  useActiveSenderProfile,
+  useCurrentProfiles,
+  useSafeCurrentSender,
 } from "@/features/multi-inbox/multi-inbox.store";
 import { Center } from "@/design-system/Center";
 import { HStack } from "@/design-system/HStack";
@@ -11,15 +12,11 @@ import { Icon, iconRegistry } from "@/design-system/Icon/Icon";
 import { Pressable } from "@/design-system/Pressable";
 import { Text } from "@/design-system/Text";
 import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu";
-import { useSafeCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { usePreferredInboxAvatar } from "@/hooks/usePreferredInboxAvatar";
-import { useInboxName } from "@/hooks/useInboxName";
 import { translate } from "@/i18n";
 import { useHeader } from "@/navigation/use-header";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
 import { converseEventEmitter } from "@/utils/events";
-import { shortDisplayName } from "@/utils/str";
-import { useAccountsProfiles } from "@/utils/useAccountsProfiles";
 import { useNavigation } from "@react-navigation/native";
 import React, { useCallback } from "react";
 import { Alert, ViewStyle } from "react-native";
@@ -68,10 +65,10 @@ function HeaderRightActions() {
 function HeaderTitle() {
   const { theme, themed } = useAppTheme();
   const navigation = useNavigation();
-  const currentAccount = useCurrentAccount();
-  const preferredName = useInboxName(currentAccount!);
-  const accountsProfilesNames = useAccountsProfiles();
-  const accounts = useAccountsList();
+  const currentAccountInboxId = useSafeCurrentSender().inboxId;
+  const { data: currentProfile } = useActiveSenderProfile();
+  const { currentProfiles } = useCurrentProfiles();
+
   const setCurrentAccount = useAccountsStore((s) => s.setCurrentAccount);
 
   const onDropdownPress = useCallback(
@@ -99,10 +96,13 @@ function HeaderTitle() {
         style={themed($dropDownMenu)}
         onPress={onDropdownPress}
         actions={[
-          ...accountsProfilesNames.map((profilePreferedName, index) => ({
-            id: accounts[index],
-            title: shortDisplayName(profilePreferedName),
-            image: currentAccount === accounts[index] ? "checkmark" : "",
+          ...currentProfiles?.map((profile) => ({
+            id: profile.id,
+            title: profile.name,
+            image:
+              currentAccountInboxId === profile.deviceIdentity.xmtpId
+                ? "checkmark"
+                : "",
           })),
           {
             displayInline: true,
@@ -119,7 +119,7 @@ function HeaderTitle() {
         ]}
       >
         <HStack style={themed($rowContainer)}>
-          <Text>{shortDisplayName(preferredName)}</Text>
+          <Text>{currentProfile?.name}</Text>
           <Center style={themed($iconContainer)}>
             <Icon
               color={theme.colors.text.secondary}
@@ -136,7 +136,7 @@ function HeaderTitle() {
 function ProfileAvatar() {
   const { theme, themed } = useAppTheme();
   const navigation = useNavigation();
-  const currentAccountInboxId = useSafeCurrentAccountInboxId();
+  const currentAccountInboxId = useSafeCurrentSender().inboxId;
   const { data: preferredName } = useInboxName({
     inboxId: currentAccountInboxId,
   });

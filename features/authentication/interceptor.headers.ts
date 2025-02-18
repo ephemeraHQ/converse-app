@@ -32,7 +32,11 @@ export const headersInterceptor = async (config: AxiosRequestConfig) => {
     url.includes(route)
   );
 
-  const headers = needsAuthenticationHeaders
+  const isJwtSetupOnBackend = /** not prioritized for March launch */ false;
+
+  const shouldUseJwtHeaders = isJwtSetupOnBackend && needsAuthenticationHeaders;
+
+  const headers = shouldUseJwtHeaders
     ? await getConvosAuthenticationHeaders()
     : await getConvosAuthenticatedHeaders();
 

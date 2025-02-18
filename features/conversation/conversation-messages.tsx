@@ -31,7 +31,6 @@ import { useRemoveReactionOnMessage } from "@/features/conversation/hooks/use-re
 import { isConversationAllowed } from "@/features/conversation/utils/is-conversation-allowed";
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm";
 import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
-import { useSafeCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { useScreenFocusEffectOnce } from "@/hooks/use-screen-focus-effect-once";
 import { useAppStateHandlers } from "@/hooks/useAppStateHandlers";
 import { useConversationMessagesQuery } from "@/queries/conversation-messages-query";
@@ -41,7 +40,7 @@ import {
   ConversationWithCodecsType,
   DecodedMessageWithCodecsType,
 } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { useSafeCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
 import { MessageId } from "@xmtp/react-native-sdk";
 import React, { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import {
@@ -63,10 +62,9 @@ export const ConversationMessages = memo(function ConversationMessages(props: {
 }) {
   const { conversation } = props;
 
-  const { theme } = useAppTheme();
+  const { ethereumAddress: currentAccount, inboxId: currentAccountInboxId } =
+    useSafeCurrentSender();
 
-  const currentAccount = useCurrentAccount()!;
-  const currentAccountInboxId = useSafeCurrentAccountInboxId();
   const topic = useCurrentConversationTopic()!;
 
   const refreshingRef = useRef(false);

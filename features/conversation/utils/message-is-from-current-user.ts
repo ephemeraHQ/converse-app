@@ -1,4 +1,4 @@
-import { getCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
+import { getSafeCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
 import logger from "@/utils/logger";
 import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { isSameInboxId } from "@/utils/xmtpRN/xmtp-inbox-id/xmtp-inbox-id";
@@ -10,9 +10,9 @@ type MessageFromCurrentUserPayload = {
 export function messageIsFromCurrentAccountInboxId({
   message,
 }: MessageFromCurrentUserPayload) {
-  const currentAccountInboxId = getCurrentAccountInboxId();
+  const { inboxId: currentInboxId } = getSafeCurrentSender();
   const messageSenderInboxId = message?.senderInboxId.toLowerCase();
-  if (!currentAccountInboxId) {
+  if (!currentInboxId) {
     logger.warn(
       "[messageIsFromCurrentAccountInboxId] No current account inbox id"
     );
@@ -24,5 +24,5 @@ export function messageIsFromCurrentAccountInboxId({
     );
     return false;
   }
-  return isSameInboxId(messageSenderInboxId, currentAccountInboxId);
+  return isSameInboxId(messageSenderInboxId, currentInboxId);
 }

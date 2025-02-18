@@ -10,11 +10,15 @@ import {
 } from "../../data/store/settingsStore";
 import { initWalletStore, WalletStoreType } from "../../data/store/walletStore";
 import {
+  ConvosSender,
   CurrentSender,
   MultiInboxClientRestorationState,
   MultiInboxClientRestorationStates,
 } from "@/features/multi-inbox/multi-inbox-client.types";
-
+import {
+  useProfileQuery,
+  useProfilesQueries,
+} from "@/features/profiles/profiles.query";
 type AccountStoreDataType = {
   settings: SettingsStoreType;
   chat: ChatStoreType;
@@ -201,6 +205,22 @@ export const useAccountsList = () => {
     .map((sender) => sender.ethereumAddress);
 };
 
+export const useActiveSenderProfile = () => {
+  const { inboxId: currentInboxId } = useSafeCurrentSender();
+  return useProfileQuery({ xmtpId: currentInboxId });
+};
+
+export const useCurrentProfiles = () => {
+  const senders = useAccountsStore((state) => state.senders);
+  const inboxIdsForCurrentInboxes = senders.map((sender) => sender.inboxId);
+  const { data: currentProfiles, isLoading: isLoadingProfiles } =
+    useProfilesQueries({
+      xmtpInboxIds: inboxIdsForCurrentInboxes,
+    });
+  const truthyProfiles = currentProfiles?.filter(Boolean);
+  return { currentProfiles: truthyProfiles, isLoadingProfiles };
+};
+
 export const useCurrentAccount = () => {
   const currentSender = useCurrentSender();
   return currentSender?.ethereumAddress;
@@ -230,6 +250,15 @@ export function getCurrentAccount() {
   const currentSender = useAccountsStore.getState().currentSender;
 
   return currentSender?.ethereumAddress;
+}
+
+export function isCurrentSender(sender: Partial<ConvosSender>) {
+  const currentSender = getSafeCurrentSender();
+  if (!sender) return false;
+  return (
+    currentSender.inboxId === sender.inboxId ||
+    currentSender.ethereumAddress === sender.ethereumAddress
+  );
 }
 
 const currentAccountStoreHook = <T extends keyof AccountStoreDataType>(
