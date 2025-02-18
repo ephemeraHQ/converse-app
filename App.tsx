@@ -41,19 +41,11 @@ import { initSentry } from "./utils/sentry";
 import { saveApiURI } from "./utils/sharedData";
 import { preventSplashScreenAutoHide } from "./utils/splash/splash";
 import { setupStreamingSubscriptions } from "@/features/streams/streams";
-import {
-  // MultiInboxClient,
-  useInitializeMultiInboxClient,
-} from "@/features/multi-inbox/multi-inbox.client";
-// import { useAppStateHandlers } from "./hooks/useAppStateHandlers";
-// import { useInstalledWallets } from "@/features/wallets/use-installed-wallets.hook";
+import { useInitializeMultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 import logger from "./utils/logger";
-import { AuthenticateWithPasskeyProvider } from "./features/onboarding/contexts/signup-with-passkey.context";
-import { PrivyPlaygroundLandingScreen } from "./features/privy-playground/privy-playground-landing.screen";
-import { useLogoutOnJwtRefreshError } from "./features/authentication/use-logout-on-jwt-refresh-error";
-// import { useAccountsStore } from "./features/multi-inbox/multi-inbox.store";
-// import { AuthenticateWithPasskeyProvider } from "./features/onboarding/contexts/signup-with-passkey.context";
-// import { PrivyPlaygroundLandingScreen } from "./features/privy-playground/privy-playground-landing.screen";
+import { AuthenticateWithPasskeyProvider } from "@/features/onboarding/contexts/signup-with-passkey.context";
+import { PrivyPlaygroundLandingScreen } from "@/features/privy-playground/privy-playground-landing.screen";
+import { useLogoutOnJwtRefreshError } from "@/features/authentication/use-logout-on-jwt-refresh-error";
 
 !!preventSplashScreenAutoHide && preventSplashScreenAutoHide();
 
