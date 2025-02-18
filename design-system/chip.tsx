@@ -1,13 +1,15 @@
-import { Avatar as RNAvatar } from "@/components/Avatar";
+import { Avatar } from "@/components/Avatar";
 import { Center } from "@/design-system/Center";
-import { Text as RNText } from "@/design-system/Text";
+import { Text } from "@/design-system/Text";
 import { useAppTheme } from "@/theme/useAppTheme";
 import React from "react";
 import { StyleProp, ViewStyle, TextStyle } from "react-native";
 import { AnimatedPressable } from "@design-system/Pressable";
 
+type IChipSize = "sm" | "md";
+
 const ChipContext = React.createContext<{
-  size: "sm" | "md";
+  size: IChipSize;
   disabled?: boolean;
   isSelected?: boolean;
 } | null>(null);
@@ -23,7 +25,7 @@ function useChipContext() {
 type IChipProps = {
   isSelected?: boolean;
   onPress?: () => void;
-  size?: "sm" | "md";
+  size?: IChipSize;
   disabled?: boolean;
   variant?: "filled" | "outlined";
   children: React.ReactNode;
@@ -44,11 +46,10 @@ export function Chip({
       <AnimatedPressable
         onPress={onPress}
         disabled={disabled}
-        style={({ pressed }) => [
+        style={() => [
           styles.$container,
           isSelected && styles.$selectedContainer,
           disabled && styles.$disabledContainer,
-          pressed && styles.$pressedContainer,
         ]}
       >
         <Center style={styles.$content}>{children}</Center>
@@ -67,7 +68,7 @@ export function ChipText({ children, style }: IChipTextProps) {
   const styles = useChipStyles({ variant: "outlined" });
 
   return (
-    <RNText
+    <Text
       preset={size === "sm" ? "small" : "body"}
       style={[
         style,
@@ -76,7 +77,7 @@ export function ChipText({ children, style }: IChipTextProps) {
       ]}
     >
       {children}
-    </RNText>
+    </Text>
   );
 }
 
@@ -95,7 +96,7 @@ type IChipAvatarProps = {
 
 export function ChipAvatar({ uri, name }: IChipAvatarProps) {
   const { theme } = useAppTheme();
-  return <RNAvatar uri={uri} name={name} size={theme.avatarSize.xs} />;
+  return <Avatar uri={uri} name={name} size={theme.avatarSize.xs} />;
 }
 
 export function useChipStyles({ variant }: { variant: "filled" | "outlined" }) {
@@ -135,9 +136,6 @@ export function useChipStyles({ variant }: { variant: "filled" | "outlined" }) {
     $content,
     $disabledContainer: {
       opacity: 0.5,
-    },
-    $pressedContainer: {
-      opacity: 0.8,
     },
     $disabledText: {
       color: theme.colors.text.inactive,
