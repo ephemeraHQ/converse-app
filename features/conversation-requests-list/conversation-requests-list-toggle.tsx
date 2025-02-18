@@ -1,4 +1,5 @@
 import { Chip } from "@/design-system/chip";
+import { HStack } from "@/design-system/HStack";
 import { useAppTheme } from "@/theme/useAppTheme";
 import React from "react";
 import { View } from "react-native";
@@ -17,9 +18,8 @@ export function ConversationRequestsToggle({
   const { theme } = useAppTheme();
 
   return (
-    <View
+    <HStack
       style={{
-        flexDirection: "row",
         gap: theme.spacing.xxs,
         marginBottom: theme.spacing.xs,
         marginHorizontal: theme.spacing.xs,
@@ -36,6 +36,6 @@ export function ConversationRequestsToggle({
           />
         </View>
       ))}
-    </View>
+    </HStack>
   );
 }
