@@ -1,4 +1,5 @@
 import { Chip } from "@/design-system/chip";
+import { useAppTheme } from "@/theme/useAppTheme";
 import React from "react";
 import { View } from "react-native";
 
@@ -13,13 +14,15 @@ export function ConversationRequestsToggle({
   selectedIndex,
   onSelect,
 }: IConversationRequestsToggleProps) {
+  const { theme } = useAppTheme();
+
   return (
     <View
       style={{
         flexDirection: "row",
-        gap: 8,
-        marginBottom: 12,
-        marginHorizontal: 12,
+        gap: theme.spacing.xxs,
+        marginBottom: theme.spacing.xs,
+        marginHorizontal: theme.spacing.xs,
       }}
     >
       {options.map((option, index) => (
