@@ -22,10 +22,13 @@ import {
 } from "@xmtp/react-native-sdk";
 import { useEffect, useMemo } from "react";
 
-const handleGroupMetadataChange = (
-  initiatorName: string,
-  content: ReturnType<GroupUpdatedCodec["decode"]>
-) => {
+const handleGroupMetadataChange = ({
+  initiatorName,
+  content,
+}: {
+  initiatorName: string;
+  content: ReturnType<GroupUpdatedCodec["decode"]>;
+}) => {
   if (content.metadataFieldsChanged.length !== 1) {
     return translate("conversation_list.updated_the_group", {
       userName: initiatorName,
@@ -55,18 +58,24 @@ const handleGroupMetadataChange = (
   );
 };
 
-const handleGroupMemberChange = (
-  initiatorName: string,
-  members: { inboxId: InboxId }[],
-  type: "added" | "removed"
-) => {
+const handleGroupMemberChange = ({
+  initiatorName,
+  members,
+  type,
+}: {
+  initiatorName: string;
+  members: { inboxId: InboxId }[];
+  type: "added" | "removed";
+}) => {
   if (members.length === 0) return null;
 
   if (members.length === 1) {
     const memberSocials = getInboxProfileSocialsQueryData({
       inboxId: members[0].inboxId,
     });
-    const memberName = getPreferredInboxAddress(memberSocials);
+    const memberName = getPreferredInboxAddress(
+      memberSocials as IProfileSocialsZodSchema[] | null | undefined
+    );
 
     if (!memberName) {
       return translate(`conversation_list.member_${type}_unknown`, {
@@ -130,26 +139,31 @@ export const useMessagePlainText = (
         const initiatorSocials = getInboxProfileSocialsQueryData({
           inboxId: content.initiatedByInboxId,
         });
-        const initiatorName = getPreferredInboxAddress(initiatorSocials);
+        const initiatorName = getPreferredInboxAddress(
+          initiatorSocials as IProfileSocialsZodSchema[] | null | undefined
+        );
 
         if (!initiatorName) return translate("conversation_list.group_updated");
 
         if (content.metadataFieldsChanged.length > 0) {
-          return handleGroupMetadataChange(initiatorName, content);
+          return handleGroupMetadataChange({
+            initiatorName,
+            content,
+          });
         }
 
-        const memberAddedText = handleGroupMemberChange(
+        const memberAddedText = handleGroupMemberChange({
           initiatorName,
-          content.membersAdded,
-          "added"
-        );
+          members: content.membersAdded,
+          type: "added",
+        });
         if (memberAddedText) return memberAddedText;
 
-        const memberRemovedText = handleGroupMemberChange(
+        const memberRemovedText = handleGroupMemberChange({
           initiatorName,
-          content.membersRemoved,
-          "removed"
-        );
+          members: content.membersRemoved,
+          type: "removed",
+        });
         if (memberRemovedText) return memberRemovedText;
 
         return translate("conversation_list.group_updated");

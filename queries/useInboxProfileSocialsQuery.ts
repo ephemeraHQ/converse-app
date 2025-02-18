@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-query";
 import { InboxId } from "@xmtp/react-native-sdk";
 import { queryClient } from "./queryClient";
+import { IProfileSocialsZodSchema } from "@/types/profileSocials";
 
 type IArgs = {
   inboxId: InboxId;
@@ -51,10 +52,12 @@ export const fetchInboxProfileSocialsQuery = ({
   );
 };
 
-export const getInboxProfileSocialsQueryData = ({ inboxId }: IArgs) => {
-  return queryClient.getQueryData(
-    getInboxProfileSocialsQueryConfig({ inboxId }).queryKey
-  );
+export const getInboxProfileSocialsQueryData = ({
+  inboxId,
+}: {
+  inboxId: InboxId;
+}): IProfileSocialsZodSchema[] | null | undefined => {
+  return queryClient.getQueryData(inboxProfileSocialsQueryKey({ inboxId }));
 };
 
 export const invalidateInboxProfileSocialsQuery = ({ inboxId }: IArgs) => {

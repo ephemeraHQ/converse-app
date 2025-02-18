@@ -13,8 +13,7 @@ globs:
 - When asked to extract a component or some code for custom hooks, create those in the same file.
 - Keep related code close together by placing the exported component at the top of the file with related components directly underneath it.
 - Avoid default exports to maintain consistent imports and easier refactoring.
-  - Named exports make codebase more maintainable and
-  - refactoring safer.
+- Named exports make codebase more maintainable and refactoring safer.
 
 ```typescript
 // ❌ Bad: Default export
