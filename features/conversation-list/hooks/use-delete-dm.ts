@@ -110,7 +110,7 @@ export const useDeleteDm = ({ topic }: { topic: ConversationTopic }) => {
         },
       },
       {
-        label: translate("cancel"),
+        label: translate("Cancel"),
         action: () => {},
       },
     ];

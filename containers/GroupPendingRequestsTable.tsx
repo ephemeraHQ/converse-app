@@ -48,7 +48,7 @@ export const GroupPendingRequestsTable: FC<GroupPendingRequestsTableProps> = ({
           const options = [
             translate("approve"),
             translate("deny"),
-            translate("cancel"),
+            translate("Cancel"),
           ];
           const title = translate("approve_member_to_this_group", {
             name: preferredName,

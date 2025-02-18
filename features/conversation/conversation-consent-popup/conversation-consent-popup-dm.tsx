@@ -14,9 +14,9 @@ import { useColorScheme } from "react-native";
 import { useCurrentConversationTopicSafe } from "../conversation.store-context";
 import {
   ConsentPopupButtonsContainer,
-  ConsentPopupTitle,
   ConversationConsentPopupButton,
   ConversationConsentPopupContainer,
+  ConversationConsentPopupHelperText,
 } from "./conversation-consent-popup.design-system";
 
 export function ConversationConsentPopupDm() {
@@ -52,7 +52,7 @@ export function ConversationConsentPopupDm() {
 
     showActionSheetWithOptions(
       {
-        options: [translate("block"), translate("cancel")],
+        options: [translate("Delete"), translate("Cancel")],
         cancelButtonIndex: 1,
         destructiveButtonIndex: 0,
         title: translate("if_you_block_contact"),
@@ -113,23 +113,21 @@ export function ConversationConsentPopupDm() {
 
   return (
     <ConversationConsentPopupContainer>
-      <ConsentPopupTitle>
-        {translate("do_you_trust_this_contact")}
-      </ConsentPopupTitle>
       <ConsentPopupButtonsContainer>
+        <ConversationConsentPopupButton
+          variant="fill"
+          text={translate("Join the conversation")}
+          onPress={handleAccept}
+        />
         <ConversationConsentPopupButton
           variant="text"
           action="danger"
-          icon="xmark"
-          text={translate("block")}
+          text={translate("Delete")}
           onPress={handleBlock}
         />
-        <ConversationConsentPopupButton
-          variant="fill"
-          icon="checkmark"
-          text={translate("accept")}
-          onPress={handleAccept}
-        />
+        <ConversationConsentPopupHelperText>
+          {translate("They won't be notified if you delete it")}
+        </ConversationConsentPopupHelperText>
       </ConsentPopupButtonsContainer>
     </ConversationConsentPopupContainer>
   );

@@ -2,9 +2,9 @@ import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { useGroupConsentForCurrentAccount } from "@/features/consent/use-group-consent-for-current-account";
 import {
   ConsentPopupButtonsContainer,
-  ConsentPopupTitle,
   ConversationConsentPopupButton,
   ConversationConsentPopupContainer,
+  ConversationConsentPopupHelperText,
 } from "@/features/conversation/conversation-consent-popup/conversation-consent-popup.design-system";
 import { useRouter } from "@/navigation/useNavigation";
 import { useGroupNameQuery } from "@/queries/useGroupNameQuery";
@@ -58,23 +58,21 @@ export function ConversationConsentPopupGroup() {
 
   return (
     <ConversationConsentPopupContainer>
-      <ConsentPopupTitle>
-        {translate("do_you_want_to_join_this_group")}
-      </ConsentPopupTitle>
       <ConsentPopupButtonsContainer>
+        <ConversationConsentPopupButton
+          variant="fill"
+          text={translate("Join the conversation")}
+          onPress={onAccept}
+        />
         <ConversationConsentPopupButton
           variant="text"
           action="danger"
-          icon="xmark"
-          text={translate("decline")}
+          text={translate("Delete")}
           onPress={handleDeclineGroup}
         />
-        <ConversationConsentPopupButton
-          variant="fill"
-          icon="checkmark"
-          text={translate("join_this_group")}
-          onPress={onAccept}
-        />
+        <ConversationConsentPopupHelperText>
+          {translate("No one is notified if you delete it")}
+        </ConversationConsentPopupHelperText>
       </ConsentPopupButtonsContainer>
     </ConversationConsentPopupContainer>
   );
