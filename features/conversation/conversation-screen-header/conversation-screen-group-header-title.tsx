@@ -32,7 +32,7 @@ export const GroupConversationTitle = memo(
     const navigation = useRouter();
 
     const onPress = useCallback(() => {
-      navigation.push("Group", { topic: conversationTopic });
+      navigation.push("Conversation", { topic: conversationTopic });
     }, [navigation, conversationTopic]);
 
     const onLongPress = useCallback(() => {

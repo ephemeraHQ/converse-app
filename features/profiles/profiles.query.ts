@@ -11,7 +11,7 @@ import { DateUtils } from "@/utils/time.utils";
 
 const profileQueryKey = (xmtpId: string) => ["profile", xmtpId] as const;
 
-const profileQueryConfig = (xmtpId: string | undefined) => {
+export const profileQueryConfig = (xmtpId: string | undefined) => {
   const enabled = !!xmtpId;
   return queryOptions({
     enabled,

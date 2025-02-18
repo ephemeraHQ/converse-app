@@ -1,16 +1,14 @@
-import { getGroupMembersQueryOptions } from "@/queries/useGroupMembersQuery";
-import { useQuery } from "@tanstack/react-query";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { useProfilesQueries } from "@/features/profiles/profiles.query";
+import { getGroupMembersQueryOptions } from "@/queries/useGroupMembersQuery";
 import { useGroupNameMutation } from "@/queries/useGroupNameMutation";
 import { useGroupNameQuery } from "@/queries/useGroupNameQuery";
-
-// export function useProfileNames(inboxIds: InboxId[] | undefined) {
+import { useQuery } from "@tanstack/react-query";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
 export const useGroupName = (args: {
   conversationTopic: ConversationTopic;
 }) => {
-  return "toodo: group name";
   const { conversationTopic } = args;
 
   const account = useCurrentAccount()!;
@@ -24,14 +22,15 @@ export const useGroupName = (args: {
     topic: conversationTopic,
   });
 
-  const { data: members, isLoading: membersLoading } = useQuery({
+  const { data: groupMembers, isLoading: isLoadingGroupMembers } = useQuery({
     ...getGroupMembersQueryOptions({ account, topic: conversationTopic }),
     enabled: !groupName && !!conversationTopic && !!account, // If we have the group name, we don't need to fetch the members
   });
 
-  // const names = useProfileNamesFromInboxIds(memberAddresses ?? []);
-  // get all profiles for inbox ids list and map over them to get the names, dead simple
-  const profiles = useProfilesFromInboxIds(members.ids);
+  const { data: profiles, isLoading: isLoadingProfiles } = useProfilesQueries(
+    groupMembers?.ids ?? []
+  );
+  const names = profiles?.map((profile) => profile?.name);
 
   const { mutateAsync } = useGroupNameMutation({
     account,
@@ -40,7 +39,7 @@ export const useGroupName = (args: {
 
   return {
     groupName: groupName || names.join(", "),
-    isLoading: groupNameLoading || membersLoading,
+    isLoading: groupNameLoading || isLoadingGroupMembers || isLoadingProfiles,
     isError,
     updateGroupName: mutateAsync,
   };
