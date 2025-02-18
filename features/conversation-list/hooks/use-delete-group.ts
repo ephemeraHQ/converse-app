@@ -89,7 +89,7 @@ export const useDeleteGroup = (args: { groupTopic: ConversationTopic }) => {
         },
       },
       {
-        label: translate("cancel"),
+        label: translate("Cancel"),
         action: () => {},
       },
     ];

@@ -267,8 +267,6 @@ export const fr = {
     "Les demandes contenant des messages potentiellement offensants ou indésirables sont déplacées dans ce dossier.",
   message_requests: "Demandes de message",
   // Conversation
-  accept: "Accepter",
-  block: "Bloquer",
   decline: "Refuser",
   unblock: "Débloquer",
   if_you_unblock_contact:
@@ -281,8 +279,6 @@ export const fr = {
   group_not_found:
     "Nous n'avons pas pu trouver ce groupe. Veuillez réessayer ou demander à quelqu'un de vous inviter à ce groupe",
   say_hi: "Dites bonjour",
-  do_you_trust_this_contact: "Faites-vous confiance à ce contact ?",
-  do_you_want_to_join_this_group: "Souhaitez-vous rejoindre ce groupe ?",
   join_this_group: "Rejoindre ce groupe",
   identity_not_found_title: "Identité introuvable",
   identity_not_found:

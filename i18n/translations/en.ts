@@ -240,7 +240,6 @@ export const en = {
   restore: "Restore",
   restore_and_unblock_inviter: "Restore and unblock inviter",
   unblock_and_restore: "Unblock and restore",
-  cancel: "Cancel",
   back: "Back",
   close: "Close",
   view_only: "View only",
@@ -278,8 +277,6 @@ export const en = {
   message_requests: "Message requests",
 
   // Conversation
-  accept: "Accept",
-  block: "Block",
   decline: "Decline",
   unblock: "Unblock",
   if_you_unblock_contact:
@@ -292,8 +289,6 @@ export const en = {
   group_not_found:
     "We couldn't find this group. Please try again or ask someone to invite you to this group",
   say_hi: "Say hi",
-  do_you_trust_this_contact: "Do you trust this contact?",
-  do_you_want_to_join_this_group: "Do you want to join this group?",
   join_this_group: "Join this group",
   identity_not_found_title: "Identity not found",
   identity_not_found:

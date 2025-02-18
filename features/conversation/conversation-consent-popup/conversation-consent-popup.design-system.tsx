@@ -9,11 +9,29 @@ export function ConversationConsentPopupButton({
   style,
   ...rest
 }: IButtonProps) {
-  return <Button withHapticFeedback={true} {...rest} />;
+  return (
+    <Button
+      size="lg"
+      style={[{ width: "100%" }, style]}
+      withHapticFeedback={true}
+      {...rest}
+    />
+  );
 }
 
-export function ConsentPopupTitle(props: ITextProps) {
-  return <Text {...props} />;
+export function ConversationConsentPopupHelperText({
+  style,
+  ...rest
+}: ITextProps) {
+  const { theme } = useAppTheme();
+
+  return (
+    <Text
+      preset="formHelper"
+      style={[{ paddingTop: theme.spacing.xxs, textAlign: "center" }, style]}
+      {...rest}
+    />
+  );
 }
 
 export function ConsentPopupButtonsContainer({
@@ -27,9 +45,11 @@ export function ConsentPopupButtonsContainer({
     <VStack
       style={[
         {
-          flexDirection: "row",
           justifyContent: "center",
-          marginTop: theme.spacing.xs,
+          gap: theme.spacing.xxs,
+          paddingBottom: theme.spacing.sm,
+          width: "100%",
+          alignItems: "stretch",
         },
         style,
       ]}
@@ -52,11 +72,13 @@ export function ConversationConsentPopupContainer({
       style={[
         {
           flexDirection: "column",
-          alignItems: "center",
+          alignItems: "stretch",
           justifyContent: "center",
-          paddingVertical: theme.spacing.md,
-          paddingHorizontal: theme.spacing.md,
-          marginTop: theme.spacing.md,
+          padding: theme.spacing.sm,
+          marginTop: theme.spacing.sm,
+          borderTopWidth: theme.borderWidth.sm,
+          borderTopColor: theme.colors.border.subtle,
+          width: "100%",
         },
         style,
       ]}

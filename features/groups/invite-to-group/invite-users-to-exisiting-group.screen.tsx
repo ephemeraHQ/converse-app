@@ -73,7 +73,7 @@ export function InviteUsersToExistingGroupScreen({
         Platform.OS === "ios" ? (
           <Button
             variant="text"
-            text={translate("cancel")}
+            text={translate("Cancel")}
             onPress={handleBack}
           />
         ) : (

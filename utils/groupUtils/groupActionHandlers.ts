@@ -48,7 +48,7 @@ export const groupRemoveRestoreHandler = (
         [
           translate("restore"),
           translate("restore_and_unblock_inviter"),
-          translate("cancel"),
+          translate("Cancel"),
         ],
         `${translate("restore")} ${groupName}?`,
         [
@@ -61,7 +61,7 @@ export const groupRemoveRestoreHandler = (
         [
           translate("remove"),
           translate("remove_and_block_inviter"),
-          translate("cancel"),
+          translate("Cancel"),
         ],
         `${translate("remove")} ${groupName}?`,
         [
