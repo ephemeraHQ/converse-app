@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { api } from "../../utils/api/api";
-import { refreshJwtInterceptor } from "./interceptor.refreshJwt";
+import { refreshJwtInterceptor } from "./interceptor.refresh-jwt";
 import { useLogout } from "@/utils/logout";
 
 export const useLogoutOnJwtRefreshError = () => {

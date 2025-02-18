@@ -63,7 +63,6 @@ export function useCreateOrUpdateProfileInfo() {
       profile: ProfileType;
     }): Promise<CreateOrUpdateProfileResponse> => {
       const { profile } = args;
-      const address = getCurrentAccount()!;
 
       const profileValidationResult = isProfileValid(profile);
       if (!profileValidationResult.success) {

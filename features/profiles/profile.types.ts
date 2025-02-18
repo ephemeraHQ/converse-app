@@ -1,25 +1,5 @@
-import {
-  IConverseUserNameZodSchema,
-  IEnsNameZodSchema,
-  IFarcasterUsernameZodSchema,
-  ILensHandleZodSchema,
-  IProfileSocialsZodSchema,
-  IUnstoppableDomainZodSchema,
-} from "@/utils/api/profiles";
 import { InboxId } from "@xmtp/react-native-sdk";
 import { ReactNode } from "react";
-
-export type ILensHandle = ILensHandleZodSchema;
-
-export type IEnsName = IEnsNameZodSchema;
-
-export type IFarcasterUsername = IFarcasterUsernameZodSchema;
-
-export type IUnstoppableDomain = IUnstoppableDomainZodSchema;
-
-export type IConverseUserName = IConverseUserNameZodSchema;
-
-export type IProfileSocials = IProfileSocialsZodSchema;
 
 export type ProfileContactCardHandle = {
   handleSave: () => Promise<{ success: boolean; error?: string }>;

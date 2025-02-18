@@ -50,7 +50,7 @@ import {
 import logger from "./utils/logger";
 import { AuthenticateWithPasskeyProvider } from "./features/onboarding/contexts/signup-with-passkey.context";
 import { PrivyPlaygroundLandingScreen } from "./features/privy-playground/privy-playground-landing.screen";
-import { useLogoutOnJwtRefreshError } from "./features/authentication/useLogoutOnJwtRefreshError";
+import { useLogoutOnJwtRefreshError } from "./features/authentication/use-logout-on-jwt-refresh-error";
 // import { useAccountsStore } from "./features/multi-inbox/multi-inbox.store";
 // import { AuthenticateWithPasskeyProvider } from "./features/onboarding/contexts/signup-with-passkey.context";
 // import { PrivyPlaygroundLandingScreen } from "./features/privy-playground/privy-playground-landing.screen";

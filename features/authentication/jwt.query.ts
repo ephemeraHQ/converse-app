@@ -15,6 +15,10 @@ export function getJwtQueryOptions() {
   });
 }
 
-export function ensureJwtQueryData() {
+export async function ensureJwtQueryData() {
   return queryClient.ensureQueryData(getJwtQueryOptions());
+}
+
+export function getJwtQueryData() {
+  return queryClient.getQueryData(getJwtQueryOptions().queryKey);
 }

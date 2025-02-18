@@ -8,7 +8,7 @@ import { useSelect } from "../../data/store/storeHelpers";
 import { getSchemedURLFromUniversalURL } from "../../utils/navigation";
 import { hideSplashScreen } from "../../utils/splash/splash";
 import { logger } from "@utils/logger";
-import { useAuthStatus } from "@/features/authentication/useAuthStatus.hook";
+import { useAuthStatus } from "@/features/authentication/use-auth-status.hook";
 
 const isDevelopmentClientURL = (url: string) => {
   return url.includes("expo-development-client");
