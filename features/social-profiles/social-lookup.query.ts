@@ -1,5 +1,5 @@
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
-import { getSocialProfilesForAddress } from "./social-lookup.api";
+import { fetchSocialProfilesForAddress } from "./social-lookup.api";
 import { utils as ethersUtils } from "ethers";
 import { DateUtils } from "@/utils/time.utils";
 import { reactQueryPersister } from "@/utils/mmkv";
@@ -25,7 +25,7 @@ const getSocialProfilesQueryOptions = (address: string | undefined) => {
           }
 
           const checksummedAddress = ethersUtils.getAddress(address!);
-          return getSocialProfilesForAddress(checksummedAddress);
+          return fetchSocialProfilesForAddress(checksummedAddress);
         }
       : skipToken,
     staleTime: DateUtils.minutes.toMilliseconds(60),

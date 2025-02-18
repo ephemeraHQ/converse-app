@@ -1,5 +1,4 @@
-import { Platform } from "react-native";
-import * as Device from "expo-device";
+import { buildDeviceMetadata } from "@/utils/device-metadata";
 import { api } from "@/utils/api/api";
 import { z } from "zod";
 
@@ -16,36 +15,36 @@ const createUserResponseSchema = z.object({
   identity: z.object({
     id: z.string(),
     privyAddress: z.string(),
-    xmtpId: z.string().nullable(),
+    xmtpId: z.string(),
   }),
-  profile: z
-    .object({
-      id: z.string(),
-      name: z.string(),
-      description: z.string().nullable(),
-    })
-    .nullable(),
+  profile: z.object({
+    id: z.string(),
+    name: z.string(),
+    description: z.string().nullable(),
+  }),
 });
 
-type CreateUserResponse = z.infer<typeof createUserResponseSchema>;
+export type CreateUserResponse = z.infer<typeof createUserResponseSchema>;
 
 export const createUser = async (args: {
   privyUserId: string;
   smartContractWalletAddress: string;
   inboxId: string;
+  profile: {
+    name: string;
+    avatar?: string;
+  };
 }): Promise<CreateUserResponse> => {
-  const { privyUserId, smartContractWalletAddress, inboxId } = args;
+  const { privyUserId, smartContractWalletAddress, inboxId, profile } = args;
 
   const requestData = {
     privyUserId,
-    device: {
-      os: Platform.OS.toLowerCase(),
-      name: Device.modelId,
-    },
+    device: buildDeviceMetadata(),
     identity: {
       privyAddress: smartContractWalletAddress,
       xmtpId: inboxId,
     },
+    profile,
   };
 
   const response = await api.post<CreateUserResponse>(
