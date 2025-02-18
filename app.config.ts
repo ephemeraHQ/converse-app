@@ -171,7 +171,6 @@ export default (): ExpoConfig => {
           "app.phantom",
         ],
         NSAppTransportSecurity: {
-          NSAllowsArbitraryLoads: false, // Not sure why
           NSAllowsLocalNetworking: true, // Not sure why
         },
       },

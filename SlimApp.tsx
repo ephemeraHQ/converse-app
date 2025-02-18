@@ -25,6 +25,7 @@ import { PrivyPlaygroundLandingScreen } from "./features/privy-playground/privy-
 import { DevToolsBubble } from "react-native-react-query-devtools";
 import * as Clipboard from "expo-clipboard";
 import { logger } from "@/utils/logger";
+import { PrivyPlaygroundLoginScreen } from "./features/privy-playground/privy-login-screen";
 export function SlimApp() {
   const colorScheme = useColorScheme();
 
@@ -62,7 +63,7 @@ export function SlimApp() {
                   <GestureHandlerRootView style={{ flex: 1 }}>
                     <BottomSheetModalProvider>
                       <AuthenticateWithPasskeyProvider>
-                        <PrivyPlaygroundLandingScreen />
+                        <PrivyPlaygroundLoginScreen />
                       </AuthenticateWithPasskeyProvider>
                       {__DEV__ && <DevToolsBubble onCopy={onCopy} />}
                       <Snackbars />

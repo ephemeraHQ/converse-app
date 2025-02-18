@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { BottomSheetModal } from "@/design-system/BottomSheet/BottomSheetModal";
 import { BottomSheetHeader } from "@/design-system/BottomSheet/BottomSheetHeader";
 import { BottomSheetContentContainer } from "@/design-system/BottomSheet/BottomSheetContentContainer";
@@ -8,10 +8,7 @@ import { useBottomSheetModalRef } from "@/design-system/BottomSheet/BottomSheet.
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { WalletId } from "thirdweb/wallets";
 import { config } from "@/config";
-import {
-  useAccountsStore,
-  useCurrentSender,
-} from "../multi-inbox/multi-inbox.store";
+import { useCurrentSender } from "../multi-inbox/multi-inbox.store";
 import { MultiInboxClient } from "../multi-inbox/multi-inbox.client";
 import { logger } from "@/utils/logger";
 import { Text } from "@/design-system/Text";
@@ -20,11 +17,9 @@ import {
   useInstalledWallets,
 } from "@/features/wallets/use-installed-wallets.hook";
 import { Button } from "@/design-system/Button/Button";
-import { SocialProfile, useConnect } from "thirdweb/react";
-import {
-  getSocialProfilesQueryData,
-  ensureSocialProfilesQueryData,
-} from "@/features/social-profiles/social-lookup.query";
+import { useConnect } from "thirdweb/react";
+import { ensureSocialProfilesQueryData } from "@/features/social-profiles/social-lookup.query";
+import { IWeb3SocialProfile } from "../social-profiles/social-lookup.api";
 
 type InstalledWalletsListProps = {
   installedWallets: ISupportedWallet[];
@@ -35,8 +30,8 @@ type InstalledWalletsListProps = {
 };
 
 type SocialIdentityListProps = {
-  socialData: SocialProfile[];
-  onSocialIdentityTapped: (socialIdentity: string) => void;
+  socialData: IWeb3SocialProfile[];
+  onSocialIdentityTapped: (socialIdentity: IWeb3SocialProfile) => void;
 };
 
 function SocialIdentityList({
@@ -49,7 +44,7 @@ function SocialIdentityList({
         <Button
           key={social.name}
           text={`Add ${social.name}: ${social.type} to inbox`}
-          onPress={() => onSocialIdentityTapped(social.name || social.type)}
+          onPress={() => onSocialIdentityTapped(social)}
         />
       ))}
     </>
@@ -108,14 +103,14 @@ type ListShowing = "wallets" | "socials";
 type ConnectWalletBottomSheetState = {
   thirdwebWalletIdThatIsConnecting: WalletId | undefined;
   ethereumAddressThatIsConnecting: string | undefined;
-  socialData: SocialProfile[] | undefined;
+  socialData: IWeb3SocialProfile[] | undefined;
   listShowing: ListShowing | undefined;
 };
 
 type ConnectWalletBottomSheetActions =
   | { type: "SetConnectingWallet"; walletId: WalletId }
   | { type: "ConnectingEthereumAddressDiscovered"; ethereumAddress: string }
-  | { type: "SocialDataLoaded"; data: SocialProfile[] }
+  | { type: "SocialDataLoaded"; data: IWeb3SocialProfile[] }
   | { type: "Reset" };
 
 function reducer(
@@ -308,9 +303,11 @@ export function ConnectWalletBottomSheet({
     // });
 
     // const addressToLink = walletAccount.address;
-    const mycbidaddress = "0x0aF849d2778f6ccE4A2641438B6207DC4750a82B";
-    const addressToLink = mycbidaddress;
-    const socialProfiles = await fetchSocialProfilesForAddress(addressToLink);
+    const michaelWalletWithBasename =
+      "0x5222f538B29267a991B346EF61A2A2c389A9f320";
+    const addressToLink = michaelWalletWithBasename;
+
+    const socialProfiles = await ensureSocialProfilesQueryData(addressToLink);
     logger.debug(
       `[ConnectWalletBottomSheet]convos ry is awesome Social profiles: ${JSON.stringify(
         socialProfiles,
@@ -321,6 +318,10 @@ export function ConnectWalletBottomSheet({
     dispatch({
       type: "ConnectingEthereumAddressDiscovered",
       ethereumAddress: addressToLink,
+    });
+    dispatch({
+      type: "SocialDataLoaded",
+      data: socialProfiles,
     });
     logger.debug(
       `[ConnectWalletBottomSheet] Got wallet address: ${addressToLink}`
@@ -382,9 +383,10 @@ export function ConnectWalletBottomSheet({
       //   `[ConnectWalletBottomSheet] Adding account to inbox client`
       // );
       // await currentInboxClient.addAccount(signer);
-      alert(
-        `You've sucesfully connected ${addressToLink} to your inbox. You won't see anything in the UI yet, but we're working on that now.`
-      );
+
+      // alert(
+      //   `You've sucesfully connected ${addressToLink} to your inbox. You won't see anything in the UI yet, but we're working on that now.`
+      // );
 
       // const socialData = await ensureProfileSocialsQueryData(addressToLink);
 
@@ -399,8 +401,8 @@ export function ConnectWalletBottomSheet({
     // });
   };
 
-  function handleSocialIdentityTapped(socialIdentity: string) {
-    alert(`You tapped on ${socialIdentity}`);
+  function handleSocialIdentityTapped(socialIdentity: IWeb3SocialProfile) {
+    alert(`You tapped on ${socialIdentity.name}`);
   }
 
   React.useEffect(() => {
