@@ -63,6 +63,9 @@ type FetchJwtResponse = z.infer<typeof fetchJwtResponseSchema>;
 
 export async function fetchJwt() {
   // todo(lustig) look at the endpoint this actually is
-  const response = await api.post<FetchJwtResponse>("/api/v1/authenticate");
-  return fetchJwtResponseSchema.parse(response.data);
+  // const response = await api.post<FetchJwtResponse>("/api/v1/authenticate");
+  // return fetchJwtResponseSchema.parse(response.data);
+  // https://xmtp-labs.slack.com/archives/C07NSHXK693/p1739877738959529
+  const dummyJwtUntilJwtBackendWorks = "dummyJwtUntilJwtBackendWorks";
+  return dummyJwtUntilJwtBackendWorks;
 }
