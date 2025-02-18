@@ -48,7 +48,7 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
     });
 
   // Peer info hooks
-  const { data: profile } = useProfileQuery(peerInboxId);
+  const { data: profile } = useProfileQuery({ xmtpId: peerInboxId });
 
   // Status hooks
   const { isUnread } = useConversationIsUnread({ topic: conversationTopic });

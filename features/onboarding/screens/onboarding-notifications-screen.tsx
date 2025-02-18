@@ -1,7 +1,6 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { useCallback, useState } from "react";
-import { ViewStyle, TextStyle } from "react-native";
-
+import { TextStyle, ViewStyle } from "react-native";
 import { Avatar } from "@/components/Avatar";
 import { Screen } from "@/components/Screen/ScreenComp/Screen";
 import { Button } from "@/design-system/Button/Button";
@@ -11,14 +10,14 @@ import { Text } from "@/design-system/Text";
 import { OnboardingNotificationRow } from "@/features/onboarding/components/onboarding-notification-row";
 import { OnboardingSubtitle } from "@/features/onboarding/components/onboarding-subtitle";
 import { OnboardingTitle } from "@/features/onboarding/components/onboarding-title";
-import { captureError } from "@/utils/capture-error";
-import { useAppTheme } from "@theme/useAppTheme";
 import {
   AuthStatuses,
   useAccountsStore,
   useSettingsStore,
 } from "@/features/multi-inbox/multi-inbox.store";
 import { NavigationParamList } from "@/screens/Navigation/Navigation";
+import { captureError } from "@/utils/capture-error";
+import { useAppTheme } from "@theme/useAppTheme";
 
 const $screenContainer: ViewStyle = {
   flex: 1,

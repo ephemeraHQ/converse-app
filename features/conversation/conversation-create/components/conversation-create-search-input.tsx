@@ -9,7 +9,6 @@ import {
   useConversationStoreContext,
 } from "@/features/conversation/conversation.store-context";
 import { usePreferredInboxAvatar } from "@/hooks/usePreferredInboxAvatar";
-// import { useInboxName } from "@/hooks/useInboxName";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { Haptics } from "@/utils/haptics";
 import { InboxId } from "@xmtp/react-native-sdk";

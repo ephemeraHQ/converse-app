@@ -29,7 +29,7 @@ export const ConversationListPinnedConversationDm = ({
     caller: "ConversationListPinnedConversationDm",
   });
 
-  const { data: profile } = useProfileQuery(peerInboxId);
+  const { data: profile } = useProfileQuery({ xmtpId: peerInboxId });
 
   const { isUnread } = useConversationIsUnread({
     topic: conversationTopic,

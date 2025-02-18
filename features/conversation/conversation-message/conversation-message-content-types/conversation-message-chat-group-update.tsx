@@ -1,14 +1,12 @@
 import { Center } from "@/design-system/Center";
+import { useProfileQuery } from "@/features/profiles/profiles.query";
 import { Avatar } from "@components/Avatar";
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { HStack } from "@design-system/HStack";
 import { Pressable } from "@design-system/Pressable";
 import { ITextProps, Text } from "@design-system/Text";
 import { TxKeyPath, translate } from "@i18n";
-import { useInboxProfileSocialsQuery } from "@queries/useInboxProfileSocialsQuery";
 import { ThemedStyle, useAppTheme } from "@theme/useAppTheme";
 import { navigate } from "@utils/navigation";
-import { getPreferredAvatar, getPreferredName } from "@utils/profile";
 import {
   DecodedMessage,
   GroupUpdatedCodec,
@@ -75,25 +73,16 @@ type IChatGroupMemberLeftProps = {
   inboxId: InboxId;
 };
 
-export function ChatGroupMemberLeft({ inboxId }: IChatGroupMemberLeftProps) {
-  const { themed } = useAppTheme();
-  const { data } = useInboxProfileSocialsQuery({
-    inboxId,
-    caller: "ChatGroupMemberLeft",
+function ChatGroupMemberLeft({ inboxId }: IChatGroupMemberLeftProps) {
+  const { themed, theme } = useAppTheme();
+
+  const { data: profile } = useProfileQuery({
+    xmtpId: inboxId,
   });
-  const { theme } = useAppTheme();
 
-  const firstSocials = data?.[0];
-
-  if (!firstSocials) {
+  if (!profile) {
     return null;
   }
-
-  const readableName = getPreferredName(
-    firstSocials,
-    firstSocials.address ?? ""
-  );
-  const avatarUri = getPreferredAvatar(firstSocials);
 
   return (
     <HStack style={themed($memberContainer)}>
@@ -107,10 +96,12 @@ export function ChatGroupMemberLeft({ inboxId }: IChatGroupMemberLeftProps) {
       >
         <Avatar
           size={theme.avatarSize.xs}
-          uri={avatarUri}
-          name={readableName}
+          uri={profile.avatarUrl}
+          name={profile.name}
         />
-        <ChatGroupUpdateText weight="bold">{readableName} </ChatGroupUpdateText>
+        <ChatGroupUpdateText weight="bold">
+          {profile?.name}{" "}
+        </ChatGroupUpdateText>
       </Pressable>
       <ChatGroupUpdateText>
         {translate("group_member_left")}
@@ -124,27 +115,15 @@ type IChatGroupMemberJoinedProps = {
 };
 
 function ChatGroupMemberJoined({ inboxId }: IChatGroupMemberJoinedProps) {
-  const { themed } = useAppTheme();
+  const { themed, theme } = useAppTheme();
 
-  const { data: socials } = useInboxProfileSocialsQuery({
-    inboxId,
-    caller: "ChatGroupMemberJoined",
+  const { data: profile } = useProfileQuery({
+    xmtpId: inboxId,
   });
 
-  const { theme } = useAppTheme();
-
-  const firstSocials = socials?.[0];
-
-  if (!firstSocials) {
+  if (!profile) {
     return null;
   }
-
-  const readableName = getPreferredName(
-    firstSocials,
-    firstSocials.address ?? ""
-  );
-
-  const avatarUri = getPreferredAvatar(firstSocials);
 
   return (
     <HStack style={themed($memberContainer)}>
@@ -158,10 +137,10 @@ function ChatGroupMemberJoined({ inboxId }: IChatGroupMemberJoinedProps) {
       >
         <Avatar
           size={theme.avatarSize.xs}
-          uri={avatarUri}
-          name={readableName}
+          uri={profile.avatarUrl}
+          name={profile.name}
         />
-        <ChatGroupUpdateText weight="bold">{readableName} </ChatGroupUpdateText>
+        <ChatGroupUpdateText weight="bold">{profile.name} </ChatGroupUpdateText>
       </Pressable>
       <ChatGroupUpdateText>
         {translate("group_member_joined")}
@@ -179,18 +158,13 @@ function ChatGroupMetadataUpdate({
   metadataEntry,
   initiatorInboxId,
 }: IChatGroupMetadataUpdateProps) {
-  const { themed } = useAppTheme();
+  const { themed, theme } = useAppTheme();
 
-  const { data: socials } = useInboxProfileSocialsQuery({
-    inboxId: initiatorInboxId,
-    caller: "ChatGroupMetadataUpdate",
+  const { data: profile } = useProfileQuery({
+    xmtpId: initiatorInboxId,
   });
 
-  const { theme } = useAppTheme();
-
-  const firstSocials = socials?.[0];
-
-  if (!firstSocials) {
+  if (!profile) {
     return null;
   }
 
@@ -213,13 +187,6 @@ function ChatGroupMetadataUpdate({
       return null;
   }
 
-  const readableName = getPreferredName(
-    firstSocials,
-    firstSocials.address ?? ""
-  );
-
-  const avatarUri = getPreferredAvatar(firstSocials);
-
   return (
     <HStack style={themed($memberContainer)}>
       <Pressable
@@ -232,10 +199,10 @@ function ChatGroupMetadataUpdate({
       >
         <Avatar
           size={theme.avatarSize.xs}
-          uri={avatarUri}
-          name={readableName}
+          uri={profile.avatarUrl}
+          name={profile.name}
         />
-        <ChatGroupUpdateText weight="bold">{readableName} </ChatGroupUpdateText>
+        <ChatGroupUpdateText weight="bold">{profile.name} </ChatGroupUpdateText>
       </Pressable>
       <ChatGroupUpdateText>{translate(txKey, txParams)}</ChatGroupUpdateText>
     </HStack>

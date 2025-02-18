@@ -338,4 +338,8 @@ export const setGroupStatus = (groupStatus: GroupStatus) => {
   setGroupStatus(groupStatus);
 };
 
+export function useAllInboxIds() {
+  return useAccountsStore.getState().senders.map((sender) => sender.inboxId);
+}
+
 export { MultiInboxClientRestorationStates };

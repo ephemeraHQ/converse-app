@@ -1,7 +1,7 @@
 import { showActionSheetWithOptions } from "@/components/StateHandlers/ActionSheetStateHandler";
 import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { useDenyDmMutation } from "@/features/consent/use-deny-dm.mutation";
-import { useInboxName } from "@/hooks/useInboxName";
+
 import { translate } from "@/i18n";
 import {
   getConversationMetadataQueryData,

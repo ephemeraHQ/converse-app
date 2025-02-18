@@ -1,7 +1,6 @@
 import { backgroundColor } from "@styles/colors";
 import { useColorScheme } from "react-native";
-
-import ShareProfileScreen from "../ShareProfile";
+import { ShareProfileScreen } from "../ShareProfile";
 import { NativeStack, navigationAnimation } from "./Navigation";
 
 export const ShareProfileScreenConfig = {

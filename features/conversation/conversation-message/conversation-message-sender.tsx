@@ -1,5 +1,5 @@
+import { useProfileQuery } from "@/features/profiles/profiles.query";
 import { Text } from "@design-system/Text";
-import { useInboxName } from "@hooks/useInboxName";
 import { InboxId } from "@xmtp/react-native-sdk";
 
 type IConversationMessageSenderProps = {
@@ -10,13 +10,18 @@ export function ConversationMessageSender(
   args: IConversationMessageSenderProps
 ) {
   const { inboxId } = args;
-  const { data: name } = useInboxName({
-    inboxId,
+
+  const { data: profile } = useProfileQuery({
+    xmtpId: inboxId,
   });
+
+  if (!profile) {
+    return null;
+  }
 
   return (
     <Text preset="smaller" color="secondary">
-      {name}
+      {profile.name}
     </Text>
   );
 }

@@ -11,7 +11,7 @@ import {
   isTransactionReferenceMessage,
 } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
-import { useInboxName } from "@/hooks/useInboxName";
+
 import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { HStack } from "@design-system/HStack";
 import { Icon } from "@design-system/Icon/Icon";

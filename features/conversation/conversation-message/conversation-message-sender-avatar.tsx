@@ -13,7 +13,7 @@ export function ConversationSenderAvatar({
   inboxId,
 }: IConversationSenderAvatarProps) {
   const { senderAvatarSize } = useConversationMessageStyles();
-  const { data: profile } = useProfileQuery(inboxId);
+  const { data: profile } = useProfileQuery({ xmtpId: inboxId });
 
   const openProfile = useCallback(() => {
     if (profile) {

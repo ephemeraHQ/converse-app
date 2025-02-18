@@ -36,7 +36,7 @@ const AddressDebugger = ({ address }: { address: string }) => {
     status,
     error,
   } = useSocialProfilesForAddress({
-    address,
+    ethAddress: address,
   });
 
   useEffect(() => {

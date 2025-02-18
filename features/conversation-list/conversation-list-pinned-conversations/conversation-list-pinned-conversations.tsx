@@ -109,7 +109,6 @@ const PinnedConversationWrapper = memo(
       return <ConversationListPinnedConversationGroup group={conversation} />;
     }
 
-    // @ts-expect-error - TODO: fix this
     return <ConversationListPinnedConversationDm conversation={conversation} />;
   }
 );
