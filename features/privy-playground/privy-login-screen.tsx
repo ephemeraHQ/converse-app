@@ -9,6 +9,7 @@ import { useState } from "react";
 import * as Application from "expo-application";
 import { config } from "@/config";
 import { RELYING_PARTY } from "../onboarding/passkey.constants";
+import { ConnectWalletBottomSheet } from "../wallets/connect-wallet.bottom-sheet";
 
 export function PrivyPlaygroundLoginScreen() {
   const [error, setError] = useState("");
@@ -93,6 +94,12 @@ export function PrivyPlaygroundLoginScreen() {
         }}
       /> */}
 
+      <ConnectWalletBottomSheet
+        isVisible={true}
+        onClose={() => {}}
+        onWalletImported={() => {}}
+      />
+
       <Button
         title="Login using Passkey"
         onPress={() =>
@@ -106,7 +113,7 @@ export function PrivyPlaygroundLoginScreen() {
         title="Create Passkey"
         onPress={() =>
           signupWithPasskey({
-            relyingParty: Constants.expoConfig?.extra?.passkeyAssociatedDomain,
+            relyingParty: RELYING_PARTY,
           })
             .then(({ user }) => {
               console.log(JSON.stringify(user, null, 2));
