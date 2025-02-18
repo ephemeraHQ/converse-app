@@ -53,3 +53,9 @@ export class StreamError extends BaseError {
     super(`[Stream] ${message}`, cause);
   }
 }
+
+export class ApiError extends BaseError {
+  constructor(message: string, cause?: unknown) {
+    super(`[API] ${message}`, cause);
+  }
+}

@@ -5,8 +5,7 @@ import {
   useSendMessage,
 } from "@/features/conversation/hooks/use-send-message";
 import { saveAttachmentLocally } from "@/utils/attachment/attachment.utils";
-import { captureErrorWithToast } from "@/utils/capture-error";
-import { sentryTrackError } from "@utils/sentry";
+import { captureError, captureErrorWithToast } from "@/utils/capture-error";
 import { useCallback } from "react";
 import { useConversationComposerStore } from "./conversation-composer.store-context";
 
@@ -150,7 +149,7 @@ function useMediaPreview() {
     try {
       await saveAttachmentLocally(mediaPreview);
     } catch (error) {
-      sentryTrackError(error);
+      captureError(error);
     }
 
     const uploadedAttachment =
