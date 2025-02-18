@@ -5,7 +5,7 @@ import {
 } from "@privy-io/expo/passkey";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { RELYING_PARTY } from "@/features/onboarding/passkey.constants";
-import logger from "@/utils/logger";
+import { logger } from "@/utils/logger";
 import { usePrivy, useEmbeddedEthereumWallet } from "@privy-io/expo";
 import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 import { useSmartWallets } from "@privy-io/expo/smart-wallets";
@@ -178,6 +178,10 @@ export const AuthenticateWithPasskeyProvider = ({
           privyUserId: privyUser!.id,
           smartContractWalletAddress,
           inboxId,
+          profile: {
+            name: `Test User ${Math.random()}`,
+            // avatar: privyUser!.imageUrl,
+          },
         });
         logger.debug(
           "[passkey onboarding context] created user",

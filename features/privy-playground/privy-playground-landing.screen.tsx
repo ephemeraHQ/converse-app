@@ -12,12 +12,15 @@ import Constants from "expo-constants";
 import { PrivyPlaygroundLoginScreen } from "./privy-playground-login.screen";
 import { PrivyPlaygroundUserScreen } from "./privy-playground-user.screen";
 import { getConfig } from "@/config";
-import logger from "@/utils/logger";
+import { logger } from "@/utils/logger";
 import * as SplashScreen from "expo-splash-screen";
 import { useAccountsStore } from "../multi-inbox/multi-inbox.store";
 import { ethers, utils as ethersUtils } from "ethers";
 import { usePrivy } from "@privy-io/expo";
 import { useSocialProfilesForAddress } from "../social-profiles/social-lookup.query";
+import { useAuthenticateWithPasskey } from "../onboarding/contexts/signup-with-passkey.context";
+import { useAuthStatus } from "../authentication/use-auth-status.hook";
+import { useLogout } from "@/utils/logout";
 const AddressDebugger = ({ address }: { address: string }) => {
   const {
     data: profiles,
@@ -309,9 +312,9 @@ const ReverseResolver = ({ address }: { address: string }) => {
 
 export function PrivyPlaygroundLandingScreen() {
   logger.info("PrivyPlaygroundLandingScreen");
-  const { user } = usePrivy();
-  const { currentSender, authStatus } = useAccountsStore();
-  const mycbidaddress = "0x0aF849d2778f6ccE4A2641438B6207DC4750a82B";
+  const { loginWithPasskey, signupWithPasskey } = useAuthenticateWithPasskey();
+  const authStatus = useAuthStatus();
+  const { logout } = useLogout();
 
   useEffect(() => {
     logger.debug("Hiding splash screen");
@@ -332,6 +335,10 @@ export function PrivyPlaygroundLandingScreen() {
           }}
         >
           <Text>Privy Playground</Text>
+          <Text>Auth Status: {JSON.stringify(authStatus, null, 2)}</Text>
+          <Button title="Login with Passkey" onPress={loginWithPasskey} />
+          <Button title="Signup with Passkey" onPress={signupWithPasskey} />
+          <Button title="Logout" onPress={logout} />
         </View>
       </ScrollView>
     </SafeAreaView>

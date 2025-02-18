@@ -11,10 +11,6 @@ import {
   IConvosProfileForInbox,
 } from "@/features/profiles/profiles.api";
 import { DateUtils } from "@/utils/time.utils";
-import {
-  useAccountsList,
-  useSafeCurrentSender,
-} from "@/features/multi-inbox/multi-inbox.store";
 
 const profileQueryKey = ({ xmtpId }: { xmtpId: string }) =>
   ["profile", xmtpId] as const;
@@ -87,6 +83,10 @@ export const removeProfileQueryData = ({ xmtpId }: { xmtpId: string }) => {
   queryClient.removeQueries({
     queryKey: profileQueryKey({ xmtpId }),
   });
+};
+
+export const useProfile = ({ xmtpId }: { xmtpId: string | undefined }) => {
+  return useQuery(profileQueryConfig({ xmtpId }));
 };
 
 export const useProfilesQueries = ({

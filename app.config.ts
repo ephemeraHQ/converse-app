@@ -1,5 +1,6 @@
 import { ExpoConfig } from "expo/config";
 import { version } from "./package.json";
+import logger from "./utils/logger";
 
 type Environment = "development" | "preview" | "production";
 
@@ -119,7 +120,9 @@ const settings: Record<Environment, EnvironmentConfig> = {
 
 // eslint-disable-next-line import/no-default-export
 export default (): ExpoConfig => {
-  const expoEnv = (env.EXPO_ENV || "development") as Environment;
+  // @ts-expect-error
+  const expoEnv = (process.env.EXPO_ENV || "development") as Environment;
+  logger.debug("expoEnv", expoEnv);
   const config = settings[expoEnv];
 
   return {
