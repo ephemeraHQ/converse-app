@@ -79,6 +79,12 @@ export const invalidateProfileQuery = ({ xmtpId }: { xmtpId: string }) => {
   });
 };
 
+export const removeProfileQueryData = ({ xmtpId }: { xmtpId: string }) => {
+  queryClient.removeQueries({
+    queryKey: profileQueryKey({ xmtpId }),
+  });
+};
+
 export const useProfilesQueries = ({
   xmtpInboxIds,
 }: {

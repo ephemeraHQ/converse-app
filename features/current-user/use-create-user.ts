@@ -1,28 +1,20 @@
-import {
-  queryOptions,
-  skipToken,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   createUser,
   CreateUserResponse,
-  fetchJwt,
 } from "@features/authentication/authentication.api";
 import {
   IConvosProfileForInboxUpdate,
-  invalidateProfileQuery,
+  removeProfileQueryData,
   setProfileQueryData,
 } from "@features/profiles/profiles.query";
-import { IConvosProfileForInbox } from "@features/profiles/profiles.api";
-import {
-  ensureJwtQueryData,
-  getJwtQueryData,
-} from "../authentication/jwt.query";
-import { queryClient } from "@/queries/queryClient";
-import { reactQueryPersister } from "@/utils/mmkv";
-import { fetchCurrentUser } from "./current-user-api";
+import { ensureJwtQueryData } from "../authentication/jwt.query";
 import { buildDeviceMetadata } from "@/utils/device-metadata";
+import { useLogout } from "@/utils/logout";
+import {
+  cancelCurrentUserQuery,
+  setCurrentUserQueryData,
+} from "./curent-user.query";
 
 type ICreateUserArgs = {
   privyUserId: string;
@@ -32,36 +24,6 @@ type ICreateUserArgs = {
     name: string;
     avatar?: string;
   };
-};
-
-const userQueryKey = () => ["user"];
-
-function getCurrentUserQueryOptions() {
-  const hasAuthenticated = getJwtQueryData();
-  const enabled = !!hasAuthenticated;
-  return queryOptions({
-    enabled,
-    queryKey: userQueryKey(),
-    queryFn: enabled ? () => fetchCurrentUser() : skipToken,
-    persister: reactQueryPersister,
-    refetchOnWindowFocus: true,
-  });
-}
-
-export const setCurrentUserData = (user: CreateUserResponse) => {
-  return queryClient.setQueryData(getCurrentUserQueryOptions().queryKey, user);
-};
-
-export const invalidateCurrentUserQuery = () => {
-  return queryClient.invalidateQueries({
-    queryKey: getCurrentUserQueryOptions().queryKey,
-  });
-};
-
-export const cancelCurrentUserQuery = () => {
-  return queryClient.cancelQueries({
-    queryKey: getCurrentUserQueryOptions().queryKey,
-  });
 };
 
 const buildOptimisticUser = (args: ICreateUserArgs): CreateUserResponse => {
@@ -96,7 +58,7 @@ const buildOptimisticUser = (args: ICreateUserArgs): CreateUserResponse => {
  * 4. Follows React Query best practices for mutations
  */
 export function useCreateUser() {
-  const queryClient = useQueryClient();
+  const { logout } = useLogout();
 
   return useMutation({
     mutationFn: async (args: ICreateUserArgs) => {
@@ -108,7 +70,7 @@ export function useCreateUser() {
       await cancelCurrentUserQuery();
 
       const optimisticUser = buildOptimisticUser(args);
-      queryClient.setQueryData(userQueryKey(), optimisticUser);
+      setCurrentUserQueryData(optimisticUser);
 
       const optimisticProfile: IConvosProfileForInboxUpdate = {
         id: optimisticUser.profile.id,
@@ -127,13 +89,15 @@ export function useCreateUser() {
       };
     },
     onSuccess: (createdUser, variables, { optimisticProfile }) => {
-      setCurrentUserData(createdUser);
+      setCurrentUserQueryData(createdUser);
       setProfileQueryData({
         xmtpId: variables.inboxId,
         data: optimisticProfile,
       });
-      invalidateCurrentUserQuery();
-      invalidateProfileQuery({ xmtpId: variables.inboxId });
+    },
+    onError: (_error, variables) => {
+      removeProfileQueryData({ xmtpId: variables.inboxId });
+      logout();
     },
   });
 }
