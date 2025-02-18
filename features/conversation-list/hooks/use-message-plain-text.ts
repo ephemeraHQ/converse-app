@@ -1,150 +1,98 @@
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import {
   isGroupUpdatedMessage,
   isRemoteAttachmentMessage,
   isReplyMessage,
   isStaticAttachmentMessage,
 } from "@/features/conversation/conversation-message/conversation-message.utils";
-import { translate } from "@/i18n";
+import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import {
-  fetchInboxProfileSocialsQuery,
-  getInboxProfileSocialsQueryData,
-} from "@/queries/useInboxProfileSocialsQuery";
-import { captureError } from "@/utils/capture-error";
-import { getPreferredInboxAddress } from "@/utils/profile";
+  useProfileQuery,
+  useProfilesQueries,
+} from "@/features/profiles/profiles.query";
+import logger from "@/utils/logger";
 import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
-import { logger } from "@utils/logger";
-import {
-  DecodedMessage,
-  GroupUpdatedCodec,
-  InboxId,
-  ReplyCodec,
-} from "@xmtp/react-native-sdk";
-import { useEffect, useMemo } from "react";
+import { GroupUpdatedCodec } from "@xmtp/react-native-sdk";
+import { useMemo } from "react";
 
-const handleGroupMetadataChange = ({
-  initiatorName,
-  content,
-}: {
+// Handles group metadata changes (name, description, image)
+function handleGroupMetadataChange(args: {
   initiatorName: string;
   content: ReturnType<GroupUpdatedCodec["decode"]>;
-}) => {
+}) {
+  const { initiatorName, content } = args;
+
   if (content.metadataFieldsChanged.length !== 1) {
-    return translate("conversation_list.updated_the_group", {
-      userName: initiatorName,
-    });
+    return `${initiatorName} updated the group`;
   }
 
   const change = content.metadataFieldsChanged[0];
-  const translations: Record<string, string> = {
-    group_name: translate("conversation_list.name_changed", {
-      userName: initiatorName,
-      newValue: change.newValue,
-    }),
-    description: translate("conversation_list.description_changed", {
-      userName: initiatorName,
-      newValue: change.newValue,
-    }),
-    group_image_url_square: translate("conversation_list.image_changed", {
-      userName: initiatorName,
-    }),
-  };
 
-  return (
-    translations[change.fieldName] ||
-    translate("conversation_list.updated_the_group", {
-      userName: initiatorName,
-    })
-  );
-};
-
-const handleGroupMemberChange = ({
-  initiatorName,
-  members,
-  type,
-}: {
-  initiatorName: string;
-  members: { inboxId: InboxId }[];
-  type: "added" | "removed";
-}) => {
-  if (members.length === 0) return null;
-
-  if (members.length === 1) {
-    const memberSocials = getInboxProfileSocialsQueryData({
-      inboxId: members[0].inboxId,
-    });
-    const memberName = getPreferredInboxAddress(
-      memberSocials as IProfileSocialsZodSchema[] | null | undefined
-    );
-
-    if (!memberName) {
-      return translate(`conversation_list.member_${type}_unknown`, {
-        userName: initiatorName,
-      });
-    }
-
-    return translate(`conversation_list.member_${type}`, {
-      userName: initiatorName,
-      memberName,
-    });
+  switch (change.fieldName) {
+    case "group_name":
+      return `${initiatorName} changed group name to ${change.newValue}`;
+    case "description":
+      return `${initiatorName} changed description to ${change.newValue}`;
+    case "group_image_url_square":
+      return `${initiatorName} changed group image`;
+    default:
+      return `${initiatorName} updated the group`;
   }
+}
 
-  return translate(`conversation_list.members_${type}`, {
-    userName: initiatorName,
-    count: members.length,
-  });
-};
-
-export const useMessagePlainText = (
+export function useMessagePlainText(
   message: DecodedMessageWithCodecsType | undefined
-) => {
+) {
   const account = useCurrentAccount();
 
-  useEffect(() => {
-    if (!message || !isGroupUpdatedMessage(message)) return;
+  // Get initiator profile for group updates
+  const initiatorInboxId =
+    message && isGroupUpdatedMessage(message)
+      ? message.content().initiatedByInboxId
+      : undefined;
 
+  const { data: initiatorProfile } = useProfileQuery(initiatorInboxId);
+
+  // Get member profiles for group updates - split into added and removed
+  const { addedMemberInboxIds, removedMemberInboxIds } = useMemo(() => {
+    if (!message || !isGroupUpdatedMessage(message)) {
+      return { addedMemberInboxIds: [], removedMemberInboxIds: [] };
+    }
     const content = message.content();
-    const inboxIds = [
-      content.initiatedByInboxId,
-      ...content.membersAdded.map((m) => m.inboxId),
-      ...content.membersRemoved.map((m) => m.inboxId),
-    ];
+    return {
+      addedMemberInboxIds: content.membersAdded.map((m) => m.inboxId),
+      removedMemberInboxIds: content.membersRemoved.map((m) => m.inboxId),
+    };
+  }, [message]);
 
-    inboxIds.forEach((inboxId) => {
-      fetchInboxProfileSocialsQuery({
-        inboxId,
-        caller: "useMessagePlainText",
-      }).catch(captureError);
-    });
-  }, [message, account]);
+  const { data: addedMemberProfiles } = useProfilesQueries(addedMemberInboxIds);
+  const { data: removedMemberProfiles } = useProfilesQueries(
+    removedMemberInboxIds
+  );
 
   return useMemo(() => {
     if (!account || !message) return "";
 
     try {
+      // Handle reply messages
       if (isReplyMessage(message)) {
-        const content = (message as DecodedMessage<ReplyCodec>).content();
+        const content = message.content();
         return typeof content === "string" ? content : content.content.text;
       }
 
+      // Handle attachment messages
       if (
         isStaticAttachmentMessage(message) ||
         isRemoteAttachmentMessage(message)
       ) {
-        return translate("conversation_list.attachment");
+        return "Attachment";
       }
 
+      // Handle group update messages
       if (isGroupUpdatedMessage(message)) {
         const content = message.content();
-        const initiatorSocials = getInboxProfileSocialsQueryData({
-          inboxId: content.initiatedByInboxId,
-        });
-        const initiatorName = getPreferredInboxAddress(
-          initiatorSocials as IProfileSocialsZodSchema[] | null | undefined
-        );
+        const initiatorName = initiatorProfile?.name ?? "Someone";
 
-        if (!initiatorName) return translate("conversation_list.group_updated");
-
+        // Handle metadata changes
         if (content.metadataFieldsChanged.length > 0) {
           return handleGroupMetadataChange({
             initiatorName,
@@ -152,31 +100,38 @@ export const useMessagePlainText = (
           });
         }
 
-        const memberAddedText = handleGroupMemberChange({
-          initiatorName,
-          members: content.membersAdded,
-          type: "added",
-        });
-        if (memberAddedText) return memberAddedText;
+        // Handle member changes
+        if (content.membersAdded.length > 0) {
+          const memberName = addedMemberProfiles?.[0]?.name ?? "someone";
+          return content.membersAdded.length === 1
+            ? `${initiatorName} added ${memberName}`
+            : `${initiatorName} added ${content.membersAdded.length} members`;
+        }
 
-        const memberRemovedText = handleGroupMemberChange({
-          initiatorName,
-          members: content.membersRemoved,
-          type: "removed",
-        });
-        if (memberRemovedText) return memberRemovedText;
+        if (content.membersRemoved.length > 0) {
+          const memberName = removedMemberProfiles?.[0]?.name ?? "someone";
+          return content.membersRemoved.length === 1
+            ? `${initiatorName} removed ${memberName}`
+            : `${initiatorName} removed ${content.membersRemoved.length} members`;
+        }
 
-        return translate("conversation_list.group_updated");
+        return "Group updated";
       }
 
+      // Handle regular messages
       const content = message.content();
       return typeof content === "string" ? content : message.fallback;
-    } catch (e) {
-      logger.error("Error getting message text", {
-        error: e,
-        contentTypeId: message.contentTypeId,
-      });
+    } catch (error) {
+      logger.error(
+        `Error getting message text for content type ${message.contentTypeId}: ${error}`
+      );
       return message.fallback;
     }
-  }, [message, account]);
-};
+  }, [
+    message,
+    account,
+    initiatorProfile,
+    addedMemberProfiles,
+    removedMemberProfiles,
+  ]);
+}
