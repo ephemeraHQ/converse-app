@@ -52,9 +52,10 @@ export function SocialNames({ socials }: ISocialNamesProps) {
     return items?.map((item) => (
       <Chip
         key={getValue(item)}
-        name={getValue(item)}
         onPress={() => handleNamePress(getValue(item))}
-      />
+      >
+        <Chip.Text>{getValue(item)}</Chip.Text>
+      </Chip>
     ));
   };
 
