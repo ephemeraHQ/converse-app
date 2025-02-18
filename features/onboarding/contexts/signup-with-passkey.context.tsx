@@ -14,7 +14,7 @@ import {
   useAccountsStore,
 } from "@/features/multi-inbox/multi-inbox.store";
 import { InboxSigner } from "@/features/multi-inbox/multi-inbox-client.types";
-import { createUser } from "@/utils/api/users";
+import { createUser } from "@/features/authentication/authentication.api";
 
 const useXmtpFromPrivySmartWalletClientSigner = ({
   onSmartClientReady,

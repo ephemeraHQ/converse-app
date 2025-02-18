@@ -50,6 +50,7 @@ import {
 import logger from "./utils/logger";
 import { AuthenticateWithPasskeyProvider } from "./features/onboarding/contexts/signup-with-passkey.context";
 import { PrivyPlaygroundLandingScreen } from "./features/privy-playground/privy-playground-landing.screen";
+import { useLogoutOnJwtRefreshError } from "./features/authentication/useLogoutOnJwtRefreshError";
 // import { useAccountsStore } from "./features/multi-inbox/multi-inbox.store";
 // import { AuthenticateWithPasskeyProvider } from "./features/onboarding/contexts/signup-with-passkey.context";
 // import { PrivyPlaygroundLandingScreen } from "./features/privy-playground/privy-playground-landing.screen";
@@ -120,6 +121,7 @@ const coinbaseUrl = new URL(`https://${config.websiteDomain}/coinbase`);
 const App = () => {
   const styles = useStyles();
   const debugRef = useRef();
+  useLogoutOnJwtRefreshError();
 
   useEffect(() => {
     setupAppAttest();
