@@ -8,7 +8,10 @@ import { useBottomSheetModalRef } from "@/design-system/BottomSheet/BottomSheet.
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { WalletId } from "thirdweb/wallets";
 import { config } from "@/config";
-import { useAccountsStore } from "../multi-inbox/multi-inbox.store";
+import {
+  useAccountsStore,
+  useCurrentSender,
+} from "../multi-inbox/multi-inbox.store";
 import { MultiInboxClient } from "../multi-inbox/multi-inbox.client";
 import { logger } from "@/utils/logger";
 import { Text } from "@/design-system/Text";
@@ -165,7 +168,7 @@ export function ConnectWalletBottomSheet({
   const hasInstalledWallets = installedWallets && installedWallets.length > 0;
 
   const bottomSheetRef = useBottomSheetModalRef();
-  const currentSender = useAccountsStore((state) => state.currentSender);
+  const currentSender = useCurrentSender();
   // const isInboxClientInitiated =
   //   !!MultiInboxClient.instance.getInboxClientForAddress({
   //     ethereumAddress: currentSender!.ethereumAddress,
@@ -262,22 +265,6 @@ export function ConnectWalletBottomSheet({
   //   socialProfilesError,
   //   onWalletImported,
   // ]);
-
-  useEffect(() => {
-    const debugSocialProfiles = async () => {
-      const mycbidaddress = "0x0aF849d2778f6ccE4A2641438B6207DC4750a82B";
-      const addressToLink = mycbidaddress;
-      const socialProfiles = await ensureSocialProfilesQueryData(addressToLink);
-      logger.debug(
-        `[ConnectWalletBottomSheet]convos ry is awesome Social profiles: ${JSON.stringify(
-          socialProfiles,
-          null,
-          2
-        )}`
-      );
-    };
-    void debugSocialProfiles();
-  }, []);
 
   const isShowingWalletList = listShowing === "wallets";
   const isWalletListDisabled = thirdwebWalletIdThatIsConnecting !== undefined;
