@@ -1,0 +1,61 @@
+---
+description: Description: These React Query guidelines are important when: - Implementing data fetching - Managing server state - Handling cache updates - Optimizing query performance - Structuring API integration
+globs: 
+---
+
+These rules help maintain consistent and efficient data fetching patterns while ensuring proper cache management and optimistic updates.
+
+## Query Key Management
+- All query keys must be defined in `QueryKeys.ts` using factory functions
+- Follow naming pattern: `<entity>QueryKey` for key factories
+- Use query key factory functions from `QueryKeys.ts` when accessing query keys
+
+```typescript
+// queries/QueryKeys.ts
+export const conversationsQueryKey = (account: string) => [
+  QueryKeys.CONVERSATIONS,
+  account?.toLowerCase(),
+];
+
+// queries/use-conversations-query.ts
+export const getConversationsQueryOptions = (args: IArgs) => ({
+  queryKey: conversationsQueryKey(args.account),
+  queryFn: () => getConversations(args),
+  enabled: !!args.account
+});
+```
+
+## Query Options Encapsulation
+- Use React Query's `queryOptions` helper for type safety
+- Export query options generators for cross-component usage
+- Handle conditional fetching with `enabled` and `skipToken`
+- Create an `enabled` variable before returning query options to avoid duplicating logic
+
+## Implementation Principles
+- Avoid destructuring rest operators with useQuery
+- Use object parameters for query options
+
+```typescript
+// ❌ Bad: Causes unnecessary re-renders
+const { data: conversations, ...rest } = useQuery()
+
+// ✅ Good: Explicit property usage
+const { data: conversations, isLoading, error } = useQuery()
+
+// ❌ Bad: Positional arguments
+useQuery(getConversationMessagesQueryOptions(account, topic))
+
+// ✅ Good: Object parameters
+useQuery(getConversationMessagesQueryOptions({ account, topic }))
+``` 
+
+- Never create a conditional queryKey:
+  @example
+  // ❌ conditional queryKey
+  queryKey: enabled ? queryKeyFactory(args) : ["profile"],
+
+// ✅ Good: Explicit property usage
+queryKey: queryKeyFactory(args),
+
+- Always use a ternary checking enabled to return liveQueryFn if enabled is true and skipToken if enabled is false
+  - queryFn: enabled ? () => liveQueryFn(args) : skipToken,

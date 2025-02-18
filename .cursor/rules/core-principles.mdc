@@ -1,0 +1,37 @@
+---
+description: Description: These core principles help maintain code quality and consistency across the codebase. They are particularly useful when: - Writing new features or components - Refactoring existing code - Reviewing pull requests - Making architectural decisions - Implementing logging and error handling
+globs: 
+---
+- Write concise TypeScript code.
+- Use functional programming patterns.
+- Prefer clean, readable code over compact code, using empty lines to separate logical blocks and improve readability.
+- Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError). Doesn't mater if it's long. For example this is good: "useGroupMembersInfo".
+- Prefer clean and easy to read code over compact code.
+- Don't create function(s) inside other functions unless it's specified
+- Add clear, concise comments to explain non-obvious logic or unconventional implementation decisions.
+- When refactoring code, preserve existing comments unless explicitly instructed otherwise or the related code is removed. Comments often explain important context or implementation decisions that should be maintained.
+- Comments should be above the code they are describing.
+- Use the suffix 'ForCurrentAccount' when using useCurrentAccount inside components or hooks.
+- Handle errors at the caller level. Unless if we really need to log something but make sure to throw back the error to the caller.
+- Minimize using external hooks inside custom hooks to prevent unnecessary rerenders. Instead, use getter functions to access data, especially in mutations.
+- Use Zod for external API response validation. Define zod schema and infer types from it.
+- Keep files small and focused. Place hooks and components in separate files unless they are small wrapper components. This improves code organization and maintainability.
+- Refactor a component using the composable pattern when you start seeing a lot of optional props.
+
+## Logging
+- Use logger for all logging operations:
+- Prefer `logger.debug` over `console.log`
+- Use template literals for inline logging:
+
+```typescript
+// ❌ Bad: Object-based logging
+logger.debug("[buildXmtpClient] Starting to build XMTP client", {
+  address,
+  inboxId,
+});
+
+// ✅ Good: Inline template literal logging
+logger.debug(
+  `[buildXmtpClient] Starting to build XMTP client with address: ${address} and inboxId: ${inboxId}`
+);
+``` 

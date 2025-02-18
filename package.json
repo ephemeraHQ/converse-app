@@ -243,13 +243,6 @@
     ]
   },
   "packageManager": "yarn@4.6.0",
-  "expo": {
-    "install": {
-      "exclude": [
-        "@sentry/react-native"
-      ]
-    }
-  },
   "engines": {
     "node": ">=20"
   }
