@@ -29,11 +29,11 @@ export function ConversationRequestsToggle({
         <View key={index} style={{ flex: 1 }}>
           <Chip
             key={index}
-            name={option}
             isSelected={index === selectedIndex}
             onPress={() => onSelect(index)}
-            showAvatar={false}
-          />
+          >
+            <Chip.Text>{option}</Chip.Text>
+          </Chip>
         </View>
       ))}
     </HStack>

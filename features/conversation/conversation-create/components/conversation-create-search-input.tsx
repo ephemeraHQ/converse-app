@@ -123,7 +123,8 @@ export const ConversationCreateSearchInput = memo(
 
 function useConversationCreateSearchStyles() {
   const { theme } = useAppTheme();
-  const chipStyles = useChipStyles();
+
+  const chipStyles = useChipStyles({ variant: "outlined" });
 
   const $container = {
     backgroundColor: theme.colors.background.surfaceless,
@@ -178,12 +179,13 @@ const UserChip = memo(function UserChip(props: { inboxId: InboxId }) {
 
   return (
     <Chip
-      avatarUri={avatarUri}
-      name={name}
       isSelected={selectedChipInboxId === inboxId}
       onPress={handlePress}
       size="md"
-    />
+    >
+      <Chip.Avatar uri={avatarUri} name={name} />
+      <Chip.Text>{name}</Chip.Text>
+    </Chip>
   );
 });
 
