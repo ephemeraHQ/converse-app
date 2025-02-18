@@ -1,7 +1,7 @@
-import type { IProfileSocials } from "@/features/profiles/profile.types";
+import { IWeb3SocialProfileType } from "@/features/social-profiles/social-lookup.api";
 
 export function doesSocialsMatchTextQuery(args: {
-  socials: IProfileSocials[];
+  socials: IWeb3SocialProfileType[];
   normalizedQuery: string;
 }) {
   const { socials, normalizedQuery } = args;

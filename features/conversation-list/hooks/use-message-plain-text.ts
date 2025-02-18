@@ -50,7 +50,9 @@ export function useMessagePlainText(
       ? message.content().initiatedByInboxId
       : undefined;
 
-  const { data: initiatorProfile } = useProfileQuery(initiatorInboxId);
+  const { data: initiatorProfile } = useProfileQuery({
+    xmtpId: initiatorInboxId,
+  });
 
   // Get member profiles for group updates - split into added and removed
   const { addedMemberInboxIds, removedMemberInboxIds } = useMemo(() => {
@@ -64,10 +66,12 @@ export function useMessagePlainText(
     };
   }, [message]);
 
-  const { data: addedMemberProfiles } = useProfilesQueries(addedMemberInboxIds);
-  const { data: removedMemberProfiles } = useProfilesQueries(
-    removedMemberInboxIds
-  );
+  const { data: addedMemberProfiles } = useProfilesQueries({
+    xmtpInboxIds: addedMemberInboxIds,
+  });
+  const { data: removedMemberProfiles } = useProfilesQueries({
+    xmtpInboxIds: removedMemberInboxIds,
+  });
 
   return useMemo(() => {
     if (!account || !message) return "";

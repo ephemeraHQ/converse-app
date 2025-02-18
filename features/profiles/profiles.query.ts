@@ -1,20 +1,16 @@
 import {
-  queryOptions,
-  skipToken,
-  useQuery,
-  useQueries,
-} from "@tanstack/react-query";
-import { queryClient } from "../../queries/queryClient";
-import { reactQueryPersister } from "@/utils/mmkv";
-import {
-  fetchProfile,
   IConvosProfileForInbox,
+  fetchProfile,
 } from "@/features/profiles/profiles.api";
+import { reactQueryPersister } from "@/utils/mmkv";
 import { DateUtils } from "@/utils/time.utils";
 import {
-  useAccountsList,
-  useSafeCurrentSender,
-} from "@/features/multi-inbox/multi-inbox.store";
+  queryOptions,
+  skipToken,
+  useQueries,
+  useQuery,
+} from "@tanstack/react-query";
+import { queryClient } from "../../queries/queryClient";
 
 const profileQueryKey = ({ xmtpId }: { xmtpId: string }) =>
   ["profile", xmtpId] as const;

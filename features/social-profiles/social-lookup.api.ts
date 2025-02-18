@@ -1,7 +1,9 @@
 import { api } from "@/utils/api/api";
+import { captureError } from "@/utils/capture-error";
 import { z } from "zod";
-import { logger } from "@/utils/logger";
-const Web3SocialProfileType = z.enum([
+
+// Define the profile type enum to match backend
+const ProfileType = z.enum([
   "ens",
   "farcaster",
   "basename",
@@ -9,33 +11,41 @@ const Web3SocialProfileType = z.enum([
   "unstoppable-domains",
 ]);
 
-export type IWeb3SocialProfileType = z.infer<typeof Web3SocialProfileType>;
-
-const Web3SocialProfileSchema = z.object({
-  type: Web3SocialProfileType,
+// Simplified schema to match backend response
+const SocialProfileSchema = z.object({
+  type: ProfileType,
   address: z.string(),
   name: z.string(),
   bio: z.string().optional(),
   avatar: z.string().optional(),
 });
 
-export type IWeb3SocialProfile = z.infer<typeof Web3SocialProfileSchema>;
+export type ISocialProfile = z.infer<typeof SocialProfileSchema>;
 
-const SocialProfilesResponseSchema = z.array(Web3SocialProfileSchema);
+const SocialProfilesResponseSchema = z.object({
+  socialProfiles: z.array(SocialProfileSchema),
+});
 
-/**
- * Fetches social profiles for a given address using the lookup endpoint
- */
-export const fetchSocialProfilesForAddress = async (
-  address: string
-): Promise<IWeb3SocialProfile[]> => {
-  logger.debug(
-    `[fetchSocialProfilesForAddress] Fetching social profiles for address: ${address}`
+export type ISocialProfilesResponse = z.infer<
+  typeof SocialProfilesResponseSchema
+>;
+
+export async function fetchSocialProfilesForAddress(args: { address: string }) {
+  const { address } = args;
+
+  const { data } = await api.get<ISocialProfilesResponse>(
+    `/api/v1/lookup/address/${address}`
   );
-  const { data } = await api.get(`/api/v1/lookup/address/${address}`);
-  const parsedData = SocialProfilesResponseSchema.parse(data);
-  logger.debug(
-    `[fetchSocialProfilesForAddress] Successfully fetched ${parsedData.length} social profiles for address: ${address}`
-  );
-  return parsedData;
-};
+
+  const response = SocialProfilesResponseSchema.safeParse(data);
+
+  if (!response.success) {
+    captureError(
+      new Error(
+        `Invalid social profiles response: ${JSON.stringify(response.error)}`
+      )
+    );
+  }
+
+  return response.data;
+}

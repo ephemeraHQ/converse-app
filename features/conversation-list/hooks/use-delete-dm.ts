@@ -1,7 +1,8 @@
 import { showActionSheetWithOptions } from "@/components/StateHandlers/ActionSheetStateHandler";
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { useDenyDmMutation } from "@/features/consent/use-deny-dm.mutation";
+import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 
+import { useProfileQuery } from "@/features/profiles/profiles.query";
 import { translate } from "@/i18n";
 import {
   getConversationMetadataQueryData,
@@ -39,8 +40,8 @@ export const useDeleteDm = ({ topic }: { topic: ConversationTopic }) => {
 
   const { mutateAsync: denyDmConsentAsync } = useDenyDmMutation();
 
-  const { data: preferredName } = useInboxName({
-    inboxId: peerInboxId!,
+  const { data: profile } = useProfileQuery({
+    xmtpId: peerInboxId!,
   });
 
   const { mutateAsync: deleteDmAsync } = useMutation({
@@ -72,7 +73,7 @@ export const useDeleteDm = ({ topic }: { topic: ConversationTopic }) => {
   });
 
   return useCallback(() => {
-    const title = `${translate("delete_chat_with")} ${preferredName}?`;
+    const title = `${translate("delete_chat_with")} ${profile?.name}?`;
 
     if (!conversationId) {
       throw new Error("Conversation not found in useDeleteDm");
@@ -130,7 +131,7 @@ export const useDeleteDm = ({ topic }: { topic: ConversationTopic }) => {
     );
   }, [
     colorScheme,
-    preferredName,
+    profile,
     deleteDmAsync,
     denyDmConsentAsync,
     peerInboxId,

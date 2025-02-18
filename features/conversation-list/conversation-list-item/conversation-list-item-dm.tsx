@@ -78,13 +78,6 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
     return `${timeToShow} ${MIDDLE_DOT} ${messageText}`;
   }, [timeToShow, messageText]);
 
-  const avatarUri = profile?.avatarUrl;
-
-  const avatarComponent = useMemo(
-    () => <Avatar size={theme.avatarSize.lg} uri={avatarUri} name={title} />,
-    [avatarUri, title, theme]
-  );
-
   const leftActionsBackgroundColor = useMemo(
     () => (isDeleted ? theme.colors.fill.tertiary : theme.colors.fill.caution),
     [isDeleted, theme]
@@ -140,7 +133,13 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
       <ConversationListItem
         onPress={onPress}
         showError={false}
-        avatarComponent={avatarComponent}
+        avatarComponent={
+          <Avatar
+            size={theme.avatarSize.lg}
+            uri={profile?.avatarUrl}
+            name={title}
+          />
+        }
         title={title}
         subtitle={subtitle}
         isUnread={isUnread}

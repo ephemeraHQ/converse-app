@@ -1,18 +1,20 @@
 import { api } from "@/utils/api/api";
+import { captureError } from "@/utils/capture-error";
 import { z } from "zod";
-import {
-  ConvosProfileForInboxSchema,
-  type IConvosProfileForInbox,
-} from "@/features/profiles/profiles.api";
 
-const SearchProfilesResultSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  description: z.string().nullable(),
-  xmtpId: z.string(),
-});
+const SearchProfilesResultSchema = z.array(
+  z.object({
+    id: z.string(),
+    name: z.string(),
+    avatarUrl: z.string().nullable(),
+    description: z.string().nullable(),
+    xmtpId: z.string(),
+  })
+);
 
-export type ISearchProfilesResult = z.infer<typeof SearchProfilesResultSchema>;
+export type ISearchProfilesResult = z.infer<
+  typeof SearchProfilesResultSchema
+>[0];
 
 export const searchProfiles = async ({
   searchQuery,
@@ -22,21 +24,12 @@ export const searchProfiles = async ({
   const { data } = await api.get("/api/v1/profiles/search", {
     params: { query: searchQuery },
   });
-  return z.array(SearchProfilesResultSchema).parse(data);
-};
 
-export const fetchProfile = async (
-  xmtpId: string
-): Promise<IConvosProfileForInbox> => {
-  const { data } = await api.get(`/api/v1/profiles/${xmtpId}`);
-  return ConvosProfileForInboxSchema.parse(data);
-};
+  const result = SearchProfilesResultSchema.safeParse(data);
 
-export const fetchAllProfilesForUser = async ({
-  convosUserId,
-}: {
-  convosUserId: string;
-}): Promise<IConvosProfileForInbox[]> => {
-  const { data } = await api.get(`/api/v1/profiles/user/${convosUserId}`);
-  return z.array(ConvosProfileForInboxSchema).parse(data);
+  if (!result.success) {
+    captureError(result.error);
+  }
+
+  return data;
 };

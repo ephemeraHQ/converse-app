@@ -1,10 +1,12 @@
 import { api } from "@/utils/api/api";
+import { captureError } from "@/utils/capture-error";
 import { logger } from "@/utils/logger";
 import { z } from "zod";
 
 export const ConvosProfileForInboxSchema = z.object({
   id: z.string(),
   name: z.string(),
+  avatarUrl: z.string().nullable(),
   description: z.string().nullable(),
   // deviceIdentityId: z.string(),
   // createdAt: z.string(),
@@ -25,7 +27,11 @@ export const updateProfile = async ({
   updates: { name?: string; description?: string };
 }) => {
   const { data } = await api.put(`/api/v1/profiles/${id}`, updates);
-  return ConvosProfileForInboxSchema.parse(data);
+  const result = ConvosProfileForInboxSchema.safeParse(data);
+  if (!result.success) {
+    captureError(result.error);
+  }
+  return data;
 };
 
 export const fetchProfile = async ({
@@ -34,7 +40,11 @@ export const fetchProfile = async ({
   xmtpId: string;
 }): Promise<IConvosProfileForInbox> => {
   const { data } = await api.get(`/api/v1/profiles/${xmtpId}`);
-  return ConvosProfileForInboxSchema.parse(data);
+  const result = ConvosProfileForInboxSchema.safeParse(data);
+  if (!result.success) {
+    captureError(result.error);
+  }
+  return data;
 };
 
 export const fetchAllProfilesForUser = async ({
@@ -43,7 +53,11 @@ export const fetchAllProfilesForUser = async ({
   convosUserId: string;
 }): Promise<IConvosProfileForInbox[]> => {
   const { data } = await api.get(`/api/v1/profiles/user/${convosUserId}`);
-  return z.array(ConvosProfileForInboxSchema).parse(data);
+  const result = z.array(ConvosProfileForInboxSchema).safeParse(data);
+  if (!result.success) {
+    captureError(result.error);
+  }
+  return data;
 };
 
 const ClaimProfileResponseSchema = z.object({

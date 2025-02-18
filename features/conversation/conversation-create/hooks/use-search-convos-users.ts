@@ -1,11 +1,12 @@
 import {
   ISearchProfilesResult,
   searchProfiles,
-} from "@/features/profiles/profiles.api";
+} from "@/features/profiles/profiles.search.api";
 import { getSearchConvosUsersQueryKey } from "@/queries/QueryKeys";
 import { DateUtils } from "@/utils/time.utils";
 import { isSameInboxId } from "@/utils/xmtpRN/xmtp-inbox-id/xmtp-inbox-id";
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
+import { InboxId } from "@xmtp/react-native-sdk";
 
 const isInboxIdIncludedInList =
   (inboxIdsToCheck: string[]) => (profile: ISearchProfilesResult) => {
