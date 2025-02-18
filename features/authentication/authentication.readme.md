@@ -51,7 +51,7 @@ All other endpoints require the JWT for authentication.
 1. **Installation ID**: Identifier for the XMTP inbox, derived from the device
 2. **Firebase AppCheck Token**: Provided by Firebase
 3. **Signed AppCheck Token**: The Firebase AppCheck token signed by the XMTP inbox (client-side)
-4. **Ethereum Wallet**: The wallet used for signing, obtained via the Privy passkey flow
+4. **XMTP Inbox ID**: The XMTP inbox ID of the user, created during the onboarding flow
 
 **Profile Data** (optional but currently always provided):
 
