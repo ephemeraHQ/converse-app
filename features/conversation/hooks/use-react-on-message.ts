@@ -1,6 +1,8 @@
-import { getCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import {
+  getCurrentAccount,
+  getSafeCurrentSender,
+} from "@/features/multi-inbox/multi-inbox.store";
 import { getConversationForCurrentAccount } from "@/features/conversation/utils/get-conversation-for-current-account";
-import { getCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import {
   addConversationMessageQuery,
   refetchConversationMessages,
@@ -34,14 +36,16 @@ export function useReactOnMessage(props: { topic: ConversationTopic }) {
       });
     },
     onMutate: (variables) => {
-      const currentAccount = getCurrentAccount()!;
-      const currentUserInboxId = getCurrentAccountInboxId()!;
+      const {
+        ethereumAddress: currentEthereumAddress,
+        inboxId: currentInboxId,
+      } = getSafeCurrentSender();
       const conversation = getConversationForCurrentAccount(topic);
 
       if (conversation) {
         // Add the reaction to the message
         addConversationMessageQuery({
-          account: currentAccount,
+          account: currentEthereumAddress,
           topic: conversation.topic,
           message: {
             id: getRandomId() as MessageId,
@@ -50,7 +54,7 @@ export function useReactOnMessage(props: { topic: ConversationTopic }) {
             fallback: variables.reaction.content,
             deliveryStatus: MessageDeliveryStatus.PUBLISHED,
             topic: conversation.topic,
-            senderInboxId: currentUserInboxId,
+            senderInboxId: currentInboxId,
             nativeContent: {},
             content: () => {
               return variables.reaction;

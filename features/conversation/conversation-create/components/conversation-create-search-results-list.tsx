@@ -5,7 +5,6 @@ import { Loader } from "@/design-system/loader";
 import { useSearchConvosUsers } from "@/features/conversation/conversation-create/hooks/use-search-convos-users";
 import { inboxIdIsPartOfConversationUsingCacheData } from "@/features/conversation/utils/inbox-id-is-part-of-converastion";
 import { useConversationStoreContext } from "@/features/conversation/conversation.store-context";
-import { useSafeCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { $globalStyles } from "@/theme/styles";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
@@ -24,7 +23,7 @@ import { useSearchExistingGroupsByGroupName } from "../queries/search-existing-g
 import { ConversationSearchResultsListItemGroup } from "./conversation-create-search-results-list-item-group";
 import { ConversationSearchResultsListItemUser } from "./conversation-create-search-results-list-item-user";
 import { ConversationSearchResultsListItemDm } from "./conversation-create-search-results-list-item-user-dm";
-
+import { useSafeCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
 // Because we want a mix of DMs, groups, and profiles
 const MAX_INITIAL_RESULTS = 3;
 
@@ -75,7 +74,7 @@ export function ConversationSearchResultsList() {
     (state) => state.searchSelectedUserInboxIds
   );
 
-  const currentUserInboxId = useSafeCurrentAccountInboxId();
+  const currentUserInboxId = useSafeCurrentSender().inboxId;
 
   const { data: searchConvosUsersData, isLoading: isSearchingConvosUsers } =
     useSearchConvosUsers({

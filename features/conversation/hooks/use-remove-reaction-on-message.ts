@@ -1,11 +1,13 @@
-import { getCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import {
+  getCurrentAccount,
+  getSafeCurrentSender,
+} from "@/features/multi-inbox/multi-inbox.store";
 import { getConversationForCurrentAccount } from "@/features/conversation/utils/get-conversation-for-current-account";
-import { getCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import {
   addConversationMessageQuery,
   refetchConversationMessages,
 } from "@/queries/conversation-messages-query";
-import { captureError, captureErrorWithToast } from "@/utils/capture-error";
+import { captureErrorWithToast } from "@/utils/capture-error";
 import { getTodayNs } from "@/utils/date";
 import { getRandomId } from "@/utils/general";
 import { contentTypesPrefixes } from "@/utils/xmtpRN/xmtp-content-types/xmtp-content-types";
@@ -36,7 +38,7 @@ export function useRemoveReactionOnMessage(props: {
     },
     onMutate: (variables) => {
       const currentAccount = getCurrentAccount()!;
-      const currentUserInboxId = getCurrentAccountInboxId()!;
+      const { inboxId: currentInboxId } = getSafeCurrentSender();
       const conversation = getConversationForCurrentAccount(topic);
 
       if (conversation) {
@@ -51,7 +53,7 @@ export function useRemoveReactionOnMessage(props: {
             fallback: variables.reaction.content,
             deliveryStatus: MessageDeliveryStatus.PUBLISHED,
             topic: conversation.topic,
-            senderInboxId: currentUserInboxId,
+            senderInboxId: currentInboxId,
             nativeContent: {},
             content: () => {
               return variables.reaction;

@@ -1,4 +1,3 @@
-import { getCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import {
   getConversationMessagesQueryData,
   useConversationMessagesQuery,
@@ -8,6 +7,7 @@ import { CoinbaseMessagingPaymentCodec } from "@/utils/xmtpRN/xmtp-content-types
 import { getMessageContentType } from "@/utils/xmtpRN/xmtp-content-types/xmtp-content-types";
 import {
   getCurrentAccount,
+  getSafeCurrentSender,
   useCurrentAccount,
 } from "@/features/multi-inbox/multi-inbox.store";
 import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-reference";
@@ -202,7 +202,7 @@ export function getCurrentUserAlreadyReactedOnMessage(args: {
   emoji: string | undefined; // Specific emoji or just reacted in general
 }) {
   const { messageId, topic, emoji } = args;
-  const currentUserInboxId = getCurrentAccountInboxId();
+  const currentUserInboxId = getSafeCurrentSender().inboxId;
   const currentAccount = getCurrentAccount()!;
   const messages = getConversationMessagesQueryData({
     account: currentAccount,

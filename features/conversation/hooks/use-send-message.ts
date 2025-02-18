@@ -62,7 +62,7 @@ export function useSendMessage() {
     },
     // onMutate: (variables) => {
     //   const currentAccount = getCurrentAccount()!;
-    //   const currentUserInboxId = getCurrentAccountInboxId()!;
+    //   const currentUserInboxId = getSafeCurrentSender().inboxId;
 
     //   // For now, we only do optimistic updates for simple text messages
     //   // And if we like this, we'll implement the rest of content types

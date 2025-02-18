@@ -21,10 +21,12 @@ export type MultiInboxClientRestorationState =
   | StaticStates
   | ReturnType<typeof MultiInboxClientRestorationStates.error>;
 
-export type CurrentSender = {
+export type ConvosSender = {
   ethereumAddress: string;
   inboxId: string;
 };
+
+export type CurrentSender = ConvosSender;
 
 export type ClientWithInvalidInstallation = undefined;
 

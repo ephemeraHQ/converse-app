@@ -320,21 +320,18 @@ export function PrivyPlaygroundLandingScreen() {
     logger.debug("Splash screen hidden");
   }, []);
 
-  // if (authStatus !== AuthStatuses.signedIn) {
-  //   return <PrivyPlaygroundLoginScreen />;
-  // }
-
   return (
     <SafeAreaView>
       <ScrollView style={{ borderColor: "rgba(0,0,0,0.1)", borderWidth: 1 }}>
-        <View style={{ padding: 20 }}>
-          {/* Add reverse resolution */}
-
-          {/* Debug your hardcoded Coinbase address */}
-          <Text style={{ fontWeight: "bold", marginTop: 10 }}>
-            Hardcoded Coinbase Address:
-          </Text>
-          <AddressDebugger address={mycbidaddress} />
+        <View
+          style={{
+            padding: 20,
+            flex: 1,
+            justifyContent: "center",
+            alignContent: "center",
+          }}
+        >
+          <Text>Privy Playground</Text>
         </View>
       </ScrollView>
     </SafeAreaView>

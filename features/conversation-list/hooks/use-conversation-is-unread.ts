@@ -1,8 +1,10 @@
 import { conversationIsUnreadForInboxId } from "@/features/conversation/utils/conversation-is-unread-by-current-account";
-import { useCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { getConversationMetadataQueryOptions } from "@/queries/conversation-metadata-query";
 import { getConversationQueryOptions } from "@/queries/conversation-query";
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import {
+  useCurrentAccount,
+  useSafeCurrentSender,
+} from "@/features/multi-inbox/multi-inbox.store";
 import { useQuery } from "@tanstack/react-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { useMemo } from "react";
@@ -15,7 +17,7 @@ export const useConversationIsUnread = ({
   topic,
 }: UseConversationIsUnreadArgs) => {
   const currentAccount = useCurrentAccount();
-  const { data: currentUserInboxId } = useCurrentAccountInboxId();
+  const currentUserInboxId = useSafeCurrentSender().inboxId;
 
   const {
     data: conversationMetadata,

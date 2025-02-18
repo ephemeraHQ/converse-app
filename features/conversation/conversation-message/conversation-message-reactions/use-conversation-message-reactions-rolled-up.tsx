@@ -1,18 +1,14 @@
 import { useConversationMessageReactions } from "@/features/conversation/conversation-message/conversation-message.utils";
-import { isCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { getInboxProfileSocialsQueryConfig } from "@/queries/useInboxProfileSocialsQuery";
 import { useQueries } from "@tanstack/react-query";
-import {
-  getPreferredInboxAddress,
-  getPreferredInboxAvatar,
-  getPreferredInboxName,
-} from "@utils/profile";
+
 import { useMemo } from "react";
 import {
   RolledUpReactions,
   SortedReaction,
 } from "./conversation-message-reactions.types";
 import { MessageId } from "@xmtp/react-native-sdk";
+import { isCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
 
 export function useConversationMessageReactionsRolledUp(args: {
   messageId: MessageId;
@@ -63,7 +59,9 @@ export function useConversationMessageReactionsRolledUp(args: {
     const previewCounts = new Map<string, number>();
 
     flatReactions.forEach((reaction) => {
-      const isOwnReaction = isCurrentAccountInboxId(reaction.senderInboxId);
+      const isOwnReaction = isCurrentSender({
+        inboxId: reaction.senderInboxId,
+      });
 
       if (isOwnReaction) {
         userReacted = true;

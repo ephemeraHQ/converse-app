@@ -1,4 +1,7 @@
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import {
+  useCurrentAccount,
+  useSafeCurrentSender,
+} from "@/features/multi-inbox/multi-inbox.store";
 import { Center } from "@/design-system/Center";
 import { AnimatedHStack, HStack } from "@/design-system/HStack";
 import { AnimatedVStack } from "@/design-system/VStack";
@@ -10,7 +13,6 @@ import {
 } from "@/features/conversation-list/conversation-list-item/conversation-list-item";
 import { useConversationRequestsListItem } from "@/features/conversation-requests-list/use-conversation-requests-list-items";
 import { conversationIsUnreadForInboxId } from "@/features/conversation/utils/conversation-is-unread-by-current-account";
-import { useCurrentAccountInboxId } from "@/hooks/use-current-account-inbox-id";
 import { getConversationMetadataQueryOptions } from "@/queries/conversation-metadata-query";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { useNavigation } from "@react-navigation/native";
@@ -24,7 +26,7 @@ export const ConversationListAwaitingRequests = memo(
     const navigation = useNavigation();
     const { likelyNotSpam, isLoading: isLoadingUknownConversations } =
       useConversationRequestsListItem();
-    const { data: currentAccountInboxId } = useCurrentAccountInboxId();
+    const currentAccountInboxId = useSafeCurrentSender().inboxId;
 
     const conversationsMetadataQueries = useQueries({
       queries: (likelyNotSpam ?? []).map((conversation) =>
