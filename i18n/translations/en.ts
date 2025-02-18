@@ -275,7 +275,6 @@ export const en = {
     "You currently have no message requests. We'll make suggestions here as you connect with others.",
   hidden_requests_warn:
     "Requests containing messages that may be offensive or unwanted are moved to this folder.",
-  message_requests: "Message requests",
 
   // Conversation
   accept: "Accept",

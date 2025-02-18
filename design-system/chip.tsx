@@ -11,6 +11,7 @@ type ChipProps = {
   isSelected?: boolean;
   onPress?: () => void;
   size?: "sm" | "md";
+  showAvatar?: boolean;
 };
 
 export function Chip({
@@ -19,6 +20,7 @@ export function Chip({
   isSelected,
   onPress,
   size = "sm",
+  showAvatar = true,
 }: ChipProps) {
   const { theme } = useAppTheme();
 
@@ -33,7 +35,9 @@ export function Chip({
         // {...debugBorder()}
         style={styles.$content}
       >
-        <Avatar uri={avatarUri} name={name} size={theme.avatarSize.xs} />
+        {showAvatar && (
+          <Avatar uri={avatarUri} name={name} size={theme.avatarSize.xs} />
+        )}
         <Text preset={size === "sm" ? "small" : "body"}>{name}</Text>
       </Center>
     </Pressable>

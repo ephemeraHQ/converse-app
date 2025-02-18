@@ -265,7 +265,7 @@ export const fr = {
     "Vous n'avez actuellement aucune demande de message. Nous ferons des suggestions ici à mesure que vous vous connecterez avec d'autres.",
   hidden_requests_warn:
     "Les demandes contenant des messages potentiellement offensants ou indésirables sont déplacées dans ce dossier.",
-  message_requests: "Demandes de message",
+
   // Conversation
   accept: "Accepter",
   block: "Bloquer",
