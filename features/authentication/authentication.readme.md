@@ -2,6 +2,12 @@
 
 This document provides a high-level overview of the authentication strategy used in our application, explaining the flow involving Firebase AppCheck, XMTP, and Ethereum wallet integration via Privy passkeys, as well as the two primary endpoints for user creation and authentication.
 
+## Loom Recordings
+
+[Convos Authentication Modeling Discussion](https://www.loom.com/share/0a1277074f2a4e989ecfe0141deac359)  
+Participants: Ry, Michael, Thierry  
+Date: Friday February 14, 2025
+
 ## Overview
 
 Our authentication mechanism involves two primary endpoints:
