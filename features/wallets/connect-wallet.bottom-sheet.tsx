@@ -323,7 +323,7 @@ export function ConnectWalletBottomSheet({
     // const addressToLink = walletAccount.address;
     const mycbidaddress = "0x0aF849d2778f6ccE4A2641438B6207DC4750a82B";
     const addressToLink = mycbidaddress;
-    const socialProfiles = await getSocialProfilesForAddress(addressToLink);
+    const socialProfiles = await fetchSocialProfilesForAddress(addressToLink);
     logger.debug(
       `[ConnectWalletBottomSheet]convos ry is awesome Social profiles: ${JSON.stringify(
         socialProfiles,

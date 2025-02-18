@@ -5,6 +5,7 @@ import { StateStorage } from "zustand/middleware";
 import { DEFAULT_GC_TIME } from "@/queries/queryClient.constants";
 import { getAccountEncryptionKey } from "./keychain";
 import logger from "./logger";
+import { config } from "@/config";
 
 const storage = new MMKV();
 
@@ -51,23 +52,48 @@ export const clearSecureMmkvForAccount = async (account: string) => {
 };
 
 const reactQueryMMKV = new MMKV({ id: "converse-react-query" });
+const secureQueryMMKV = new MMKV({
+  id: "secure-convos-react-query",
+  encryptionKey: config.reactQueryEncryptionKey,
+});
 
-export const reactQueryPersister = experimental_createPersister({
-  storage: {
+type MaybePromise<T> = T | Promise<T>;
+
+type PersistStorage<TStorageValue = string> = {
+  getItem: (key: string) => MaybePromise<TStorageValue | undefined | null>;
+  setItem: (key: string, value: TStorageValue) => MaybePromise<unknown>;
+  removeItem: (key: string) => MaybePromise<void>;
+};
+
+type MMKVReactQueryStorage = PersistStorage & {
+  clearAll(): void;
+};
+
+function createMMKVStorage(storage: MMKV): MMKVReactQueryStorage {
+  return {
     getItem: (key: string) => {
-      const stringValue = reactQueryMMKV.getString(key);
-      return stringValue || null;
+      const stringValue = storage.getString(key);
+      return stringValue ?? null;
     },
     setItem: (key: string, value: string) => {
       // Deleting before setting to avoid memory leak
-      // relevant only until we upgrade to v3 of react-native-mmkv https://github.com/mrousavy/react-native-mmkv/issues/440#issuecomment-2345737896
-      // https://github.com/mrousavy/react-native-mmkv/issues/440
-      reactQueryMMKV.delete(key);
+      // relevant only until we upgrade to v3 of react-native-mmkv
+      // https://github.com/mrousavy/react-native-mmkv/issues/440#issuecomment-2345737896
+      storage.delete(key);
       if (value) {
-        reactQueryMMKV.set(key, value);
+        storage.set(key, value);
       }
     },
-    removeItem: (key: string) => reactQueryMMKV.delete(key),
-  },
+    removeItem: (key: string) => storage.delete(key),
+    clearAll: () => storage.clearAll(),
+  };
+}
+
+export const reactQueryPersister = experimental_createPersister({
+  storage: createMMKVStorage(reactQueryMMKV),
   maxAge: DEFAULT_GC_TIME,
+});
+
+export const secureQueryPersister = experimental_createPersister({
+  storage: createMMKVStorage(secureQueryMMKV),
 });

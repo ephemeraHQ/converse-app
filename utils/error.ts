@@ -53,3 +53,9 @@ export class StreamError extends BaseError {
     super(`[Stream] ${message}`, cause);
   }
 }
+
+export class AuthenticationError extends BaseError {
+  constructor(message: string, cause?: unknown) {
+    super(`[Authentication] ${message}`, cause);
+  }
+}

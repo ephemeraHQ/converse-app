@@ -63,7 +63,6 @@ export function AddAttachmentButton() {
 
         try {
           const uploadedAttachment = await uploadRemoteAttachment(
-            currentAccount,
             encryptedAttachment
           );
 

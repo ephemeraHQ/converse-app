@@ -63,7 +63,6 @@ export function useCreateOrUpdateProfileInfo() {
       profile: ProfileType;
     }): Promise<CreateOrUpdateProfileResponse> => {
       const { profile } = args;
-      const address = getCurrentAccount()!;
 
       const profileValidationResult = isProfileValid(profile);
       if (!profileValidationResult.success) {
@@ -104,7 +103,6 @@ export function useCreateOrUpdateProfileInfo() {
 
           try {
             publicAvatar = await uploadFile({
-              account: address,
               filePath: resizedImage.uri,
               contentType: "image/jpeg",
             });

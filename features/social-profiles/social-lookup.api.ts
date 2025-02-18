@@ -1,7 +1,7 @@
-import { api } from "../../utils/api/api";
+import { api } from "@/utils/api/api";
 import { z } from "zod";
 
-const ProfileType = z.enum([
+const Web3SocialProfileType = z.enum([
   "ens",
   "farcaster",
   "basename",
@@ -9,29 +9,28 @@ const ProfileType = z.enum([
   "unstoppable-domains",
 ]);
 
-export type ProfileType = z.infer<typeof ProfileType>;
+export type IWeb3SocialProfileType = z.infer<typeof Web3SocialProfileType>;
 
-const SocialProfileSchema = z.object({
-  type: ProfileType,
+const Web3SocialProfileSchema = z.object({
+  type: Web3SocialProfileType,
   address: z.string(),
   name: z.string(),
   bio: z.string().optional(),
   avatar: z.string().optional(),
 });
 
-export type SocialProfile = z.infer<typeof SocialProfileSchema>;
+export type IWeb3SocialProfile = z.infer<typeof Web3SocialProfileSchema>;
 
-const SocialProfilesResponseSchema = z.array(SocialProfileSchema);
+const SocialProfilesResponseSchema = z.array(Web3SocialProfileSchema);
 
 /**
  * Fetches social profiles for a given address using the lookup endpoint
  */
-export const getSocialProfilesForAddress = async (
+export const fetchSocialProfilesForAddress = async (
   address: string
-): Promise<SocialProfile[]> => {
+): Promise<IWeb3SocialProfile[]> => {
   try {
     const { data } = await api.get(`/api/v1/lookup/address/${address}`);
-    // Validate the response data against our schema
     return SocialProfilesResponseSchema.parse(data);
   } catch (error) {
     console.error(

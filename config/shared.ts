@@ -57,4 +57,7 @@ export const shared = {
     clientId: process.env.EXPO_PUBLIC_PRIVY_CLIENT_ID,
   },
   thirdwebClientId: process.env.EXPO_PUBLIC_THIRDWEB_CLIENT_ID,
+  reactQueryEncryptionKey:
+    // @ts-expect-error todo fixme
+    process.env.EXPO_PUBLIC_SECURE_REACT_QUERY_ENCRYPTION_KEY,
 } as const satisfies Partial<IConfig>;

@@ -53,4 +53,5 @@ export type IConfig = {
   privy: IPrivyConfig;
   evm: IEvmConfig;
   appCheckDebugToken?: string;
+  reactQueryEncryptionKey: string;
 };

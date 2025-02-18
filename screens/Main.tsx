@@ -25,7 +25,7 @@ import {
   getConverseInitialURL,
   getConverseStateFromPath,
 } from "./Navigation/navHelpers";
-import { useAuthStatus } from "@/features/authentication/useAuthStatus.hook";
+import { useAuthStatus } from "@/features/authentication/use-auth-status.hook";
 const prefix = Linking.createURL("/");
 
 const linking: LinkingOptions<NavigationParamList> = {

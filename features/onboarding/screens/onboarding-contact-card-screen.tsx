@@ -17,7 +17,7 @@ import {
 } from "@/features/multi-inbox/multi-inbox.store";
 import { OnboardingCreateContactCard } from "@/features/onboarding/components/onboarding-contact-card";
 import { OnboardingContactCardThemeProvider } from "@/features/onboarding/components/onboarding-contact-card-provider";
-import logger from "@/utils/logger";
+import { logger } from "@/utils/logger";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { formatRandomUserName } from "@/features/onboarding/utils/format-random-user-name";
 import { useAddPfp } from "../hooks/useAddPfp";
