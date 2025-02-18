@@ -45,7 +45,6 @@ export function ConsentPopupButtonsContainer({
     <VStack
       style={[
         {
-          flexDirection: "column",
           justifyContent: "center",
           gap: theme.spacing.xxs,
           paddingBottom: theme.spacing.sm,
