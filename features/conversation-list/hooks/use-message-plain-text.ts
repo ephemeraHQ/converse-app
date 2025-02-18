@@ -11,7 +11,7 @@ import {
   getInboxProfileSocialsQueryData,
 } from "@/queries/useInboxProfileSocialsQuery";
 import { captureError } from "@/utils/capture-error";
-import { getPreferredInboxName } from "@/utils/profile";
+import { getPreferredInboxAddress } from "@/utils/profile";
 import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { logger } from "@utils/logger";
 import {
@@ -22,55 +22,100 @@ import {
 } from "@xmtp/react-native-sdk";
 import { useEffect, useMemo } from "react";
 
+const handleGroupMetadataChange = (
+  initiatorName: string,
+  content: ReturnType<GroupUpdatedCodec["decode"]>
+) => {
+  if (content.metadataFieldsChanged.length !== 1) {
+    return translate("conversation_list.updated_the_group", {
+      userName: initiatorName,
+    });
+  }
+
+  const change = content.metadataFieldsChanged[0];
+  const translations: Record<string, string> = {
+    group_name: translate("conversation_list.name_changed", {
+      userName: initiatorName,
+      newValue: change.newValue,
+    }),
+    description: translate("conversation_list.description_changed", {
+      userName: initiatorName,
+      newValue: change.newValue,
+    }),
+    group_image_url_square: translate("conversation_list.image_changed", {
+      userName: initiatorName,
+    }),
+  };
+
+  return (
+    translations[change.fieldName] ||
+    translate("conversation_list.updated_the_group", {
+      userName: initiatorName,
+    })
+  );
+};
+
+const handleGroupMemberChange = (
+  initiatorName: string,
+  members: { inboxId: InboxId }[],
+  type: "added" | "removed"
+) => {
+  if (members.length === 0) return null;
+
+  if (members.length === 1) {
+    const memberSocials = getInboxProfileSocialsQueryData({
+      inboxId: members[0].inboxId,
+    });
+    const memberName = getPreferredInboxAddress(memberSocials);
+
+    if (!memberName) {
+      return translate(`conversation_list.member_${type}_unknown`, {
+        userName: initiatorName,
+      });
+    }
+
+    return translate(`conversation_list.member_${type}`, {
+      userName: initiatorName,
+      memberName,
+    });
+  }
+
+  return translate(`conversation_list.members_${type}`, {
+    userName: initiatorName,
+    count: members.length,
+  });
+};
+
 export const useMessagePlainText = (
   message: DecodedMessageWithCodecsType | undefined
 ) => {
   const account = useCurrentAccount();
 
-  // Not sure why we have this. Fixed the typing but need to check why it's needed.
-  // I guess it's to make sure we have the data to display the people's name in group?
-  // But we might have a better solution for that
   useEffect(() => {
-    if (!message) {
-      return;
-    }
+    if (!message || !isGroupUpdatedMessage(message)) return;
 
-    if (isGroupUpdatedMessage(message)) {
-      // TODO: check why we need to cast here. We should not need to do this since we have type guards
-      const messageTyped = message as DecodedMessage<GroupUpdatedCodec>;
-      const inboxIds: InboxId[] = [];
-      const content = messageTyped.content();
-      inboxIds.push(content.initiatedByInboxId);
-      content.membersAdded.forEach((member) => {
-        inboxIds.push(member.inboxId);
-      });
-      content.membersRemoved.forEach((member) => {
-        inboxIds.push(member.inboxId);
-      });
-      if (inboxIds.length > 0) {
-        for (const inboxId of inboxIds) {
-          fetchInboxProfileSocialsQuery({
-            inboxId,
-            caller: "useMessagePlainText",
-          }).catch(captureError);
-        }
-      }
-    }
+    const content = message.content();
+    const inboxIds = [
+      content.initiatedByInboxId,
+      ...content.membersAdded.map((m) => m.inboxId),
+      ...content.membersRemoved.map((m) => m.inboxId),
+    ];
+
+    inboxIds.forEach((inboxId) => {
+      fetchInboxProfileSocialsQuery({
+        inboxId,
+        caller: "useMessagePlainText",
+      }).catch(captureError);
+    });
   }, [message, account]);
 
   return useMemo(() => {
-    if (!account) return "";
-    if (!message) return "";
+    if (!account || !message) return "";
 
     try {
       if (isReplyMessage(message)) {
-        const messageTyped = message as DecodedMessage<ReplyCodec>;
-        const content = messageTyped.content();
-
-        if (typeof content === "string") {
-          return content;
-        }
-        return content.content.text;
+        const content = (message as DecodedMessage<ReplyCodec>).content();
+        return typeof content === "string" ? content : content.content.text;
       }
 
       if (
@@ -80,91 +125,38 @@ export const useMessagePlainText = (
         return translate("conversation_list.attachment");
       }
 
-      const content = message?.content();
       if (isGroupUpdatedMessage(message)) {
         const content = message.content();
         const initiatorSocials = getInboxProfileSocialsQueryData({
           inboxId: content.initiatedByInboxId,
         });
-        const initiatorName = getPreferredInboxName(initiatorSocials);
+        const initiatorName = getPreferredInboxAddress(initiatorSocials);
+
         if (!initiatorName) return translate("conversation_list.group_updated");
+
         if (content.metadataFieldsChanged.length > 0) {
-          if (content.metadataFieldsChanged.length === 1) {
-            switch (content.metadataFieldsChanged[0].fieldName) {
-              case "group_name":
-                return translate("conversation_list.name_changed", {
-                  userName: initiatorName,
-                  newValue: content.metadataFieldsChanged[0].newValue,
-                });
+          return handleGroupMetadataChange(initiatorName, content);
+        }
 
-              case "description":
-                return translate("conversation_list.description_changed", {
-                  userName: initiatorName,
-                  newValue: content.metadataFieldsChanged[0].newValue,
-                });
-              case "group_image_url_square":
-                return translate("conversation_list.image_changed", {
-                  userName: initiatorName,
-                });
+        const memberAddedText = handleGroupMemberChange(
+          initiatorName,
+          content.membersAdded,
+          "added"
+        );
+        if (memberAddedText) return memberAddedText;
 
-              default:
-                return translate("conversation_list.updated_the_group", {
-                  userName: initiatorName,
-                });
-            }
-          }
-          return translate("conversation_list.updated_the_group", {
-            userName: initiatorName,
-          });
-        }
-        if (content.membersAdded.length > 0) {
-          if (content.membersAdded.length === 1) {
-            const memberSocials = getInboxProfileSocialsQueryData({
-              inboxId: content.membersAdded[0].inboxId,
-            });
-            const memberName = getPreferredInboxName(memberSocials);
-            if (!memberName)
-              return translate("conversation_list.member_added_unknown", {
-                userName: initiatorName,
-              });
-            return translate("conversation_list.member_added", {
-              userName: initiatorName,
-              memberName: memberName,
-            });
-          }
-          return translate("conversation_list.members_added", {
-            userName: initiatorName,
-            count: content.membersAdded.length,
-          });
-        }
-        if (content.membersRemoved.length > 0) {
-          if (content.membersRemoved.length === 1) {
-            const memberSocials = getInboxProfileSocialsQueryData({
-              inboxId: content.membersRemoved[0].inboxId,
-            });
-            const memberName = getPreferredInboxName(memberSocials);
-            if (!memberName)
-              return translate("conversation_list.member_removed_unknown", {
-                userName: initiatorName,
-              });
-            return translate("conversation_list.member_removed", {
-              userName: initiatorName,
-              memberName: memberName,
-            });
-          }
-          return translate("conversation_list.members_removed", {
-            userName: initiatorName,
-            count: content.membersRemoved.length,
-          });
-        }
+        const memberRemovedText = handleGroupMemberChange(
+          initiatorName,
+          content.membersRemoved,
+          "removed"
+        );
+        if (memberRemovedText) return memberRemovedText;
 
         return translate("conversation_list.group_updated");
       }
-      if (typeof content === "string") {
-        return content;
-      }
 
-      return message?.fallback;
+      const content = message.content();
+      return typeof content === "string" ? content : message.fallback;
     } catch (e) {
       logger.error("Error getting message text", {
         error: e,

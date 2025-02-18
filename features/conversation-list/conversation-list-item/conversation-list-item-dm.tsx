@@ -6,16 +6,15 @@ import { RestoreSwipeableAction } from "@/features/conversation-list/conversatio
 import { useConversationIsDeleted } from "@/features/conversation-list/hooks/use-conversation-is-deleted";
 import { useConversationIsUnread } from "@/features/conversation-list/hooks/use-conversation-is-unread";
 import { useDeleteDm } from "@/features/conversation-list/hooks/use-delete-dm";
+import { useMessagePlainText } from "@/features/conversation-list/hooks/use-message-plain-text";
 import { useRestoreConversation } from "@/features/conversation-list/hooks/use-restore-conversation";
 import { useToggleReadStatus } from "@/features/conversation-list/hooks/use-toggle-read-status";
-import { useMessagePlainText } from "@/features/conversation-list/hooks/use-message-plain-text";
+import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { useProfileQuery } from "@/features/profiles/profiles.query";
 import { useConversationQuery } from "@/queries/conversation-query";
 import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { captureErrorWithToast } from "@/utils/capture-error";
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
-import { usePreferredInboxAvatar } from "@hooks/usePreferredInboxAvatar";
-import { useInboxName } from "@hooks/useInboxName";
 import { getCompactRelativeTime } from "@utils/date";
 import { navigate } from "@utils/navigation";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
@@ -49,13 +48,7 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
     });
 
   // Peer info hooks
-  const { data: preferredName, isLoading: isLoadingPreferredName } =
-    useInboxName({
-      inboxId: peerInboxId,
-    });
-  const { data: avatarUri } = usePreferredInboxAvatar({
-    inboxId: peerInboxId,
-  });
+  const { data: profile } = useProfileQuery(peerInboxId);
 
   // Status hooks
   const { isUnread } = useConversationIsUnread({ topic: conversationTopic });
@@ -73,9 +66,9 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
 
   // Computed values
   const title = useMemo(() => {
-    if (preferredName) return preferredName;
-    return isLoadingPreferredName || isLoadingPeerInboxId ? " " : " ";
-  }, [preferredName, isLoadingPreferredName, isLoadingPeerInboxId]);
+    if (profile?.name) return profile.name;
+    return isLoadingPeerInboxId ? " " : "";
+  }, [profile, isLoadingPeerInboxId]);
 
   const timestamp = conversation?.lastMessage?.sentNs ?? 0;
   const timeToShow = getCompactRelativeTime(timestamp);
@@ -85,11 +78,11 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
     return `${timeToShow} ${MIDDLE_DOT} ${messageText}`;
   }, [timeToShow, messageText]);
 
+  const avatarUri = profile?.avatarUrl;
+
   const avatarComponent = useMemo(
-    () => (
-      <Avatar size={theme.avatarSize.lg} uri={avatarUri} name={preferredName} />
-    ),
-    [avatarUri, preferredName, theme]
+    () => <Avatar size={theme.avatarSize.lg} uri={avatarUri} name={title} />,
+    [avatarUri, title, theme]
   );
 
   const leftActionsBackgroundColor = useMemo(

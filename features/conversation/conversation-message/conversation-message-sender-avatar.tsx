@@ -1,39 +1,33 @@
 import { useConversationMessageStyles } from "@/features/conversation/conversation-message/conversation-message.styles";
-import { usePreferredInboxAvatar } from "@/hooks/usePreferredInboxAvatar";
 import { navigate } from "@/utils/navigation";
 import { Avatar } from "@components/Avatar";
-import { usePreferredInboxAddress } from "@hooks/usePreferredInboxAddress";
-import { useInboxName } from "@hooks/useInboxName";
-import { InboxId } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
 import { TouchableOpacity } from "react-native";
+import { useProfileQuery } from "@/features/profiles/profiles.query";
 
 type IConversationSenderAvatarProps = {
-  inboxId: InboxId;
+  inboxId: string;
 };
 
 export function ConversationSenderAvatar({
   inboxId,
 }: IConversationSenderAvatarProps) {
   const { senderAvatarSize } = useConversationMessageStyles();
-
-  const { data: address } = usePreferredInboxAddress({ inboxId });
-  const { data: name } = useInboxName({
-    inboxId,
-  });
-  const { data: avatarUri } = usePreferredInboxAvatar({
-    inboxId,
-  });
+  const { data: profile } = useProfileQuery(inboxId);
 
   const openProfile = useCallback(() => {
-    if (address) {
+    if (profile) {
       navigate("Profile", { inboxId });
     }
-  }, [address, inboxId]);
+  }, [profile, inboxId]);
 
   return (
     <TouchableOpacity onPress={openProfile}>
-      <Avatar size={senderAvatarSize} uri={avatarUri} name={name} />
+      <Avatar
+        size={senderAvatarSize}
+        uri={profile?.avatarUrl}
+        name={profile?.name ?? ""}
+      />
     </TouchableOpacity>
   );
 }
