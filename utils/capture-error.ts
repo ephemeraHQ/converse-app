@@ -2,16 +2,10 @@ import { showSnackbar } from "@/components/Snackbar/Snackbar.service";
 import { logger } from "@/utils/logger";
 
 export function captureError(error: unknown) {
-  if (error instanceof Error && error.cause) {
-    logger.error(error.message, `Caused by:`, error.cause);
-  } else {
-    logger.error(error);
-  }
+  logger.error(error);
 
   // Note: (thierry) Our logger is already sending error to Sentry
-  // sentryTrackError(error, {
-  //   message: options?.message,
-  // });
+  // sentryTrackError({ error });
 }
 
 export function captureErrorWithToast(

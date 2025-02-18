@@ -1,0 +1,43 @@
+---
+description: Description: These file structure and naming conventions are important when: - Creating new files or directories - Organizing feature modules - Structuring the project hierarchy - Naming components and utilities - Setting up new features
+globs: 
+---
+
+These rules help maintain a consistent and intuitive project structure that scales well as the application grows.
+
+## Directory Structure
+- Use lower-kebab-case for directories and files (e.g., components/auth-wizard).
+- Import paths from our project should start with @/.
+- Use the same name for the file and the component.
+- Keep features self-contained. Create a new feature folder if accessing features across boundaries.
+- Place queries within their respective feature folders, but maintain queryKeys at the root level for better visibility.
+
+## File Naming Convention
+Use descriptive suffixes:
+
+```
+[featureName].screen.tsx
+[featureName].nav.tsx
+[featureName].store.ts
+[featureName].queries.ts
+[featureName].utils.ts
+[featureName].client.ts
+[featureName].types.ts
+[featureName].test.ts
+```
+
+// ❌ Bad: Generic or unclear names
+profile.ts
+group-chat.tsx
+utils.ts
+types.ts
+
+// ✅ Good: Clear, descriptive names with proper suffixes
+profile.screen.tsx
+group-chat.nav.tsx
+conversation.store.ts
+messages.queries.ts
+profile.utils.ts
+auth.client.ts
+user.types.ts
+login.test.ts 

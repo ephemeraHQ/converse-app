@@ -29,7 +29,6 @@ import { VStack } from "@/design-system/VStack";
 import { useLogout } from "@/features/authentication/use-logout.hook";
 import logger from "@/utils/logger";
 import { AppSettingsScreen } from "@/features/app-settings/app-settings.screen";
-import UserProfileNav from "./UserProfileNav";
 import { ConversationListScreen } from "@/features/conversation-list/conversation-list.screen";
 import { BlockedConversationsScreen } from "@/features/blocked-conversations/blocked-conversations.screen";
 import { ConversationRequestsListNav } from "@/features/conversation-requests-list/conversation-requests-list.nav";
@@ -150,7 +149,6 @@ export function SignedInNavigation() {
         </NativeStack.Group>
 
         <NativeStack.Group>
-          {UserProfileNav()}
           <NativeStack.Screen
             name="AppSettings"
             component={AppSettingsScreen}

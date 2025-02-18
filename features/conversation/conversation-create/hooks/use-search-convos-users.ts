@@ -16,7 +16,7 @@ const isInboxIdIncludedInList =
 
 export function useSearchConvosUsers(args: {
   searchQuery: string;
-  inboxIdsToOmit: string[];
+  inboxIdsToOmit: InboxId[];
 }) {
   const { searchQuery, inboxIdsToOmit } = args;
 

@@ -1,52 +1,51 @@
+import { captureError } from "@/utils/capture-error";
 import * as ExpoHaptics from "expo-haptics";
 import { runOnJS } from "react-native-reanimated";
-
-import { sentryTrackError } from "./sentry";
 
 const impactFeedbackStyle = ExpoHaptics.ImpactFeedbackStyle;
 
 const notificationFeedbackStyles = ExpoHaptics.NotificationFeedbackType;
 
 const selectionAsync = () => {
-  ExpoHaptics.impactAsync(impactFeedbackStyle.Light).catch(sentryTrackError); // Selection doens't seem to work? So use light impact for now
+  ExpoHaptics.impactAsync(impactFeedbackStyle.Light).catch(captureError); // Selection doens't seem to work? So use light impact for now
 };
 
 const successNotificationAsync = () => {
   ExpoHaptics.notificationAsync(notificationFeedbackStyles.Success).catch(
-    sentryTrackError
+    captureError
   );
 };
 
 const warningNotificationAsync = () => {
   ExpoHaptics.notificationAsync(notificationFeedbackStyles.Warning).catch(
-    sentryTrackError
+    captureError
   );
 };
 
 const errorNotificationAsync = () => {
   ExpoHaptics.notificationAsync(notificationFeedbackStyles.Error).catch(
-    sentryTrackError
+    captureError
   );
 };
 
 const lightImpactAsync = () => {
-  ExpoHaptics.impactAsync(impactFeedbackStyle.Light).catch(sentryTrackError);
+  ExpoHaptics.impactAsync(impactFeedbackStyle.Light).catch(captureError);
 };
 
 const mediumImpactAsync = () => {
-  ExpoHaptics.impactAsync(impactFeedbackStyle.Medium).catch(sentryTrackError);
+  ExpoHaptics.impactAsync(impactFeedbackStyle.Medium).catch(captureError);
 };
 
 const heavyImpactAsync = () => {
-  ExpoHaptics.impactAsync(impactFeedbackStyle.Heavy).catch(sentryTrackError);
+  ExpoHaptics.impactAsync(impactFeedbackStyle.Heavy).catch(captureError);
 };
 
 const softImpactAsync = () => {
-  ExpoHaptics.impactAsync(impactFeedbackStyle.Soft).catch(sentryTrackError);
+  ExpoHaptics.impactAsync(impactFeedbackStyle.Soft).catch(captureError);
 };
 
 const rigidImpactAsync = () => {
-  ExpoHaptics.impactAsync(impactFeedbackStyle.Rigid).catch(sentryTrackError);
+  ExpoHaptics.impactAsync(impactFeedbackStyle.Rigid).catch(captureError);
 };
 
 export const Haptics = {

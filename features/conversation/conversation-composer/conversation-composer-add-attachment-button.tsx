@@ -1,7 +1,10 @@
 import { Center } from "@/design-system/Center";
 import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu";
 import { useConversationComposerStore } from "@/features/conversation/conversation-composer/conversation-composer.store-context";
+import { useConversationComposerIsEnabled } from "@/features/conversation/conversation-composer/hooks/conversation-composer-is-enabled";
 import { getCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { captureErrorWithToast } from "@/utils/capture-error";
+import { encryptRemoteAttachment } from "@/utils/xmtpRN/attachments";
 import { Icon, iconRegistry } from "@design-system/Icon/Icon";
 import { translate } from "@i18n";
 import { useAppTheme } from "@theme/useAppTheme";
@@ -11,14 +14,9 @@ import {
   pickMediaFromLibrary,
   takePictureFromCamera,
 } from "@utils/media";
-import { sentryTrackError, sentryTrackMessage } from "@utils/sentry";
-import { encryptRemoteAttachment } from "@/utils/xmtpRN/attachments";
 import * as ImagePicker from "expo-image-picker";
-import { setStatusBarHidden } from "expo-status-bar";
 import mime from "mime";
 import { useCallback } from "react";
-import { Platform } from "react-native";
-import { useConversationComposerIsEnabled } from "@/features/conversation/conversation-composer/hooks/conversation-composer-is-enabled";
 
 const DATA_MIMETYPE_REGEX = /data:(.*?);/;
 
@@ -61,34 +59,31 @@ export function AddAttachmentButton() {
           mimeType || undefined
         );
 
-        try {
-          const uploadedAttachment = await uploadRemoteAttachment(
-            encryptedAttachment
-          );
+        const uploadedAttachment =
+          await uploadRemoteAttachment(encryptedAttachment);
 
-          store.getState().updateMediaPreviewStatus("uploaded");
-
-          store.getState().setComposerUploadedAttachment(uploadedAttachment);
-        } catch (error) {
-          sentryTrackMessage("ATTACHMENT_UPLOAD_ERROR", { error });
-        }
+        store.getState().updateMediaPreviewStatus("uploaded");
+        store.getState().setComposerUploadedAttachment(uploadedAttachment);
       } catch (error) {
-        sentryTrackError(error);
+        store.getState().setComposerMediaPreview(null);
+        throw error;
       }
     },
     [store]
   );
 
   const pickMedia = useCallback(async () => {
-    if (Platform.OS === "ios") {
-      setStatusBarHidden(true, "fade");
-    }
     const asset = await pickMediaFromLibrary();
-    if (Platform.OS === "ios") {
-      setStatusBarHidden(false, "fade");
+
+    if (!asset) {
+      return;
     }
-    if (!asset) return;
-    handleAttachmentSelected(asset);
+
+    try {
+      await handleAttachmentSelected(asset);
+    } catch (error) {
+      captureErrorWithToast(error);
+    }
   }, [handleAttachmentSelected]);
 
   const openCamera = useCallback(async () => {

@@ -1,0 +1,25 @@
+---
+description: Description: These React component guidelines are crucial when: - Creating new components - Refactoring existing components - Implementing performance optimizations - Managing component state and effects - Structuring component hierarchies
+globs: 
+---
+
+- Use named exports.
+- Write JSX inline rather than separate render functions.
+- Prefer early returns over ternaries.
+- Use array syntax for merged styles: `style={[{ color: "red" }, style]}`.
+- Minimize useEffect and setState usage.
+- Wrap components in memo() for performance.
+- When creating a new component or custom hook, aim to minimize the number of props you pass. Instead, try to reuse existing hooks whenever possible. This is especially important if the props or arguments you want to pass are only needed within the new component or hook we wanted to pass are ONLY used in the new component or hook.
+- When asked to extract a component or some code for custom hooks, create those in the same file.
+- Keep related code close together by placing the exported component at the top of the file with related components directly underneath it.
+- Avoid default exports to maintain consistent imports and easier refactoring.
+  - Named exports make codebase more maintainable and
+  - refactoring safer.
+
+```typescript
+// ❌ Bad: Default export
+export default function ProfileScreen()
+
+// ✅ Good: Named export
+export function ProfileScreen()
+``` 

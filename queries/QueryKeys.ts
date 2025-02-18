@@ -38,6 +38,7 @@ export enum QueryKeys {
   DM_PEER_INBOX_ID = "dm-peer-inbox-id",
 
   PRIVY_CUSTOM_METADATA = "privy-custom-metadata",
+
   // User search
   USER_SEARCH = "user-search",
 
@@ -154,7 +155,6 @@ export const dmPeerInboxIdQueryKey = (args: {
 // Conversations Search
 export const getSearchConvosUsersQueryKey = (searchQuery: string) => [
   QueryKeys.USER_SEARCH,
-  "by-name",
   searchQuery,
 ];
 

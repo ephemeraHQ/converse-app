@@ -39,3 +39,6 @@ expo-env.d.ts
 # System files
 .DS_Store
 *.log
+
+# Cursor
+.specstory/

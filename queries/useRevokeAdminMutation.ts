@@ -1,8 +1,8 @@
 import { useMutation } from "@tanstack/react-query";
 import { logger } from "@utils/logger";
-import { sentryTrackError } from "@utils/sentry";
 import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
-
+import { captureError } from "@/utils/capture-error";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { revokeAdminMutationKey } from "./MutationKeys";
 import {
   cancelGroupMembersQuery,
@@ -10,8 +10,6 @@ import {
   setGroupMembersQueryData,
 } from "./useGroupMembersQuery";
 import { useGroupQuery } from "./useGroupQuery";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import { captureError } from "@/utils/capture-error";
 
 export const useRevokeAdminMutation = (
   account: string,

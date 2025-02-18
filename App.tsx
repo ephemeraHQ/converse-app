@@ -37,7 +37,7 @@ import {
 import { ThirdwebProvider } from "thirdweb/react";
 import { config } from "./config";
 import { Main } from "./screens/Main";
-import { initSentry } from "./utils/sentry";
+import { sentryInit } from "./utils/sentry";
 import { saveApiURI } from "./utils/sharedData";
 import { preventSplashScreenAutoHide } from "./utils/splash/splash";
 import { setupStreamingSubscriptions } from "@/features/streams/streams";
@@ -105,13 +105,13 @@ configureCoinbase({
   hostPackageName: "org.toshi",
 });
 
-initSentry();
+sentryInit();
 
 saveApiURI();
 
 const coinbaseUrl = new URL(`https://${config.websiteDomain}/coinbase`);
 
-const App = () => {
+export function App() {
   const styles = useStyles();
   const debugRef = useRef();
   useLogoutOnJwtRefreshError();
@@ -153,7 +153,7 @@ const App = () => {
       <DebugButton ref={debugRef} />
     </View>
   );
-};
+}
 
 // On Android we use the default keyboard "animation"
 const AppKeyboardProvider =

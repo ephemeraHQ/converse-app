@@ -15,15 +15,18 @@ export const queryClient = new QueryClient({
         }`
       );
     },
-    onError: (error, query) => {
-      captureError(
-        new Error(
-          `Error in query: ${JSON.stringify(query.queryKey)}${
-            query.meta?.caller ? ` (caller: ${query.meta.caller})` : ""
-          }`,
-          { cause: error }
-        )
-      );
+    onError: (error: Error, query) => {
+      const queryInfo = `${JSON.stringify(query.queryKey)}${
+        query.meta?.caller ? ` (caller: ${query.meta.caller})` : ""
+      }`;
+
+      const enhancedError = new Error(`[Query] ${queryInfo} ${error.message}`, {
+        cause: error.cause,
+      });
+
+      enhancedError.stack = error.stack;
+
+      captureError(enhancedError);
     },
   }),
 
