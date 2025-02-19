@@ -231,94 +231,6 @@ const NameResolver = () => {
   );
 };
 
-const alchemyApiKey = "get one";
-const ReverseResolver = ({ address }: { address: string }) => {
-  const [cbId, setCbId] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function reverseResolve() {
-      try {
-        // Method 1: Try standard ENS reverse resolution
-        const provider = new ethers.providers.AlchemyProvider(
-          "mainnet",
-          alchemyApiKey
-        );
-
-        // Try both checksummed and lowercase versions
-        const checksummedAddress = ethersUtils.getAddress(address);
-        const lowercaseAddress = address.toLowerCase();
-
-        logger.debug("[ReverseResolver] Attempting reverse resolution for:", {
-          original: address,
-          checksummed: checksummedAddress,
-          lowercase: lowercaseAddress,
-        });
-
-        // Try standard ENS reverse lookup
-        const name = await provider.lookupAddress(checksummedAddress);
-        logger.debug(
-          "[ReverseResolver] Standard ENS reverse lookup result:",
-          name
-        );
-
-        // Method 2: Try to query the cb.id contract directly
-        // Note: This is a placeholder - we need to find the actual contract address and ABI
-        // const cbIdContract = new ethers.Contract(CB_ID_CONTRACT_ADDRESS, CB_ID_ABI, provider);
-        // const cbIdName = await cbIdContract.reverseLookup(address);
-
-        // Method 3: Try to use ENS reverse records
-        if (name) {
-          const resolver = await provider.getResolver(name);
-          if (resolver) {
-            const records = await Promise.all([
-              resolver.getText("url"),
-              resolver.getText("com.github"),
-              resolver.getText("com.twitter"),
-              resolver.getText("description"),
-            ]);
-
-            logger.debug("[ReverseResolver] ENS Text Records:", {
-              url: records[0],
-              github: records[1],
-              twitter: records[2],
-              description: records[3],
-            });
-          }
-        }
-
-        // Method 4: Try to query Coinbase's API if they have one
-        // This would require finding their API endpoint for cb.id resolution
-        try {
-          const response = await fetch(
-            `https://api.coinbase.com/v2/resolve/address/${address}`
-          );
-          const data = await response.json();
-          logger.debug("[ReverseResolver] Coinbase API Response:", data);
-        } catch (apiErr) {
-          logger.debug(
-            "[ReverseResolver] Coinbase API not available or error:",
-            apiErr
-          );
-        }
-      } catch (err) {
-        logger.error("[ReverseResolver] Error during reverse resolution:", err);
-      }
-    }
-
-    if (address) {
-      reverseResolve();
-    }
-  }, [address]);
-
-  return (
-    <View style={{ marginTop: 10 }}>
-      <Text style={{ fontWeight: "bold" }}>Reverse Resolution Attempts:</Text>
-      <Text>Address: {address}</Text>
-      {cbId && <Text>Found cb.id: {cbId}</Text>}
-    </View>
-  );
-};
-
 export function PrivyPlaygroundLandingScreen() {
   const { loginWithPasskey, signupWithPasskey } = useAuthenticateWithPasskey();
   const authStatus = useAccountsStore((state) => state.authStatus);
@@ -338,25 +250,6 @@ export function PrivyPlaygroundLandingScreen() {
     status: currentProfileStatus,
     error,
   } = useCurrentProfile();
-
-  // useEffect(() => {
-  //   logger.debug("Hiding splash screen");
-  //   Constants.expoConfig?.splash?.hide?.();
-  //   SplashScreen.hideAsync();
-  //   logger.debug("Splash screen hidden");
-  // }, []);
-
-  // useEffect(() => {
-  //   logger.debug("currentSender", currentSender);
-  //   if (currentSender?.ethereumAddress && currentSender.inboxId) {
-  //     async function _fetchJwt() {
-  //       const jwt = await fetchJwt();
-  //       logger.debug("JWT", jwt);
-  //     }
-
-  //     _fetchJwt();
-  //   }
-  // }, [currentSender]);
 
   const [
     shouldShowConnectWalletBottomSheet,
