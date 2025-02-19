@@ -119,7 +119,8 @@ const settings: Record<Environment, EnvironmentConfig> = {
 
 // eslint-disable-next-line import/no-default-export
 export default (): ExpoConfig => {
-  const expoEnv = (env.EXPO_ENV || "development") as Environment;
+  // @ts-expect-error
+  const expoEnv = (process.env.EXPO_ENV || "development") as Environment;
   const config = settings[expoEnv];
 
   return {
@@ -170,7 +171,6 @@ export default (): ExpoConfig => {
           "app.phantom",
         ],
         NSAppTransportSecurity: {
-          NSAllowsArbitraryLoads: false, // Not sure why
           NSAllowsLocalNetworking: true, // Not sure why
         },
       },

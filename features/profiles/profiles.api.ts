@@ -9,9 +9,8 @@ export const ConvosProfileForInboxSchema = z.object({
   deviceIdentityId: z.string(),
   createdAt: z.string(),
   updatedAt: z.string(),
-  deviceIdentity: z.object({
-    xmtpId: z.string(),
-  }),
+  xmtpId: z.string(),
+  avatar: z.string().nullable(),
 });
 
 export type IConvosProfileForInbox = z.infer<

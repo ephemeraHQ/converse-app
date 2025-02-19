@@ -89,6 +89,10 @@ export const removeProfileQueryData = ({ xmtpId }: { xmtpId: string }) => {
   });
 };
 
+export const useProfile = ({ xmtpId }: { xmtpId: string | undefined }) => {
+  return useQuery(profileQueryConfig({ xmtpId }));
+};
+
 export const useProfilesQueries = ({
   xmtpInboxIds,
 }: {

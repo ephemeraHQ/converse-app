@@ -3,7 +3,6 @@ import { ProfileScreenConfig } from "@/features/profiles/profile.nav";
 import ActionSheetStateHandler from "@components/StateHandlers/ActionSheetStateHandler";
 import { HydrationStateHandler } from "@components/StateHandlers/HydrationStateHandler";
 import { InitialStateHandler } from "@components/StateHandlers/InitialStateHandler";
-import NetworkStateHandler from "@components/StateHandlers/NetworkStateHandler";
 import { ConversationScreenConfig } from "@features/conversation/conversation.nav";
 import { LinkingOptions, NavigationContainer } from "@react-navigation/native";
 import { backgroundColor } from "@styles/colors";
@@ -98,7 +97,6 @@ const Initializer = () => {
       {Platform.OS === "android" && (
         <StatusBar backgroundColor={backgroundColor(colorScheme)} />
       )}
-      <NetworkStateHandler />
       <ActionSheetStateHandler />
     </>
   );
