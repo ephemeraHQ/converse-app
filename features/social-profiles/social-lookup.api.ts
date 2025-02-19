@@ -11,33 +11,52 @@ const ProfileType = z.enum([
   "unstoppable-domains",
 ]);
 
-export type ISocialProfile = z.infer<typeof SocialProfileSchema>;
-const Web3SocialProfileSchema = z.object({
-  type: z.enum(["farcaster", "lens", "ens"]),
-  name: z.string().optional(),
-  avatar: z.string().optional(),
+// Define the base social profile schema to match backend
+// Base schema for common social profile fields
+const BaseSocialProfileSchema = z.object({
+  address: z.string(),
+  name: z.string(),
   bio: z.string().optional(),
-  metadata: z
-    .union([FarcasterProfileSchema, LensProfileSchema, EnsProfileSchema])
-    .optional(),
+  avatar: z.string().optional(),
 });
 
-export type IFarcasterProfile = IWeb3SocialProfile & {
-  type: "farcaster";
-  metadata: z.infer<typeof FarcasterProfileSchema>;
-};
+// Generic social profile that can have any profile type
+const SocialProfileSchema = BaseSocialProfileSchema.extend({
+  type: ProfileType,
+});
 
-export type ILensProfile = IWeb3SocialProfile & {
-  type: "lens";
-  metadata: z.infer<typeof LensProfileSchema>;
-};
+// ENS-specific profile schema
+export const EnsProfileSchema = BaseSocialProfileSchema.extend({
+  type: z.literal("ens"),
+});
 
-export type IEnsProfile = IWeb3SocialProfile & {
-  type: "ens";
-  metadata: z.infer<typeof EnsProfileSchema>;
-};
+// Farcaster-specific profile schema
+export const FarcasterProfileSchema = BaseSocialProfileSchema.extend({
+  type: z.literal("farcaster"),
+});
 
-export type IWeb3SocialProfile = z.infer<typeof Web3SocialProfileSchema>;
+// Lens-specific profile schema
+export const LensProfileSchema = BaseSocialProfileSchema.extend({
+  type: z.literal("lens"),
+});
+
+// Unstoppable Domains-specific profile schema
+export const UnstoppableDomainsProfileSchema = BaseSocialProfileSchema.extend({
+  type: z.literal("unstoppable-domains"),
+});
+
+export const BasenameProfileSchema = BaseSocialProfileSchema.extend({
+  type: z.literal("basename"),
+});
+
+export type IEnsProfile = z.infer<typeof EnsProfileSchema>;
+export type IFarcasterProfile = z.infer<typeof FarcasterProfileSchema>;
+export type ILensProfile = z.infer<typeof LensProfileSchema>;
+export type IUnstoppableDomainsProfile = z.infer<
+  typeof UnstoppableDomainsProfileSchema
+>;
+export type IBasenameProfile = z.infer<typeof BasenameProfileSchema>;
+export type ISocialProfile = z.infer<typeof SocialProfileSchema>;
 
 const SocialProfilesResponseSchema = z.object({
   socialProfiles: z.array(SocialProfileSchema),
@@ -64,5 +83,5 @@ export async function fetchSocialProfilesForAddress(args: { address: string }) {
     );
   }
 
-  return response.data;
+  return data.socialProfiles as ISocialProfile[];
 }

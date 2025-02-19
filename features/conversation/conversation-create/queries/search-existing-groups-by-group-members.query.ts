@@ -1,6 +1,6 @@
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
 import { getSafeCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
-import { doesWeb3SocialsMatchTextQuery } from "@/features/profiles/utils/does-socials-match-text-query";
+import { doesSocialProfilesMatchTextQuery } from "@/features/profiles/utils/does-social-profiles-match-text-query";
 import { ensureSocialProfilesQueryData } from "@/features/social-profiles/social-lookup.query";
 import { getSearchExistingGroupsByMemberNameQueryKey } from "@/queries/QueryKeys";
 import { getAllowedConsentConversationsQueryData } from "@/queries/conversations-allowed-consent-query";
@@ -44,14 +44,14 @@ export async function searchExistingGroupsByGroupMembers(args: {
         // Use Promise.race to get the first matching member
         const result = await Promise.race([
           ...otherMembersInboxIds.map(async (inboxId) => {
-            const socials = await ensureSocialProfilesQueryData({
+            const socialProfiles = await ensureSocialProfilesQueryData({
               ethAddress: inboxId,
             });
 
-            if (!socials) return false;
+            if (!socialProfiles) return false;
 
-            return doesWeb3SocialsMatchTextQuery({
-              web3SocialProfiles: socials,
+            return doesSocialProfilesMatchTextQuery({
+              socialProfiles,
               normalizedQuery: searchQuery,
             });
           }),

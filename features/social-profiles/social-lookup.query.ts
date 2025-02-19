@@ -16,7 +16,9 @@ const getSocialProfilesQueryOptions = (args: IArgs) => {
     queryKey: socialProfilesQueryKey({ ethAddress: args.ethAddress! }),
     queryFn: enabled
       ? () => {
-          return fetchSocialProfilesForAddress(address!);
+          return fetchSocialProfilesForAddress({
+            address: args.ethAddress!,
+          });
         }
       : skipToken,
     // staleTime: DateUtils.minutes.toMilliseconds(60),

@@ -1,7 +1,7 @@
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm";
 import { getCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { ensureProfileQueryData } from "@/features/profiles/profiles.query";
-import { doesWeb3SocialsMatchTextQuery } from "@/features/profiles/utils/does-socials-match-text-query";
+import { doesSocialProfilesMatchTextQuery } from "@/features/profiles/utils/does-social-profiles-match-text-query";
 import { ensureSocialProfilesQueryData } from "@/features/social-profiles/social-lookup.query";
 import { getSearchExistingDmsQueryKey } from "@/queries/QueryKeys";
 import { getAllowedConsentConversationsQueryData } from "@/queries/conversations-allowed-consent-query";
@@ -97,16 +97,16 @@ async function searchExistingDms(args: {
           ?.toLowerCase()
           .includes(normalizedSearchQuery);
 
-        const socials = await ensureSocialProfilesQueryData({
+        const socialProfiles = await ensureSocialProfilesQueryData({
           ethAddress: otherMemberInboxId,
         });
 
-        const hasWeb3SocialProfileMatch = doesWeb3SocialsMatchTextQuery({
-          web3SocialProfiles: socials,
+        const hasSocialProfileMatch = doesSocialProfilesMatchTextQuery({
+          socialProfiles,
           normalizedQuery: normalizedSearchQuery,
         });
 
-        return hasProfileMatch || hasWeb3SocialProfileMatch
+        return hasProfileMatch || hasSocialProfileMatch
           ? conversation.topic
           : null;
       } catch (e) {
