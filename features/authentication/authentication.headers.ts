@@ -9,12 +9,14 @@ import { toHex } from "viem";
 import { ensureJwtQueryData } from "./jwt.query";
 import { AuthenticationError } from "@/utils/error";
 
+// used for requests that are creating an authentication token
 export const XMTP_INSTALLATION_ID_HEADER_KEY = "X-XMTP-InstallationId";
 export const XMTP_INBOX_ID_HEADER_KEY = "X-XMTP-InboxId";
 export const FIREBASE_APP_CHECK_HEADER_KEY = "X-Firebase-AppCheck";
 export const XMTP_SIGNATURE_HEADER_KEY = "X-XMTP-Signature";
 
-export const JWT_AUTH_HEADER_KEY = "X-Convos-AuthToken";
+// used for authenticated requests
+export const CONVOS_AUTH_TOKEN_HEADER_KEY = "X-Convos-AuthToken";
 
 export type XmtpApiHeaders = {
   [XMTP_INSTALLATION_ID_HEADER_KEY]: string;
@@ -116,6 +118,6 @@ export async function getConvosAuthenticationHeaders(): Promise<XmtpApiHeaders> 
 export async function getConvosAuthenticatedHeaders() {
   const jwt = await ensureJwtQueryData();
   return {
-    [JWT_AUTH_HEADER_KEY]: jwt,
+    [CONVOS_AUTH_TOKEN_HEADER_KEY]: jwt,
   };
 }
