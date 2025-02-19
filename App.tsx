@@ -46,6 +46,7 @@ import logger from "./utils/logger";
 import { AuthenticateWithPasskeyProvider } from "@/features/onboarding/contexts/signup-with-passkey.context";
 import { PrivyPlaygroundLandingScreen } from "@/features/privy-playground/privy-playground-landing.screen";
 import { useLogoutOnJwtRefreshError } from "@/features/authentication/use-logout-on-jwt-refresh-error";
+import { useMonitorNetworkConnectivity } from "./dependencies/NetworkMonitor/use-monitor-network-connectivity";
 
 !!preventSplashScreenAutoHide && preventSplashScreenAutoHide();
 
@@ -114,6 +115,7 @@ const App = () => {
   const styles = useStyles();
   const debugRef = useRef();
   useLogoutOnJwtRefreshError();
+  useMonitorNetworkConnectivity();
 
   useEffect(() => {
     setupAppAttest();

@@ -334,7 +334,6 @@ export function PrivyPlaygroundLandingScreen() {
             alignContent: "center",
           }}
         >
-          <Text>Privy Playground</Text>
           <Text>Auth Status: {JSON.stringify(authStatus, null, 2)}</Text>
           <Button title="Login with Passkey" onPress={loginWithPasskey} />
           <Button title="Signup with Passkey" onPress={signupWithPasskey} />

@@ -12,11 +12,11 @@ import { useCoinbaseWalletListener } from "@utils/coinbaseWallet";
 import { converseEventEmitter } from "@utils/events";
 import "expo-dev-client";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import { Text, useColorScheme } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
 import { config } from "@/config";
-import { useColorScheme } from "react-native";
 import { useInitializeMultiInboxClient } from "./features/multi-inbox/multi-inbox.client";
 import { PrivyProvider } from "@privy-io/expo";
 import { ThirdwebProvider } from "thirdweb/react";
@@ -26,6 +26,7 @@ import { DevToolsBubble } from "react-native-react-query-devtools";
 import * as Clipboard from "expo-clipboard";
 import { logger } from "@/utils/logger";
 import { PrivyPlaygroundLoginScreen } from "./features/privy-playground/privy-login-screen";
+import { useMonitorNetworkConnectivity } from "./dependencies/NetworkMonitor/use-monitor-network-connectivity";
 export function SlimApp() {
   const colorScheme = useColorScheme();
 
@@ -35,6 +36,7 @@ export function SlimApp() {
 
   useInitializeMultiInboxClient();
   useReactQueryDevTools(queryClient);
+  useMonitorNetworkConnectivity();
 
   const { themeScheme, setThemeContextOverride, ThemeProvider } =
     useThemeProvider();
@@ -47,8 +49,6 @@ export function SlimApp() {
       return false;
     }
   };
-
-  //   logger.debug(JSON.stringify(config, null, 2));
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -64,7 +64,7 @@ export function SlimApp() {
                   <GestureHandlerRootView style={{ flex: 1 }}>
                     <BottomSheetModalProvider>
                       <AuthenticateWithPasskeyProvider>
-                        <PrivyPlaygroundLoginScreen />
+                        <PrivyPlaygroundLandingScreen />
                       </AuthenticateWithPasskeyProvider>
                       {__DEV__ && <DevToolsBubble onCopy={onCopy} />}
                       <Snackbars />
