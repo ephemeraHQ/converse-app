@@ -178,9 +178,10 @@ export function ConnectWalletBottomSheet({
   const bottomSheetRef = useBottomSheetModalRef();
   const currentSender = useCurrentSender();
   const isInboxClientInitiated =
+    currentSender &&
     !!MultiInboxClient.instance.getInboxClientForAddress({
-      ethereumAddress: currentSender!.ethereumAddress,
-    })!;
+      ethereumAddress: currentSender.ethereumAddress,
+    });
 
   const initialState: ConnectWalletBottomSheetState = {
     listShowing: "wallets",

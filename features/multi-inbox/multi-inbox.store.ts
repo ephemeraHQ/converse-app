@@ -143,7 +143,7 @@ export const useAccountsStore = create<AccountsStoreStype>()(
       },
     }),
     {
-      name: "store-accounts",
+      name: "store-accounts-new-3",
       storage: createJSONStorage(() => zustandMMKVStorage),
       partialize: (state) => {
         const partializedState = {

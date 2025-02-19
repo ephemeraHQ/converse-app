@@ -43,8 +43,6 @@ export type IConfig = {
   thirdwebClientId: string;
   xmtpEnv: IXmtpEnv;
   apiURI: string;
-  /** @deprecated this is the URI of the old backend ; we're going to use apiURI instead for the new backend */
-  deprecatedApiURI: string;
   bundleId: string;
   scheme: string;
   websiteDomain: string;

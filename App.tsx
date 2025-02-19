@@ -1,18 +1,16 @@
 import { PrivyProvider } from "@privy-io/expo";
-import { DevToolsBubble } from "react-native-react-query-devtools";
 import * as Clipboard from "expo-clipboard";
+import { DevToolsBubble } from "react-native-react-query-devtools";
 // This is a requirement for Privy to work, does not make any sense
 // To test run yarn start --no-dev --minify
 
+import { AuthenticateWithPasskeyProvider } from "@/features/authentication/authenticate-with-passkey.context";
+import { useLogoutOnJwtRefreshError } from "@/features/authentication/use-logout-on-jwt-refresh-error";
+import { useInitializeMultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
+import { PrivyPlaygroundLandingScreen } from "@/features/privy-playground/privy-playground-landing.screen";
+import { setupStreamingSubscriptions } from "@/features/streams/streams";
 import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
 import { DebugButton } from "@components/DebugButton";
-import {
-  AppState,
-  Platform,
-  StyleSheet,
-  View,
-  useColorScheme,
-} from "react-native";
 import { Snackbars } from "@components/Snackbar/Snackbars";
 import { BottomSheetModalProvider } from "@design-system/BottomSheet/BottomSheetModalProvider";
 import { useReactQueryDevTools } from "@dev-plugins/react-query";
@@ -20,13 +18,20 @@ import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { SmartWalletsProvider } from "@privy-io/expo/smart-wallets";
 import { queryClient } from "@queries/queryClient";
 import { MaterialDarkTheme, MaterialLightTheme } from "@styles/colors";
-import { focusManager, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider, focusManager } from "@tanstack/react-query";
 import { useThemeProvider } from "@theme/useAppTheme";
 import { setupAppAttest } from "@utils/appCheck";
 import { useCoinbaseWalletListener } from "@utils/coinbaseWallet";
 import { converseEventEmitter } from "@utils/events";
 import "expo-dev-client";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import {
+  AppState,
+  Platform,
+  StyleSheet,
+  View,
+  useColorScheme,
+} from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
@@ -36,17 +41,11 @@ import {
 } from "react-native-reanimated";
 import { ThirdwebProvider } from "thirdweb/react";
 import { config } from "./config";
-import { Main } from "./screens/Main";
-import { sentryInit } from "./utils/sentry";
-import { saveApiURI } from "./utils/sharedData";
-import { preventSplashScreenAutoHide } from "./utils/splash/splash";
-import { setupStreamingSubscriptions } from "@/features/streams/streams";
-import { useInitializeMultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
-import logger from "./utils/logger";
-import { AuthenticateWithPasskeyProvider } from "@/features/authentication/authenticate-with-passkey.context";
-import { PrivyPlaygroundLandingScreen } from "@/features/privy-playground/privy-playground-landing.screen";
-import { useLogoutOnJwtRefreshError } from "@/features/authentication/use-logout-on-jwt-refresh-error";
 import { useMonitorNetworkConnectivity } from "./dependencies/NetworkMonitor/use-monitor-network-connectivity";
+import { Main } from "./screens/Main";
+import logger from "./utils/logger";
+import { sentryInit } from "./utils/sentry";
+import { preventSplashScreenAutoHide } from "./utils/splash/splash";
 
 !!preventSplashScreenAutoHide && preventSplashScreenAutoHide();
 
@@ -106,8 +105,6 @@ configureCoinbase({
 });
 
 sentryInit();
-
-saveApiURI();
 
 const coinbaseUrl = new URL(`https://${config.websiteDomain}/coinbase`);
 
