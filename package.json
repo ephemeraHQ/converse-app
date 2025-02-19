@@ -1,6 +1,6 @@
 {
   "name": "converse",
-  "version": "2.2.23",
+  "version": "2.2.24",
   "private": true,
   "scripts": {
     "start": "expo start",
