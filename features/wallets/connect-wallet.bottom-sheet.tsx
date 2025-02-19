@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BottomSheetModal } from "@/design-system/BottomSheet/BottomSheetModal";
 import { BottomSheetHeader } from "@/design-system/BottomSheet/BottomSheetHeader";
 import { BottomSheetContentContainer } from "@/design-system/BottomSheet/BottomSheetContentContainer";
@@ -185,7 +185,7 @@ export function ConnectWalletBottomSheet({
   // }
 
   const initialState: ConnectWalletBottomSheetState = {
-    listShowing: "wallets",
+    listShowing: "socials",
     thirdwebWalletIdThatIsConnecting: undefined,
     ethereumAddressThatIsConnecting: undefined,
     socialData: undefined,
@@ -197,6 +197,23 @@ export function ConnectWalletBottomSheet({
     socialData,
     listShowing,
   } = state;
+
+  useEffect(() => {
+    async function loadSocialData() {
+      const socialProfiles = await ensureSocialProfilesQueryData(
+        "0xa64af7f78de39a238ecd4fff7d6d410dbace2df0"
+      );
+      logger.debug(
+        `[ConnectWalletBottomSheet] Social profiles: ${JSON.stringify(
+          socialProfiles,
+          null,
+          2
+        )}`
+      );
+      dispatch({ type: "SocialDataLoaded", data: socialProfiles });
+    }
+    loadSocialData();
+  }, [ethereumAddressThatIsConnecting]);
 
   // const {
   //   data: socialProfiles,

@@ -48,7 +48,8 @@ export function SlimApp() {
     }
   };
 
-  logger.debug(JSON.stringify(config, null, 2));
+  //   logger.debug(JSON.stringify(config, null, 2));
+
   return (
     <QueryClientProvider client={queryClient}>
       <PrivyProvider
