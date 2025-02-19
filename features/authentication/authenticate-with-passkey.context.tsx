@@ -15,11 +15,7 @@ import {
 } from "@/features/multi-inbox/multi-inbox.store";
 import { InboxSigner } from "@/features/multi-inbox/multi-inbox-client.types";
 import { createUser } from "@/features/authentication/authentication.api";
-import {
-  ensureJwtQueryData,
-  fetchJwtQueryData,
-  invalidateJwtQueryData,
-} from "./jwt.query";
+import { fetchJwtQueryData, invalidateJwtQueryData } from "./jwt.query";
 
 const useXmtpFromPrivySmartWalletClientSigner = ({
   onSmartClientReady,

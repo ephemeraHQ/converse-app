@@ -164,7 +164,6 @@ export function ConnectWalletBottomSheet({
 
   const { installedWallets, isLoading: areInstalledWalletsLoading } =
     useInstalledWallets();
-
   const { connect } = useConnect();
 
   const hasInstalledWallets = installedWallets && installedWallets.length > 0;
