@@ -136,7 +136,7 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
         avatarComponent={
           <Avatar
             size={theme.avatarSize.lg}
-            uri={profile?.avatarUrl}
+            uri={profile?.avatar}
             name={title}
           />
         }

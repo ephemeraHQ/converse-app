@@ -19,6 +19,7 @@ import {
   useProfileQuery,
   useProfilesQueries,
 } from "@/features/profiles/profiles.query";
+import { InboxId } from "@xmtp/react-native-sdk";
 type AccountStoreDataType = {
   settings: SettingsStoreType;
   chat: ChatStoreType;
@@ -79,6 +80,8 @@ type AccountsStoreStype = {
 
   setCurrentAccount: ({ ethereumAddress }: { ethereumAddress: string }) => void;
 
+  setCurrentInboxId: (inboxId: InboxId) => void;
+
   setCurrentSender: (sender: CurrentSender | undefined) => void;
   addSender: (sender: CurrentSender) => void;
   // setCurrentAccount: (ethereumAddress: string) => void;
@@ -99,6 +102,15 @@ export const useAccountsStore = create<AccountsStoreStype>()(
         const sender = senders.find(
           (sender) => sender.ethereumAddress === ethereumAddress
         );
+        if (!sender) {
+          throw new Error("Sender not found");
+        }
+        set({ currentSender: sender });
+      },
+
+      setCurrentInboxId: (inboxId: InboxId) => {
+        const senders = get().senders;
+        const sender = senders.find((sender) => sender.inboxId === inboxId);
         if (!sender) {
           throw new Error("Sender not found");
         }
@@ -209,7 +221,10 @@ export const useAccountsList = () => {
 
 export const useSafeActiveSenderProfile = () => {
   const { inboxId: currentInboxId } = useSafeCurrentSender();
-  return useProfileQuery({ xmtpId: currentInboxId });
+  const senders = useAccountsStore.getState().senders;
+  const sender = senders.find((sender) => sender.inboxId === currentInboxId);
+  const ethereumAddress = sender?.ethereumAddress;
+  return useProfileQuery({ xmtpId: ethereumAddress });
 };
 
 export const useCurrentProfile = () => {

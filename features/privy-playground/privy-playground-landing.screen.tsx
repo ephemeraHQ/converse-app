@@ -1,41 +1,35 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, { useState, useEffect } from "react";
-import {
-  SafeAreaView,
-  Text,
-  View,
-  ScrollView,
-  Button,
-  TextInput,
-} from "react-native";
-import Constants from "expo-constants";
-import { PrivyPlaygroundLoginScreen } from "./privy-playground-login.screen";
-import { PrivyPlaygroundUserScreen } from "./privy-playground-user.screen";
-import { getConfig } from "@/config";
+import { useLogout } from "@/features/authentication/use-logout.hook";
 import { logger } from "@/utils/logger";
-import * as SplashScreen from "expo-splash-screen";
+import { usePrivy } from "@privy-io/expo";
+import { ethers, utils as ethersUtils } from "ethers";
+import React, { useEffect, useState } from "react";
+import {
+  Button,
+  SafeAreaView,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
+import { useAuthenticateWithPasskey } from "../authentication/authenticate-with-passkey.context";
+import { ensureJwtQueryData } from "../authentication/jwt.query";
+import { useCreateUser } from "../current-user/use-create-user";
 import {
   AuthStatuses,
   useAccountsStore,
   useCurrentProfile,
   useCurrentSender,
 } from "../multi-inbox/multi-inbox.store";
-import { ethers, utils as ethersUtils } from "ethers";
-import { usePrivy } from "@privy-io/expo";
-import { useSocialProfilesForAddress } from "../social-profiles/social-lookup.query";
-import { useAuthenticateWithPasskey } from "../authentication/authenticate-with-passkey.context";
-import { useAuthStatus } from "../authentication/use-auth-status.hook";
-import { useLogout } from "@/features/authentication/use-logout.hook";
+import { useSocialProfilesForAddressQuery } from "../social-profiles/social-lookup.query";
 import { ConnectWalletBottomSheet } from "../wallets/connect-wallet.bottom-sheet";
-import { useCreateUser } from "../current-user/use-create-user";
-import { ensureJwtQueryData, useJwtQuery } from "../authentication/jwt.query";
-import { fetchJwt } from "../authentication/authentication.api";
+
 const AddressDebugger = ({ address }: { address: string }) => {
   const {
     data: profiles,
     status,
     error,
-  } = useSocialProfilesForAddress({
+  } = useSocialProfilesForAddressQuery({
     ethAddress: address,
   });
 

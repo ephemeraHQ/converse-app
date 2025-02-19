@@ -10,7 +10,7 @@ jest.setTimeout(600_000);
 
 const TestComponent = ({ uri }: { uri?: string }) => (
   <TestThemeProvider>
-    <Avatar uri={uri} />
+    <Avatar uri={uri} name="John Doe" />
   </TestThemeProvider>
 );
 

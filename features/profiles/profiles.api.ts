@@ -6,13 +6,13 @@ import { z } from "zod";
 export const ConvosProfileForInboxSchema = z.object({
   id: z.string(),
   name: z.string(),
-  avatarUrl: z.string().nullable(),
   description: z.string().nullable(),
   // deviceIdentityId: z.string(),
   // createdAt: z.string(),
   // updatedAt: z.string(),
   xmtpId: z.string(),
   avatar: z.string().nullable(),
+  privyAddress: z.string(),
 });
 
 export type IConvosProfileForInbox = z.infer<

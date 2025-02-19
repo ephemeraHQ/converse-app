@@ -34,7 +34,7 @@ export function ConversationSearchResultsListItemUser({
     <ConversationSearchResultsListItem
       avatar={
         <Avatar
-          uri={profile?.avatarUrl}
+          uri={profile?.avatar}
           size={theme.avatarSize.md}
           name={profile?.name}
         />

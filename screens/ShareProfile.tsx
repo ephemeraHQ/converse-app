@@ -1,21 +1,20 @@
-import AndroidBackAction from "@/components/AndroidBackAction";
 import { Avatar } from "@/components/Avatar";
 import Button from "@/components/Button/Button";
-import ActionButton from "@/components/Chat/ActionButton";
 import { Screen } from "@/components/Screen/ScreenComp/Screen";
 import { config } from "@/config";
 import { Text } from "@/design-system/Text";
 import { useSafeCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
 import { useProfileQuery } from "@/features/profiles/profiles.query";
 import { translate } from "@/i18n";
+import { useHeader } from "@/navigation/use-header";
 import { NavigationParamList } from "@/screens/Navigation/Navigation";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { AvatarSizes } from "@styles/sizes";
 import { useAppTheme } from "@theme/useAppTheme";
 import { shortAddress } from "@utils/strings/shortAddress";
-import React, { useEffect, useState } from "react";
-import { Platform, Share, TouchableOpacity, View } from "react-native";
+import React, { useState } from "react";
+import { Platform, Share, View } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 
 type IShareProfileScreenProps = NativeStackScreenProps<
@@ -34,10 +33,8 @@ export function ShareProfileScreen({
 
   const { data: profile } = useProfileQuery({ xmtpId: inboxId });
 
-  const { avatar, name, description } = profile || {};
-
   const profileUrl = `https://${config.websiteDomain}/dm/${
-    name || shortAddress(inboxId)
+    profile?.name || shortAddress(inboxId)
   }`;
 
   const shareDict =
@@ -47,24 +44,14 @@ export function ShareProfileScreen({
     ? translate("share_profile.link_copied")
     : translate("share_profile.copy_link");
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerRight: () =>
-        Platform.OS === "ios" && (
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <ActionButton
-              picto="xmark"
-              style={{ width: 30, height: 30, marginTop: 10 }}
-            />
-          </TouchableOpacity>
-        ),
-      headerLeft: () =>
-        Platform.OS !== "ios" && <AndroidBackAction navigation={navigation} />,
-    });
-  }, [navigation]);
+  useHeader({
+    title: translate("share_profile.title"),
+    onBack: () => navigation.goBack(),
+  });
 
-  function handleShare() {
-    Share.share(shareDict);
+  async function handleShare() {
+    await Share.share(shareDict);
+    setCopiedLink(true);
   }
 
   return (
@@ -77,8 +64,8 @@ export function ShareProfileScreen({
       >
         <View style={{ alignItems: "center" }}>
           <Avatar
-            uri={avatar}
-            name={displayName}
+            uri={profile?.avatar}
+            name={profile?.name}
             size={AvatarSizes.shareProfile}
             style={{ alignSelf: "center" }}
           />
@@ -89,9 +76,9 @@ export function ShareProfileScreen({
               textAlign: "center",
             }}
           >
-            {displayName || username || shortAddress(userAddress)}
+            {profile?.name || shortAddress(inboxId)}
           </Text>
-          {displayName !== username && (
+          {profile?.name && (
             <Text
               preset="formLabel"
               style={{
@@ -99,7 +86,7 @@ export function ShareProfileScreen({
                 textAlign: "center",
               }}
             >
-              {username || shortAddress(userAddress)}
+              {profile.name || shortAddress(inboxId)}
             </Text>
           )}
         </View>

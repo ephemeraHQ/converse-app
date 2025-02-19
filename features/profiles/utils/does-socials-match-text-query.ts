@@ -1,43 +1,55 @@
-import { IWeb3SocialProfileType } from "@/features/social-profiles/social-lookup.api";
+import { IWeb3SocialProfile } from "@/features/social-profiles/social-lookup.api";
+import {
+  isEnsProfile,
+  isFarcasterProfile,
+  isLensProfile,
+} from "@/features/social-profiles/social-profiles.utils";
 
-export function doesSocialsMatchTextQuery(args: {
-  socials: IWeb3SocialProfileType[];
+export function doesWeb3SocialsMatchTextQuery(args: {
+  web3SocialProfiles: IWeb3SocialProfile[];
   normalizedQuery: string;
 }) {
-  const { socials, normalizedQuery } = args;
+  const { web3SocialProfiles, normalizedQuery } = args;
 
-  return socials.some((profile) => {
-    return [
-      // Check address
-      profile.address?.toLowerCase().includes(normalizedQuery),
-      // Check ENS
-      profile.ensNames?.some(
-        (ens) =>
-          ens.name.toLowerCase().includes(normalizedQuery) ||
-          ens.displayName?.toLowerCase()?.includes(normalizedQuery)
-      ),
-      // Check Lens
-      profile.lensHandles?.some(
-        (lens) =>
-          lens.handle.toLowerCase().includes(normalizedQuery) ||
-          lens.name?.toLowerCase()?.includes(normalizedQuery)
-      ),
-      // Check Farcaster
-      profile.farcasterUsernames?.some(
-        (fc) =>
-          fc.username.toLowerCase().includes(normalizedQuery) ||
-          fc.name?.toLowerCase()?.includes(normalizedQuery)
-      ),
-      // Check Unstoppable Domains
-      profile.unstoppableDomains?.some((ud) =>
-        ud.domain.toLowerCase().includes(normalizedQuery)
-      ),
-      // Check usernames
-      profile.userNames?.some(
-        (un) =>
-          un.name.toLowerCase().includes(normalizedQuery) ||
-          un.displayName?.toLowerCase()?.includes(normalizedQuery)
-      ),
+  return web3SocialProfiles.some((web3SocialProfile) => {
+    // Check base profile fields
+    const hasMatchInBaseFields = [
+      web3SocialProfile.name?.toLowerCase().includes(normalizedQuery),
+      web3SocialProfile.bio?.toLowerCase().includes(normalizedQuery),
     ].some(Boolean);
+
+    if (hasMatchInBaseFields) {
+      return true;
+    }
+
+    // Check metadata based on profile type
+    if (!web3SocialProfile.metadata) {
+      return false;
+    }
+
+    if (isEnsProfile(web3SocialProfile)) {
+      return web3SocialProfile.metadata.name
+        ?.toLowerCase()
+        .includes(normalizedQuery);
+    }
+
+    if (isLensProfile(web3SocialProfile)) {
+      return web3SocialProfile.metadata.name
+        ?.toLowerCase()
+        .includes(normalizedQuery);
+    }
+
+    if (isFarcasterProfile(web3SocialProfile)) {
+      return [
+        web3SocialProfile.metadata.username
+          ?.toLowerCase()
+          .includes(normalizedQuery),
+        web3SocialProfile.metadata.display
+          ?.toLowerCase()
+          .includes(normalizedQuery),
+      ].some(Boolean);
+    }
+
+    return false;
   });
 }

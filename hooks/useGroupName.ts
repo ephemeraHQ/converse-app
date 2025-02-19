@@ -27,9 +27,10 @@ export const useGroupName = (args: {
     enabled: !groupName && !!conversationTopic && !!account, // If we have the group name, we don't need to fetch the members
   });
 
-  const { data: profiles, isLoading: isLoadingProfiles } = useProfilesQueries(
-    groupMembers?.ids ?? []
-  );
+  const { data: profiles, isLoading: isLoadingProfiles } = useProfilesQueries({
+    xmtpInboxIds: groupMembers?.ids ?? [],
+  });
+
   const names = profiles?.map((profile) => profile?.name);
 
   const { mutateAsync } = useGroupNameMutation({

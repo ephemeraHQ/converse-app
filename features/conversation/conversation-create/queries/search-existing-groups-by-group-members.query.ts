@@ -1,6 +1,6 @@
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
 import { getSafeCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
-import { doesSocialsMatchTextQuery } from "@/features/profiles/utils/does-socials-match-text-query";
+import { doesWeb3SocialsMatchTextQuery } from "@/features/profiles/utils/does-socials-match-text-query";
 import { ensureSocialProfilesQueryData } from "@/features/social-profiles/social-lookup.query";
 import { getSearchExistingGroupsByMemberNameQueryKey } from "@/queries/QueryKeys";
 import { getAllowedConsentConversationsQueryData } from "@/queries/conversations-allowed-consent-query";
@@ -50,8 +50,8 @@ export async function searchExistingGroupsByGroupMembers(args: {
 
             if (!socials) return false;
 
-            return doesSocialsMatchTextQuery({
-              socials,
+            return doesWeb3SocialsMatchTextQuery({
+              web3SocialProfiles: socials,
               normalizedQuery: searchQuery,
             });
           }),

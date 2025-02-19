@@ -40,7 +40,7 @@ export const ConversationListPinnedConversationDm = ({
   }, [conversation.topic]);
 
   const title = profile?.name ?? "";
-  const avatarUri = profile?.avatarUrl;
+  const avatarUri = profile?.avatar;
 
   const displayMessagePreview =
     conversation.lastMessage &&

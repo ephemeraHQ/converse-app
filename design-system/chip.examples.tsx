@@ -1,7 +1,7 @@
+import { Icon } from "@/design-system/Icon/Icon";
 import React from "react";
 import { View } from "react-native";
-import { Chip } from "./chip";
-import { Icon } from "@/design-system/Icon/Icon";
+import { Chip, ChipAvatar, ChipIcon, ChipText } from "./chip";
 
 export default {
   title: "Design System/Chip",
@@ -12,41 +12,41 @@ export function ChipExamples() {
     <View style={{ gap: 10, padding: 10 }}>
       {/* Basic usage with just text */}
       <Chip>
-        <Chip.Text>Basic Chip</Chip.Text>
+        <ChipText>Basic Chip</ChipText>
       </Chip>
 
       {/* With avatar and text */}
       <Chip>
-        <Chip.Avatar uri="https://example.com/avatar.jpg" name="John Doe" />
-        <Chip.Text>John Doe</Chip.Text>
+        <ChipAvatar uri="https://example.com/avatar.jpg" name="John Doe" />
+        <ChipText>John Doe</ChipText>
       </Chip>
 
       {/* With custom icon */}
       <Chip>
-        <Chip.Icon>
+        <ChipIcon>
           <Icon icon="star" size={16} />
-        </Chip.Icon>
-        <Chip.Text>With Icon</Chip.Text>
+        </ChipIcon>
+        <ChipText>With Icon</ChipText>
       </Chip>
 
       {/* Filled variant */}
       <Chip variant="filled">
-        <Chip.Text>Filled Chip</Chip.Text>
+        <ChipText>Filled Chip</ChipText>
       </Chip>
 
       {/* Disabled state */}
       <Chip disabled>
-        <Chip.Text>Disabled Chip</Chip.Text>
+        <ChipText>Disabled Chip</ChipText>
       </Chip>
 
       {/* Selected state with medium size */}
       <Chip size="md" isSelected>
-        <Chip.Text>Selected (Medium)</Chip.Text>
+        <ChipText>Selected (Medium)</ChipText>
       </Chip>
 
       {/* Interactive chip with onPress */}
       <Chip onPress={() => alert("Chip pressed!")}>
-        <Chip.Text>Pressable Chip</Chip.Text>
+        <ChipText>Pressable Chip</ChipText>
       </Chip>
 
       {/* Combination of multiple props */}
@@ -56,11 +56,11 @@ export function ChipExamples() {
         isSelected
         onPress={() => alert("Complex chip pressed!")}
       >
-        <Chip.Avatar uri="https://example.com/avatar.jpg" name="Jane Smith" />
-        <Chip.Icon>
+        <ChipAvatar uri="https://example.com/avatar.jpg" name="Jane Smith" />
+        <ChipIcon>
           <Icon icon="checkmark" size={16} />
-        </Chip.Icon>
-        <Chip.Text>Complex Chip</Chip.Text>
+        </ChipIcon>
+        <ChipText>Complex Chip</ChipText>
       </Chip>
     </View>
   );

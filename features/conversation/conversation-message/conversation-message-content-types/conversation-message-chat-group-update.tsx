@@ -96,7 +96,7 @@ function ChatGroupMemberLeft({ inboxId }: IChatGroupMemberLeftProps) {
       >
         <Avatar
           size={theme.avatarSize.xs}
-          uri={profile.avatarUrl}
+          uri={profile.avatar}
           name={profile.name}
         />
         <ChatGroupUpdateText weight="bold">
@@ -137,7 +137,7 @@ function ChatGroupMemberJoined({ inboxId }: IChatGroupMemberJoinedProps) {
       >
         <Avatar
           size={theme.avatarSize.xs}
-          uri={profile.avatarUrl}
+          uri={profile.ava}
           name={profile.name}
         />
         <ChatGroupUpdateText weight="bold">{profile.name} </ChatGroupUpdateText>
@@ -199,7 +199,7 @@ function ChatGroupMetadataUpdate({
       >
         <Avatar
           size={theme.avatarSize.xs}
-          uri={profile.avatarUrl}
+          uri={profile.ava}
           name={profile.name}
         />
         <ChatGroupUpdateText weight="bold">{profile.name} </ChatGroupUpdateText>

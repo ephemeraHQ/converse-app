@@ -10,7 +10,7 @@ import { Platform, StyleProp, ViewStyle } from "react-native";
 
 export type IAvatarProps = {
   uri: Nullable<string>;
-  name?: string;
+  name: Nullable<string>;
   size?: number;
   style?: StyleProp<ViewStyle>;
 };

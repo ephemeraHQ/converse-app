@@ -1,6 +1,7 @@
 ## General
 
 - When I ask you to “clean” a file, rewrite the content following the rules and best practices listed below.
+- When I ask you to "Make more readable", rewrite the content following the rules and best practices listed below and add some comments to explain the code. The comments need to be short and direct. Don't add comments when it's obvious what the code is doing. Also add some comments to explain why we are doing something in a certain way.
 
 ## Core Principles
 

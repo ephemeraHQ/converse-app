@@ -3,7 +3,8 @@ import { ProfileContactCard } from "@/features/profiles/components/profile-conta
 import { ProfileSection } from "@/features/profiles/components/profile-section";
 import { ProfileSocialsNames } from "@/features/profiles/components/profile-social-names";
 import { useProfileOtherScreenHeader } from "@/features/profiles/profile-other.screen-header";
-import { useInboxProfileSocialsQuery } from "@/queries/useInboxProfileSocialsQuery";
+import { useProfileQuery } from "@/features/profiles/profiles.query";
+import { useSocialProfilesForAddressQuery } from "@/features/social-profiles/social-lookup.query";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { InboxId } from "@xmtp/react-native-sdk";
 import { memo } from "react";
@@ -15,9 +16,10 @@ export const ProfileOther = memo(function (props: { inboxId: InboxId }) {
 
   useProfileOtherScreenHeader({ inboxId });
 
-  const { data: socials } = useInboxProfileSocialsQuery({
-    inboxId,
-    caller: "ProfileOther",
+  const { data: profile } = useProfileQuery({ xmtpId: inboxId });
+
+  const { data: socialProfiles } = useSocialProfilesForAddressQuery({
+    ethAddress: profile?.privyAddress,
   });
 
   return (
@@ -26,7 +28,9 @@ export const ProfileOther = memo(function (props: { inboxId: InboxId }) {
         <ProfileContactCard inboxId={inboxId} />
       </ProfileSection>
 
-      {socials && <ProfileSocialsNames socials={socials[0]} />}
+      {socialProfiles && (
+        <ProfileSocialsNames socialProfiles={socialProfiles} />
+      )}
     </Screen>
   );
 });

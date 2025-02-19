@@ -11,16 +11,33 @@ const ProfileType = z.enum([
   "unstoppable-domains",
 ]);
 
-// Simplified schema to match backend response
-const SocialProfileSchema = z.object({
-  type: ProfileType,
-  address: z.string(),
-  name: z.string(),
-  bio: z.string().optional(),
+export type ISocialProfile = z.infer<typeof SocialProfileSchema>;
+const Web3SocialProfileSchema = z.object({
+  type: z.enum(["farcaster", "lens", "ens"]),
+  name: z.string().optional(),
   avatar: z.string().optional(),
+  bio: z.string().optional(),
+  metadata: z
+    .union([FarcasterProfileSchema, LensProfileSchema, EnsProfileSchema])
+    .optional(),
 });
 
-export type ISocialProfile = z.infer<typeof SocialProfileSchema>;
+export type IFarcasterProfile = IWeb3SocialProfile & {
+  type: "farcaster";
+  metadata: z.infer<typeof FarcasterProfileSchema>;
+};
+
+export type ILensProfile = IWeb3SocialProfile & {
+  type: "lens";
+  metadata: z.infer<typeof LensProfileSchema>;
+};
+
+export type IEnsProfile = IWeb3SocialProfile & {
+  type: "ens";
+  metadata: z.infer<typeof EnsProfileSchema>;
+};
+
+export type IWeb3SocialProfile = z.infer<typeof Web3SocialProfileSchema>;
 
 const SocialProfilesResponseSchema = z.object({
   socialProfiles: z.array(SocialProfileSchema),

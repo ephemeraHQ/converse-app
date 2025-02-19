@@ -66,7 +66,7 @@ export function useConversationMessageReactionsRolledUp(args: {
         reactor: {
           address: reaction.senderInboxId,
           userName: profile?.name,
-          avatar: profile?.avatarUrl,
+          avatar: profile?.avatar,
         },
       });
     });

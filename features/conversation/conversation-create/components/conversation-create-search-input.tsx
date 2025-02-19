@@ -2,13 +2,18 @@ import { Center } from "@/design-system/Center";
 import { HStack } from "@/design-system/HStack";
 import { Text } from "@/design-system/Text";
 import { VStack } from "@/design-system/VStack";
-import { Chip, useChipStyles } from "@/design-system/chip";
+import {
+  Chip,
+  ChipAvatar,
+  ChipText,
+  useChipStyles,
+} from "@/design-system/chip";
 import { TextInput } from "@/design-system/text-input";
 import {
   useConversationStore,
   useConversationStoreContext,
 } from "@/features/conversation/conversation.store-context";
-import { usePreferredInboxAvatar } from "@/hooks/usePreferredInboxAvatar";
+import { useProfileQuery } from "@/features/profiles/profiles.query";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { Haptics } from "@/utils/haptics";
 import { InboxId } from "@xmtp/react-native-sdk";
@@ -167,9 +172,8 @@ function useConversationCreateSearchStyles() {
 const UserChip = memo(function UserChip(props: { inboxId: InboxId }) {
   const { inboxId } = props;
 
-  const { data: avatarUri } = usePreferredInboxAvatar({ inboxId });
-  // const { data: name } = useInboxName({ inboxId });
-  const name = "todo username inbox lookup";
+  const { data: profile } = useProfileQuery({ xmtpId: inboxId });
+
   const selectedChipInboxId = useStore((state) => state.selectedChipInboxId);
 
   const handlePress = useCallback(() => {
@@ -183,8 +187,8 @@ const UserChip = memo(function UserChip(props: { inboxId: InboxId }) {
       onPress={handlePress}
       size="md"
     >
-      <Chip.Avatar uri={avatarUri} name={name} />
-      <Chip.Text>{name}</Chip.Text>
+      <ChipAvatar uri={profile?.avatar} name={profile?.name} />
+      <ChipText>{profile?.name}</ChipText>
     </Chip>
   );
 });

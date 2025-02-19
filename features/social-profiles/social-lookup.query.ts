@@ -25,7 +25,7 @@ const getSocialProfilesQueryOptions = (args: IArgs) => {
   });
 };
 
-export const useSocialProfilesForAddress = (args: IArgs) => {
+export const useSocialProfilesForAddressQuery = (args: IArgs) => {
   return useQuery(getSocialProfilesQueryOptions(args));
 };
 

@@ -1,22 +1,26 @@
 import { logger } from "@/utils/logger";
+import { CoinbaseMessagingPaymentCodec } from "@/utils/xmtpRN/xmtp-content-types/xmtp-coinbase-payment";
+import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-reference";
 import {
+  GroupUpdatedCodec,
+  ReactionCodec,
+  ReadReceiptCodec,
   RemoteAttachmentCodec,
   ReplyCodec,
-  GroupUpdatedCodec,
-  TextCodec,
-  ReadReceiptCodec,
-  ReactionCodec,
   StaticAttachmentCodec,
+  TextCodec,
   Client as XmtpClient,
 } from "@xmtp/react-native-sdk";
-import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-reference";
-import { CoinbaseMessagingPaymentCodec } from "@/utils/xmtpRN/xmtp-content-types/xmtp-coinbase-payment";
 
 import { config } from "@/config";
 import {
   AuthStatuses,
   useAccountsStore,
 } from "@/features/multi-inbox/multi-inbox.store";
+import { captureError } from "@/utils/capture-error";
+import { getDbEncryptionKey } from "@/utils/keychain";
+import { ConverseXmtpClientType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
+import { useEffect } from "react";
 import {
   ClientWithInvalidInstallation,
   CurrentSender,
@@ -24,10 +28,6 @@ import {
   InboxSigner,
   MultiInboxClientRestorationStates,
 } from "./multi-inbox-client.types";
-import { getDbEncryptionKey } from "@/utils/keychain";
-import { useEffect } from "react";
-import { captureError } from "@/utils/capture-error";
-import { ConverseXmtpClientType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 
 /**
  * Client for managing multiple XMTP inboxes and their lifecycle.
@@ -74,10 +74,13 @@ export class MultiInboxClient {
   } = {};
 
   private get xmtpClientInboxIdToAddressMap() {
-    return useAccountsStore.getState().senders.reduce((acc, sender) => {
-      acc[sender.inboxId] = sender.ethereumAddress;
-      return acc;
-    }, {} as { [inboxId: string]: string });
+    return useAccountsStore.getState().senders.reduce(
+      (acc, sender) => {
+        acc[sender.inboxId] = sender.ethereumAddress;
+        return acc;
+      },
+      {} as { [inboxId: string]: string }
+    );
   }
 
   private static _instance: MultiInboxClient;
@@ -241,9 +244,8 @@ export class MultiInboxClient {
           `[addInbox] No existing inbox found for address: ${signerEthereumAddress}, creating new one`
         );
 
-        const xmtpInboxClient = await this.performInboxCreationFromInboxSigner(
-          inboxSigner
-        );
+        const xmtpInboxClient =
+          await this.performInboxCreationFromInboxSigner(inboxSigner);
 
         if (!useAccountsStore.getState().currentSender) {
           useAccountsStore.getState().setCurrentSender({
@@ -357,9 +359,8 @@ export class MultiInboxClient {
               inboxId
             );
 
-            const isInstallationValid = await this.isClientInstallationValid(
-              xmtpInboxClient
-            );
+            const isInstallationValid =
+              await this.isClientInstallationValid(xmtpInboxClient);
 
             if (!isInstallationValid) {
               logger.warn(

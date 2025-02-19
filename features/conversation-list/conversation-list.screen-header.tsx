@@ -69,8 +69,6 @@ function HeaderTitle() {
   const { data: currentProfile } = useSafeActiveSenderProfile();
   const { currentProfiles } = useCurrentProfiles();
 
-  const setCurrentAccount = useAccountsStore((s) => s.setCurrentAccount);
-
   const onDropdownPress = useCallback(
     (profileXmtpInboxId: string) => {
       if (profileXmtpInboxId === "all-chats") {
@@ -83,10 +81,7 @@ function HeaderTitle() {
       } else if (profileXmtpInboxId === "app-settings") {
         navigation.navigate("AppSettings");
       } else {
-        // TODO: Implement this
-        // useAccountsStore.getState().setCurrentSender({
-        //   inboxId: profileXmtpInboxId,
-        // });
+        useAccountsStore.getState().setCurrentInboxId(profileXmtpInboxId);
       }
     },
     [navigation]
@@ -102,10 +97,7 @@ function HeaderTitle() {
           ...currentProfiles?.map((profile) => ({
             id: profile.id,
             title: profile.name,
-            image:
-              currentAccountInboxId === profile.deviceIdentity.xmtpId
-                ? "checkmark"
-                : "",
+            image: currentAccountInboxId === profile.xmtpId ? "checkmark" : "",
           })),
           {
             displayInline: true,
@@ -160,7 +152,7 @@ function ProfileAvatar() {
     >
       <Center style={themed($avatarContainer)}>
         <Avatar
-          uri={profile?.avatarUrl}
+          uri={profile?.avatar}
           name={profile?.name}
           size={theme.avatarSize.sm}
         />

@@ -1,14 +1,13 @@
 import { ConversationHeaderTitle } from "@/features/conversation/conversation-screen-header/conversation-screen-header-title";
-import { usePreferredInboxAvatar } from "@/hooks/usePreferredInboxAvatar";
+import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { useProfileQuery } from "@/features/profiles/profiles.query";
 import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query";
 import { copyToClipboard } from "@/utils/clipboard";
 import { Avatar } from "@components/Avatar";
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { useRouter } from "@navigation/useNavigation";
 import { useAppTheme } from "@theme/useAppTheme";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
-import { useInboxName } from "@/features/inbox/inbox.api";
 
 type DmConversationTitleProps = {
   topic: ConversationTopic;
@@ -37,30 +36,24 @@ export const DmConversationTitle = ({ topic }: DmConversationTitleProps) => {
     copyToClipboard(JSON.stringify(topic));
   }, [topic]);
 
-  const { data: preferredInboxName, isLoading: isLoadingPreferredInboxName } =
-    useInboxName({
-      inboxId: peerInboxId!,
-    });
+  const { data: profile, isLoading: isLoadingProfile } = useProfileQuery({
+    xmtpId: peerInboxId!,
+  });
 
-  const { data: preferredAvatarUri, isLoading: isLoadingPreferredAvatarUri } =
-    usePreferredInboxAvatar({
-      inboxId: peerInboxId!,
-    });
-
-  if (isLoadingPreferredInboxName || isLoadingPreferredAvatarUri) {
+  if (isLoadingProfile) {
     return null;
   }
 
   return (
     <ConversationHeaderTitle
-      title={preferredInboxName}
+      title={profile?.name}
       onLongPress={onLongPress}
       onPress={onPress}
       avatarComponent={
         <Avatar
-          uri={preferredAvatarUri ?? undefined}
+          uri={profile?.avatar ?? undefined}
           size={theme.avatarSize.md}
-          name={preferredInboxName}
+          name={profile?.name}
         />
       }
     />

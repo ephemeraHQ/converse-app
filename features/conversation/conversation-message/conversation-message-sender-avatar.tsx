@@ -25,7 +25,7 @@ export function ConversationSenderAvatar({
     <TouchableOpacity onPress={openProfile}>
       <Avatar
         size={senderAvatarSize}
-        uri={profile?.avatarUrl}
+        uri={profile?.avatar}
         name={profile?.name ?? ""}
       />
     </TouchableOpacity>

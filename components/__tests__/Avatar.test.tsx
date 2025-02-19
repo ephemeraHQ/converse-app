@@ -14,7 +14,7 @@ jest.mock("react-native/Libraries/Utilities/useColorScheme", () => ({
 describe("Avatar Component", () => {
   it("renders correctly with image URI", () => {
     const { getByTestId } = renderWithThemeProvider(
-      <Avatar uri="http://placebacon.net/400/300" size={50} />
+      <Avatar name="John Doe" uri="http://placebacon.net/400/300" size={50} />
     );
 
     // Check if the ImageBackground is rendered with the correct URI

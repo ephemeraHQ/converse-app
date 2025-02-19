@@ -2,9 +2,7 @@ import { Avatar } from "@/components/Avatar";
 import { Text } from "@/design-system/Text";
 import { VStack } from "@/design-system/VStack";
 import { ProfileContactCardLayout } from "@/features/profiles/components/profile-contact-card/profile-contact-card-layout";
-import { useInboxUsername } from "@/features/profiles/utils/inbox-username";
-import { usePreferredInboxAvatar } from "@/hooks/usePreferredInboxAvatar";
-import { usePreferredInboxName } from "@/hooks/usePreferredInboxName";
+import { useProfileQuery } from "@/features/profiles/profiles.query";
 import { useAppTheme } from "@/theme/useAppTheme";
 import React, { memo } from "react";
 import { IProfileContactCardProps } from "../../profile.types";
@@ -15,15 +13,11 @@ import { IProfileContactCardProps } from "../../profile.types";
 export const ProfileContactCard = memo(function ProfileContactCard({
   inboxId,
 }: IProfileContactCardProps) {
-  const { data: avatarUri } = usePreferredInboxAvatar({ inboxId });
-  const { data: displayName } = usePreferredInboxName({ inboxId });
-  const { data: username } = useInboxUsername({ inboxId });
+  const { data: profile } = useProfileQuery({
+    xmtpId: inboxId,
+  });
 
   const { theme } = useAppTheme();
-
-  const avatar = (
-    <Avatar uri={avatarUri} name={displayName} size={theme.avatarSize.lg} />
-  );
 
   const content = (
     <VStack style={{ marginTop: theme.spacing.md }}>
@@ -34,15 +28,27 @@ export const ProfileContactCard = memo(function ProfileContactCard({
           marginBottom: theme.spacing.xxxs,
         }}
       >
-        {displayName}
+        {profile?.name}
       </Text>
-      {username && (
+      {/* TODO: Add main address */}
+      {/* {profile?.username && (
         <Text inverted color="secondary" preset="smaller">
-          {username}
+          {profile?.username}
         </Text>
-      )}
+      )} */}
     </VStack>
   );
 
-  return <ProfileContactCardLayout avatar={avatar} name={content} />;
+  return (
+    <ProfileContactCardLayout
+      avatar={
+        <Avatar
+          uri={profile?.avatar}
+          name={profile?.name}
+          size={theme.avatarSize.lg}
+        />
+      }
+      name={content}
+    />
+  );
 });
