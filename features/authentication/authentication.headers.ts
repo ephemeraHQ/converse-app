@@ -13,6 +13,7 @@ export const XMTP_INSTALLATION_ID_HEADER_KEY = "X-XMTP-InstallationId";
 export const XMTP_INBOX_ID_HEADER_KEY = "X-XMTP-InboxId";
 export const FIREBASE_APP_CHECK_HEADER_KEY = "X-Firebase-AppCheck";
 export const XMTP_SIGNATURE_HEADER_KEY = "X-XMTP-Signature";
+export const CONVOS_AUTH_TOKEN_HEADER_KEY = "X-Convos-AuthToken";
 
 export type XmtpApiHeaders = {
   [XMTP_INSTALLATION_ID_HEADER_KEY]: string;
@@ -86,6 +87,6 @@ export async function getConvosAuthenticationHeaders(): Promise<XmtpApiHeaders> 
 export async function getConvosAuthenticatedHeaders() {
   const jwt = await ensureJwtQueryData();
   return {
-    Authorization: `Bearer ${jwt}`,
+    [CONVOS_AUTH_TOKEN_HEADER_KEY]: jwt,
   };
 }
