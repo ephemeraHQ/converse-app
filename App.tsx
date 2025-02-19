@@ -43,7 +43,7 @@ import { preventSplashScreenAutoHide } from "./utils/splash/splash";
 import { setupStreamingSubscriptions } from "@/features/streams/streams";
 import { useInitializeMultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 import logger from "./utils/logger";
-import { AuthenticateWithPasskeyProvider } from "@/features/onboarding/contexts/signup-with-passkey.context";
+import { AuthenticateWithPasskeyProvider } from "@/features/authentication/authenticate-with-passkey.context";
 import { PrivyPlaygroundLandingScreen } from "@/features/privy-playground/privy-playground-landing.screen";
 import { useLogoutOnJwtRefreshError } from "@/features/authentication/use-logout-on-jwt-refresh-error";
 import { useMonitorNetworkConnectivity } from "./dependencies/NetworkMonitor/use-monitor-network-connectivity";

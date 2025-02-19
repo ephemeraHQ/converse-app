@@ -4,6 +4,7 @@ import { utils as ethersUtils } from "ethers";
 import { DateUtils } from "@/utils/time.utils";
 import { reactQueryPersister } from "@/utils/mmkv";
 import { queryClient } from "@/queries/queryClient";
+import { logger } from "@/utils/logger";
 
 const socialProfilesQueryKey = (address: string) =>
   ["socialProfiles", address] as const;
@@ -14,22 +15,35 @@ export type UseSocialProfilesForAddressArgs = {
 
 const getSocialProfilesQueryOptions = (address: string | undefined) => {
   const enabled = Boolean(address);
+  logger.debug(
+    `[getSocialProfilesQueryOptions] Creating query options for address: ${address}, enabled: ${enabled}`
+  );
   return queryOptions({
     enabled,
     queryKey: socialProfilesQueryKey(address!),
     queryFn: enabled
       ? () => {
-          // Validate and format the address
-          if (!ethersUtils.isAddress(address!)) {
-            throw new Error("Invalid Ethereum address");
-          }
+          // logger.debug(
+          //   `[getSocialProfilesQueryOptions] Executing query function for address: ${address}`
+          // );
+          // // Validate and format the address
+          // if (!ethersUtils.isAddress(address!)) {
+          //   logger.error(
+          //     `[getSocialProfilesQueryOptions] Invalid Ethereum address: ${address}`
+          //   );
+          //   throw new Error("Invalid Ethereum address");
+          // }
 
-          const checksummedAddress = ethersUtils.getAddress(address!);
-          return fetchSocialProfilesForAddress(checksummedAddress);
+          // const checksummedAddress = ethersUtils.getAddress(address!);
+          // logger.debug(
+          //   `[getSocialProfilesQueryOptions] Fetching social profiles for checksummed address: ${checksummedAddress}`
+          // );
+          return fetchSocialProfilesForAddress(address!);
         }
       : skipToken,
-    staleTime: DateUtils.minutes.toMilliseconds(60),
-    persister: reactQueryPersister,
+    // staleTime: DateUtils.minutes.toMilliseconds(60),
+    // persister: reactQueryPersister,
+    staleTime: 0,
   });
 };
 
@@ -46,5 +60,6 @@ export const getSocialProfilesQueryData = (address: string | undefined) => {
 };
 
 export const ensureSocialProfilesQueryData = async (address: string) => {
+  await queryClient.invalidateQueries(getSocialProfilesQueryOptions(address));
   return queryClient.ensureQueryData(getSocialProfilesQueryOptions(address));
 };

@@ -150,7 +150,9 @@ export const useAccountsStore = create<AccountsStoreStype>()(
           } else {
             logger.debug(
               `[multi-inbox.store#onRehydrationStorage] State hydrated successfully: ${JSON.stringify(
-                state
+                state,
+                null,
+                2
               )}`
             );
             if (state?.senders && state.senders.length > 0) {
@@ -205,9 +207,14 @@ export const useAccountsList = () => {
     .map((sender) => sender.ethereumAddress);
 };
 
-export const useActiveSenderProfile = () => {
+export const useSafeActiveSenderProfile = () => {
   const { inboxId: currentInboxId } = useSafeCurrentSender();
   return useProfileQuery({ xmtpId: currentInboxId });
+};
+
+export const useCurrentProfile = () => {
+  const currentSender = useCurrentSender();
+  return useProfileQuery({ xmtpId: currentSender?.inboxId });
 };
 
 export const useCurrentProfiles = () => {
@@ -226,8 +233,12 @@ export const useCurrentAccount = () => {
   return currentSender?.ethereumAddress;
 };
 
+export const getCurrentSender = (): CurrentSender | undefined => {
+  return useAccountsStore.getState().currentSender;
+};
+
 export const getSafeCurrentSender = (): CurrentSender => {
-  const currentSender = useAccountsStore.getState().currentSender;
+  const currentSender = getCurrentSender();
   if (!currentSender) {
     throw new Error("No current sender");
   }
@@ -326,3 +337,5 @@ export const setGroupStatus = (groupStatus: GroupStatus) => {
   const setGroupStatus = getSettingsStore(account).getState().setGroupStatus;
   setGroupStatus(groupStatus);
 };
+
+export { MultiInboxClientRestorationStates };

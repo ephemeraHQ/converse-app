@@ -1,7 +1,7 @@
 import { Avatar } from "@/components/Avatar";
 import {
   useAccountsStore,
-  useActiveSenderProfile,
+  useSafeActiveSenderProfile,
   useCurrentProfiles,
   useSafeCurrentSender,
 } from "@/features/multi-inbox/multi-inbox.store";
@@ -66,7 +66,7 @@ function HeaderTitle() {
   const { theme, themed } = useAppTheme();
   const navigation = useNavigation();
   const currentAccountInboxId = useSafeCurrentSender().inboxId;
-  const { data: currentProfile } = useActiveSenderProfile();
+  const { data: currentProfile } = useSafeActiveSenderProfile();
   const { currentProfiles } = useCurrentProfiles();
 
   const setCurrentAccount = useAccountsStore((s) => s.setCurrentAccount);

@@ -6,9 +6,13 @@ import { VStack } from "@/design-system/VStack";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { useBottomSheetModalRef } from "@/design-system/BottomSheet/BottomSheet.utils";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { WalletId } from "thirdweb/wallets";
+import { createWallet, WalletId } from "thirdweb/wallets";
 import { config } from "@/config";
-import { useCurrentSender } from "../multi-inbox/multi-inbox.store";
+import {
+  useCurrentSender,
+  MultiInboxClientRestorationStates,
+  useAccountsStore,
+} from "../multi-inbox/multi-inbox.store";
 import { MultiInboxClient } from "../multi-inbox/multi-inbox.client";
 import { logger } from "@/utils/logger";
 import { Text } from "@/design-system/Text";
@@ -19,7 +23,14 @@ import {
 import { Button } from "@/design-system/Button/Button";
 import { useConnect } from "thirdweb/react";
 import { ensureSocialProfilesQueryData } from "@/features/social-profiles/social-lookup.query";
-import { IWeb3SocialProfile } from "../social-profiles/social-lookup.api";
+import {
+  fetchSocialProfilesForAddress,
+  IWeb3SocialProfile,
+} from "../social-profiles/social-lookup.api";
+import { ScrollView } from "react-native";
+import { thirdwebClient } from "@/utils/thirdweb";
+import { InboxSigner } from "../multi-inbox/multi-inbox-client.types";
+import { base } from "thirdweb/chains";
 
 type InstalledWalletsListProps = {
   installedWallets: ISupportedWallet[];
@@ -40,13 +51,15 @@ function SocialIdentityList({
 }: SocialIdentityListProps) {
   return (
     <>
-      {socialData?.map((social) => (
-        <Button
-          key={social.name}
-          text={`Add ${social.name}: ${social.type} to inbox`}
-          onPress={() => onSocialIdentityTapped(social)}
-        />
-      ))}
+      <ScrollView>
+        {socialData?.map((social) => (
+          <Button
+            key={`${social.name}-${social.type}`}
+            text={JSON.stringify(social, null, 2)}
+            onPress={() => onSocialIdentityTapped(social)}
+          />
+        ))}
+      </ScrollView>
     </>
   );
 }
@@ -60,6 +73,7 @@ function InstalledWalletsList({
 }: InstalledWalletsListProps) {
   return (
     <>
+      <Text>Installed Wallets</Text>
       {installedWallets.map((wallet) => {
         const isLoading = loadingWalletId === wallet.thirdwebId;
         return (
@@ -67,9 +81,9 @@ function InstalledWalletsList({
             loading={isLoading}
             disabled={isDisabled}
             key={wallet.thirdwebId}
-            text={`Add ${wallet.name} to inbox (${
-              isLoading ? "loading..." : ""
-            })`}
+            // text={`Add ${wallet.name} to inbox (${
+            //   isLoading ? "loading..." : ""
+            // })`}
             onPress={() =>
               onWalletTapped(wallet.thirdwebId, {
                 mobileConfig: { callbackURL: coinbaseCallbackUrl },
@@ -85,15 +99,7 @@ function InstalledWalletsList({
 type ConnectWalletBottomSheetProps = {
   isVisible: boolean;
   onClose: () => void;
-  onWalletImported: ({
-    address,
-    username,
-    avatarUri,
-  }: {
-    address: string;
-    username: string | undefined;
-    avatarUri: string | undefined;
-  }) => void;
+  onWalletImported: (socialData: IWeb3SocialProfile[]) => void;
 };
 
 const coinbaseUrl = new URL(`https://${config.websiteDomain}/coinbase`);
@@ -158,34 +164,26 @@ export function ConnectWalletBottomSheet({
 
   const { installedWallets, isLoading: areInstalledWalletsLoading } =
     useInstalledWallets();
+  logger.debug(
+    `[ConnectWalletBottomSheet] Installed wallets: ${JSON.stringify(
+      installedWallets,
+      null,
+      2
+    )}`
+  );
   const { connect } = useConnect();
 
   const hasInstalledWallets = installedWallets && installedWallets.length > 0;
 
   const bottomSheetRef = useBottomSheetModalRef();
   const currentSender = useCurrentSender();
-  // const isInboxClientInitiated =
-  //   !!MultiInboxClient.instance.getInboxClientForAddress({
-  //     ethereumAddress: currentSender!.ethereumAddress,
-  //   })!;
-
-  // function getInitialShowingList(
-  //   installedWallets: ISupportedWallet[],
-  //   isInboxClientInitiated: boolean
-  // ): ListShowing | undefined {
-  //   if (!isInboxClientInitiated) {
-  //     return "wallets";
-  //   }
-
-  //   if (installedWallets.length === 0) {
-  //     return "socials";
-  //   }
-
-  //   return undefined;
-  // }
+  const isInboxClientInitiated =
+    !!MultiInboxClient.instance.getInboxClientForAddress({
+      ethereumAddress: currentSender!.ethereumAddress,
+    })!;
 
   const initialState: ConnectWalletBottomSheetState = {
-    listShowing: "socials",
+    listShowing: "wallets",
     thirdwebWalletIdThatIsConnecting: undefined,
     ethereumAddressThatIsConnecting: undefined,
     socialData: undefined,
@@ -198,85 +196,37 @@ export function ConnectWalletBottomSheet({
     listShowing,
   } = state;
 
-  useEffect(() => {
-    async function loadSocialData() {
-      const socialProfiles = await ensureSocialProfilesQueryData(
-        "0xa64af7f78de39a238ecd4fff7d6d410dbace2df0"
-      );
-      logger.debug(
-        `[ConnectWalletBottomSheet] Social profiles: ${JSON.stringify(
-          socialProfiles,
-          null,
-          2
-        )}`
-      );
-      dispatch({ type: "SocialDataLoaded", data: socialProfiles });
-    }
-    loadSocialData();
-  }, [ethereumAddressThatIsConnecting]);
+  const restored =
+    useAccountsStore.getState().multiInboxClientRestorationState === "restored";
 
-  // const {
-  //   data: socialProfiles,
-  //   isLoading: isSocialProfilesLoading,
-  //   error: socialProfilesError,
-  // } = useSocialProfiles({
-  //   client: thirdwebClient,
-  //   address: ethereumAddressThatIsConnecting,
-  // });
   // useEffect(() => {
-  //   if (socialProfilesError) {
-  //     logger.error(
-  //       `[ConnectWalletBottomSheet] Error loading social profiles: ${JSON.stringify(
-  //         socialProfilesError.message,
-  //         null,
-  //         2
-  //       )}`
-  //     );
-  //   }
   //   logger.debug(
-  //     `[ConnectWalletBottomSheet] Social profiles: ${JSON.stringify(
-  //       {
-  //         ethereumAddressThatIsConnecting,
-  //         socialProfiles,
-  //         isSocialProfilesLoading,
-  //       },
+  //     `[ConnectWalletBottomSheet] Current sender: ${JSON.stringify(
+  //       currentSender,
   //       null,
   //       2
   //     )}`
   //   );
-  //   if (socialProfiles && !isSocialProfilesLoading) {
-  //     dispatch({ type: "SocialDataLoaded", data: socialProfiles });
-
-  //     logger.debug(
-  //       `[ConnectWalletBottomSheet] Social data for address ${ethereumAddressThatIsConnecting}:`,
-  //       JSON.stringify(socialProfiles, null, 2)
-  //     );
-  //     if (socialProfiles.length === 0) {
-  //       alert(
-  //         "you linked a wallet with no social profiles attached, what to do here?"
-  //       );
-  //       logger.debug(
-  //         `[ConnectWalletBottomSheet] No social profiles found for address ${ethereumAddressThatIsConnecting}`
-  //       );
-  //       onWalletImported({
-  //         address: ethereumAddressThatIsConnecting!,
-  //         username: undefined,
-  //         avatarUri: undefined,
-  //       });
-  //     } else {
-  //       logger.debug(
-  //         `[ConnectWalletBottomSheet] Social data for address ${ethereumAddressThatIsConnecting}:`,
-  //         JSON.stringify(socialProfiles, null, 2)
-  //       );
-  //     }
+  //   if (!currentSender || !restored) {
+  //     return;
   //   }
-  // }, [
-  //   socialProfiles,
-  //   isSocialProfilesLoading,
-  //   ethereumAddressThatIsConnecting,
-  //   socialProfilesError,
-  //   onWalletImported,
-  // ]);
+
+  //   async function loadSocialData() {
+  //     const shaneWallet = "0xa64af7f78de39a238ecd4fff7d6d410dbace2df0";
+  //     const michaelranbowWallet = "0x5222f538B29267a991B346EF61A2A2c389A9f320";
+  //     const socialProfiles =
+  //       await ensureSocialProfilesQueryData(michaelranbowWallet);
+  //     logger.debug(
+  //       `[ConnectWalletBottomSheet] Social profiles: ${JSON.stringify(
+  //         socialProfiles,
+  //         null,
+  //         2
+  //       )}`
+  //     );
+  //     dispatch({ type: "SocialDataLoaded", data: socialProfiles });
+  //   }
+  //   loadSocialData();
+  // }, [ethereumAddressThatIsConnecting, currentSender, restored]);
 
   const isShowingWalletList = listShowing === "wallets";
   const isWalletListDisabled = thirdwebWalletIdThatIsConnecting !== undefined;
@@ -290,13 +240,13 @@ export function ConnectWalletBottomSheet({
     walletType: WalletId,
     options?: any
   ) => {
-    // if (!isInboxClientInitiated) {
-    //   throw new Error(
-    //     `[ConnectWalletBottomSheet] Inbox client not initiated for address ${
-    //       currentSender!.ethereumAddress
-    //     } when attempting to connect wallet ${walletType}`
-    //   );
-    // }
+    if (!isInboxClientInitiated) {
+      throw new Error(
+        `[ConnectWalletBottomSheet] Inbox client not initiated for address ${
+          currentSender!.ethereumAddress
+        } when attempting to connect wallet ${walletType}`
+      );
+    }
 
     dispatch({ type: "SetConnectingWallet", walletId: walletType });
 
@@ -304,118 +254,110 @@ export function ConnectWalletBottomSheet({
       `[ConnectWalletBottomSheet] Handling connect wallet tapped for ${walletType}`
     );
 
-    // connect(async () => {
-
-    logger.debug(
-      `[ConnectWalletBottomSheet] Creating wallet of type ${walletType}`
-    );
-
-    // const w = createWallet(walletType, options);
-
-    // logger.debug(
-    //   `[ConnectWalletBottomSheet] Connecting wallet to thirdweb client`
-    // );
-    // const walletAccount = await w.connect({
-    //   client: thirdwebClient,
-    // });
-
-    // const addressToLink = walletAccount.address;
-    const michaelWalletWithBasename =
-      "0x5222f538B29267a991B346EF61A2A2c389A9f320";
-    const addressToLink = michaelWalletWithBasename;
-
-    const socialProfiles = await ensureSocialProfilesQueryData(addressToLink);
-    logger.debug(
-      `[ConnectWalletBottomSheet]convos ry is awesome Social profiles: ${JSON.stringify(
-        socialProfiles,
-        null,
-        2
-      )}`
-    );
-    dispatch({
-      type: "ConnectingEthereumAddressDiscovered",
-      ethereumAddress: addressToLink,
-    });
-    dispatch({
-      type: "SocialDataLoaded",
-      data: socialProfiles,
-    });
-    logger.debug(
-      `[ConnectWalletBottomSheet] Got wallet address: ${addressToLink}`
-    );
-
-    logger.debug(
-      `[ConnectWalletBottomSheet] Getting inbox client for current sender: ${
-        currentSender!.ethereumAddress
-      }`
-    );
-    const currentInboxClient =
-      MultiInboxClient.instance.getInboxClientForAddress({
-        ethereumAddress: currentSender!.ethereumAddress,
-      })!;
-
-    logger.debug(
-      `[ConnectWalletBottomSheet] Checking if address ${addressToLink} can be messaged`
-    );
-    const resultsMap = await currentInboxClient.canMessage([addressToLink]);
-    logger.debug(
-      `[ConnectWalletBottomSheet] Results map: ${JSON.stringify(
-        resultsMap,
-        null,
-        2
-      )}`
-    );
-    const isOnXmtp = resultsMap[addressToLink];
-
-    logger.debug(
-      `[ConnectWalletBottomSheet] Is on XMTP? ${isOnXmtp} for address ${addressToLink}`
-    );
-
-    if (isOnXmtp) {
+    connect(async () => {
       logger.debug(
-        `[ConnectWalletBottomSheet] Address ${addressToLink} is already on XMTP`
+        `[ConnectWalletBottomSheet] Creating wallet of type ${walletType}`
       );
-      alert(
-        `You are already on XMTP with address ${addressToLink}. We're going to handle this carefully according to https://xmtp-labs.slack.com/archives/C07NSHXK693/p1739215446331469?thread_ts=1739212558.484059&cid=C07NSHXK693.`
-      );
-    } else {
+
+      const w = createWallet(walletType, options);
+
       logger.debug(
-        `[ConnectWalletBottomSheet] Creating signer for address ${addressToLink}`
+        `[ConnectWalletBottomSheet] Connecting wallet to thirdweb client`
       );
-      // const signer: InboxSigner = {
-      //   getAddress: async () => addressToLink,
-      //   getChainId: () => base.id,
-      //   getBlockNumber: () => undefined,
-      //   walletType: () => "EOA",
-      //   signMessage: async (message: string) => {
-      //     logger.debug(
-      //       `[ConnectWalletBottomSheet] Signing message for address ${addressToLink}`
-      //     );
-      //     const signature = await walletAccount.signMessage({ message });
-      //     return signature;
-      //   },
-      // };
+      const walletAccount = await w.connect({
+        client: thirdwebClient,
+      });
 
-      // logger.debug(
-      //   `[ConnectWalletBottomSheet] Adding account to inbox client`
-      // );
-      // await currentInboxClient.addAccount(signer);
+      const addressToLink = walletAccount.address;
+      dispatch({
+        type: "ConnectingEthereumAddressDiscovered",
+        ethereumAddress: addressToLink,
+      });
 
-      // alert(
-      //   `You've sucesfully connected ${addressToLink} to your inbox. You won't see anything in the UI yet, but we're working on that now.`
-      // );
+      const socialProfiles = await ensureSocialProfilesQueryData(addressToLink);
+      logger.debug(
+        `[ConnectWalletBottomSheet]convos ry is awesome Social profiles: ${JSON.stringify(
+          socialProfiles,
+          null,
+          2
+        )}`
+      );
+      dispatch({
+        type: "SocialDataLoaded",
+        data: socialProfiles,
+      });
+      logger.debug(
+        `[ConnectWalletBottomSheet] Got wallet address: ${addressToLink}`
+      );
 
-      // const socialData = await ensureProfileSocialsQueryData(addressToLink);
+      logger.debug(
+        `[ConnectWalletBottomSheet] Getting inbox client for current sender: ${
+          currentSender!.ethereumAddress
+        }`
+      );
+      const currentInboxClient =
+        MultiInboxClient.instance.getInboxClientForAddress({
+          ethereumAddress: currentSender!.ethereumAddress,
+        })!;
 
-      // onWalletImported({
-      //   address: addressToLink,
-      //   username: socialData.ensNames?.[0]?.name,
-      //   avatarUri: socialData.ensNames?.[0]?.avatar,
-      // });
-    }
+      logger.debug(
+        `[ConnectWalletBottomSheet] Checking if address ${addressToLink} can be messaged`
+      );
+      const resultsMap = await currentInboxClient.canMessage([addressToLink]);
+      logger.debug(
+        `[ConnectWalletBottomSheet] Results map: ${JSON.stringify(
+          resultsMap,
+          null,
+          2
+        )}`
+      );
+      const isOnXmtp = resultsMap[addressToLink];
 
-    // return w;
-    // });
+      logger.debug(
+        `[ConnectWalletBottomSheet] Is on XMTP? ${isOnXmtp} for address ${addressToLink}`
+      );
+
+      if (isOnXmtp) {
+        logger.debug(
+          `[ConnectWalletBottomSheet] Address ${addressToLink} is already on XMTP`
+        );
+        alert(
+          `You are already on XMTP with address ${addressToLink}. We're going to handle this carefully according to https://xmtp-labs.slack.com/archives/C07NSHXK693/p1739215446331469?thread_ts=1739212558.484059&cid=C07NSHXK693.`
+        );
+      } else {
+        logger.debug(
+          `[ConnectWalletBottomSheet] Creating signer for address ${addressToLink}`
+        );
+        const signer: InboxSigner = {
+          getAddress: async () => addressToLink,
+          getChainId: () => base.id,
+          getBlockNumber: () => undefined,
+          walletType: () => "EOA",
+          signMessage: async (message: string) => {
+            logger.debug(
+              `[ConnectWalletBottomSheet] Signing message for address ${addressToLink}`
+            );
+            const signature = await walletAccount.signMessage({ message });
+            return signature;
+          },
+        };
+
+        logger.debug(
+          `[ConnectWalletBottomSheet] Adding account to inbox client`
+        );
+        await currentInboxClient.addAccount(signer);
+
+        alert(
+          `You've sucesfully connected ${addressToLink} to your inbox. You won't see anything in the UI yet, but we're working on that now.`
+        );
+
+        const socialData = await ensureSocialProfilesQueryData(addressToLink);
+
+        onWalletImported(socialData);
+      }
+
+      return w;
+    });
   };
 
   function handleSocialIdentityTapped(socialIdentity: IWeb3SocialProfile) {
@@ -436,7 +378,7 @@ export function ConnectWalletBottomSheet({
       snapPoints={["50%"]}
       onDismiss={onClose}
     >
-      <BottomSheetHeader title="Import an identity" />
+      <BottomSheetHeader title="Imiport an identity" />
       <BottomSheetContentContainer
         style={{
           flex: 1,

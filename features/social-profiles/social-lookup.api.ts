@@ -1,6 +1,6 @@
 import { api } from "@/utils/api/api";
 import { z } from "zod";
-
+import { logger } from "@/utils/logger";
 const Web3SocialProfileType = z.enum([
   "ens",
   "farcaster",
@@ -29,14 +29,13 @@ const SocialProfilesResponseSchema = z.array(Web3SocialProfileSchema);
 export const fetchSocialProfilesForAddress = async (
   address: string
 ): Promise<IWeb3SocialProfile[]> => {
-  try {
-    const { data } = await api.get(`/api/v1/lookup/address/${address}`);
-    return SocialProfilesResponseSchema.parse(data);
-  } catch (error) {
-    console.error(
-      "[API SOCIAL-LOOKUP] Failed to fetch social profiles:",
-      error
-    );
-    return [];
-  }
+  logger.debug(
+    `[fetchSocialProfilesForAddress] Fetching social profiles for address: ${address}`
+  );
+  const { data } = await api.get(`/api/v1/lookup/address/${address}`);
+  const parsedData = SocialProfilesResponseSchema.parse(data);
+  logger.debug(
+    `[fetchSocialProfilesForAddress] Successfully fetched ${parsedData.length} social profiles for address: ${address}`
+  );
+  return parsedData;
 };

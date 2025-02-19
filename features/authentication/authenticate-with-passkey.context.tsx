@@ -174,22 +174,23 @@ export const AuthenticateWithPasskeyProvider = ({
           "[passkey onboarding context] smart contract wallet address",
           smartContractWalletAddress
         );
-        const user = await createUser({
-          privyUserId: privyUser!.id,
-          smartContractWalletAddress,
-          inboxId,
-          profile: {
-            name: `Test User ${Math.random()}`,
-            // avatar: privyUser!.imageUrl,
-          },
-        });
-        logger.debug(
-          "[passkey onboarding context] created user",
-          JSON.stringify(user, null, 2)
-        );
+        // const user = await createUser({
+        //   privyUserId: privyUser!.id,
+        //   smartContractWalletAddress,
+        //   inboxId,
+        //   profile: {
+        //     name: `Test User ${Math.random()}`,
+        //     // avatar: privyUser!.imageUrl,
+        //   },
+        // });
+        // logger.debug(
+        //   "[passkey onboarding context] created user",
+        //   JSON.stringify(user, null, 2)
+        // );
         logger.debug(
           "[passkey onboarding context] signing up and created a new inbox successfully in useXmtpFromPrivySmartWalletClientSigner"
         );
+        useAccountsStore.getState().setAuthStatus(AuthStatuses.signingUp);
       } catch (error) {
         logger.error(
           "[passkey onboarding context] Error creating user:",

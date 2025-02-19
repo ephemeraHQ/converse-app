@@ -22,11 +22,11 @@ import WebviewPreviewNav, {
   WebviewPreviewNavParams,
 } from "./WebviewPreviewNav";
 import { screenListeners, stackGroupScreenOptions } from "./navHelpers";
-import { AuthenticateWithPasskeyProvider } from "@/features/onboarding/contexts/signup-with-passkey.context";
+import { AuthenticateWithPasskeyProvider } from "@/features/authentication/authenticate-with-passkey.context";
 import { useCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
 import { Center } from "@/design-system/Center";
 import { VStack } from "@/design-system/VStack";
-import { useLogout } from "@/utils/logout";
+import { useLogout } from "@/features/authentication/use-logout.hook";
 import logger from "@/utils/logger";
 import { AppSettingsScreen } from "@/features/app-settings/app-settings.screen";
 import UserProfileNav from "./UserProfileNav";

@@ -8,7 +8,8 @@ import { usePrivy } from "@privy-io/expo";
 import { StackActions } from "@react-navigation/native";
 import { converseNavigatorRef } from "@utils/navigation";
 import { useCallback } from "react";
-import logger from "../logger";
+import { logger } from "../../utils/logger";
+import { clearJwtQueryData } from "./jwt.query";
 
 export const useLogout = () => {
   const { setAuthStatus } = useAccountsStore();
@@ -32,6 +33,7 @@ export const useLogout = () => {
       queryClient.removeQueries({
         queryKey: ["current-user"],
       });
+      clearJwtQueryData();
     } catch (error) {
       logger.error("[useLogout] Error logging out", error);
     }

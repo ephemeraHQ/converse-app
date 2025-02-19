@@ -12,7 +12,7 @@ import { useCoinbaseWalletListener } from "@utils/coinbaseWallet";
 import { converseEventEmitter } from "@utils/events";
 import "expo-dev-client";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
-import { Text, useColorScheme } from "react-native";
+import { SafeAreaView, Text, useColorScheme } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
@@ -20,7 +20,7 @@ import { config } from "@/config";
 import { useInitializeMultiInboxClient } from "./features/multi-inbox/multi-inbox.client";
 import { PrivyProvider } from "@privy-io/expo";
 import { ThirdwebProvider } from "thirdweb/react";
-import { AuthenticateWithPasskeyProvider } from "./features/onboarding/contexts/signup-with-passkey.context";
+import { AuthenticateWithPasskeyProvider } from "./features/authentication/authenticate-with-passkey.context";
 import { PrivyPlaygroundLandingScreen } from "./features/privy-playground/privy-playground-landing.screen";
 import { DevToolsBubble } from "react-native-react-query-devtools";
 import * as Clipboard from "expo-clipboard";
@@ -37,6 +37,9 @@ export function SlimApp() {
   useInitializeMultiInboxClient();
   useReactQueryDevTools(queryClient);
   useMonitorNetworkConnectivity();
+  useEffect(() => {
+    setupAppAttest();
+  }, []);
 
   const { themeScheme, setThemeContextOverride, ThemeProvider } =
     useThemeProvider();
@@ -63,9 +66,11 @@ export function SlimApp() {
                 <PaperProvider theme={paperTheme}>
                   <GestureHandlerRootView style={{ flex: 1 }}>
                     <BottomSheetModalProvider>
-                      <AuthenticateWithPasskeyProvider>
-                        <PrivyPlaygroundLandingScreen />
-                      </AuthenticateWithPasskeyProvider>
+                      <SafeAreaView style={{ flex: 1 }}>
+                        <AuthenticateWithPasskeyProvider>
+                          <PrivyPlaygroundLandingScreen />
+                        </AuthenticateWithPasskeyProvider>
+                      </SafeAreaView>
                       {__DEV__ && <DevToolsBubble onCopy={onCopy} />}
                       <Snackbars />
                     </BottomSheetModalProvider>

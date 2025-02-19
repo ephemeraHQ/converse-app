@@ -17,7 +17,7 @@ import { validateProfileName } from "@/features/profiles/utils/validate-profile-
 import { translate } from "@/i18n";
 import { useInboxProfileSocialsQuery } from "@/queries/useInboxProfileSocialsQuery";
 import { useAppTheme } from "@/theme/useAppTheme";
-import { useLogout } from "@/utils/logout";
+import { useLogout } from "@/features/authentication/use-logout.hook";
 import { useRouter } from "@navigation/useNavigation";
 import { InboxId } from "@xmtp/react-native-sdk";
 import React, { memo, useCallback, useEffect, useState } from "react";

@@ -31,12 +31,12 @@ import { MultiInboxClient } from "../multi-inbox/multi-inbox.client";
 //   usePrivyUserCustomMetadataForCurrentAccount,
 // } from "@/queries/use-privy-user-custom-metadata";
 import { InboxState } from "@xmtp/react-native-sdk/build/lib/InboxState";
-import { AuthenticateWithPasskeyProvider } from "../onboarding/contexts/signup-with-passkey.context";
+import { AuthenticateWithPasskeyProvider } from "../authentication/authenticate-with-passkey.context";
 import {
   AuthStatuses,
   useAccountsStore,
 } from "../multi-inbox/multi-inbox.store";
-import { useLogout } from "@/utils/logout";
+import { useLogout } from "@/features/authentication/use-logout.hook";
 const coinbaseUrl = new URL(`https://${config.websiteDomain}/coinbase`);
 
 export const PrivyPlaygroundUserScreen = () => {

@@ -14,7 +14,7 @@ import * as Updates from "expo-updates";
 import { forwardRef, useImperativeHandle } from "react";
 import { Alert, Platform } from "react-native";
 import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
-import { useLogout } from "@/utils/logout";
+import { useLogout } from "@/features/authentication/use-logout.hook";
 
 export const DebugButton = forwardRef((props, ref) => {
   const { logout } = useLogout();

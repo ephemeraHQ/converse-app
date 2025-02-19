@@ -8,9 +8,9 @@ import { memo, useState } from "react";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
 import { Center } from "@/design-system/Center";
 import { Button, TextStyle, ViewStyle } from "react-native";
-import { useAuthenticateWithPasskey } from "@/features/onboarding/contexts/signup-with-passkey.context";
+import { useAuthenticateWithPasskey } from "@/features/authentication/authenticate-with-passkey.context";
 import { useNavigation } from "@react-navigation/native";
-import { useLogout } from "@/utils/logout";
+import { useLogout } from "@/features/authentication/use-logout.hook";
 import { ConnectWalletBottomSheet } from "@/features/wallets/connect-wallet.bottom-sheet";
 const $subtextStyle: TextStyle = {
   textAlign: "center",
