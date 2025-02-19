@@ -1,15 +1,15 @@
 import { showActionSheetWithOptions } from "@/components/StateHandlers/ActionSheetStateHandler";
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { updateInboxIdsConsentForAccount } from "@/features/consent/update-inbox-ids-consent-for-account";
-import { translate } from "@/i18n";
+import { deleteConversation } from "@/features/conversation/conversation-metadata/conversation-metadata.api";
 import {
   getConversationMetadataQueryData,
   updateConversationMetadataQueryData,
-} from "@/queries/conversation-metadata-query";
+} from "@/features/conversation/conversation-metadata/conversation-metadata.query";
+import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { translate } from "@/i18n";
 import { getGroupQueryData } from "@/queries/useGroupQuery";
 import { actionSheetColors } from "@/styles/colors";
 import { useAppTheme } from "@/theme/useAppTheme";
-import { deleteTopic } from "@/utils/api/topics";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { useMutation } from "@tanstack/react-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
@@ -23,28 +23,29 @@ export const useDeleteGroup = (args: { groupTopic: ConversationTopic }) => {
 
   const { mutateAsync: deleteGroupAsync } = useMutation({
     mutationFn: () =>
-      deleteTopic({
+      deleteConversation({
+        account: currentAccount,
         topic: groupTopic,
       }),
     onMutate: () => {
-      const previousIsDeleted = getConversationMetadataQueryData({
+      const previousDeleted = getConversationMetadataQueryData({
         account: currentAccount,
         topic: groupTopic,
-      })?.isDeleted;
+      })?.deleted;
 
       updateConversationMetadataQueryData({
         account: currentAccount,
         topic: groupTopic,
-        updateData: { isDeleted: true },
+        updateData: { deleted: true },
       });
 
-      return { previousIsDeleted };
+      return { previousDeleted };
     },
     onError: (error, _, context) => {
       updateConversationMetadataQueryData({
         account: currentAccount,
         topic: groupTopic,
-        updateData: { isDeleted: context?.previousIsDeleted },
+        updateData: { deleted: context?.previousDeleted },
       });
     },
   });

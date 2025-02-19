@@ -1,10 +1,9 @@
+import { getConversationMetadatas } from "@/features/conversation/conversation-metadata/conversation-metadata.api";
 import { conversationMetadataQueryKey } from "@/queries/QueryKeys";
-import { getTopics } from "@/utils/api/topics";
-import logger from "@/utils/logger";
 import { queryOptions, skipToken } from "@tanstack/react-query";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { create, windowScheduler } from "@yornaath/batshit";
-import { queryClient } from "./queryClient";
+import { queryClient } from "../../../queries/queryClient";
 
 export type IConversationMetadataQueryData = Awaited<
   ReturnType<typeof getConversationMetadata>
@@ -48,25 +47,20 @@ export function updateConversationMetadataQueryData(
   const { updateData, account, topic } = args;
   queryClient.setQueryData(
     getConversationMetadataQueryOptions({ account, topic }).queryKey,
-    (previousData) => {
-      return {
-        account: args.account,
-        topic: args.topic,
-        // By default, if we didn't have any data for this conversation, we put those values
-        isDeleted: false,
-        isPinned: false,
-        markedAsUnread: false,
-        ...(previousData ?? {}),
-        ...updateData,
-      };
-    }
+    (previousData) => ({
+      account: args.account,
+      topic: args.topic,
+      deleted: false,
+      pinned: false,
+      unread: false,
+      updatedAt: new Date().toISOString(),
+      ...(previousData ?? {}),
+      ...updateData,
+    })
   );
 }
 
 async function getConversationMetadata(args: IArgs) {
-  logger.debug(
-    `[ConversationMetadataQuery] getConversationMetadata for account: ${args.account}, topic: ${args.topic}`
-  );
   return batchedGetConversationMetadata.fetch(args);
 }
 
@@ -100,7 +94,8 @@ const batchedGetConversationMetadata = create({
 
     const results = await Promise.all(
       Object.entries(accountGroups).map(async ([account, groupArgs]) => {
-        const conversationsData = await getTopics({
+        const conversationsData = await getConversationMetadatas({
+          account,
           topics: groupArgs.map((arg) => arg.topic),
         });
 

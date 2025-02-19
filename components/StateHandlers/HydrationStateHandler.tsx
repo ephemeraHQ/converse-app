@@ -1,4 +1,4 @@
-import { prefetchConversationMetadataQuery } from "@/queries/conversation-metadata-query";
+import { prefetchConversationMetadataQuery } from "@/features/conversation/conversation-metadata/conversation-metadata.query";
 import { fetchAllowedConsentConversationsQuery } from "@/queries/conversations-allowed-consent-query";
 import { captureError } from "@/utils/capture-error";
 import { useAppStore } from "@data/store/appStore";

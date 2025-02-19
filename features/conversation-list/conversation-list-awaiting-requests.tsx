@@ -13,7 +13,7 @@ import {
 } from "@/features/conversation-list/conversation-list-item/conversation-list-item";
 import { useConversationRequestsListItem } from "@/features/conversation-requests-list/use-conversation-requests-list-items";
 import { conversationIsUnreadForInboxId } from "@/features/conversation/utils/conversation-is-unread-by-current-account";
-import { getConversationMetadataQueryOptions } from "@/queries/conversation-metadata-query";
+import { getConversationMetadataQueryOptions } from "@/features/conversation/conversation-metadata/conversation-metadata.query";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { useNavigation } from "@react-navigation/native";
 import { useQueries } from "@tanstack/react-query";
@@ -52,8 +52,10 @@ export const ConversationListAwaitingRequests = memo(
             lastMessageSenderInboxId:
               conversation.lastMessage?.senderInboxId ?? null,
             consumerInboxId: currentAccountInboxId!,
-            markedAsUnread: query.data?.markedAsUnread ?? false,
-            readUntil: query.data?.readUntil ?? 0,
+            markedAsUnread: query.data?.unread ?? false,
+            readUntil: query.data?.readUntil
+              ? new Date(query.data.readUntil).getTime()
+              : null,
           });
         }),
       [conversationsMetadataQueries, likelyNotSpam, currentAccountInboxId]

@@ -2,10 +2,11 @@ import { getCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import {
   getConversationMetadataQueryData,
   updateConversationMetadataQueryData,
-} from "@/queries/conversation-metadata-query";
-import { markTopicAsRead } from "@/utils/api/topics";
+} from "@/features/conversation/conversation-metadata/conversation-metadata.query";
+import { markConversationAsRead } from "@/features/conversation/conversation-metadata/conversation-metadata.api";
 import { useMutation } from "@tanstack/react-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
+import { formatDateForApi } from "@/utils/api/api.utils";
 
 export function useMarkConversationAsRead(args: { topic: ConversationTopic }) {
   const { topic } = args;
@@ -13,14 +14,18 @@ export function useMarkConversationAsRead(args: { topic: ConversationTopic }) {
   const { mutateAsync: markAsReadAsync } = useMutation({
     mutationFn: async () => {
       const currentAccount = getCurrentAccount()!;
-      await markTopicAsRead({
+      const readUntil = formatDateForApi(new Date());
+
+      await markConversationAsRead({
         account: currentAccount,
         topic,
-        readUntil: new Date().getTime(),
+        readUntil,
       });
     },
     onMutate: () => {
       const currentAccount = getCurrentAccount()!;
+      const readUntil = formatDateForApi(new Date());
+
       const previousData = getConversationMetadataQueryData({
         account: currentAccount,
         topic,
@@ -29,10 +34,9 @@ export function useMarkConversationAsRead(args: { topic: ConversationTopic }) {
       updateConversationMetadataQueryData({
         account: currentAccount,
         topic,
-
         updateData: {
-          readUntil: new Date().getTime(),
-          markedAsUnread: false,
+          readUntil,
+          unread: false,
         },
       });
 

@@ -2,7 +2,7 @@ import { getSafeCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
 import { useMarkConversationAsRead } from "@/features/conversation/hooks/use-mark-conversation-as-read";
 import { useMarkConversationAsUnread } from "@/features/conversation/hooks/use-mark-conversation-as-unread";
 import { conversationIsUnreadForInboxId } from "@/features/conversation/utils/conversation-is-unread-by-current-account";
-import { getConversationMetadataQueryData } from "@/queries/conversation-metadata-query";
+import { getConversationMetadataQueryData } from "@/features/conversation/conversation-metadata/conversation-metadata.query";
 import { getConversationQueryData } from "@/queries/conversation-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
@@ -36,8 +36,10 @@ export const useToggleReadStatus = ({ topic }: UseToggleReadStatusProps) => {
       lastMessageSenderInboxId:
         conversation?.lastMessage?.senderInboxId ?? null,
       consumerInboxId: currentInboxId,
-      readUntil: conversationData?.readUntil ?? 0,
-      markedAsUnread: conversationData?.markedAsUnread ?? false,
+      readUntil: conversationData?.readUntil
+        ? new Date(conversationData.readUntil).getTime()
+        : null,
+      markedAsUnread: conversationData?.unread ?? false,
     });
 
     if (conversationIsUnread) {

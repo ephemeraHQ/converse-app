@@ -1,9 +1,12 @@
-import { getCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import {
+  getCurrentAccount,
+  useCurrentAccount,
+} from "@/features/multi-inbox/multi-inbox.store";
 import {
   getConversationMetadataQueryData,
   updateConversationMetadataQueryData,
-} from "@/queries/conversation-metadata-query";
-import { markTopicAsUnread } from "@/utils/api/topics";
+} from "@/features/conversation/conversation-metadata/conversation-metadata.query";
+import { markConversationAsUnread } from "@/features/conversation/conversation-metadata/conversation-metadata.api";
 import { useMutation } from "@tanstack/react-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 
@@ -12,9 +15,12 @@ export function useMarkConversationAsUnread(args: {
 }) {
   const { topic } = args;
 
+  const currentAccount = useCurrentAccount()!;
+
   const { mutateAsync: markAsUnreadAsync } = useMutation({
     mutationFn: async () => {
-      await markTopicAsUnread({
+      await markConversationAsUnread({
+        account: currentAccount,
         topic,
       });
     },
@@ -29,7 +35,7 @@ export function useMarkConversationAsUnread(args: {
         account: currentAccount,
         topic,
         updateData: {
-          markedAsUnread: true,
+          unread: true,
         },
       });
 

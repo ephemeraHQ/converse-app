@@ -1,12 +1,6 @@
 import { Platform } from "react-native";
-
-import { useSettingsStore } from "../multi-inbox/multi-inbox.store";
 import { useAppStore } from "../../data/store/appStore";
-import { getCurrentAccountPrimaryProfile } from "@utils/profile/getCurrentAccountPrimaryProfile";
-
-export function isMissingConverseProfile() {
-  return !getCurrentAccountPrimaryProfile();
-}
+import { useSettingsStore } from "../multi-inbox/multi-inbox.store";
 
 export function needToShowNotificationsPermissions() {
   const notifications = useSettingsStore.getState().notifications;

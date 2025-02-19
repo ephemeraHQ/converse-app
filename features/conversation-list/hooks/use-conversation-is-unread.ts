@@ -1,5 +1,5 @@
 import { conversationIsUnreadForInboxId } from "@/features/conversation/utils/conversation-is-unread-by-current-account";
-import { getConversationMetadataQueryOptions } from "@/queries/conversation-metadata-query";
+import { getConversationMetadataQueryOptions } from "@/features/conversation/conversation-metadata/conversation-metadata.query";
 import { getConversationQueryOptions } from "@/queries/conversation-query";
 import {
   useCurrentAccount,
@@ -47,8 +47,10 @@ export const useConversationIsUnread = ({
       lastMessageSent: lastMessage?.sentNs ?? null,
       lastMessageSenderInboxId: lastMessage?.senderInboxId ?? null,
       consumerInboxId: currentUserInboxId!,
-      markedAsUnread: conversationMetadata?.markedAsUnread ?? false,
-      readUntil: conversationMetadata?.readUntil ?? 0,
+      markedAsUnread: conversationMetadata?.unread ?? false,
+      readUntil: conversationMetadata?.readUntil
+        ? new Date(conversationMetadata.readUntil).getTime()
+        : null,
     });
   }, [
     lastMessage,

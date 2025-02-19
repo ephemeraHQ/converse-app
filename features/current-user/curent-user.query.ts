@@ -34,3 +34,7 @@ export const cancelCurrentUserQuery = () => {
     queryKey: getCurrentUserQueryOptions().queryKey,
   });
 };
+
+export const getCurrentUserQueryData = () => {
+  return queryClient.getQueryData(getCurrentUserQueryOptions().queryKey);
+};
