@@ -1,14 +1,4 @@
-import { create, StoreApi, UseBoundStore } from "zustand";
-import { createJSONStorage, persist } from "zustand/middleware";
-import { logger } from "@utils/logger";
-import mmkv, { zustandMMKVStorage } from "../../utils/mmkv";
-import { ChatStoreType, initChatStore } from "../../data/store/chatStore";
-import {
-  GroupStatus,
-  initSettingsStore,
-  SettingsStoreType,
-} from "../../data/store/settingsStore";
-import { initWalletStore, WalletStoreType } from "../../data/store/walletStore";
+import { ChatStoreType, initChatStore } from "@/data/store/chatStore";
 import {
   ConvosSender,
   CurrentSender,
@@ -19,7 +9,18 @@ import {
   useProfileQuery,
   useProfilesQueries,
 } from "@/features/profiles/profiles.query";
+import { logger } from "@utils/logger";
 import { InboxId } from "@xmtp/react-native-sdk";
+import { StoreApi, UseBoundStore, create } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
+import {
+  GroupStatus,
+  SettingsStoreType,
+  initSettingsStore,
+} from "../../data/store/settingsStore";
+import { WalletStoreType, initWalletStore } from "../../data/store/walletStore";
+import mmkv, { zustandMMKVStorage } from "../../utils/mmkv";
+
 type AccountStoreDataType = {
   settings: SettingsStoreType;
   chat: ChatStoreType;

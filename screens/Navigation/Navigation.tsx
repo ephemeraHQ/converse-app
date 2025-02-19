@@ -2,10 +2,10 @@ import {
   ConversationNav,
   ConversationNavParams,
 } from "@/features/conversation/conversation.nav";
-import {
-  InviteUsersToExistingGroupNav,
-  InviteUsersToExistingGroupParams,
-} from "@/features/groups/invite-to-group/InviteUsersToExistingGroup.nav";
+// import {
+//   InviteUsersToExistingGroupNav,
+//   InviteUsersToExistingGroupParams,
+// } from "@/features/groups/invite-to-group/InviteUsersToExistingGroup.nav";
 import { OnboardingWelcomeScreen } from "@/features/onboarding/screens/onboarding-welcome-screen";
 import { ProfileNav, ProfileNavParams } from "@/features/profiles/profile.nav";
 import { translate } from "@/i18n";
@@ -56,7 +56,7 @@ export type NavigationParamList = {
   ShareProfile: undefined;
   TopUp: undefined;
   Profile: ProfileNavParams;
-  InviteUsersToExistingGroup: InviteUsersToExistingGroupParams;
+  // InviteUsersToExistingGroup: InviteUsersToExistingGroupParams;
   UserProfile: undefined;
   WebviewPreview: WebviewPreviewNavParams;
 

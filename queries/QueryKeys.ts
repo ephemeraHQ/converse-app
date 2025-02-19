@@ -30,7 +30,6 @@ export enum QueryKeys {
   GROUP_PERMISSIONS = "group-permissions",
 
   // Group Invites
-  GROUP_INVITE = "group-invite",
   GROUP_JOIN_REQUEST = "group-join-request",
   PENDING_JOIN_REQUESTS = "pending-join-requests",
 
@@ -130,12 +129,6 @@ export const groupPermissionsQueryKey = (
 ) => [QueryKeys.GROUP_PERMISSIONS, account?.toLowerCase(), topic];
 
 // Group Invites
-export const groupInviteQueryKey = (account: string, inviteId: string) => [
-  QueryKeys.GROUP_INVITE,
-  account?.toLowerCase(),
-  inviteId,
-];
-
 export const groupJoinRequestQueryKey = (
   account: string,
   requestId: string

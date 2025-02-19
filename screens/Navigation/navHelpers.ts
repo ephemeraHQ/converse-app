@@ -58,25 +58,6 @@ export const getConverseStateFromPath =
       pathForState = pathForState.slice(1);
     }
 
-    // Handle group invite links
-    if (pathForState?.startsWith("group-invite")) {
-      const url = new URL(`https://${config.websiteDomain}/${pathForState}`);
-      const params = new URLSearchParams(url.search);
-      const inviteId = params.get("inviteId") || url.pathname.split("/")[1];
-      if (inviteId) {
-        return {
-          routes: [
-            {
-              name: "GroupInvite",
-              params: {
-                groupInviteId: inviteId,
-              },
-            },
-          ],
-        };
-      }
-    }
-
     // dm method must link to the Conversation Screen as well
     // but prefilling the parameters
     if (pathForState?.startsWith("dm?peer=")) {

@@ -2,7 +2,7 @@ import { GroupAvatar } from "@/components/group-avatar";
 import { Text } from "@/design-system/Text";
 import { ConversationHeaderTitle } from "@/features/conversation/conversation-screen-header/conversation-screen-header-title";
 import { useGroupName } from "@/hooks/useGroupName";
-import { useGroupPendingRequests } from "@/hooks/useGroupPendingRequests";
+// import { useGroupPendingRequests } from "@/hooks/useGroupPendingRequests";
 import { useGroupMembersQuery } from "@/queries/useGroupMembersQuery";
 import { copyToClipboard } from "@/utils/clipboard";
 import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
@@ -39,7 +39,7 @@ export const GroupConversationTitle = memo(
       copyToClipboard(JSON.stringify(conversationTopic));
     }, [conversationTopic]);
 
-    const requestsCount = useGroupPendingRequests(conversationTopic).length;
+    const requestsCount = 0; // TODO useGroupPendingRequests(conversationTopic).length;
 
     if (groupNameLoading) {
       return null;
