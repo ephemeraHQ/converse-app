@@ -29,7 +29,7 @@ const profileQueryConfig = ({ xmtpId }: { xmtpId: string | undefined }) => {
     refetchIntervalInBackground: false,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    staleTime: DateUtils.days.toMilliseconds(1),
+    staleTime: DateUtils.hours.toMilliseconds(1),
     persister: reactQueryPersister,
   });
 };
@@ -64,7 +64,7 @@ export const setProfileQueryData = ({
     profileQueryKey({ xmtpId }),
     {
       ...data,
-      updatedAt: updatedAt ? updatedAt.toString() : Date.now().toString(),
+      // updatedAt: updatedAt ? updatedAt.toString() : Date.now().toString(),
     }
   );
 };

@@ -10,11 +10,12 @@ import {
 } from "@features/profiles/profiles.query";
 import { ensureJwtQueryData } from "../authentication/jwt.query";
 import { buildDeviceMetadata } from "@/utils/device-metadata";
-import { useLogout } from "@/utils/logout";
+import { useLogout } from "@/features/authentication/use-logout.hook";
 import {
   cancelCurrentUserQuery,
   setCurrentUserQueryData,
 } from "./curent-user.query";
+import { logger } from "@/utils/logger";
 
 type ICreateUserArgs = {
   privyUserId: string;
@@ -23,6 +24,7 @@ type ICreateUserArgs = {
   profile: {
     name: string;
     avatar?: string;
+    description?: string;
   };
 };
 
@@ -43,7 +45,7 @@ const buildOptimisticUser = (args: ICreateUserArgs): CreateUserResponse => {
     profile: {
       id: "123",
       name: args.profile.name,
-      description: null,
+      description: args.profile.description ?? null,
     },
   };
 };
@@ -62,8 +64,10 @@ export function useCreateUser() {
 
   return useMutation({
     mutationFn: async (args: ICreateUserArgs) => {
+      const token = await ensureJwtQueryData();
+      logger.debug("useCreateUser: jwt", token);
       const user = await createUser(args);
-      await ensureJwtQueryData();
+      logger.debug("useCreateUser: user", JSON.stringify(user, null, 2));
       return user;
     },
     onMutate: async (args: ICreateUserArgs) => {

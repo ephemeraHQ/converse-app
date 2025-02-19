@@ -8,7 +8,11 @@ import { useBottomSheetModalRef } from "@/design-system/BottomSheet/BottomSheet.
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { WalletId } from "thirdweb/wallets";
 import { config } from "@/config";
-import { useCurrentSender } from "../multi-inbox/multi-inbox.store";
+import {
+  useCurrentSender,
+  MultiInboxClientRestorationStates,
+  useAccountsStore,
+} from "../multi-inbox/multi-inbox.store";
 import { MultiInboxClient } from "../multi-inbox/multi-inbox.client";
 import { logger } from "@/utils/logger";
 import { Text } from "@/design-system/Text";
@@ -19,7 +23,11 @@ import {
 import { Button } from "@/design-system/Button/Button";
 import { useConnect } from "thirdweb/react";
 import { ensureSocialProfilesQueryData } from "@/features/social-profiles/social-lookup.query";
-import { IWeb3SocialProfile } from "../social-profiles/social-lookup.api";
+import {
+  fetchSocialProfilesForAddress,
+  IWeb3SocialProfile,
+} from "../social-profiles/social-lookup.api";
+import { ScrollView } from "react-native";
 
 type InstalledWalletsListProps = {
   installedWallets: ISupportedWallet[];
@@ -40,13 +48,15 @@ function SocialIdentityList({
 }: SocialIdentityListProps) {
   return (
     <>
-      {socialData?.map((social) => (
-        <Button
-          key={social.name}
-          text={`Add ${social.name}: ${social.type} to inbox`}
-          onPress={() => onSocialIdentityTapped(social)}
-        />
-      ))}
+      <ScrollView>
+        {socialData?.map((social) => (
+          <Button
+            key={`${social.name}-${social.type}`}
+            text={JSON.stringify(social, null, 2)}
+            onPress={() => onSocialIdentityTapped(social)}
+          />
+        ))}
+      </ScrollView>
     </>
   );
 }
@@ -60,6 +70,7 @@ function InstalledWalletsList({
 }: InstalledWalletsListProps) {
   return (
     <>
+      <Text>Installed Wallets</Text>
       {installedWallets.map((wallet) => {
         const isLoading = loadingWalletId === wallet.thirdwebId;
         return (
@@ -67,9 +78,9 @@ function InstalledWalletsList({
             loading={isLoading}
             disabled={isDisabled}
             key={wallet.thirdwebId}
-            text={`Add ${wallet.name} to inbox (${
-              isLoading ? "loading..." : ""
-            })`}
+            // text={`Add ${wallet.name} to inbox (${
+            //   isLoading ? "loading..." : ""
+            // })`}
             onPress={() =>
               onWalletTapped(wallet.thirdwebId, {
                 mobileConfig: { callbackURL: coinbaseCallbackUrl },
@@ -158,12 +169,18 @@ export function ConnectWalletBottomSheet({
 
   const { installedWallets, isLoading: areInstalledWalletsLoading } =
     useInstalledWallets();
+  logger.debug(
+    `[ConnectWalletBottomSheet] Installed wallets: ${JSON.stringify(
+      installedWallets,
+      null,
+      2
+    )}`
+  );
   const { connect } = useConnect();
 
   const hasInstalledWallets = installedWallets && installedWallets.length > 0;
 
   const bottomSheetRef = useBottomSheetModalRef();
-  const currentSender = useCurrentSender();
   // const isInboxClientInitiated =
   //   !!MultiInboxClient.instance.getInboxClientForAddress({
   //     ethereumAddress: currentSender!.ethereumAddress,
@@ -198,10 +215,28 @@ export function ConnectWalletBottomSheet({
     listShowing,
   } = state;
 
+  const currentSender = useCurrentSender();
+  const restored =
+    useAccountsStore.getState().multiInboxClientRestorationState === "restored";
+
   useEffect(() => {
+    logger.debug(
+      `[ConnectWalletBottomSheet] Current sender: ${JSON.stringify(
+        currentSender,
+        null,
+        2
+      )}`
+    );
+    if (!currentSender || !restored) {
+      return;
+    }
+
+    return;
     async function loadSocialData() {
+      const shaneWallet = "0xa64af7f78de39a238ecd4fff7d6d410dbace2df0";
+      const michaelranbowWallet = "0x5222f538B29267a991B346EF61A2A2c389A9f320";
       const socialProfiles = await ensureSocialProfilesQueryData(
-        "0xa64af7f78de39a238ecd4fff7d6d410dbace2df0"
+        michaelranbowWallet
       );
       logger.debug(
         `[ConnectWalletBottomSheet] Social profiles: ${JSON.stringify(
@@ -213,70 +248,7 @@ export function ConnectWalletBottomSheet({
       dispatch({ type: "SocialDataLoaded", data: socialProfiles });
     }
     loadSocialData();
-  }, [ethereumAddressThatIsConnecting]);
-
-  // const {
-  //   data: socialProfiles,
-  //   isLoading: isSocialProfilesLoading,
-  //   error: socialProfilesError,
-  // } = useSocialProfiles({
-  //   client: thirdwebClient,
-  //   address: ethereumAddressThatIsConnecting,
-  // });
-  // useEffect(() => {
-  //   if (socialProfilesError) {
-  //     logger.error(
-  //       `[ConnectWalletBottomSheet] Error loading social profiles: ${JSON.stringify(
-  //         socialProfilesError.message,
-  //         null,
-  //         2
-  //       )}`
-  //     );
-  //   }
-  //   logger.debug(
-  //     `[ConnectWalletBottomSheet] Social profiles: ${JSON.stringify(
-  //       {
-  //         ethereumAddressThatIsConnecting,
-  //         socialProfiles,
-  //         isSocialProfilesLoading,
-  //       },
-  //       null,
-  //       2
-  //     )}`
-  //   );
-  //   if (socialProfiles && !isSocialProfilesLoading) {
-  //     dispatch({ type: "SocialDataLoaded", data: socialProfiles });
-
-  //     logger.debug(
-  //       `[ConnectWalletBottomSheet] Social data for address ${ethereumAddressThatIsConnecting}:`,
-  //       JSON.stringify(socialProfiles, null, 2)
-  //     );
-  //     if (socialProfiles.length === 0) {
-  //       alert(
-  //         "you linked a wallet with no social profiles attached, what to do here?"
-  //       );
-  //       logger.debug(
-  //         `[ConnectWalletBottomSheet] No social profiles found for address ${ethereumAddressThatIsConnecting}`
-  //       );
-  //       onWalletImported({
-  //         address: ethereumAddressThatIsConnecting!,
-  //         username: undefined,
-  //         avatarUri: undefined,
-  //       });
-  //     } else {
-  //       logger.debug(
-  //         `[ConnectWalletBottomSheet] Social data for address ${ethereumAddressThatIsConnecting}:`,
-  //         JSON.stringify(socialProfiles, null, 2)
-  //       );
-  //     }
-  //   }
-  // }, [
-  //   socialProfiles,
-  //   isSocialProfilesLoading,
-  //   ethereumAddressThatIsConnecting,
-  //   socialProfilesError,
-  //   onWalletImported,
-  // ]);
+  }, [ethereumAddressThatIsConnecting, currentSender, restored]);
 
   const isShowingWalletList = listShowing === "wallets";
   const isWalletListDisabled = thirdwebWalletIdThatIsConnecting !== undefined;
@@ -436,7 +408,7 @@ export function ConnectWalletBottomSheet({
       snapPoints={["50%"]}
       onDismiss={onClose}
     >
-      <BottomSheetHeader title="Import an identity" />
+      <BottomSheetHeader title="Imiport an identity" />
       <BottomSheetContentContainer
         style={{
           flex: 1,

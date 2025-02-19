@@ -14,13 +14,22 @@ import { PrivyPlaygroundUserScreen } from "./privy-playground-user.screen";
 import { getConfig } from "@/config";
 import { logger } from "@/utils/logger";
 import * as SplashScreen from "expo-splash-screen";
-import { useAccountsStore } from "../multi-inbox/multi-inbox.store";
+import {
+  AuthStatuses,
+  useAccountsStore,
+  useCurrentProfile,
+  useCurrentSender,
+} from "../multi-inbox/multi-inbox.store";
 import { ethers, utils as ethersUtils } from "ethers";
 import { usePrivy } from "@privy-io/expo";
 import { useSocialProfilesForAddress } from "../social-profiles/social-lookup.query";
-import { useAuthenticateWithPasskey } from "../onboarding/contexts/signup-with-passkey.context";
+import { useAuthenticateWithPasskey } from "../authentication/authenticate-with-passkey.context";
 import { useAuthStatus } from "../authentication/use-auth-status.hook";
-import { useLogout } from "@/utils/logout";
+import { useLogout } from "@/features/authentication/use-logout.hook";
+import { ConnectWalletBottomSheet } from "../wallets/connect-wallet.bottom-sheet";
+import { useCreateUser } from "../current-user/use-create-user";
+import { ensureJwtQueryData, useJwtQuery } from "../authentication/jwt.query";
+import { fetchJwt } from "../authentication/authentication.api";
 const AddressDebugger = ({ address }: { address: string }) => {
   const {
     data: profiles,
@@ -311,17 +320,48 @@ const ReverseResolver = ({ address }: { address: string }) => {
 };
 
 export function PrivyPlaygroundLandingScreen() {
-  logger.info("PrivyPlaygroundLandingScreen");
   const { loginWithPasskey, signupWithPasskey } = useAuthenticateWithPasskey();
-  const authStatus = useAuthStatus();
+  const authStatus = useAccountsStore((state) => state.authStatus);
+  const isSigningUp = authStatus === AuthStatuses.signingUp;
+  const currentSender = useCurrentSender();
+  const { user: privyUser } = usePrivy();
+  // const authStatus = useAuthStatus();
+  // const { data: jwt } = useJwtQuery();
   const { logout } = useLogout();
+  const { mutate: createUser, isPending: isCreatingUser } = useCreateUser();
+  const canCreateUser =
+    currentSender?.ethereumAddress !== undefined &&
+    currentSender.inboxId !== undefined &&
+    isSigningUp;
+  const {
+    data: currentProfile,
+    status: currentProfileStatus,
+    error,
+  } = useCurrentProfile();
 
-  useEffect(() => {
-    logger.debug("Hiding splash screen");
-    Constants.expoConfig?.splash?.hide?.();
-    SplashScreen.hideAsync();
-    logger.debug("Splash screen hidden");
-  }, []);
+  // useEffect(() => {
+  //   logger.debug("Hiding splash screen");
+  //   Constants.expoConfig?.splash?.hide?.();
+  //   SplashScreen.hideAsync();
+  //   logger.debug("Splash screen hidden");
+  // }, []);
+
+  // useEffect(() => {
+  //   logger.debug("currentSender", currentSender);
+  //   if (currentSender?.ethereumAddress && currentSender.inboxId) {
+  //     async function _fetchJwt() {
+  //       const jwt = await fetchJwt();
+  //       logger.debug("JWT", jwt);
+  //     }
+
+  //     _fetchJwt();
+  //   }
+  // }, [currentSender]);
+
+  const [
+    shouldShowConnectWalletBottomSheet,
+    setShouldShowConnectWalletBottomSheet,
+  ] = useState(false);
 
   return (
     <SafeAreaView>
@@ -334,10 +374,88 @@ export function PrivyPlaygroundLandingScreen() {
             alignContent: "center",
           }}
         >
-          <Text>Auth Status: {JSON.stringify(authStatus, null, 2)}</Text>
-          <Button title="Login with Passkey" onPress={loginWithPasskey} />
-          <Button title="Signup with Passkey" onPress={signupWithPasskey} />
-          <Button title="Logout" onPress={logout} />
+          {canCreateUser && (
+            <Button
+              title="Create User"
+              onPress={() =>
+                createUser(
+                  {
+                    privyUserId: privyUser!.id,
+                    smartContractWalletAddress: currentSender.ethereumAddress,
+                    inboxId: currentSender.inboxId,
+                    profile: {
+                      name: `Test User: ${Math.random()}`,
+                      avatar: "https://placehold.co/100x100",
+                      description: "random description",
+                    },
+                  },
+                  {
+                    async onSuccess(data, variables, context) {
+                      logger.debug(
+                        "Successfully created user",
+                        data,
+                        variables,
+                        context
+                      );
+                      const jwt = await ensureJwtQueryData();
+                      logger.debug(
+                        "Successfully created user and got JWT",
+                        jwt
+                      );
+                    },
+                    onError(error, variables, context) {
+                      logger.error(
+                        "Error creating user",
+                        error,
+                        variables,
+                        context
+                      );
+                    },
+                  }
+                )
+              }
+            />
+          )}
+          {/* <Text>JWT: {JSON.stringify(!!jwt ? jwt : "nothin", null, 2)}</Text> */}
+          <Text>
+            Something: {JSON.stringify({ authStatus, isCreatingUser }, null, 2)}
+          </Text>
+          <Text>Current Sender: {JSON.stringify(currentSender, null, 2)}</Text>
+          <Text>Current Profile Status: {currentProfileStatus}</Text>
+          <Text>Current Profile Error: {error?.message}</Text>
+          <Text>
+            Current Profile: {JSON.stringify(currentProfile, null, 2)}
+          </Text>
+
+          <Button
+            title="Connect Wallet"
+            disabled={authStatus !== AuthStatuses.signedIn}
+            onPress={() => setShouldShowConnectWalletBottomSheet(true)}
+          />
+
+          <Button
+            disabled={authStatus !== AuthStatuses.signedOut}
+            title="Login with Passkey"
+            onPress={loginWithPasskey}
+          />
+          <Button
+            disabled={authStatus !== AuthStatuses.signedOut}
+            title="Signup with Passkey"
+            onPress={signupWithPasskey}
+          />
+          <Button
+            disabled={authStatus !== AuthStatuses.signedIn}
+            title="Logout"
+            onPress={logout}
+          />
+          <ConnectWalletBottomSheet
+            isVisible={shouldShowConnectWalletBottomSheet}
+            onClose={() => {}}
+            onWalletImported={() => {
+              alert("wallet imported");
+              setShouldShowConnectWalletBottomSheet(false);
+            }}
+          />
         </View>
       </ScrollView>
     </SafeAreaView>

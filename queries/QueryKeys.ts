@@ -41,18 +41,15 @@ export enum QueryKeys {
   // User search
   USER_SEARCH = "user-search",
 
-  // InboxId
-  INBOX_ID_FOR_ACCOUNT = "inbox-id-for-account",
-
   // Profile Socials
   PROFILE_SOCIALS = "profile-socials",
 }
 
-// InboxId
-export const getInboxIdForAccountQueryKey = (account: string) => [
-  QueryKeys.INBOX_ID_FOR_ACCOUNT,
-  account?.toLowerCase(),
-];
+// // InboxId
+// export const getInboxIdForAccountQueryKey = (account: string) => [
+//   QueryKeys.INBOX_ID_FOR_ACCOUNT,
+//   account?.toLowerCase(),
+// ];
 
 // Conversations
 export const conversationSyncAllQueryKey = (args: {

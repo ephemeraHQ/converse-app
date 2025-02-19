@@ -6,10 +6,10 @@ import * as Application from "expo-application";
 import { getConfig } from "@/config";
 import { RELYING_PARTY } from "../onboarding/passkey.constants";
 import logger from "@/utils/logger";
-import { useAuthenticateWithPasskey } from "@/features/onboarding/contexts/signup-with-passkey.context";
+import { useAuthenticateWithPasskey } from "@/features/authentication/authenticate-with-passkey.context";
 import { useNavigation } from "@react-navigation/native";
 import { queryClient } from "@/queries/queryClient";
-import { useLogout } from "@/utils/logout";
+import { useLogout } from "@/features/authentication/use-logout.hook";
 import {
   AuthStatuses,
   deleteStores,

@@ -5,6 +5,7 @@ import { config } from "@/config";
 import { captureError } from "@/utils/capture-error";
 import { GenericError } from "@/utils/error";
 import { firebase } from "@react-native-firebase/app-check";
+import { logger } from "./logger";
 
 const appCheck = firebase.appCheck();
 
@@ -34,9 +35,13 @@ export const tryGetAppCheckToken = async ({
     return undefined;
   }
 };
-
 export async function setupAppAttest() {
+  logger.debug("[setupAppAttest] Starting app attestation setup");
+
   const rnfbProvider = appCheck.newReactNativeFirebaseAppCheckProvider();
+  logger.debug(
+    "[setupAppAttest] Created new React Native Firebase App Check provider"
+  );
 
   rnfbProvider.configure({
     android: {
@@ -49,9 +54,17 @@ export async function setupAppAttest() {
       debugToken: config.appCheckDebugToken,
     },
   });
+  logger.debug(
+    `[setupAppAttest] Configured provider for ${
+      __DEV__ ? "debug" : "production"
+    } environment`
+  );
 
   appCheck.initializeAppCheck({
     provider: rnfbProvider,
     isTokenAutoRefreshEnabled: true,
   });
+  logger.debug(
+    "[setupAppAttest] Initialized App Check with auto token refresh enabled"
+  );
 }

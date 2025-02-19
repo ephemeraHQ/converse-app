@@ -6,9 +6,9 @@ export const ConvosProfileForInboxSchema = z.object({
   id: z.string(),
   name: z.string(),
   description: z.string().nullable(),
-  deviceIdentityId: z.string(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
+  // deviceIdentityId: z.string(),
+  // createdAt: z.string(),
+  // updatedAt: z.string(),
   xmtpId: z.string(),
   avatar: z.string().nullable(),
 });

@@ -24,7 +24,6 @@ import {
   InboxSigner,
   MultiInboxClientRestorationStates,
 } from "./multi-inbox-client.types";
-import { setInboxIdQueryData } from "@/queries/inbox-id-query";
 import { getDbEncryptionKey } from "@/utils/keychain";
 import { useEffect } from "react";
 import { captureError } from "@/utils/capture-error";
@@ -254,10 +253,6 @@ export class MultiInboxClient {
         }
 
         const clientInboxId = xmtpInboxClient.inboxId;
-        setInboxIdQueryData({
-          account: signerEthereumAddress,
-          inboxId: clientInboxId,
-        });
 
         useAccountsStore.getState().addSender({
           ethereumAddress: signerEthereumAddress,
@@ -377,10 +372,6 @@ export class MultiInboxClient {
             }
 
             const clientInboxId = xmtpInboxClient.inboxId;
-            setInboxIdQueryData({
-              account: ethereumAddress,
-              inboxId: clientInboxId,
-            });
 
             useAccountsStore.getState().addSender({
               ethereumAddress,

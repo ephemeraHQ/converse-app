@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { api } from "../../utils/api/api";
 import { refreshJwtInterceptor } from "./interceptor.refresh-jwt";
-import { useLogout } from "@/utils/logout";
+import { useLogout } from "@/features/authentication/use-logout.hook";
 
 export const useLogoutOnJwtRefreshError = () => {
   const { logout } = useLogout();

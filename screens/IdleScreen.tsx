@@ -1,4 +1,4 @@
-import { useLogout } from "@/utils/logout";
+import { useLogout } from "@/features/authentication/use-logout.hook";
 import { memo } from "react";
 import { SafeAreaView } from "react-native";
 import { Text, Button } from "react-native-paper";
