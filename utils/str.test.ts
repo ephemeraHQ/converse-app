@@ -1,11 +1,4 @@
-import { PixelRatio } from "react-native";
-
-import {
-  addressPrefix,
-  capitalize,
-  formatGroupName,
-  shortDisplayName,
-} from "./str";
+import { addressPrefix, capitalize, shortDisplayName } from "./str";
 
 jest.mock("react-native", () => ({
   Dimensions: {
@@ -63,14 +56,5 @@ describe("addressPrefix", () => {
 
   it("should return the original address if shorter than 6 characters", () => {
     expect(addressPrefix("0x123")).toBe("0x123");
-  });
-});
-
-describe("formatGroupName", () => {
-  it("should return groupName if provided", () => {
-    const topic = "randomTopicString";
-    const groupName = "MyGroupName";
-    const result = formatGroupName(topic, groupName);
-    expect(result).toBe(groupName);
   });
 });

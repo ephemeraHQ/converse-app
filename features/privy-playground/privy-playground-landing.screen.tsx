@@ -239,11 +239,12 @@ export function PrivyPlaygroundLandingScreen() {
     currentSender?.ethereumAddress !== undefined &&
     currentSender.inboxId !== undefined &&
     isSigningUp;
-  const {
-    data: currentProfile,
-    status: currentProfileStatus,
-    error,
-  } = useCurrentProfile();
+
+  // const {
+  //   data: currentProfile,
+  //   status: currentProfileStatus,
+  //   error,
+  // } = useCurrentProfile();
 
   const [
     shouldShowConnectWalletBottomSheet,
@@ -308,11 +309,11 @@ export function PrivyPlaygroundLandingScreen() {
             Something: {JSON.stringify({ authStatus, isCreatingUser }, null, 2)}
           </Text>
           <Text>Current Sender: {JSON.stringify(currentSender, null, 2)}</Text>
-          <Text>Current Profile Status: {currentProfileStatus}</Text>
-          <Text>Current Profile Error: {error?.message}</Text>
-          <Text>
+          {/* <Text>Current Profile Status: {currentProfileStatus}</Text> */}
+          {/* <Text>Current Profile Error: {error?.message}</Text> */}
+          {/* <Text>
             Current Profile: {JSON.stringify(currentProfile, null, 2)}
-          </Text>
+          </Text> */}
 
           <Button
             title="Connect Wallet"
@@ -335,14 +336,14 @@ export function PrivyPlaygroundLandingScreen() {
             title="Logout"
             onPress={logout}
           />
-          <ConnectWalletBottomSheet
+          {/* <ConnectWalletBottomSheet
             isVisible={shouldShowConnectWalletBottomSheet}
             onClose={() => {}}
             onWalletImported={() => {
               alert("wallet imported");
               setShouldShowConnectWalletBottomSheet(false);
             }}
-          />
+          /> */}
         </View>
       </ScrollView>
     </SafeAreaView>

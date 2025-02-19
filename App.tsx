@@ -200,7 +200,7 @@ export function AppWithProviders() {
                       <BottomSheetModalProvider>
                         {/* <App /> */}
                         <AuthenticateWithPasskeyProvider>
-                          <PrivyPlaygroundLandingScreen />
+                          <App />
                         </AuthenticateWithPasskeyProvider>
                         {__DEV__ && <DevToolsBubble onCopy={onCopy} />}
                         <Snackbars />
