@@ -20,6 +20,8 @@ export const AttachmentContainer = memo(function AttachmentContainer(
           alignItems: "center",
           backgroundColor: theme.colors.fill.tertiary,
           aspectRatio: 1.5, // Default aspect ratio for attachments
+          borderWidth: theme.borderWidth.sm, // 1px border width
+          borderColor: theme.colors.border.edge, // Using edge color for subtle border
         },
         style,
       ]}
