@@ -34,6 +34,7 @@ import { ConversationListScreen } from "@/features/conversation-list/conversatio
 import { BlockedConversationsScreen } from "@/features/blocked-conversations/blocked-conversations.screen";
 import { ConversationRequestsListNav } from "@/features/conversation-requests-list/conversation-requests-list.nav";
 import { ShareProfileNav } from "./ShareProfileNav";
+import { useLogoutOnJwtRefreshError } from "@/features/authentication/use-logout-on-jwt-refresh-error";
 
 export type NavigationParamList = {
   Idle: undefined;
@@ -120,6 +121,7 @@ const FakeScreen = memo(function FakeScreen() {
 });
 
 export function SignedInNavigation() {
+  useLogoutOnJwtRefreshError();
   const colorScheme = useColorScheme();
 
   return (

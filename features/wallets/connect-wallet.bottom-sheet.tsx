@@ -164,23 +164,23 @@ export function ConnectWalletBottomSheet({
 
   const { installedWallets, isLoading: areInstalledWalletsLoading } =
     useInstalledWallets();
-  logger.debug(
-    `[ConnectWalletBottomSheet] Installed wallets: ${JSON.stringify(
-      installedWallets,
-      null,
-      2
-    )}`
-  );
+
   const { connect } = useConnect();
 
   const hasInstalledWallets = installedWallets && installedWallets.length > 0;
 
   const bottomSheetRef = useBottomSheetModalRef();
+  React.useEffect(() => {
+    if (isVisible) {
+      bottomSheetRef.current?.present();
+    } else {
+      bottomSheetRef.current?.dismiss();
+    }
+  }, [isVisible, bottomSheetRef]);
+
   const currentSender = useCurrentSender();
-  const isInboxClientInitiated =
-    !!MultiInboxClient.instance.getInboxClientForAddress({
-      ethereumAddress: currentSender!.ethereumAddress,
-    })!;
+  const isRestored =
+    useAccountsStore.getState().multiInboxClientRestorationState === "restored";
 
   const initialState: ConnectWalletBottomSheetState = {
     listShowing: "wallets",
@@ -196,9 +196,14 @@ export function ConnectWalletBottomSheet({
     listShowing,
   } = state;
 
-  const restored =
-    useAccountsStore.getState().multiInboxClientRestorationState === "restored";
+  if (!isRestored || !currentSender) {
+    return null;
+  }
 
+  const isInboxClientInitiated =
+    !!MultiInboxClient.instance.getInboxClientForAddress({
+      ethereumAddress: currentSender!.ethereumAddress,
+    })!;
   // useEffect(() => {
   //   logger.debug(
   //     `[ConnectWalletBottomSheet] Current sender: ${JSON.stringify(
@@ -297,8 +302,8 @@ export function ConnectWalletBottomSheet({
       );
       const currentInboxClient =
         MultiInboxClient.instance.getInboxClientForAddress({
-          ethereumAddress: currentSender!.ethereumAddress,
-        })!;
+          ethereumAddress: currentSender.ethereumAddress,
+        });
 
       logger.debug(
         `[ConnectWalletBottomSheet] Checking if address ${addressToLink} can be messaged`
@@ -363,14 +368,6 @@ export function ConnectWalletBottomSheet({
   function handleSocialIdentityTapped(socialIdentity: IWeb3SocialProfile) {
     alert(`You tapped on ${socialIdentity.name}`);
   }
-
-  React.useEffect(() => {
-    if (isVisible) {
-      bottomSheetRef.current?.present();
-    } else {
-      bottomSheetRef.current?.dismiss();
-    }
-  }, [isVisible, bottomSheetRef]);
 
   return (
     <BottomSheetModal

@@ -15,6 +15,11 @@ import {
 } from "@/features/multi-inbox/multi-inbox.store";
 import { InboxSigner } from "@/features/multi-inbox/multi-inbox-client.types";
 import { createUser } from "@/features/authentication/authentication.api";
+import {
+  ensureJwtQueryData,
+  fetchJwtQueryData,
+  invalidateJwtQueryData,
+} from "./jwt.query";
 
 const useXmtpFromPrivySmartWalletClientSigner = ({
   onSmartClientReady,
@@ -70,21 +75,32 @@ const useXmtpFromPrivySmartWalletClientSigner = ({
 
     hasInvokedOnSmartClientReady.current = true;
 
-    const signer: InboxSigner = {
-      getAddress: async () => {
-        return smartWalletClient!.account.address;
-      },
-      getChainId: () => {
-        return smartWalletClient!.chain?.id;
-      },
-      getBlockNumber: () => undefined,
-      walletType: () => "SCW",
-      signMessage: async (message: string) => {
-        return smartWalletClient!.signMessage({ message });
-      },
-    };
+    try {
+      const signer: InboxSigner = {
+        getAddress: async () => {
+          return smartWalletClient!.account.address;
+        },
+        getChainId: () => {
+          return smartWalletClient!.chain?.id;
+        },
+        getBlockNumber: () => undefined,
+        walletType: () => "SCW",
+        signMessage: async (message: string) => {
+          return smartWalletClient!.signMessage({ message });
+        },
+      };
 
-    onSmartClientReady(signer);
+      onSmartClientReady(signer);
+      logger.debug(
+        "[useXmtpFromPrivySmartWalletClientSigner] onSmartClientReady invoked successfully."
+      );
+    } catch (error) {
+      logger.error(
+        "[useXmtpFromPrivySmartWalletClientSigner] Error invoking onSmartClientReady",
+        error
+      );
+      throw error;
+    }
   }, [
     hasSmartWalletClientChanged,
     newSmartWalletClientExistsAndIsReady,
@@ -106,29 +122,7 @@ export const AuthenticateWithPasskeyProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const { senders, currentSender } = useAccountsStore();
-  useEffect(() => {
-    if (senders.length === 0) {
-      return;
-    }
-    logger.debug(
-      "[signup with passkey provider] amount of senders changed: ",
-      senders.length
-    );
-  }, [senders.length]);
-  useEffect(() => {
-    if (
-      currentSender?.ethereumAddress === undefined ||
-      currentSender?.inboxId === undefined
-    ) {
-      return;
-    }
-    logger.debug(
-      "[signup with passkey provider] current sender changed: ",
-      JSON.stringify(currentSender, null, 2)
-    );
-  }, [currentSender]);
-
+  const { senders } = useAccountsStore();
   const { loginWithPasskey: privyLoginWithPasskey } =
     usePrivyLoginWithPasskey();
   const { create: createEmbeddedWallet } = useEmbeddedEthereumWallet();
@@ -154,7 +148,7 @@ export const AuthenticateWithPasskeyProvider = ({
   const signingUp = authStatus === AuthStatuses.signingUp;
   const signingIn = authStatus === AuthStatuses.signingIn;
 
-  const { user: privyUser, isReady } = usePrivy();
+  const { user: privyUser } = usePrivy();
 
   useXmtpFromPrivySmartWalletClientSigner({
     invokedWhen: signingUp && senders.length === 0,
@@ -174,19 +168,6 @@ export const AuthenticateWithPasskeyProvider = ({
           "[passkey onboarding context] smart contract wallet address",
           smartContractWalletAddress
         );
-        // const user = await createUser({
-        //   privyUserId: privyUser!.id,
-        //   smartContractWalletAddress,
-        //   inboxId,
-        //   profile: {
-        //     name: `Test User ${Math.random()}`,
-        //     // avatar: privyUser!.imageUrl,
-        //   },
-        // });
-        // logger.debug(
-        //   "[passkey onboarding context] created user",
-        //   JSON.stringify(user, null, 2)
-        // );
         logger.debug(
           "[passkey onboarding context] signing up and created a new inbox successfully in useXmtpFromPrivySmartWalletClientSigner"
         );
@@ -207,16 +188,28 @@ export const AuthenticateWithPasskeyProvider = ({
       logger.debug(
         "[passkey onboarding context] Smart wallet client signer is ready"
       );
-      await MultiInboxClient.instance.createNewInboxForPrivySmartContractWallet(
-        {
-          inboxSigner: signer,
-        }
-      );
 
-      logger.debug(
-        "[passkey onboarding context] signing up and created a new inbox successfully in useXmtpFromPrivySmartWalletClientSigner"
-      );
-      useAccountsStore.getState().setAuthStatus(AuthStatuses.signedIn);
+      try {
+        await MultiInboxClient.instance.createNewInboxForPrivySmartContractWallet(
+          {
+            inboxSigner: signer,
+          }
+        );
+
+        await invalidateJwtQueryData();
+        await fetchJwtQueryData();
+
+        logger.debug(
+          "[passkey onboarding context] signing up and created a new inbox successfully in useXmtpFromPrivySmartWalletClientSigner"
+        );
+        useAccountsStore.getState().setAuthStatus(AuthStatuses.signedIn);
+      } catch (error) {
+        logger.error(
+          "[passkey onboarding context] Error during onSmartClientReady:",
+          error
+        );
+        throw error;
+      }
     },
   });
 
@@ -242,10 +235,23 @@ export const AuthenticateWithPasskeyProvider = ({
   };
 
   const loginWithPasskey = async () => {
-    useAccountsStore.getState().setAuthStatus(AuthStatuses.signingIn);
-    await privyLoginWithPasskey({
-      relyingParty: RELYING_PARTY,
-    });
+    try {
+      logger.debug("[loginWithPasskey] Setting auth status to signingIn");
+      useAccountsStore.getState().setAuthStatus(AuthStatuses.signingIn);
+
+      logger.debug("[loginWithPasskey] Attempting to login with passkey");
+      await privyLoginWithPasskey({
+        relyingParty: RELYING_PARTY,
+      });
+
+      logger.debug("[loginWithPasskey] Successfully logged in with passkey");
+    } catch (error) {
+      logger.error(
+        "[loginWithPasskey] Error during login with passkey:",
+        error
+      );
+      throw error;
+    }
   };
 
   return (

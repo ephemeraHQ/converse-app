@@ -13,13 +13,13 @@ import { clearJwtQueryData } from "./jwt.query";
 
 export const useLogout = () => {
   const { setAuthStatus } = useAccountsStore();
-  const privy = usePrivy();
+  const { logout: privyLogout } = usePrivy();
 
   const logout = useCallback(async () => {
     setAuthStatus(AuthStatuses.signedOut);
     logger.debug("[useLogout] Logging out invoked");
     try {
-      await privy.logout();
+      await privyLogout();
       logger.debug(
         "[useLogout] Privy logout await completed, checking client user call"
       );
@@ -28,16 +28,13 @@ export const useLogout = () => {
       MultiInboxClient.instance.logoutMessagingClients();
 
       queryClient.removeQueries({
-        queryKey: ["embeddedWallet"],
-      });
-      queryClient.removeQueries({
         queryKey: ["current-user"],
       });
       clearJwtQueryData();
     } catch (error) {
       logger.error("[useLogout] Error logging out", error);
     }
-  }, [privy, setAuthStatus]);
+  }, [privyLogout, setAuthStatus]);
 
   return { logout };
 };

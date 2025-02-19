@@ -8,253 +8,64 @@ import {
   Button,
   TextInput,
 } from "react-native";
-import Constants from "expo-constants";
-import { PrivyPlaygroundLoginScreen } from "./privy-playground-login.screen";
-import { PrivyPlaygroundUserScreen } from "./privy-playground-user.screen";
-import { getConfig } from "@/config";
 import { logger } from "@/utils/logger";
-import * as SplashScreen from "expo-splash-screen";
 import {
   AuthStatuses,
   useAccountsStore,
   useCurrentProfile,
   useCurrentSender,
 } from "../multi-inbox/multi-inbox.store";
-import { ethers, utils as ethersUtils } from "ethers";
+import { ethers } from "ethers";
 import { usePrivy } from "@privy-io/expo";
-import { useSocialProfilesForAddress } from "../social-profiles/social-lookup.query";
 import { useAuthenticateWithPasskey } from "../authentication/authenticate-with-passkey.context";
-import { useAuthStatus } from "../authentication/use-auth-status.hook";
 import { useLogout } from "@/features/authentication/use-logout.hook";
 import { ConnectWalletBottomSheet } from "../wallets/connect-wallet.bottom-sheet";
 import { useCreateUser } from "../current-user/use-create-user";
-import { ensureJwtQueryData, useJwtQuery } from "../authentication/jwt.query";
-import { fetchJwt } from "../authentication/authentication.api";
-const AddressDebugger = ({ address }: { address: string }) => {
-  const {
-    data: profiles,
-    status,
-    error,
-  } = useSocialProfilesForAddress({
-    address,
-  });
-
-  useEffect(() => {
-    async function debugAddress() {
-      try {
-        // Validate and format the address
-        const isValidAddress = ethersUtils.isAddress(address);
-        const checksummedAddress = ethersUtils.getAddress(address);
-        const lowercaseAddress = address.toLowerCase();
-
-        logger.debug("[AddressDebugger] Address Analysis:", {
-          originalAddress: address,
-          isValidAddress,
-          checksummedAddress,
-          lowercaseAddress,
-        });
-
-        // Try ENS resolution with different address formats
-        const provider = new ethers.providers.AlchemyProvider("mainnet");
-
-        const [originalEns, checksumEns, lowercaseEns] = await Promise.all([
-          provider.lookupAddress(address),
-          provider.lookupAddress(checksummedAddress),
-          provider.lookupAddress(lowercaseAddress),
-        ]);
-
-        logger.debug("[AddressDebugger] ENS Results:", {
-          originalEns,
-          checksumEns,
-          lowercaseEns,
-        });
-
-        if (checksumEns) {
-          const resolver = await provider.getResolver(checksumEns);
-          if (resolver) {
-            const avatar = await resolver.getText("avatar");
-            const email = await resolver.getText("email");
-            const url = await resolver.getText("url");
-            const twitter = await resolver.getText("com.twitter");
-            const github = await resolver.getText("com.github");
-
-            logger.debug("[AddressDebugger] ENS Records for", checksumEns, {
-              avatar,
-              email,
-              url,
-              twitter,
-              github,
-            });
-          }
-        }
-      } catch (err) {
-        logger.error("[AddressDebugger] Error:", err);
-      }
-    }
-
-    debugAddress();
-  }, [address]);
-
-  useEffect(() => {
-    if (profiles) {
-      logger.debug(
-        "[AddressDebugger] Thirdweb Social Profiles for",
-        address,
-        ":",
-        profiles
-      );
-    }
-    if (error) {
-      logger.error("[AddressDebugger] Thirdweb Social Profiles Error:", error);
-    }
-  }, [profiles, error, address]);
-
-  return (
-    <View
-      style={{
-        marginTop: 20,
-        padding: 10,
-        borderTopWidth: 1,
-        borderTopColor: "rgba(0,0,0,0.1)",
-      }}
-    >
-      <Text style={{ fontWeight: "bold" }}>Address Debug Information</Text>
-      <Text>Original: {address}</Text>
-      <Text>Checksum: {ethersUtils.getAddress(address)}</Text>
-      <Text>Status: {status}</Text>
-      {profiles && (
-        <Text>
-          Found {profiles.length} social profile(s). Check debug logs for
-          details.
-        </Text>
-      )}
-      {error && <Text style={{ color: "red" }}>Error: {error.message}</Text>}
-    </View>
-  );
-};
-
-const NameResolver = () => {
-  const [name, setName] = useState("halfjew22.cb.id");
-  const [resolvedAddress, setResolvedAddress] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function resolveName() {
-      try {
-        const provider = new ethers.providers.AlchemyProvider("mainnet");
-
-        // Try to resolve the name
-        const address = await provider.resolveName(name);
-        logger.debug(`[NameResolver] Resolved ${name} to:`, address);
-
-        // Additional Coinbase-specific logging
-        if (name.endsWith(".cb.id")) {
-          logger.debug("[NameResolver] This is a Coinbase ID");
-
-          // Log the parts of the cb.id
-          const [username] = name.split(".");
-          logger.debug("[NameResolver] Coinbase username:", username);
-
-          // Construct the Coinbase profile URL
-          const cbProfileUrl = `https://www.coinbase.com/${username}`;
-          logger.debug("[NameResolver] Coinbase Profile URL:", cbProfileUrl);
-        }
-
-        setResolvedAddress(address);
-
-        if (address) {
-          // If we got an address, let's get any associated records
-          const resolver = await provider.getResolver(name);
-          if (resolver) {
-            const avatar = await resolver.getText("avatar");
-            const email = await resolver.getText("email");
-            const url = await resolver.getText("url");
-            const twitter = await resolver.getText("com.twitter");
-            const github = await resolver.getText("com.github");
-
-            logger.debug(`[NameResolver] Records for ${name}:`, {
-              avatar,
-              email,
-              url,
-              twitter,
-              github,
-            });
-          }
-        }
-      } catch (err) {
-        logger.error("[NameResolver] Error resolving name:", err);
-        setResolvedAddress(null);
-      }
-    }
-
-    if (name) {
-      resolveName();
-    }
-  }, [name]);
-
-  const isCoinbaseId = name.endsWith(".cb.id");
-  const username = isCoinbaseId ? name.split(".")[0] : null;
-
-  return (
-    <View
-      style={{
-        marginTop: 20,
-        padding: 10,
-        borderTopWidth: 1,
-        borderTopColor: "rgba(0,0,0,0.1)",
-      }}
-    >
-      <Text style={{ fontWeight: "bold", marginBottom: 10 }}>
-        Name Resolution
-      </Text>
-      <TextInput
-        value={name}
-        onChangeText={setName}
-        style={{
-          borderWidth: 1,
-          borderColor: "rgba(0,0,0,0.1)",
-          padding: 10,
-          marginBottom: 10,
-          borderRadius: 5,
-        }}
-        placeholder="Enter ENS or cb.id name"
-      />
-      <Text>Resolved Address: {resolvedAddress || "Not found"}</Text>
-      {isCoinbaseId && username && (
-        <View style={{ marginTop: 10 }}>
-          <Text style={{ fontWeight: "bold" }}>Coinbase Information:</Text>
-          <Text>Username: {username}</Text>
-          <Text>Profile URL: https://www.coinbase.com/{username}</Text>
-        </View>
-      )}
-      {resolvedAddress && <AddressDebugger address={resolvedAddress} />}
-    </View>
-  );
-};
+import {
+  ensureJwtQueryData,
+  fetchJwtQueryData,
+  invalidateJwtQueryData,
+  setJwtQueryData,
+  useJwtQuery,
+} from "../authentication/jwt.query";
+import { useMMKVListener, useMMKVString } from "react-native-mmkv";
+import { secureQueryMMKV } from "@/utils/mmkv";
+import { getCurrentAccountPrimaryProfile } from "@/utils/profile/getCurrentAccountPrimaryProfile";
+import {
+  fetchProfileQuery,
+  invalidateProfileQuery,
+} from "../profiles/profiles.query";
+import { useLogoutOnJwtRefreshError } from "../authentication/use-logout-on-jwt-refresh-error";
 
 export function PrivyPlaygroundLandingScreen() {
+  useLogoutOnJwtRefreshError();
   const { loginWithPasskey, signupWithPasskey } = useAuthenticateWithPasskey();
   const authStatus = useAccountsStore((state) => state.authStatus);
   const isSigningUp = authStatus === AuthStatuses.signingUp;
   const currentSender = useCurrentSender();
   const { user: privyUser } = usePrivy();
   // const authStatus = useAuthStatus();
-  // const { data: jwt } = useJwtQuery();
+  const { data: jwt } = useJwtQuery();
   const { logout } = useLogout();
   const { mutate: createUser, isPending: isCreatingUser } = useCreateUser();
   const canCreateUser =
     currentSender?.ethereumAddress !== undefined &&
     currentSender.inboxId !== undefined &&
     isSigningUp;
-  const {
-    data: currentProfile,
-    status: currentProfileStatus,
-    error,
-  } = useCurrentProfile();
+  // const {
+  //   data: currentProfile,
+  //   status: currentProfileStatus,
+  //   error,
+  // } = useCurrentProfile();
 
   const [
     shouldShowConnectWalletBottomSheet,
     setShouldShowConnectWalletBottomSheet,
   ] = useState(false);
+
+  useMMKVListener((key) => {
+    logger.debug("key", key);
+  }, secureQueryMMKV);
 
   return (
     <SafeAreaView>
@@ -267,6 +78,33 @@ export function PrivyPlaygroundLandingScreen() {
             alignContent: "center",
           }}
         >
+          <Text>JWT: {JSON.stringify(!!jwt ? jwt : "nothin", null, 2)}</Text>
+          <Button
+            title="fetch profile"
+            onPress={async () => {
+              await invalidateProfileQuery({
+                xmtpId: currentSender?.inboxId!,
+              });
+              const profile = await fetchProfileQuery({
+                xmtpId: currentSender?.inboxId!,
+              });
+              alert(JSON.stringify(profile, null, 2));
+              logger.debug("profile", profile);
+            }}
+          />
+          <Button
+            title="refetch JWT"
+            onPress={async () => {
+              await invalidateJwtQueryData();
+              const jwt = await fetchJwtQueryData();
+              logger.debug("jwt", jwt);
+            }}
+          />
+          <Button title="clear JWT" onPress={() => setJwtQueryData("")} />
+          <Button
+            title="silly JWT"
+            onPress={() => setJwtQueryData("silly JWT")}
+          />
           {canCreateUser && (
             <Button
               title="Create User"
@@ -314,11 +152,11 @@ export function PrivyPlaygroundLandingScreen() {
             Something: {JSON.stringify({ authStatus, isCreatingUser }, null, 2)}
           </Text>
           <Text>Current Sender: {JSON.stringify(currentSender, null, 2)}</Text>
-          <Text>Current Profile Status: {currentProfileStatus}</Text>
+          {/* <Text>Current Profile Status: {currentProfileStatus}</Text>
           <Text>Current Profile Error: {error?.message}</Text>
           <Text>
             Current Profile: {JSON.stringify(currentProfile, null, 2)}
-          </Text>
+          </Text> */}
 
           <Button
             title="Connect Wallet"
@@ -337,9 +175,16 @@ export function PrivyPlaygroundLandingScreen() {
             onPress={signupWithPasskey}
           />
           <Button
-            disabled={authStatus !== AuthStatuses.signedIn}
+            // disabled={authStatus !== AuthStatuses.signedIn}
             title="Logout"
-            onPress={logout}
+            onPress={async () => {
+              try {
+                await logout();
+                logger.debug("Logout successful");
+              } catch (error) {
+                logger.error("Error during logout", error);
+              }
+            }}
           />
           <ConnectWalletBottomSheet
             isVisible={shouldShowConnectWalletBottomSheet}

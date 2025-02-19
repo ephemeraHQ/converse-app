@@ -144,9 +144,7 @@ export class MultiInboxClient {
   }
 
   private constructor() {
-    logger.debug("[constructor] Initializing MultiInboxClient");
     this.initialize();
-    logger.debug("[constructor] MultiInboxClient initialization started");
   }
 
   private async performInboxCreationFromInboxSigner(

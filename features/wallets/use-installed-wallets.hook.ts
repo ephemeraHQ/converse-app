@@ -81,47 +81,26 @@ const SupportedWallets: ISupportedWallet[] = [
 async function getInstalledWallets(
   supportedWallets: ISupportedWallet[]
 ): Promise<ISupportedWallet[]> {
-  logger.debug(
-    `[getInstalledWallets] Checking ${supportedWallets.length} supported wallets`
-  );
   let installedWalletChecks: boolean[] = [];
   try {
     installedWalletChecks = await Promise.all(
       supportedWallets.map(async (w) => {
         try {
-          logger.debug(
-            `[getInstalledWallets] Checking if ${w.name} is installed at ${w.customScheme}wc`
-          );
           const canOpen = await Linking.canOpenURL(`${w.customScheme}wc`);
-          logger.debug(
-            `[getInstalledWallets] ${w.name} is installed: ${canOpen}`
-          );
 
           return canOpen;
         } catch (e) {
-          logger.error(
-            `[getInstalledWallets] Error checking if ${w.name} is installed: ${e}`
-          );
           return false;
         }
       })
     );
   } catch (e) {
-    logger.error(
-      `[getInstalledWallets] Error checking installed wallets: ${e}`
-    );
     installedWalletChecks = [];
   }
 
   const installedWallets = supportedWallets.filter(
     (_, index) => installedWalletChecks[index]
   ) as ISupportedWallet[];
-
-  logger.debug(
-    `[getInstalledWallets] Found ${
-      installedWallets.length
-    } installed wallets: ${installedWallets.map((w) => w.name).join(", ")}`
-  );
 
   return installedWallets;
 }
@@ -130,7 +109,6 @@ function getInstalledWalletsQueryOptions() {
   return queryOptions({
     queryKey: ["installedWallets"],
     queryFn: async () => {
-      logger.debug("getInstalledWalletsQueryOptions");
       return await getInstalledWallets(SupportedWallets);
     },
     staleTime: 0,

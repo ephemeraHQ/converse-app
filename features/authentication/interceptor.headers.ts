@@ -43,14 +43,6 @@ export const headersInterceptor = async (config: AxiosRequestConfig) => {
     headers = needsAuthenticationHeaders
       ? await getConvosAuthenticationHeaders()
       : await getConvosAuthenticatedHeaders();
-
-    logger.debug(
-      `[headersInterceptor] Headers generated successfully, ${JSON.stringify(
-        headers,
-        null,
-        2
-      )}`
-    );
   } catch (error) {
     logger.error(`[headersInterceptor] Failed to generate headers: ${error}`);
     throw error;
