@@ -39,6 +39,7 @@ import { shortAddress } from "@/utils/strings/shortAddress";
 import { HStack } from "@/design-system/HStack";
 import { Pressable } from "@/design-system/Pressable";
 import { Avatar } from "@/components/Avatar";
+import { ActivityIndicator } from "@/design-system/activity-indicator";
 
 type InstalledWalletsListProps = {
   installedWallets: ISupportedWallet[];
@@ -95,27 +96,35 @@ function InstalledWalletsList({
   loadingWalletId,
 }: InstalledWalletsListProps) {
   return (
-    <>
-      <Text>Installed Wallets</Text>
+    <VStack>
+      <Text>
+        You’ll be asked to allow your wallet app to share your public address
+        with Convos
+      </Text>
       {installedWallets.map((wallet) => {
         const isLoading = loadingWalletId === wallet.thirdwebId;
         return (
-          <Button
-            loading={isLoading}
+          <Pressable
             disabled={isDisabled}
             key={wallet.thirdwebId}
-            // text={`Add ${wallet.name} to inbox (${
-            //   isLoading ? "loading..." : ""
-            // })`}
             onPress={() =>
               onWalletTapped(wallet.thirdwebId, {
                 mobileConfig: { callbackURL: coinbaseCallbackUrl },
               })
             }
-          />
+          >
+            <HStack>
+              <Avatar uri={wallet.iconURL} name={wallet.name} />
+              <VStack>
+                <Text>{wallet.name}</Text>
+                <Text>{wallet.thirdwebId}</Text>
+              </VStack>
+              {isLoading && <ActivityIndicator />}
+            </HStack>
+          </Pressable>
         );
       })}
-    </>
+    </VStack>
   );
 }
 
@@ -168,6 +177,13 @@ function reducer(
   state: ConnectWalletBottomSheetState,
   action: ConnectWalletBottomSheetActions
 ): ConnectWalletBottomSheetState {
+  logger.debug(
+    `[ConnectWalletBottomSheet] Reducer called with action: ${JSON.stringify(
+      action,
+      null,
+      2
+    )}`
+  );
   switch (action.type) {
     case "ConnectAWallet":
       return {
@@ -317,6 +333,7 @@ export function ConnectWalletBottomSheet({
     wallets.length === 0;
 
   const isShowingSignToConfirm =
+    connectWalletBottomSheetMode === "promptForWalletSignature" ||
     connectWalletBottomSheetMode === "waitingForWalletSignature" ||
     connectWalletBottomSheetMode === "waitingForSocialDataToLoad";
 
@@ -531,7 +548,36 @@ export function ConnectWalletBottomSheet({
               </HStack>
               <Button
                 text={`Sign into ${thirdwebWalletIdThatIsConnecting}`}
-                onPress={() => {}}
+                onPress={async () => {
+                  dispatch({ type: "SignInToWallet" });
+                  const signer: InboxSigner = {
+                    getAddress: async () => connectingWalletAccount?.address!,
+                    getChainId: () => base.id,
+                    getBlockNumber: () => undefined,
+                    walletType: () => "EOA",
+                    signMessage: async (message: string) => {
+                      logger.debug(
+                        `[ConnectWalletBottomSheet] Signing message for address ${connectingWalletAccount?.address}`
+                      );
+                      const signature =
+                        await connectingWalletAccount!.signMessage({
+                          message,
+                        });
+                      return signature;
+                    },
+                  };
+                  logger.debug(
+                    `[ConnectWalletBottomSheet] Adding account to inbox client`
+                  );
+                  const currentInboxClient =
+                    MultiInboxClient.instance.getInboxClientForAddress({
+                      ethereumAddress: currentSenderEthereumAddress!,
+                    });
+                  await currentInboxClient.addAccount(signer);
+                  alert(
+                    `You've sucesfully connected ${connectingWalletAccount?.address} to your inbox. You won't see anything in the UI yet, but we're working on that now.`
+                  );
+                }}
               />
             </VStack>
           )}

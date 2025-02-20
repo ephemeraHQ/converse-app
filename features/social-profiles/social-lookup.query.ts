@@ -15,9 +15,6 @@ export type UseSocialProfilesForAddressArgs = {
 
 const getSocialProfilesQueryOptions = (address: string | undefined) => {
   const enabled = Boolean(address);
-  logger.debug(
-    `[getSocialProfilesQueryOptions] Creating query options for address: ${address}, enabled: ${enabled}`
-  );
   return queryOptions({
     enabled,
     queryKey: socialProfilesQueryKey(address!),
