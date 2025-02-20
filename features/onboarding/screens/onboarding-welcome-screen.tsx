@@ -1,4 +1,4 @@
-import { Screen } from "@/components/Button/screen/screen";
+import { Screen } from "@/components/screen/screen";
 import { showSnackbar } from "@/components/snackbar/snackbar.service";
 import { Center } from "@/design-system/Center";
 import { Pressable } from "@/design-system/Pressable";

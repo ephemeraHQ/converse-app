@@ -1,4 +1,4 @@
-import { Screen } from "@/components/Button/screen/screen";
+import { Screen } from "@/components/screen/screen";
 import { OnboardingSubtitle } from "@/features/onboarding/components/onboarding-subtitle";
 import { OnboardingTitle } from "@/features/onboarding/components/onboarding-title";
 import React, { memo, useCallback, useEffect, useState } from "react";

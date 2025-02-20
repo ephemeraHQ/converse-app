@@ -1,4 +1,4 @@
-import { Screen } from "@/components/Button/screen/screen";
+import { Screen } from "@/components/screen/screen";
 import { EmptyState } from "@/design-system/empty-state";
 import { useBlockedConversationsForCurrentAccount } from "@/features/blocked-conversations/use-blocked-conversations-for-current-account";
 import { ConversationList } from "@/features/conversation-list/conversation-list";

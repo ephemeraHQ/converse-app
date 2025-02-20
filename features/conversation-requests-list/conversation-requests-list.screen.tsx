@@ -1,4 +1,4 @@
-import { Screen } from "@/components/Button/screen/screen";
+import { Screen } from "@/components/screen/screen";
 import { ConversationList } from "@/features/conversation-list/conversation-list";
 import { ConversationRequestsToggle } from "@/features/conversation-requests-list/conversation-requests-list-toggle";
 import { useConversationRequestsListScreenHeader } from "@/features/conversation-requests-list/conversation-requests-list.screen-header";
