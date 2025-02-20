@@ -9,7 +9,7 @@ import { useSetupStreamingSubscriptions } from "@/features/streams/streams";
 import { $globalStyles } from "@/theme/styles";
 import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
 import { DebugButton } from "@/components/debug-button";
-import { Snackbars } from "@/components/snackbar/snackbars";
+import { Snackbars } from "@/components/Button/snackbar/snackbars";
 import { BottomSheetModalProvider } from "@design-system/BottomSheet/BottomSheetModalProvider";
 import { useReactQueryDevTools } from "@dev-plugins/react-query";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";

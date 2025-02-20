@@ -1,5 +1,5 @@
 import { Screen } from "@/components/Screen/ScreenComp/Screen";
-import { showSnackbar } from "@/components/snackbar/snackbar.service";
+import { showSnackbar } from "@/components/Button/snackbar/snackbar.service";
 import { Center } from "@/design-system/Center";
 import { Pressable } from "@/design-system/Pressable";
 import { AnimatedText, Text } from "@/design-system/Text";

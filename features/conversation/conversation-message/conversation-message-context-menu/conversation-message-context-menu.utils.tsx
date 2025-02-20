@@ -1,4 +1,4 @@
-import { showSnackbar } from "@/components/snackbar/snackbar.service";
+import { showSnackbar } from "@/components/Button/snackbar/snackbar.service";
 import { IDropdownMenuCustomItemProps } from "@/design-system/dropdown-menu/dropdown-menu-custom";
 import { useConversationComposerStore } from "@/features/conversation/conversation-composer/conversation-composer.store-context";
 import { useConversationMessageContextMenuStore } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu.store-context";

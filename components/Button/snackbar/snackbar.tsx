@@ -4,12 +4,12 @@ import {
   SNACKBAR_HEIGHT,
   SNACKBAR_LARGE_TEXT_HEIGHT,
   SNACKBAR_SPACE_BETWEEN_SNACKBARS,
-} from "@/components/snackbar/snackbar.constants";
+} from "@/components/Button/snackbar/snackbar.constants";
 import {
   getNumberOfSnackbars,
   onSnackbarsChange,
-} from "@/components/snackbar/snackbar.service";
-import { ISnackbar } from "@/components/snackbar/snackbar.types";
+} from "@/components/Button/snackbar/snackbar.service";
+import { ISnackbar } from "@/components/Button/snackbar/snackbar.types";
 import { Button } from "@design-system/Button/Button";
 import { Center } from "@design-system/Center";
 import { AnimatedHStack, HStack } from "@design-system/HStack";
