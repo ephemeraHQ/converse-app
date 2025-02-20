@@ -133,6 +133,9 @@ export function PrivyPlaygroundLandingScreen() {
                         "Successfully created user and got JWT",
                         jwt
                       );
+                      useAccountsStore
+                        .getState()
+                        .setAuthStatus(AuthStatuses.signedIn);
                     },
                     onError(error, variables, context) {
                       logger.error(

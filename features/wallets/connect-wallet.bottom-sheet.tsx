@@ -6,7 +6,11 @@ import { VStack } from "@/design-system/VStack";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { useBottomSheetModalRef } from "@/design-system/BottomSheet/BottomSheet.utils";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { createWallet, WalletId } from "thirdweb/wallets";
+import {
+  Account as ThirdwebEthereumWalletAccount,
+  createWallet,
+  WalletId,
+} from "thirdweb/wallets";
 import { config } from "@/config";
 import {
   useCurrentSender,
@@ -104,18 +108,36 @@ type ConnectWalletBottomSheetProps = {
 
 const coinbaseUrl = new URL(`https://${config.websiteDomain}/coinbase`);
 
-type ListShowing = "wallets" | "socials";
+const WalletImportBottomSheetMode = {
+  welcome: "welcome",
+  waitingForWalletsToLoad: "waitingForWalletsToLoad",
+  chooseWallet: "chooseWallet",
+  waitingForWalletConnection: "waitingForWalletConnection",
+  promptForWalletSignature: "promptForWalletSignature",
+  waitingForWalletSignature: "waitingForWalletSignature",
+  waitingForSocialDataToLoad: "waitingForSocialDataToLoad",
+  chooseSocialIdentity: "chooseSocialIdentity",
+} as const;
+
+type WalletImportBottomSheetMode =
+  (typeof WalletImportBottomSheetMode)[keyof typeof WalletImportBottomSheetMode];
 
 type ConnectWalletBottomSheetState = {
+  connectWalletBottomSheetMode: WalletImportBottomSheetMode;
   thirdwebWalletIdThatIsConnecting: WalletId | undefined;
-  ethereumAddressThatIsConnecting: string | undefined;
+  connectingWalletAccount: ThirdwebEthereumWalletAccount | undefined;
   socialData: IWeb3SocialProfile[] | undefined;
-  listShowing: ListShowing | undefined;
 };
 
 type ConnectWalletBottomSheetActions =
-  | { type: "SetConnectingWallet"; walletId: WalletId }
-  | { type: "ConnectingEthereumAddressDiscovered"; ethereumAddress: string }
+  | { type: "ConnectAWallet" }
+  | { type: "SetWalletToConnect"; walletId: WalletId }
+  | {
+      type: "WalletAccountConnected";
+      account: ThirdwebEthereumWalletAccount;
+    }
+  | { type: "SignInToWallet" }
+  | { type: "WalletAccountLinkSigned" }
   | { type: "SocialDataLoaded"; data: IWeb3SocialProfile[] }
   | { type: "Reset" };
 
@@ -124,29 +146,61 @@ function reducer(
   action: ConnectWalletBottomSheetActions
 ): ConnectWalletBottomSheetState {
   switch (action.type) {
-    case "SetConnectingWallet":
+    case "ConnectAWallet":
       return {
         ...state,
+        connectWalletBottomSheetMode: "chooseWallet",
+      };
+    case "SetWalletToConnect":
+      return {
+        ...state,
+        connectWalletBottomSheetMode: "waitingForWalletConnection",
         thirdwebWalletIdThatIsConnecting: action.walletId,
-        ethereumAddressThatIsConnecting: undefined,
+        connectingWalletAccount: undefined,
         socialData: undefined,
       };
-    case "ConnectingEthereumAddressDiscovered":
+
+    case "WalletAccountConnected":
       return {
         ...state,
-        ethereumAddressThatIsConnecting: action.ethereumAddress,
+        connectWalletBottomSheetMode: "promptForWalletSignature",
+        connectingWalletAccount: action.account,
       };
+    case "SignInToWallet":
+      return {
+        ...state,
+        connectWalletBottomSheetMode: "waitingForWalletSignature",
+      };
+
+    case "WalletAccountLinkSigned":
+      const hasLoadedSocialData = state.socialData !== undefined;
+      const destinationMode = hasLoadedSocialData
+        ? "chooseSocialIdentity"
+        : "waitingForSocialDataToLoad";
+      return {
+        ...state,
+        connectWalletBottomSheetMode: destinationMode,
+      };
+
     case "SocialDataLoaded":
+      const currentMode = state.connectWalletBottomSheetMode;
+      if (currentMode === "waitingForSocialDataToLoad") {
+        return {
+          ...state,
+          connectWalletBottomSheetMode: "chooseSocialIdentity",
+          socialData: action.data,
+        };
+      }
       return {
         ...state,
         socialData: action.data,
-        thirdwebWalletIdThatIsConnecting: undefined,
       };
+
     case "Reset":
       return {
         ...state,
         thirdwebWalletIdThatIsConnecting: undefined,
-        ethereumAddressThatIsConnecting: undefined,
+        connectingWalletAccount: undefined,
         socialData: undefined,
       };
     default:
@@ -182,17 +236,16 @@ export function ConnectWalletBottomSheet({
     useAccountsStore.getState().multiInboxClientRestorationState === "restored";
 
   const initialState: ConnectWalletBottomSheetState = {
-    listShowing: "wallets",
+    connectWalletBottomSheetMode: "welcome",
     thirdwebWalletIdThatIsConnecting: undefined,
-    ethereumAddressThatIsConnecting: undefined,
+    connectingWalletAccount: undefined,
     socialData: undefined,
   };
   const [state, dispatch] = React.useReducer(reducer, initialState);
   const {
     thirdwebWalletIdThatIsConnecting,
-    ethereumAddressThatIsConnecting,
     socialData,
-    listShowing,
+    connectWalletBottomSheetMode,
   } = state;
 
   if (!isRestored || !currentSender) {
@@ -203,42 +256,14 @@ export function ConnectWalletBottomSheet({
     !!MultiInboxClient.instance.getInboxClientForAddress({
       ethereumAddress: currentSender!.ethereumAddress,
     })!;
-  // useEffect(() => {
-  //   logger.debug(
-  //     `[ConnectWalletBottomSheet] Current sender: ${JSON.stringify(
-  //       currentSender,
-  //       null,
-  //       2
-  //     )}`
-  //   );
-  //   if (!currentSender || !restored) {
-  //     return;
-  //   }
 
-  //   async function loadSocialData() {
-  //     const shaneWallet = "0xa64af7f78de39a238ecd4fff7d6d410dbace2df0";
-  //     const michaelranbowWallet = "0x5222f538B29267a991B346EF61A2A2c389A9f320";
-  //     const socialProfiles =
-  //       await ensureSocialProfilesQueryData(michaelranbowWallet);
-  //     logger.debug(
-  //       `[ConnectWalletBottomSheet] Social profiles: ${JSON.stringify(
-  //         socialProfiles,
-  //         null,
-  //         2
-  //       )}`
-  //     );
-  //     dispatch({ type: "SocialDataLoaded", data: socialProfiles });
-  //   }
-  //   loadSocialData();
-  // }, [ethereumAddressThatIsConnecting, currentSender, restored]);
-
-  const isShowingWalletList = listShowing === "wallets";
+  const isShowingWalletList = connectWalletBottomSheetMode === "wallets";
   const isWalletListDisabled = thirdwebWalletIdThatIsConnecting !== undefined;
 
   const isShowingSocialIdentityList =
-    listShowing === "socials" && socialData !== undefined;
+    connectWalletBottomSheetMode === "socials" && socialData !== undefined;
   const isShowingNoSocialsMessage =
-    listShowing === "socials" && socialData === undefined;
+    connectWalletBottomSheetMode === "socials" && socialData === undefined;
 
   const handleConnectWalletTapped = async (
     walletType: WalletId,
@@ -252,7 +277,7 @@ export function ConnectWalletBottomSheet({
       );
     }
 
-    dispatch({ type: "SetConnectingWallet", walletId: walletType });
+    dispatch({ type: "SetWalletToConnect", walletId: walletType });
 
     logger.debug(
       `[ConnectWalletBottomSheet] Handling connect wallet tapped for ${walletType}`
@@ -274,8 +299,8 @@ export function ConnectWalletBottomSheet({
 
       const addressToLink = walletAccount.address;
       dispatch({
-        type: "ConnectingEthereumAddressDiscovered",
-        ethereumAddress: addressToLink,
+        type: "WalletAccountConnected",
+        account: walletAccount,
       });
 
       const socialProfiles = await ensureSocialProfilesQueryData(addressToLink);
@@ -329,35 +354,31 @@ export function ConnectWalletBottomSheet({
           `You are already on XMTP with address ${addressToLink}. We're going to handle this carefully according to https://xmtp-labs.slack.com/archives/C07NSHXK693/p1739215446331469?thread_ts=1739212558.484059&cid=C07NSHXK693.`
         );
       } else {
-        logger.debug(
-          `[ConnectWalletBottomSheet] Creating signer for address ${addressToLink}`
-        );
-        const signer: InboxSigner = {
-          getAddress: async () => addressToLink,
-          getChainId: () => base.id,
-          getBlockNumber: () => undefined,
-          walletType: () => "EOA",
-          signMessage: async (message: string) => {
-            logger.debug(
-              `[ConnectWalletBottomSheet] Signing message for address ${addressToLink}`
-            );
-            const signature = await walletAccount.signMessage({ message });
-            return signature;
-          },
-        };
-
-        logger.debug(
-          `[ConnectWalletBottomSheet] Adding account to inbox client`
-        );
-        await currentInboxClient.addAccount(signer);
-
-        alert(
-          `You've sucesfully connected ${addressToLink} to your inbox. You won't see anything in the UI yet, but we're working on that now.`
-        );
-
-        const socialData = await ensureSocialProfilesQueryData(addressToLink);
-
-        onWalletImported(socialData);
+        // logger.debug(
+        //   `[ConnectWalletBottomSheet] Creating signer for address ${addressToLink}`
+        // );
+        // const signer: InboxSigner = {
+        //   getAddress: async () => addressToLink,
+        //   getChainId: () => base.id,
+        //   getBlockNumber: () => undefined,
+        //   walletType: () => "EOA",
+        //   signMessage: async (message: string) => {
+        //     logger.debug(
+        //       `[ConnectWalletBottomSheet] Signing message for address ${addressToLink}`
+        //     );
+        //     const signature = await walletAccount.signMessage({ message });
+        //     return signature;
+        //   },
+        // };
+        // logger.debug(
+        //   `[ConnectWalletBottomSheet] Adding account to inbox client`
+        // );
+        // await currentInboxClient.addAccount(signer);
+        // alert(
+        //   `You've sucesfully connected ${addressToLink} to your inbox. You won't see anything in the UI yet, but we're working on that now.`
+        // );
+        // const socialData = await ensureSocialProfilesQueryData(addressToLink);
+        // onWalletImported(socialData);
       }
 
       return w;
