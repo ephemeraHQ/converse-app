@@ -9,7 +9,7 @@ import { useEffect, useRef, useState } from "react";
 
 export function useLoginWithPasskey() {
   const { client: smartWalletClient } = useSmartWallets();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const clientRef = useRef(smartWalletClient);
   const { loginWithPasskey: privyLoginWithPasskey } =
     usePrivyLoginWithPasskey();
@@ -30,7 +30,7 @@ export function useLoginWithPasskey() {
 
   const login = async () => {
     try {
-      setIsLoading(true);
+      setIsLoggingIn(true);
 
       await privyLoginWithPasskey({
         relyingParty: RELYING_PARTY,
@@ -51,9 +51,9 @@ export function useLoginWithPasskey() {
     } catch (error) {
       throw error;
     } finally {
-      setIsLoading(false);
+      setIsLoggingIn(false);
     }
   };
 
-  return { login, isLoading };
+  return { login, isLoggingIn };
 }

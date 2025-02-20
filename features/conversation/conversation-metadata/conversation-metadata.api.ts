@@ -13,52 +13,35 @@ const ConversationMetadataSchema = z.object({
   updatedAt: z.string().datetime(),
 });
 
-export type IConversationMetadata = z.infer<typeof ConversationMetadataSchema>;
+// export type IConversationMetadata = z.infer<typeof ConversationMetadataSchema>;
 
-export async function getConversationMetadatas(args: {
-  account: string;
-  topics: ConversationTopic[];
-}) {
-  const { account, topics } = args;
+// export async function getConversationMetadatas(args: {
+//   account: string;
+//   topics: ConversationTopic[];
+// }) {
+//   const { account, topics } = args;
 
-  const conversationIds = await Promise.all(
-    topics.map((topic) => getConversationId({ account, topic }))
-  );
+//   const conversationIds = await Promise.all(
+//     topics.map((topic) => getConversationId({ account, topic }))
+//   );
 
-  const { data } = await api.post(`/api/metadata/conversations`, {
-    conversationIds,
-  });
+//   const { data } = await api.post(`/api/v1/metadata/conversations`, {
+//     conversationIds,
+//   });
 
-  const parseResult = z.record(ConversationMetadataSchema).safeParse(data);
-  if (!parseResult.success) {
-    captureError(
-      new Error(
-        `Failed to parse conversation metadatas response: ${JSON.stringify(
-          parseResult.error
-        )}`
-      )
-    );
-  }
+//   const parseResult = z.record(ConversationMetadataSchema).safeParse(data);
+//   if (!parseResult.success) {
+//     captureError(
+//       new Error(
+//         `Failed to parse conversation metadatas response: ${JSON.stringify(
+//           parseResult.error
+//         )}`
+//       )
+//     );
+//   }
 
-  return data as Record<string, IConversationMetadata>;
-}
-
-export async function getAllConversationMetadatas() {
-  const { data } = await api.get(`/api/metadata/conversations`);
-
-  const parseResult = z.record(ConversationMetadataSchema).safeParse(data);
-  if (!parseResult.success) {
-    captureError(
-      new Error(
-        `Failed to parse all conversation metadatas response: ${JSON.stringify(
-          parseResult.error
-        )}`
-      )
-    );
-  }
-
-  return data as Record<string, IConversationMetadata>;
-}
+//   return data as Record<string, IConversationMetadata>;
+// }
 
 export async function getConversationMetadata(args: {
   account: string;
@@ -68,7 +51,7 @@ export async function getConversationMetadata(args: {
   const conversationId = await getConversationId({ account, topic });
 
   const { data } = await api.get(
-    `/api/metadata/conversation/${conversationId}`
+    `/api/v1/metadata/conversation/${conversationId}`
   );
 
   const parseResult = ConversationMetadataSchema.safeParse(data);
@@ -205,7 +188,7 @@ async function updateConversationMetadata(args: {
     throw new Error("No current user found");
   }
 
-  const { data } = await api.post(`/api/metadata/conversation`, {
+  const { data } = await api.post(`/api/v1/metadata/conversation`, {
     conversationId,
     deviceIdentityId: currentUser.identities.find(
       (identity) => identity.privyAddress === account

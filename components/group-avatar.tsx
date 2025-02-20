@@ -11,7 +11,7 @@ import { Nullable } from "@/types/general";
 import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 import React, { memo, useMemo } from "react";
 import { StyleProp, TextStyle, ViewStyle } from "react-native";
-import { Avatar } from "./Avatar";
+import { Avatar } from "./avatar";
 
 /**
  * Comp to render a group avatar from a list of inbox ids

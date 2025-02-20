@@ -1,4 +1,4 @@
-import { Avatar } from "@/components/Avatar";
+import { Avatar } from "@/components/avatar";
 import { Center } from "@/design-system/Center";
 import { Icon } from "@/design-system/Icon/Icon";
 import { Pressable } from "@/design-system/Pressable";

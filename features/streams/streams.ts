@@ -66,7 +66,7 @@ export function useSetupStreamingSubscriptions() {
         // Handle new accounts
         const newAccounts = currentAccounts.filter(
           (account: string) =>
-            !previousAccounts.includes(account) || !firstRenderRef.current
+            !previousAccounts.includes(account) && !firstRenderRef.current
         );
 
         if (newAccounts.length > 0) {

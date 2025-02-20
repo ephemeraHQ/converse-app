@@ -1,4 +1,4 @@
-import { Avatar } from "@/components/Avatar";
+import { Avatar } from "@/components/avatar";
 import { ConversationSearchResultsListItem } from "@/features/conversation/conversation-create/components/conversation-create-search-result-list-item";
 import { useConversationStore } from "@/features/conversation/conversation.store-context";
 import { useProfileQuery } from "@/features/profiles/profiles.query";

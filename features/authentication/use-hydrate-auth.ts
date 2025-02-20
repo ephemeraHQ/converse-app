@@ -21,11 +21,22 @@ export function useHydrateAuth() {
       (state) =>
         [state.multiInboxClientRestorationState, state.currentSender] as const,
       async ([multiInboxClientRestorationState, currentSender]) => {
+        // No sender means user is not logged in
         if (!currentSender) {
           useAuthStore.getState().actions.setStatus("signedOut");
           return;
         }
 
+        // Wait until multi-inbox client is fully restored
+        const hasRestoredInMultiClientRestorationState =
+          multiInboxClientRestorationState ===
+          MultiInboxClientRestorationStates.restored;
+
+        if (!hasRestoredInMultiClientRestorationState) {
+          return;
+        }
+
+        // Check if there was an error during restoration
         const hasErrorInMultiClientRestorationState =
           typeof multiInboxClientRestorationState === "object" &&
           "error" in multiInboxClientRestorationState;
@@ -35,28 +46,21 @@ export function useHydrateAuth() {
           return;
         }
 
-        const hasRestoredInMultiClientRestorationState =
-          multiInboxClientRestorationState ===
-          MultiInboxClientRestorationStates.restored;
+        try {
+          // Verify user exists in our backend before signing in
+          const user = await ensureCurrentUserQueryData();
 
-        if (hasRestoredInMultiClientRestorationState) {
-          // Verify user profile exists before signing in
-          try {
-            // TODO: Check current user and maybe do upsert since having user isn't a "must"?
-            const user = await ensureCurrentUserQueryData();
-
-            if (!user) {
-              useAuthStore.getState().actions.setStatus("onboarding");
-              return;
-            }
-          } catch {
+          if (!user) {
             useAuthStore.getState().actions.setStatus("onboarding");
             return;
           }
-
-          // We're good to go!
-          useAuthStore.getState().actions.setStatus("signedIn");
+        } catch {
+          // If we can't fetch user data, send to onboarding
+          useAuthStore.getState().actions.setStatus("onboarding");
+          return;
         }
+
+        useAuthStore.getState().actions.setStatus("signedIn");
       },
       {
         fireImmediately: true,

@@ -43,6 +43,11 @@ export const useConversationIsUnread = ({
       return false;
     }
 
+    // For now, if we don't have conversation metadata, we consider the conversation unread
+    if (!conversationMetadata) {
+      return true;
+    }
+
     return conversationIsUnreadForInboxId({
       lastMessageSent: lastMessage?.sentNs ?? null,
       lastMessageSenderInboxId: lastMessage?.senderInboxId ?? null,

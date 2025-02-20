@@ -13,7 +13,7 @@ export function useSignupWithPasskey() {
   const { client: smartWalletClient } = useSmartWallets();
   const { signupWithPasskey: privySignupWithPasskey } =
     usePrivySignupWithPasskey();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSigningUp, setIsSigningUp] = useState(false);
 
   const clientRef = useRef(smartWalletClient);
 
@@ -34,7 +34,7 @@ export function useSignupWithPasskey() {
 
   const signup = async () => {
     try {
-      setIsLoading(true);
+      setIsSigningUp(true);
 
       await privySignupWithPasskey({
         relyingParty: RELYING_PARTY,
@@ -55,9 +55,9 @@ export function useSignupWithPasskey() {
     } catch (error) {
       throw error;
     } finally {
-      setIsLoading(false);
+      setIsSigningUp(false);
     }
   };
 
-  return { signup, isLoading };
+  return { signup, isSigningUp: isSigningUp };
 }

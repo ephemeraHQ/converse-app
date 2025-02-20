@@ -1,4 +1,4 @@
-import { Avatar } from "@/components/Avatar";
+import { Avatar } from "@/components/avatar";
 import Button from "@/components/Button/Button";
 import { Screen } from "@/components/Screen/ScreenComp/Screen";
 import { config } from "@/config";

@@ -1,11 +1,11 @@
 import {
   dismissSnackbar,
   useSnackbars,
-} from "@components/Snackbar/Snackbar.service";
+} from "@/components/snackbar/snackbar.service";
 import React, { memo } from "react";
-import { Snackbar } from "./Snackbar";
-import { SnackbarBackdrop } from "@components/Snackbar/SnackbarBackdrop/SnackbarBackdrop";
-import { ISnackbar } from "@components/Snackbar/Snackbar.types";
+import { Snackbar } from "./snackbar";
+import { SnackbarBackdrop } from "@/components/snackbar/snackbar-backdrop/snackbar-backdrop";
+import { ISnackbar } from "@/components/snackbar/snackbar.types";
 
 export type InternalSnackbarContextType = {
   snackbars: ISnackbar[];

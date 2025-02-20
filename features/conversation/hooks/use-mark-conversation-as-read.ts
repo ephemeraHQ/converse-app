@@ -4,14 +4,24 @@ import {
   updateConversationMetadataQueryData,
 } from "@/features/conversation/conversation-metadata/conversation-metadata.query";
 import { markConversationAsRead } from "@/features/conversation/conversation-metadata/conversation-metadata.api";
-import { useMutation } from "@tanstack/react-query";
+import { MutationOptions, useMutation } from "@tanstack/react-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { formatDateForApi } from "@/utils/api/api.utils";
 
-export function useMarkConversationAsRead(args: { topic: ConversationTopic }) {
+// Define the type for the mutation context
+type MarkAsReadContext = {
+  previousData: {
+    readUntil?: string;
+    unread?: boolean;
+  } | null;
+};
+
+export function getMarkConversationAsReadMutationOptions(args: {
+  topic: ConversationTopic;
+}): MutationOptions<void, Error, void, MarkAsReadContext> {
   const { topic } = args;
 
-  const { mutateAsync: markAsReadAsync } = useMutation({
+  return {
     mutationFn: async () => {
       const currentAccount = getCurrentAccount()!;
       const readUntil = formatDateForApi(new Date());
@@ -47,10 +57,16 @@ export function useMarkConversationAsRead(args: { topic: ConversationTopic }) {
       updateConversationMetadataQueryData({
         account: currentAccount,
         topic,
-        updateData: context?.previousData ?? null,
+        updateData: context?.previousData ?? {},
       });
     },
-  });
+  };
+}
+
+export function useMarkConversationAsRead(args: { topic: ConversationTopic }) {
+  const { mutateAsync: markAsReadAsync } = useMutation(
+    getMarkConversationAsReadMutationOptions(args)
+  );
 
   return {
     markAsReadAsync,

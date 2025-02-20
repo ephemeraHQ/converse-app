@@ -1,4 +1,4 @@
-import { ISnackbar } from "@components/Snackbar/Snackbar.types";
+import { ISnackbar } from "@/components/snackbar/snackbar.types";
 import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 

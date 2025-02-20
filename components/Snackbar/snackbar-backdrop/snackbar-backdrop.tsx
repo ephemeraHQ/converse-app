@@ -1,8 +1,8 @@
 import { LinearGradient } from "@/design-system/linear-gradient";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { hexToRGBA } from "@/utils/colors";
-import { useSnackbars } from "@components/Snackbar/Snackbar.service";
-import { useGradientHeight } from "@components/Snackbar/SnackbarBackdrop/SnackbarBackdrop.utils";
+import { useSnackbars } from "@/components/snackbar/snackbar.service";
+import { useGradientHeight } from "@/components/snackbar/snackbar-backdrop/snackbar-backdrop.utils";
 // import MaskedView from "@react-native-masked-view/masked-view";
 import { SICK_SPRING_CONFIG } from "@theme/animations";
 import { memo } from "react";

@@ -1,9 +1,11 @@
+import { getMarkConversationAsReadMutationOptions } from "@/features/conversation/hooks/use-mark-conversation-as-read";
 import { isConversationAllowed } from "@/features/conversation/utils/is-conversation-allowed";
 import { isConversationConsentUnknown } from "@/features/conversation/utils/is-conversation-consent-unknown";
 import { startMessageStreaming } from "@/features/streams/stream-messages";
 import { setConversationQueryData } from "@/queries/conversation-query";
 import { addConversationToAllowedConsentConversationsQuery } from "@/queries/conversations-allowed-consent-query";
 import { addConversationToUnknownConsentConversationsQuery } from "@/queries/conversations-unknown-consent-query";
+import { queryClient } from "@/queries/queryClient";
 import { ensureGroupMembersQueryData } from "@/queries/useGroupMembersQuery";
 import { captureError } from "@/utils/capture-error";
 import { ConversationWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
@@ -11,6 +13,7 @@ import {
   stopStreamingConversations,
   streamConversations,
 } from "@/utils/xmtpRN/xmtp-conversations/xmtp-conversations-stream";
+import { MutationObserver } from "@tanstack/react-query";
 import { StreamError } from "@utils/error";
 
 export async function startConversationStreaming(account: string) {
@@ -36,6 +39,15 @@ async function handleNewConversation(args: {
   const { account, conversation } = args;
 
   if (isConversationAllowed(conversation)) {
+    // Create conversation metadata
+    const markAsReadMutationObserver = new MutationObserver(
+      queryClient,
+      getMarkConversationAsReadMutationOptions({
+        topic: conversation.topic,
+      })
+    );
+    markAsReadMutationObserver.mutate().catch(captureError);
+
     addConversationToAllowedConsentConversationsQuery({
       account,
       conversation,

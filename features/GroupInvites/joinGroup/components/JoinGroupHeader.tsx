@@ -1,4 +1,4 @@
-import { Avatar } from "@components/Avatar";
+import { Avatar } from "@/components/avatar";
 import { textPrimaryColor, textSecondaryColor } from "@styles/colors";
 import { AvatarSizes } from "@styles/sizes";
 import React from "react";

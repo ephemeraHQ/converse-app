@@ -1,5 +1,5 @@
 import { Screen } from "@/components/Screen/ScreenComp/Screen";
-import { showSnackbar } from "@/components/Snackbar/Snackbar.service";
+import { showSnackbar } from "@/components/snackbar/snackbar.service";
 import { Center } from "@/design-system/Center";
 import { Pressable } from "@/design-system/Pressable";
 import { AnimatedText, Text } from "@/design-system/Text";
@@ -23,8 +23,8 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
 
   const { logout } = useLogout();
 
-  const { signup, isLoading: isSigningUp } = useSignupWithPasskey();
-  const { login, isLoading: isLoggingIn } = useLoginWithPasskey();
+  const { signup, isSigningUp } = useSignupWithPasskey();
+  const { login, isLoggingIn } = useLoginWithPasskey();
 
   // Safer to fully logout when we're here
   useEffect(() => {

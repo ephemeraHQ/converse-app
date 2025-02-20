@@ -1,4 +1,4 @@
-import { showSnackbar } from "@/components/Snackbar/Snackbar.service";
+import { showSnackbar } from "@/components/snackbar/snackbar.service";
 import { logger } from "@/utils/logger";
 
 export function captureError(error: unknown) {
