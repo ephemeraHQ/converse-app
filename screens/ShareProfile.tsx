@@ -10,7 +10,6 @@ import { useHeader } from "@/navigation/use-header";
 import { NavigationParamList } from "@/screens/Navigation/Navigation";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { AvatarSizes } from "@styles/sizes";
 import { useAppTheme } from "@theme/useAppTheme";
 import { shortAddress } from "@utils/strings/shortAddress";
 import React, { useState } from "react";
@@ -66,7 +65,6 @@ export function ShareProfileScreen({
           <Avatar
             uri={profile?.avatar}
             name={profile?.name}
-            size={AvatarSizes.shareProfile}
             style={{ alignSelf: "center" }}
           />
           <Text

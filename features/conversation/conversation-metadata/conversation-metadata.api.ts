@@ -13,7 +13,7 @@ const ConversationMetadataSchema = z.object({
   updatedAt: z.string().datetime(),
 });
 
-// export type IConversationMetadata = z.infer<typeof ConversationMetadataSchema>;
+export type IConversationMetadata = z.infer<typeof ConversationMetadataSchema>;
 
 // export async function getConversationMetadatas(args: {
 //   account: string;
@@ -50,7 +50,7 @@ export async function getConversationMetadata(args: {
   const { account, topic } = args;
   const conversationId = await getConversationId({ account, topic });
 
-  const { data } = await api.get(
+  const { data } = await api.get<IConversationMetadata>(
     `/api/v1/metadata/conversation/${conversationId}`
   );
 
@@ -65,7 +65,7 @@ export async function getConversationMetadata(args: {
     );
   }
 
-  return data as IConversationMetadata;
+  return data;
 }
 
 export async function markConversationAsRead(args: {
@@ -188,13 +188,16 @@ async function updateConversationMetadata(args: {
     throw new Error("No current user found");
   }
 
-  const { data } = await api.post(`/api/v1/metadata/conversation`, {
-    conversationId,
-    deviceIdentityId: currentUser.identities.find(
-      (identity) => identity.privyAddress === account
-    )?.id,
-    ...updates,
-  });
+  const { data } = await api.post<IConversationMetadata>(
+    `/api/v1/metadata/conversation`,
+    {
+      conversationId,
+      deviceIdentityId: currentUser.identities.find(
+        (identity) => identity.privyAddress === account
+      )?.id,
+      ...updates,
+    }
+  );
 
   const parseResult = ConversationMetadataSchema.safeParse(data);
   if (!parseResult.success) {
@@ -207,5 +210,5 @@ async function updateConversationMetadata(args: {
     );
   }
 
-  return data as IConversationMetadata;
+  return data;
 }

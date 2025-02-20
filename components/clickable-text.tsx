@@ -1,10 +1,8 @@
 import { ParsedText } from "@/components/parsed-text/parsed-text";
 import Clipboard from "@react-native-clipboard/clipboard";
-import { actionSheetColors } from "@styles/colors";
 import * as Linking from "expo-linking";
-import { useCallback, useEffect } from "react";
-import { StyleProp, StyleSheet, TextStyle, useColorScheme } from "react-native";
-import { navigate } from "../utils/navigation";
+import { useCallback } from "react";
+import { StyleProp, StyleSheet, TextStyle } from "react-native";
 import {
   ADDRESS_REGEX,
   CB_ID_REGEX,
@@ -15,7 +13,7 @@ import {
   UNS_REGEX,
   URL_REGEX,
 } from "../utils/regex";
-import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
+import { showActionSheet } from "./StateHandlers/ActionSheetStateHandler";
 
 type Props = {
   children: React.ReactNode;
@@ -23,7 +21,6 @@ type Props = {
 };
 
 export function ClickableText({ children, style }: Props) {
-  const colorScheme = useColorScheme();
   const styles = useStyles();
 
   const handleEmailPress = useCallback((email: string) => {
@@ -52,23 +49,22 @@ export function ClickableText({ children, style }: Props) {
 
       const options = Object.keys(methods);
 
-      showActionSheetWithOptions(
-        {
+      showActionSheet({
+        options: {
           options,
           title: content,
           cancelButtonIndex: options.indexOf("Cancel"),
-          ...actionSheetColors(colorScheme),
         },
-        (selectedIndex?: number) => {
+        callback: (selectedIndex?: number) => {
           if (selectedIndex === undefined) return;
           const method = (methods as any)[options[selectedIndex]];
           if (method) {
             method();
           }
-        }
-      );
+        },
+      });
     },
-    [colorScheme]
+    []
   );
 
   return (

@@ -1,4 +1,4 @@
-import { showActionSheetWithOptions } from "@/components/StateHandlers/ActionSheetStateHandler";
+import { showActionSheet } from "@/components/StateHandlers/ActionSheetStateHandler";
 import { updateInboxIdsConsentForAccount } from "@/features/consent/update-inbox-ids-consent-for-account";
 import { deleteConversation } from "@/features/conversation/conversation-metadata/conversation-metadata.api";
 import {
@@ -8,7 +8,6 @@ import {
 import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { translate } from "@/i18n";
 import { getGroupQueryData } from "@/queries/useGroupQuery";
-import { actionSheetColors } from "@/styles/colors";
 import { useAppTheme } from "@/theme/useAppTheme";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { useMutation } from "@tanstack/react-query";
@@ -95,19 +94,18 @@ export const useDeleteGroup = (args: { groupTopic: ConversationTopic }) => {
       },
     ];
 
-    showActionSheetWithOptions(
-      {
+    showActionSheet({
+      options: {
         options: actions.map((a) => a.label),
         cancelButtonIndex: actions.length - 1,
         destructiveButtonIndex: [0, 1],
         title,
-        ...actionSheetColors(colorScheme),
       },
-      async (selectedIndex?: number) => {
+      callback: async (selectedIndex?: number) => {
         if (selectedIndex !== undefined) {
-          await actions[selectedIndex].action();
+          actions[selectedIndex].action();
         }
-      }
-    );
-  }, [colorScheme, currentAccount, groupTopic, deleteGroupAsync]);
+      },
+    });
+  }, [currentAccount, groupTopic, deleteGroupAsync]);
 };

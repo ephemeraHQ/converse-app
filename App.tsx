@@ -1,31 +1,30 @@
-import { PrivyProvider } from "@privy-io/expo";
-import * as Clipboard from "expo-clipboard";
-import { DevToolsBubble } from "react-native-react-query-devtools";
-import ActionSheetStateHandler from "@/components/StateHandlers/ActionSheetStateHandler";
+import { ActionSheet } from "@/components/StateHandlers/ActionSheetStateHandler";
+import { DebugButton } from "@/components/debug-button";
+import { Snackbars } from "@/components/snackbar/snackbars";
 import { useHydrateAuth } from "@/features/authentication/use-hydrate-auth";
 import { useLogoutOnJwtRefreshError } from "@/features/authentication/use-logout-on-jwt-refresh-error";
 import { useInitializeMultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 import { useSetupStreamingSubscriptions } from "@/features/streams/streams";
 import { $globalStyles } from "@/theme/styles";
 import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
-import { DebugButton } from "@/components/debug-button";
-import { Snackbars } from "@/components/snackbar/snackbars";
 import { BottomSheetModalProvider } from "@design-system/BottomSheet/BottomSheetModalProvider";
 import { useReactQueryDevTools } from "@dev-plugins/react-query";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
+import { PrivyProvider } from "@privy-io/expo";
 import { SmartWalletsProvider } from "@privy-io/expo/smart-wallets";
 import { queryClient } from "@queries/queryClient";
-import { MaterialDarkTheme, MaterialLightTheme } from "@styles/colors";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { useThemeProvider } from "@theme/useAppTheme";
 import { setupAppAttest } from "@utils/appCheck";
 import { useCoinbaseWalletListener } from "@utils/coinbaseWallet";
+import * as Clipboard from "expo-clipboard";
 import "expo-dev-client";
-import React, { useEffect, useMemo } from "react";
-import { Platform, useColorScheme } from "react-native";
+import React, { useEffect } from "react";
+import { Platform } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
+import { DevToolsBubble } from "react-native-react-query-devtools";
 import {
   ReanimatedLogLevel,
   configureReanimatedLogger,
@@ -62,8 +61,6 @@ configureCoinbase({
 const coinbaseUrl = new URL(`https://${config.websiteDomain}/coinbase`);
 
 export function App() {
-  const colorScheme = useColorScheme();
-
   useInitializeMultiInboxClient();
   useLogoutOnJwtRefreshError();
   useMonitorNetworkConnectivity();
@@ -73,10 +70,6 @@ export function App() {
 
   const { themeScheme, setThemeContextOverride, ThemeProvider } =
     useThemeProvider();
-
-  const paperTheme = useMemo(() => {
-    return colorScheme === "dark" ? MaterialDarkTheme : MaterialLightTheme;
-  }, [colorScheme]);
 
   useEffect(() => {
     setupAppAttest();
@@ -104,7 +97,7 @@ export function App() {
             <AppKeyboardProvider>
               <ActionSheetProvider>
                 <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
-                  <PaperProvider theme={paperTheme}>
+                  <PaperProvider>
                     <GestureHandlerRootView style={$globalStyles.flex1}>
                       <BottomSheetModalProvider>
                         {/* <AuthenticateWithPasskeyProvider> */}
@@ -112,7 +105,7 @@ export function App() {
                         {/* </AuthenticateWithPasskeyProvider> */}
                         {__DEV__ && <DevToolsBubble onCopy={onCopy} />}
                         <DebugButton />
-                        <ActionSheetStateHandler />
+                        <ActionSheet />
                         <Snackbars />
                       </BottomSheetModalProvider>
                     </GestureHandlerRootView>

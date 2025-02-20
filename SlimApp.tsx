@@ -1,19 +1,18 @@
-import { config } from "@/config";
 import { Snackbars } from "@/components/snackbar/snackbars";
+import { config } from "@/config";
 import { BottomSheetModalProvider } from "@design-system/BottomSheet/BottomSheetModalProvider";
 import { useReactQueryDevTools } from "@dev-plugins/react-query";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { PrivyProvider } from "@privy-io/expo";
 import { SmartWalletsProvider } from "@privy-io/expo/smart-wallets";
 import { queryClient } from "@queries/queryClient";
-import { MaterialDarkTheme, MaterialLightTheme } from "@styles/colors";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { useThemeProvider } from "@theme/useAppTheme";
 import { setupAppAttest } from "@utils/appCheck";
 import * as Clipboard from "expo-clipboard";
 import "expo-dev-client";
-import React, { useEffect, useMemo } from "react";
-import { SafeAreaView, useColorScheme } from "react-native";
+import React, { useEffect } from "react";
+import { SafeAreaView } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Provider as PaperProvider } from "react-native-paper";
 import { DevToolsBubble } from "react-native-react-query-devtools";
@@ -23,12 +22,6 @@ import { useInitializeMultiInboxClient } from "./features/multi-inbox/multi-inbo
 import { PrivyPlaygroundLandingScreen } from "./features/privy-playground/privy-playground-landing.screen";
 
 export function SlimApp() {
-  const colorScheme = useColorScheme();
-
-  const paperTheme = useMemo(() => {
-    return colorScheme === "dark" ? MaterialDarkTheme : MaterialLightTheme;
-  }, [colorScheme]);
-
   useInitializeMultiInboxClient();
   useReactQueryDevTools(queryClient);
   useMonitorNetworkConnectivity();
@@ -58,7 +51,7 @@ export function SlimApp() {
           <ThirdwebProvider>
             <ActionSheetProvider>
               <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
-                <PaperProvider theme={paperTheme}>
+                <PaperProvider>
                   <GestureHandlerRootView style={{ flex: 1 }}>
                     <BottomSheetModalProvider>
                       <SafeAreaView style={{ flex: 1 }}>

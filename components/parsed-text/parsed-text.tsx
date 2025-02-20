@@ -1,8 +1,8 @@
 import { ITextProps, Text } from "@design-system/Text";
 import React, { ReactNode, forwardRef } from "react";
 import { Text as RNText } from "react-native";
-import { ICustomParseShape } from "./ParsedText.types";
-import { PATTERNS, isDefaultPattern, parseText } from "./ParsedText.utils";
+import { ICustomParseShape } from "./parsed-text.types";
+import { PATTERNS, isDefaultPattern, parseText } from "./parsed-text.utils";
 
 export type ParsedTextProps = {
   /** The text or components to render */

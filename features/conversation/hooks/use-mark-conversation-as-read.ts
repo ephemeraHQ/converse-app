@@ -35,7 +35,6 @@ export function getMarkConversationAsReadMutationOptions(args: {
     onMutate: () => {
       const currentAccount = getCurrentAccount()!;
       const readUntil = formatDateForApi(new Date());
-
       const previousData = getConversationMetadataQueryData({
         account: currentAccount,
         topic,
@@ -50,7 +49,15 @@ export function getMarkConversationAsReadMutationOptions(args: {
         },
       });
 
-      return { previousData };
+      // Extract only the fields we need for rollback
+      return {
+        previousData: previousData
+          ? {
+              readUntil: previousData.readUntil,
+              unread: previousData.unread,
+            }
+          : null,
+      };
     },
     onError: (error, _, context) => {
       const currentAccount = getCurrentAccount()!;

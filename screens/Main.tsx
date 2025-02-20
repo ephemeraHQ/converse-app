@@ -30,7 +30,6 @@ import {
   ShareProfileNav,
   ShareProfileScreenConfig,
 } from "./Navigation/ShareProfileNav";
-import { WebviewPreviewScreenConfig } from "./Navigation/WebviewPreviewNav";
 
 const prefix = Linking.createURL("/");
 
@@ -43,7 +42,6 @@ const linking: LinkingOptions<NavigationParamList> = {
       Conversation: ConversationScreenConfig,
       Profile: ProfileScreenConfig,
       ShareProfile: ShareProfileScreenConfig,
-      WebviewPreview: WebviewPreviewScreenConfig,
     },
   },
   // TODO: Fix this

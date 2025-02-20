@@ -1,14 +1,9 @@
 import { ActivityIndicator } from "@/design-system/activity-indicator";
 import { IconButton } from "@design-system/IconButton/IconButton";
 import { AnimatedVStack, VStack } from "@design-system/VStack";
-import {
-  setAndroidColors,
-  setAndroidSystemColor,
-} from "@styles/colors/helpers";
 import { useAppTheme } from "@theme/useAppTheme";
 import { Image } from "expo-image";
-import { useEffect } from "react";
-import { StyleSheet, useColorScheme } from "react-native";
+import { StyleSheet } from "react-native";
 
 type SendAttachmentPreviewProps = {
   uri: string;
@@ -25,15 +20,7 @@ export function SendAttachmentPreview({
   error,
   isLandscape,
 }: SendAttachmentPreviewProps) {
-  const colorScheme = useColorScheme();
   const { theme } = useAppTheme();
-
-  useEffect(() => {
-    setAndroidSystemColor("#000000");
-    return () => {
-      setAndroidColors(colorScheme);
-    };
-  }, [colorScheme]);
 
   return (
     <AnimatedVStack

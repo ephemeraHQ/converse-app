@@ -1,26 +1,21 @@
-import { showActionSheetWithOptions } from "@/components/StateHandlers/ActionSheetStateHandler";
+import { showActionSheet } from "@/components/StateHandlers/ActionSheetStateHandler";
 import { useDenyDmMutation } from "@/features/consent/use-deny-dm.mutation";
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
-import { useProfileQuery } from "@/features/profiles/profiles.query";
-import { translate } from "@/i18n";
+import { deleteConversation } from "@/features/conversation/conversation-metadata/conversation-metadata.api";
 import {
   getConversationMetadataQueryData,
   updateConversationMetadataQueryData,
 } from "@/features/conversation/conversation-metadata/conversation-metadata.query";
+import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { useProfileQuery } from "@/features/profiles/profiles.query";
+import { translate } from "@/i18n";
 import { getConversationQueryOptions } from "@/queries/conversation-query";
 import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query";
-import { actionSheetColors } from "@/styles/colors";
-import { useAppTheme } from "@/theme/useAppTheme";
-import { deleteConversation } from "@/features/conversation/conversation-metadata/conversation-metadata.api";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
 
 export const useDeleteDm = ({ topic }: { topic: ConversationTopic }) => {
-  const { theme } = useAppTheme();
-  const colorScheme = theme.isDark ? "dark" : "light";
-
   const currentAccount = useCurrentAccount()!;
 
   const { data: conversationId } = useQuery({
@@ -111,22 +106,20 @@ export const useDeleteDm = ({ topic }: { topic: ConversationTopic }) => {
       },
     ];
 
-    showActionSheetWithOptions(
-      {
+    showActionSheet({
+      options: {
         options: actions.map((a) => a.label),
         cancelButtonIndex: actions.length - 1,
         destructiveButtonIndex: [0, 1],
         title,
-        ...actionSheetColors(colorScheme),
       },
-      async (selectedIndex?: number) => {
+      callback: async (selectedIndex?: number) => {
         if (selectedIndex !== undefined) {
           await actions[selectedIndex].action();
         }
-      }
-    );
+      },
+    });
   }, [
-    colorScheme,
     profile,
     deleteDmAsync,
     denyDmConsentAsync,

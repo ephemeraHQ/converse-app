@@ -29,9 +29,6 @@ type AppStoreType = {
   lastVersionOpen: string;
   setLastVersionOpen: (version: string) => void;
 
-  actionSheetShown: boolean;
-  setActionSheetShown: (s: boolean) => void;
-
   contextMenuShownId: string | null;
   setContextMenuShown: (messageId: string | null) => void;
 };
@@ -64,10 +61,6 @@ export const useAppStore = create<AppStoreType>()(
         lastVersionOpen: "",
         setLastVersionOpen: (version) =>
           set(() => ({ lastVersionOpen: version })),
-
-        actionSheetShown: false,
-        setActionSheetShown: (s: boolean) =>
-          set(() => ({ actionSheetShown: s })),
 
         contextMenuShownId: null,
         setContextMenuShown: (messageId: string | null) =>

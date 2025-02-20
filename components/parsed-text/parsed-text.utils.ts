@@ -2,7 +2,7 @@ import {
   ICustomParseShape,
   IDefaultParseShape,
   IParseShape,
-} from "@/components/parsed-text/parsed-text";
+} from "@/components/parsed-text/parsed-text.types";
 import { ObjectTyped } from "@/utils/object-typed";
 
 type ITextPart = {

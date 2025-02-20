@@ -1,16 +1,14 @@
-import { showActionSheetWithOptions } from "@/components/StateHandlers/ActionSheetStateHandler";
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { showActionSheet } from "@/components/StateHandlers/ActionSheetStateHandler";
 import { useAllowDmMutation } from "@/features/consent/use-allow-dm.mutation";
 import { useDenyDmMutation } from "@/features/consent/use-deny-dm.mutation";
+import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { useRouter } from "@/navigation/useNavigation";
 import { getConversationQueryData } from "@/queries/conversation-query";
 import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query";
-import { actionSheetColors } from "@/styles/colors";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { ensureError } from "@/utils/error";
 import { translate } from "@i18n";
 import React, { useCallback } from "react";
-import { useColorScheme } from "react-native";
 import { useCurrentConversationTopicSafe } from "../conversation.store-context";
 import {
   ConsentPopupButtonsContainer,
@@ -31,8 +29,6 @@ export function ConversationConsentPopupDm() {
 
   const navigation = useRouter();
 
-  const colorScheme = useColorScheme();
-
   const { mutateAsync: denyDmConsentAsync } = useDenyDmMutation();
   const { mutateAsync: allowDmConsentAsync } = useAllowDmMutation();
 
@@ -50,15 +46,14 @@ export function ConversationConsentPopupDm() {
       throw new Error("Conversation not found");
     }
 
-    showActionSheetWithOptions(
-      {
+    showActionSheet({
+      options: {
         options: [translate("Delete"), translate("Cancel")],
         cancelButtonIndex: 1,
         destructiveButtonIndex: 0,
         title: translate("if_you_block_contact"),
-        ...actionSheetColors(colorScheme),
       },
-      async (selectedIndex?: number) => {
+      callback: async (selectedIndex?: number) => {
         if (selectedIndex === 0) {
           try {
             await denyDmConsentAsync({
@@ -73,16 +68,9 @@ export function ConversationConsentPopupDm() {
             });
           }
         }
-      }
-    );
-  }, [
-    colorScheme,
-    navigation,
-    denyDmConsentAsync,
-    peerInboxId,
-    topic,
-    currentAccount,
-  ]);
+      },
+    });
+  }, [navigation, denyDmConsentAsync, peerInboxId, topic, currentAccount]);
 
   const handleAccept = useCallback(async () => {
     try {

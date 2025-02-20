@@ -8,14 +8,13 @@ import {
   loggingFilePath,
   rotateLoggingFile,
 } from "@utils/logger";
-import { navigate } from "@utils/navigation";
 import Share from "@utils/share";
 import Constants from "expo-constants";
 import { Image } from "expo-image";
 import * as Updates from "expo-updates";
 import { useCallback, useEffect, useMemo } from "react";
 import { Alert, Platform } from "react-native";
-import { showActionSheetWithOptions } from "./StateHandlers/ActionSheetStateHandler";
+import { showActionSheet } from "./StateHandlers/ActionSheetStateHandler";
 
 export function DebugButton() {
   const { logout } = useLogout();
@@ -93,21 +92,21 @@ export function DebugButton() {
         });
       },
       "New log session": rotateLoggingFile,
-      "Display current session logs": async () => {
-        navigate("WebviewPreview", { uri: loggingFilePath });
-      },
-      "Display native logs": async () => {
-        const nativeLogFilePath = await getNativeLogFile();
-        navigate("WebviewPreview", { uri: nativeLogFilePath });
-      },
-      "Display previous session logs": async () => {
-        const previousLoggingFile = await getPreviousSessionLoggingFile();
-        if (!previousLoggingFile) {
-          return Alert.alert("No previous session logging file found");
-        }
-        navigate("WebviewPreview", { uri: previousLoggingFile });
-      },
-      Cancel: undefined,
+      // "Display current session logs": async () => {
+      //   navigate("WebviewPreview", { uri: loggingFilePath });
+      // },
+      // "Display native logs": async () => {
+      //   const nativeLogFilePath = await getNativeLogFile();
+      //   navigate("WebviewPreview", { uri: nativeLogFilePath });
+      // },
+      // "Display previous session logs": async () => {
+      //   const previousLoggingFile = await getPreviousSessionLoggingFile();
+      //   if (!previousLoggingFile) {
+      //     return Alert.alert("No previous session logging file found");
+      //   }
+      //   navigate("WebviewPreview", { uri: previousLoggingFile });
+      // },
+      // Cancel: undefined,
     };
   }, [logout]);
 
@@ -120,20 +119,20 @@ export function DebugButton() {
         ? Constants.expoConfig?.ios?.buildNumber
         : Constants.expoConfig?.android?.versionCode;
 
-    showActionSheetWithOptions(
-      {
+    showActionSheet({
+      options: {
         title: `Converse v${appVersion} (${buildNumber})`,
         options,
         cancelButtonIndex: options.indexOf("Cancel"),
       },
-      (selectedIndex?: number) => {
+      callback: (selectedIndex?: number) => {
         if (selectedIndex === undefined) return;
         const method = methods[options[selectedIndex] as keyof typeof methods];
         if (method) {
           method();
         }
-      }
-    );
+      },
+    });
   }, [methods]);
 
   useEffect(() => {

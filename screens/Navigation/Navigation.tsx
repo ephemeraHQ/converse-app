@@ -6,7 +6,6 @@ import { ConversationNavParams } from "@/features/conversation/conversation.nav"
 import { ProfileNavParams } from "@/features/profiles/profile.nav";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Platform } from "react-native";
-import { WebviewPreviewNavParams } from "./WebviewPreviewNav";
 
 export type NavigationParamList = {
   Idle: undefined;
@@ -32,7 +31,6 @@ export type NavigationParamList = {
   Profile: ProfileNavParams;
   // InviteUsersToExistingGroup: InviteUsersToExistingGroupParams;
   UserProfile: undefined;
-  WebviewPreview: WebviewPreviewNavParams;
 
   // UI Tests
   Examples: undefined;

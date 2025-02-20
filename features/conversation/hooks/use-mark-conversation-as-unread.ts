@@ -43,11 +43,13 @@ export function useMarkConversationAsUnread(args: {
     },
     onError: (error, _, context) => {
       const currentAccount = getCurrentAccount()!;
-      updateConversationMetadataQueryData({
-        account: currentAccount,
-        topic,
-        updateData: context?.previousData ?? null,
-      });
+      if (context?.previousData) {
+        updateConversationMetadataQueryData({
+          account: currentAccount,
+          topic,
+          updateData: context.previousData,
+        });
+      }
     },
   });
 
