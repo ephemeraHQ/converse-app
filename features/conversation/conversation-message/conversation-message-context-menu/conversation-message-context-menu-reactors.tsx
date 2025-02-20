@@ -1,4 +1,4 @@
-import { GroupAvatarInboxIds } from "@/components/group-avatar";
+import { GroupAvatarInboxIds } from "@/components-name/group-avatar";
 import { AnimatedCenter, Center } from "@/design-system/Center";
 import { HStack } from "@/design-system/HStack";
 import { ObjectTyped } from "@/utils/object-typed";

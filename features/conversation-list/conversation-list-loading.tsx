@@ -1,4 +1,4 @@
-import { AnimatedTextCarousel } from "@/components/animated-text-carousel";
+import { AnimatedTextCarousel } from "@/components-name/animated-text-carousel";
 import { useHeaderHeight } from "@/design-system/Header/Header.utils";
 import { Text } from "@/design-system/Text";
 import { AnimatableText } from "@/design-system/Text/AnimatedText";

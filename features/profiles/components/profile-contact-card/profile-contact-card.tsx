@@ -1,4 +1,4 @@
-import { Avatar } from "@/components/avatar";
+import { Avatar } from "@/components-name/avatar";
 import { Text } from "@/design-system/Text";
 import { VStack } from "@/design-system/VStack";
 import { ProfileContactCardLayout } from "@/features/profiles/components/profile-contact-card/profile-contact-card-layout";

@@ -16,7 +16,7 @@
     "resolveJsonModule": true,
     "paths": {
       "@/*": ["./*"],
-      "@components/*": ["./components/*"],
+      "@components/*": ["components-name/*"],
       "@config": ["./config"],
       "@config/*": ["./config/*"],
       "@containers/*": ["./containers/*"],

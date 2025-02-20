@@ -1,4 +1,4 @@
-import { Avatar } from "@/components/avatar";
+import { Avatar } from "@/components-name/avatar";
 import { Center } from "@/design-system/Center";
 import { HStack } from "@/design-system/HStack";
 import { HeaderAction } from "@/design-system/Header/HeaderAction";

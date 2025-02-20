@@ -1,4 +1,4 @@
-import { showActionSheet } from "@/components/StateHandlers/ActionSheetStateHandler";
+import { showActionSheet } from "@/components-name/StateHandlers/ActionSheetStateHandler";
 import { useAllowDmMutation } from "@/features/consent/use-allow-dm.mutation";
 import { useDenyDmMutation } from "@/features/consent/use-deny-dm.mutation";
 import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";

@@ -3,7 +3,7 @@ import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { useProfileQuery } from "@/features/profiles/profiles.query";
 import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query";
 import { copyToClipboard } from "@/utils/clipboard";
-import { Avatar } from "@/components/avatar";
+import { Avatar } from "@/components-name/avatar";
 import { useRouter } from "@/navigation/use-navigation";
 import { useAppTheme } from "@/theme/use-app-theme";
 import { ConversationTopic } from "@xmtp/react-native-sdk";

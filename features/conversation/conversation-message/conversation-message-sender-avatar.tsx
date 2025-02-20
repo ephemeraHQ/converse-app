@@ -1,6 +1,6 @@
 import { useConversationMessageStyles } from "@/features/conversation/conversation-message/conversation-message.styles";
 import { navigate } from "@/utils/navigation";
-import { Avatar } from "@/components/avatar";
+import { Avatar } from "@/components-name/avatar";
 import { useCallback } from "react";
 import { TouchableOpacity } from "react-native";
 import { useProfileQuery } from "@/features/profiles/profiles.query";

@@ -1,4 +1,4 @@
-import { GroupAvatar } from "@/components/group-avatar";
+import { GroupAvatar } from "@/components-name/group-avatar";
 import { Text } from "@/design-system/Text";
 import { ConversationHeaderTitle } from "@/features/conversation/conversation-screen-header/conversation-screen-header-title";
 import { useGroupName } from "@/hooks/useGroupName";

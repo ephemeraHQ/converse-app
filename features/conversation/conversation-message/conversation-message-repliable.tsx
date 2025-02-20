@@ -1,4 +1,7 @@
-import { ISwipeableRenderActionsArgs, Swipeable } from "@/components/swipeable";
+import {
+  ISwipeableRenderActionsArgs,
+  Swipeable,
+} from "@/components-name/swipeable";
 import { AnimatedVStack } from "@/design-system/VStack";
 import { useConversationMessageStyles } from "@/features/conversation/conversation-message/conversation-message.styles";
 import logger from "@/utils/logger";

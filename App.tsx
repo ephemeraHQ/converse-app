@@ -1,6 +1,6 @@
-import { ActionSheet } from "@/components/StateHandlers/ActionSheetStateHandler";
-import { DebugButton } from "@/components/debug-button";
-import { Snackbars } from "@/components/snackbar/snackbars";
+import { ActionSheet } from "@/components-name/StateHandlers/ActionSheetStateHandler";
+import { DebugButton } from "@/components-name/debug-button";
+import { Snackbars } from "@/components-name/snackbar/snackbars";
 import { useHydrateAuth } from "@/features/authentication/use-hydrate-auth";
 import { useLogoutOnJwtRefreshError } from "@/features/authentication/use-logout-on-jwt-refresh-error";
 import { useInitializeMultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";

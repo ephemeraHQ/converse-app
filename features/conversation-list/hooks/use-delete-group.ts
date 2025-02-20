@@ -1,4 +1,4 @@
-import { showActionSheet } from "@/components/StateHandlers/ActionSheetStateHandler";
+import { showActionSheet } from "@/components-name/StateHandlers/ActionSheetStateHandler";
 import { updateInboxIdsConsentForAccount } from "@/features/consent/update-inbox-ids-consent-for-account";
 import { deleteConversation } from "@/features/conversation/conversation-metadata/conversation-metadata.api";
 import {

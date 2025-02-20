@@ -1,4 +1,4 @@
-import { Avatar } from "@/components/avatar";
+import { Avatar } from "@/components-name/avatar";
 import { Center } from "@/design-system/Center";
 import { Icon } from "@/design-system/Icon/Icon";
 import { VStack } from "@/design-system/VStack";

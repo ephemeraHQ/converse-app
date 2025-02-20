@@ -1,5 +1,5 @@
-import { Avatar } from "@/components/avatar";
-import { ISwipeableRenderActionsArgs } from "@/components/swipeable";
+import { Avatar } from "@/components-name/avatar";
+import { ISwipeableRenderActionsArgs } from "@/components-name/swipeable";
 import { MIDDLE_DOT } from "@/design-system/middle-dot";
 import { ConversationListItemSwipeable } from "@/features/conversation-list/conversation-list-item/conversation-list-item-swipeable/conversation-list-item-swipeable";
 import { RestoreSwipeableAction } from "@/features/conversation-list/conversation-list-item/conversation-list-item-swipeable/conversation-list-item-swipeable-restore-action";

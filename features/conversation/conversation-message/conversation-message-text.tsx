@@ -1,4 +1,4 @@
-import { ClickableText } from "@/components/clickable-text";
+import { ClickableText } from "@/components-name/clickable-text";
 import { useAppTheme } from "@/theme/use-app-theme";
 import { memo } from "react";
 

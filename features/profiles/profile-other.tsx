@@ -1,4 +1,4 @@
-import { Screen } from "@/components/screen/screen";
+import { Screen } from "@/components-name/screen/screen";
 import { ProfileContactCard } from "@/features/profiles/components/profile-contact-card/profile-contact-card";
 import { ProfileSection } from "@/features/profiles/components/profile-section";
 import { ProfileSocialsNames } from "@/features/profiles/components/profile-social-names";

@@ -2,7 +2,7 @@ import {
   ICustomParseShape,
   IDefaultParseShape,
   IParseShape,
-} from "@/components/parsed-text/parsed-text.types";
+} from "@/components-name/parsed-text/parsed-text.types";
 import { ObjectTyped } from "@/utils/object-typed";
 
 type ITextPart = {
@@ -73,22 +73,27 @@ function createMatchedPart(args: {
   const { pattern, match, index } = args;
   const text = match[0];
 
-  const props = ObjectTyped.entries(pattern).reduce((acc, [key, value]) => {
-    if (["pattern", "renderText", "nonExhaustiveMaxMatchCount"].includes(key)) {
-      return acc;
-    }
+  const props = ObjectTyped.entries(pattern).reduce(
+    (acc, [key, value]) => {
+      if (
+        ["pattern", "renderText", "nonExhaustiveMaxMatchCount"].includes(key)
+      ) {
+        return acc;
+      }
 
-    if (typeof value === "function") {
-      // Support onPress / onLongPress functions
-      acc[key] = () =>
-        // @ts-ignore
-        value(text, index);
-    } else {
-      // Set a prop with an arbitrary name to the value in the match-config
-      acc[key] = value;
-    }
-    return acc;
-  }, {} as Record<string, any>);
+      if (typeof value === "function") {
+        // Support onPress / onLongPress functions
+        acc[key] = () =>
+          // @ts-ignore
+          value(text, index);
+      } else {
+        // Set a prop with an arbitrary name to the value in the match-config
+        acc[key] = value;
+      }
+      return acc;
+    },
+    {} as Record<string, any>
+  );
 
   return {
     ...props,

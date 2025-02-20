@@ -1,10 +1,10 @@
-import { IPicto } from "@/components/Picto/Picto.types";
+import { IPicto } from "@/components-name/Picto/Picto.types";
 import { ReactElement } from "react";
 import { StyleProp, TextStyle, ViewStyle } from "react-native";
 import {
   ExtendedEdge,
   useSafeAreaInsetsStyle,
-} from "@/components/screen/screen.helpers";
+} from "@/components-name/screen/screen.helpers";
 import { translate } from "@/i18n";
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { HStack } from "../HStack";

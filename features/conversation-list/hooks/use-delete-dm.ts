@@ -1,4 +1,4 @@
-import { showActionSheet } from "@/components/StateHandlers/ActionSheetStateHandler";
+import { showActionSheet } from "@/components-name/StateHandlers/ActionSheetStateHandler";
 import { useDenyDmMutation } from "@/features/consent/use-deny-dm.mutation";
 import { deleteConversation } from "@/features/conversation/conversation-metadata/conversation-metadata.api";
 import {

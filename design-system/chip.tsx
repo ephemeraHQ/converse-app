@@ -1,4 +1,4 @@
-import { Avatar, IAvatarProps } from "@/components/avatar";
+import { Avatar, IAvatarProps } from "@/components-name/avatar";
 import { Center } from "@/design-system/Center";
 import { ITextProps, Text } from "@/design-system/Text";
 import { useAppTheme } from "@/theme/use-app-theme";

@@ -1,4 +1,4 @@
-import { ParsedText } from "@/components/parsed-text/parsed-text";
+import { ParsedText } from "@/components-name/parsed-text/parsed-text";
 import Clipboard from "@react-native-clipboard/clipboard";
 import * as Linking from "expo-linking";
 import { useCallback } from "react";

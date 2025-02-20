@@ -1,5 +1,5 @@
-import { useSnackbars } from "@/components/snackbar/snackbar.service";
-import { useGradientHeight } from "@/components/snackbar/snackbar-backdrop/snackbar-backdrop.utils";
+import { useSnackbars } from "@/components-name/snackbar/snackbar.service";
+import { useGradientHeight } from "@/components-name/snackbar/snackbar-backdrop/snackbar-backdrop.utils";
 import { AnimatedVStack } from "@design-system/VStack";
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
