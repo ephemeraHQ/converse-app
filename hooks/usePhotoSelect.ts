@@ -2,7 +2,7 @@ import { actionSheetColors } from "@styles/colors";
 import { useCallback, useState } from "react";
 import { useColorScheme } from "react-native";
 
-import { showActionSheet } from "../components-name/StateHandlers/ActionSheetStateHandler";
+import { showActionSheet } from "../components/action-sheet";
 import { executeAfterKeyboardClosed } from "../utils/keyboard";
 import {
   compressAndResizeImage,

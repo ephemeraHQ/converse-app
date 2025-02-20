@@ -1,7 +1,7 @@
 import { Center } from "@/design-system/Center";
 import { Text } from "@/design-system/Text";
 import { VStack } from "@/design-system/VStack";
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
 import { useProfilesQueries } from "@/features/profiles/profiles.query";
 import { useGroupMembersQuery } from "@/queries/useGroupMembersQuery";
 import { useGroupQuery } from "@/queries/useGroupQuery";
@@ -53,7 +53,7 @@ export const GroupAvatar = memo(function GroupAvatar(props: {
 
   const { theme } = useAppTheme();
 
-  const currentAccount = useCurrentAccount()!;
+  const currentAccount = useCurrentSenderEthAddress()!;
 
   const { data: group } = useGroupQuery({
     account: currentAccount,

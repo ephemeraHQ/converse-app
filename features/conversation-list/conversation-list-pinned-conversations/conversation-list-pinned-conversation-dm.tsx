@@ -4,7 +4,7 @@ import { useConversationIsUnread } from "@/features/conversation-list/hooks/use-
 import { useDmConversationContextMenuViewProps } from "@/features/conversation-list/hooks/use-conversation-list-item-context-menu-props";
 import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query";
 import { DmWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
 import { navigate } from "@utils/navigation";
 import { useCallback } from "react";
 import { isTextMessage } from "../../conversation/conversation-message/conversation-message.utils";
@@ -19,7 +19,7 @@ type IConversationListPinnedConversationDmProps = {
 export const ConversationListPinnedConversationDm = ({
   conversation,
 }: IConversationListPinnedConversationDmProps) => {
-  const currentAccount = useCurrentAccount()!;
+  const currentAccount = useCurrentSenderEthAddress()!;
 
   const conversationTopic = conversation.topic;
 

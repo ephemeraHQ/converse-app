@@ -1,4 +1,4 @@
-import { showActionSheet } from "@/components-name/StateHandlers/ActionSheetStateHandler";
+import { showActionSheet } from "@/components/action-sheet";
 import { translate } from "@i18n";
 import { ConsentState } from "@xmtp/react-native-sdk";
 import { ColorSchemeName } from "react-native";

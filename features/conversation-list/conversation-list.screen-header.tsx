@@ -1,4 +1,4 @@
-import { Avatar } from "@/components-name/avatar";
+import { Avatar } from "@/components/avatar";
 import { Center } from "@/design-system/Center";
 import { HStack } from "@/design-system/HStack";
 import { HeaderAction } from "@/design-system/Header/HeaderAction";
@@ -7,9 +7,9 @@ import { Pressable } from "@/design-system/Pressable";
 import { Text } from "@/design-system/Text";
 import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu";
 import {
-  useAccountsStore,
+  multiInboxStore,
   useCurrentProfiles,
-  useSafeActiveSenderProfile,
+  useSafeCurrentSenderProfile,
   useSafeCurrentSender,
 } from "@/features/multi-inbox/multi-inbox.store";
 import { useProfileQuery } from "@/features/profiles/profiles.query";
@@ -66,7 +66,7 @@ function HeaderTitle() {
   const { theme, themed } = useAppTheme();
   const navigation = useNavigation();
   const currentAccountInboxId = useSafeCurrentSender().inboxId;
-  const { data: currentProfile } = useSafeActiveSenderProfile();
+  const { data: currentProfile } = useSafeCurrentSenderProfile();
   const { currentProfiles } = useCurrentProfiles();
 
   const onDropdownPress = useCallback(
@@ -81,7 +81,7 @@ function HeaderTitle() {
       } else if (profileXmtpInboxId === "app-settings") {
         navigation.navigate("AppSettings");
       } else {
-        useAccountsStore.getState().setCurrentInboxId(profileXmtpInboxId);
+        multiInboxStore.getState().setCurrentInboxId(profileXmtpInboxId);
       }
     },
     [navigation]

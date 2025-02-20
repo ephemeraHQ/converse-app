@@ -23,7 +23,7 @@ import { createWallet, WalletId } from "thirdweb/wallets";
 import { InboxSigner } from "../multi-inbox/multi-inbox-client.types";
 import { MultiInboxClient } from "../multi-inbox/multi-inbox.client";
 import {
-  useAccountsStore,
+  multiInboxStore,
   useCurrentSender,
 } from "../multi-inbox/multi-inbox.store";
 import { ISocialProfile } from "../social-profiles/social-lookup.api";
@@ -194,7 +194,7 @@ export function ConnectWalletBottomSheet({
   } = state;
 
   const restored =
-    useAccountsStore.getState().multiInboxClientRestorationState === "restored";
+    multiInboxStore.getState().multiInboxClientRestorationState === "restored";
 
   // useEffect(() => {
   //   logger.debug(

@@ -1,10 +1,10 @@
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import { useCurrentAccount } from "../features/multi-inbox/multi-inbox.store";
+import { useCurrentSenderEthAddress } from "../features/multi-inbox/multi-inbox.store";
 import { useGroupPhotoMutation } from "../queries/useGroupPhotoMutation";
 import { useGroupPhotoQuery } from "../queries/useGroupPhotoQuery";
 
 export const useGroupPhoto = (topic: ConversationTopic) => {
-  const account = useCurrentAccount();
+  const account = useCurrentSenderEthAddress();
   const { data, isLoading, isError } = useGroupPhotoQuery({
     account: account ?? "",
     topic,

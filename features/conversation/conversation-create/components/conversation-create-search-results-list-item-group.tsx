@@ -1,4 +1,4 @@
-import { GroupAvatar } from "@/components-name/group-avatar";
+import { GroupAvatar } from "@/components/group-avatar";
 import { ConversationSearchResultsListItem } from "@/features/conversation/conversation-create/components/conversation-create-search-result-list-item";
 import { useConversationStore } from "@/features/conversation/conversation.store-context";
 import { useProfilesQueries } from "@/features/profiles/profiles.query";

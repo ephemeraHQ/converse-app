@@ -14,7 +14,7 @@ import { Image } from "expo-image";
 import * as Updates from "expo-updates";
 import { useCallback, useEffect, useMemo } from "react";
 import { Alert, Platform } from "react-native";
-import { showActionSheet } from "./StateHandlers/ActionSheetStateHandler";
+import { showActionSheet } from "./action-sheet";
 
 export function DebugButton() {
   const { logout } = useLogout();

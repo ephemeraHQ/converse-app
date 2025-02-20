@@ -5,8 +5,8 @@ import {
   SNACKBAR_HEIGHT,
   SNACKBAR_LARGE_TEXT_HEIGHT,
   SNACKBAR_SPACE_BETWEEN_SNACKBARS,
-} from "@/components-name/snackbar/snackbar.constants";
-import { useSnackbars } from "@/components-name/snackbar/snackbar.service";
+} from "@/components/snackbar/snackbar.constants";
+import { useSnackbars } from "@/components/snackbar/snackbar.service";
 
 export const useGradientHeight = () => {
   const snackbars = useSnackbars();

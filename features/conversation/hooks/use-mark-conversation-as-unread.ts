@@ -1,6 +1,6 @@
 import {
   getCurrentAccount,
-  useCurrentAccount,
+  useCurrentSenderEthAddress,
 } from "@/features/multi-inbox/multi-inbox.store";
 import {
   getConversationMetadataQueryData,
@@ -15,7 +15,7 @@ export function useMarkConversationAsUnread(args: {
 }) {
   const { topic } = args;
 
-  const currentAccount = useCurrentAccount()!;
+  const currentAccount = useCurrentSenderEthAddress()!;
 
   const { mutateAsync: markAsUnreadAsync } = useMutation({
     mutationFn: async () => {

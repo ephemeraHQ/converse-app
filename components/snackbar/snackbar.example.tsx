@@ -1,4 +1,4 @@
-import { showSnackbar } from "@/components-name/snackbar/snackbar.service";
+import { showSnackbar } from "@/components/snackbar/snackbar.service";
 import { Button } from "@design-system/Button/Button";
 import { VStack } from "@design-system/VStack";
 import { useAppTheme } from "@/theme/use-app-theme";

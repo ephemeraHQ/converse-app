@@ -1,4 +1,4 @@
-import { Screen } from "@/components-name/screen/screen";
+import { Screen } from "@/components/screen/screen";
 import { HStack } from "@/design-system/HStack";
 import { AnimatedVStack } from "@/design-system/VStack";
 import { ConversationList } from "@/features/conversation-list/conversation-list";

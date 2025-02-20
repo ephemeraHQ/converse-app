@@ -1,6 +1,6 @@
 import { useCurrentConversationTopicSafe } from "@/features/conversation/conversation.store-context";
 import { useRemoveReactionOnMessage } from "@/features/conversation/hooks/use-remove-reaction-on-message";
-import { Avatar } from "@/components-name/avatar";
+import { Avatar } from "@/components/avatar";
 import { BottomSheet } from "@design-system/BottomSheet/BottomSheet";
 import { BottomSheetContentContainer } from "@design-system/BottomSheet/BottomSheetContentContainer";
 import { BottomSheetHeader } from "@design-system/BottomSheet/BottomSheetHeader";

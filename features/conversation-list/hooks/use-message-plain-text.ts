@@ -4,7 +4,7 @@ import {
   isReplyMessage,
   isStaticAttachmentMessage,
 } from "@/features/conversation/conversation-message/conversation-message.utils";
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
 import {
   useProfileQuery,
   useProfilesQueries,
@@ -42,7 +42,7 @@ function handleGroupMetadataChange(args: {
 export function useMessagePlainText(
   message: DecodedMessageWithCodecsType | undefined
 ) {
-  const account = useCurrentAccount();
+  const account = useCurrentSenderEthAddress();
 
   // Get initiator profile for group updates
   const initiatorInboxId =

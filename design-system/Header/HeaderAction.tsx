@@ -1,4 +1,4 @@
-import { IPicto } from "@/components-name/Picto/Picto.types";
+import { IPicto } from "@/components/Picto/Picto.types";
 import { ReactElement } from "react";
 import { TextStyle, View, ViewStyle } from "react-native";
 import { translate } from "@/i18n";

@@ -2,7 +2,7 @@ import { conversationIsUnreadForInboxId } from "@/features/conversation/utils/co
 import { getConversationMetadataQueryOptions } from "@/features/conversation/conversation-metadata/conversation-metadata.query";
 import { getConversationQueryOptions } from "@/queries/conversation-query";
 import {
-  useCurrentAccount,
+  useCurrentSenderEthAddress,
   useSafeCurrentSender,
 } from "@/features/multi-inbox/multi-inbox.store";
 import { useQuery } from "@tanstack/react-query";
@@ -16,7 +16,7 @@ type UseConversationIsUnreadArgs = {
 export const useConversationIsUnread = ({
   topic,
 }: UseConversationIsUnreadArgs) => {
-  const currentAccount = useCurrentAccount();
+  const currentAccount = useCurrentSenderEthAddress();
   const currentUserInboxId = useSafeCurrentSender().inboxId;
 
   const {

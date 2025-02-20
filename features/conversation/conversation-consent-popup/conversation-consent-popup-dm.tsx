@@ -1,7 +1,7 @@
-import { showActionSheet } from "@/components-name/StateHandlers/ActionSheetStateHandler";
+import { showActionSheet } from "@/components/action-sheet";
 import { useAllowDmMutation } from "@/features/consent/use-allow-dm.mutation";
 import { useDenyDmMutation } from "@/features/consent/use-deny-dm.mutation";
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
 import { useRouter } from "@/navigation/use-navigation";
 import { getConversationQueryData } from "@/queries/conversation-query";
 import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query";
@@ -19,7 +19,7 @@ import {
 
 export function ConversationConsentPopupDm() {
   const topic = useCurrentConversationTopicSafe();
-  const currentAccount = useCurrentAccount()!;
+  const currentAccount = useCurrentSenderEthAddress()!;
 
   const { data: peerInboxId } = useDmPeerInboxIdQuery({
     account: currentAccount,

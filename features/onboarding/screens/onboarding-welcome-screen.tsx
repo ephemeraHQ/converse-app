@@ -1,5 +1,5 @@
-import { Screen } from "@/components-name/screen/screen";
-import { showSnackbar } from "@/components-name/snackbar/snackbar.service";
+import { Screen } from "@/components/screen/screen";
+import { showSnackbar } from "@/components/snackbar/snackbar.service";
 import { Center } from "@/design-system/Center";
 import { Pressable } from "@/design-system/Pressable";
 import { AnimatedText, Text } from "@/design-system/Text";
@@ -7,7 +7,7 @@ import { VStack } from "@/design-system/VStack";
 import { Loader } from "@/design-system/loader";
 import { useLogout } from "@/features/authentication/use-logout.hook";
 import { getCurrentUserQueryData } from "@/features/current-user/curent-user.query";
-import { useAccountsStore } from "@/features/multi-inbox/multi-inbox.store";
+import { multiInboxStore } from "@/features/multi-inbox/multi-inbox.store";
 import { OnboardingSubtitle } from "@/features/onboarding/components/onboarding-subtitle";
 import { OnboardingTitle } from "@/features/onboarding/components/onboarding-title";
 import { useLoginWithPasskey } from "@/features/onboarding/hooks/use-login-with-passkey";
@@ -35,7 +35,7 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
   const handleSignup = useCallback(async () => {
     try {
       const { inboxId, ethereumAddress } = await signup();
-      useAccountsStore.getState().addSender({
+      multiInboxStore.getState().addSender({
         inboxId,
         ethereumAddress,
       });
@@ -49,7 +49,7 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
   const handleLogin = useCallback(async () => {
     try {
       const { inboxId, ethereumAddress } = await login();
-      useAccountsStore.getState().addSender({
+      multiInboxStore.getState().addSender({
         inboxId,
         ethereumAddress,
       });

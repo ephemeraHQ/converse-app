@@ -1,4 +1,4 @@
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
 import { isConversationAllowed } from "@/features/conversation/utils/is-conversation-allowed";
 import { useScreenFocusEffectOnce } from "@/hooks/use-screen-focus-effect-once";
 import { useAppStateHandlers } from "@/hooks/useAppStateHandlers";
@@ -10,7 +10,7 @@ import { useQueries, useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
 
 export const useConversationListConversations = () => {
-  const currentAccount = useCurrentAccount();
+  const currentAccount = useCurrentSenderEthAddress();
 
   const {
     data: conversations,

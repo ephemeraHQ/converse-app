@@ -1,5 +1,5 @@
 import { getMessageSpamScore } from "@/features/conversation-requests-list/utils/get-message-spam-score";
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
 import { getMessageStringContent } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { getUnknownConsentConversationsQueryOptions } from "@/queries/conversations-unknown-consent-query";
 import { captureError } from "@/utils/capture-error";
@@ -7,7 +7,7 @@ import { getMessageContentType } from "@/utils/xmtpRN/xmtp-content-types/xmtp-co
 import { useQueries, useQuery } from "@tanstack/react-query";
 
 export function useConversationRequestsListItem() {
-  const currentAccount = useCurrentAccount();
+  const currentAccount = useCurrentSenderEthAddress();
 
   const {
     data: unkownConsentConversations,

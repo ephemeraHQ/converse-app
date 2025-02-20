@@ -1,5 +1,5 @@
 import {
-  useCurrentAccount,
+  useCurrentSenderEthAddress,
   useSafeCurrentSender,
 } from "@/features/multi-inbox/multi-inbox.store";
 import { Center } from "@/design-system/Center";
@@ -22,7 +22,7 @@ import React, { memo, useMemo } from "react";
 export const ConversationListAwaitingRequests = memo(
   function ConversationListAwaitingRequests() {
     const { theme } = useAppTheme();
-    const currentAccount = useCurrentAccount()!;
+    const currentAccount = useCurrentSenderEthAddress()!;
     const navigation = useNavigation();
     const { likelyNotSpam, isLoading: isLoadingUknownConversations } =
       useConversationRequestsListItem();

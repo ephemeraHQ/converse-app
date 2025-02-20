@@ -1,4 +1,4 @@
-import { ISwipeableProps, Swipeable } from "@/components-name/swipeable";
+import { ISwipeableProps, Swipeable } from "@/components/swipeable";
 import { useAppTheme } from "@/theme/use-app-theme";
 import React, { memo } from "react";
 import { useConversationListItemSwipeableStyles } from "./conversation-list-item-swipeable.styles";

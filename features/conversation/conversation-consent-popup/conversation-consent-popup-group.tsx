@@ -1,4 +1,4 @@
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
 import { useGroupConsentForCurrentAccount } from "@/features/consent/use-group-consent-for-current-account";
 import {
   ConsentPopupButtonsContainer,
@@ -24,7 +24,7 @@ export function ConversationConsentPopupGroup() {
 
   const { denyGroup, allowGroup } = useGroupConsentForCurrentAccount(topic);
 
-  const account = useCurrentAccount()!;
+  const account = useCurrentSenderEthAddress()!;
 
   const { data: groupName } = useGroupNameQuery({ account, topic });
 

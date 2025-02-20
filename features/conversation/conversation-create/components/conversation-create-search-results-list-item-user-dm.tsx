@@ -1,4 +1,4 @@
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
 import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { memo } from "react";
@@ -10,7 +10,7 @@ export const ConversationSearchResultsListItemDm = memo(
   }: {
     conversationTopic: ConversationTopic;
   }) {
-    const currentAccount = useCurrentAccount()!;
+    const currentAccount = useCurrentSenderEthAddress()!;
 
     const { data: inboxId } = useDmPeerInboxIdQuery({
       account: currentAccount,

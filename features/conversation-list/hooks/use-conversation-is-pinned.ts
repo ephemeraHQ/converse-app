@@ -1,4 +1,4 @@
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
 import { getConversationMetadataQueryOptions } from "@/features/conversation/conversation-metadata/conversation-metadata.query";
 import { useQuery } from "@tanstack/react-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
@@ -8,7 +8,7 @@ export function useConversationIsPinned(args: {
 }) {
   const { conversationTopic } = args;
 
-  const currentAccount = useCurrentAccount();
+  const currentAccount = useCurrentSenderEthAddress();
 
   const { data: isPinned } = useQuery({
     ...getConversationMetadataQueryOptions({

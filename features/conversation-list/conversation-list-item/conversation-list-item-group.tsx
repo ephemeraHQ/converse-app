@@ -1,5 +1,5 @@
-import { GroupAvatar } from "@/components-name/group-avatar";
-import { ISwipeableRenderActionsArgs } from "@/components-name/swipeable";
+import { GroupAvatar } from "@/components/group-avatar";
+import { ISwipeableRenderActionsArgs } from "@/components/swipeable";
 import { MIDDLE_DOT } from "@/design-system/middle-dot";
 import { ConversationListItemSwipeable } from "@/features/conversation-list/conversation-list-item/conversation-list-item-swipeable/conversation-list-item-swipeable";
 import { useConversationIsUnread } from "@/features/conversation-list/hooks/use-conversation-is-unread";
@@ -8,7 +8,7 @@ import { useToggleReadStatus } from "@/features/conversation-list/hooks/use-togg
 import { useMessagePlainText } from "@/features/conversation-list/hooks/use-message-plain-text";
 import { useGroupName } from "@/hooks/useGroupName";
 import { useGroupQuery } from "@/queries/useGroupQuery";
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
 import { useRouter } from "@/navigation/use-navigation";
 import { getCompactRelativeTime } from "@utils/date";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
@@ -25,7 +25,7 @@ export const ConversationListItemGroup = memo(
   function ConversationListItemGroup({
     conversationTopic,
   }: IConversationListItemGroupProps) {
-    const currentAccount = useCurrentAccount()!;
+    const currentAccount = useCurrentSenderEthAddress()!;
     const router = useRouter();
 
     const { data: group } = useGroupQuery({

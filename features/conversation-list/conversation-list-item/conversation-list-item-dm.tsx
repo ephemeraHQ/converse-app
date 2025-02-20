@@ -1,5 +1,5 @@
-import { Avatar } from "@/components-name/avatar";
-import { ISwipeableRenderActionsArgs } from "@/components-name/swipeable";
+import { Avatar } from "@/components/avatar";
+import { ISwipeableRenderActionsArgs } from "@/components/swipeable";
 import { MIDDLE_DOT } from "@/design-system/middle-dot";
 import { ConversationListItemSwipeable } from "@/features/conversation-list/conversation-list-item/conversation-list-item-swipeable/conversation-list-item-swipeable";
 import { RestoreSwipeableAction } from "@/features/conversation-list/conversation-list-item/conversation-list-item-swipeable/conversation-list-item-swipeable-restore-action";
@@ -9,7 +9,7 @@ import { useDeleteDm } from "@/features/conversation-list/hooks/use-delete-dm";
 import { useMessagePlainText } from "@/features/conversation-list/hooks/use-message-plain-text";
 import { useRestoreConversation } from "@/features/conversation-list/hooks/use-restore-conversation";
 import { useToggleReadStatus } from "@/features/conversation-list/hooks/use-toggle-read-status";
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
 import { useProfileQuery } from "@/features/profiles/profiles.query";
 import { useConversationQuery } from "@/queries/conversation-query";
 import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query";
@@ -30,7 +30,7 @@ type IConversationListItemDmProps = {
 export const ConversationListItemDm = memo(function ConversationListItemDm({
   conversationTopic,
 }: IConversationListItemDmProps) {
-  const currentAccount = useCurrentAccount()!;
+  const currentAccount = useCurrentSenderEthAddress()!;
   const { theme } = useAppTheme();
 
   // Conversation related hooks

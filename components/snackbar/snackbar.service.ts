@@ -1,5 +1,5 @@
-import { useSnackBarStore } from "@/components-name/snackbar/snackbar.store";
-import { ISnackbar } from "@/components-name/snackbar/snackbar.types";
+import { useSnackBarStore } from "@/components/snackbar/snackbar.store";
+import { ISnackbar } from "@/components/snackbar/snackbar.types";
 import { Haptics } from "@utils/haptics";
 import { v4 as uuidv4 } from "uuid";
 

@@ -1,11 +1,11 @@
-import { showActionSheet } from "@/components-name/StateHandlers/ActionSheetStateHandler";
+import { showActionSheet } from "@/components/action-sheet";
 import { useDenyDmMutation } from "@/features/consent/use-deny-dm.mutation";
 import { deleteConversation } from "@/features/conversation/conversation-metadata/conversation-metadata.api";
 import {
   getConversationMetadataQueryData,
   updateConversationMetadataQueryData,
 } from "@/features/conversation/conversation-metadata/conversation-metadata.query";
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
 import { useProfileQuery } from "@/features/profiles/profiles.query";
 import { translate } from "@/i18n";
 import { getConversationQueryOptions } from "@/queries/conversation-query";
@@ -16,7 +16,7 @@ import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
 
 export const useDeleteDm = ({ topic }: { topic: ConversationTopic }) => {
-  const currentAccount = useCurrentAccount()!;
+  const currentAccount = useCurrentSenderEthAddress()!;
 
   const { data: conversationId } = useQuery({
     ...getConversationQueryOptions({

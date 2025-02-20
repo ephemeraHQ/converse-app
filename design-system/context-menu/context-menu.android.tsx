@@ -1,4 +1,4 @@
-import { showActionSheet } from "@/components-name/StateHandlers/ActionSheetStateHandler";
+import { showActionSheet } from "@/components/action-sheet";
 import { AnimatedVStack } from "@/design-system/VStack";
 import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu";
 import { useAppTheme } from "@/theme/use-app-theme";

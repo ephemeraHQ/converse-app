@@ -1,4 +1,4 @@
-import { ISwipeableRenderActionsArgs } from "@/components-name/swipeable";
+import { ISwipeableRenderActionsArgs } from "@/components/swipeable";
 import { useConversationIsUnread } from "@/features/conversation-list/hooks/use-conversation-is-unread";
 import { useAppTheme } from "@/theme/use-app-theme";
 import { ConversationTopic } from "@xmtp/react-native-sdk";

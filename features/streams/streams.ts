@@ -1,7 +1,7 @@
 import { useAppStore } from "@/stores/app-store";
 import {
   MultiInboxClientRestorationStates,
-  useAccountsStore,
+  multiInboxStore,
 } from "@/features/multi-inbox/multi-inbox.store";
 import { captureError } from "@/utils/capture-error";
 import { stopStreamingConversations } from "@/utils/xmtpRN/xmtp-conversations/xmtp-conversations-stream";
@@ -35,7 +35,7 @@ export function useSetupStreamingSubscriptions() {
   const firstRenderRef = useRef(true);
 
   useEffect(() => {
-    const unsubscribe = useAccountsStore.subscribe(
+    const unsubscribe = multiInboxStore.subscribe(
       (state) =>
         [state.senders, state.multiInboxClientRestorationState] as const,
       (

@@ -1,6 +1,6 @@
 import { Center } from "@/design-system/Center";
 import { useProfileQuery } from "@/features/profiles/profiles.query";
-import { Avatar } from "@/components-name/avatar";
+import { Avatar } from "@/components/avatar";
 import { HStack } from "@design-system/HStack";
 import { Pressable } from "@design-system/Pressable";
 import { ITextProps, Text } from "@design-system/Text";

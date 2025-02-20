@@ -1,4 +1,4 @@
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
 import { AnimatedCenter } from "@/design-system/Center";
 import { AnimatedHStack } from "@/design-system/HStack";
 import { AnimatedVStack } from "@/design-system/VStack";
@@ -88,7 +88,7 @@ const PinnedConversationWrapper = memo(
   function PinnedConversationWrapper(props: { topic: ConversationTopic }) {
     const { topic } = props;
 
-    const currentAccount = useCurrentAccount();
+    const currentAccount = useCurrentSenderEthAddress();
 
     const { data: conversation } = useConversationQuery({
       topic,

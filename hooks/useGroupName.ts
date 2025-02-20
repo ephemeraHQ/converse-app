@@ -1,4 +1,4 @@
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
 import { useProfilesQueries } from "@/features/profiles/profiles.query";
 import { getGroupMembersQueryOptions } from "@/queries/useGroupMembersQuery";
 import { useGroupNameMutation } from "@/queries/useGroupNameMutation";
@@ -11,7 +11,7 @@ export const useGroupName = (args: {
 }) => {
   const { conversationTopic } = args;
 
-  const account = useCurrentAccount()!;
+  const account = useCurrentSenderEthAddress()!;
 
   const {
     data: groupName,

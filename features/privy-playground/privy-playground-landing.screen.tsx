@@ -17,8 +17,8 @@ import { ensureJwtQueryData } from "../authentication/jwt.query";
 import { useCreateUser } from "../current-user/use-create-user";
 import {
   AuthStatuses,
-  useAccountsStore,
-  useCurrentProfile,
+  multiInboxStore,
+  useCurrentSenderProfile,
   useCurrentSender,
 } from "../multi-inbox/multi-inbox.store";
 import { useSocialProfilesForAddressQuery } from "../social-profiles/social-lookup.query";
@@ -227,7 +227,7 @@ const NameResolver = () => {
 
 export function PrivyPlaygroundLandingScreen() {
   const { loginWithPasskey, signupWithPasskey } = useAuthenticateWithPasskey();
-  const authStatus = useAccountsStore((state) => state.authStatus);
+  const authStatus = multiInboxStore((state) => state.authStatus);
   const isSigningUp = authStatus === AuthStatuses.signingUp;
   const currentSender = useCurrentSender();
   const { user: privyUser } = usePrivy();

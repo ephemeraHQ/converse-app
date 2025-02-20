@@ -1,6 +1,6 @@
 import { ImagePickerAsset } from "expo-image-picker";
 import { useCallback, useState } from "react";
-import { showActionSheet } from "@/components-name/StateHandlers/ActionSheetStateHandler";
+import { showActionSheet } from "@/components/action-sheet";
 import { translate } from "@i18n";
 import { executeAfterKeyboardClosed } from "@utils/keyboard";
 import { pickMediaFromLibrary, takePictureFromCamera } from "@utils/media";

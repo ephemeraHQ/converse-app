@@ -1,4 +1,4 @@
-import { Snackbars } from "@/components-name/snackbar/snackbars";
+import { Snackbars } from "@/components/snackbar/snackbars";
 import { config } from "@/config";
 import { BottomSheetModalProvider } from "@design-system/BottomSheet/BottomSheetModalProvider";
 import { useReactQueryDevTools } from "@dev-plugins/react-query";

@@ -8,7 +8,7 @@ import {
 } from "@/features/conversation/conversation-metadata/conversation-metadata.query";
 import {
   getCurrentAccount,
-  useCurrentAccount,
+  useCurrentSenderEthAddress,
 } from "@/features/multi-inbox/multi-inbox.store";
 import { useMutation } from "@tanstack/react-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
@@ -19,7 +19,7 @@ export function usePinOrUnpinConversation(args: {
 }) {
   const { conversationTopic } = args;
 
-  const currentAccount = useCurrentAccount()!;
+  const currentAccount = useCurrentSenderEthAddress()!;
 
   const { mutateAsync: pinConversationAsync } = useMutation({
     mutationFn: () => {
