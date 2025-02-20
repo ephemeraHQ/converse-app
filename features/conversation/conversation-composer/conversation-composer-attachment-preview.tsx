@@ -2,7 +2,7 @@ import { SendAttachmentPreview } from "@/features/conversation/conversation-comp
 import { HStack } from "@design-system/HStack";
 import { AnimatedVStack } from "@design-system/VStack";
 import { SICK_DAMPING, SICK_STIFFNESS } from "@theme/animations";
-import { useAppTheme } from "@theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import React, { memo, useCallback } from "react";
 import { useAnimatedStyle, withSpring } from "react-native-reanimated";
 import {

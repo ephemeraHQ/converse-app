@@ -4,7 +4,7 @@ import { HStack } from "@/design-system/HStack";
 import { ObjectTyped } from "@/utils/object-typed";
 import { getReactionContent } from "@/utils/xmtpRN/reactions";
 import { Text } from "@design-system/Text";
-import { useAppTheme } from "@theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { InboxId, ReactionContent } from "@xmtp/react-native-sdk";
 import React, { FC, memo, useMemo } from "react";
 import { FlatList } from "react-native-gesture-handler";

@@ -1,18 +1,15 @@
-import { URL_REGEX } from "@utils/regex";
 import {
   IConvosContentType,
   isContentType,
 } from "@/utils/xmtpRN/xmtp-content-types/xmtp-content-types";
+import { URL_REGEX } from "@utils/regex";
 
-type V3SpameScoreParams = {
+export function getMessageSpamScore(args: {
   messageText: string;
   contentType: IConvosContentType;
-};
+}) {
+  const { messageText, contentType } = args;
 
-export const getV3SpamScore = async ({
-  messageText,
-  contentType,
-}: V3SpameScoreParams): Promise<number> => {
   // TODO: Check if adder has been approved already
 
   let spamScore = 0;
@@ -21,7 +18,7 @@ export const getV3SpamScore = async ({
   // Check contents of last message
   spamScore += computeMessageContentSpamScore(messageText, contentType);
   return spamScore;
-};
+}
 
 export const computeMessageContentSpamScore = (
   message: string,

@@ -1,4 +1,4 @@
-import { useSelect } from "@/data/store/storeHelpers";
+import { useSelect } from "@/stores/stores.utils";
 import { AttachmentRemoteImage } from "@/features/conversation/conversation-attachment/conversation-attachment-remote-image";
 import {
   BubbleContainer,
@@ -24,7 +24,7 @@ import { HStack } from "@design-system/HStack";
 import { Icon } from "@design-system/Icon/Icon";
 import { Text } from "@design-system/Text";
 import { VStack } from "@design-system/VStack";
-import { useAppTheme } from "@theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { DecodedMessage, MessageId, ReplyCodec } from "@xmtp/react-native-sdk";
 import { memo } from "react";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";

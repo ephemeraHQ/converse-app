@@ -2,7 +2,7 @@ import { memo } from "react";
 
 import { TextField } from "./TextField";
 import { TextFieldProps } from "./TextField.props";
-import { useAppTheme } from "../../theme/useAppTheme";
+import { useAppTheme } from "../../theme/use-app-theme";
 
 type ITextFieldSimpleSize = "md" | "lg";
 

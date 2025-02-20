@@ -1,7 +1,7 @@
 import { AnimatedHStack, HStack } from "@/design-system/HStack";
 import { Text } from "@/design-system/Text";
 import { useMessagePlainText } from "@/features/conversation-list/hooks/use-message-plain-text";
-import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { captureError } from "@/utils/capture-error";
 import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { ViewStyle } from "react-native";

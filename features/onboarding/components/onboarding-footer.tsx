@@ -2,7 +2,7 @@ import { IIconName } from "@/design-system/Icon/Icon.types";
 import { AnimatedVStack } from "@/design-system/VStack";
 import { ActivityIndicator } from "@/design-system/activity-indicator";
 import { OnboardingIconButton } from "@/features/onboarding/components/onboarding-icon-button";
-import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { converseEventEmitter } from "@/utils/events";
 import { useCallback } from "react";
 import { ViewStyle } from "react-native";

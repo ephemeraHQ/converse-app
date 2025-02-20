@@ -1,4 +1,4 @@
-import { useAppStore } from "@/data/store/appStore";
+import { useAppStore } from "@/stores/app-store";
 import {
   MultiInboxClientRestorationStates,
   useAccountsStore,

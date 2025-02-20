@@ -1,4 +1,4 @@
-import { useAppTheme } from "@theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { logger } from "@utils/logger";
 import { useMemo } from "react";
 import { SFSymbol } from "react-native-sfsymbols";

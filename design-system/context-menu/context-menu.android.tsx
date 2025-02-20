@@ -1,7 +1,7 @@
 import { showActionSheet } from "@/components/StateHandlers/ActionSheetStateHandler";
 import { AnimatedVStack } from "@/design-system/VStack";
 import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { Haptics } from "@/utils/haptics";
 import { memo, useCallback } from "react";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";

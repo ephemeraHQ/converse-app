@@ -1,6 +1,6 @@
 import { useShallow } from "zustand/react/shallow";
 
-import { pick } from "../../utils/objects";
+import { pick } from "../utils/objects";
 
 export function useSelect<S extends object, K extends keyof S>(
   keys: K[]

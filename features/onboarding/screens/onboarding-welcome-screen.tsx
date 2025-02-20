@@ -13,7 +13,7 @@ import { OnboardingTitle } from "@/features/onboarding/components/onboarding-tit
 import { useLoginWithPasskey } from "@/features/onboarding/hooks/use-login-with-passkey";
 import { useSignupWithPasskey } from "@/features/onboarding/hooks/use-signup-with-passkey";
 import { $globalStyles } from "@/theme/styles";
-import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { memo, useCallback, useEffect } from "react";
 import { Button, TextStyle } from "react-native";

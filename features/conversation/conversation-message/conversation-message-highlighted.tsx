@@ -1,8 +1,8 @@
-import { useSelect } from "@/data/store/storeHelpers";
+import { useSelect } from "@/stores/stores.utils";
 import { AnimatedVStack } from "@/design-system/VStack";
 import { useMessageContextStoreContext } from "@/features/conversation/conversation-message/conversation-message.store-context";
 import { useConversationStore } from "@/features/conversation/conversation.store-context";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { memo, useEffect } from "react";
 import {
   cancelAnimation,

@@ -7,7 +7,7 @@ import { useConversationMessageById } from "../use-conversation-message";
 import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
 import { getReactionContent } from "@/utils/xmtpRN/reactions";
 import { Text } from "@design-system/Text";
-import { useAppTheme } from "@theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { favoritedEmojis } from "@utils/emojis/favoritedEmojis";
 import {
   ConversationTopic,

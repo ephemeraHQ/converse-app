@@ -9,7 +9,7 @@ import { useMessagePlainText } from "@/features/conversation-list/hooks/use-mess
 import { useGroupName } from "@/hooks/useGroupName";
 import { useGroupQuery } from "@/queries/useGroupQuery";
 import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
-import { useRouter } from "@navigation/useNavigation";
+import { useRouter } from "@/navigation/use-navigation";
 import { getCompactRelativeTime } from "@utils/date";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { memo, useCallback } from "react";

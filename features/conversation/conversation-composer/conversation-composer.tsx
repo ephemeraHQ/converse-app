@@ -2,7 +2,7 @@ import { ReplyPreview } from "@/features/conversation/conversation-composer/conv
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { HStack } from "@design-system/HStack";
 import { VStack } from "@design-system/VStack";
-import { useAppTheme } from "@theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import React, { memo, useCallback } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AddAttachmentButton } from "./conversation-composer-add-attachment-button";

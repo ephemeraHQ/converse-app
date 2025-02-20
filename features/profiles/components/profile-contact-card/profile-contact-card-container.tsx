@@ -1,6 +1,6 @@
 import React, { memo } from "react";
 import { Dimensions, ViewStyle } from "react-native";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import Animated, {
   useAnimatedStyle,
   withSpring,

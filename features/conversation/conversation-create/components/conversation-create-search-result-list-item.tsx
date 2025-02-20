@@ -3,7 +3,7 @@ import { Pressable } from "@/design-system/Pressable";
 import { VStack } from "@/design-system/VStack";
 import { $globalStyles } from "@/theme/styles";
 import { Text } from "@design-system/Text";
-import { ThemedStyle, useAppTheme } from "@theme/useAppTheme";
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { ReactNode } from "react";
 import { ViewStyle } from "react-native";
 

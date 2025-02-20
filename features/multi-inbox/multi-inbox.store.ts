@@ -338,17 +338,6 @@ export const useChatStore = currentAccountStoreHook("chat");
 export const getWalletStore = (account: string) =>
   getAccountStore(account).wallet;
 
-// Group status helper
-export const setGroupStatus = (groupStatus: GroupStatus) => {
-  const account = getCurrentAccount();
-  if (!account) {
-    logger.warn("[setGroupStatus] No current account");
-    return;
-  }
-  const setGroupStatus = getSettingsStore(account).getState().setGroupStatus;
-  setGroupStatus(groupStatus);
-};
-
 export function useAllInboxIds() {
   return useAccountsStore.getState().senders.map((sender) => sender.inboxId);
 }

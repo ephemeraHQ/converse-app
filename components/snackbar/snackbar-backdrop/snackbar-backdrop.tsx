@@ -1,5 +1,5 @@
 import { LinearGradient } from "@/design-system/linear-gradient";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { hexToRGBA } from "@/utils/colors";
 import { useSnackbars } from "@/components/snackbar/snackbar.service";
 import { useGradientHeight } from "@/components/snackbar/snackbar-backdrop/snackbar-backdrop.utils";

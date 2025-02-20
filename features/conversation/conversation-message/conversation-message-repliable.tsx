@@ -3,7 +3,7 @@ import { AnimatedVStack } from "@/design-system/VStack";
 import { useConversationMessageStyles } from "@/features/conversation/conversation-message/conversation-message.styles";
 import logger from "@/utils/logger";
 import { Icon } from "@design-system/Icon/Icon";
-import { useAppTheme } from "@theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { Haptics } from "@utils/haptics";
 import { memo, useCallback } from "react";
 import {

@@ -1,6 +1,6 @@
 import { debugBorder } from "@/utils/debug-style";
 import { HStack } from "@design-system/HStack";
-import { useAppTheme } from "@theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { useMemo } from "react";
 
 export const BubbleContainer = ({

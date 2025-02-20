@@ -1,4 +1,4 @@
-import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import React, { memo } from "react";
 import { View, ViewStyle } from "react-native";
 import { SettingsListRow } from "./settings-list-row";

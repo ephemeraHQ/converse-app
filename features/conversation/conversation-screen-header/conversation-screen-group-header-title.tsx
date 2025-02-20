@@ -7,7 +7,7 @@ import { useGroupMembersQuery } from "@/queries/useGroupMembersQuery";
 import { copyToClipboard } from "@/utils/clipboard";
 import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { translate } from "@i18n";
-import { useRouter } from "@navigation/useNavigation";
+import { useRouter } from "@/navigation/use-navigation";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import React, { memo, useCallback } from "react";
 

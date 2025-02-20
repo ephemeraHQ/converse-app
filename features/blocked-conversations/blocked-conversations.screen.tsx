@@ -3,7 +3,7 @@ import { EmptyState } from "@/design-system/empty-state";
 import { useBlockedConversationsForCurrentAccount } from "@/features/blocked-conversations/use-blocked-conversations-for-current-account";
 import { ConversationList } from "@/features/conversation-list/conversation-list";
 import { useHeader } from "@/navigation/use-header";
-import { useRouter } from "@/navigation/useNavigation";
+import { useRouter } from "@/navigation/use-navigation";
 import { $globalStyles } from "@/theme/styles";
 import { translate } from "@i18n/index";
 import React from "react";

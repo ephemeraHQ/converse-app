@@ -1,6 +1,6 @@
 import { IconButton } from "@design-system/IconButton/IconButton";
 import { VStack } from "@design-system/VStack";
-import { useAppTheme } from "@theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import React, { memo } from "react";
 import { useConversationComposerStoreContext } from "./conversation-composer.store-context";
 

@@ -1,5 +1,5 @@
 import { textPresets } from "@/design-system/Text/Text.presets";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { forwardRef, memo } from "react";
 import {
   TextInput as RNTextInput,

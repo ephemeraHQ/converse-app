@@ -14,7 +14,7 @@ import { PrivyProvider } from "@privy-io/expo";
 import { SmartWalletsProvider } from "@privy-io/expo/smart-wallets";
 import { queryClient } from "@queries/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { useThemeProvider } from "@theme/useAppTheme";
+import { useThemeProvider } from "@/theme/use-app-theme";
 import { setupAppAttest } from "@utils/appCheck";
 import { useCoinbaseWalletListener } from "@utils/coinbaseWallet";
 import * as Clipboard from "expo-clipboard";
@@ -32,7 +32,7 @@ import {
 import { ThirdwebProvider } from "thirdweb/react";
 import { config } from "./config";
 import { useMonitorNetworkConnectivity } from "./dependencies/NetworkMonitor/use-monitor-network-connectivity";
-import { Main } from "./screens/Main";
+import { AppNavigator } from "./navigation/app-navigator";
 import "./utils/ignore-logs";
 import { sentryInit } from "./utils/sentry";
 import { preventSplashScreenAutoHide } from "./utils/splash/splash";
@@ -101,7 +101,7 @@ export function App() {
                     <GestureHandlerRootView style={$globalStyles.flex1}>
                       <BottomSheetModalProvider>
                         {/* <AuthenticateWithPasskeyProvider> */}
-                        <Main />
+                        <AppNavigator />
                         {/* </AuthenticateWithPasskeyProvider> */}
                         {__DEV__ && <DevToolsBubble onCopy={onCopy} />}
                         <DebugButton />

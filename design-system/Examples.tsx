@@ -8,7 +8,7 @@ import { IconButtonExample } from "@design-system/IconButton/IconButton.example"
 import { TextExample } from "@design-system/Text/Text.example";
 import { TextFieldExample } from "@design-system/TextField/TextField.example";
 import { VStack } from "@design-system/VStack";
-import { useAppTheme } from "@theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { useState } from "react";
 import { Switch, useColorScheme } from "react-native";
 import { Text } from "@design-system/Text/Text";

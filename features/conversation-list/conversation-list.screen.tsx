@@ -13,9 +13,9 @@ import {
 import { usePinnedConversations } from "@/features/conversation-list/hooks/use-pinned-conversations";
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
 import { useMinimumLoadingTime } from "@/hooks/use-minimum-loading-time";
-import { NavigationParamList } from "@/screens/Navigation/Navigation";
+import { NavigationParamList } from "@/navigation/navigation.types";
 import { $globalStyles } from "@/theme/styles";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { captureError } from "@/utils/capture-error";
 import { isDev } from "@/utils/getEnv";
 import {

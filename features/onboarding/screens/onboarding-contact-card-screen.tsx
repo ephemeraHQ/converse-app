@@ -5,7 +5,7 @@ import React, { memo, useCallback, useEffect, useState } from "react";
 
 import { Center } from "@/design-system/Center";
 import { VStack } from "@/design-system/VStack";
-import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { Alert, TextStyle, ViewStyle } from "react-native";
 import { useAddPfp } from "../hooks/useAddPfp";

@@ -1,4 +1,4 @@
-import { useThemeProvider } from "@/theme/useAppTheme";
+import { useThemeProvider } from "@/theme/use-app-theme";
 import { memo } from "react";
 
 /**

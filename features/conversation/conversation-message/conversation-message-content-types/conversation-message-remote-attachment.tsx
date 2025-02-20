@@ -1,7 +1,7 @@
 import { VStack } from "@/design-system/VStack";
 import { AttachmentRemoteImage } from "@/features/conversation/conversation-attachment/conversation-attachment-remote-image";
 import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { DecodedMessage, RemoteAttachmentCodec } from "@xmtp/react-native-sdk";
 import { memo } from "react";
 

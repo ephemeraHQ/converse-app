@@ -10,11 +10,8 @@ import {
   ProfileNav,
   ProfileScreenConfig,
 } from "@/features/profiles/profile.nav";
-import { IdleScreen } from "@/screens/IdleScreen";
-import {
-  NativeStack,
-  NavigationParamList,
-} from "@/screens/Navigation/Navigation";
+import { NavigationParamList } from "@/navigation/navigation.types";
+import { useThemeProvider } from "@/theme/use-app-theme";
 import { captureError } from "@/utils/capture-error";
 import { hideSplashScreen } from "@/utils/splash/splash";
 import {
@@ -22,14 +19,14 @@ import {
   ConversationScreenConfig,
 } from "@features/conversation/conversation.nav";
 import { LinkingOptions, NavigationContainer } from "@react-navigation/native";
-import { useThemeProvider } from "@theme/useAppTheme";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { converseNavigatorRef } from "@utils/navigation";
 import * as Linking from "expo-linking";
 import React, { useEffect } from "react";
 import {
   ShareProfileNav,
   ShareProfileScreenConfig,
-} from "./Navigation/ShareProfileNav";
+} from "../screens/ShareProfileNav";
 
 const prefix = Linking.createURL("/");
 
@@ -50,7 +47,7 @@ const linking: LinkingOptions<NavigationParamList> = {
   // getInitialURL: () => null,
 };
 
-export function Main() {
+export function AppNavigator() {
   const {
     themeScheme,
     navigationTheme,
@@ -71,14 +68,16 @@ export function Main() {
             // is not meant for this one
           }}
         >
-          <NavigationContent />
+          <AppStacks />
         </NavigationContainer>
       </ThemeProvider>
     </>
   );
 }
 
-const NavigationContent = () => {
+export const AppNativeStack = createNativeStackNavigator<NavigationParamList>();
+
+function AppStacks() {
   const authStatus = useAuthStore((state) => state.status);
 
   useEffect(() => {
@@ -92,7 +91,7 @@ const NavigationContent = () => {
   const isSignedOut = authStatus === "signedOut";
 
   return (
-    <NativeStack.Navigator
+    <AppNativeStack.Navigator
       screenOptions={{
         // Since we handle with useHeader hook
         header: () => null,
@@ -100,24 +99,24 @@ const NavigationContent = () => {
     >
       {isUndetermined ? (
         // Show idle screen during restoration
-        <NativeStack.Screen
+        <AppNativeStack.Screen
           name="Idle"
           component={IdleScreen}
           // Fade animation for auth state changes
           options={{ animation: "fade" }}
         />
       ) : isSignedOut ? (
-        <NativeStack.Group>
-          <NativeStack.Screen
+        <AppNativeStack.Group>
+          <AppNativeStack.Screen
             name="OnboardingWelcome"
             component={OnboardingWelcomeScreen}
             // Fade animation when transitioning to signed out state
             options={{ animation: "fade" }}
           />
-        </NativeStack.Group>
+        </AppNativeStack.Group>
       ) : isOnboarding ? (
-        <NativeStack.Group>
-          <NativeStack.Screen
+        <AppNativeStack.Group>
+          <AppNativeStack.Screen
             name="OnboardingCreateContactCard"
             component={OnboardingContactCardScreen}
             // Fade animation when transitioning to onboarding state
@@ -127,17 +126,17 @@ const NavigationContent = () => {
             name="OnboardingNotifications"
             component={OnboardingNotificationsScreen}
           /> */}
-        </NativeStack.Group>
+        </AppNativeStack.Group>
       ) : (
         // Main app screens
-        <NativeStack.Group>
-          <NativeStack.Screen
+        <AppNativeStack.Group>
+          <AppNativeStack.Screen
             name="Chats"
             component={ConversationListScreen}
             // Fade animation when transitioning to authenticated state
             options={{ animation: "fade" }}
           />
-          <NativeStack.Screen
+          <AppNativeStack.Screen
             name="Blocked"
             component={BlockedConversationsScreen}
           />
@@ -146,12 +145,17 @@ const NavigationContent = () => {
           {ShareProfileNav()}
           {/* {WebviewPreviewNav()} */}
           {ProfileNav()}
-          <NativeStack.Screen
+          <AppNativeStack.Screen
             name="AppSettings"
             component={AppSettingsScreen}
           />
-        </NativeStack.Group>
+        </AppNativeStack.Group>
       )}
-    </NativeStack.Navigator>
+    </AppNativeStack.Navigator>
   );
-};
+}
+
+// TODO: Maybe show animated splash screen or something
+function IdleScreen() {
+  return null;
+}

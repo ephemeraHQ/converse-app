@@ -7,7 +7,7 @@ import { captureErrorWithToast } from "@/utils/capture-error";
 import { encryptRemoteAttachment } from "@/utils/xmtpRN/attachments";
 import { Icon, iconRegistry } from "@design-system/Icon/Icon";
 import { translate } from "@i18n";
-import { useAppTheme } from "@theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { uploadRemoteAttachment } from "@utils/attachment/uploadRemoteAttachment";
 import {
   compressAndResizeImage,
@@ -59,8 +59,9 @@ export function AddAttachmentButton() {
           mimeType || undefined
         );
 
-        const uploadedAttachment =
-          await uploadRemoteAttachment(encryptedAttachment);
+        const uploadedAttachment = await uploadRemoteAttachment(
+          encryptedAttachment
+        );
 
         store.getState().updateMediaPreviewStatus("uploaded");
         store.getState().setComposerUploadedAttachment(uploadedAttachment);

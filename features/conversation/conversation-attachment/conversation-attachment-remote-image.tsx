@@ -6,7 +6,7 @@ import { IVStackProps, VStack } from "@design-system/VStack";
 import { PressableScale } from "@design-system/pressable-scale";
 import { translate } from "@i18n";
 import { useQuery } from "@tanstack/react-query";
-import { useAppTheme } from "@theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { getLocalAttachmentForMessageId } from "@utils/attachment/getLocalAttachment";
 import { handleDecryptedLocalAttachment } from "@utils/attachment/handleDecryptedLocalAttachment";
 import {

@@ -5,7 +5,7 @@ import {
   textFontWeightStyles,
   textSizeStyles,
 } from "./Text.styles";
-import { ThemedStyleArray } from "../../theme/useAppTheme";
+import { ThemedStyleArray } from "../../theme/use-app-theme";
 
 export type IPresets =
   | "title"

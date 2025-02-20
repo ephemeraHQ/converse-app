@@ -5,7 +5,7 @@ import { HStack } from "@design-system/HStack";
 import { Pressable } from "@design-system/Pressable";
 import { ITextProps, Text } from "@design-system/Text";
 import { TxKeyPath, translate } from "@i18n";
-import { ThemedStyle, useAppTheme } from "@theme/useAppTheme";
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { navigate } from "@utils/navigation";
 import {
   DecodedMessage,

@@ -1,5 +1,5 @@
 import { ConversationScreen } from "@/features/conversation/conversation.screen";
-import { NativeStack } from "@/screens/Navigation/Navigation";
+import { AppNativeStack } from "@/navigation/app-navigator";
 import { translate } from "@/i18n";
 import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 
@@ -22,7 +22,7 @@ export const ConversationScreenConfig = {
 
 export function ConversationNav() {
   return (
-    <NativeStack.Screen
+    <AppNativeStack.Screen
       options={{
         title: "",
         headerTitle: translate("chat"),

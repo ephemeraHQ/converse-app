@@ -15,7 +15,7 @@ import {
 import { useProfileQuery } from "@/features/profiles/profiles.query";
 import { translate } from "@/i18n";
 import { useHeader } from "@/navigation/use-header";
-import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { converseEventEmitter } from "@/utils/events";
 import { useNavigation } from "@react-navigation/native";
 import React, { useCallback } from "react";

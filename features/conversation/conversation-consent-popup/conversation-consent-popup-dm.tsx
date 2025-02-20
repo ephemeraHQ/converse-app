@@ -2,7 +2,7 @@ import { showActionSheet } from "@/components/StateHandlers/ActionSheetStateHand
 import { useAllowDmMutation } from "@/features/consent/use-allow-dm.mutation";
 import { useDenyDmMutation } from "@/features/consent/use-deny-dm.mutation";
 import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
-import { useRouter } from "@/navigation/useNavigation";
+import { useRouter } from "@/navigation/use-navigation";
 import { getConversationQueryData } from "@/queries/conversation-query";
 import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query";
 import { captureErrorWithToast } from "@/utils/capture-error";

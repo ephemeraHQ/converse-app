@@ -10,7 +10,7 @@ import { TouchableHighlight } from "@design-system/touchable-highlight";
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { BottomSheetMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
 import { FlashList } from "@shopify/flash-list";
-import { ThemedStyle, useAppTheme } from "@theme/useAppTheme";
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { memo, useCallback, useRef, useState } from "react";
 import { Modal, Platform, TextStyle, ViewStyle } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";

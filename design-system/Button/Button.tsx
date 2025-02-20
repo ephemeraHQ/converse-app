@@ -1,6 +1,6 @@
 import { Icon } from "@design-system/Icon/Icon";
 import { IIconSizeKey } from "@theme/icon";
-import { useAppTheme } from "@theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { useCallback, useMemo } from "react";
 import {
   ActivityIndicator,

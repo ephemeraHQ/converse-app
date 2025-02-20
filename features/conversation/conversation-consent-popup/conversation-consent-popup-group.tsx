@@ -6,7 +6,7 @@ import {
   ConversationConsentPopupContainer,
   ConversationConsentPopupHelperText,
 } from "@/features/conversation/conversation-consent-popup/conversation-consent-popup.design-system";
-import { useRouter } from "@/navigation/useNavigation";
+import { useRouter } from "@/navigation/use-navigation";
 import { useGroupNameQuery } from "@/queries/useGroupNameQuery";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { translate } from "@i18n";

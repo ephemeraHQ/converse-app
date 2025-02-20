@@ -1,7 +1,7 @@
 import { TextField } from "@/design-system/TextField/TextField";
 import { TextFieldProps } from "@/design-system/TextField/TextField.props";
 import { translate } from "@/i18n";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { memo } from "react";
 
 type IProfileContactCardEditableNameInputProps = TextFieldProps;

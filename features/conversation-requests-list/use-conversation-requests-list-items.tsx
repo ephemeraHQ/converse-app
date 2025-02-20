@@ -1,4 +1,4 @@
-import { getV3SpamScore } from "@/data/helpers/conversations/spamScore";
+import { getMessageSpamScore } from "@/features/conversation-requests-list/utils/get-message-spam-score";
 import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { getMessageStringContent } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { getUnknownConsentConversationsQueryOptions } from "@/queries/conversations-unknown-consent-query";
@@ -41,7 +41,7 @@ export function useConversationRequestsListItem() {
         }
 
         try {
-          const spamScore = await getV3SpamScore({
+          const spamScore = await getMessageSpamScore({
             messageText,
             contentType,
           });

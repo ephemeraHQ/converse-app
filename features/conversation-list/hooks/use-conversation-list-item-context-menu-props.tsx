@@ -11,7 +11,7 @@ import { useDeleteGroup } from "@/features/conversation-list/hooks/use-delete-gr
 import { useToggleReadStatus } from "@/features/conversation-list/hooks/use-toggle-read-status";
 import { ConversationPreview } from "@/features/conversation/conversation-preview/conversation-preview";
 import { translate } from "@/i18n";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { Haptics } from "@/utils/haptics";
 import { ConversationTopic } from "@xmtp/react-native-sdk";

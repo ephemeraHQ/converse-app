@@ -1,5 +1,5 @@
 import { Platform } from "react-native";
-import { useAppStore } from "../../data/store/appStore";
+import { useAppStore } from "../../stores/app-store";
 import { useSettingsStore } from "../multi-inbox/multi-inbox.store";
 
 export function needToShowNotificationsPermissions() {

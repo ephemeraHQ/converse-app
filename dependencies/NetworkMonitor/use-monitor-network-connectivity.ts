@@ -3,8 +3,8 @@ import { logger } from "@utils/logger";
 import { useEffect } from "react";
 
 import { config } from "../../config";
-import { useAppStore } from "../../data/store/appStore";
-import { useSelect } from "../../data/store/storeHelpers";
+import { useAppStore } from "../../stores/app-store";
+import { useSelect } from "../../stores/stores.utils";
 
 NetInfo.configure({
   reachabilityUrl: `${config.apiURI}/healthcheck`,

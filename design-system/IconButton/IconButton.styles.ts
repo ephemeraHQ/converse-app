@@ -6,7 +6,7 @@ import {
   IIconButtonSize,
   IIconButtonVariant,
 } from "./IconButton.props";
-import { Theme } from "../../theme/useAppTheme";
+import { Theme } from "../../theme/use-app-theme";
 
 type IconButtonStyleProps = {
   variant: IIconButtonVariant;

@@ -6,7 +6,7 @@ import { useSearchConvosUsers } from "@/features/conversation/conversation-creat
 import { inboxIdIsPartOfConversationUsingCacheData } from "@/features/conversation/utils/inbox-id-is-part-of-converastion";
 import { useConversationStoreContext } from "@/features/conversation/conversation.store-context";
 import { $globalStyles } from "@/theme/styles";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 import { ReactNode, memo, useMemo } from "react";
 import { FlatList } from "react-native";

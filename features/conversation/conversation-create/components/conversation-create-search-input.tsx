@@ -14,7 +14,7 @@ import {
   useConversationStoreContext,
 } from "@/features/conversation/conversation.store-context";
 import { useProfileQuery } from "@/features/profiles/profiles.query";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { Haptics } from "@/utils/haptics";
 import { InboxId } from "@xmtp/react-native-sdk";
 import React, { memo, useCallback, useEffect, useRef } from "react";

@@ -16,11 +16,11 @@ import { isConversationDm } from "@/features/conversation/utils/is-conversation-
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
 import { useHeader } from "@/navigation/use-header";
 import { useConversationQuery } from "@/queries/conversation-query";
-import { NavigationParamList } from "@/screens/Navigation/Navigation";
+import { NavigationParamList } from "@/navigation/navigation.types";
 import { $globalStyles } from "@/theme/styles";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
-import { useRouter } from "@navigation/useNavigation";
+import { useRouter } from "@/navigation/use-navigation";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { memo } from "react";
 import { ConversationMessages } from "./conversation-messages";

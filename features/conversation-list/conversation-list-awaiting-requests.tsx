@@ -14,7 +14,7 @@ import {
 import { useConversationRequestsListItem } from "@/features/conversation-requests-list/use-conversation-requests-list-items";
 import { conversationIsUnreadForInboxId } from "@/features/conversation/utils/conversation-is-unread-by-current-account";
 import { getConversationMetadataQueryOptions } from "@/features/conversation/conversation-metadata/conversation-metadata.query";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { useNavigation } from "@react-navigation/native";
 import { useQueries } from "@tanstack/react-query";
 import React, { memo, useMemo } from "react";

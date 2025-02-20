@@ -6,7 +6,7 @@ import { useProfilesQueries } from "@/features/profiles/profiles.query";
 import { useGroupMembersQuery } from "@/queries/useGroupMembersQuery";
 import { useGroupQuery } from "@/queries/useGroupQuery";
 import { $globalStyles } from "@/theme/styles";
-import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { Nullable } from "@/types/general";
 import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 import React, { memo, useMemo } from "react";

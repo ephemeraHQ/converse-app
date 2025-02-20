@@ -4,7 +4,7 @@ import { VStack } from "@/design-system/VStack";
 import { SettingsList } from "@/design-system/settings-list/settings-list";
 import { ISettingsListRow } from "@/design-system/settings-list/settings-list.types";
 import { useUpdatesLogEntries } from "@/features/app-settings/hooks/use-updates-log-entries";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import * as Updates from "expo-updates";
 import { memo, useMemo, useState } from "react";
 

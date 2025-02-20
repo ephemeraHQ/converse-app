@@ -1,4 +1,4 @@
-import { useAppTheme } from "@/theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import {
   TextProps as RNTextProps,
   TextStyle,

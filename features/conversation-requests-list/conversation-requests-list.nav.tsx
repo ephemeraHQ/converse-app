@@ -1,4 +1,4 @@
-import { NativeStack } from "@/screens/Navigation/Navigation";
+import { AppNativeStack } from "@/navigation/app-navigator";
 import { ConversationRequestsListScreen } from "./conversation-requests-list.screen";
 
 export const ConversationRequestsListScreenConfig = {
@@ -7,7 +7,7 @@ export const ConversationRequestsListScreenConfig = {
 
 export function ConversationRequestsListNav() {
   return (
-    <NativeStack.Screen
+    <AppNativeStack.Screen
       name="ChatsRequests"
       component={ConversationRequestsListScreen}
     />

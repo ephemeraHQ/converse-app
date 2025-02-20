@@ -1,7 +1,7 @@
 import { ActivityIndicator } from "@/design-system/activity-indicator";
 import { IconButton } from "@design-system/IconButton/IconButton";
 import { AnimatedVStack, VStack } from "@design-system/VStack";
-import { useAppTheme } from "@theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { Image } from "expo-image";
 import { StyleSheet } from "react-native";
 

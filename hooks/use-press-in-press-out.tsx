@@ -5,7 +5,7 @@ import {
   withTiming,
 } from "react-native-reanimated";
 
-import { useAppTheme } from "@theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 
 export function usePressInOut() {
   const { theme } = useAppTheme();

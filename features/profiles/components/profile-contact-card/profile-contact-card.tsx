@@ -3,7 +3,7 @@ import { Text } from "@/design-system/Text";
 import { VStack } from "@/design-system/VStack";
 import { ProfileContactCardLayout } from "@/features/profiles/components/profile-contact-card/profile-contact-card-layout";
 import { useProfileQuery } from "@/features/profiles/profiles.query";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import React, { memo } from "react";
 import { IProfileContactCardProps } from "../../profile.types";
 

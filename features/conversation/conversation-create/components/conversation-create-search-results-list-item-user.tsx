@@ -2,7 +2,7 @@ import { Avatar } from "@/components/avatar";
 import { ConversationSearchResultsListItem } from "@/features/conversation/conversation-create/components/conversation-create-search-result-list-item";
 import { useConversationStore } from "@/features/conversation/conversation.store-context";
 import { useProfileQuery } from "@/features/profiles/profiles.query";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { useCallback } from "react";
 
 type UserSearchResultListItemProps = {

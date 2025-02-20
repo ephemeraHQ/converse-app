@@ -4,7 +4,6 @@ import { ConversationNavParams } from "@/features/conversation/conversation.nav"
 //   InviteUsersToExistingGroupParams,
 // } from "@/features/groups/invite-to-group/InviteUsersToExistingGroup.nav";
 import { ProfileNavParams } from "@/features/profiles/profile.nav";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Platform } from "react-native";
 
 export type NavigationParamList = {
@@ -37,7 +36,3 @@ export type NavigationParamList = {
 
   AppSettings: undefined;
 };
-
-export const NativeStack = createNativeStackNavigator<NavigationParamList>();
-
-export const navigationAnimation = Platform.OS === "ios" ? "default" : "none";

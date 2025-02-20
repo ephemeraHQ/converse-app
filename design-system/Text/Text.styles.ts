@@ -1,6 +1,6 @@
 import { TextStyle } from "react-native";
 import { typography } from "@theme/typography";
-import { Theme, ThemedStyle } from "@theme/useAppTheme";
+import { Theme, ThemedStyle } from "@/theme/use-app-theme";
 import { IInvertedTextColors, ITextColors, IWeights } from "./Text.props";
 
 export const textSizeStyles = {

@@ -1,7 +1,7 @@
 import { Center } from "@/design-system/Center";
 import { Icon } from "@/design-system/Icon/Icon";
 import { Text } from "@/design-system/Text";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { Nullable } from "@/types/general";
 import { getCapitalizedLettersForAvatar } from "@/utils/get-capitalized-letters-for-avatar";
 import { Image } from "expo-image";

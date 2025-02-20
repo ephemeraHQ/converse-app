@@ -7,7 +7,7 @@ import { PrivyProvider } from "@privy-io/expo";
 import { SmartWalletsProvider } from "@privy-io/expo/smart-wallets";
 import { queryClient } from "@queries/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { useThemeProvider } from "@theme/useAppTheme";
+import { useThemeProvider } from "@/theme/use-app-theme";
 import { setupAppAttest } from "@utils/appCheck";
 import * as Clipboard from "expo-clipboard";
 import "expo-dev-client";

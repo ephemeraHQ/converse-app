@@ -1,7 +1,7 @@
 import { VStack } from "@/design-system/VStack";
 import { useConversationStore } from "@/features/conversation/conversation.store-context";
 import { $globalStyles } from "@/theme/styles";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 // import { LegendList } from "@legendapp/list";
 import { ReactElement, memo, useEffect } from "react";

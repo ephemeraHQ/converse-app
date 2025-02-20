@@ -1,7 +1,7 @@
 import { showSnackbar } from "@/components/snackbar/snackbar.service";
 import { Button } from "@design-system/Button/Button";
 import { VStack } from "@design-system/VStack";
-import { useAppTheme } from "@theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { Image } from "expo-image";
 import { memo } from "react";
 import { Dimensions } from "react-native";

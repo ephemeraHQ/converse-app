@@ -5,7 +5,7 @@ import { ProfileSocialsNames } from "@/features/profiles/components/profile-soci
 import { useProfileOtherScreenHeader } from "@/features/profiles/profile-other.screen-header";
 import { useProfileQuery } from "@/features/profiles/profiles.query";
 import { useSocialProfilesForAddressQuery } from "@/features/social-profiles/social-lookup.query";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { InboxId } from "@xmtp/react-native-sdk";
 import { memo } from "react";
 

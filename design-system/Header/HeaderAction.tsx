@@ -2,7 +2,7 @@ import { IPicto } from "@components/Picto/Picto.types";
 import { ReactElement } from "react";
 import { TextStyle, View, ViewStyle } from "react-native";
 import { translate } from "@/i18n";
-import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { Icon } from "../Icon/Icon";
 import { Pressable } from "../Pressable";
 import { ITextProps, Text } from "../Text";

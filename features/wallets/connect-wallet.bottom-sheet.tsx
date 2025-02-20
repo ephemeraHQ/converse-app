@@ -11,7 +11,7 @@ import {
   ISupportedWallet,
   useInstalledWallets,
 } from "@/features/wallets/use-installed-wallets.hook";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { logger } from "@/utils/logger";
 import { thirdwebClient } from "@/utils/thirdweb";
 import React from "react";
