@@ -10,7 +10,7 @@ export type Environment = (typeof Environments)[keyof typeof Environments];
 
 export const getEnv = (): Environment => {
   const expoEnv = Constants.expoConfig?.extra?.expoEnv as Environment;
-  if (__DEV__ || expoEnv === "development") {
+  if (expoEnv === "development") {
     return Environments.development;
   } else if (expoEnv === "preview") {
     return Environments.preview;

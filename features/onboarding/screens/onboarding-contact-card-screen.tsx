@@ -18,6 +18,7 @@ import { ProfileContactCardEditableAvatar } from "@/features/profiles/components
 import { ProfileContactCardEditableNameInput } from "@/features/profiles/components/profile-contact-card/profile-contact-card-editable-name-input";
 import { ProfileContactCardLayout } from "@/features/profiles/components/profile-contact-card/profile-contact-card-layout";
 import { validateProfileName } from "@/features/profiles/utils/validate-profile-name";
+import { useHeader } from "@/navigation/use-header";
 import { ValidationError } from "@/utils/api/api.error";
 import { usePrivy } from "@privy-io/expo";
 import { create } from "zustand";
@@ -47,8 +48,6 @@ export function OnboardingContactCardScreen() {
         smartContractWalletAddress: currentSender?.ethereumAddress,
         profile: {
           name: useOnboardingContactCardStore.getState().name,
-          avatar: "",
-          description: "",
         },
       });
 
@@ -85,6 +84,14 @@ export function OnboardingContactCardScreen() {
   //   alert("Working on this right now 🤙");
   //   // setIsConnectWalletBottomSheetVisible(true);
   // }, []);
+
+  useHeader({
+    safeAreaEdges: ["top"],
+    leftText: "Logout",
+    onLeftPress: () => {
+      useAuthStore.getState().actions.setStatus("signedOut");
+    },
+  });
 
   return (
     <>

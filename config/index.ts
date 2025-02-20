@@ -1,8 +1,7 @@
 import { isDev, isPreview } from "@/utils/getEnv";
 import { developmentConfig } from "./development";
-import { productionConfig } from "./production";
 import { previewConfig } from "./preview";
-import { z } from "zod";
+import { productionConfig } from "./production";
 
 // todo: use zod for env and stop typing in multiple places
 // crash on first build step rather than at runtime
@@ -19,6 +18,20 @@ import { z } from "zod";
 
 // // // Validate config at startup
 // // configSchema.parse(Config);
+
+/**
+ * Helpful when debugging locally using other environments
+ */
+const API_URL = process.env.EXPO_PUBLIC_CONVOS_API_URI;
+const EXPO_ENV = process.env.EXPO_ENV;
+
+if (API_URL.includes("localhost")) {
+  if (EXPO_ENV && EXPO_ENV !== "development") {
+    throw new Error(
+      "Using localhost API URL in non-dev environment. Did you forget to pull env vars?"
+    );
+  }
+}
 
 export const getConfig = () => {
   if (isDev) return developmentConfig;

@@ -93,7 +93,7 @@ const converseTransport: transportFunctionType = async (props) => {
   }
 
   // Console logging in dev
-  if (isDev) {
+  if (__DEV__) {
     // Use the enhanced message for console logging
     props.msg = logMessage;
     consoleTransport(props);

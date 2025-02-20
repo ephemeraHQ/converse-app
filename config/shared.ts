@@ -58,4 +58,8 @@ export const shared = {
   thirdwebClientId: process.env.EXPO_PUBLIC_THIRDWEB_CLIENT_ID,
   reactQueryEncryptionKey:
     process.env.EXPO_PUBLIC_SECURE_REACT_QUERY_ENCRYPTION_KEY,
+  appCheckDebugToken:
+    Platform.OS === "android"
+      ? process.env.EXPO_PUBLIC_FIREBASE_APP_CHECK_DEBUG_TOKEN_ANDROID
+      : process.env.EXPO_PUBLIC_FIREBASE_APP_CHECK_DEBUG_TOKEN_IOS,
 } as const satisfies Partial<IConfig>;

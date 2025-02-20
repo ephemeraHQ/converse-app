@@ -1,4 +1,4 @@
-import { tryGetAppCheckToken } from "../../utils/appCheck";
+import { tryGetAppCheckToken } from "./app-check";
 import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 import {
   getSafeCurrentSender,
@@ -20,11 +20,8 @@ export const CONVOS_AUTH_TOKEN_HEADER_KEY = "X-Convos-AuthToken";
 
 export type XmtpApiHeaders = {
   [XMTP_INSTALLATION_ID_HEADER_KEY]: string;
-
   [XMTP_INBOX_ID_HEADER_KEY]: string;
-
   [FIREBASE_APP_CHECK_HEADER_KEY]: string;
-
   [XMTP_SIGNATURE_HEADER_KEY]: string;
 };
 
@@ -38,7 +35,6 @@ export type XmtpApiHeaders = {
  * Privy passkeys. See authentication.readme.md for more details.
  */
 import { logger } from "@/utils/logger";
-
 export async function getConvosAuthenticationHeaders(): Promise<XmtpApiHeaders> {
   logger.debug(
     "[getConvosAuthenticationHeaders] Starting to get authentication headers"
@@ -49,27 +45,30 @@ export async function getConvosAuthenticationHeaders(): Promise<XmtpApiHeaders> 
     `[getConvosAuthenticationHeaders] Current ethereum address: ${currentEthereumAddress}`
   );
 
+  const { multiInboxClientRestorationState } = useMultiInboxStore.getState();
   const areInboxesRestored =
-    useMultiInboxStore.getState().multiInboxClientRestorationState ===
+    multiInboxClientRestorationState ===
     MultiInboxClientRestorationStates.restored;
+
   logger.debug(
-    `[getConvosAuthenticationHeaders] Are inboxes restored: ${
-      useMultiInboxStore.getState().multiInboxClientRestorationState
-    }`
+    `[getConvosAuthenticationHeaders] Are inboxes restored: ${multiInboxClientRestorationState}`
   );
-  const appCheckToken = await tryGetAppCheckToken();
+
+  // Disabled for now until we go live and it works with bun
+  const appCheckToken = "123";
+  // const appCheckToken = await tryGetAppCheckToken();
+  // if (!appCheckToken) {
+  //   logger.error(
+  //     "[getConvosAuthenticationHeaders] No App Check Token Available"
+  //   );
+  //   throw new AuthenticationError(
+  //     "No App Check Token Available. This indicates that we believe the app is not running on an authentic build of our application on a device that has not been tampered with."
+  //   );
+  // }
+
   const inboxClient = MultiInboxClient.instance.getInboxClientForAddress({
     ethereumAddress: currentEthereumAddress,
   });
-
-  if (!appCheckToken) {
-    logger.error(
-      "[getConvosAuthenticationHeaders] No App Check Token Available"
-    );
-    throw new AuthenticationError(
-      "No App Check Token Available. This indicates that we believe the app is not running on an authentic build of our application on a device that has not been tampered with."
-    );
-  }
 
   if (!areInboxesRestored) {
     logger.error("[getConvosAuthenticationHeaders] Inboxes not restored");
@@ -90,6 +89,7 @@ export async function getConvosAuthenticationHeaders(): Promise<XmtpApiHeaders> 
   logger.debug(
     "[getConvosAuthenticationHeaders] Signing app check token with installation key"
   );
+
   const rawAppCheckTokenSignature = await inboxClient.signWithInstallationKey(
     appCheckToken
   );
@@ -98,11 +98,12 @@ export async function getConvosAuthenticationHeaders(): Promise<XmtpApiHeaders> 
   logger.debug(
     "[getConvosAuthenticationHeaders] Successfully created authentication headers"
   );
+
   return {
     [XMTP_INSTALLATION_ID_HEADER_KEY]: inboxClient.installationId,
     [XMTP_INBOX_ID_HEADER_KEY]: inboxClient.inboxId,
-    [FIREBASE_APP_CHECK_HEADER_KEY]: appCheckToken,
     [XMTP_SIGNATURE_HEADER_KEY]: appCheckTokenSignatureHexString,
+    [FIREBASE_APP_CHECK_HEADER_KEY]: appCheckToken, // Disabled for now until we go live and it works with bun
   };
 }
 

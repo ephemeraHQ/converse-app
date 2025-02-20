@@ -5,7 +5,7 @@ import { config } from "@/config";
 import { captureError } from "@/utils/capture-error";
 import { GenericError } from "@/utils/error";
 import { firebase } from "@react-native-firebase/app-check";
-import { logger } from "./logger";
+import { logger } from "../../utils/logger";
 
 const appCheck = firebase.appCheck();
 
@@ -35,6 +35,7 @@ export const tryGetAppCheckToken = async ({
     return undefined;
   }
 };
+
 export async function setupAppAttest() {
   logger.debug("[setupAppAttest] Starting app attestation setup");
 
@@ -43,15 +44,17 @@ export async function setupAppAttest() {
     "[setupAppAttest] Created new React Native Firebase App Check provider"
   );
 
+  // Configure provider based on environment and platform
   rnfbProvider.configure({
     android: {
-      provider: __DEV__ ? "debug" : "playIntegrity",
+      provider: __DEV__ ? ("debug" as const) : ("playIntegrity" as const),
       debugToken: config.appCheckDebugToken,
     },
     apple: {
-      provider: __DEV__ ? "debug" : "appAttestWithDeviceCheckFallback",
-      // Will be intentionally undefined in non-dev environments
-      debugToken: config.appCheckDebugToken,
+      provider: __DEV__
+        ? ("debug" as const)
+        : ("appAttestWithDeviceCheckFallback" as const),
+      debugToken: config.appCheckDebugToken, // Undefined in non-dev environments
     },
   });
   logger.debug(

@@ -1,5 +1,4 @@
 import { IConfig } from "@/config/config.types";
-import { Platform } from "react-native";
 import { shared } from "./shared";
 
 export const developmentConfig: IConfig = {
@@ -12,10 +11,6 @@ export const developmentConfig: IConfig = {
   universalLinks: ["dev.converse.xyz/", "dev.getconverse.app/"].flatMap(
     (domain) => [`https://${domain}`, `http://${domain}`, domain]
   ),
-  appCheckDebugToken:
-    Platform.OS === "android"
-      ? process.env.EXPO_PUBLIC_FIREBASE_APP_CHECK_DEBUG_TOKEN_ANDROID
-      : process.env.EXPO_PUBLIC_FIREBASE_APP_CHECK_DEBUG_TOKEN_IOS,
   evm: {
     rpcEndpoint: process.env.EXPO_PUBLIC_EVM_RPC_ENDPOINT,
     transactionChainId: "0x14a34", // Base Sepolia

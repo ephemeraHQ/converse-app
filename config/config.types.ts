@@ -50,6 +50,6 @@ export type IConfig = {
   universalLinks: string[];
   privy: IPrivyConfig;
   evm: IEvmConfig;
-  appCheckDebugToken?: string;
+  appCheckDebugToken: string | undefined;
   reactQueryEncryptionKey: string;
 };

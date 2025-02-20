@@ -3,6 +3,7 @@ import {
   createInboxWithSigner,
   createSmartWalletSigner,
 } from "@/features/onboarding/utils/passkey";
+import { authLogger } from "@/utils/logger";
 import { useEmbeddedEthereumWallet } from "@privy-io/expo";
 import { useSignupWithPasskey as usePrivySignupWithPasskey } from "@privy-io/expo/passkey";
 import { useSmartWallets } from "@privy-io/expo/smart-wallets";
@@ -14,13 +15,13 @@ export function useSignupWithPasskey() {
   const { signupWithPasskey: privySignupWithPasskey } =
     usePrivySignupWithPasskey();
   const [isSigningUp, setIsSigningUp] = useState(false);
-
   const clientRef = useRef(smartWalletClient);
 
   useEffect(() => {
     clientRef.current = smartWalletClient;
   }, [smartWalletClient]);
 
+  // Helper function to wait for smart wallet client initialization
   async function waitForSmartWalletClient(maxAttempts = 10) {
     for (let i = 0; i < maxAttempts; i++) {
       if (clientRef.current) {
@@ -28,7 +29,6 @@ export function useSignupWithPasskey() {
       }
       await new Promise((resolve) => setTimeout(resolve, 1000));
     }
-
     throw new Error("Timeout waiting for smart wallet client");
   }
 
@@ -36,16 +36,20 @@ export function useSignupWithPasskey() {
     try {
       setIsSigningUp(true);
 
-      await privySignupWithPasskey({
-        relyingParty: RELYING_PARTY,
-      });
+      // Step 1: Passkey signup
+      authLogger.debug(`[Passkey Signup] Starting passkey registration`);
+      await privySignupWithPasskey({ relyingParty: RELYING_PARTY });
 
+      // Step 2: Wallet creation
+      authLogger.debug(`[Wallet Setup] Creating embedded and smart wallets`);
       await createEmbeddedWallet();
-
       const smartWalletclient = await waitForSmartWalletClient();
-
       const signer = createSmartWalletSigner(smartWalletclient);
 
+      // Step 3: Inbox creation
+      authLogger.debug(
+        `[Inbox Setup] Creating inbox for address: ${smartWalletclient.account.address}`
+      );
       const { inboxId } = await createInboxWithSigner(signer);
 
       return {
@@ -59,5 +63,5 @@ export function useSignupWithPasskey() {
     }
   };
 
-  return { signup, isSigningUp: isSigningUp };
+  return { signup, isSigningUp };
 }

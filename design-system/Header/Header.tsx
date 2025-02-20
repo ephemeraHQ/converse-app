@@ -13,6 +13,7 @@ import { ITouchableOpacityProps } from "../TouchableOpacity";
 import { VStack } from "../VStack";
 import { HeaderAction } from "./HeaderAction";
 import { useHeaderHeight } from "@/design-system/Header/Header.utils";
+import { debugBorder } from "@/utils/debug-style";
 
 export type HeaderProps = {
   titleStyle?: StyleProp<TextStyle>;

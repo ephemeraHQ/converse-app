@@ -7,6 +7,7 @@ import { Icon } from "../Icon/Icon";
 import { Pressable } from "../Pressable";
 import { ITextProps, Text } from "../Text";
 import { ITouchableOpacityProps, TouchableOpacity } from "../TouchableOpacity";
+import { debugBorder } from "@/utils/debug-style";
 
 type HeaderActionProps = {
   backgroundColor?: string;
@@ -75,7 +76,6 @@ const $actionTextContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexGrow: 0,
   alignItems: "center",
   justifyContent: "center",
-  height: "100%",
   paddingHorizontal: spacing.md,
   zIndex: 2,
 });

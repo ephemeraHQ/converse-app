@@ -6,6 +6,7 @@ import { useLogoutOnJwtRefreshError } from "@/features/authentication/use-logout
 import { useInitializeMultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 import { useSetupStreamingSubscriptions } from "@/features/streams/streams";
 import { $globalStyles } from "@/theme/styles";
+import { useThemeProvider } from "@/theme/use-app-theme";
 import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
 import { BottomSheetModalProvider } from "@design-system/BottomSheet/BottomSheetModalProvider";
 import { useReactQueryDevTools } from "@dev-plugins/react-query";
@@ -14,8 +15,6 @@ import { PrivyProvider } from "@privy-io/expo";
 import { SmartWalletsProvider } from "@privy-io/expo/smart-wallets";
 import { queryClient } from "@queries/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { useThemeProvider } from "@/theme/use-app-theme";
-import { setupAppAttest } from "@utils/appCheck";
 import { useCoinbaseWalletListener } from "@utils/coinbaseWallet";
 import * as Clipboard from "expo-clipboard";
 import "expo-dev-client";
@@ -72,7 +71,8 @@ export function App() {
     useThemeProvider();
 
   useEffect(() => {
-    setupAppAttest();
+    // Disabled for now until we go live and it works with bun
+    // setupAppAttest();
   }, []);
 
   useCoinbaseWalletListener(true, coinbaseUrl);
