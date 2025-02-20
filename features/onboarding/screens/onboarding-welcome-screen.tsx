@@ -6,7 +6,6 @@ import { AnimatedText, Text } from "@/design-system/Text";
 import { VStack } from "@/design-system/VStack";
 import { Loader } from "@/design-system/loader";
 import { useLogout } from "@/features/authentication/use-logout.hook";
-import { getCurrentUserQueryData } from "@/features/current-user/curent-user.query";
 import { useMultiInboxStore } from "@/features/multi-inbox/multi-inbox.store";
 import { OnboardingSubtitle } from "@/features/onboarding/components/onboarding-subtitle";
 import { OnboardingTitle } from "@/features/onboarding/components/onboarding-title";

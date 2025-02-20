@@ -145,9 +145,9 @@ export class MultiInboxClient {
   }
 
   private constructor() {
-    logger.debug("[constructor] Initializing MultiInboxClient");
-    this.initialize().catch(captureError);
-    logger.debug("[constructor] MultiInboxClient initialization started");
+    // logger.debug("[constructor] Initializing MultiInboxClient");
+    // this.initialize().catch(captureError);
+    // logger.debug("[constructor] MultiInboxClient initialization started");
   }
 
   private async performInboxCreationFromInboxSigner(
@@ -528,7 +528,17 @@ export class MultiInboxClient {
 
 export const useInitializeMultiInboxClient = () => {
   useEffect(() => {
-    MultiInboxClient.instance.initialize().catch(captureError);
+    logger.debug(
+      "[useInitializeMultiInboxClient] Initializing MultiInboxClient"
+    );
+    MultiInboxClient.instance
+      .initialize()
+      .catch(captureError)
+      .then(() => {
+        logger.debug(
+          "[useInitializeMultiInboxClient] MultiInboxClient initialization completed"
+        );
+      });
   }, []);
 };
 

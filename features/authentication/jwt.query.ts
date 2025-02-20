@@ -1,6 +1,6 @@
 import { queryClient } from "@/queries/queryClient";
 import { secureQueryPersister } from "@/utils/mmkv";
-import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
+import { queryOptions, skipToken } from "@tanstack/react-query";
 import { getCurrentSender } from "../multi-inbox/multi-inbox.store";
 import { fetchJwt } from "./authentication.api";
 
@@ -23,16 +23,8 @@ export function getJwtQueryOptions() {
   });
 }
 
-export function useJwtQuery() {
-  return useQuery(getJwtQueryOptions());
-}
-
 export async function ensureJwtQueryData() {
   return queryClient.ensureQueryData(getJwtQueryOptions());
-}
-
-export function getJwtQueryData() {
-  return queryClient.getQueryData(getJwtQueryOptions().queryKey);
 }
 
 export function refetchJwtQuery() {

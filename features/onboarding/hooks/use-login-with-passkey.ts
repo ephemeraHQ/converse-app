@@ -3,6 +3,7 @@ import {
   createInboxWithSigner,
   createSmartWalletSigner,
 } from "@/features/onboarding/utils/passkey";
+import { logger } from "@/utils/logger";
 import { useLoginWithPasskey as usePrivyLoginWithPasskey } from "@privy-io/expo/passkey";
 import { useSmartWallets } from "@privy-io/expo/smart-wallets";
 import { useEffect, useRef, useState } from "react";
@@ -40,8 +41,6 @@ export function useLoginWithPasskey() {
 
       const signer = createSmartWalletSigner(client);
 
-      await createInboxWithSigner(signer);
-
       const { inboxId } = await createInboxWithSigner(signer);
 
       return {
@@ -49,6 +48,7 @@ export function useLoginWithPasskey() {
         ethereumAddress: client.account.address,
       };
     } catch (error) {
+      logger.error("[login] Error during login process:", error);
       throw error;
     } finally {
       setIsLoggingIn(false);

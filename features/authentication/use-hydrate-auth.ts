@@ -7,13 +7,18 @@ import { useEffect } from "react";
 
 export function useHydrateAuth() {
   const { user: privyUser, isReady } = usePrivy();
+  const authStatus = useAuthStore((s) => s.status);
 
   // If we don't have a Privy user, it's not good at all
   useEffect(() => {
-    if (!privyUser && isReady) {
+    if (
+      !privyUser &&
+      isReady &&
+      (authStatus === "signedOut" || authStatus === "onboarding")
+    ) {
       useAuthStore.getState().actions.setStatus("signedOut");
     }
-  }, [privyUser, isReady]);
+  }, [privyUser, isReady, authStatus]);
 
   // Hydrate auth based on multi-inbox client restoration state and current sender
   useEffect(() => {
@@ -46,6 +51,7 @@ export function useHydrateAuth() {
           return;
         }
 
+        // TODO: Maybe only run this when we login and not signup
         try {
           // Verify user exists in our backend before signing in
           const user = await ensureCurrentUserQueryData();

@@ -42,15 +42,15 @@ export function useSignupWithPasskey() {
 
       await createEmbeddedWallet();
 
-      const client = await waitForSmartWalletClient();
+      const smartWalletclient = await waitForSmartWalletClient();
 
-      const signer = createSmartWalletSigner(client);
+      const signer = createSmartWalletSigner(smartWalletclient);
 
       const { inboxId } = await createInboxWithSigner(signer);
 
       return {
         inboxId,
-        ethereumAddress: client.account.address,
+        ethereumAddress: smartWalletclient.account.address,
       };
     } catch (error) {
       throw error;
