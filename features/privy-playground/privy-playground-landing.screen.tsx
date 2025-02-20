@@ -8,7 +8,6 @@ import {
   Button,
   TextInput,
 } from "react-native";
-import { logger } from "@/utils/logger";
 import {
   AuthStatuses,
   useAccountsStore,
@@ -36,6 +35,7 @@ import {
   invalidateProfileQuery,
 } from "../profiles/profiles.query";
 import { useLogoutOnJwtRefreshError } from "../authentication/use-logout-on-jwt-refresh-error";
+import { buildDeviceMetadata } from "@/utils/device-metadata";
 
 export function PrivyPlaygroundLandingScreen() {
   useLogoutOnJwtRefreshError();
@@ -63,9 +63,7 @@ export function PrivyPlaygroundLandingScreen() {
     setShouldShowConnectWalletBottomSheet,
   ] = useState(false);
 
-  useMMKVListener((key) => {
-    logger.debug("key", key);
-  }, secureQueryMMKV);
+  useMMKVListener((key) => {}, secureQueryMMKV);
 
   return (
     <SafeAreaView>
@@ -89,7 +87,6 @@ export function PrivyPlaygroundLandingScreen() {
                 xmtpId: currentSender?.inboxId!,
               });
               alert(JSON.stringify(profile, null, 2));
-              logger.debug("profile", profile);
             }}
           />
           <Button
@@ -97,7 +94,6 @@ export function PrivyPlaygroundLandingScreen() {
             onPress={async () => {
               await invalidateJwtQueryData();
               const jwt = await fetchJwtQueryData();
-              logger.debug("jwt", jwt);
             }}
           />
           <Button title="clear JWT" onPress={() => setJwtQueryData("")} />
@@ -122,29 +118,12 @@ export function PrivyPlaygroundLandingScreen() {
                   },
                   {
                     async onSuccess(data, variables, context) {
-                      logger.debug(
-                        "Successfully created user",
-                        data,
-                        variables,
-                        context
-                      );
                       const jwt = await ensureJwtQueryData();
-                      logger.debug(
-                        "Successfully created user and got JWT",
-                        jwt
-                      );
                       useAccountsStore
                         .getState()
                         .setAuthStatus(AuthStatuses.signedIn);
                     },
-                    onError(error, variables, context) {
-                      logger.error(
-                        "Error creating user",
-                        error,
-                        variables,
-                        context
-                      );
-                    },
+                    onError(error, variables, context) {},
                   }
                 )
               }
@@ -163,7 +142,6 @@ export function PrivyPlaygroundLandingScreen() {
 
           <Button
             title="Connect Wallet"
-            disabled={authStatus !== AuthStatuses.signedIn}
             onPress={() => setShouldShowConnectWalletBottomSheet(true)}
           />
 
@@ -183,18 +161,23 @@ export function PrivyPlaygroundLandingScreen() {
             onPress={async () => {
               try {
                 await logout();
-                logger.debug("Logout successful");
-              } catch (error) {
-                logger.error("Error during logout", error);
-              }
+              } catch (error) {}
             }}
           />
           <ConnectWalletBottomSheet
             isVisible={shouldShowConnectWalletBottomSheet}
             onClose={() => {}}
-            onWalletImported={() => {
-              alert("wallet imported");
-              setShouldShowConnectWalletBottomSheet(false);
+            onWalletImported={(socialIdentity) => {
+              createUser({
+                privyUserId: privyUser!.id,
+                smartContractWalletAddress: currentSender!.ethereumAddress!,
+                inboxId: currentSender!.inboxId!,
+                profile: {
+                  name: socialIdentity.name,
+                  avatar: socialIdentity.avatar,
+                  description: socialIdentity.bio,
+                },
+              });
             }}
           />
         </View>

@@ -23,6 +23,7 @@ const createUserResponseSchema = z
       id: z.string(),
       name: z.string(),
       description: z.string().nullable(),
+      avatar: z.string().nullable(),
     }),
   })
   .strict();
@@ -36,6 +37,7 @@ export const createUser = async (args: {
   profile: {
     name: string;
     avatar?: string;
+    description?: string;
   };
 }): Promise<CreateUserResponse> => {
   const { privyUserId, smartContractWalletAddress, inboxId, profile } = args;

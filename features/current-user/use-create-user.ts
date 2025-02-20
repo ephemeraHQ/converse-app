@@ -46,6 +46,7 @@ const buildOptimisticUser = (args: ICreateUserArgs): CreateUserResponse => {
       id: "123",
       name: args.profile.name,
       description: args.profile.description ?? null,
+      avatar: args.profile.avatar ?? null,
     },
   };
 };
@@ -80,6 +81,7 @@ export function useCreateUser() {
         id: optimisticUser.profile.id,
         name: optimisticUser.profile.name,
         description: optimisticUser.profile.description,
+        avatar: optimisticUser.profile.avatar,
       };
 
       setProfileQueryData({

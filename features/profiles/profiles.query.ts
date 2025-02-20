@@ -11,10 +11,6 @@ import {
   IConvosProfileForInbox,
 } from "@/features/profiles/profiles.api";
 import { DateUtils } from "@/utils/time.utils";
-import {
-  useAccountsList,
-  useSafeCurrentSender,
-} from "@/features/multi-inbox/multi-inbox.store";
 
 const profileQueryKey = ({ xmtpId }: { xmtpId: string }) =>
   ["profile", xmtpId] as const;
@@ -58,13 +54,11 @@ export type ISetProfileQueryDataArgs = {
 export const setProfileQueryData = ({
   xmtpId,
   data,
-  updatedAt,
 }: ISetProfileQueryDataArgs) => {
   return queryClient.setQueryData<Partial<IConvosProfileForInbox>>(
     profileQueryKey({ xmtpId }),
     {
       ...data,
-      // updatedAt: updatedAt ? updatedAt.toString() : Date.now().toString(),
     }
   );
 };

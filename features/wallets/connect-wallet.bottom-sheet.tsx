@@ -18,7 +18,6 @@ import {
   useAccountsStore,
 } from "../multi-inbox/multi-inbox.store";
 import { MultiInboxClient } from "../multi-inbox/multi-inbox.client";
-import { logger } from "@/utils/logger";
 import { Text } from "@/design-system/Text";
 import {
   ISupportedWallet,
@@ -71,7 +70,10 @@ function SocialIdentityList({
         </Text>
         <ScrollView>
           {socialData?.map((social) => (
-            <Pressable key={`${social.name}-${social.type}`}>
+            <Pressable
+              key={`${social.name}-${social.type}`}
+              onPress={() => onSocialIdentityTapped(social)}
+            >
               <HStack>
                 <Avatar uri={social.avatar} name={social.name} />
                 <VStack>
@@ -131,7 +133,7 @@ function InstalledWalletsList({
 type ConnectWalletBottomSheetProps = {
   isVisible: boolean;
   onClose: () => void;
-  onWalletImported: (socialData: IWeb3SocialProfile[]) => void;
+  onWalletImported: (socialData: IWeb3SocialProfile) => void;
 };
 
 const coinbaseUrl = new URL(`https://${config.websiteDomain}/coinbase`);
@@ -177,13 +179,6 @@ function reducer(
   state: ConnectWalletBottomSheetState,
   action: ConnectWalletBottomSheetActions
 ): ConnectWalletBottomSheetState {
-  logger.debug(
-    `[ConnectWalletBottomSheet] Reducer called with action: ${JSON.stringify(
-      action,
-      null,
-      2
-    )}`
-  );
   switch (action.type) {
     case "ConnectAWallet":
       return {
@@ -350,75 +345,35 @@ export function ConnectWalletBottomSheet({
   ) => {
     dispatch({ type: "SetWalletToConnect", walletId: walletType });
 
-    logger.debug(
-      `[ConnectWalletBottomSheet] Handling connect wallet tapped for ${walletType}`
-    );
-
     connect(async () => {
-      logger.debug(
-        `[ConnectWalletBottomSheet] Creating wallet of type ${walletType}`
-      );
-
       const w = createWallet(walletType, options);
 
-      logger.debug(
-        `[ConnectWalletBottomSheet] Connecting wallet to thirdweb client`
-      );
       const walletAccount = await w.connect({
         client: thirdwebClient,
       });
 
       const addressToLink = walletAccount.address;
-      // note we're likely going to have to save this in a ref due to
-      // state spreading in reducer...
       dispatch({
         type: "WalletAccountConnected",
         account: walletAccount,
       });
 
       const socialProfiles = await ensureSocialProfilesQueryData(addressToLink);
-      logger.debug(
-        `[ConnectWalletBottomSheet]convos ry is awesome Social profiles: ${JSON.stringify(
-          socialProfiles,
-          null,
-          2
-        )}`
-      );
 
       dispatch({
         type: "SocialDataLoaded",
         data: socialProfiles,
       });
-      logger.debug(
-        `[ConnectWalletBottomSheet] Got wallet address: ${addressToLink}`
-      );
 
       const currentInboxClient =
         MultiInboxClient.instance.getInboxClientForAddress({
-          ethereumAddress: currentSenderEthereumAddress,
+          ethereumAddress: currentSenderEthereumAddress!,
         });
 
-      logger.debug(
-        `[ConnectWalletBottomSheet] Checking if address ${addressToLink} can be messaged`
-      );
       const resultsMap = await currentInboxClient.canMessage([addressToLink]);
-      logger.debug(
-        `[ConnectWalletBottomSheet] Results map: ${JSON.stringify(
-          resultsMap,
-          null,
-          2
-        )}`
-      );
       const isOnXmtp = resultsMap[addressToLink];
 
-      logger.debug(
-        `[ConnectWalletBottomSheet] Is on XMTP? ${isOnXmtp} for address ${addressToLink}`
-      );
-
       if (isOnXmtp) {
-        logger.debug(
-          `[ConnectWalletBottomSheet] Address ${addressToLink} is already on XMTP`
-        );
         alert(
           `You are already on XMTP with address ${addressToLink}. We're going to handle this carefully according to https://xmtp-labs.slack.com/archives/C07NSHXK693/p1739215446331469?thread_ts=1739212558.484059&cid=C07NSHXK693.`
         );
@@ -455,7 +410,9 @@ export function ConnectWalletBottomSheet({
   };
 
   function handleSocialIdentityTapped(socialIdentity: IWeb3SocialProfile) {
-    alert(`You tapped on ${socialIdentity.name}`);
+    onWalletImported(socialIdentity);
+    bottomSheetRef.current?.dismiss();
+    dispatch({ type: "Reset" });
   }
 
   function getBottomSheetHeaderTitle(mode: WalletImportBottomSheetMode) {
@@ -547,7 +504,7 @@ export function ConnectWalletBottomSheet({
                 </VStack>
               </HStack>
               <Button
-                text={`Sign into ${thirdwebWalletIdThatIsConnecting}`}
+                text={`Sign in ${thirdwebWalletIdThatIsConnecting}`}
                 onPress={async () => {
                   dispatch({ type: "SignInToWallet" });
                   const signer: InboxSigner = {
@@ -556,9 +513,6 @@ export function ConnectWalletBottomSheet({
                     getBlockNumber: () => undefined,
                     walletType: () => "EOA",
                     signMessage: async (message: string) => {
-                      logger.debug(
-                        `[ConnectWalletBottomSheet] Signing message for address ${connectingWalletAccount?.address}`
-                      );
                       const signature =
                         await connectingWalletAccount!.signMessage({
                           message,
@@ -566,17 +520,12 @@ export function ConnectWalletBottomSheet({
                       return signature;
                     },
                   };
-                  logger.debug(
-                    `[ConnectWalletBottomSheet] Adding account to inbox client`
-                  );
                   const currentInboxClient =
                     MultiInboxClient.instance.getInboxClientForAddress({
                       ethereumAddress: currentSenderEthereumAddress!,
                     });
                   await currentInboxClient.addAccount(signer);
-                  alert(
-                    `You've sucesfully connected ${connectingWalletAccount?.address} to your inbox. You won't see anything in the UI yet, but we're working on that now.`
-                  );
+                  dispatch({ type: "WalletAccountLinkSigned" });
                 }}
               />
             </VStack>
