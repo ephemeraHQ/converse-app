@@ -11,10 +11,11 @@ import { logger } from "@utils/logger";
 import { startConversationStreaming } from "./stream-conversations";
 import { startMessageStreaming } from "./stream-messages";
 import { useStreamingStore } from "./stream-store";
+import { useEffect, useRef } from "react";
 
 // todo move this to multi-inbox-client
 // when clients are added and removed; start and stop respective streams
-export function setupStreamingSubscriptions() {
+export function useSetupStreamingSubscriptions() {
   // Start/stop streaming when internet connectivity changes
   // TODO: Fix this, we need to combine with the accounts store subscription below
   // useAppStore.subscribe(
@@ -31,50 +32,65 @@ export function setupStreamingSubscriptions() {
   //   }
   // );
 
-  // Start/Stop streaming when accounts change
-  useAccountsStore.subscribe(
-    (state) => [state.senders, state.multiInboxClientRestorationState] as const,
-    (
-      [senders, multiInboxClientRestorationState],
-      [previousSenders, previousMultiInboxClientRestorationState]
-    ) => {
-      const { isInternetReachable } = useAppStore.getState();
+  const firstRenderRef = useRef(true);
 
-      if (!isInternetReachable) {
-        return;
+  useEffect(() => {
+    const unsubscribe = useAccountsStore.subscribe(
+      (state) =>
+        [state.senders, state.multiInboxClientRestorationState] as const,
+      (
+        [senders, multiInboxClientRestorationState],
+        [previousSenders, previousMultiInboxClientRestorationState]
+      ) => {
+        const { isInternetReachable } = useAppStore.getState();
+
+        if (!isInternetReachable) {
+          return;
+        }
+
+        if (
+          multiInboxClientRestorationState !==
+          MultiInboxClientRestorationStates.restored
+        ) {
+          return;
+        }
+
+        const previousAccounts = previousSenders.map(
+          (sender: { ethereumAddress: string }) => sender.ethereumAddress
+        );
+
+        const currentAccounts = senders.map(
+          (sender: { ethereumAddress: string }) => sender.ethereumAddress
+        );
+
+        // Handle new accounts
+        const newAccounts = currentAccounts.filter(
+          (account: string) =>
+            !previousAccounts.includes(account) || !firstRenderRef.current
+        );
+
+        if (newAccounts.length > 0) {
+          startStreaming(newAccounts);
+        }
+
+        // Handle removed accounts
+        const removedAccounts = previousAccounts.filter(
+          (account: string) => !currentAccounts.includes(account)
+        );
+
+        if (removedAccounts.length > 0) {
+          stopStreaming(removedAccounts);
+        }
+
+        firstRenderRef.current = false;
+      },
+      {
+        fireImmediately: true,
       }
+    );
 
-      if (
-        multiInboxClientRestorationState !==
-        MultiInboxClientRestorationStates.restored
-      ) {
-        return;
-      }
-
-      const previousAccounts = previousSenders.map(
-        (sender: { ethereumAddress: string }) => sender.ethereumAddress
-      );
-      const currentAccounts = senders.map(
-        (sender: { ethereumAddress: string }) => sender.ethereumAddress
-      );
-
-      // Handle new accounts
-      const newAccounts = currentAccounts.filter(
-        (account: string) => !previousAccounts.includes(account)
-      );
-      if (newAccounts.length > 0) {
-        startStreaming(newAccounts);
-      }
-
-      // Handle removed accounts
-      const removedAccounts = previousAccounts.filter(
-        (account: string) => !currentAccounts.includes(account)
-      );
-      if (removedAccounts.length > 0) {
-        stopStreaming(removedAccounts);
-      }
-    }
-  );
+    return () => unsubscribe();
+  }, []);
 }
 
 async function startStreaming(accountsToStream: string[]) {

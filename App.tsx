@@ -5,7 +5,7 @@ import ActionSheetStateHandler from "@/components/StateHandlers/ActionSheetState
 import { useHydrateAuth } from "@/features/authentication/use-hydrate-auth";
 import { useLogoutOnJwtRefreshError } from "@/features/authentication/use-logout-on-jwt-refresh-error";
 import { useInitializeMultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
-import { setupStreamingSubscriptions } from "@/features/streams/streams";
+import { useSetupStreamingSubscriptions } from "@/features/streams/streams";
 import { $globalStyles } from "@/theme/styles";
 import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
 import { DebugButton } from "@components/DebugButton";
@@ -69,6 +69,7 @@ export function App() {
   useMonitorNetworkConnectivity();
   useHydrateAuth();
   useReactQueryDevTools(queryClient);
+  useSetupStreamingSubscriptions();
 
   const { themeScheme, setThemeContextOverride, ThemeProvider } =
     useThemeProvider();
@@ -79,7 +80,6 @@ export function App() {
 
   useEffect(() => {
     setupAppAttest();
-    setupStreamingSubscriptions();
   }, []);
 
   useCoinbaseWalletListener(true, coinbaseUrl);
