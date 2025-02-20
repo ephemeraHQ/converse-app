@@ -5,7 +5,6 @@ import { BlockedConversationsScreen } from "@/features/blocked-conversations/blo
 import { ConversationListScreen } from "@/features/conversation-list/conversation-list.screen";
 import { ConversationRequestsListNav } from "@/features/conversation-requests-list/conversation-requests-list.nav";
 import { OnboardingContactCardScreen } from "@/features/onboarding/screens/onboarding-contact-card-screen";
-import { OnboardingNotificationsScreen } from "@/features/onboarding/screens/onboarding-notifications-screen";
 import { OnboardingWelcomeScreen } from "@/features/onboarding/screens/onboarding-welcome-screen";
 import {
   ProfileNav,
@@ -126,10 +125,10 @@ const NavigationContent = () => {
             // Fade animation when transitioning to onboarding state
             options={{ animation: "fade" }}
           />
-          <NativeStack.Screen
+          {/* <NativeStack.Screen
             name="OnboardingNotifications"
             component={OnboardingNotificationsScreen}
-          />
+          /> */}
         </NativeStack.Group>
       ) : (
         // Main app screens

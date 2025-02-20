@@ -1,8 +1,7 @@
 import { queryClient } from "@/queries/queryClient";
 import { reactQueryPersister } from "@/utils/mmkv";
-import { CreateUserResponse } from "@features/authentication/authentication.api";
 import { queryOptions, useQuery } from "@tanstack/react-query";
-import { fetchCurrentUser } from "./current-user-api";
+import { ICurrentUser, fetchCurrentUser } from "./current-user-api";
 
 const currentUserQueryKey = () => ["current-user"] as const;
 
@@ -19,7 +18,7 @@ export function useCurrentUserQuery() {
   return useQuery(getCurrentUserQueryOptions());
 }
 
-export function setCurrentUserQueryData(args: { user: CreateUserResponse }) {
+export function setCurrentUserQueryData(args: { user: ICurrentUser }) {
   const { user } = args;
   return queryClient.setQueryData(getCurrentUserQueryOptions().queryKey, user);
 }

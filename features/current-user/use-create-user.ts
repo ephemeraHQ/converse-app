@@ -91,7 +91,12 @@ export function useCreateUser() {
     // },
 
     onSuccess: (data) => {
-      setCurrentUserQueryData(data);
+      setCurrentUserQueryData({
+        user: {
+          id: data.id,
+          identities: [data.identity],
+        },
+      });
       setProfileQueryData({
         xmtpId: data.identity.xmtpId,
         data: {
