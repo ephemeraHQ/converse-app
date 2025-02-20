@@ -1,6 +1,6 @@
 import { Avatar } from "@/components/avatar";
 import Button from "@/components/Button/Button";
-import { Screen } from "@/components/Picto/screen/screen";
+import { Screen } from "@/components/Button/screen/screen";
 import { config } from "@/config";
 import { Text } from "@/design-system/Text";
 import { useSafeCurrentSender } from "@/features/multi-inbox/multi-inbox.store";

@@ -4,7 +4,7 @@ import { StyleProp, TextStyle, ViewStyle } from "react-native";
 import {
   ExtendedEdge,
   useSafeAreaInsetsStyle,
-} from "@/components/Picto/screen/screen.helpers";
+} from "@/components/Button/screen/screen.helpers";
 import { translate } from "@/i18n";
 import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
 import { HStack } from "../HStack";
