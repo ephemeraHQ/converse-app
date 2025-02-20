@@ -1,7 +1,7 @@
-import { buildDeviceMetadata } from "@/utils/device-metadata";
 import { api } from "@/utils/api/api";
+import { handleApiError } from "@/utils/api/api.error";
+import { buildDeviceMetadata } from "@/utils/device-metadata";
 import { z } from "zod";
-import { logger } from "@/utils/logger";
 
 const deviceOSEnum = z.enum(["android", "ios", "web"]);
 
@@ -40,28 +40,21 @@ export const createUser = async (args: {
 }): Promise<CreateUserResponse> => {
   const { privyUserId, smartContractWalletAddress, inboxId, profile } = args;
 
-  const requestData = {
-    privyUserId,
-    device: buildDeviceMetadata(),
-    identity: {
-      privyAddress: smartContractWalletAddress,
-      xmtpId: inboxId,
-    },
-    profile,
-  };
+  try {
+    const response = await api.post<CreateUserResponse>("/api/v1/users", {
+      privyUserId,
+      device: buildDeviceMetadata(),
+      identity: {
+        privyAddress: smartContractWalletAddress,
+        xmtpId: inboxId,
+      },
+      profile,
+    });
 
-  const response = await api.post<CreateUserResponse>(
-    "/api/v1/users",
-    requestData
-  );
-  logger.debug(
-    `[createUser] Response from /api/v1/users: ${JSON.stringify(
-      response.data,
-      null,
-      2
-    )}`
-  );
-  return createUserResponseSchema.parse(response.data);
+    return createUserResponseSchema.parse(response.data);
+  } catch (error) {
+    throw handleApiError(error, "createUser");
+  }
 };
 
 const fetchJwtResponseSchema = z.object({
@@ -70,17 +63,11 @@ const fetchJwtResponseSchema = z.object({
 
 type FetchJwtResponse = z.infer<typeof fetchJwtResponseSchema>;
 
-export async function fetchJwt() {
-  logger.debug(`[fetchJwt] Fetching JWT token`);
-  const response = await api.post<FetchJwtResponse>("/api/v1/authenticate");
-  logger.debug(
-    `[fetchJwt] Response from /api/v1/authenticate: ${JSON.stringify(
-      response.data,
-      null,
-      2
-    )}`
-  );
-  const parsedResponse = fetchJwtResponseSchema.parse(response.data);
-  logger.debug(`[fetchJwt] Successfully fetched JWT token`);
-  return parsedResponse;
+export async function fetchJwt(): Promise<FetchJwtResponse> {
+  try {
+    const response = await api.post<FetchJwtResponse>("/api/v1/authenticate");
+    return fetchJwtResponseSchema.parse(response.data);
+  } catch (error) {
+    throw handleApiError(error, "fetchJwt");
+  }
 }

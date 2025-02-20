@@ -1,23 +1,19 @@
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React, { useCallback, useState } from "react";
-import { TextStyle, ViewStyle } from "react-native";
 import { Avatar } from "@/components/Avatar";
 import { Screen } from "@/components/Screen/ScreenComp/Screen";
 import { Button } from "@/design-system/Button/Button";
 import { Center } from "@/design-system/Center";
 import { AnimatedHStack } from "@/design-system/HStack";
 import { Text } from "@/design-system/Text";
+import { useSettingsStore } from "@/features/multi-inbox/multi-inbox.store";
 import { OnboardingNotificationRow } from "@/features/onboarding/components/onboarding-notification-row";
 import { OnboardingSubtitle } from "@/features/onboarding/components/onboarding-subtitle";
 import { OnboardingTitle } from "@/features/onboarding/components/onboarding-title";
-import {
-  AuthStatuses,
-  useAccountsStore,
-  useSettingsStore,
-} from "@/features/multi-inbox/multi-inbox.store";
 import { NavigationParamList } from "@/screens/Navigation/Navigation";
 import { captureError } from "@/utils/capture-error";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useAppTheme } from "@theme/useAppTheme";
+import React, { useCallback, useState } from "react";
+import { TextStyle, ViewStyle } from "react-native";
 
 const $screenContainer: ViewStyle = {
   flex: 1,
@@ -43,14 +39,12 @@ export function OnboardingNotificationsScreen(
 
   // const displayName = useInboxName(currentAccount);
 
-  const setAuthStatus = useAccountsStore((s) => s.setAuthStatus);
   const handleEnableNotifications = () => {
     try {
       // TODO
     } catch (error) {
       captureError(error);
     } finally {
-      setAuthStatus(AuthStatuses.signedIn);
     }
   };
 
@@ -102,7 +96,6 @@ export function OnboardingNotificationsScreen(
         variant="text"
         onPress={() => {
           setNotificationsSettings({ showNotificationScreen: false });
-          setAuthStatus(AuthStatuses.signedIn);
         }}
       />
     </Screen>

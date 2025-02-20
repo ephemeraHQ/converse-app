@@ -2,7 +2,7 @@ import { Avatar, IAvatarProps } from "@/components/Avatar";
 import { Center } from "@/design-system/Center";
 import { ITextProps, Text } from "@/design-system/Text";
 import { useAppTheme } from "@/theme/useAppTheme";
-import { AnimatedPressable } from "@design-system/Pressable";
+import { Pressable } from "@/design-system/Pressable";
 import React from "react";
 import { StyleProp, ViewStyle } from "react-native";
 
@@ -43,17 +43,17 @@ export function Chip({
 
   return (
     <ChipContext.Provider value={{ size, disabled, isSelected }}>
-      <AnimatedPressable
+      <Pressable
         onPress={onPress}
         disabled={disabled}
-        style={() => [
+        style={[
           styles.$container,
           isSelected && styles.$selectedContainer,
           disabled && styles.$disabledContainer,
         ]}
       >
         <Center style={styles.$content}>{children}</Center>
-      </AnimatedPressable>
+      </Pressable>
     </ChipContext.Provider>
   );
 }

@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { api } from "../../utils/api/api";
 import { refreshJwtInterceptor } from "./interceptor.refresh-jwt";
 import { useLogout } from "@/features/authentication/use-logout.hook";
+import logger from "@/utils/logger";
 
 export const useLogoutOnJwtRefreshError = () => {
   const { logout } = useLogout();
@@ -11,6 +12,7 @@ export const useLogoutOnJwtRefreshError = () => {
     const responseInterceptor = api.interceptors.response.use(
       (response) => response,
       refreshJwtInterceptor(api, () => {
+        logger.debug("[useLogoutOnJwtRefreshError] Logging out");
         // Now we can use hook-based functions here
         logout();
       })

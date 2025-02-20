@@ -196,6 +196,7 @@ async function updateConversationMetadata(args: {
   };
 }) {
   const { account, topic, updates } = args;
+
   const conversationId = await getConversationId({ account, topic });
 
   const currentUser = getCurrentUserQueryData();
@@ -206,7 +207,9 @@ async function updateConversationMetadata(args: {
 
   const { data } = await api.post(`/api/metadata/conversation`, {
     conversationId,
-    deviceIdentityId: currentUser.identity.id,
+    deviceIdentityId: currentUser.identities.find(
+      (identity) => identity.privyAddress === account
+    )?.id,
     ...updates,
   });
 

@@ -80,20 +80,34 @@ export async function getPreviousSessionLoggingFile() {
 }
 
 const converseTransport: transportFunctionType = async (props) => {
+  let logMessage = props.msg;
+
+  // Format log message to include error cause if it exists
+  if (props.rawMsg?.[0] instanceof Error) {
+    const error = props.rawMsg[0];
+    if (error.cause) {
+      logMessage = `${logMessage} | Cause: ${
+        error.cause instanceof Error ? error.cause.message : error.cause
+      }`;
+    }
+  }
+
+  // Console logging in dev
   if (isDev) {
+    // Use the enhanced message for console logging
+    props.msg = logMessage;
     consoleTransport(props);
   }
 
+  // Error tracking
   if (props.level.severity >= LOG_LEVELS.error) {
     const errorArg = props.rawMsg?.[0];
-
     const error =
       errorArg instanceof Error
         ? errorArg
         : new Error(
             typeof errorArg === "string" ? errorArg : JSON.stringify(errorArg)
           );
-
     const context = props.rawMsg?.[1];
 
     sentryTrackError({
@@ -106,9 +120,9 @@ const converseTransport: transportFunctionType = async (props) => {
     });
   }
 
-  // File logging
+  // File logging with enhanced message
   if (loggingFilePath) {
-    await RNFS.appendFile(loggingFilePath, `${props.msg}\n`, "utf8");
+    await RNFS.appendFile(loggingFilePath, `${logMessage}\n`, "utf8");
   }
 };
 

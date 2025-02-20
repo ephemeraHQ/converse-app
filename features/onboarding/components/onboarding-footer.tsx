@@ -1,22 +1,24 @@
-import { AnimatedVStack } from "@/design-system/VStack";
-import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
-import { OnboardingIconButton } from "@/features/onboarding/components/onboarding-icon-button";
 import { IIconName } from "@/design-system/Icon/Icon.types";
-import { OnboardingFooterText } from "./onboarding-footer-text";
+import { AnimatedVStack } from "@/design-system/VStack";
+import { ActivityIndicator } from "@/design-system/activity-indicator";
+import { OnboardingIconButton } from "@/features/onboarding/components/onboarding-icon-button";
+import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
+import { converseEventEmitter } from "@/utils/events";
+import { useCallback } from "react";
+import { ViewStyle } from "react-native";
+import { useAnimatedKeyboard, useAnimatedStyle } from "react-native-reanimated";
 import {
   ONBOARDING_ENTERING_DELAY,
   ONBOARDING_ENTERING_DURATION,
 } from "../constants/animation-constants";
-import { ViewStyle } from "react-native";
-import { useCallback } from "react";
-import { converseEventEmitter } from "@/utils/events";
-import { useAnimatedKeyboard, useAnimatedStyle } from "react-native-reanimated";
+import { OnboardingFooterText } from "./onboarding-footer-text";
 
 type IOnboardingFooterProps = {
   text: string;
   iconName: IIconName;
   onPress: () => void;
   disabled?: boolean;
+  isLoading?: boolean;
 };
 
 const $iconButtonStyle: ThemedStyle<ViewStyle> = ({ borderRadius }) => ({
@@ -28,6 +30,7 @@ export function OnboardingFooter({
   iconName,
   onPress,
   disabled,
+  isLoading,
 }: IOnboardingFooterProps) {
   const { themed, theme } = useAppTheme();
   const { animation } = theme;
@@ -58,10 +61,14 @@ export function OnboardingFooter({
         action="primary"
         size="xl"
         disabled={disabled}
-        iconName={iconName}
         style={themed($iconButtonStyle)}
         onPress={onPress}
         onLongPress={showDebug}
+        {...(isLoading
+          ? { icon: <ActivityIndicator /> }
+          : {
+              iconName,
+            })}
       />
       <OnboardingFooterText color={disabled ? "inactive" : "primary"}>
         {text}

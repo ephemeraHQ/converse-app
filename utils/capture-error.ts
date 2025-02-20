@@ -3,7 +3,6 @@ import { logger } from "@/utils/logger";
 
 export function captureError(error: unknown) {
   logger.error(error);
-
   // Note: (thierry) Our logger is already sending error to Sentry
   // sentryTrackError({ error });
 }

@@ -232,6 +232,7 @@ export const Snackbar = memo(
               >
                 {snackbar.actions?.map((action) => (
                   <Button
+                    hitSlop={theme.spacing.xxs}
                     withHapticFeedback
                     key={action.label}
                     text={action.label}
@@ -250,6 +251,7 @@ export const Snackbar = memo(
                   }}
                 >
                   <IconButton
+                    hitSlop={theme.spacing.xxs}
                     withHaptics
                     onPress={dismissItem}
                     variant="ghost"

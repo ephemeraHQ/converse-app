@@ -1,30 +1,38 @@
 import { config } from "@/config";
-import { ProfileScreenConfig } from "@/features/profiles/profile.nav";
-import ActionSheetStateHandler from "@components/StateHandlers/ActionSheetStateHandler";
-import { HydrationStateHandler } from "@components/StateHandlers/HydrationStateHandler";
-import { InitialStateHandler } from "@components/StateHandlers/InitialStateHandler";
-import { ConversationScreenConfig } from "@features/conversation/conversation.nav";
+import { AppSettingsScreen } from "@/features/app-settings/app-settings.screen";
+import { useAuthStore } from "@/features/authentication/authentication.store";
+import { BlockedConversationsScreen } from "@/features/blocked-conversations/blocked-conversations.screen";
+import { ConversationListScreen } from "@/features/conversation-list/conversation-list.screen";
+import { ConversationRequestsListNav } from "@/features/conversation-requests-list/conversation-requests-list.nav";
+import { OnboardingContactCardScreen } from "@/features/onboarding/screens/onboarding-contact-card-screen";
+import { OnboardingNotificationsScreen } from "@/features/onboarding/screens/onboarding-notifications-screen";
+import { OnboardingWelcomeScreen } from "@/features/onboarding/screens/onboarding-welcome-screen";
+import {
+  ProfileNav,
+  ProfileScreenConfig,
+} from "@/features/profiles/profile.nav";
+import { IdleScreen } from "@/screens/IdleScreen";
+import {
+  NativeStack,
+  NavigationParamList,
+} from "@/screens/Navigation/Navigation";
+import { captureError } from "@/utils/capture-error";
+import { hideSplashScreen } from "@/utils/splash/splash";
+import {
+  ConversationNav,
+  ConversationScreenConfig,
+} from "@features/conversation/conversation.nav";
 import { LinkingOptions, NavigationContainer } from "@react-navigation/native";
-import { backgroundColor } from "@styles/colors";
 import { useThemeProvider } from "@theme/useAppTheme";
 import { converseNavigatorRef } from "@utils/navigation";
 import * as Linking from "expo-linking";
-import { StatusBar } from "expo-status-bar";
-import React from "react";
-import { Platform, useColorScheme } from "react-native";
+import React, { useEffect } from "react";
 import {
-  IdleNavigation,
-  NavigationParamList,
-  SignedInNavigation,
-  SignedOutNavigation,
-} from "./Navigation/Navigation";
-import { ShareProfileScreenConfig } from "./Navigation/ShareProfileNav";
+  ShareProfileNav,
+  ShareProfileScreenConfig,
+} from "./Navigation/ShareProfileNav";
 import { WebviewPreviewScreenConfig } from "./Navigation/WebviewPreviewNav";
-import {
-  getConverseInitialURL,
-  getConverseStateFromPath,
-} from "./Navigation/navHelpers";
-import { useAuthStatus } from "@/features/authentication/use-auth-status.hook";
+
 const prefix = Linking.createURL("/");
 
 const linking: LinkingOptions<NavigationParamList> = {
@@ -39,9 +47,10 @@ const linking: LinkingOptions<NavigationParamList> = {
       WebviewPreview: WebviewPreviewScreenConfig,
     },
   },
-  // @ts-ignore
-  getStateFromPath: getConverseStateFromPath("fullStackNavigation"),
-  getInitialURL: getConverseInitialURL,
+  // TODO: Fix this
+  // getStateFromPath: getConverseStateFromPath("fullStackNavigation"),
+  // TODO: Fix this
+  // getInitialURL: () => null,
 };
 
 export function Main() {
@@ -55,7 +64,6 @@ export function Main() {
   return (
     <>
       <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
-        <Initializer />
         <NavigationContainer<NavigationParamList>
           theme={navigationTheme}
           linking={linking}
@@ -74,30 +82,79 @@ export function Main() {
 }
 
 const NavigationContent = () => {
-  const { isRestoring, isSignedIn, isSignedOut } = useAuthStatus();
+  const authStatus = useAuthStore((state) => state.status);
 
-  // Show idle navigation during signup/signin/restoration
-  if (isRestoring) {
-    return <IdleNavigation />;
-  } else if (isSignedOut) {
-    return <SignedOutNavigation />;
-  } else if (isSignedIn) {
-    return <SignedInNavigation />;
-  }
-};
+  useEffect(() => {
+    if (authStatus !== "undetermined") {
+      hideSplashScreen().catch(captureError);
+    }
+  }, [authStatus]);
 
-// Bunch of handlers. Not really react components
-const Initializer = () => {
-  const colorScheme = useColorScheme();
+  const isUndetermined = authStatus === "undetermined";
+  const isOnboarding = authStatus === "onboarding";
+  const isSignedOut = authStatus === "signedOut";
 
   return (
-    <>
-      <HydrationStateHandler />
-      <InitialStateHandler />
-      {Platform.OS === "android" && (
-        <StatusBar backgroundColor={backgroundColor(colorScheme)} />
+    <NativeStack.Navigator
+      screenOptions={{
+        // Since we handle with useHeader hook
+        header: () => null,
+      }}
+    >
+      {isUndetermined ? (
+        // Show idle screen during restoration
+        <NativeStack.Screen
+          name="Idle"
+          component={IdleScreen}
+          // Fade animation for auth state changes
+          options={{ animation: "fade" }}
+        />
+      ) : isSignedOut ? (
+        <NativeStack.Group>
+          <NativeStack.Screen
+            name="OnboardingWelcome"
+            component={OnboardingWelcomeScreen}
+            // Fade animation when transitioning to signed out state
+            options={{ animation: "fade" }}
+          />
+        </NativeStack.Group>
+      ) : isOnboarding ? (
+        <NativeStack.Group>
+          <NativeStack.Screen
+            name="OnboardingCreateContactCard"
+            component={OnboardingContactCardScreen}
+            // Fade animation when transitioning to onboarding state
+            options={{ animation: "fade" }}
+          />
+          <NativeStack.Screen
+            name="OnboardingNotifications"
+            component={OnboardingNotificationsScreen}
+          />
+        </NativeStack.Group>
+      ) : (
+        // Main app screens
+        <NativeStack.Group>
+          <NativeStack.Screen
+            name="Chats"
+            component={ConversationListScreen}
+            // Fade animation when transitioning to authenticated state
+            options={{ animation: "fade" }}
+          />
+          <NativeStack.Screen
+            name="Blocked"
+            component={BlockedConversationsScreen}
+          />
+          {ConversationRequestsListNav()}
+          {ConversationNav()}
+          {ShareProfileNav()}
+          {/* {WebviewPreviewNav()} */}
+          {ProfileNav()}
+          <NativeStack.Screen
+            name="AppSettings"
+            component={AppSettingsScreen}
+          />
+        </NativeStack.Group>
       )}
-      <ActionSheetStateHandler />
-    </>
+    </NativeStack.Navigator>
   );
 };

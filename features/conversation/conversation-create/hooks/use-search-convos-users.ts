@@ -8,31 +8,22 @@ import { isSameInboxId } from "@/utils/xmtpRN/xmtp-inbox-id/xmtp-inbox-id";
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
 import { InboxId } from "@xmtp/react-native-sdk";
 
-const isInboxIdIncludedInList =
-  (inboxIdsToCheck: string[]) => (profile: ISearchProfilesResult) => {
-    return inboxIdsToCheck.some((inboxIdToCheck) =>
-      isSameInboxId(profile.xmtpId, inboxIdToCheck)
-    );
-  };
-
 export function useSearchConvosUsers(args: {
   searchQuery: string;
   inboxIdsToOmit: InboxId[];
 }) {
   const { searchQuery, inboxIdsToOmit } = args;
 
-  const shouldInboxIdBeOmitted = isInboxIdIncludedInList(inboxIdsToOmit);
-
   return useQuery({
     ...getConvosUsersSearchQueryOptions(searchQuery),
     select: (data: ISearchProfilesResult[]) => {
-      // Filter out search results for addresses that should be omitted
-      // (e.g. current user and users selected users)
-      const filteredResults: ISearchProfilesResult[] = data?.filter(
-        shouldInboxIdBeOmitted
+      // Filter out search results for inboxIds that should be omitted
+      return data.filter(
+        (profile) =>
+          !inboxIdsToOmit.some((inboxIdToOmit) =>
+            isSameInboxId(profile.xmtpId, inboxIdToOmit)
+          )
       );
-
-      return filteredResults;
     },
   });
 }

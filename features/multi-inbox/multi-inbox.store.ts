@@ -12,7 +12,11 @@ import {
 import { logger } from "@utils/logger";
 import { InboxId } from "@xmtp/react-native-sdk";
 import { StoreApi, UseBoundStore, create } from "zustand";
-import { createJSONStorage, persist } from "zustand/middleware";
+import {
+  createJSONStorage,
+  persist,
+  subscribeWithSelector,
+} from "zustand/middleware";
 import {
   GroupStatus,
   SettingsStoreType,
@@ -59,20 +63,7 @@ export const deleteStores = (account: string) => {
   mmkv.delete(`store-${account}-wallet`);
 };
 
-export const AuthStatuses = {
-  signingUp: "signingUp",
-  signingIn: "signingIn",
-  restoring: "restoring",
-  signedIn: "signedIn",
-  signedOut: "signedOut",
-  undetermined: "undetermined",
-} as const;
-
-type AuthStatus = (typeof AuthStatuses)[keyof typeof AuthStatuses];
-
 type AccountsStoreStype = {
-  authStatus: AuthStatus;
-  setAuthStatus: (status: AuthStatus) => void;
   multiInboxClientRestorationState: MultiInboxClientRestorationState;
   setMultiInboxClientRestorationState: (
     state: MultiInboxClientRestorationState
@@ -80,119 +71,123 @@ type AccountsStoreStype = {
   currentSender: CurrentSender | undefined;
 
   setCurrentAccount: ({ ethereumAddress }: { ethereumAddress: string }) => void;
-
   setCurrentInboxId: (inboxId: InboxId) => void;
-
   setCurrentSender: (sender: CurrentSender | undefined) => void;
+
   addSender: (sender: CurrentSender) => void;
   // setCurrentAccount: (ethereumAddress: string) => void;
   senders: CurrentSender[];
   logoutAllSenders: () => void;
 };
+
 // Main accounts store
 export const useAccountsStore = create<AccountsStoreStype>()(
-  persist(
-    (set, get) => ({
-      authStatus: AuthStatuses.signedOut,
-      setAuthStatus: (status: AuthStatus) => set({ authStatus: status }),
-
-      currentSender: undefined,
-      signedInUserId: undefined,
-      setCurrentAccount: ({ ethereumAddress }: { ethereumAddress: string }) => {
-        const senders = get().senders;
-        const sender = senders.find(
-          (sender) => sender.ethereumAddress === ethereumAddress
-        );
-        if (!sender) {
-          throw new Error("Sender not found");
-        }
-        set({ currentSender: sender });
-      },
-
-      setCurrentInboxId: (inboxId: InboxId) => {
-        const senders = get().senders;
-        const sender = senders.find((sender) => sender.inboxId === inboxId);
-        if (!sender) {
-          throw new Error("Sender not found");
-        }
-        set({ currentSender: sender });
-      },
-
-      setCurrentSender: (sender: CurrentSender | undefined) =>
-        set({ currentSender: sender }),
-      multiInboxClientRestorationState: MultiInboxClientRestorationStates.idle,
-      setMultiInboxClientRestorationState: (
-        state: MultiInboxClientRestorationState
-      ) => set({ multiInboxClientRestorationState: state }),
-      addSender: (sender: CurrentSender) =>
-        set((state) => {
-          if (!storesByAccount[sender.ethereumAddress]) {
-            initStores(sender.ethereumAddress);
-          }
-          const senderExists = state.senders.some(
-            (existingSender) =>
-              existingSender.ethereumAddress === sender.ethereumAddress &&
-              existingSender.inboxId === sender.inboxId
+  subscribeWithSelector(
+    persist(
+      (set, get) => ({
+        currentSender: undefined,
+        signedInUserId: undefined,
+        setCurrentAccount: ({
+          ethereumAddress,
+        }: {
+          ethereumAddress: string;
+        }) => {
+          const senders = get().senders;
+          const sender = senders.find(
+            (sender) => sender.ethereumAddress === ethereumAddress
           );
-          if (senderExists) return state;
-          return { senders: [...state.senders, sender] };
-        }),
-      senders: [],
-      logoutAllSenders: () => {
-        set({ senders: [], currentSender: undefined });
-      },
-    }),
-    {
-      name: "store-accounts-new-3",
-      storage: createJSONStorage(() => zustandMMKVStorage),
-      partialize: (state) => {
-        const partializedState = {
-          ...state,
-          multiInboxClientRestorationState:
-            MultiInboxClientRestorationStates.idle,
-        };
-        return partializedState;
-      },
+          if (!sender) {
+            throw new Error("Sender not found");
+          }
+          set({ currentSender: sender });
+        },
 
-      onRehydrateStorage: () => {
-        return (state, error) => {
-          if (error) {
-            logger.warn(
-              `[multi-inbox.store#onRehydrationStorage] An error happened during hydration: ${error}`
+        setCurrentInboxId: (inboxId: InboxId) => {
+          const senders = get().senders;
+          const sender = senders.find((sender) => sender.inboxId === inboxId);
+          if (!sender) {
+            throw new Error("Sender not found");
+          }
+          set({ currentSender: sender });
+        },
+
+        setCurrentSender: (sender: CurrentSender | undefined) =>
+          set({ currentSender: sender }),
+        multiInboxClientRestorationState:
+          MultiInboxClientRestorationStates.idle,
+        setMultiInboxClientRestorationState: (
+          state: MultiInboxClientRestorationState
+        ) => set({ multiInboxClientRestorationState: state }),
+        addSender: (sender: CurrentSender) =>
+          set((state) => {
+            if (!storesByAccount[sender.ethereumAddress]) {
+              initStores(sender.ethereumAddress);
+            }
+            const senderExists = state.senders.some(
+              (existingSender) =>
+                existingSender.ethereumAddress === sender.ethereumAddress &&
+                existingSender.inboxId === sender.inboxId
             );
-          } else {
-            logger.debug(
-              `[multi-inbox.store#onRehydrationStorage] State hydrated successfully: ${JSON.stringify(
-                state,
-                null,
-                2
-              )}`
-            );
-            if (state?.senders && state.senders.length > 0) {
-              logger.debug(
-                `[multi-inbox.store#onRehydrationStorage] Found ${state.senders.length} accounts in hydration, initializing stores`
+            if (senderExists) return state;
+            return { senders: [...state.senders, sender] };
+          }),
+        senders: [],
+        logoutAllSenders: () => {
+          set({ senders: [], currentSender: undefined });
+        },
+      }),
+      {
+        name: "multi-inbox-store",
+        storage: createJSONStorage(() => zustandMMKVStorage),
+        partialize: (state) => {
+          const partializedState = {
+            ...state,
+            multiInboxClientRestorationState:
+              MultiInboxClientRestorationStates.idle,
+          };
+          return partializedState;
+        },
+
+        onRehydrateStorage: () => {
+          return (state, error) => {
+            if (error) {
+              logger.warn(
+                `[multi-inbox.store#onRehydrationStorage] An error happened during hydration: ${error}`
               );
-              state.senders.map((sender) => {
-                if (!storesByAccount[sender.ethereumAddress]) {
-                  logger.debug(
-                    `[multi-inbox.store#onRehydrationStorage] Initializing store for account: ${sender.ethereumAddress}`
-                  );
-                  initStores(sender.ethereumAddress);
-                } else {
-                  logger.debug(
-                    `[multi-inbox.store#onRehydrationStorage] Store already exists for account: ${sender.ethereumAddress}`
-                  );
-                }
-              });
             } else {
               logger.debug(
-                "[multi-inbox.store#onRehydrationStorage] No accounts found in hydrated state"
+                `[multi-inbox.store#onRehydrationStorage] State hydrated successfully: ${JSON.stringify(
+                  state,
+                  null,
+                  2
+                )}`
               );
+              if (state?.senders && state.senders.length > 0) {
+                logger.debug(
+                  `[multi-inbox.store#onRehydrationStorage] Found ${state.senders.length} accounts in hydration, initializing stores`
+                );
+                state.senders.map((sender) => {
+                  if (!storesByAccount[sender.ethereumAddress]) {
+                    logger.debug(
+                      `[multi-inbox.store#onRehydrationStorage] Initializing store for account: ${sender.ethereumAddress}`
+                    );
+                    initStores(sender.ethereumAddress);
+                  } else {
+                    logger.debug(
+                      `[multi-inbox.store#onRehydrationStorage] Store already exists for account: ${sender.ethereumAddress}`
+                    );
+                  }
+                });
+              } else {
+                logger.debug(
+                  "[multi-inbox.store#onRehydrationStorage] No accounts found in hydrated state"
+                );
+              }
             }
-          }
-        };
-      },
-    }
+          };
+        },
+      }
+    )
   )
 );
 
@@ -224,8 +219,8 @@ export const useSafeActiveSenderProfile = () => {
   const { inboxId: currentInboxId } = useSafeCurrentSender();
   const senders = useAccountsStore.getState().senders;
   const sender = senders.find((sender) => sender.inboxId === currentInboxId);
-  const ethereumAddress = sender?.ethereumAddress;
-  return useProfileQuery({ xmtpId: ethereumAddress });
+  const xmtpId = sender?.inboxId;
+  return useProfileQuery({ xmtpId });
 };
 
 export const useCurrentProfile = () => {
@@ -359,3 +354,16 @@ export function useAllInboxIds() {
 }
 
 export { MultiInboxClientRestorationStates };
+
+export function clearAllStores() {
+  // Get list of all accounts
+  const senders = useAccountsStore.getState().senders;
+
+  // Delete stores for each account
+  senders.forEach((sender) => {
+    deleteStores(sender.ethereumAddress);
+  });
+
+  // Clear all senders and current sender
+  useAccountsStore.getState().logoutAllSenders();
+}

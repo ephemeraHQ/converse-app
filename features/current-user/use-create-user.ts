@@ -1,21 +1,11 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  createUser,
-  CreateUserResponse,
-} from "@features/authentication/authentication.api";
-import {
-  IConvosProfileForInboxUpdate,
-  removeProfileQueryData,
-  setProfileQueryData,
-} from "@features/profiles/profiles.query";
-import { ensureJwtQueryData } from "../authentication/jwt.query";
+import { setCurrentUserQueryData } from "@/features/current-user/curent-user.query";
+import { setProfileQueryData } from "@/features/profiles/profiles.query";
 import { buildDeviceMetadata } from "@/utils/device-metadata";
-import { useLogout } from "@/features/authentication/use-logout.hook";
 import {
-  cancelCurrentUserQuery,
-  setCurrentUserQueryData,
-} from "./curent-user.query";
-import { logger } from "@/utils/logger";
+  CreateUserResponse,
+  createUser,
+} from "@features/authentication/authentication.api";
+import { useMutation } from "@tanstack/react-query";
 
 type ICreateUserArgs = {
   privyUserId: string;
@@ -60,48 +50,56 @@ const buildOptimisticUser = (args: ICreateUserArgs): CreateUserResponse => {
  * 4. Follows React Query best practices for mutations
  */
 export function useCreateUser() {
-  const { logout } = useLogout();
+  // const { logout } = useLogout();
 
   return useMutation({
     mutationFn: async (args: ICreateUserArgs) => {
-      const token = await ensureJwtQueryData();
-      logger.debug("useCreateUser: jwt", token);
-      const user = await createUser(args);
-      logger.debug("useCreateUser: user", JSON.stringify(user, null, 2));
-      return user;
+      return createUser(args);
     },
-    onMutate: async (args: ICreateUserArgs) => {
-      await cancelCurrentUserQuery();
+    // onMutate: async (args: ICreateUserArgs) => {
+    //   await cancelCurrentUserQuery();
 
-      const optimisticUser = buildOptimisticUser(args);
-      setCurrentUserQueryData(optimisticUser);
+    //   const optimisticUser = buildOptimisticUser(args);
+    //   setCurrentUserQueryData(optimisticUser);
 
-      const optimisticProfile: IConvosProfileForInboxUpdate = {
-        id: optimisticUser.profile.id,
-        name: optimisticUser.profile.name,
-        description: optimisticUser.profile.description,
-      };
+    //   const optimisticProfile: IConvosProfileForInboxUpdate = {
+    //     id: optimisticUser.profile.id,
+    //     name: optimisticUser.profile.name,
+    //     description: optimisticUser.profile.description,
+    //   };
 
+    //   setProfileQueryData({
+    //     xmtpId: args.inboxId,
+    //     data: optimisticProfile,
+    //   });
+
+    //   return {
+    //     optimisticUser,
+    //     optimisticProfile,
+    //   };
+    // },
+    // onSuccess: (createdUser, variables, { optimisticProfile }) => {
+    //   setCurrentUserQueryData(createdUser);
+    //   setProfileQueryData({
+    //     xmtpId: variables.inboxId,
+    //     data: optimisticProfile,
+    //   });
+    // },
+    // onError: (_error, variables) => {
+    //   removeProfileQueryData({ xmtpId: variables.inboxId });
+    //   logout();
+    // },
+
+    onSuccess: (data) => {
+      setCurrentUserQueryData(data);
       setProfileQueryData({
-        xmtpId: args.inboxId,
-        data: optimisticProfile,
+        xmtpId: data.identity.xmtpId,
+        data: {
+          id: data.profile.id,
+          name: data.profile.name,
+          description: data.profile.description ?? null,
+        },
       });
-
-      return {
-        optimisticUser,
-        optimisticProfile,
-      };
-    },
-    onSuccess: (createdUser, variables, { optimisticProfile }) => {
-      setCurrentUserQueryData(createdUser);
-      setProfileQueryData({
-        xmtpId: variables.inboxId,
-        data: optimisticProfile,
-      });
-    },
-    onError: (_error, variables) => {
-      removeProfileQueryData({ xmtpId: variables.inboxId });
-      logout();
     },
   });
 }

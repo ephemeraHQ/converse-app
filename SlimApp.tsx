@@ -1,32 +1,27 @@
+import { config } from "@/config";
 import { Snackbars } from "@components/Snackbar/Snackbars";
 import { BottomSheetModalProvider } from "@design-system/BottomSheet/BottomSheetModalProvider";
 import { useReactQueryDevTools } from "@dev-plugins/react-query";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
+import { PrivyProvider } from "@privy-io/expo";
 import { SmartWalletsProvider } from "@privy-io/expo/smart-wallets";
 import { queryClient } from "@queries/queryClient";
 import { MaterialDarkTheme, MaterialLightTheme } from "@styles/colors";
-import { focusManager, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { useThemeProvider } from "@theme/useAppTheme";
 import { setupAppAttest } from "@utils/appCheck";
-import { useCoinbaseWalletListener } from "@utils/coinbaseWallet";
-import { converseEventEmitter } from "@utils/events";
-import "expo-dev-client";
-import React, { useCallback, useEffect, useMemo, useRef } from "react";
-import { SafeAreaView, Text, useColorScheme } from "react-native";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { KeyboardProvider } from "react-native-keyboard-controller";
-import { Provider as PaperProvider } from "react-native-paper";
-import { config } from "@/config";
-import { useInitializeMultiInboxClient } from "./features/multi-inbox/multi-inbox.client";
-import { PrivyProvider } from "@privy-io/expo";
-import { ThirdwebProvider } from "thirdweb/react";
-import { AuthenticateWithPasskeyProvider } from "./features/authentication/authenticate-with-passkey.context";
-import { PrivyPlaygroundLandingScreen } from "./features/privy-playground/privy-playground-landing.screen";
-import { DevToolsBubble } from "react-native-react-query-devtools";
 import * as Clipboard from "expo-clipboard";
-import { logger } from "@/utils/logger";
-import { PrivyPlaygroundLoginScreen } from "./features/privy-playground/privy-login-screen";
+import "expo-dev-client";
+import React, { useEffect, useMemo } from "react";
+import { SafeAreaView, useColorScheme } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { Provider as PaperProvider } from "react-native-paper";
+import { DevToolsBubble } from "react-native-react-query-devtools";
+import { ThirdwebProvider } from "thirdweb/react";
 import { useMonitorNetworkConnectivity } from "./dependencies/NetworkMonitor/use-monitor-network-connectivity";
+import { useInitializeMultiInboxClient } from "./features/multi-inbox/multi-inbox.client";
+import { PrivyPlaygroundLandingScreen } from "./features/privy-playground/privy-playground-landing.screen";
+
 export function SlimApp() {
   const colorScheme = useColorScheme();
 
@@ -67,9 +62,7 @@ export function SlimApp() {
                   <GestureHandlerRootView style={{ flex: 1 }}>
                     <BottomSheetModalProvider>
                       <SafeAreaView style={{ flex: 1 }}>
-                        <AuthenticateWithPasskeyProvider>
-                          <PrivyPlaygroundLandingScreen />
-                        </AuthenticateWithPasskeyProvider>
+                        <PrivyPlaygroundLandingScreen />
                       </SafeAreaView>
                       {__DEV__ && <DevToolsBubble onCopy={onCopy} />}
                       <Snackbars />

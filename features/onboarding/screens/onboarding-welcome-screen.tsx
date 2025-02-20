@@ -1,63 +1,86 @@
 import { Screen } from "@/components/Screen/ScreenComp/Screen";
-import { AnimatedText } from "@/design-system/Text";
-import { OnboardingTitle } from "@/features/onboarding/components/onboarding-title";
-import { OnboardingSubtitle } from "@/features/onboarding/components/onboarding-subtitle";
-
-import { VStack } from "@/design-system/VStack";
-import { memo, useState } from "react";
-import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
+import { showSnackbar } from "@/components/Snackbar/Snackbar.service";
 import { Center } from "@/design-system/Center";
-import { Button, TextStyle, ViewStyle } from "react-native";
-import { useAuthenticateWithPasskey } from "@/features/authentication/authenticate-with-passkey.context";
-import { useNavigation } from "@react-navigation/native";
+import { Pressable } from "@/design-system/Pressable";
+import { AnimatedText, Text } from "@/design-system/Text";
+import { VStack } from "@/design-system/VStack";
+import { Loader } from "@/design-system/loader";
 import { useLogout } from "@/features/authentication/use-logout.hook";
-import { ConnectWalletBottomSheet } from "@/features/wallets/connect-wallet.bottom-sheet";
-const $subtextStyle: TextStyle = {
-  textAlign: "center",
-};
-
-const $screenContainer: ViewStyle = {
-  flex: 1,
-};
-
-const $titleContainer: ViewStyle = {
-  flex: 1,
-};
-
-const $titleStyle: ThemedStyle<TextStyle> = ({ spacing }) => ({
-  marginTop: spacing.xs,
-  marginBottom: spacing.sm,
-});
+import { getCurrentUserQueryData } from "@/features/current-user/curent-user.query";
+import { useAccountsStore } from "@/features/multi-inbox/multi-inbox.store";
+import { OnboardingSubtitle } from "@/features/onboarding/components/onboarding-subtitle";
+import { OnboardingTitle } from "@/features/onboarding/components/onboarding-title";
+import { useLoginWithPasskey } from "@/features/onboarding/hooks/use-login-with-passkey";
+import { useSignupWithPasskey } from "@/features/onboarding/hooks/use-signup-with-passkey";
+import { $globalStyles } from "@/theme/styles";
+import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
+import { captureErrorWithToast } from "@/utils/capture-error";
+import { memo, useCallback, useEffect } from "react";
+import { Button, TextStyle } from "react-native";
 
 export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
-  return <OnboardingWelcomeScreenContent />;
-});
+  const { themed, theme } = useAppTheme();
 
-const OnboardingWelcomeScreenContent = memo(
-  function OnboardingWelcomeScreenContent() {
-    const { themed } = useAppTheme();
-    const { logout } = useLogout();
+  const { logout } = useLogout();
 
-    const { signupWithPasskey, loginWithPasskey } =
-      useAuthenticateWithPasskey();
-    const navigation = useNavigation();
+  const { signup, isLoading: isSigningUp } = useSignupWithPasskey();
+  const { login, isLoading: isLoggingIn } = useLoginWithPasskey();
 
-    const [isVisible, setIsVisible] = useState(true);
+  // Safer to fully logout when we're here
+  useEffect(() => {
+    logout();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-    return (
+  const handleSignup = useCallback(async () => {
+    try {
+      const { inboxId, ethereumAddress } = await signup();
+      useAccountsStore.getState().addSender({
+        inboxId,
+        ethereumAddress,
+      });
+    } catch (error) {
+      captureErrorWithToast(error, {
+        message: "Error signing up with passkey",
+      });
+    }
+  }, [signup]);
+
+  const handleLogin = useCallback(async () => {
+    try {
+      const { inboxId, ethereumAddress } = await login();
+      useAccountsStore.getState().addSender({
+        inboxId,
+        ethereumAddress,
+      });
+    } catch (error) {
+      captureErrorWithToast(error, {
+        message: "Error signing in with passkey",
+      });
+    }
+  }, [login]);
+
+  const handleReset = useCallback(async () => {
+    try {
+      await logout();
+      showSnackbar({
+        message: "State reset. You can now sign in again",
+      });
+    } catch (error) {
+      captureErrorWithToast(error, {
+        message: "Error resetting state. Please close the app and try again",
+      });
+    }
+  }, [logout]);
+
+  return (
+    <>
       <Screen
+        contentContainerStyle={$globalStyles.flex1}
         safeAreaEdges={["bottom"]}
-        contentContainerStyle={$screenContainer}
         preset="scroll"
       >
-        <ConnectWalletBottomSheet
-          isVisible={isVisible}
-          onClose={() => {
-            setIsVisible(false);
-          }}
-          onWalletImported={() => {}}
-        />
-        <Center style={$titleContainer}>
+        <Center style={$globalStyles.flex1}>
           <VStack>
             <OnboardingSubtitle>Welcome to Convos</OnboardingSubtitle>
             <OnboardingTitle style={themed($titleStyle)}>
@@ -69,37 +92,61 @@ const OnboardingWelcomeScreenContent = memo(
           </VStack>
         </Center>
 
-        <Button
-          onPress={async () => {
-            try {
-              await signupWithPasskey();
-              // @ts-ignore
-              navigation.replace("OnboardingCreateContactCard");
-            } catch (error) {
-              console.log("error", error);
-            }
+        {/* The whole loading state and this UI/UX is temporary */}
+        <VStack
+          style={{
+            height: 100,
           }}
-          title="Signup with Passkey"
-        />
+        >
+          {isSigningUp || isLoggingIn ? (
+            <Center style={$globalStyles.flex1}>
+              <Loader />
+            </Center>
+          ) : (
+            <>
+              <Button onPress={handleSignup} title="Signup with Passkey" />
+              <Button onPress={handleLogin} title="Sign in with Passkey" />
+            </>
+          )}
+        </VStack>
 
-        <Button
-          onPress={async () => {
-            try {
-              await loginWithPasskey();
-            } catch (error) {
-              console.log("error", error);
-            }
+        <Center
+          style={{
+            paddingHorizontal: theme.spacing.lg,
+            marginTop: theme.spacing.lg,
           }}
-          title="Sign in with passkey"
-        />
-
-        <Button
-          title="Clear Stuff and Restart (use this if you get in a funky state)"
-          onPress={() => {
-            logout();
-          }}
-        />
+        >
+          <Pressable onPress={handleReset}>
+            <Text
+              preset="smaller"
+              color="secondary"
+              style={{
+                textAlign: "center",
+              }}
+            >
+              Press me to clear stuff and restart{"\n"}(use this if you get in a
+              funky state)
+            </Text>
+          </Pressable>
+        </Center>
       </Screen>
-    );
-  }
-);
+
+      {/* <ConnectWalletBottomSheet
+          isVisible={isVisible}
+          onClose={() => {
+            setIsVisible(false);
+          }}
+          onWalletImported={() => {}}
+        /> */}
+    </>
+  );
+});
+
+const $subtextStyle: TextStyle = {
+  textAlign: "center",
+};
+
+const $titleStyle: ThemedStyle<TextStyle> = ({ spacing }) => ({
+  marginTop: spacing.xs,
+  marginBottom: spacing.sm,
+});
