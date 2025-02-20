@@ -50,11 +50,9 @@ export function useLoginWithPasskey() {
     } catch (error) {
       logger.error("[login] Error during login process:", error);
       throw error;
+    } finally {
+      setIsLoggingIn(false);
     }
-    // Don't set because the component will get unmounted anyway and we don't want the loading to stop
-    // finally {
-    //   setIsLoggingIn(false);
-    // }
   };
 
   return { login, isLoggingIn };
