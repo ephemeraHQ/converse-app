@@ -12,7 +12,7 @@ import { useAddPfp } from "../hooks/useAddPfp";
 // import { useProfile } from "../hooks/useProfile";
 import { useAuthStore } from "@/features/authentication/authentication.store";
 import { useCreateUser } from "@/features/current-user/use-create-user";
-import { multiInboxStore } from "@/features/multi-inbox/multi-inbox.store";
+import { useMultiInboxStore } from "@/features/multi-inbox/multi-inbox.store";
 import { OnboardingFooter } from "@/features/onboarding/components/onboarding-footer";
 import { ProfileContactCardEditableAvatar } from "@/features/profiles/components/profile-contact-card/profile-contact-card-editable-avatar";
 import { ProfileContactCardEditableNameInput } from "@/features/profiles/components/profile-contact-card/profile-contact-card-editable-name-input";
@@ -31,7 +31,7 @@ export function OnboardingContactCardScreen() {
 
   const handleRealContinue = useCallback(async () => {
     try {
-      const currentSender = multiInboxStore.getState().currentSender;
+      const currentSender = useMultiInboxStore.getState().currentSender;
 
       if (!currentSender) {
         throw new Error("No current sender found, please logout");

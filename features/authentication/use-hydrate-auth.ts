@@ -1,7 +1,7 @@
 import { useAuthStore } from "@/features/authentication/authentication.store";
 import { ensureCurrentUserQueryData } from "@/features/current-user/curent-user.query";
 import { MultiInboxClientRestorationStates } from "@/features/multi-inbox/multi-inbox-client.types";
-import { multiInboxStore } from "@/features/multi-inbox/multi-inbox.store";
+import { useMultiInboxStore } from "@/features/multi-inbox/multi-inbox.store";
 import { usePrivy } from "@privy-io/expo";
 import { useEffect } from "react";
 
@@ -17,7 +17,7 @@ export function useHydrateAuth() {
 
   // Hydrate auth based on multi-inbox client restoration state and current sender
   useEffect(() => {
-    const unsub = multiInboxStore.subscribe(
+    const unsub = useMultiInboxStore.subscribe(
       (state) =>
         [state.multiInboxClientRestorationState, state.currentSender] as const,
       async ([multiInboxClientRestorationState, currentSender]) => {

@@ -7,7 +7,7 @@ import { VStack } from "@/design-system/VStack";
 import { Loader } from "@/design-system/loader";
 import { useLogout } from "@/features/authentication/use-logout.hook";
 import { getCurrentUserQueryData } from "@/features/current-user/curent-user.query";
-import { multiInboxStore } from "@/features/multi-inbox/multi-inbox.store";
+import { useMultiInboxStore } from "@/features/multi-inbox/multi-inbox.store";
 import { OnboardingSubtitle } from "@/features/onboarding/components/onboarding-subtitle";
 import { OnboardingTitle } from "@/features/onboarding/components/onboarding-title";
 import { useLoginWithPasskey } from "@/features/onboarding/hooks/use-login-with-passkey";
@@ -35,7 +35,7 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
   const handleSignup = useCallback(async () => {
     try {
       const { inboxId, ethereumAddress } = await signup();
-      multiInboxStore.getState().addSender({
+      useMultiInboxStore.getState().addSender({
         inboxId,
         ethereumAddress,
       });
@@ -49,7 +49,7 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
   const handleLogin = useCallback(async () => {
     try {
       const { inboxId, ethereumAddress } = await login();
-      multiInboxStore.getState().addSender({
+      useMultiInboxStore.getState().addSender({
         inboxId,
         ethereumAddress,
       });

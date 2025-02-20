@@ -2,7 +2,7 @@ import { Center } from "@/design-system/Center";
 import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu";
 import { useConversationComposerStore } from "@/features/conversation/conversation-composer/conversation-composer.store-context";
 import { useConversationComposerIsEnabled } from "@/features/conversation/conversation-composer/hooks/conversation-composer-is-enabled";
-import { getCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { getCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { encryptRemoteAttachment } from "@/utils/xmtpRN/attachments";
 import { Icon, iconRegistry } from "@design-system/Icon/Icon";
@@ -51,7 +51,7 @@ export function AddAttachmentButton() {
           }
         }
 
-        const currentAccount = getCurrentAccount()!;
+        const currentAccount = getCurrentSenderEthAddress()!;
 
         const encryptedAttachment = await encryptRemoteAttachment(
           currentAccount,

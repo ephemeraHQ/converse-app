@@ -7,7 +7,7 @@ import { Pressable } from "@/design-system/Pressable";
 import { Text } from "@/design-system/Text";
 import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu";
 import {
-  multiInboxStore,
+  useMultiInboxStore,
   useCurrentProfiles,
   useSafeCurrentSenderProfile,
   useSafeCurrentSender,
@@ -81,7 +81,7 @@ function HeaderTitle() {
       } else if (profileXmtpInboxId === "app-settings") {
         navigation.navigate("AppSettings");
       } else {
-        multiInboxStore.getState().setCurrentInboxId(profileXmtpInboxId);
+        useMultiInboxStore.getState().setCurrentInboxId(profileXmtpInboxId);
       }
     },
     [navigation]

@@ -1,4 +1,4 @@
-import { getCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { getCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
 import {
   getConversationMetadataQueryData,
   updateConversationMetadataQueryData,
@@ -23,7 +23,7 @@ export function getMarkConversationAsReadMutationOptions(args: {
 
   return {
     mutationFn: async () => {
-      const currentAccount = getCurrentAccount()!;
+      const currentAccount = getCurrentSenderEthAddress()!;
       const readUntil = formatDateForApi(new Date());
 
       await markConversationAsRead({
@@ -33,7 +33,7 @@ export function getMarkConversationAsReadMutationOptions(args: {
       });
     },
     onMutate: () => {
-      const currentAccount = getCurrentAccount()!;
+      const currentAccount = getCurrentSenderEthAddress()!;
       const readUntil = formatDateForApi(new Date());
       const previousData = getConversationMetadataQueryData({
         account: currentAccount,
@@ -60,7 +60,7 @@ export function getMarkConversationAsReadMutationOptions(args: {
       };
     },
     onError: (error, _, context) => {
-      const currentAccount = getCurrentAccount()!;
+      const currentAccount = getCurrentSenderEthAddress()!;
       updateConversationMetadataQueryData({
         account: currentAccount,
         topic,

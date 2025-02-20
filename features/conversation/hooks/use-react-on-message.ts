@@ -1,5 +1,5 @@
 import {
-  getCurrentAccount,
+  getCurrentSenderEthAddress,
   getSafeCurrentSender,
 } from "@/features/multi-inbox/multi-inbox.store";
 import { getConversationForCurrentAccount } from "@/features/conversation/utils/get-conversation-for-current-account";
@@ -64,7 +64,7 @@ export function useReactOnMessage(props: { topic: ConversationTopic }) {
       }
     },
     onError: (error) => {
-      const currentAccount = getCurrentAccount()!;
+      const currentAccount = getCurrentSenderEthAddress()!;
       refetchConversationMessages({
         account: currentAccount,
         topic,

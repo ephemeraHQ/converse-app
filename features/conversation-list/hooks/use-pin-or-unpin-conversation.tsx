@@ -7,7 +7,7 @@ import {
   updateConversationMetadataQueryData,
 } from "@/features/conversation/conversation-metadata/conversation-metadata.query";
 import {
-  getCurrentAccount,
+  getCurrentSenderEthAddress,
   useCurrentSenderEthAddress,
 } from "@/features/multi-inbox/multi-inbox.store";
 import { useMutation } from "@tanstack/react-query";
@@ -29,7 +29,7 @@ export function usePinOrUnpinConversation(args: {
       });
     },
     onMutate: () => {
-      const currentAccount = getCurrentAccount()!;
+      const currentAccount = getCurrentSenderEthAddress()!;
       const previousPinned = getConversationMetadataQueryData({
         account: currentAccount,
         topic: conversationTopic,
@@ -44,7 +44,7 @@ export function usePinOrUnpinConversation(args: {
       return { previousPinned };
     },
     onError: (error, _, context) => {
-      const currentAccount = getCurrentAccount()!;
+      const currentAccount = getCurrentSenderEthAddress()!;
       updateConversationMetadataQueryData({
         account: currentAccount,
         topic: conversationTopic,
@@ -61,7 +61,7 @@ export function usePinOrUnpinConversation(args: {
       });
     },
     onMutate: () => {
-      const currentAccount = getCurrentAccount()!;
+      const currentAccount = getCurrentSenderEthAddress()!;
       const previousPinned = getConversationMetadataQueryData({
         account: currentAccount,
         topic: conversationTopic,
@@ -76,7 +76,7 @@ export function usePinOrUnpinConversation(args: {
       return { previousPinned };
     },
     onError: (error, _, context) => {
-      const currentAccount = getCurrentAccount()!;
+      const currentAccount = getCurrentSenderEthAddress()!;
       updateConversationMetadataQueryData({
         account: currentAccount,
         topic: conversationTopic,
@@ -86,7 +86,7 @@ export function usePinOrUnpinConversation(args: {
   });
 
   const pinOrUnpinConversationAsync = useCallback(async () => {
-    const currentAccount = getCurrentAccount()!;
+    const currentAccount = getCurrentSenderEthAddress()!;
     const isPinned = getConversationMetadataQueryData({
       account: currentAccount,
       topic: conversationTopic,

@@ -1,5 +1,5 @@
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm";
-import { getCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { getCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
 import { ensureProfileQueryData } from "@/features/profiles/profiles.query";
 import { doesSocialProfilesMatchTextQuery } from "@/features/profiles/utils/does-social-profiles-match-text-query";
 import { ensureSocialProfilesQueryData } from "@/features/social-profiles/social-lookup.query";
@@ -43,7 +43,7 @@ async function searchExistingDms(args: {
   inboxId: InboxId;
 }) {
   const { searchQuery, inboxId } = args;
-  const currentAccount = getCurrentAccount()!;
+  const currentAccount = getCurrentSenderEthAddress()!;
   const conversations = getAllowedConsentConversationsQueryData({
     account: currentAccount,
   });

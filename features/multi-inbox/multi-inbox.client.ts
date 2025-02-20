@@ -13,7 +13,7 @@ import {
 } from "@xmtp/react-native-sdk";
 
 import { config } from "@/config";
-import { multiInboxStore } from "@/features/multi-inbox/multi-inbox.store";
+import { useMultiInboxStore } from "@/features/multi-inbox/multi-inbox.store";
 import { captureError } from "@/utils/capture-error";
 import { getDbEncryptionKey } from "@/utils/keychain";
 import { ConverseXmtpClientType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
@@ -46,20 +46,21 @@ import {
 export class MultiInboxClient {
   get isRestored() {
     return (
-      multiInboxStore.getState().multiInboxClientRestorationState ===
+      useMultiInboxStore.getState().multiInboxClientRestorationState ===
       MultiInboxClientRestorationStates.restored
     );
   }
 
   get isRestoring() {
     return (
-      multiInboxStore.getState().multiInboxClientRestorationState ===
+      useMultiInboxStore.getState().multiInboxClientRestorationState ===
       MultiInboxClientRestorationStates.restoring
     );
   }
 
   get isError() {
-    const state = multiInboxStore.getState().multiInboxClientRestorationState;
+    const state =
+      useMultiInboxStore.getState().multiInboxClientRestorationState;
     if (typeof state === "string") {
       return false;
     }
@@ -71,7 +72,7 @@ export class MultiInboxClient {
   } = {};
 
   private get xmtpClientInboxIdToAddressMap() {
-    return multiInboxStore.getState().senders.reduce((acc, sender) => {
+    return useMultiInboxStore.getState().senders.reduce((acc, sender) => {
       acc[sender.inboxId] = sender.ethereumAddress;
       return acc;
     }, {} as { [inboxId: string]: string });
@@ -87,11 +88,11 @@ export class MultiInboxClient {
   }
 
   get currentSender(): CurrentSender | undefined {
-    return multiInboxStore.getState().currentSender;
+    return useMultiInboxStore.getState().currentSender;
   }
 
   get allEthereumAccountAddresses() {
-    return multiInboxStore
+    return useMultiInboxStore
       .getState()
       .senders.map((sender) => sender.ethereumAddress);
   }
@@ -110,7 +111,7 @@ export class MultiInboxClient {
     }
 
     const wasSignedInLastSession = Boolean(
-      multiInboxStore.getState().currentSender
+      useMultiInboxStore.getState().currentSender
     );
 
     logger.debug(
@@ -118,7 +119,7 @@ export class MultiInboxClient {
     );
 
     if (wasSignedInLastSession) {
-      multiInboxStore
+      useMultiInboxStore
         .getState()
         .setMultiInboxClientRestorationState(
           MultiInboxClientRestorationStates.restoring
@@ -135,7 +136,7 @@ export class MultiInboxClient {
     logger.debug(
       "[initialize] Setting multi-inbox client restoration state to restored"
     );
-    multiInboxStore
+    useMultiInboxStore
       .getState()
       .setMultiInboxClientRestorationState(
         MultiInboxClientRestorationStates.restored
@@ -185,7 +186,7 @@ export class MultiInboxClient {
   }
 
   private setErrorState(error: string) {
-    multiInboxStore
+    useMultiInboxStore
       .getState()
       .setMultiInboxClientRestorationState(
         MultiInboxClientRestorationStates.error(error)
@@ -245,8 +246,8 @@ export class MultiInboxClient {
           inboxSigner
         );
 
-        if (!multiInboxStore.getState().currentSender) {
-          multiInboxStore.getState().setCurrentSender({
+        if (!useMultiInboxStore.getState().currentSender) {
+          useMultiInboxStore.getState().setCurrentSender({
             ethereumAddress: signerEthereumAddress,
             inboxId: xmtpInboxClient.inboxId,
           });
@@ -254,7 +255,7 @@ export class MultiInboxClient {
 
         const clientInboxId = xmtpInboxClient.inboxId;
 
-        multiInboxStore.getState().addSender({
+        useMultiInboxStore.getState().addSender({
           ethereumAddress: signerEthereumAddress,
           inboxId: clientInboxId,
         });
@@ -278,7 +279,7 @@ export class MultiInboxClient {
           `[addInbox] Error creating XMTP inbox for address ${signerEthereumAddress}:`,
           error
         );
-        multiInboxStore
+        useMultiInboxStore
           .getState()
           .setMultiInboxClientRestorationState(
             MultiInboxClientRestorationStates.error(
@@ -297,10 +298,10 @@ export class MultiInboxClient {
 
   private async restorePreviouslyCreatedInboxesForDevice() {
     const startTime = Date.now();
-    const previouslyCreatedInboxes = multiInboxStore.getState().senders;
+    const previouslyCreatedInboxes = useMultiInboxStore.getState().senders;
 
     const wasSignedInLastSession = Boolean(
-      multiInboxStore.getState().currentSender
+      useMultiInboxStore.getState().currentSender
     );
     const hasNoInboxesToRestore = previouslyCreatedInboxes.length === 0;
     const isInNoInboxButLoggedInErrorState =
@@ -374,7 +375,7 @@ export class MultiInboxClient {
 
             const clientInboxId = xmtpInboxClient.inboxId;
 
-            multiInboxStore.getState().addSender({
+            useMultiInboxStore.getState().addSender({
               ethereumAddress,
               inboxId: clientInboxId,
             });
@@ -384,7 +385,7 @@ export class MultiInboxClient {
               `[restorePreviouslyCreatedInboxesForDevice] Error building XMTP inbox client for address ${ethereumAddress}:`,
               error
             );
-            multiInboxStore
+            useMultiInboxStore
               .getState()
               .setMultiInboxClientRestorationState(
                 MultiInboxClientRestorationStates.error(
@@ -417,7 +418,7 @@ export class MultiInboxClient {
           lowercaseClientLinkedEthereumAddress;
       });
 
-      multiInboxStore
+      useMultiInboxStore
         .getState()
         .setMultiInboxClientRestorationState(
           MultiInboxClientRestorationStates.restored
@@ -442,7 +443,7 @@ export class MultiInboxClient {
         error
       );
       // Reset initialization state on error
-      multiInboxStore
+      useMultiInboxStore
         .getState()
         .setMultiInboxClientRestorationState(
           MultiInboxClientRestorationStates.error(
@@ -506,7 +507,7 @@ export class MultiInboxClient {
         ];
       }
     );
-    multiInboxStore.getState().logoutAllSenders();
+    useMultiInboxStore.getState().logoutAllSenders();
   }
 
   private async isClientInstallationValid(client: XmtpClient) {

@@ -18,8 +18,6 @@ import {
   subscribeWithSelector,
 } from "zustand/middleware";
 
-// First, let's define the missing types and remove unused ones
-
 type IMultiInboxStoreType = {
   multiInboxClientRestorationState: MultiInboxClientRestorationState;
   setMultiInboxClientRestorationState: (
@@ -34,8 +32,7 @@ type IMultiInboxStoreType = {
   logoutAllSenders: () => void;
 };
 
-// Remove unused stores map since we only have one store now
-const useMultiInboxStore = create<IMultiInboxStoreType>()(
+export const useMultiInboxStore = create<IMultiInboxStoreType>()(
   subscribeWithSelector(
     persist(
       (set, get) => ({
@@ -112,20 +109,20 @@ const useMultiInboxStore = create<IMultiInboxStoreType>()(
   )
 );
 
-export const useSafeCurrentSenderProfile = () => {
+export function useSafeCurrentSenderProfile() {
   const { inboxId: currentInboxId } = useSafeCurrentSender();
   const senders = useMultiInboxStore.getState().senders;
   const sender = senders.find((sender) => sender.inboxId === currentInboxId);
   const xmtpId = sender?.inboxId;
   return useProfileQuery({ xmtpId });
-};
+}
 
-export const useCurrentSenderProfile = () => {
+export function useCurrentSenderProfile() {
   const currentSender = useCurrentSender();
   return useProfileQuery({ xmtpId: currentSender?.inboxId });
-};
+}
 
-export const useCurrentProfiles = () => {
+export function useCurrentProfiles() {
   const senders = useMultiInboxStore((state) => state.senders);
   const inboxIdsForCurrentInboxes = senders.map((sender) => sender.inboxId);
   const { data: currentProfiles, isLoading: isLoadingProfiles } =
@@ -134,53 +131,58 @@ export const useCurrentProfiles = () => {
     });
   const truthyProfiles = currentProfiles?.filter(Boolean);
   return { currentProfiles: truthyProfiles, isLoadingProfiles };
-};
+}
 
-export const useCurrentSenderEthAddress = () => {
+export function useCurrentSenderEthAddress() {
   const currentSender = useCurrentSender();
   return currentSender?.ethereumAddress;
-};
+}
 
-export const getCurrentSender = (): CurrentSender | undefined => {
+export function getCurrentSenderEthAddress() {
+  const currentSender = useMultiInboxStore.getState().currentSender;
+  return currentSender?.ethereumAddress;
+}
+
+export function getCurrentSender(): CurrentSender | undefined {
   return useMultiInboxStore.getState().currentSender;
-};
+}
 
-export const getSafeCurrentSender = (): CurrentSender => {
+export function getSafeCurrentSender(): CurrentSender {
   const currentSender = getCurrentSender();
   if (!currentSender) {
     throw new Error("No current sender");
   }
   return currentSender;
-};
+}
 
-export const useSafeCurrentSender = (): CurrentSender => {
+export function useSafeCurrentSender(): CurrentSender {
   const currentSender = useCurrentSender();
   if (!currentSender) {
     throw new Error("No current sender");
   }
   return currentSender;
-};
+}
 
-export const useCurrentSender = () => {
+export function useCurrentSender() {
   return useMultiInboxStore((s) => s.currentSender);
-};
+}
 
-export const isCurrentSender = (sender: Partial<ConvosSender>) => {
+export function isCurrentSender(sender: Partial<ConvosSender>) {
   const currentSender = getSafeCurrentSender();
   if (!sender) return false;
   return (
     currentSender.inboxId === sender.inboxId ||
     currentSender.ethereumAddress === sender.ethereumAddress
   );
-};
+}
 
-export const useAllInboxIds = () => {
+export function useAllInboxIds() {
   return useMultiInboxStore.getState().senders.map((sender) => sender.inboxId);
-};
+}
 
 export { MultiInboxClientRestorationStates };
 
-export const clearAllStores = () => {
+export function clearAllStores() {
   useMultiInboxStore.getState().logoutAllSenders();
   mmkv.clearAll();
-};
+}

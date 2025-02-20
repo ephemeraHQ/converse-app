@@ -1,5 +1,5 @@
 import {
-  getCurrentAccount,
+  getCurrentSenderEthAddress,
   useCurrentSenderEthAddress,
 } from "@/features/multi-inbox/multi-inbox.store";
 import {
@@ -25,7 +25,7 @@ export function useMarkConversationAsUnread(args: {
       });
     },
     onMutate: () => {
-      const currentAccount = getCurrentAccount()!;
+      const currentAccount = getCurrentSenderEthAddress()!;
       const previousData = getConversationMetadataQueryData({
         account: currentAccount,
         topic,
@@ -42,7 +42,7 @@ export function useMarkConversationAsUnread(args: {
       return { previousData };
     },
     onError: (error, _, context) => {
-      const currentAccount = getCurrentAccount()!;
+      const currentAccount = getCurrentSenderEthAddress()!;
       if (context?.previousData) {
         updateConversationMetadataQueryData({
           account: currentAccount,

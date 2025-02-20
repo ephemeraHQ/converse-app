@@ -1,27 +1,4 @@
-import { Wallet, ethers } from "ethers";
-
-import {
-  getSafeCurrentSender,
-  getWalletStore,
-} from "../../features/multi-inbox/multi-inbox.store";
-import { getSecureItemAsync } from "../keychain";
-
-import { logger } from "@utils/logger";
-
-export const getCurrentAccountSigner = async () => {
-  const account = getSafeCurrentSender().ethereumAddress;
-  const pkPath = getWalletStore(account).getState().privateKeyPath;
-  if (!pkPath) return;
-  try {
-    // Here we should check, if the key does not exist, we should probably
-    // delete pkPath and alert the user
-    const pk = await getSecureItemAsync(pkPath);
-    if (!pk) return;
-    return new Wallet(pk);
-  } catch (e) {
-    logger.warn(e);
-  }
-};
+import { ethers } from "ethers";
 
 export const evmHelpers = {
   toWei: (value: string, units: ethers.BigNumberish) =>

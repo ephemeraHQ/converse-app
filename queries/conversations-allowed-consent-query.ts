@@ -17,7 +17,7 @@ import {
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { queryClient } from "./queryClient";
 import { ensureGroupMembersQueryData } from "./useGroupMembersQuery";
-import { multiInboxStore } from "@/features/multi-inbox/multi-inbox.store";
+import { useMultiInboxStore } from "@/features/multi-inbox/multi-inbox.store";
 import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 
 export type IAllowedConsentConversationsQuery = Awaited<

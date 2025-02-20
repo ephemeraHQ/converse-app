@@ -1,5 +1,5 @@
 import {
-  getCurrentAccount,
+  getCurrentSenderEthAddress,
   getSafeCurrentSender,
 } from "@/features/multi-inbox/multi-inbox.store";
 import { getConversationForCurrentAccount } from "@/features/conversation/utils/get-conversation-for-current-account";
@@ -37,7 +37,7 @@ export function useRemoveReactionOnMessage(props: {
       });
     },
     onMutate: (variables) => {
-      const currentAccount = getCurrentAccount()!;
+      const currentAccount = getCurrentSenderEthAddress()!;
       const { inboxId: currentInboxId } = getSafeCurrentSender();
       const conversation = getConversationForCurrentAccount(topic);
 
@@ -63,7 +63,7 @@ export function useRemoveReactionOnMessage(props: {
       }
     },
     onError: (error) => {
-      const currentAccount = getCurrentAccount()!;
+      const currentAccount = getCurrentSenderEthAddress()!;
       refetchConversationMessages({
         account: currentAccount,
         topic,

@@ -34,7 +34,7 @@ import { InboxState } from "@xmtp/react-native-sdk/build/lib/InboxState";
 import { AuthenticateWithPasskeyProvider } from "../authentication/authenticate-with-passkey.context";
 import {
   AuthStatuses,
-  multiInboxStore,
+  useMultiInboxStore,
 } from "../multi-inbox/multi-inbox.store";
 import { useLogout } from "@/features/authentication/use-logout.hook";
 const coinbaseUrl = new URL(`https://${config.websiteDomain}/coinbase`);
@@ -44,7 +44,7 @@ export const PrivyPlaygroundUserScreen = () => {
 
   const { user } = usePrivy();
   const { logout } = useLogout();
-  const { currentSender, authStatus } = multiInboxStore();
+  const { currentSender, authStatus } = useMultiInboxStore();
 
   const { client: smartWalletClient } = useSmartWallets();
 
