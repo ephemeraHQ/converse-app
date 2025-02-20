@@ -54,9 +54,11 @@ export function useSignupWithPasskey() {
       };
     } catch (error) {
       throw error;
-    } finally {
-      setIsSigningUp(false);
     }
+    // Don't set because the component will get unmounted anyway and we don't want the loading to stop
+    // finally {
+    //   setIsSigningUp(false);
+    // }
   };
 
   return { signup, isSigningUp: isSigningUp };
