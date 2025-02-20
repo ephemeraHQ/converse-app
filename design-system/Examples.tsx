@@ -1,5 +1,5 @@
 import { Screen } from "@components/Screen/ScreenComp/Screen";
-import { SnackbarExample } from "@/components/Button/snackbar/snackbar.example";
+import { SnackbarExample } from "@/components/snackbar/snackbar.example";
 import { BottomSheetExample } from "@design-system/BottomSheet/BottomSheet.example";
 import { Button } from "@design-system/Button/Button";
 import { ButtonExample } from "@design-system/Button/Button.example";

@@ -1,5 +1,5 @@
 import { config } from "@/config";
-import { Snackbars } from "@/components/Button/snackbar/snackbars";
+import { Snackbars } from "@/components/snackbar/snackbars";
 import { BottomSheetModalProvider } from "@design-system/BottomSheet/BottomSheetModalProvider";
 import { useReactQueryDevTools } from "@dev-plugins/react-query";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";

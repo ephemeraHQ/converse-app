@@ -1,4 +1,4 @@
-import { showSnackbar } from "@/components/Button/snackbar/snackbar.service";
+import { showSnackbar } from "@/components/snackbar/snackbar.service";
 import { useAllowGroupMutation } from "@/features/consent/use-allow-group.mutation";
 import { useDenyGroupMutation } from "@/features/consent/use-deny-group.mutation";
 import { updateInboxIdsConsentForAccount } from "@/features/consent/update-inbox-ids-consent-for-account";
