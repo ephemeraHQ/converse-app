@@ -1,4 +1,4 @@
-import { Screen } from "@/components/Screen/ScreenComp/Screen";
+import { Screen } from "@/components/Picto/screen/screen";
 import { Center } from "@/design-system/Center";
 import { VStack } from "@/design-system/VStack";
 import { ActivityIndicator } from "@/design-system/activity-indicator";

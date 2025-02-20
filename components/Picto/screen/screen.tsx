@@ -10,12 +10,12 @@ import {
   isNonScrolling,
   useAutoPreset,
   useSafeAreaInsetsStyle,
-} from "./Screen.helpers";
+} from "./screen.helpers";
 import {
   AutoScreenProps,
   IScreenProps,
   ScrollScreenProps,
-} from "./Screen.props";
+} from "./screen.props";
 
 function ScreenWithoutScrolling(props: IScreenProps) {
   const { style, contentContainerStyle, children } = props;

@@ -1,4 +1,4 @@
-import { Screen } from "@/components/Screen/ScreenComp/Screen";
+import { Screen } from "@/components/Picto/screen/screen";
 import { SettingsList } from "@/design-system/settings-list/settings-list";
 import { useAddPfp } from "@/features/onboarding/hooks/useAddPfp";
 import { ProfileContactCard } from "@/features/profiles/components/profile-contact-card/profile-contact-card";

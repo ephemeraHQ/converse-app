@@ -1,4 +1,4 @@
-import { Screen } from "@/components/Screen/ScreenComp/Screen";
+import { Screen } from "@/components/Picto/screen/screen";
 import { HStack } from "@/design-system/HStack";
 import { AnimatedVStack } from "@/design-system/VStack";
 import { ConversationList } from "@/features/conversation-list/conversation-list";

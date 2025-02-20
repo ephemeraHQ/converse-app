@@ -1,4 +1,4 @@
-import { Screen } from "@components/Screen/ScreenComp/Screen";
+import { Screen } from "@/components/Picto/screen/screen";
 import { SnackbarExample } from "@/components/snackbar/snackbar.example";
 import { BottomSheetExample } from "@design-system/BottomSheet/BottomSheet.example";
 import { Button } from "@design-system/Button/Button";
