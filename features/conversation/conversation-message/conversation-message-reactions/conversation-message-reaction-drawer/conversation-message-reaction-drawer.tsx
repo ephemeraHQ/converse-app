@@ -1,6 +1,6 @@
 import { useCurrentConversationTopicSafe } from "@/features/conversation/conversation.store-context";
 import { useRemoveReactionOnMessage } from "@/features/conversation/hooks/use-remove-reaction-on-message";
-import { Avatar } from "@components/Avatar";
+import { Avatar } from "@/components/avatar";
 import { BottomSheet } from "@design-system/BottomSheet/BottomSheet";
 import { BottomSheetContentContainer } from "@design-system/BottomSheet/BottomSheetContentContainer";
 import { BottomSheetHeader } from "@design-system/BottomSheet/BottomSheetHeader";
@@ -10,7 +10,7 @@ import { TouchableHighlight } from "@design-system/touchable-highlight";
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { BottomSheetMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
 import { FlashList } from "@shopify/flash-list";
-import { ThemedStyle, useAppTheme } from "@theme/useAppTheme";
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { memo, useCallback, useRef, useState } from "react";
 import { Modal, Platform, TextStyle, ViewStyle } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";

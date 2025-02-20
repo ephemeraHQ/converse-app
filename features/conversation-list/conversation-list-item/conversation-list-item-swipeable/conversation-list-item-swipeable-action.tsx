@@ -1,6 +1,6 @@
 import { AnimatedCenter, Center } from "@/design-system/Center";
 import { IIconName, IIconProps } from "@/design-system/Icon/Icon.types";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { Haptics } from "@/utils/haptics";
 import { Icon } from "@design-system/Icon/Icon";
 import React from "react";

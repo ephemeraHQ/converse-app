@@ -1,7 +1,7 @@
 import React, { memo } from "react";
 import { View, ViewStyle, Switch, TouchableOpacity } from "react-native";
 import { Text } from "@/design-system/Text";
-import { useAppTheme, ThemedStyle } from "@/theme/useAppTheme";
+import { useAppTheme, ThemedStyle } from "@/theme/use-app-theme";
 import { HStack } from "@/design-system/HStack";
 import { VStack } from "@/design-system/VStack";
 import { Icon } from "@/design-system/Icon/Icon";

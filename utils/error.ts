@@ -59,3 +59,9 @@ export class AuthenticationError extends BaseError {
     super(`[Authentication] ${message}`, cause);
   }
 }
+
+export class ApiError extends BaseError {
+  constructor(message: string, cause?: unknown) {
+    super(`[API] ${message}`, cause);
+  }
+}

@@ -2,7 +2,7 @@ import { Center } from "@/design-system/Center";
 import { HStack } from "@/design-system/HStack";
 import { Text } from "@/design-system/Text";
 import { VStack } from "@/design-system/VStack";
-import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { memo } from "react";
 import { Switch, ViewStyle } from "react-native";
 

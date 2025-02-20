@@ -1,4 +1,4 @@
-import { Screen } from "@/components/Screen/ScreenComp/Screen";
+import { Screen } from "@/components/screen/screen";
 import { Center } from "@/design-system/Center";
 import { VStack } from "@/design-system/VStack";
 import { ActivityIndicator } from "@/design-system/activity-indicator";
@@ -16,11 +16,11 @@ import { isConversationDm } from "@/features/conversation/utils/is-conversation-
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
 import { useHeader } from "@/navigation/use-header";
 import { useConversationQuery } from "@/queries/conversation-query";
-import { NavigationParamList } from "@/screens/Navigation/Navigation";
+import { NavigationParamList } from "@/navigation/navigation.types";
 import { $globalStyles } from "@/theme/styles";
-import { useAppTheme } from "@/theme/useAppTheme";
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
-import { useRouter } from "@navigation/useNavigation";
+import { useAppTheme } from "@/theme/use-app-theme";
+import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
+import { useRouter } from "@/navigation/use-navigation";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React, { memo } from "react";
 import { ConversationMessages } from "./conversation-messages";
@@ -59,7 +59,7 @@ export const ConversationScreen = memo(function ConversationScreen(
 const Content = memo(function Content() {
   const { theme } = useAppTheme();
 
-  const currentAccount = useCurrentAccount()!;
+  const currentAccount = useCurrentSenderEthAddress()!;
   const navigation = useRouter();
   const topic = useConversationStoreContext((state) => state.topic);
   const isCreatingNewConversation = useConversationStoreContext(

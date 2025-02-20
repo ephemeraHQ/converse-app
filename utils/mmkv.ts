@@ -51,8 +51,8 @@ export const clearSecureMmkvForAccount = async (account: string) => {
   delete secureMmkvByAccount[account];
 };
 
-const reactQueryMMKV = new MMKV({ id: "converse-react-query" });
-const secureQueryMMKV = new MMKV({
+export const reactQueryMMKV = new MMKV({ id: "converse-react-query" });
+export const secureQueryMMKV = new MMKV({
   id: "secure-convos-react-query",
   encryptionKey: config.reactQueryEncryptionKey,
 });

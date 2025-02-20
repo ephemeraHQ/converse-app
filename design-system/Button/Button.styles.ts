@@ -4,7 +4,7 @@ import {
   Theme,
   ThemedStyle,
   flattenThemedStyles,
-} from "../../theme/useAppTheme";
+} from "../../theme/use-app-theme";
 import { textPresets } from "./../Text/Text.presets";
 import { IButtonAction, IButtonSize, IButtonVariant } from "./Button.props";
 

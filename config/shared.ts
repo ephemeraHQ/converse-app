@@ -34,7 +34,6 @@ export const shared = {
   debugMenu: false,
   xmtpEnv: (process.env.EXPO_PUBLIC_XMTP_ENV || "dev") as IConfig["xmtpEnv"],
   apiURI: maybeReplaceLocalhost(process.env.EXPO_PUBLIC_CONVOS_API_URI),
-  deprecatedApiURI: maybeReplaceLocalhost(process.env.EXPO_PUBLIC_API_URI),
   debugAddresses:
     process.env.EXPO_PUBLIC_DEBUG_ADDRESSES?.toLowerCase().split(",") || [],
   lensApiDomain: "api.lens.dev",
@@ -58,6 +57,5 @@ export const shared = {
   },
   thirdwebClientId: process.env.EXPO_PUBLIC_THIRDWEB_CLIENT_ID,
   reactQueryEncryptionKey:
-    // @ts-expect-error todo fixme
     process.env.EXPO_PUBLIC_SECURE_REACT_QUERY_ENCRYPTION_KEY,
 } as const satisfies Partial<IConfig>;

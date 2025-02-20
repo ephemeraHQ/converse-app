@@ -1,3 +1,4 @@
+import { Nullable } from "@/types/general";
 import { MessageId } from "@xmtp/react-native-sdk";
 
 /**
@@ -33,6 +34,6 @@ export type SortedReaction = {
  */
 export type ReactorDetails = {
   address: string;
-  userName?: string;
-  avatar?: string;
+  userName: Nullable<string>;
+  avatar: Nullable<string>;
 };

@@ -1,14 +1,12 @@
 import { useConversationMessageReactions } from "@/features/conversation/conversation-message/conversation-message.utils";
-import { getInboxProfileSocialsQueryConfig } from "@/queries/useInboxProfileSocialsQuery";
-import { useQueries } from "@tanstack/react-query";
-
+import { isCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
+import { useProfilesQueries } from "@/features/profiles/profiles.query";
+import { MessageId } from "@xmtp/react-native-sdk";
 import { useMemo } from "react";
 import {
   RolledUpReactions,
   SortedReaction,
 } from "./conversation-message-reactions.types";
-import { MessageId } from "@xmtp/react-native-sdk";
-import { isCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
 
 export function useConversationMessageReactionsRolledUp(args: {
   messageId: MessageId;
@@ -26,22 +24,9 @@ export function useConversationMessageReactionsRolledUp(args: {
     )
   );
 
-  const inboxProfileSocialsQueries = useQueries({
-    queries: inboxIds.map((inboxId) =>
-      getInboxProfileSocialsQueryConfig({ inboxId })
-    ),
+  const { data: profiles } = useProfilesQueries({
+    xmtpInboxIds: inboxIds,
   });
-
-  const membersSocials = inboxProfileSocialsQueries.map(
-    ({ data: socials }, index) => {
-      return {
-        inboxId: inboxIds[index],
-        address: getPreferredInboxAddress(socials),
-        uri: getPreferredInboxAvatar(socials),
-        name: getPreferredInboxName(socials),
-      };
-    }
-  );
 
   return useMemo((): RolledUpReactions => {
     const detailed: SortedReaction[] = [];
@@ -73,17 +58,15 @@ export function useConversationMessageReactionsRolledUp(args: {
         (previewCounts.get(reaction.content) || 0) + 1
       );
 
-      const socialDetails = membersSocials.find(
-        (social) => social.inboxId === reaction.senderInboxId
-      );
+      const profile = profiles?.[inboxIds.indexOf(reaction.senderInboxId)];
 
       detailed.push({
         content: reaction.content,
         isOwnReaction,
         reactor: {
           address: reaction.senderInboxId,
-          userName: socialDetails?.name,
-          avatar: socialDetails?.uri,
+          userName: profile?.name,
+          avatar: profile?.avatar,
         },
       });
     });
@@ -104,5 +87,5 @@ export function useConversationMessageReactionsRolledUp(args: {
       preview,
       detailed,
     };
-  }, [reactionsBySender, membersSocials, messageId]);
+  }, [reactionsBySender, profiles, messageId, inboxIds]);
 }

@@ -14,11 +14,6 @@ type EnvironmentConfig = {
     bundleIdentifier: string;
     associatedDomains: string[];
     googleServicesFile: string;
-    // infoPlist: {
-    //   NSAppTransportSecurity: {
-    //     NSAllowsArbitraryLoads: boolean;
-    //   };
-    // };
   };
   android: {
     package: string;
@@ -44,11 +39,6 @@ const settings: Record<Environment, EnvironmentConfig> = {
         "webcredentials:dev.converse.xyz",
       ],
       googleServicesFile: "./google-services/ios/development.plist",
-      // infoPlist: {
-      //   NSAppTransportSecurity: {
-      //     NSAllowsArbitraryLoads: true,
-      //   },
-      // },
     },
     android: {
       package: "com.converse.dev",
@@ -71,11 +61,6 @@ const settings: Record<Environment, EnvironmentConfig> = {
         "webcredentials:preview.converse.xyz",
       ],
       googleServicesFile: "./google-services/ios/preview.plist",
-      // infoPlist: {
-      //   NSAppTransportSecurity: {
-      //     NSAllowsArbitraryLoads: false,
-      //   },
-      // },
     },
     android: {
       package: "com.converse.preview",
@@ -98,11 +83,6 @@ const settings: Record<Environment, EnvironmentConfig> = {
         "webcredentials:converse.xyz",
       ],
       googleServicesFile: "./google-services/ios/production.plist",
-      // infoPlist: {
-      //   NSAppTransportSecurity: {
-      //     NSAllowsArbitraryLoads: false,
-      //   },
-      // },
     },
     android: {
       package: "com.converse.prod",
@@ -119,7 +99,6 @@ const settings: Record<Environment, EnvironmentConfig> = {
 
 // eslint-disable-next-line import/no-default-export
 export default (): ExpoConfig => {
-  // @ts-expect-error
   const expoEnv = (process.env.EXPO_ENV || "development") as Environment;
   const config = settings[expoEnv];
 

@@ -1,10 +1,10 @@
-import { Avatar } from "@/components/Avatar";
+import { Avatar, IAvatarProps } from "@/components/avatar";
 import { Center } from "@/design-system/Center";
-import { Text } from "@/design-system/Text";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { ITextProps, Text } from "@/design-system/Text";
+import { useAppTheme } from "@/theme/use-app-theme";
+import { Pressable } from "@/design-system/Pressable";
 import React from "react";
-import { StyleProp, ViewStyle, TextStyle } from "react-native";
-import { AnimatedPressable } from "@design-system/Pressable";
+import { StyleProp, ViewStyle } from "react-native";
 
 type IChipSize = "sm" | "md";
 
@@ -43,25 +43,22 @@ export function Chip({
 
   return (
     <ChipContext.Provider value={{ size, disabled, isSelected }}>
-      <AnimatedPressable
+      <Pressable
         onPress={onPress}
         disabled={disabled}
-        style={() => [
+        style={[
           styles.$container,
           isSelected && styles.$selectedContainer,
           disabled && styles.$disabledContainer,
         ]}
       >
         <Center style={styles.$content}>{children}</Center>
-      </AnimatedPressable>
+      </Pressable>
     </ChipContext.Provider>
   );
 }
 
-type IChipTextProps = {
-  children: string;
-  style?: StyleProp<TextStyle>;
-};
+type IChipTextProps = ITextProps;
 
 export function ChipText({ children, style }: IChipTextProps) {
   const { size, disabled, isSelected } = useChipContext();
@@ -89,10 +86,7 @@ export function ChipIcon({ children }: IChipIconProps) {
   return children;
 }
 
-type IChipAvatarProps = {
-  uri?: string;
-  name: string;
-};
+type IChipAvatarProps = IAvatarProps;
 
 export function ChipAvatar({ uri, name }: IChipAvatarProps) {
   const { theme } = useAppTheme();
@@ -145,8 +139,3 @@ export function useChipStyles({ variant }: { variant: "filled" | "outlined" }) {
     },
   } as const;
 }
-
-// Add Chip compound components to the main export
-Chip.Text = ChipText;
-Chip.Icon = ChipIcon;
-Chip.Avatar = ChipAvatar;

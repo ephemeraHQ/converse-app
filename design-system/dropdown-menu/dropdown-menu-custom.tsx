@@ -3,7 +3,7 @@ import { Icon } from "@/design-system/Icon/Icon";
 import { IIconName } from "@/design-system/Icon/Icon.types";
 import { Text } from "@/design-system/Text";
 import { VStack } from "@/design-system/VStack";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { Pressable } from "react-native";
 
 type IMenuListContainerProps = {

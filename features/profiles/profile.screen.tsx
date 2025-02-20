@@ -1,6 +1,6 @@
 import { ProfileMe } from "@/features/profiles/profile-me";
 import { ProfileOther } from "@/features/profiles/profile-other";
-import { NavigationParamList } from "@/screens/Navigation/Navigation";
+import { NavigationParamList } from "@/navigation/navigation.types";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import React from "react";
 import { isCurrentSender } from "../multi-inbox/multi-inbox.store";

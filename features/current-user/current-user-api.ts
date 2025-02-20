@@ -1,30 +1,33 @@
 import { api } from "@/utils/api/api";
+import { captureError } from "@/utils/capture-error";
 import { z } from "zod";
 
 export const CurrentUserSchema = z.object({
   id: z.string(),
-  privyUserId: z.string(),
-  device: z.object({
-    id: z.string(),
-    os: z.string(),
-    name: z.string().nullable(),
-  }),
-  identity: z.object({
-    id: z.string(),
-    privyAddress: z.string(),
-    xmtpId: z.string(),
-  }),
-  profile: z.object({
-    id: z.string(),
-    name: z.string(),
-    description: z.string().nullable(),
-  }),
+  identities: z.array(
+    z.object({
+      id: z.string(),
+      privyAddress: z.string(),
+      xmtpId: z.string().nullable(),
+    })
+  ),
 });
 
 export type ICurrentUser = z.infer<typeof CurrentUserSchema>;
 
 export async function fetchCurrentUser(): Promise<ICurrentUser> {
-  // todo what's the endpoint
-  const { data } = await api.get("/api/v1/user/me");
-  return CurrentUserSchema.parse(data);
+  const { data } = await api.get("/api/v1/users/me");
+
+  const parseResult = CurrentUserSchema.safeParse(data);
+  if (!parseResult.success) {
+    captureError(
+      new Error(
+        `Failed to parse current user response: ${JSON.stringify(
+          parseResult.error
+        )}`
+      )
+    );
+  }
+
+  return data as ICurrentUser;
 }

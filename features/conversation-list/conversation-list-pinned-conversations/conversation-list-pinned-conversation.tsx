@@ -4,7 +4,7 @@ import {
   IContextMenuViewProps,
 } from "@/design-system/context-menu/context-menu";
 import { useConversationListPinnedConversationsStyles } from "@/features/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversations.styles";
-import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import logger from "@/utils/logger";
 import { Center } from "@design-system/Center";
 import { HStack } from "@design-system/HStack";

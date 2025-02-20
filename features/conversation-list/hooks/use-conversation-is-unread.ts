@@ -1,8 +1,8 @@
 import { conversationIsUnreadForInboxId } from "@/features/conversation/utils/conversation-is-unread-by-current-account";
-import { getConversationMetadataQueryOptions } from "@/queries/conversation-metadata-query";
+import { getConversationMetadataQueryOptions } from "@/features/conversation/conversation-metadata/conversation-metadata.query";
 import { getConversationQueryOptions } from "@/queries/conversation-query";
 import {
-  useCurrentAccount,
+  useCurrentSenderEthAddress,
   useSafeCurrentSender,
 } from "@/features/multi-inbox/multi-inbox.store";
 import { useQuery } from "@tanstack/react-query";
@@ -16,7 +16,7 @@ type UseConversationIsUnreadArgs = {
 export const useConversationIsUnread = ({
   topic,
 }: UseConversationIsUnreadArgs) => {
-  const currentAccount = useCurrentAccount();
+  const currentAccount = useCurrentSenderEthAddress();
   const currentUserInboxId = useSafeCurrentSender().inboxId;
 
   const {
@@ -43,12 +43,19 @@ export const useConversationIsUnread = ({
       return false;
     }
 
+    // For now, if we don't have conversation metadata, we consider the conversation unread
+    if (!conversationMetadata) {
+      return true;
+    }
+
     return conversationIsUnreadForInboxId({
       lastMessageSent: lastMessage?.sentNs ?? null,
       lastMessageSenderInboxId: lastMessage?.senderInboxId ?? null,
       consumerInboxId: currentUserInboxId!,
-      markedAsUnread: conversationMetadata?.markedAsUnread ?? false,
-      readUntil: conversationMetadata?.readUntil ?? 0,
+      markedAsUnread: conversationMetadata?.unread ?? false,
+      readUntil: conversationMetadata?.readUntil
+        ? new Date(conversationMetadata.readUntil).getTime()
+        : null,
     });
   }, [
     lastMessage,

@@ -1,37 +1,37 @@
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import {
   getConversationMetadataQueryData,
   updateConversationMetadataQueryData,
-} from "@/queries/conversation-metadata-query";
+} from "@/features/conversation/conversation-metadata/conversation-metadata.query";
+import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
 import { useMutation } from "@tanstack/react-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 
 export function useRestoreConversation(args: { topic: ConversationTopic }) {
   const { topic } = args;
-  const currentAccount = useCurrentAccount()!;
+  const currentAccount = useCurrentSenderEthAddress()!;
 
   const { mutateAsync: restoreConversationAsync } = useMutation({
     mutationFn: () => {
       updateConversationMetadataQueryData({
         account: currentAccount,
         topic,
-        updateData: { isDeleted: false },
+        updateData: { deleted: false },
       });
       return Promise.resolve();
     },
     onMutate: () => {
-      const previousIsDeleted = getConversationMetadataQueryData({
+      const previousDeleted = getConversationMetadataQueryData({
         account: currentAccount,
         topic,
-      })?.isDeleted;
+      })?.deleted;
 
-      return { previousIsDeleted };
+      return { previousDeleted };
     },
     onError: (error, _, context) => {
       updateConversationMetadataQueryData({
         account: currentAccount,
         topic,
-        updateData: { isDeleted: context?.previousIsDeleted },
+        updateData: { deleted: context?.previousDeleted },
       });
     },
   });

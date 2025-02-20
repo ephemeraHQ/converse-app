@@ -5,7 +5,7 @@ import { Text } from "../Text/Text";
 import { VStack } from "../VStack";
 import { TextField } from "./TextField";
 import { TextFieldSimple } from "./TextFieldSimple";
-import { useAppTheme } from "@theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { ViewStyle } from "react-native";
 
 export const TextFieldExample = memo(function TextFieldExample() {

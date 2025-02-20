@@ -4,7 +4,7 @@ import {
   DropdownMenuCustomItem,
   IDropdownMenuCustomItemProps,
 } from "@/design-system/dropdown-menu/dropdown-menu-custom";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { debugBorder } from "@/utils/debug-style";
 import { memo, useCallback } from "react";
 import { EntryAnimationsValues, withSpring } from "react-native-reanimated";

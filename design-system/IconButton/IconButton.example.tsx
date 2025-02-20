@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { useAppTheme } from "../../theme/useAppTheme";
+import { useAppTheme } from "../../theme/use-app-theme";
 import { HStack } from "../HStack";
 import { Text } from "../Text/Text";
 import { VStack } from "../VStack";

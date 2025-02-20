@@ -1,5 +1,5 @@
 import { AnimatedHStack } from "@/design-system/HStack";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { debugBorder } from "@/utils/debug-style";
 import { Haptics } from "@/utils/haptics";
 import { memo } from "react";

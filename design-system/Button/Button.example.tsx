@@ -1,5 +1,5 @@
 import { VStack } from "@design-system/VStack";
-import { useAppTheme } from "@theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { Button } from "./Button";
 import { Icon } from "../Icon/Icon";
 

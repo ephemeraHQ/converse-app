@@ -1,15 +1,14 @@
-import { showActionSheetWithOptions } from "@/components/StateHandlers/ActionSheetStateHandler";
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { showActionSheet } from "@/components/action-sheet";
 import { updateInboxIdsConsentForAccount } from "@/features/consent/update-inbox-ids-consent-for-account";
-import { translate } from "@/i18n";
+import { deleteConversation } from "@/features/conversation/conversation-metadata/conversation-metadata.api";
 import {
   getConversationMetadataQueryData,
   updateConversationMetadataQueryData,
-} from "@/queries/conversation-metadata-query";
+} from "@/features/conversation/conversation-metadata/conversation-metadata.query";
+import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
+import { translate } from "@/i18n";
 import { getGroupQueryData } from "@/queries/useGroupQuery";
-import { actionSheetColors } from "@/styles/colors";
-import { useAppTheme } from "@/theme/useAppTheme";
-import { deleteTopic } from "@/utils/api/topics";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { useMutation } from "@tanstack/react-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
@@ -17,34 +16,35 @@ import { useCallback } from "react";
 
 export const useDeleteGroup = (args: { groupTopic: ConversationTopic }) => {
   const { groupTopic } = args;
-  const currentAccount = useCurrentAccount()!;
+  const currentAccount = useCurrentSenderEthAddress()!;
   const { theme } = useAppTheme();
   const colorScheme = theme.isDark ? "dark" : "light";
 
   const { mutateAsync: deleteGroupAsync } = useMutation({
     mutationFn: () =>
-      deleteTopic({
+      deleteConversation({
+        account: currentAccount,
         topic: groupTopic,
       }),
     onMutate: () => {
-      const previousIsDeleted = getConversationMetadataQueryData({
+      const previousDeleted = getConversationMetadataQueryData({
         account: currentAccount,
         topic: groupTopic,
-      })?.isDeleted;
+      })?.deleted;
 
       updateConversationMetadataQueryData({
         account: currentAccount,
         topic: groupTopic,
-        updateData: { isDeleted: true },
+        updateData: { deleted: true },
       });
 
-      return { previousIsDeleted };
+      return { previousDeleted };
     },
     onError: (error, _, context) => {
       updateConversationMetadataQueryData({
         account: currentAccount,
         topic: groupTopic,
-        updateData: { isDeleted: context?.previousIsDeleted },
+        updateData: { deleted: context?.previousDeleted },
       });
     },
   });
@@ -94,19 +94,18 @@ export const useDeleteGroup = (args: { groupTopic: ConversationTopic }) => {
       },
     ];
 
-    showActionSheetWithOptions(
-      {
+    showActionSheet({
+      options: {
         options: actions.map((a) => a.label),
         cancelButtonIndex: actions.length - 1,
         destructiveButtonIndex: [0, 1],
         title,
-        ...actionSheetColors(colorScheme),
       },
-      async (selectedIndex?: number) => {
+      callback: async (selectedIndex?: number) => {
         if (selectedIndex !== undefined) {
-          await actions[selectedIndex].action();
+          actions[selectedIndex].action();
         }
-      }
-    );
-  }, [colorScheme, currentAccount, groupTopic, deleteGroupAsync]);
+      },
+    });
+  }, [currentAccount, groupTopic, deleteGroupAsync]);
 };

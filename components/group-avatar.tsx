@@ -1,22 +1,17 @@
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
 import { Center } from "@/design-system/Center";
 import { Text } from "@/design-system/Text";
 import { VStack } from "@/design-system/VStack";
+import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
+import { useProfilesQueries } from "@/features/profiles/profiles.query";
 import { useGroupMembersQuery } from "@/queries/useGroupMembersQuery";
 import { useGroupQuery } from "@/queries/useGroupQuery";
-import { getInboxProfileSocialsQueryConfig } from "@/queries/useInboxProfileSocialsQuery";
 import { $globalStyles } from "@/theme/styles";
-import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
-import {
-  getPreferredInboxAddress,
-  getPreferredInboxAvatar,
-  getPreferredInboxName,
-} from "@/utils/profile";
-import { useQueries } from "@tanstack/react-query";
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
+import { Nullable } from "@/types/general";
 import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 import React, { memo, useMemo } from "react";
 import { StyleProp, TextStyle, ViewStyle } from "react-native";
-import { Avatar } from "./Avatar";
+import { Avatar } from "./avatar";
 
 /**
  * Comp to render a group avatar from a list of inbox ids
@@ -26,25 +21,23 @@ export const GroupAvatarInboxIds = memo(function GroupAvatarInboxIds(props: {
 }) {
   const { inboxIds } = props;
 
-  const socialsData = useQueries({
-    queries: inboxIds.map((inboxId) =>
-      getInboxProfileSocialsQueryConfig({ inboxId })
-    ),
+  const { data: profiles } = useProfilesQueries({
+    xmtpInboxIds: inboxIds,
   });
 
   const members = useMemo(() => {
-    return socialsData
-      .map(({ data: socials }, index): IGroupAvatarMember | null =>
-        socials
+    return profiles
+      ?.map((profile): IGroupAvatarMember | null =>
+        profile
           ? {
-              address: getPreferredInboxAddress(socials) ?? "",
-              uri: getPreferredInboxAvatar(socials),
-              name: getPreferredInboxName(socials),
+              address: profile.xmtpId,
+              uri: profile.avatar,
+              name: profile.name,
             }
           : null
       )
       .filter(Boolean);
-  }, [socialsData]);
+  }, [profiles]);
 
   return <GroupAvatarUI members={members} />;
 });
@@ -60,7 +53,7 @@ export const GroupAvatar = memo(function GroupAvatar(props: {
 
   const { theme } = useAppTheme();
 
-  const currentAccount = useCurrentAccount()!;
+  const currentAccount = useCurrentSenderEthAddress()!;
 
   const { data: group } = useGroupQuery({
     account: currentAccount,
@@ -90,30 +83,25 @@ export const GroupAvatar = memo(function GroupAvatar(props: {
     }, []);
   }, [members, currentAccount]);
 
-  const membersSocials = useQueries({
-    queries:
-      members?.ids.map((inboxId) =>
-        getInboxProfileSocialsQueryConfig({ inboxId, caller: "group-avatar" })
-      ) ?? [],
+  const { data: profiles } = useProfilesQueries({
+    xmtpInboxIds: memberAddresses,
   });
 
   const memberData = useMemo<IGroupAvatarMember[]>(() => {
-    return membersSocials.map(({ data: socials }, index) => {
-      const address = memberAddresses[index];
-      if (!socials) {
-        return {
-          address,
-          name: address,
-        };
-      }
-
-      return {
-        address,
-        uri: getPreferredInboxAvatar(socials),
-        name: getPreferredInboxName(socials),
-      };
-    });
-  }, [membersSocials, memberAddresses]);
+    return (
+      profiles
+        ?.map((profile): IGroupAvatarMember | null =>
+          profile
+            ? {
+                address: profile.xmtpId,
+                uri: profile.avatar,
+                name: profile.name,
+              }
+            : null
+        )
+        .filter(Boolean) ?? []
+    );
+  }, [profiles]);
 
   const sizeNumber = useMemo(() => {
     if (size === "sm") {
@@ -126,7 +114,9 @@ export const GroupAvatar = memo(function GroupAvatar(props: {
   }, [size, theme]);
 
   if (group?.imageUrlSquare) {
-    return <Avatar uri={group.imageUrlSquare} size={sizeNumber} />;
+    return (
+      <Avatar uri={group.imageUrlSquare} size={sizeNumber} name={group.name} />
+    );
   }
 
   return <GroupAvatarUI members={memberData} size={sizeNumber} />;
@@ -139,8 +129,8 @@ type Position = { x: number; y: number; size: number };
 
 type IGroupAvatarMember = {
   address: string;
-  uri?: string;
-  name?: string;
+  uri: Nullable<string>;
+  name: Nullable<string>;
 };
 
 type IGroupAvatarUIProps = {

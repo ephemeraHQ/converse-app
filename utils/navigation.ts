@@ -3,7 +3,7 @@ import { Linking as RNLinking } from "react-native";
 
 import logger from "./logger";
 import { config } from "../config";
-import { NavigationParamList } from "../screens/Navigation/Navigation";
+import { NavigationParamList } from "../navigation/navigation.types";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { createNavigationContainerRef } from "@react-navigation/native";
 
@@ -64,28 +64,6 @@ const isDMLink = (url: string) => {
   return false;
 };
 
-const isGroupInviteLink = (url: string) => {
-  // First check if it's a universal link
-  for (const prefix of config.universalLinks) {
-    if (url.startsWith(prefix)) {
-      const path = url.slice(prefix.length);
-      if (path.toLowerCase().startsWith("group-invite/")) {
-        logger.debug("[Navigation] Found group invite universal link:", path);
-        return true;
-      }
-    }
-  }
-
-  // Then check for deep link format with scheme
-  if (url.includes("group-invite")) {
-    logger.debug("[Navigation] Found group invite deep link:", url);
-    return true;
-  }
-
-  logger.debug("[Navigation] Not a group invite link:", url);
-  return false;
-};
-
 const isGroupLink = (url: string) => {
   for (const prefix of config.universalLinks) {
     if (url.startsWith(prefix)) {
@@ -105,10 +83,6 @@ RNLinking.openURL = (url: string) => {
   try {
     if (isDMLink(url)) {
       logger.debug("[Navigation] Handling DM link");
-      return originalOpenURL(getSchemedURLFromUniversalURL(url));
-    }
-    if (isGroupInviteLink(url)) {
-      logger.debug("[Navigation] Handling group invite link");
       return originalOpenURL(getSchemedURLFromUniversalURL(url));
     }
     if (isGroupLink(url)) {

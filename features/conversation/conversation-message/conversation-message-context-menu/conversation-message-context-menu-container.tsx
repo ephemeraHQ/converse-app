@@ -1,6 +1,6 @@
 import { AnimatedVStack, VStack } from "@/design-system/VStack";
 import { useConversationMessageContextMenuStyles } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu.styles";
-import { useAppTheme } from "@theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { memo, useEffect } from "react";
 import { Platform, StatusBar, useWindowDimensions } from "react-native";
 import {

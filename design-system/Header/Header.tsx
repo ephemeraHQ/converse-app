@@ -4,9 +4,9 @@ import { StyleProp, TextStyle, ViewStyle } from "react-native";
 import {
   ExtendedEdge,
   useSafeAreaInsetsStyle,
-} from "@/components/Screen/ScreenComp/Screen.helpers";
+} from "@/components/screen/screen.helpers";
 import { translate } from "@/i18n";
-import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { HStack } from "../HStack";
 import { ITextProps, Text } from "../Text";
 import { ITouchableOpacityProps } from "../TouchableOpacity";

@@ -8,7 +8,7 @@ import { TextField } from "@/design-system/TextField/TextField";
 import { VStack } from "@/design-system/VStack";
 import { ProfileContactCardContainer } from "@/features/profiles/components/profile-contact-card/profile-contact-card-container";
 import { translate } from "@/i18n";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { memo, useCallback, useState } from "react";
 import { ViewStyle } from "react-native";
 import { OnboardingEditableAvatar } from "./onboarding-editable-avatar";

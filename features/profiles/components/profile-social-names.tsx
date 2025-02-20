@@ -1,50 +1,78 @@
+import { HStack } from "@/design-system/HStack";
+import { Text } from "@/design-system/Text";
 import { VStack } from "@/design-system/VStack";
-import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
-import { formatConverseUsername } from "../utils/format-converse-username";
-import { SocialNames } from "./social-names";
-import { IProfileSocials } from "../profile.types";
-import { ViewStyle } from "react-native";
+import { Chip, ChipText } from "@/design-system/chip";
+import { ISocialProfile } from "@/features/social-profiles/social-lookup.api";
+import { translate } from "@/i18n";
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
+import Clipboard from "@react-native-clipboard/clipboard";
+import React from "react";
+import { Alert, ViewStyle } from "react-native";
 
 type IProfileSocialsNamesProps = {
-  socials: IProfileSocials;
+  socialProfiles: ISocialProfile[];
 };
 
-export function ProfileSocialsNames({ socials }: IProfileSocialsNamesProps) {
-  const { themed } = useAppTheme();
+export function ProfileSocialsNames({
+  socialProfiles,
+}: IProfileSocialsNamesProps) {
+  const { theme, themed } = useAppTheme();
 
-  // Filter out Converse usernames
-  const filteredUserNames = socials.userNames?.filter(
-    (u) => !formatConverseUsername(u.name)?.isConverseUsername
-  );
+  // Get ENS names from profiles
+  const ensNames = socialProfiles
+    .filter((p) => p.type === "ens")
+    .map((p) => ({
+      name: p.name ?? "",
+    }))
+    .filter((p) => p.name);
 
-  // Filter out .eth domains from unstoppable domains to avoid duplicates
-  const filteredUnstoppableDomains = socials.unstoppableDomains?.filter(
-    (d) => d.domain && !d.domain.toLowerCase().endsWith(".eth")
-  );
+  // Get Farcaster usernames
+  const farcasterNames = socialProfiles
+    .filter((p) => p.type === "farcaster")
+    .map((p) => ({
+      name: p.name ?? "",
+    }))
+    .filter((p) => p.name);
+
+  // Get Lens usernames
+  const lensNames = socialProfiles
+    .filter((p) => p.type === "lens")
+    .map((p) => ({
+      name: p.name ?? "",
+    }))
+    .filter((p) => p.name);
 
   if (
-    (filteredUserNames?.length ?? 0) === 0 &&
-    (socials.ensNames?.length ?? 0) === 0 &&
-    (filteredUnstoppableDomains?.length ?? 0) === 0
+    farcasterNames.length === 0 &&
+    lensNames.length === 0 &&
+    ensNames.length === 0
   ) {
     return null;
   }
 
+  const handleNamePress = (name: string) => {
+    Clipboard.setString(name);
+    Alert.alert(translate("userProfile.copied"));
+  };
+
+  const renderSocialChips = (items: { name: string }[]) => {
+    return items.map((item) => (
+      <Chip key={item.name} onPress={() => handleNamePress(item.name)}>
+        <ChipText>{item.name}</ChipText>
+      </Chip>
+    ));
+  };
+
   return (
     <VStack style={[themed($section), themed($borderTop)]}>
-      <SocialNames
-        socials={{
-          userNames: filteredUserNames?.map((u) => ({
-            name: u.name,
-          })),
-          ensNames: socials.ensNames?.map((e) => ({
-            name: e.name,
-          })),
-          unstoppableDomains: filteredUnstoppableDomains?.map((d) => ({
-            name: d.domain,
-          })),
-        }}
-      />
+      <VStack style={{ paddingVertical: theme.spacing.sm }}>
+        <Text>{translate("userProfile.names")}</Text>
+        <HStack style={themed($chipContainer)}>
+          {farcasterNames.length > 0 && renderSocialChips(farcasterNames)}
+          {lensNames.length > 0 && renderSocialChips(lensNames)}
+          {ensNames.length > 0 && renderSocialChips(ensNames)}
+        </HStack>
+      </VStack>
     </VStack>
   );
 }
@@ -58,4 +86,10 @@ const $section: ThemedStyle<ViewStyle> = ({ spacing, colors }) => ({
 const $borderTop: ThemedStyle<ViewStyle> = ({ spacing, colors }) => ({
   borderTopWidth: spacing.xxs,
   borderTopColor: colors.background.sunken,
+});
+
+const $chipContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+  flexWrap: "wrap",
+  gap: spacing.xs,
+  paddingTop: spacing.sm,
 });

@@ -11,7 +11,7 @@ import { FullWindowOverlay } from "react-native-screens";
 
 import { BottomSheetBackdropOpacity } from "./BottomSheetBackdropOpacity";
 import { BottomSheetHandleBar } from "./BottomSheetHandleBar";
-import { useAppTheme } from "../../theme/useAppTheme";
+import { useAppTheme } from "../../theme/use-app-theme";
 
 export type IBottomSheetModalProps = GorhomBottomSheetModalProps & {
   absoluteHandleBar?: boolean;

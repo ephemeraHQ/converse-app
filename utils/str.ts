@@ -1,4 +1,3 @@
-import { humanize } from "@/utils/human-hash";
 import { Dimensions } from "react-native";
 
 export const shortDisplayName = (displayName: string | undefined): string => {
@@ -27,10 +26,6 @@ export const capitalize = (str: string) => str[0].toUpperCase() + str.slice(1);
 
 export const addressPrefix = (address: string) =>
   (address && address.length >= 6 ? address.slice(0, 6) : address) || "";
-
-export const formatGroupName = (topic: string, groupName?: string) =>
-  groupName ||
-  capitalize(humanize(topic.slice(14, 46), { numWords: 3, separator: " " }));
 
 export function normalizeString(str: string) {
   return str.toLowerCase().trim();

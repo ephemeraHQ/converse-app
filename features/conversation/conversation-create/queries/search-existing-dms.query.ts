@@ -1,91 +1,16 @@
-import { doesSocialsMatchTextQuery } from "@/features/profiles/utils/does-socials-match-text-query";
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm";
+import { getCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
+import { ensureProfileQueryData } from "@/features/profiles/profiles.query";
+import { doesSocialProfilesMatchTextQuery } from "@/features/profiles/utils/does-social-profiles-match-text-query";
+import { ensureSocialProfilesQueryData } from "@/features/social-profiles/social-lookup.query";
 import { getSearchExistingDmsQueryKey } from "@/queries/QueryKeys";
 import { getAllowedConsentConversationsQueryData } from "@/queries/conversations-allowed-consent-query";
 import { ensureDmPeerInboxIdQueryData } from "@/queries/use-dm-peer-inbox-id-query";
 import { ensureGroupMembersQueryData } from "@/queries/useGroupMembersQuery";
-import { ensureInboxProfileSocialsQueryData } from "@/queries/useInboxProfileSocialsQuery";
+import { captureError } from "@/utils/capture-error";
+import { normalizeString } from "@/utils/str";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
-import { getCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
-import { normalizeString } from "@/utils/str";
-
-export async function searchExistingDms(args: {
-  searchQuery: string;
-  inboxId: InboxId;
-}) {
-  const { searchQuery, inboxId } = args;
-  const currentAccount = getCurrentAccount()!;
-  const conversations = getAllowedConsentConversationsQueryData({
-    account: currentAccount,
-  });
-  const normalizedSearchQuery = searchQuery.toLowerCase().trim();
-
-  if (!conversations) {
-    return [];
-  }
-
-  if (!normalizedSearchQuery) {
-    return [];
-  }
-
-  const matchingTopics: ConversationTopic[] = [];
-  const dmConversations = conversations.filter(isConversationDm);
-
-  const results = await Promise.all(
-    dmConversations.map(async (conversation) => {
-      try {
-        // Try to get peer inbox ID either from members or direct query
-        const [peerInboxId, members] = await Promise.race([
-          // Get peer inbox ID from members
-          ensureGroupMembersQueryData({
-            caller: "searchExistingDms",
-            account: currentAccount,
-            topic: conversation.topic,
-          }).then((members) => {
-            const otherId = members.ids.find((id) => id !== inboxId);
-            return [otherId, members] as const;
-          }),
-          // Get peer inbox ID directly
-          ensureDmPeerInboxIdQueryData({
-            account: currentAccount,
-            topic: conversation.topic,
-            caller: "searchExistingDms",
-          }).then((peerId) => [peerId, null] as const),
-        ]);
-
-        const otherMemberInboxId =
-          peerInboxId || members?.ids.find((id) => id !== inboxId);
-
-        if (!otherMemberInboxId) {
-          throw new Error("No other member inbox Id found for conversation DM");
-        }
-
-        const socials = await ensureInboxProfileSocialsQueryData({
-          inboxId: otherMemberInboxId,
-          caller: "searchExistingDms",
-        });
-
-        if (!socials) {
-          return null;
-        }
-
-        const hasMatch = doesSocialsMatchTextQuery({
-          socials,
-          normalizedQuery: normalizedSearchQuery,
-        });
-
-        return hasMatch ? conversation.topic : null;
-      } catch {
-        return null;
-      }
-    })
-  );
-
-  matchingTopics.push(...results.filter(Boolean));
-
-  return matchingTopics;
-}
 
 export function getSearchExistingDmsQueryOptions(args: {
   searchQuery: string;
@@ -111,4 +36,88 @@ export function useSearchExistingDms(args: {
   inboxId: InboxId;
 }) {
   return useQuery(getSearchExistingDmsQueryOptions(args));
+}
+
+async function searchExistingDms(args: {
+  searchQuery: string;
+  inboxId: InboxId;
+}) {
+  const { searchQuery, inboxId } = args;
+  const currentAccount = getCurrentSenderEthAddress()!;
+  const conversations = getAllowedConsentConversationsQueryData({
+    account: currentAccount,
+  });
+  const normalizedSearchQuery = searchQuery.toLowerCase().trim();
+
+  if (!conversations) {
+    return [];
+  }
+
+  // Return early if search query is empty
+  if (!normalizedSearchQuery) {
+    return [];
+  }
+
+  const matchingTopics: ConversationTopic[] = [];
+  const dmConversations = conversations.filter(isConversationDm);
+
+  const results = await Promise.all(
+    dmConversations.map(async (conversation) => {
+      try {
+        // Get peer's inbox ID from either group members or DM peer data, using whichever returns first
+        const [peerInboxId, members] = await Promise.race([
+          ensureGroupMembersQueryData({
+            caller: "searchExistingDms",
+            account: currentAccount,
+            topic: conversation.topic,
+          }).then((members) => {
+            const otherId = members.ids.find((id) => id !== inboxId);
+            return [otherId, members] as const;
+          }),
+
+          ensureDmPeerInboxIdQueryData({
+            account: currentAccount,
+            topic: conversation.topic,
+            caller: "searchExistingDms",
+          }).then((peerId) => [peerId, null] as const),
+        ]);
+
+        const otherMemberInboxId =
+          peerInboxId || members?.ids.find((id) => id !== inboxId);
+
+        if (!otherMemberInboxId) {
+          throw new Error("No other member inbox Id found for conversation DM");
+        }
+
+        const profile = await ensureProfileQueryData({
+          xmtpId: otherMemberInboxId,
+        });
+
+        const hasProfileMatch = profile?.name
+          ?.toLowerCase()
+          .includes(normalizedSearchQuery);
+
+        const socialProfiles = await ensureSocialProfilesQueryData({
+          ethAddress: otherMemberInboxId,
+        });
+
+        const hasSocialProfileMatch = doesSocialProfilesMatchTextQuery({
+          socialProfiles,
+          normalizedQuery: normalizedSearchQuery,
+        });
+
+        return hasProfileMatch || hasSocialProfileMatch
+          ? conversation.topic
+          : null;
+      } catch (e) {
+        captureError(e);
+        return null;
+      }
+    })
+  );
+
+  // Filter out nulls and add matching topics to results
+  matchingTopics.push(...results.filter(Boolean));
+
+  return matchingTopics;
 }

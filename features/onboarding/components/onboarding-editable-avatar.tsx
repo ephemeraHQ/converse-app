@@ -1,8 +1,8 @@
-import { Avatar } from "@/components/Avatar";
+import { Avatar } from "@/components/avatar";
 import { Center } from "@/design-system/Center";
 import { Icon } from "@/design-system/Icon/Icon";
 import { VStack } from "@/design-system/VStack";
-import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { ViewStyle } from "react-native";
 
 type IOnboardingEditableAvatarProps = {

@@ -1,6 +1,6 @@
 import { useConversationComposerIsEnabled } from "@/features/conversation/conversation-composer/hooks/conversation-composer-is-enabled";
 import { textSizeStyles } from "@design-system/Text/Text.styles";
-import { useAppTheme } from "@theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import React, { memo, useCallback, useEffect, useRef } from "react";
 import { Platform, TextInput as RNTextInput } from "react-native";
 import { useConversationComposerStore } from "./conversation-composer.store-context";

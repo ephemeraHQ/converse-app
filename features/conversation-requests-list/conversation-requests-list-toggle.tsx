@@ -1,6 +1,6 @@
-import { Chip } from "@/design-system/chip";
+import { Chip, ChipText } from "@/design-system/chip";
 import { HStack } from "@/design-system/HStack";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import React from "react";
 import { View } from "react-native";
 
@@ -32,7 +32,7 @@ export function ConversationRequestsToggle({
             isSelected={index === selectedIndex}
             onPress={() => onSelect(index)}
           >
-            <Chip.Text>{option}</Chip.Text>
+            <ChipText>{option}</ChipText>
           </Chip>
         </View>
       ))}

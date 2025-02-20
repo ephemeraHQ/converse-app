@@ -1,43 +1,42 @@
+import { useAuthStore } from "@/features/authentication/authentication.store";
 import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
-import {
-  AuthStatuses,
-  useAccountsStore,
-} from "@/features/multi-inbox/multi-inbox.store";
+import { clearAllStores } from "@/features/multi-inbox/multi-inbox.store";
 import { queryClient } from "@/queries/queryClient";
+import { reactQueryMMKV, secureQueryMMKV } from "@/utils/mmkv";
 import { usePrivy } from "@privy-io/expo";
-import { StackActions } from "@react-navigation/native";
-import { converseNavigatorRef } from "@utils/navigation";
 import { useCallback } from "react";
 import { logger } from "../../utils/logger";
-import { clearJwtQueryData } from "./jwt.query";
 
 export const useLogout = () => {
-  const { setAuthStatus } = useAccountsStore();
   const privy = usePrivy();
 
   const logout = useCallback(async () => {
-    setAuthStatus(AuthStatuses.signedOut);
     logger.debug("[useLogout] Logging out invoked");
     try {
+      useAuthStore.getState().actions.setStatus("signedOut");
+
       await privy.logout();
+
       logger.debug(
         "[useLogout] Privy logout await completed, checking client user call"
       );
 
-      converseNavigatorRef.current?.dispatch(StackActions.popToTop());
+      clearAllStores();
+
+      // converseNavigatorRef.current?.dispatch(StackActions.popToTop());
+
       MultiInboxClient.instance.logoutMessagingClients();
 
-      queryClient.removeQueries({
-        queryKey: ["embeddedWallet"],
-      });
-      queryClient.removeQueries({
-        queryKey: ["current-user"],
-      });
-      clearJwtQueryData();
+      // Clear both in-memory cache and persisted data
+      queryClient.getQueryCache().clear();
+      queryClient.clear();
+      queryClient.removeQueries();
+      reactQueryMMKV.clearAll();
+      secureQueryMMKV.clearAll();
     } catch (error) {
       logger.error("[useLogout] Error logging out", error);
     }
-  }, [privy, setAuthStatus]);
+  }, [privy]);
 
   return { logout };
 };

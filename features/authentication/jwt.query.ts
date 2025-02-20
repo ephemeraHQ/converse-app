@@ -1,12 +1,14 @@
-import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
-import { secureQueryPersister } from "@/utils/mmkv";
 import { queryClient } from "@/queries/queryClient";
-import { fetchJwt } from "./authentication.api";
+import { secureQueryPersister } from "@/utils/mmkv";
+import { queryOptions, skipToken } from "@tanstack/react-query";
 import { getCurrentSender } from "../multi-inbox/multi-inbox.store";
+import { fetchJwt } from "./authentication.api";
 
 export function getJwtQueryOptions() {
   const currentSender = getCurrentSender();
+
   const enabled = !!currentSender?.ethereumAddress && !!currentSender.inboxId;
+
   return queryOptions({
     enabled,
     queryKey: ["jwt"],
@@ -21,18 +23,10 @@ export function getJwtQueryOptions() {
   });
 }
 
-export function useJwtQuery() {
-  return useQuery(getJwtQueryOptions());
-}
-
 export async function ensureJwtQueryData() {
   return queryClient.ensureQueryData(getJwtQueryOptions());
 }
 
-export function getJwtQueryData() {
-  return queryClient.getQueryData(getJwtQueryOptions().queryKey);
-}
-
-export function clearJwtQueryData() {
-  queryClient.removeQueries(getJwtQueryOptions());
+export function refetchJwtQuery() {
+  return queryClient.refetchQueries(getJwtQueryOptions());
 }

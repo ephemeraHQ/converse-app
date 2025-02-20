@@ -1,14 +1,15 @@
-import { Avatar } from "@/components/Avatar";
+import { Avatar } from "@/components/avatar";
 import { Center } from "@/design-system/Center";
 import { Icon } from "@/design-system/Icon/Icon";
 import { Pressable } from "@/design-system/Pressable";
 import { VStack } from "@/design-system/VStack";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
+import { Nullable } from "@/types/general";
 import { memo } from "react";
 
 export const ProfileContactCardEditableAvatar = memo(function (props: {
-  avatarUri: string | undefined;
-  avatarName: string | undefined;
+  avatarUri: Nullable<string>;
+  avatarName: Nullable<string>;
   onPress: () => void;
 }) {
   const { avatarUri, avatarName, onPress } = props;

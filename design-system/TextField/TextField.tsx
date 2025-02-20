@@ -8,7 +8,11 @@ import React, {
 import { TextInput as RNTextInput, TextStyle, ViewStyle } from "react-native";
 import { translate } from "@i18n";
 import { $globalStyles } from "@theme/styles";
-import { ThemedStyle, ThemedStyleArray, useAppTheme } from "@theme/useAppTheme";
+import {
+  ThemedStyle,
+  ThemedStyleArray,
+  useAppTheme,
+} from "@/theme/use-app-theme";
 import { HStack } from "../HStack";
 import { Text } from "../Text/Text";
 import { textPresets } from "../Text/Text.presets";

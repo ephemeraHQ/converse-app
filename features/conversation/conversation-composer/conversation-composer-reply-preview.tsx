@@ -11,7 +11,8 @@ import {
   isTransactionReferenceMessage,
 } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
-import { useInboxName } from "@/hooks/useInboxName";
+
+import { useProfileQuery } from "@/features/profiles/profiles.query";
 import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { HStack } from "@design-system/HStack";
 import { Icon } from "@design-system/Icon/Icon";
@@ -19,7 +20,7 @@ import { IconButton } from "@design-system/IconButton/IconButton";
 import { Text } from "@design-system/Text";
 import { AnimatedVStack, VStack } from "@design-system/VStack";
 import { SICK_DAMPING, SICK_STIFFNESS } from "@theme/animations";
-import { useAppTheme } from "@theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { Haptics } from "@utils/haptics";
 import {
   ConversationTopic,
@@ -40,7 +41,6 @@ import {
   useConversationComposerStore,
   useConversationComposerStoreContext,
 } from "./conversation-composer.store-context";
-
 export const ReplyPreview = memo(function ReplyPreview() {
   const topic = useCurrentConversationTopic();
 
@@ -67,15 +67,15 @@ const Content = memo(function Content(props: {
     conversationTopic,
   });
 
-  const { data: inboxName } = useInboxName({
-    inboxId: replyMessage?.senderInboxId!, // ! because we have enabled in the query
+  const { data: profile } = useProfileQuery({
+    xmtpId: replyMessage?.senderInboxId!, // ! because we have enabled in the query
   });
 
   const replyingTo = replyMessage
     ? messageIsFromCurrentAccountInboxId({ message: replyMessage })
       ? `Replying to you`
-      : inboxName
-      ? `Replying to ${inboxName}`
+      : profile?.name
+      ? `Replying to ${profile.name}`
       : "Replying"
     : "";
 

@@ -2,12 +2,12 @@ import { GroupAvatar } from "@/components/group-avatar";
 import { Text } from "@/design-system/Text";
 import { ConversationHeaderTitle } from "@/features/conversation/conversation-screen-header/conversation-screen-header-title";
 import { useGroupName } from "@/hooks/useGroupName";
-import { useGroupPendingRequests } from "@/hooks/useGroupPendingRequests";
+// import { useGroupPendingRequests } from "@/hooks/useGroupPendingRequests";
 import { useGroupMembersQuery } from "@/queries/useGroupMembersQuery";
 import { copyToClipboard } from "@/utils/clipboard";
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
 import { translate } from "@i18n";
-import { useRouter } from "@navigation/useNavigation";
+import { useRouter } from "@/navigation/use-navigation";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import React, { memo, useCallback } from "react";
 
@@ -17,7 +17,7 @@ type GroupConversationTitleProps = {
 
 export const GroupConversationTitle = memo(
   ({ conversationTopic }: GroupConversationTitleProps) => {
-    const currentAccount = useCurrentAccount()!;
+    const currentAccount = useCurrentSenderEthAddress()!;
 
     const { data: members } = useGroupMembersQuery({
       caller: "GroupConversationTitle",
@@ -32,14 +32,14 @@ export const GroupConversationTitle = memo(
     const navigation = useRouter();
 
     const onPress = useCallback(() => {
-      navigation.push("Group", { topic: conversationTopic });
+      navigation.push("Conversation", { topic: conversationTopic });
     }, [navigation, conversationTopic]);
 
     const onLongPress = useCallback(() => {
       copyToClipboard(JSON.stringify(conversationTopic));
     }, [conversationTopic]);
 
-    const requestsCount = useGroupPendingRequests(conversationTopic).length;
+    const requestsCount = 0; // TODO useGroupPendingRequests(conversationTopic).length;
 
     if (groupNameLoading) {
       return null;

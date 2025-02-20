@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useAppTheme } from "@theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { Button } from "@design-system/Button/Button";
 import { Text } from "@design-system/Text";
 import { VStack } from "../VStack";

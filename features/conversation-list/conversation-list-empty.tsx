@@ -4,7 +4,7 @@ import { ConversationListItem } from "@/features/conversation-list/conversation-
 import { ConversationListItemAvatarSkeleton } from "@/features/conversation-list/conversation-list-item/conversation-list-item-avatar-skeleton";
 import { useConversationListStyles } from "@/features/conversation-list/conversation-list.styles";
 import { usePinnedConversations } from "@/features/conversation-list/hooks/use-pinned-conversations";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { hexToRGBA } from "@/utils/colors";
 import React, { memo } from "react";
 

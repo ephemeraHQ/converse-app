@@ -6,7 +6,7 @@ import {
 } from "@react-native-menu/menu";
 import { Platform, StyleProp, ViewStyle } from "react-native";
 import { Pressable } from "../Pressable";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { Haptics } from "@/utils/haptics";
 import { getInlinedItem } from "./dropdown-menu.utils";
 

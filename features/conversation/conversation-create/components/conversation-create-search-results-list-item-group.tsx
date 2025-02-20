@@ -1,7 +1,7 @@
 import { GroupAvatar } from "@/components/group-avatar";
 import { ConversationSearchResultsListItem } from "@/features/conversation/conversation-create/components/conversation-create-search-result-list-item";
 import { useConversationStore } from "@/features/conversation/conversation.store-context";
-import { useInboxesUsername } from "@/features/profiles/utils/inbox-username";
+import { useProfilesQueries } from "@/features/profiles/profiles.query";
 import { useGroupMembers } from "@/hooks/useGroupMembers";
 import { useGroupName } from "@/hooks/useGroupName";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
@@ -21,8 +21,8 @@ export const ConversationSearchResultsListItemGroup = memo(
 
     const conversationStore = useConversationStore();
 
-    const { data: usernames } = useInboxesUsername({
-      inboxIds: members?.ids?.slice(0, 3) ?? [],
+    const { data: profiles } = useProfilesQueries({
+      xmtpInboxIds: members?.ids?.slice(0, 3) ?? [],
     });
 
     const handlePress = useCallback(() => {
@@ -38,7 +38,12 @@ export const ConversationSearchResultsListItemGroup = memo(
       <ConversationSearchResultsListItem
         avatar={<GroupAvatar groupTopic={conversationTopic} />}
         title={groupName}
-        subtitle={usernames.slice(0, 3).join(", ") ?? ""}
+        subtitle={
+          profiles
+            ?.slice(0, 3)
+            .map((profile) => profile?.name)
+            .join(", ") ?? ""
+        }
         onPress={handlePress}
       />
     );

@@ -1,27 +1,22 @@
-import { showActionSheetWithOptions } from "@/components/StateHandlers/ActionSheetStateHandler";
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { showActionSheet } from "@/components/action-sheet";
 import { useDenyDmMutation } from "@/features/consent/use-deny-dm.mutation";
-import { useInboxName } from "@/hooks/useInboxName";
-import { translate } from "@/i18n";
+import { deleteConversation } from "@/features/conversation/conversation-metadata/conversation-metadata.api";
 import {
   getConversationMetadataQueryData,
   updateConversationMetadataQueryData,
-} from "@/queries/conversation-metadata-query";
+} from "@/features/conversation/conversation-metadata/conversation-metadata.query";
+import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
+import { useProfileQuery } from "@/features/profiles/profiles.query";
+import { translate } from "@/i18n";
 import { getConversationQueryOptions } from "@/queries/conversation-query";
 import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query";
-import { actionSheetColors } from "@/styles/colors";
-import { useAppTheme } from "@/theme/useAppTheme";
-import { deleteTopic } from "@/utils/api/topics";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
 
 export const useDeleteDm = ({ topic }: { topic: ConversationTopic }) => {
-  const { theme } = useAppTheme();
-  const colorScheme = theme.isDark ? "dark" : "light";
-
-  const currentAccount = useCurrentAccount()!;
+  const currentAccount = useCurrentSenderEthAddress()!;
 
   const { data: conversationId } = useQuery({
     ...getConversationQueryOptions({
@@ -39,40 +34,37 @@ export const useDeleteDm = ({ topic }: { topic: ConversationTopic }) => {
 
   const { mutateAsync: denyDmConsentAsync } = useDenyDmMutation();
 
-  const { data: preferredName } = useInboxName({
-    inboxId: peerInboxId!,
+  const { data: profile } = useProfileQuery({
+    xmtpId: peerInboxId!,
   });
 
   const { mutateAsync: deleteDmAsync } = useMutation({
-    mutationFn: () =>
-      deleteTopic({
-        topic,
-      }),
+    mutationFn: () => deleteConversation({ account: currentAccount, topic }),
     onMutate: () => {
-      const previousIsDeleted = getConversationMetadataQueryData({
+      const previousDeleted = getConversationMetadataQueryData({
         account: currentAccount,
         topic,
-      })?.isDeleted;
+      })?.deleted;
 
       updateConversationMetadataQueryData({
         account: currentAccount,
         topic,
-        updateData: { isDeleted: true },
+        updateData: { deleted: true },
       });
 
-      return { previousIsDeleted };
+      return { previousDeleted };
     },
     onError: (error, _, context) => {
       updateConversationMetadataQueryData({
         account: currentAccount,
         topic,
-        updateData: { isDeleted: context?.previousIsDeleted },
+        updateData: { deleted: context?.previousDeleted },
       });
     },
   });
 
   return useCallback(() => {
-    const title = `${translate("delete_chat_with")} ${preferredName}?`;
+    const title = `${translate("delete_chat_with")} ${profile?.name}?`;
 
     if (!conversationId) {
       throw new Error("Conversation not found in useDeleteDm");
@@ -114,23 +106,21 @@ export const useDeleteDm = ({ topic }: { topic: ConversationTopic }) => {
       },
     ];
 
-    showActionSheetWithOptions(
-      {
+    showActionSheet({
+      options: {
         options: actions.map((a) => a.label),
         cancelButtonIndex: actions.length - 1,
         destructiveButtonIndex: [0, 1],
         title,
-        ...actionSheetColors(colorScheme),
       },
-      async (selectedIndex?: number) => {
+      callback: async (selectedIndex?: number) => {
         if (selectedIndex !== undefined) {
           await actions[selectedIndex].action();
         }
-      }
-    );
+      },
+    });
   }, [
-    colorScheme,
-    preferredName,
+    profile,
     deleteDmAsync,
     denyDmConsentAsync,
     peerInboxId,

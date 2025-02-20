@@ -1,10 +1,42 @@
 import { captureError } from "@/utils/capture-error";
 import { logger } from "@/utils/logger";
-import { QueryCache, QueryClient } from "@tanstack/react-query";
+import {
+  Mutation,
+  MutationCache,
+  QueryCache,
+  QueryClient,
+} from "@tanstack/react-query";
 import { DEFAULT_GC_TIME, DEFAULT_STALE_TIME } from "./queryClient.constants";
-import { useAccountsStore } from "@/features/multi-inbox/multi-inbox.store";
 
 export const queryClient = new QueryClient({
+  mutationCache: new MutationCache({
+    onError: (
+      error: Error,
+      variables: unknown,
+      context: unknown,
+      mutation: Mutation<unknown, unknown, unknown, unknown>
+    ) => {
+      // Example: [Mutation] markConversationAsRead (caller: Conversation Messages) (variables: {"topic":"0x1234567890abcdef1234567890abcdef1234567890"})
+      const mutationInfo = `${
+        mutation.options.mutationKey
+          ? `${JSON.stringify(mutation.options.mutationKey)} `
+          : ""
+      }${mutation.meta?.caller ? `(caller: ${mutation.meta.caller}) ` : ""}${
+        variables ? `(variables: ${JSON.stringify(variables)}) ` : ""
+      }`;
+
+      const enhancedError = new Error(
+        `[Mutation] ${mutationInfo}${error.message}`,
+        {
+          cause: error.cause,
+        }
+      );
+
+      enhancedError.stack = error.stack;
+
+      captureError(enhancedError);
+    },
+  }),
   queryCache: new QueryCache({
     // Used to track which queries execute the queryFn which means will do a network request.
     // Carefull, this is also triggered when the query gets its data from the persister.
@@ -15,15 +47,19 @@ export const queryClient = new QueryClient({
         }`
       );
     },
-    onError: (error, query) => {
-      captureError(
-        new Error(
-          `Error in query: ${JSON.stringify(query.queryKey)}${
-            query.meta?.caller ? ` (caller: ${query.meta.caller})` : ""
-          }`,
-          { cause: error }
-        )
-      );
+    onError: (error: Error, query) => {
+      // Example: [Query] error fetching ["conversation", "0x1234567890abcdef1234567890abcdef1234567890"] (caller: Conversation Messages)
+      const queryInfo = `${JSON.stringify(query.queryKey)}${
+        query.meta?.caller ? ` (caller: ${query.meta.caller})` : ""
+      }`;
+
+      const enhancedError = new Error(`[Query] ${queryInfo} ${error.message}`, {
+        cause: error.cause,
+      });
+
+      enhancedError.stack = error.stack;
+
+      captureError(enhancedError);
     },
   }),
 

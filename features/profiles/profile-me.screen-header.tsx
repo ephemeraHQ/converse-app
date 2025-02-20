@@ -10,8 +10,8 @@ import {
 } from "@/features/profiles/profile-me.store";
 import { translate } from "@/i18n";
 import { useHeader } from "@/navigation/use-header";
-import { useRouter } from "@/navigation/useNavigation";
-import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
+import { useRouter } from "@/navigation/use-navigation";
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { Haptics } from "@/utils/haptics";
 import { navigate } from "@/utils/navigation";

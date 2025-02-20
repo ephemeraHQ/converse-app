@@ -1,11 +1,7 @@
-import {
-  AuthStatuses,
-  useAccountsStore,
-} from "@/features/multi-inbox/multi-inbox.store";
+import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 import { conversationSyncAllQueryKey } from "@/queries/QueryKeys";
 import { queryClient } from "@/queries/queryClient";
 import { captureError } from "@/utils/capture-error";
-import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 import { queryOptions, skipToken } from "@tanstack/react-query";
 import { ConsentState } from "@xmtp/react-native-sdk";
 
@@ -15,9 +11,7 @@ type IArgs = {
 };
 
 export function getConversationSyncAllQueryOptions(args: IArgs) {
-  const isSignedIn =
-    useAccountsStore.getState().authStatus === AuthStatuses.signedIn;
-  const enabled = !!args.ethAddress && isSignedIn;
+  const enabled = !!args.ethAddress;
   return queryOptions({
     enabled,
     queryKey: conversationSyncAllQueryKey(args),

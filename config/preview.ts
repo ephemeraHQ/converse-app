@@ -12,7 +12,6 @@ export const previewConfig: IConfig = {
     (domain) => [`https://${domain}`, `http://${domain}`, domain]
   ),
   evm: {
-    // @ts-expect-error note(lustig) env types aren't working for me OOTB
     rpcEndpoint: process.env.EXPO_PUBLIC_EVM_RPC_ENDPOINT,
     transactionChainId: "0x14a34", // Base Sepolia
     USDC: {

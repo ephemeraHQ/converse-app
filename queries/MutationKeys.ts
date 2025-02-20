@@ -23,9 +23,6 @@ export enum MutationKeys {
   // Group Consent
   ALLOW_GROUP = "allowGroup",
   BLOCK_GROUP = "blockGroup",
-
-  // Group Invites
-  CREATE_GROUP_JOIN_REQUEST = "createGroupJoinRequest",
 }
 
 export const sendMessageMutationKey = (
@@ -88,8 +85,3 @@ export const blockGroupMutationKey = (
   account: string,
   topic: ConversationTopic
 ) => [MutationKeys.BLOCK_GROUP, account, topic];
-
-export const createGroupJoinRequestMutationKey = (
-  account: string,
-  groupInviteId: string
-) => [MutationKeys.CREATE_GROUP_JOIN_REQUEST, account, groupInviteId];

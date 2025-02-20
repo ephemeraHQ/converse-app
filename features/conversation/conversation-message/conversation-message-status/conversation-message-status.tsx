@@ -4,7 +4,7 @@ import { Icon } from "@/design-system/Icon/Icon";
 import { AnimatedText } from "@/design-system/Text";
 import { usePrevious } from "@/hooks/use-previous-value";
 import { translate } from "@/i18n";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { Haptics } from "@/utils/haptics";
 import React, { memo, useEffect } from "react";
 import { IConvosMessageStatus } from "../conversation-message.types";

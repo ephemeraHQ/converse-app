@@ -2,7 +2,7 @@ import { tryGetAppCheckToken } from "../../utils/appCheck";
 import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 import {
   getSafeCurrentSender,
-  useAccountsStore,
+  useMultiInboxStore,
 } from "@/features/multi-inbox/multi-inbox.store";
 import { MultiInboxClientRestorationStates } from "@/features/multi-inbox/multi-inbox-client.types";
 import { toHex } from "viem";
@@ -50,11 +50,11 @@ export async function getConvosAuthenticationHeaders(): Promise<XmtpApiHeaders> 
   );
 
   const areInboxesRestored =
-    useAccountsStore.getState().multiInboxClientRestorationState ===
+    useMultiInboxStore.getState().multiInboxClientRestorationState ===
     MultiInboxClientRestorationStates.restored;
   logger.debug(
     `[getConvosAuthenticationHeaders] Are inboxes restored: ${
-      useAccountsStore.getState().multiInboxClientRestorationState
+      useMultiInboxStore.getState().multiInboxClientRestorationState
     }`
   );
   const appCheckToken = await tryGetAppCheckToken();

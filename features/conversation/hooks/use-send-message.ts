@@ -1,4 +1,4 @@
-import { getCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { getCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
 import { getOrFetchConversation } from "@/queries/conversation-query";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { useMutation } from "@tanstack/react-query";
@@ -29,7 +29,7 @@ export async function sendMessage(args: ISendMessageParams) {
 
   const conversation = await getOrFetchConversation({
     topic,
-    account: getCurrentAccount()!,
+    account: getCurrentSenderEthAddress()!,
     caller: "use-send-message#sendMessage",
   });
 

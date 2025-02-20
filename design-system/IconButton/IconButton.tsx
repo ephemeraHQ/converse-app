@@ -7,7 +7,7 @@ import {
   TextStyle,
   ViewStyle,
 } from "react-native";
-import { useAppTheme } from "../../theme/useAppTheme";
+import { useAppTheme } from "../../theme/use-app-theme";
 import { Icon } from "../Icon/Icon";
 import { Pressable } from "../Pressable";
 import { IIconButtonProps } from "./IconButton.props";

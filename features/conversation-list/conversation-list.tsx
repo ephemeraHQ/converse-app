@@ -2,7 +2,7 @@ import { AnimatedVStack } from "@/design-system/VStack";
 import { ConversationListItemDm } from "@/features/conversation-list/conversation-list-item/conversation-list-item-dm";
 import { ConversationListItemGroup } from "@/features/conversation-list/conversation-list-item/conversation-list-item-group";
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { ConversationWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { useCallback, useRef } from "react";
 import {

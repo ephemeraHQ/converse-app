@@ -1,44 +1,24 @@
+import { queryClient } from "@/queries/queryClient";
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
 import { fetchSocialProfilesForAddress } from "./social-lookup.api";
-import { utils as ethersUtils } from "ethers";
-import { DateUtils } from "@/utils/time.utils";
-import { reactQueryPersister } from "@/utils/mmkv";
-import { queryClient } from "@/queries/queryClient";
-import { logger } from "@/utils/logger";
 
-const socialProfilesQueryKey = (address: string) =>
-  ["socialProfiles", address] as const;
+const socialProfilesQueryKey = (args: { ethAddress: string }) =>
+  ["socialProfiles", args.ethAddress] as const;
 
-export type UseSocialProfilesForAddressArgs = {
-  address?: string;
+type IArgs = {
+  ethAddress: string | undefined;
 };
 
-const getSocialProfilesQueryOptions = (address: string | undefined) => {
-  const enabled = Boolean(address);
-  logger.debug(
-    `[getSocialProfilesQueryOptions] Creating query options for address: ${address}, enabled: ${enabled}`
-  );
+const getSocialProfilesQueryOptions = (args: IArgs) => {
+  const enabled = Boolean(args.ethAddress);
   return queryOptions({
     enabled,
-    queryKey: socialProfilesQueryKey(address!),
+    queryKey: socialProfilesQueryKey({ ethAddress: args.ethAddress! }),
     queryFn: enabled
       ? () => {
-          // logger.debug(
-          //   `[getSocialProfilesQueryOptions] Executing query function for address: ${address}`
-          // );
-          // // Validate and format the address
-          // if (!ethersUtils.isAddress(address!)) {
-          //   logger.error(
-          //     `[getSocialProfilesQueryOptions] Invalid Ethereum address: ${address}`
-          //   );
-          //   throw new Error("Invalid Ethereum address");
-          // }
-
-          // const checksummedAddress = ethersUtils.getAddress(address!);
-          // logger.debug(
-          //   `[getSocialProfilesQueryOptions] Fetching social profiles for checksummed address: ${checksummedAddress}`
-          // );
-          return fetchSocialProfilesForAddress(address!);
+          return fetchSocialProfilesForAddress({
+            address: args.ethAddress!,
+          });
         }
       : skipToken,
     // staleTime: DateUtils.minutes.toMilliseconds(60),
@@ -47,19 +27,14 @@ const getSocialProfilesQueryOptions = (address: string | undefined) => {
   });
 };
 
-export const useSocialProfilesForAddress = ({
-  address,
-}: UseSocialProfilesForAddressArgs) => {
-  return useQuery(getSocialProfilesQueryOptions(address));
+export const useSocialProfilesForAddressQuery = (args: IArgs) => {
+  return useQuery(getSocialProfilesQueryOptions(args));
 };
 
-export const getSocialProfilesQueryData = (address: string | undefined) => {
-  return queryClient.getQueryData(
-    getSocialProfilesQueryOptions(address).queryKey
-  );
+export const getSocialProfilesQueryData = (args: IArgs) => {
+  return queryClient.getQueryData(getSocialProfilesQueryOptions(args).queryKey);
 };
 
-export const ensureSocialProfilesQueryData = async (address: string) => {
-  await queryClient.invalidateQueries(getSocialProfilesQueryOptions(address));
-  return queryClient.ensureQueryData(getSocialProfilesQueryOptions(address));
+export const ensureSocialProfilesQueryData = async (args: IArgs) => {
+  return queryClient.ensureQueryData(getSocialProfilesQueryOptions(args));
 };

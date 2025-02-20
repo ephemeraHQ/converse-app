@@ -1,4 +1,4 @@
-import { useRouter } from "@/navigation/useNavigation";
+import { useRouter } from "@/navigation/use-navigation";
 
 import { config } from "@/config";
 import { HStack } from "@/design-system/HStack";
@@ -8,7 +8,7 @@ import { Text } from "@/design-system/Text";
 import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu";
 import { translate } from "@/i18n";
 import { useHeader } from "@/navigation/use-header";
-import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { Haptics } from "@/utils/haptics";
 import { InboxId } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";

@@ -4,14 +4,13 @@ import { useConversationIsUnread } from "@/features/conversation-list/hooks/use-
 import { useDmConversationContextMenuViewProps } from "@/features/conversation-list/hooks/use-conversation-list-item-context-menu-props";
 import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query";
 import { DmWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
-import { usePreferredInboxAvatar } from "@hooks/usePreferredInboxAvatar";
-import { useInboxName } from "@hooks/useInboxName";
+import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
 import { navigate } from "@utils/navigation";
 import { useCallback } from "react";
 import { isTextMessage } from "../../conversation/conversation-message/conversation-message.utils";
 import { ConversationListPinnedConversation } from "./conversation-list-pinned-conversation";
 import { PinnedConversationMessagePreview } from "./conversation-list-pinned-conversation-message-preview";
+import { useProfileQuery } from "@/features/profiles/profiles.query";
 
 type IConversationListPinnedConversationDmProps = {
   conversation: DmWithCodecsType;
@@ -20,7 +19,7 @@ type IConversationListPinnedConversationDmProps = {
 export const ConversationListPinnedConversationDm = ({
   conversation,
 }: IConversationListPinnedConversationDmProps) => {
-  const currentAccount = useCurrentAccount()!;
+  const currentAccount = useCurrentSenderEthAddress()!;
 
   const conversationTopic = conversation.topic;
 
@@ -30,13 +29,7 @@ export const ConversationListPinnedConversationDm = ({
     caller: "ConversationListPinnedConversationDm",
   });
 
-  const { data: preferredName } = useInboxName({
-    inboxId: peerInboxId,
-  });
-
-  const { data: preferredAvatar } = usePreferredInboxAvatar({
-    inboxId: peerInboxId!,
-  });
+  const { data: profile } = useProfileQuery({ xmtpId: peerInboxId });
 
   const { isUnread } = useConversationIsUnread({
     topic: conversationTopic,
@@ -46,7 +39,8 @@ export const ConversationListPinnedConversationDm = ({
     navigate("Conversation", { topic: conversation.topic });
   }, [conversation.topic]);
 
-  const title = preferredName;
+  const title = profile?.name ?? "";
+  const avatarUri = profile?.avatar;
 
   const displayMessagePreview =
     conversation.lastMessage &&
@@ -61,14 +55,11 @@ export const ConversationListPinnedConversationDm = ({
     <VStack>
       <ConversationListPinnedConversation
         avatarComponent={
-          <PinnedConversationAvatar
-            uri={preferredAvatar ?? undefined}
-            name={preferredName}
-          />
+          <PinnedConversationAvatar uri={avatarUri} name={title} />
         }
         onPress={onPress}
         showUnread={isUnread}
-        title={title ?? ""}
+        title={title}
         contextMenuProps={contextMenuProps}
       />
       {displayMessagePreview && (

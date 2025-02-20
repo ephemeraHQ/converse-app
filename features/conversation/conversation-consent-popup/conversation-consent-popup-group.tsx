@@ -1,4 +1,4 @@
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
 import { useGroupConsentForCurrentAccount } from "@/features/consent/use-group-consent-for-current-account";
 import {
   ConsentPopupButtonsContainer,
@@ -6,7 +6,7 @@ import {
   ConversationConsentPopupContainer,
   ConversationConsentPopupHelperText,
 } from "@/features/conversation/conversation-consent-popup/conversation-consent-popup.design-system";
-import { useRouter } from "@/navigation/useNavigation";
+import { useRouter } from "@/navigation/use-navigation";
 import { useGroupNameQuery } from "@/queries/useGroupNameQuery";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { translate } from "@i18n";
@@ -24,7 +24,7 @@ export function ConversationConsentPopupGroup() {
 
   const { denyGroup, allowGroup } = useGroupConsentForCurrentAccount(topic);
 
-  const account = useCurrentAccount()!;
+  const account = useCurrentSenderEthAddress()!;
 
   const { data: groupName } = useGroupNameQuery({ account, topic });
 

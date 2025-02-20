@@ -1,4 +1,4 @@
-import { Screen } from "@/components/Screen/ScreenComp/Screen";
+import { Screen } from "@/components/screen/screen";
 import { HStack } from "@/design-system/HStack";
 import { Text } from "@/design-system/Text";
 import { VStack } from "@/design-system/VStack";
@@ -6,8 +6,8 @@ import { SettingsList } from "@/design-system/settings-list/settings-list";
 import { ISettingsListRow } from "@/design-system/settings-list/settings-list.types";
 import { translate } from "@/i18n";
 import { useHeader } from "@/navigation/use-header";
-import { useRouter } from "@/navigation/useNavigation";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { useRouter } from "@/navigation/use-navigation";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { getEnv } from "@/utils/getEnv";
 import { memo, useMemo } from "react";
 import { OtaUpdatesList } from "./components/ota-updates-list";
@@ -54,7 +54,6 @@ export const AppSettingsScreen = memo(function AppSettingsScreen() {
       >
         <SettingsList rows={generalSettings} />
         <OtaUpdatesList />
-        <Text>test</Text>
       </VStack>
     </Screen>
   );

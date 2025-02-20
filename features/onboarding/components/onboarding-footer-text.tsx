@@ -1,5 +1,5 @@
 import { AnimatedText, IAnimatedTextProps } from "@/design-system/Text";
-import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { memo } from "react";
 import { TextStyle } from "react-native";
 

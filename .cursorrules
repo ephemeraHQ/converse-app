@@ -1,4 +1,7 @@
-# Code Style Guide
+## General
+
+- When I ask you to “clean” a file, rewrite the content following the rules and best practices listed below.
+- When I ask you to "Make more readable", rewrite the content following the rules and best practices listed below and add some comments to explain the code. The comments need to be short and direct. Don't add comments when it's obvious what the code is doing. Also add some comments to explain why we are doing something in a certain way.
 
 ## Core Principles
 
@@ -38,27 +41,58 @@
 
 - Use types over interfaces, prefixed with 'I' (e.g., IMyItem).
 - Never use 'any'.
-- Avoid enums, use maps instead.
+- Avoid enums, use maps or string literals instead.
 - Use functional components with TypeScript types.
 - Prefer inferring types if possible over explicit typing.
 - Prefer type assertions on return objects (`return {...} satisfies IType`) over function return type annotations (`function(): IType`) if we have to put a type because the inferring is not working well.
 
-## Function Patterns
+## Function Parameter
 
-- Use function keyword for pure functions.
-- Prefer object params: `function(args: { name: string })` over `function(name: string)`.
-- Destructure parameters at the top level.
-  - Makes it clearer which properties are being used and
-  - improves code readability.
-  -
-  - @example
-  - // ❌ Bad: Nested destructuring
-  - function getMetadataOptions(args: IArgs) {
-  - const { account } = args;
-  - }
-  -
-  - // ✅ Good: Top-level destructuring
-  - function getMetadataOptions({ account, topic }: IArgs) {
+### Guidelines
+
+- Use the `function` keyword for pure functions.
+- Prefer object parameters: `function(args: { propertyOne: string })` over `function(propertyOne: string)`.
+- Destructure parameters at the top of the function body.
+- Don't create external types for the parameters unless we need to use them outside of the function.
+
+### Examples
+
+#### ❌ Bad: Extracting types unnecessarily
+
+```ts
+type MetadataOptions = { account: string; topic: string };
+
+function getMetadataOptions(args: MetadataOptions) {
+  const { account, topic } = args;
+  // Function body
+}
+```
+
+✅ Good: Keeping types inline
+
+```ts
+function getMetadataOptions(args: { account: string; topic: string }) {
+  const { account, topic } = args;
+  // Function body
+}
+```
+
+#### ❌ Bad: Passing individual arguments
+
+```ts
+function getMetadataOptions(account: string, topic: string) {
+  // Function body
+}
+```
+
+#### ✅ Good: Using args and destructuring at the top level
+
+```ts
+function getMetadataOptions(args: { account: string; topic: string }) {
+  const { account, topic } = args;
+  // Function body
+}
+```
 
 ## React & Components
 
@@ -306,3 +340,10 @@ queryClient.getQueryData(conversationsQueryKey(account));
   -
   - // ✅ Good: Object parameters
   - useQuery(getConversationMessagesQueryOptions({ account, topic }))
+
+## Error handling
+
+### Guidelines
+
+- Use the `captureError` function to capture errors.
+- You can add context to the error my enhancing the error object with more information.

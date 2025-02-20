@@ -1,14 +1,14 @@
-import { doesSocialsMatchTextQuery } from "@/features/profiles/utils/does-socials-match-text-query";
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
+import { getSafeCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
+import { doesSocialProfilesMatchTextQuery } from "@/features/profiles/utils/does-social-profiles-match-text-query";
+import { ensureSocialProfilesQueryData } from "@/features/social-profiles/social-lookup.query";
 import { getSearchExistingGroupsByMemberNameQueryKey } from "@/queries/QueryKeys";
 import { getAllowedConsentConversationsQueryData } from "@/queries/conversations-allowed-consent-query";
 import { ensureGroupMembersQueryData } from "@/queries/useGroupMembersQuery";
-import { ensureInboxProfileSocialsQueryData } from "@/queries/useInboxProfileSocialsQuery";
 import { captureError } from "@/utils/capture-error";
 import { normalizeString } from "@/utils/str";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
-import { getSafeCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
 
 export async function searchExistingGroupsByGroupMembers(args: {
   searchQuery: string;
@@ -44,15 +44,14 @@ export async function searchExistingGroupsByGroupMembers(args: {
         // Use Promise.race to get the first matching member
         const result = await Promise.race([
           ...otherMembersInboxIds.map(async (inboxId) => {
-            const socials = await ensureInboxProfileSocialsQueryData({
-              inboxId,
-              caller: "searchExistingGroupsByGroupMembers",
+            const socialProfiles = await ensureSocialProfilesQueryData({
+              ethAddress: inboxId,
             });
 
-            if (!socials) return false;
+            if (!socialProfiles) return false;
 
-            return doesSocialsMatchTextQuery({
-              socials,
+            return doesSocialProfilesMatchTextQuery({
+              socialProfiles,
               normalizedQuery: searchQuery,
             });
           }),

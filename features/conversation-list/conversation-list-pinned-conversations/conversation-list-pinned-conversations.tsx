@@ -1,4 +1,4 @@
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
 import { AnimatedCenter } from "@/design-system/Center";
 import { AnimatedHStack } from "@/design-system/HStack";
 import { AnimatedVStack } from "@/design-system/VStack";
@@ -10,7 +10,7 @@ import { useAllowedConversationsCount } from "@/features/conversation-list/hooks
 import { usePinnedConversations } from "@/features/conversation-list/hooks/use-pinned-conversations";
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
 import { useConversationQuery } from "@/queries/conversation-query";
-import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { captureError } from "@/utils/capture-error";
 import { chunk } from "@/utils/general";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
@@ -88,7 +88,7 @@ const PinnedConversationWrapper = memo(
   function PinnedConversationWrapper(props: { topic: ConversationTopic }) {
     const { topic } = props;
 
-    const currentAccount = useCurrentAccount();
+    const currentAccount = useCurrentSenderEthAddress();
 
     const { data: conversation } = useConversationQuery({
       topic,
@@ -109,7 +109,6 @@ const PinnedConversationWrapper = memo(
       return <ConversationListPinnedConversationGroup group={conversation} />;
     }
 
-    // @ts-expect-error - TODO: fix this
     return <ConversationListPinnedConversationDm conversation={conversation} />;
   }
 );

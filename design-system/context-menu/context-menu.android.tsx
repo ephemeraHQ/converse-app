@@ -1,17 +1,14 @@
-import { showActionSheetWithOptions } from "@/components/StateHandlers/ActionSheetStateHandler";
+import { showActionSheet } from "@/components/action-sheet";
 import { AnimatedVStack } from "@/design-system/VStack";
 import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { Haptics } from "@/utils/haptics";
 import { memo, useCallback } from "react";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import {
-  Easing,
   runOnJS,
   useAnimatedStyle,
   useSharedValue,
-  withSequence,
-  withTiming,
 } from "react-native-reanimated";
 import type { IContextMenuViewProps } from "./context-menu.types";
 
@@ -85,7 +82,7 @@ const ContextMenuActionSheet = memo(function ContextMenuActionSheet(
     transform: [{ scale: scaleAV.value }],
   }));
 
-  const showActionSheet = useCallback(() => {
+  const showActionSheetCallback = useCallback(() => {
     // Transform menuConfig.menuItems into action sheet options
     const options = [
       ...menuConfig.menuItems.map((item) => item.actionTitle),
@@ -100,14 +97,14 @@ const ContextMenuActionSheet = memo(function ContextMenuActionSheet(
       onMenuWillShow();
     }
 
-    showActionSheetWithOptions(
-      {
+    showActionSheet({
+      options: {
         options,
         cancelButtonIndex,
         destructiveButtonIndex:
           destructiveButtonIndex >= 0 ? destructiveButtonIndex : undefined,
       },
-      (selectedIndex) => {
+      callback: (selectedIndex) => {
         if (onMenuWillHide) {
           onMenuWillHide();
         }
@@ -122,8 +119,8 @@ const ContextMenuActionSheet = memo(function ContextMenuActionSheet(
             },
           });
         }
-      }
-    );
+      },
+    });
   }, [menuConfig, onPressMenuItem, onMenuWillHide, onMenuWillShow]);
 
   // Maybe gesture can be improved. Didn't want to spend too much time on it since we might find a better solution for Android later.
@@ -133,7 +130,7 @@ const ContextMenuActionSheet = memo(function ContextMenuActionSheet(
     })
     .onStart((e) => {
       Haptics.softImpactAsyncAnimated();
-      runOnJS(showActionSheet)();
+      runOnJS(showActionSheetCallback)();
     })
     .onFinalize(() => {
       // Reset

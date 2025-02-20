@@ -1,36 +1,32 @@
-import React, { useEffect } from "react";
-import { BottomSheetModal } from "@/design-system/BottomSheet/BottomSheetModal";
-import { BottomSheetHeader } from "@/design-system/BottomSheet/BottomSheetHeader";
-import { BottomSheetContentContainer } from "@/design-system/BottomSheet/BottomSheetContentContainer";
-import { VStack } from "@/design-system/VStack";
-import { useAppTheme } from "@/theme/useAppTheme";
-import { useBottomSheetModalRef } from "@/design-system/BottomSheet/BottomSheet.utils";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { createWallet, WalletId } from "thirdweb/wallets";
 import { config } from "@/config";
-import {
-  useCurrentSender,
-  MultiInboxClientRestorationStates,
-  useAccountsStore,
-} from "../multi-inbox/multi-inbox.store";
-import { MultiInboxClient } from "../multi-inbox/multi-inbox.client";
-import { logger } from "@/utils/logger";
+import { useBottomSheetModalRef } from "@/design-system/BottomSheet/BottomSheet.utils";
+import { BottomSheetContentContainer } from "@/design-system/BottomSheet/BottomSheetContentContainer";
+import { BottomSheetHeader } from "@/design-system/BottomSheet/BottomSheetHeader";
+import { BottomSheetModal } from "@/design-system/BottomSheet/BottomSheetModal";
+import { Button } from "@/design-system/Button/Button";
 import { Text } from "@/design-system/Text";
+import { VStack } from "@/design-system/VStack";
+import { ensureSocialProfilesQueryData } from "@/features/social-profiles/social-lookup.query";
 import {
   ISupportedWallet,
   useInstalledWallets,
 } from "@/features/wallets/use-installed-wallets.hook";
-import { Button } from "@/design-system/Button/Button";
-import { useConnect } from "thirdweb/react";
-import { ensureSocialProfilesQueryData } from "@/features/social-profiles/social-lookup.query";
-import {
-  fetchSocialProfilesForAddress,
-  IWeb3SocialProfile,
-} from "../social-profiles/social-lookup.api";
-import { ScrollView } from "react-native";
+import { useAppTheme } from "@/theme/use-app-theme";
+import { logger } from "@/utils/logger";
 import { thirdwebClient } from "@/utils/thirdweb";
-import { InboxSigner } from "../multi-inbox/multi-inbox-client.types";
+import React from "react";
+import { ScrollView } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { base } from "thirdweb/chains";
+import { useConnect } from "thirdweb/react";
+import { createWallet, WalletId } from "thirdweb/wallets";
+import { InboxSigner } from "../multi-inbox/multi-inbox-client.types";
+import { MultiInboxClient } from "../multi-inbox/multi-inbox.client";
+import {
+  useMultiInboxStore,
+  useCurrentSender,
+} from "../multi-inbox/multi-inbox.store";
+import { ISocialProfile } from "../social-profiles/social-lookup.api";
 
 type InstalledWalletsListProps = {
   installedWallets: ISupportedWallet[];
@@ -41,8 +37,8 @@ type InstalledWalletsListProps = {
 };
 
 type SocialIdentityListProps = {
-  socialData: IWeb3SocialProfile[];
-  onSocialIdentityTapped: (socialIdentity: IWeb3SocialProfile) => void;
+  socialData: ISocialProfile[];
+  onSocialIdentityTapped: (socialIdentity: ISocialProfile) => void;
 };
 
 function SocialIdentityList({
@@ -99,7 +95,7 @@ function InstalledWalletsList({
 type ConnectWalletBottomSheetProps = {
   isVisible: boolean;
   onClose: () => void;
-  onWalletImported: (socialData: IWeb3SocialProfile[]) => void;
+  onWalletImported: (socialData: ISocialProfile[]) => void;
 };
 
 const coinbaseUrl = new URL(`https://${config.websiteDomain}/coinbase`);
@@ -109,14 +105,14 @@ type ListShowing = "wallets" | "socials";
 type ConnectWalletBottomSheetState = {
   thirdwebWalletIdThatIsConnecting: WalletId | undefined;
   ethereumAddressThatIsConnecting: string | undefined;
-  socialData: IWeb3SocialProfile[] | undefined;
+  socialData: ISocialProfile[] | undefined;
   listShowing: ListShowing | undefined;
 };
 
 type ConnectWalletBottomSheetActions =
   | { type: "SetConnectingWallet"; walletId: WalletId }
   | { type: "ConnectingEthereumAddressDiscovered"; ethereumAddress: string }
-  | { type: "SocialDataLoaded"; data: IWeb3SocialProfile[] }
+  | { type: "SocialDataLoaded"; data: ISocialProfile[] }
   | { type: "Reset" };
 
 function reducer(
@@ -178,9 +174,10 @@ export function ConnectWalletBottomSheet({
   const bottomSheetRef = useBottomSheetModalRef();
   const currentSender = useCurrentSender();
   const isInboxClientInitiated =
+    currentSender &&
     !!MultiInboxClient.instance.getInboxClientForAddress({
-      ethereumAddress: currentSender!.ethereumAddress,
-    })!;
+      ethereumAddress: currentSender.ethereumAddress,
+    });
 
   const initialState: ConnectWalletBottomSheetState = {
     listShowing: "wallets",
@@ -197,7 +194,8 @@ export function ConnectWalletBottomSheet({
   } = state;
 
   const restored =
-    useAccountsStore.getState().multiInboxClientRestorationState === "restored";
+    useMultiInboxStore.getState().multiInboxClientRestorationState ===
+    "restored";
 
   // useEffect(() => {
   //   logger.debug(
@@ -274,7 +272,9 @@ export function ConnectWalletBottomSheet({
         ethereumAddress: addressToLink,
       });
 
-      const socialProfiles = await ensureSocialProfilesQueryData(addressToLink);
+      const socialProfiles = await ensureSocialProfilesQueryData({
+        ethAddress: addressToLink,
+      });
       logger.debug(
         `[ConnectWalletBottomSheet]convos ry is awesome Social profiles: ${JSON.stringify(
           socialProfiles,
@@ -351,7 +351,9 @@ export function ConnectWalletBottomSheet({
           `You've sucesfully connected ${addressToLink} to your inbox. You won't see anything in the UI yet, but we're working on that now.`
         );
 
-        const socialData = await ensureSocialProfilesQueryData(addressToLink);
+        const socialData = await ensureSocialProfilesQueryData({
+          ethAddress: addressToLink,
+        });
 
         onWalletImported(socialData);
       }
@@ -360,7 +362,7 @@ export function ConnectWalletBottomSheet({
     });
   };
 
-  function handleSocialIdentityTapped(socialIdentity: IWeb3SocialProfile) {
+  function handleSocialIdentityTapped(socialIdentity: ISocialProfile) {
     alert(`You tapped on ${socialIdentity.name}`);
   }
 

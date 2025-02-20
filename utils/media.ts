@@ -1,14 +1,10 @@
-import { actionSheetColors } from "@styles/colors";
 import Big from "big.js";
 import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
-import { useCallback, useState } from "react";
-import { Alert, Image, Linking, useColorScheme } from "react-native";
+import { Alert, Image, Linking } from "react-native";
 
-import logger from "./logger";
-import { showActionSheetWithOptions } from "../components/StateHandlers/ActionSheetStateHandler";
-import { executeAfterKeyboardClosed } from "../utils/keyboard";
 import { Nullable } from "../types/general";
+import logger from "./logger";
 
 const imageMimeTypes = [
   "image/cgm",
@@ -291,68 +287,6 @@ const allowedMimeTypes = [
   ...audioMimeTypes,
   ...videoMimeTypes,
 ];
-
-type MediaSelect = {
-  initialMedia?: string;
-  onMediaAdd?: (newUrl: string) => void;
-  isAvatar?: boolean;
-};
-
-export const useMediaSelect = (payload?: MediaSelect) => {
-  const { initialMedia, onMediaAdd, isAvatar } = payload ?? {};
-  const colorScheme = useColorScheme();
-  const [media, setMedia] = useState<string | undefined>(initialMedia);
-
-  const pickMedia = useCallback(async () => {
-    const asset = await pickMediaFromLibrary({
-      allowsEditing: true,
-      aspect: [1, 1],
-    });
-    if (!asset) return;
-    const resizedImage = await compressAndResizeImage(asset.uri, isAvatar);
-    setMedia(resizedImage.uri);
-    onMediaAdd?.(resizedImage.uri);
-  }, [onMediaAdd, isAvatar]);
-
-  const openCamera = useCallback(async () => {
-    const asset = await takePictureFromCamera({
-      allowsEditing: true,
-      aspect: [1, 1],
-    });
-    if (!asset) return;
-    const resizedImage = await compressAndResizeImage(asset.uri, isAvatar);
-    setMedia(resizedImage.uri);
-    onMediaAdd?.(resizedImage.uri);
-  }, [isAvatar, onMediaAdd]);
-
-  const addMedia = useCallback(() => {
-    const showOptions = () =>
-      showActionSheetWithOptions(
-        {
-          options: ["Take photo", "Choose from library", "Cancel"],
-          cancelButtonIndex: 2,
-          ...actionSheetColors(colorScheme),
-        },
-        async (selectedIndex?: number) => {
-          switch (selectedIndex) {
-            case 0: // Camera
-              openCamera();
-              break;
-            case 1: // Media Library
-              pickMedia();
-              break;
-
-            default:
-              break;
-          }
-        }
-      );
-
-    executeAfterKeyboardClosed(showOptions);
-  }, [colorScheme, openCamera, pickMedia]);
-
-  return { media, addMedia };
-};
 
 export type AttachmentSelectedStatus =
   | "picked"

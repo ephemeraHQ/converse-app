@@ -1,12 +1,12 @@
 import { isConversationDenied } from "@/features/conversation/utils/is-conversation-denied";
-import { getConversationMetadataQueryOptions } from "@/queries/conversation-metadata-query";
+import { getConversationMetadataQueryOptions } from "@/features/conversation/conversation-metadata/conversation-metadata.query";
 import { useAllowedConsentConversationsQuery } from "@/queries/conversations-allowed-consent-query";
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
 import { useQueries } from "@tanstack/react-query";
 import { useMemo } from "react";
 
 export const useBlockedConversationsForCurrentAccount = () => {
-  const currentAccount = useCurrentAccount();
+  const currentAccount = useCurrentSenderEthAddress();
 
   const { data } = useAllowedConsentConversationsQuery({
     account: currentAccount!,
@@ -29,7 +29,7 @@ export const useBlockedConversationsForCurrentAccount = () => {
       const query = conversationsMetadataQueries[index];
       return (
         // Include deleted conversations
-        query?.data?.isDeleted ||
+        query?.data?.deleted ||
         // Include denied conversations
         isConversationDenied(conversation)
       );

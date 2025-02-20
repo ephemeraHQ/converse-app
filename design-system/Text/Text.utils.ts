@@ -1,4 +1,4 @@
-import { IThemed } from "@theme/useAppTheme";
+import { IThemed } from "@/theme/use-app-theme";
 import { StyleProp, TextStyle } from "react-native";
 import { textPresets } from "./Text.presets";
 import {

@@ -1,9 +1,9 @@
-import { useSelect } from "@/data/store/storeHelpers";
+import { useSelect } from "@/stores/stores.utils";
 import { useMessageContextStoreContext } from "@/features/conversation/conversation-message/conversation-message.store-context";
 import { AnimatedHStack, HStack } from "@design-system/HStack";
 import { Text } from "@design-system/Text";
 import { VStack } from "@design-system/VStack";
-import { ThemedStyle, useAppTheme } from "@theme/useAppTheme";
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { memo, useCallback } from "react";
 import { TextStyle, TouchableHighlight, ViewStyle } from "react-native";
 import { openMessageReactionsDrawer } from "./conversation-message-reaction-drawer/conversation-message-reaction-drawer.service";

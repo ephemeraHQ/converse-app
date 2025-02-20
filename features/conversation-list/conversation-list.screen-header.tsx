@@ -1,10 +1,4 @@
-import { Avatar } from "@/components/Avatar";
-import {
-  useAccountsStore,
-  useSafeActiveSenderProfile,
-  useCurrentProfiles,
-  useSafeCurrentSender,
-} from "@/features/multi-inbox/multi-inbox.store";
+import { Avatar } from "@/components/avatar";
 import { Center } from "@/design-system/Center";
 import { HStack } from "@/design-system/HStack";
 import { HeaderAction } from "@/design-system/Header/HeaderAction";
@@ -12,10 +6,16 @@ import { Icon, iconRegistry } from "@/design-system/Icon/Icon";
 import { Pressable } from "@/design-system/Pressable";
 import { Text } from "@/design-system/Text";
 import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu";
-import { usePreferredInboxAvatar } from "@/hooks/usePreferredInboxAvatar";
+import {
+  useMultiInboxStore,
+  useCurrentProfiles,
+  useSafeCurrentSenderProfile,
+  useSafeCurrentSender,
+} from "@/features/multi-inbox/multi-inbox.store";
+import { useProfileQuery } from "@/features/profiles/profiles.query";
 import { translate } from "@/i18n";
 import { useHeader } from "@/navigation/use-header";
-import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { converseEventEmitter } from "@/utils/events";
 import { useNavigation } from "@react-navigation/native";
 import React, { useCallback } from "react";
@@ -66,27 +66,25 @@ function HeaderTitle() {
   const { theme, themed } = useAppTheme();
   const navigation = useNavigation();
   const currentAccountInboxId = useSafeCurrentSender().inboxId;
-  const { data: currentProfile } = useSafeActiveSenderProfile();
+  const { data: currentProfile } = useSafeCurrentSenderProfile();
   const { currentProfiles } = useCurrentProfiles();
 
-  const setCurrentAccount = useAccountsStore((s) => s.setCurrentAccount);
-
   const onDropdownPress = useCallback(
-    (actionId: string) => {
-      if (actionId === "all-chats") {
+    (profileXmtpInboxId: string) => {
+      if (profileXmtpInboxId === "all-chats") {
         Alert.alert("Coming soon");
-      } else if (actionId === "new-account") {
+      } else if (profileXmtpInboxId === "new-account") {
         alert(
           "Under Construction - waiting on Privy for multiple embedded passkey support"
         );
         // navigation.navigate("NewAccountNavigator");
-      } else if (actionId === "app-settings") {
+      } else if (profileXmtpInboxId === "app-settings") {
         navigation.navigate("AppSettings");
       } else {
-        setCurrentAccount({ ethereumAddress: actionId });
+        useMultiInboxStore.getState().setCurrentInboxId(profileXmtpInboxId);
       }
     },
-    [navigation, setCurrentAccount]
+    [navigation]
   );
 
   return (
@@ -99,10 +97,7 @@ function HeaderTitle() {
           ...currentProfiles?.map((profile) => ({
             id: profile.id,
             title: profile.name,
-            image:
-              currentAccountInboxId === profile.deviceIdentity.xmtpId
-                ? "checkmark"
-                : "",
+            image: currentAccountInboxId === profile.xmtpId ? "checkmark" : "",
           })),
           {
             displayInline: true,
@@ -136,13 +131,10 @@ function HeaderTitle() {
 function ProfileAvatar() {
   const { theme, themed } = useAppTheme();
   const navigation = useNavigation();
-  const currentAccountInboxId = useSafeCurrentSender().inboxId;
-  const { data: preferredName } = useInboxName({
-    inboxId: currentAccountInboxId,
-  });
-  const { data: avatarUri } = usePreferredInboxAvatar({
-    inboxId: currentAccountInboxId!,
-  });
+
+  const { inboxId } = useSafeCurrentSender();
+
+  const { data: profile } = useProfileQuery({ xmtpId: inboxId });
 
   const showDebugMenu = useCallback(() => {
     converseEventEmitter.emit("showDebugMenu");
@@ -152,7 +144,7 @@ function ProfileAvatar() {
     <Pressable
       onPress={() => {
         navigation.navigate("Profile", {
-          inboxId: currentAccountInboxId,
+          inboxId,
         });
       }}
       hitSlop={theme.spacing.sm}
@@ -160,8 +152,8 @@ function ProfileAvatar() {
     >
       <Center style={themed($avatarContainer)}>
         <Avatar
-          uri={avatarUri}
-          name={preferredName}
+          uri={profile?.avatar}
+          name={profile?.name}
           size={theme.avatarSize.sm}
         />
       </Center>

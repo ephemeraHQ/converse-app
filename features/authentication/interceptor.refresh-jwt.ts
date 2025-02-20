@@ -8,17 +8,20 @@
  * 3. Retries the original request
  * 4. If refresh fails, user is logged out
  */
+import { getConvosAuthenticatedHeaders } from "@/features/authentication/authentication.headers";
+import {
+  ensureJwtQueryData,
+  refetchJwtQuery,
+} from "@/features/authentication/jwt.query";
+import { captureError } from "@/utils/capture-error";
+import { logger } from "@/utils/logger";
 import {
   AxiosError,
   AxiosInstance,
-  AxiosResponse,
   AxiosRequestConfig,
+  AxiosResponse,
 } from "axios";
-import { ensureJwtQueryData } from "@/features/authentication/jwt.query";
-import { getConvosAuthenticatedHeaders } from "@/features/authentication/authentication.headers";
 import { AuthenticationError } from "../../utils/error";
-import { captureError } from "@/utils/capture-error";
-import { logger } from "@/utils/logger";
 
 type ExtendedAxiosRequestConfig = AxiosRequestConfig & {
   _retry?: boolean;
@@ -36,9 +39,11 @@ export const refreshJwtInterceptor = (
     const isUnauthorizedError = error.response.status === 401;
     const originalRequest = error.config as ExtendedAxiosRequestConfig;
     const hasNotTriedTokenRefresh = !originalRequest?._retry;
+
     // Only attempt token refresh for 401 errors that haven't been retried
-    const shouldRetry =
-      isUnauthorizedError && hasNotTriedTokenRefresh && originalRequest;
+    const shouldRetry = Boolean(
+      isUnauthorizedError && hasNotTriedTokenRefresh && originalRequest
+    );
 
     if (shouldRetry) {
       // Mark this request as retried to prevent infinite refresh loops
@@ -46,7 +51,10 @@ export const refreshJwtInterceptor = (
 
       try {
         // Step 1: Attempt to get a fresh JWT token
+        // Need to refetch, removeQuery or invalidateQuery doesn't work
+        await refetchJwtQuery();
         const refreshedJwtResponse = await ensureJwtQueryData();
+
         const isTokenRefreshSuccessful = !!refreshedJwtResponse;
 
         if (!isTokenRefreshSuccessful) {

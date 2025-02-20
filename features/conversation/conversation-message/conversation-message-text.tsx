@@ -1,5 +1,5 @@
-import { ClickableText } from "@components/ClickableText";
-import { useAppTheme } from "@theme/useAppTheme";
+import { ClickableText } from "@/components/clickable-text";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { memo } from "react";
 
 type IMessageTextProps = {

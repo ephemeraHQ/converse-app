@@ -1,3 +1,4 @@
+import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 import { unknownConsentConversationsQueryKey } from "@/queries/QueryKeys";
 import { setConversationQueryData } from "@/queries/conversation-query";
 import { ensureConversationSyncAllQuery } from "@/queries/conversation-sync-all-query";
@@ -7,11 +8,6 @@ import { ConversationWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-clie
 import { queryOptions, skipToken } from "@tanstack/react-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { queryClient } from "./queryClient";
-import {
-  useAccountsStore,
-  AuthStatuses,
-} from "@/features/multi-inbox/multi-inbox.store";
-import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 
 export type IUnknownConversationsQuery = Awaited<
   ReturnType<typeof getUnknownConversations>
@@ -170,9 +166,9 @@ export function getUnknownConsentConversationsQueryOptions(args: {
   caller?: string;
 }) {
   const { account, caller } = args;
-  const isSignedIn =
-    useAccountsStore.getState().authStatus === AuthStatuses.signedIn;
-  const enabled = !!account && isSignedIn;
+
+  const enabled = !!account;
+
   return queryOptions({
     enabled,
     meta: {

@@ -8,8 +8,8 @@ import { useToggleReadStatus } from "@/features/conversation-list/hooks/use-togg
 import { useMessagePlainText } from "@/features/conversation-list/hooks/use-message-plain-text";
 import { useGroupName } from "@/hooks/useGroupName";
 import { useGroupQuery } from "@/queries/useGroupQuery";
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
-import { useRouter } from "@navigation/useNavigation";
+import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
+import { useRouter } from "@/navigation/use-navigation";
 import { getCompactRelativeTime } from "@utils/date";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { memo, useCallback } from "react";
@@ -25,7 +25,7 @@ export const ConversationListItemGroup = memo(
   function ConversationListItemGroup({
     conversationTopic,
   }: IConversationListItemGroupProps) {
-    const currentAccount = useCurrentAccount()!;
+    const currentAccount = useCurrentSenderEthAddress()!;
     const router = useRouter();
 
     const { data: group } = useGroupQuery({

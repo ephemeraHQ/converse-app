@@ -1,6 +1,6 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { render } from "@testing-library/react-native";
-import { useThemeProvider } from "@theme/useAppTheme";
+import { useThemeProvider } from "@/theme/use-app-theme";
 import { measureRenders, MeasureRendersOptions } from "reassure";
 
 export const TestThemeProvider = ({

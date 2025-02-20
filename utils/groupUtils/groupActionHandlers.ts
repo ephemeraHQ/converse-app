@@ -1,6 +1,5 @@
-import { showActionSheetWithOptions } from "@components/StateHandlers/ActionSheetStateHandler";
+import { showActionSheet } from "@/components/action-sheet";
 import { translate } from "@i18n";
-import { actionSheetColors } from "@styles/colors";
 import { ConsentState } from "@xmtp/react-native-sdk";
 import { ColorSchemeName } from "react-native";
 
@@ -24,23 +23,22 @@ export const groupRemoveRestoreHandler = (
       title: string,
       actions: (() => void)[]
     ) => {
-      showActionSheetWithOptions(
-        {
+      showActionSheet({
+        options: {
           options,
           cancelButtonIndex: options.length - 1,
           destructiveButtonIndex: consent === "denied" ? undefined : [0, 1],
           title,
-          ...actionSheetColors(colorScheme),
         },
-        async (selectedIndex?: number) => {
+        callback: (selectedIndex?: number) => {
           if (selectedIndex !== undefined && selectedIndex < actions.length) {
             actions[selectedIndex]();
             callback(true);
           } else {
             callback(false);
           }
-        }
-      );
+        },
+      });
     };
 
     if (consent === "denied") {

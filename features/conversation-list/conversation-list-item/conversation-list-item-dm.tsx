@@ -1,4 +1,4 @@
-import { Avatar } from "@/components/Avatar";
+import { Avatar } from "@/components/avatar";
 import { ISwipeableRenderActionsArgs } from "@/components/swipeable";
 import { MIDDLE_DOT } from "@/design-system/middle-dot";
 import { ConversationListItemSwipeable } from "@/features/conversation-list/conversation-list-item/conversation-list-item-swipeable/conversation-list-item-swipeable";
@@ -6,16 +6,15 @@ import { RestoreSwipeableAction } from "@/features/conversation-list/conversatio
 import { useConversationIsDeleted } from "@/features/conversation-list/hooks/use-conversation-is-deleted";
 import { useConversationIsUnread } from "@/features/conversation-list/hooks/use-conversation-is-unread";
 import { useDeleteDm } from "@/features/conversation-list/hooks/use-delete-dm";
+import { useMessagePlainText } from "@/features/conversation-list/hooks/use-message-plain-text";
 import { useRestoreConversation } from "@/features/conversation-list/hooks/use-restore-conversation";
 import { useToggleReadStatus } from "@/features/conversation-list/hooks/use-toggle-read-status";
-import { useMessagePlainText } from "@/features/conversation-list/hooks/use-message-plain-text";
+import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
+import { useProfileQuery } from "@/features/profiles/profiles.query";
 import { useConversationQuery } from "@/queries/conversation-query";
 import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { captureErrorWithToast } from "@/utils/capture-error";
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
-import { usePreferredInboxAvatar } from "@hooks/usePreferredInboxAvatar";
-import { useInboxName } from "@hooks/useInboxName";
 import { getCompactRelativeTime } from "@utils/date";
 import { navigate } from "@utils/navigation";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
@@ -31,7 +30,7 @@ type IConversationListItemDmProps = {
 export const ConversationListItemDm = memo(function ConversationListItemDm({
   conversationTopic,
 }: IConversationListItemDmProps) {
-  const currentAccount = useCurrentAccount()!;
+  const currentAccount = useCurrentSenderEthAddress()!;
   const { theme } = useAppTheme();
 
   // Conversation related hooks
@@ -49,13 +48,7 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
     });
 
   // Peer info hooks
-  const { data: preferredName, isLoading: isLoadingPreferredName } =
-    useInboxName({
-      inboxId: peerInboxId,
-    });
-  const { data: avatarUri } = usePreferredInboxAvatar({
-    inboxId: peerInboxId,
-  });
+  const { data: profile } = useProfileQuery({ xmtpId: peerInboxId });
 
   // Status hooks
   const { isUnread } = useConversationIsUnread({ topic: conversationTopic });
@@ -73,9 +66,9 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
 
   // Computed values
   const title = useMemo(() => {
-    if (preferredName) return preferredName;
-    return isLoadingPreferredName || isLoadingPeerInboxId ? " " : " ";
-  }, [preferredName, isLoadingPreferredName, isLoadingPeerInboxId]);
+    if (profile?.name) return profile.name;
+    return isLoadingPeerInboxId ? " " : "";
+  }, [profile, isLoadingPeerInboxId]);
 
   const timestamp = conversation?.lastMessage?.sentNs ?? 0;
   const timeToShow = getCompactRelativeTime(timestamp);
@@ -84,13 +77,6 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
     if (!timeToShow || !messageText) return "";
     return `${timeToShow} ${MIDDLE_DOT} ${messageText}`;
   }, [timeToShow, messageText]);
-
-  const avatarComponent = useMemo(
-    () => (
-      <Avatar size={theme.avatarSize.lg} uri={avatarUri} name={preferredName} />
-    ),
-    [avatarUri, preferredName, theme]
-  );
 
   const leftActionsBackgroundColor = useMemo(
     () => (isDeleted ? theme.colors.fill.tertiary : theme.colors.fill.caution),
@@ -147,7 +133,13 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
       <ConversationListItem
         onPress={onPress}
         showError={false}
-        avatarComponent={avatarComponent}
+        avatarComponent={
+          <Avatar
+            size={theme.avatarSize.lg}
+            uri={profile?.avatar}
+            name={title}
+          />
+        }
         title={title}
         subtitle={subtitle}
         isUnread={isUnread}

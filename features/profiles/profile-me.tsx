@@ -1,4 +1,4 @@
-import { Screen } from "@/components/Screen/ScreenComp/Screen";
+import { Screen } from "@/components/screen/screen";
 import { SettingsList } from "@/design-system/settings-list/settings-list";
 import { useAddPfp } from "@/features/onboarding/hooks/useAddPfp";
 import { ProfileContactCard } from "@/features/profiles/components/profile-contact-card/profile-contact-card";
@@ -6,22 +6,22 @@ import { ProfileContactCardEditableAvatar } from "@/features/profiles/components
 import { ProfileContactCardEditableNameInput } from "@/features/profiles/components/profile-contact-card/profile-contact-card-editable-name-input";
 import { ProfileContactCardLayout } from "@/features/profiles/components/profile-contact-card/profile-contact-card-layout";
 import { ProfileSection } from "@/features/profiles/components/profile-section";
-import { ProfileSocialsNames } from "@/features/profiles/components/profile-social-names";
 import { useProfileMeScreenHeader } from "@/features/profiles/profile-me.screen-header";
 import {
   useProfileMeStore,
   useProfileMeStoreValue,
 } from "@/features/profiles/profile-me.store";
+import { useProfileQuery } from "@/features/profiles/profiles.query";
 import { validateProfileName } from "@/features/profiles/utils/validate-profile-name";
-
+import { useSocialProfilesForAddressQuery } from "@/features/social-profiles/social-lookup.query";
 import { translate } from "@/i18n";
-import { useInboxProfileSocialsQuery } from "@/queries/useInboxProfileSocialsQuery";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { useLogout } from "@/features/authentication/use-logout.hook";
-import { useRouter } from "@navigation/useNavigation";
+import { useRouter } from "@/navigation/use-navigation";
 import { InboxId } from "@xmtp/react-native-sdk";
 import React, { memo, useCallback, useEffect, useState } from "react";
 import { useCurrentSender } from "../multi-inbox/multi-inbox.store";
+import { ProfileSocialsNames } from "@/features/profiles/components/profile-social-names";
 
 export function ProfileMe(props: { inboxId: InboxId }) {
   const { inboxId } = props;
@@ -36,9 +36,10 @@ export function ProfileMe(props: { inboxId: InboxId }) {
 
   const isMyProfile = useCurrentSender()?.inboxId === inboxId;
 
-  const { data: socials } = useInboxProfileSocialsQuery({
-    inboxId,
-    caller: "ProfileMe",
+  const { data: profile } = useProfileQuery({ xmtpId: inboxId });
+
+  const { data: socialProfiles } = useSocialProfilesForAddressQuery({
+    ethAddress: profile?.privyAddress,
   });
 
   useProfileMeScreenHeader({ inboxId });
@@ -56,7 +57,9 @@ export function ProfileMe(props: { inboxId: InboxId }) {
         )}
       </ProfileSection>
 
-      {socials && <ProfileSocialsNames socials={socials[0]} />}
+      {socialProfiles && (
+        <ProfileSocialsNames socialProfiles={socialProfiles} />
+      )}
 
       {isMyProfile && (
         <ProfileSection withTopBorder>
@@ -76,7 +79,9 @@ export function ProfileMe(props: { inboxId: InboxId }) {
               {
                 label: translate("log_out"),
                 isWarning: true,
-                onPress: () => logout(),
+                onPress: () => {
+                  logout();
+                },
               },
             ]}
           />
@@ -130,13 +135,7 @@ const EditableProfileContactCardAvatar = memo(
 
     const profileMeStore = useProfileMeStore(inboxId);
 
-    const { data: currentAvatarName } = usePreferredInboxName({
-      inboxId,
-    });
-
-    const { data: currentAvatarUri } = usePreferredInboxAvatar({
-      inboxId,
-    });
+    const { data: profile } = useProfileQuery({ xmtpId: inboxId });
 
     useEffect(() => {
       if (asset?.uri && asset.uri !== profileMeStore.getState().avatarUri) {
@@ -146,8 +145,8 @@ const EditableProfileContactCardAvatar = memo(
 
     return (
       <ProfileContactCardEditableAvatar
-        avatarUri={asset?.uri ?? currentAvatarUri}
-        avatarName={currentAvatarName}
+        avatarUri={asset?.uri ?? profile?.avatar}
+        avatarName={profile?.name}
         onPress={addPFP}
       />
     );

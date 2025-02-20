@@ -1,4 +1,4 @@
-import { useSelect } from "@/data/store/storeHelpers";
+import { useSelect } from "@/stores/stores.utils";
 import { AttachmentRemoteImage } from "@/features/conversation/conversation-attachment/conversation-attachment-remote-image";
 import {
   BubbleContainer,
@@ -17,18 +17,19 @@ import {
   useConversationStore,
   useCurrentConversationTopicSafe,
 } from "@/features/conversation/conversation.store-context";
-import { useInboxName } from "@/hooks/useInboxName";
+
 import { captureError } from "@/utils/capture-error";
 import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { HStack } from "@design-system/HStack";
 import { Icon } from "@design-system/Icon/Icon";
 import { Text } from "@design-system/Text";
 import { VStack } from "@design-system/VStack";
-import { useAppTheme } from "@theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { DecodedMessage, MessageId, ReplyCodec } from "@xmtp/react-native-sdk";
 import { memo } from "react";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { useConversationMessageById } from "../use-conversation-message";
+import { useProfileQuery } from "@/features/profiles/profiles.query";
 
 export const MessageReply = memo(function MessageReply(props: {
   message: DecodedMessage<ReplyCodec>;
@@ -124,9 +125,11 @@ const MessageReplyReference = memo(function MessageReplyReference(props: {
     conversationTopic: topic,
   });
 
-  const { data: inboxName } = useInboxName({
-    inboxId: referencedMessage?.senderInboxId,
+  const { data: profile } = useProfileQuery({
+    xmtpId: referencedMessage?.senderInboxId,
   });
+
+  const inboxName = profile?.name;
 
   const tapGesture = Gesture.Tap()
     .onBegin(() => {

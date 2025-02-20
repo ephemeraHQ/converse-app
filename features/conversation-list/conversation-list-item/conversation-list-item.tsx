@@ -3,7 +3,7 @@ import { ITextProps, Text } from "@/design-system/Text";
 import { VStack } from "@/design-system/VStack";
 import { TouchableHighlight } from "@/design-system/touchable-highlight";
 import { useConversationListStyles } from "@/features/conversation-list/conversation-list.styles";
-import { ThemedStyle, useAppTheme } from "@/theme/useAppTheme";
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import React, { memo } from "react";
 import { ViewStyle } from "react-native";
 

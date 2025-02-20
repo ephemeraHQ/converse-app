@@ -1,5 +1,5 @@
 import {
-  getCurrentAccount,
+  getCurrentSenderEthAddress,
   getSafeCurrentSender,
 } from "@/features/multi-inbox/multi-inbox.store";
 import {

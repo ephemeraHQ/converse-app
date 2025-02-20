@@ -1,6 +1,6 @@
 import { AnimatedVStack } from "@/design-system/VStack";
 import { ILoaderSize } from "@/theme/loader";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import {
   Canvas,
   Path,

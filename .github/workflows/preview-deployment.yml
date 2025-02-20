@@ -145,6 +145,12 @@ jobs:
         run: |
           eas build --platform ios --profile preview --non-interactive --auto-submit
 
+      - name: Upload Sourcemaps to Sentry
+        run: |
+          # Get token from EAS environment
+          export SENTRY_AUTH_TOKEN=$(eas env:get --variable-name=SENTRY_AUTH_TOKEN --variable-environment=preview | tr -d ' ' | cut -d'=' -f2)
+          npx sentry-expo-upload-sourcemaps dist
+
   android-build:
     needs: [check-changes, bump-version]
     if: needs.check-changes.outputs.has_native_changes == 'true'
@@ -188,6 +194,12 @@ jobs:
         run: |
           eas build --platform android --profile preview --non-interactive --auto-submit
 
+      - name: Upload Sourcemaps to Sentry
+        run: |
+          # Get token from EAS environment
+          export SENTRY_AUTH_TOKEN=$(eas env:get --variable-name=SENTRY_AUTH_TOKEN --variable-environment=preview | tr -d ' ' | cut -d'=' -f2)
+          npx sentry-expo-upload-sourcemaps dist
+
   ota-update:
     needs: check-changes
     if: needs.check-changes.outputs.has_native_changes == 'false'
@@ -227,6 +239,6 @@ jobs:
 
       - name: Upload Sourcemaps to Sentry
         run: |
-          # Seems to be the only way to get the token
+          # Get token from EAS environment
           export SENTRY_AUTH_TOKEN=$(eas env:get --variable-name=SENTRY_AUTH_TOKEN --variable-environment=preview | tr -d ' ' | cut -d'=' -f2)
           npx sentry-expo-upload-sourcemaps dist

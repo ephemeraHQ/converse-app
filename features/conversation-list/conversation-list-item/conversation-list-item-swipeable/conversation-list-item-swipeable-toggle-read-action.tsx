@@ -1,6 +1,6 @@
 import { ISwipeableRenderActionsArgs } from "@/components/swipeable";
 import { useConversationIsUnread } from "@/features/conversation-list/hooks/use-conversation-is-unread";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import React, { memo, useState } from "react";
 import { runOnJS, useAnimatedReaction } from "react-native-reanimated";

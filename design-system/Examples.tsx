@@ -1,5 +1,5 @@
-import { Screen } from "@components/Screen/ScreenComp/Screen";
-import { SnackbarExample } from "@components/Snackbar/Snackbar.example";
+import { Screen } from "@/components/screen/screen";
+import { SnackbarExample } from "@/components/snackbar/snackbar.example";
 import { BottomSheetExample } from "@design-system/BottomSheet/BottomSheet.example";
 import { Button } from "@design-system/Button/Button";
 import { ButtonExample } from "@design-system/Button/Button.example";
@@ -8,7 +8,7 @@ import { IconButtonExample } from "@design-system/IconButton/IconButton.example"
 import { TextExample } from "@design-system/Text/Text.example";
 import { TextFieldExample } from "@design-system/TextField/TextField.example";
 import { VStack } from "@design-system/VStack";
-import { useAppTheme } from "@theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { useState } from "react";
 import { Switch, useColorScheme } from "react-native";
 import { Text } from "@design-system/Text/Text";

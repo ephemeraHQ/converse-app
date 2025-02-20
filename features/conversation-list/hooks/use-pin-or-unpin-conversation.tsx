@@ -1,9 +1,15 @@
-import { getCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import {
+  pinConversation,
+  unpinConversation,
+} from "@/features/conversation/conversation-metadata/conversation-metadata.api";
 import {
   getConversationMetadataQueryData,
   updateConversationMetadataQueryData,
-} from "@/queries/conversation-metadata-query";
-import { pinTopic, unpinTopic } from "@/utils/api/topics";
+} from "@/features/conversation/conversation-metadata/conversation-metadata.query";
+import {
+  getCurrentSenderEthAddress,
+  useCurrentSenderEthAddress,
+} from "@/features/multi-inbox/multi-inbox.store";
 import { useMutation } from "@tanstack/react-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
@@ -13,74 +19,78 @@ export function usePinOrUnpinConversation(args: {
 }) {
   const { conversationTopic } = args;
 
+  const currentAccount = useCurrentSenderEthAddress()!;
+
   const { mutateAsync: pinConversationAsync } = useMutation({
     mutationFn: () => {
-      return pinTopic({
+      return pinConversation({
+        account: currentAccount,
         topic: conversationTopic,
       });
     },
     onMutate: () => {
-      const currentAccount = getCurrentAccount()!;
-      const previousIsPinned = getConversationMetadataQueryData({
+      const currentAccount = getCurrentSenderEthAddress()!;
+      const previousPinned = getConversationMetadataQueryData({
         account: currentAccount,
         topic: conversationTopic,
-      })?.isPinned;
+      })?.pinned;
 
       updateConversationMetadataQueryData({
         account: currentAccount,
         topic: conversationTopic,
-        updateData: { isPinned: true },
+        updateData: { pinned: true },
       });
 
-      return { previousIsPinned };
+      return { previousPinned };
     },
     onError: (error, _, context) => {
-      const currentAccount = getCurrentAccount()!;
+      const currentAccount = getCurrentSenderEthAddress()!;
       updateConversationMetadataQueryData({
         account: currentAccount,
         topic: conversationTopic,
-        updateData: { isPinned: context?.previousIsPinned },
+        updateData: { pinned: context?.previousPinned },
       });
     },
   });
 
   const { mutateAsync: unpinConversationAsync } = useMutation({
     mutationFn: () => {
-      return unpinTopic({
+      return unpinConversation({
+        account: currentAccount,
         topic: conversationTopic,
       });
     },
     onMutate: () => {
-      const currentAccount = getCurrentAccount()!;
-      const previousIsPinned = getConversationMetadataQueryData({
+      const currentAccount = getCurrentSenderEthAddress()!;
+      const previousPinned = getConversationMetadataQueryData({
         account: currentAccount,
         topic: conversationTopic,
-      })?.isPinned;
+      })?.pinned;
 
       updateConversationMetadataQueryData({
         account: currentAccount,
         topic: conversationTopic,
-        updateData: { isPinned: false },
+        updateData: { pinned: false },
       });
 
-      return { previousIsPinned };
+      return { previousPinned };
     },
     onError: (error, _, context) => {
-      const currentAccount = getCurrentAccount()!;
+      const currentAccount = getCurrentSenderEthAddress()!;
       updateConversationMetadataQueryData({
         account: currentAccount,
         topic: conversationTopic,
-        updateData: { isPinned: context?.previousIsPinned },
+        updateData: { pinned: context?.previousPinned },
       });
     },
   });
 
   const pinOrUnpinConversationAsync = useCallback(async () => {
-    const currentAccount = getCurrentAccount()!;
+    const currentAccount = getCurrentSenderEthAddress()!;
     const isPinned = getConversationMetadataQueryData({
       account: currentAccount,
       topic: conversationTopic,
-    })?.isPinned;
+    })?.pinned;
 
     if (isPinned) {
       return unpinConversationAsync();

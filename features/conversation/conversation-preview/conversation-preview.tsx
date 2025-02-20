@@ -1,4 +1,4 @@
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
 import { Center } from "@/design-system/Center";
 import { Text } from "@/design-system/Text";
 import { VStack } from "@/design-system/VStack";
@@ -24,7 +24,7 @@ type ConversationPreviewProps = {
 };
 
 export const ConversationPreview = ({ topic }: ConversationPreviewProps) => {
-  const currentAccount = useCurrentAccount()!;
+  const currentAccount = useCurrentSenderEthAddress()!;
 
   const { data: messages, isLoading: isLoadingMessages } =
     useConversationMessagesQuery({

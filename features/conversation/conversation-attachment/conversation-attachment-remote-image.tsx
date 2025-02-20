@@ -1,12 +1,12 @@
 import { AttachmentLoading } from "@/features/conversation/conversation-attachment/conversation-attachment-loading";
-import { getCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { getCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
 import { Icon } from "@design-system/Icon/Icon";
 import { Text } from "@design-system/Text";
 import { IVStackProps, VStack } from "@design-system/VStack";
 import { PressableScale } from "@design-system/pressable-scale";
 import { translate } from "@i18n";
 import { useQuery } from "@tanstack/react-query";
-import { useAppTheme } from "@theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { getLocalAttachmentForMessageId } from "@utils/attachment/getLocalAttachment";
 import { handleDecryptedLocalAttachment } from "@utils/attachment/handleDecryptedLocalAttachment";
 import {
@@ -155,7 +155,7 @@ async function fetchAttachment(
     parseFloat(content.contentLength) <= MAX_AUTOMATIC_DOWNLOAD_ATTACHMENT_SIZE
   ) {
     const decryptedLocalAttachment = await fetchAndDecodeRemoteAttachment({
-      account: getCurrentAccount()!,
+      account: getCurrentSenderEthAddress()!,
       messageId: messageId,
       remoteAttachmentContent: content,
     });

@@ -1,37 +1,29 @@
 import {
   ISearchProfilesResult,
   searchProfiles,
-} from "@/features/profiles/profiles.api";
+} from "@/features/profiles/profiles.search.api";
 import { getSearchConvosUsersQueryKey } from "@/queries/QueryKeys";
 import { DateUtils } from "@/utils/time.utils";
 import { isSameInboxId } from "@/utils/xmtpRN/xmtp-inbox-id/xmtp-inbox-id";
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
-
-const isInboxIdIncludedInList =
-  (inboxIdsToCheck: string[]) => (profile: ISearchProfilesResult) => {
-    return inboxIdsToCheck.some((inboxIdToCheck) =>
-      isSameInboxId(profile.xmtpId, inboxIdToCheck)
-    );
-  };
+import { InboxId } from "@xmtp/react-native-sdk";
 
 export function useSearchConvosUsers(args: {
   searchQuery: string;
-  inboxIdsToOmit: string[];
+  inboxIdsToOmit: InboxId[];
 }) {
   const { searchQuery, inboxIdsToOmit } = args;
-
-  const shouldInboxIdBeOmitted = isInboxIdIncludedInList(inboxIdsToOmit);
 
   return useQuery({
     ...getConvosUsersSearchQueryOptions(searchQuery),
     select: (data: ISearchProfilesResult[]) => {
-      // Filter out search results for addresses that should be omitted
-      // (e.g. current user and users selected users)
-      const filteredResults: ISearchProfilesResult[] = data?.filter(
-        shouldInboxIdBeOmitted
+      // Filter out search results for inboxIds that should be omitted
+      return data.filter(
+        (profile) =>
+          !inboxIdsToOmit.some((inboxIdToOmit) =>
+            isSameInboxId(profile.xmtpId, inboxIdToOmit)
+          )
       );
-
-      return filteredResults;
     },
   });
 }

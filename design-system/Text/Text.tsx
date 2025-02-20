@@ -2,7 +2,7 @@ import React from "react";
 import { Text as RNText, StyleProp, TextStyle } from "react-native";
 
 import { translate } from "../../i18n";
-import { useAppTheme } from "../../theme/useAppTheme";
+import { useAppTheme } from "../../theme/use-app-theme";
 import { ITextProps } from "./Text.props";
 import { getTextStyle } from "./Text.utils";
 

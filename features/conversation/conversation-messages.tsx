@@ -34,7 +34,7 @@ import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/util
 import { useScreenFocusEffectOnce } from "@/hooks/use-screen-focus-effect-once";
 import { useAppStateHandlers } from "@/hooks/useAppStateHandlers";
 import { useConversationMessagesQuery } from "@/queries/conversation-messages-query";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { captureError } from "@/utils/capture-error";
 import {
   ConversationWithCodecsType,

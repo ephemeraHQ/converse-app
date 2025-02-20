@@ -1,7 +1,9 @@
 import { api } from "@/utils/api/api";
+import { captureError } from "@/utils/capture-error";
 import { z } from "zod";
-import { logger } from "@/utils/logger";
-const Web3SocialProfileType = z.enum([
+
+// Define the profile type enum to match backend
+const ProfileType = z.enum([
   "ens",
   "farcaster",
   "basename",
@@ -9,33 +11,77 @@ const Web3SocialProfileType = z.enum([
   "unstoppable-domains",
 ]);
 
-export type IWeb3SocialProfileType = z.infer<typeof Web3SocialProfileType>;
-
-const Web3SocialProfileSchema = z.object({
-  type: Web3SocialProfileType,
+// Define the base social profile schema to match backend
+// Base schema for common social profile fields
+const BaseSocialProfileSchema = z.object({
   address: z.string(),
   name: z.string(),
   bio: z.string().optional(),
   avatar: z.string().optional(),
 });
 
-export type IWeb3SocialProfile = z.infer<typeof Web3SocialProfileSchema>;
+// Generic social profile that can have any profile type
+const SocialProfileSchema = BaseSocialProfileSchema.extend({
+  type: ProfileType,
+});
 
-const SocialProfilesResponseSchema = z.array(Web3SocialProfileSchema);
+// ENS-specific profile schema
+export const EnsProfileSchema = BaseSocialProfileSchema.extend({
+  type: z.literal("ens"),
+});
 
-/**
- * Fetches social profiles for a given address using the lookup endpoint
- */
-export const fetchSocialProfilesForAddress = async (
-  address: string
-): Promise<IWeb3SocialProfile[]> => {
-  logger.debug(
-    `[fetchSocialProfilesForAddress] Fetching social profiles for address: ${address}`
+// Farcaster-specific profile schema
+export const FarcasterProfileSchema = BaseSocialProfileSchema.extend({
+  type: z.literal("farcaster"),
+});
+
+// Lens-specific profile schema
+export const LensProfileSchema = BaseSocialProfileSchema.extend({
+  type: z.literal("lens"),
+});
+
+// Unstoppable Domains-specific profile schema
+export const UnstoppableDomainsProfileSchema = BaseSocialProfileSchema.extend({
+  type: z.literal("unstoppable-domains"),
+});
+
+export const BasenameProfileSchema = BaseSocialProfileSchema.extend({
+  type: z.literal("basename"),
+});
+
+export type IEnsProfile = z.infer<typeof EnsProfileSchema>;
+export type IFarcasterProfile = z.infer<typeof FarcasterProfileSchema>;
+export type ILensProfile = z.infer<typeof LensProfileSchema>;
+export type IUnstoppableDomainsProfile = z.infer<
+  typeof UnstoppableDomainsProfileSchema
+>;
+export type IBasenameProfile = z.infer<typeof BasenameProfileSchema>;
+export type ISocialProfile = z.infer<typeof SocialProfileSchema>;
+
+const SocialProfilesResponseSchema = z.object({
+  socialProfiles: z.array(SocialProfileSchema),
+});
+
+export type ISocialProfilesResponse = z.infer<
+  typeof SocialProfilesResponseSchema
+>;
+
+export async function fetchSocialProfilesForAddress(args: { address: string }) {
+  const { address } = args;
+
+  const { data } = await api.get<ISocialProfilesResponse>(
+    `/api/v1/lookup/address/${address}`
   );
-  const { data } = await api.get(`/api/v1/lookup/address/${address}`);
-  const parsedData = SocialProfilesResponseSchema.parse(data);
-  logger.debug(
-    `[fetchSocialProfilesForAddress] Successfully fetched ${parsedData.length} social profiles for address: ${address}`
-  );
-  return parsedData;
-};
+
+  const response = SocialProfilesResponseSchema.safeParse(data);
+
+  if (!response.success) {
+    captureError(
+      new Error(
+        `Invalid social profiles response: ${JSON.stringify(response.error)}`
+      )
+    );
+  }
+
+  return data.socialProfiles as ISocialProfile[];
+}

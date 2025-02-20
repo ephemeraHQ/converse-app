@@ -8,7 +8,7 @@ import { Loader } from "@/design-system/loader";
 import { ConversationListEmpty } from "@/features/conversation-list/conversation-list-empty";
 import { translate } from "@/i18n";
 import { $globalStyles } from "@/theme/styles";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import React, { memo, useEffect } from "react";
 import {
   Easing,

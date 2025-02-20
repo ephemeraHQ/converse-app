@@ -1,8 +1,8 @@
-import { useCurrentAccount } from "@/features/multi-inbox/multi-inbox.store";
+import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
 import { isConversationAllowed } from "@/features/conversation/utils/is-conversation-allowed";
 import { useScreenFocusEffectOnce } from "@/hooks/use-screen-focus-effect-once";
 import { useAppStateHandlers } from "@/hooks/useAppStateHandlers";
-import { getConversationMetadataQueryOptions } from "@/queries/conversation-metadata-query";
+import { getConversationMetadataQueryOptions } from "@/features/conversation/conversation-metadata/conversation-metadata.query";
 import { prefetchConversationMessages } from "@/queries/conversation-messages-query";
 import { getAllowedConsentConversationsQueryOptions } from "@/queries/conversations-allowed-consent-query";
 import { captureError } from "@/utils/capture-error";
@@ -10,7 +10,7 @@ import { useQueries, useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
 
 export const useConversationListConversations = () => {
-  const currentAccount = useCurrentAccount();
+  const currentAccount = useCurrentSenderEthAddress();
 
   const {
     data: conversations,
@@ -73,8 +73,8 @@ export const useConversationListConversations = () => {
     const filtered = conversations.filter((conversation, index) => {
       const query = conversationsMetadataQueries[index];
       const isAllowed = isConversationAllowed(conversation);
-      const isPinned = query?.data?.isPinned;
-      const isDeleted = query?.data?.isDeleted;
+      const isPinned = query?.data?.pinned;
+      const isDeleted = query?.data?.deleted;
       const isLoading = query?.isLoading;
 
       return isAllowed && !isPinned && !isDeleted && !isLoading;

@@ -9,7 +9,7 @@ import { Text } from "@design-system/Text";
 import { TextField } from "@design-system/TextField/TextField";
 import { VStack } from "@design-system/VStack";
 import { translate } from "@i18n";
-import { ThemedStyle, useAppTheme } from "@theme/useAppTheme";
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { ICategorizedEmojisRecord, IEmoji } from "@utils/emojis/emoji-types";
 import { emojis } from "@utils/emojis/emojis";
 import { memo, useCallback, useRef, useState } from "react";

@@ -4,7 +4,7 @@ import { Icon } from "@/design-system/Icon/Icon";
 import { Text } from "@/design-system/Text";
 import { VStack } from "@/design-system/VStack";
 import { useConversationListStyles } from "@/features/conversation-list/conversation-list.styles";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import React, { memo, useEffect } from "react";
 import {
   useAnimatedStyle,

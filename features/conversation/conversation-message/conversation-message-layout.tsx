@@ -1,4 +1,4 @@
-import { useSelect } from "@/data/store/storeHelpers";
+import { useSelect } from "@/stores/stores.utils";
 import { HStack } from "@/design-system/HStack";
 import { AnimatedVStack, VStack } from "@/design-system/VStack";
 import { ConversationMessageSender } from "@/features/conversation/conversation-message/conversation-message-sender";
@@ -6,7 +6,7 @@ import { ConversationSenderAvatar } from "@/features/conversation/conversation-m
 import { useMessageContextStoreContext } from "@/features/conversation/conversation-message/conversation-message.store-context";
 import { useConversationMessageStyles } from "@/features/conversation/conversation-message/conversation-message.styles";
 import { isGroupUpdatedMessage } from "@/features/conversation/conversation-message/conversation-message.utils";
-import { useAppTheme } from "@/theme/useAppTheme";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { ReactNode, memo } from "react";
 
 type IConversationMessageLayoutProps = {

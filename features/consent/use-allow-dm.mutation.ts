@@ -1,6 +1,6 @@
 import {
-  getCurrentAccount,
-  useCurrentAccount,
+  getCurrentSenderEthAddress,
+  useCurrentSenderEthAddress,
 } from "@/features/multi-inbox/multi-inbox.store";
 import { getConversationQueryData } from "@/queries/conversation-query";
 import {
@@ -26,7 +26,7 @@ import {
 import { updateInboxIdsConsentForAccount } from "@/features/consent/update-inbox-ids-consent-for-account";
 import { updateConsentForGroupsForAccount } from "@/features/consent/update-consent-for-groups-for-account";
 export function useAllowDmMutation() {
-  const currentAccount = useCurrentAccount()!;
+  const currentAccount = useCurrentSenderEthAddress()!;
 
   return useMutation({
     mutationFn: async (args: {
@@ -38,7 +38,7 @@ export function useAllowDmMutation() {
       if (!peerInboxId) {
         throw new Error("Peer inbox id not found");
       }
-      const currentAccount = getCurrentAccount()!;
+      const currentAccount = getCurrentSenderEthAddress()!;
       await Promise.all([
         updateConsentForGroupsForAccount({
           account: currentAccount,
