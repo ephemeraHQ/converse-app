@@ -5,7 +5,7 @@ import { useGroupConversationContextMenuViewProps } from "@/features/conversatio
 import { isTextMessage } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { useGroupName } from "@/hooks/useGroupName";
 import { GroupWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
-import { navigate } from "@utils/navigation";
+import { navigate } from "@/navigation/navigation.utils";
 import { useCallback } from "react";
 import { ConversationListPinnedConversation } from "./conversation-list-pinned-conversation";
 import { PinnedConversationMessagePreview } from "./conversation-list-pinned-conversation-message-preview";

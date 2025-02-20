@@ -35,4 +35,5 @@ export type NavigationParamList = {
   Examples: undefined;
 
   AppSettings: undefined;
+  WebviewPreview: { uri: string };
 };

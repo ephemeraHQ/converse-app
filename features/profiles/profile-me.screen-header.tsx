@@ -14,7 +14,7 @@ import { useRouter } from "@/navigation/use-navigation";
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { Haptics } from "@/utils/haptics";
-import { navigate } from "@/utils/navigation";
+import { navigate } from "@/navigation/navigation.utils";
 import { InboxId } from "@xmtp/react-native-sdk";
 import { memo, useCallback } from "react";
 import { ViewStyle } from "react-native";

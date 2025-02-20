@@ -5,7 +5,7 @@ import { useDmConversationContextMenuViewProps } from "@/features/conversation-l
 import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query";
 import { DmWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
-import { navigate } from "@utils/navigation";
+import { navigate } from "@/navigation/navigation.utils";
 import { useCallback } from "react";
 import { isTextMessage } from "../../conversation/conversation-message/conversation-message.utils";
 import { ConversationListPinnedConversation } from "./conversation-list-pinned-conversation";

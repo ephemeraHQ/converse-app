@@ -1,5 +1,5 @@
 import { ActionSheet } from "@/components/action-sheet";
-import { DebugButton } from "@/components/debug-button";
+import { DebugProvider } from "@/components/debug-provider";
 import { Snackbars } from "@/components/snackbar/snackbars";
 import { useHydrateAuth } from "@/features/authentication/use-hydrate-auth";
 import { useLogoutOnJwtRefreshError } from "@/features/authentication/use-logout-on-jwt-refresh-error";
@@ -99,15 +99,16 @@ export function App() {
                 <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
                   <PaperProvider>
                     <GestureHandlerRootView style={$globalStyles.flex1}>
-                      <BottomSheetModalProvider>
-                        {/* <AuthenticateWithPasskeyProvider> */}
-                        <AppNavigator />
-                        {/* </AuthenticateWithPasskeyProvider> */}
-                        {__DEV__ && <DevToolsBubble onCopy={onCopy} />}
-                        <DebugButton />
-                        <ActionSheet />
-                        <Snackbars />
-                      </BottomSheetModalProvider>
+                      <DebugProvider>
+                        <BottomSheetModalProvider>
+                          {/* <AuthenticateWithPasskeyProvider> */}
+                          <AppNavigator />
+                          {/* </AuthenticateWithPasskeyProvider> */}
+                          {__DEV__ && <DevToolsBubble onCopy={onCopy} />}
+                          <ActionSheet />
+                          <Snackbars />
+                        </BottomSheetModalProvider>
+                      </DebugProvider>
                     </GestureHandlerRootView>
                   </PaperProvider>
                 </ThemeProvider>

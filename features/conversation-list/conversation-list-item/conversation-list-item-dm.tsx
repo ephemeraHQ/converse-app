@@ -16,7 +16,7 @@ import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query";
 import { useAppTheme } from "@/theme/use-app-theme";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { getCompactRelativeTime } from "@utils/date";
-import { navigate } from "@utils/navigation";
+import { navigate } from "@/navigation/navigation.utils";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { memo, useCallback, useMemo } from "react";
 import { ConversationListItem } from "./conversation-list-item";

@@ -3,8 +3,6 @@ import { AnimatedVStack } from "@/design-system/VStack";
 import { ActivityIndicator } from "@/design-system/activity-indicator";
 import { OnboardingIconButton } from "@/features/onboarding/components/onboarding-icon-button";
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
-import { converseEventEmitter } from "@/utils/events";
-import { useCallback } from "react";
 import { ViewStyle } from "react-native";
 import { useAnimatedKeyboard, useAnimatedStyle } from "react-native-reanimated";
 import {
@@ -37,11 +35,6 @@ export function OnboardingFooter({
 
   const keyboard = useAnimatedKeyboard();
 
-  // AR - don't anticipate this will be here long
-  const showDebug = useCallback(() => {
-    converseEventEmitter.emit("showDebugMenu");
-  }, []);
-
   const animatedStyle = useAnimatedStyle(() => {
     // When using keyboard avoiding view it is putting this above the keyboard, so we will move it down when the keyboard animates
     return {
@@ -63,7 +56,6 @@ export function OnboardingFooter({
         disabled={disabled}
         style={themed($iconButtonStyle)}
         onPress={onPress}
-        onLongPress={showDebug}
         {...(isLoading
           ? { icon: <ActivityIndicator /> }
           : {

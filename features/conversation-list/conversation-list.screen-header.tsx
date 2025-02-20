@@ -7,16 +7,15 @@ import { Pressable } from "@/design-system/Pressable";
 import { Text } from "@/design-system/Text";
 import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu";
 import {
-  useMultiInboxStore,
   useCurrentProfiles,
-  useSafeCurrentSenderProfile,
+  useMultiInboxStore,
   useSafeCurrentSender,
+  useSafeCurrentSenderProfile,
 } from "@/features/multi-inbox/multi-inbox.store";
 import { useProfileQuery } from "@/features/profiles/profiles.query";
 import { translate } from "@/i18n";
 import { useHeader } from "@/navigation/use-header";
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
-import { converseEventEmitter } from "@/utils/events";
 import { useNavigation } from "@react-navigation/native";
 import React, { useCallback } from "react";
 import { Alert, ViewStyle } from "react-native";
@@ -136,10 +135,6 @@ function ProfileAvatar() {
 
   const { data: profile } = useProfileQuery({ xmtpId: inboxId });
 
-  const showDebugMenu = useCallback(() => {
-    converseEventEmitter.emit("showDebugMenu");
-  }, []);
-
   return (
     <Pressable
       onPress={() => {
@@ -148,7 +143,6 @@ function ProfileAvatar() {
         });
       }}
       hitSlop={theme.spacing.sm}
-      onLongPress={showDebugMenu}
     >
       <Center style={themed($avatarContainer)}>
         <Avatar

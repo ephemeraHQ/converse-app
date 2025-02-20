@@ -1,26 +1,26 @@
 import * as Linking from "expo-linking";
 import { Linking as RNLinking } from "react-native";
 
-import logger from "./logger";
+import logger from "../utils/logger";
 import { config } from "../config";
-import { NavigationParamList } from "../navigation/navigation.types";
+import { NavigationParamList } from "./navigation.types";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { createNavigationContainerRef } from "@react-navigation/native";
 
 // https://reactnavigation.org/docs/navigating-without-navigation-prop/#usage
-export const converseNavigatorRef = createNavigationContainerRef();
+export const navigationRef = createNavigationContainerRef();
 
 export const navigate = async <T extends keyof NavigationParamList>(
   screen: T,
   params?: NavigationParamList[T]
 ) => {
   logger.debug("[Navigation] Navigating to:", screen, params);
-  if (!converseNavigatorRef) {
+  if (!navigationRef) {
     logger.error("[Navigation] Conversation navigator not found");
     return;
   }
 
-  if (!converseNavigatorRef.isReady()) {
+  if (!navigationRef.isReady()) {
     logger.error(
       "[Navigation] Conversation navigator is not ready (wait for appStore#hydrated to be true using waitForAppStoreHydration)"
     );
@@ -35,7 +35,7 @@ export const navigate = async <T extends keyof NavigationParamList>(
 
   // todo(any): figure out proper typing here
   // @ts-ignore
-  converseNavigatorRef.navigate(screen, params);
+  navigationRef.navigate(screen, params);
 };
 
 export const navigateToTopic = async (topic: ConversationTopic) => {

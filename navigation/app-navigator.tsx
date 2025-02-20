@@ -11,6 +11,8 @@ import {
   ProfileScreenConfig,
 } from "@/features/profiles/profile.nav";
 import { NavigationParamList } from "@/navigation/navigation.types";
+import { navigationRef } from "@/navigation/navigation.utils";
+import { WebviewPreviewNav } from "@/screens/WebviewPreviewNav";
 import { useThemeProvider } from "@/theme/use-app-theme";
 import { captureError } from "@/utils/capture-error";
 import { hideSplashScreen } from "@/utils/splash/splash";
@@ -20,7 +22,6 @@ import {
 } from "@features/conversation/conversation.nav";
 import { LinkingOptions, NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { converseNavigatorRef } from "@utils/navigation";
 import * as Linking from "expo-linking";
 import React, { useEffect } from "react";
 import {
@@ -61,7 +62,7 @@ export function AppNavigator() {
         <NavigationContainer<NavigationParamList>
           theme={navigationTheme}
           linking={linking}
-          ref={converseNavigatorRef}
+          ref={navigationRef}
           onUnhandledAction={() => {
             // Since we're handling multiple navigators,
             // let's silence errors when the action
@@ -143,7 +144,7 @@ function AppStacks() {
           {ConversationRequestsListNav()}
           {ConversationNav()}
           {ShareProfileNav()}
-          {/* {WebviewPreviewNav()} */}
+          {WebviewPreviewNav()}
           {ProfileNav()}
           <AppNativeStack.Screen
             name="AppSettings"

@@ -1,6 +1,8 @@
+import { VStack } from "@/design-system/VStack";
 import { useLogout } from "@/features/authentication/use-logout.hook";
 import { translate } from "@/i18n";
-import { converseEventEmitter } from "@/utils/events";
+import { navigate } from "@/navigation/navigation.utils";
+import { $globalStyles } from "@/theme/styles";
 import { getNativeLogFile } from "@/utils/xmtpRN/logs";
 import * as Sentry from "@sentry/react-native";
 import {
@@ -12,11 +14,13 @@ import Share from "@utils/share";
 import Constants from "expo-constants";
 import { Image } from "expo-image";
 import * as Updates from "expo-updates";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { Alert, Platform } from "react-native";
 import { showActionSheet } from "./action-sheet";
 
-export function DebugButton() {
+export function DebugProvider(props: { children: React.ReactNode }) {
+  const { children } = props;
+
   const { logout } = useLogout();
 
   const methods = useMemo(() => {
@@ -92,21 +96,21 @@ export function DebugButton() {
         });
       },
       "New log session": rotateLoggingFile,
-      // "Display current session logs": async () => {
-      //   navigate("WebviewPreview", { uri: loggingFilePath });
-      // },
-      // "Display native logs": async () => {
-      //   const nativeLogFilePath = await getNativeLogFile();
-      //   navigate("WebviewPreview", { uri: nativeLogFilePath });
-      // },
-      // "Display previous session logs": async () => {
-      //   const previousLoggingFile = await getPreviousSessionLoggingFile();
-      //   if (!previousLoggingFile) {
-      //     return Alert.alert("No previous session logging file found");
-      //   }
-      //   navigate("WebviewPreview", { uri: previousLoggingFile });
-      // },
-      // Cancel: undefined,
+      "Display current session logs": async () => {
+        navigate("WebviewPreview", { uri: loggingFilePath });
+      },
+      "Display native logs": async () => {
+        const nativeLogFilePath = await getNativeLogFile();
+        navigate("WebviewPreview", { uri: nativeLogFilePath });
+      },
+      "Display previous session logs": async () => {
+        const previousLoggingFile = await getPreviousSessionLoggingFile();
+        if (!previousLoggingFile) {
+          return Alert.alert("No previous session logging file found");
+        }
+        navigate("WebviewPreview", { uri: previousLoggingFile });
+      },
+      Cancel: undefined,
     };
   }, [logout]);
 
@@ -135,12 +139,42 @@ export function DebugButton() {
     });
   }, [methods]);
 
-  useEffect(() => {
-    converseEventEmitter.on("showDebugMenu", showDebugMenu);
-    return () => {
-      converseEventEmitter.off("showDebugMenu", showDebugMenu);
-    };
+  const tapCountRef = useRef(0);
+  const tapTimeoutRef = useRef<NodeJS.Timeout>();
+
+  const handleTouchStart = useCallback(() => {
+    // Increment tap count
+    tapCountRef.current += 1;
+
+    // Clear existing timeout
+    if (tapTimeoutRef.current) {
+      clearTimeout(tapTimeoutRef.current);
+    }
+
+    // Set new timeout to reset count after 2 seconds
+    tapTimeoutRef.current = setTimeout(() => {
+      tapCountRef.current = 0;
+    }, 2000);
+
+    // Show debug menu after 4 taps
+    if (tapCountRef.current >= 4) {
+      showDebugMenu();
+      tapCountRef.current = 0;
+    }
   }, [showDebugMenu]);
 
-  return null;
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (tapTimeoutRef.current) {
+        clearTimeout(tapTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  return (
+    <VStack onTouchStart={handleTouchStart} style={$globalStyles.flex1}>
+      {children}
+    </VStack>
+  );
 }
