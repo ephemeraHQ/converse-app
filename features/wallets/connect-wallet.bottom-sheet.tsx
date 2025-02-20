@@ -35,6 +35,10 @@ import { ScrollView } from "react-native";
 import { thirdwebClient } from "@/utils/thirdweb";
 import { InboxSigner } from "../multi-inbox/multi-inbox-client.types";
 import { base } from "thirdweb/chains";
+import { shortAddress } from "@/utils/strings/shortAddress";
+import { HStack } from "@/design-system/HStack";
+import { Pressable } from "@/design-system/Pressable";
+import { Avatar } from "@/components/Avatar";
 
 type InstalledWalletsListProps = {
   installedWallets: ISupportedWallet[];
@@ -55,15 +59,30 @@ function SocialIdentityList({
 }: SocialIdentityListProps) {
   return (
     <>
-      <ScrollView>
-        {socialData?.map((social) => (
-          <Button
-            key={`${social.name}-${social.type}`}
-            text={JSON.stringify(social, null, 2)}
-            onPress={() => onSocialIdentityTapped(social)}
-          />
-        ))}
-      </ScrollView>
+      <VStack>
+        <Text>
+          Select an onchain identity to use as your name on Convos. You can
+          change this later.
+        </Text>
+        <Text>
+          Remember, using an onchain name may reveal other assets held in the
+          same wallet.
+        </Text>
+        <ScrollView>
+          {socialData?.map((social) => (
+            <Pressable key={`${social.name}-${social.type}`}>
+              <HStack>
+                <Avatar uri={social.avatar} name={social.name} />
+                <VStack>
+                  <Text>{social.name}</Text>
+                  {/*  sometimes we want to do something with this like show lens */}
+                  <Text>{social.type}</Text>
+                </VStack>
+              </HStack>
+            </Pressable>
+          ))}
+        </ScrollView>
+      </VStack>
     </>
   );
 }
@@ -127,11 +146,15 @@ type ConnectWalletBottomSheetState = {
   thirdwebWalletIdThatIsConnecting: WalletId | undefined;
   connectingWalletAccount: ThirdwebEthereumWalletAccount | undefined;
   socialData: IWeb3SocialProfile[] | undefined;
+  wallets: ISupportedWallet[] | undefined;
+  currentInboxId: string | undefined;
 };
 
 type ConnectWalletBottomSheetActions =
   | { type: "ConnectAWallet" }
   | { type: "SetWalletToConnect"; walletId: WalletId }
+  | { type: "WalletsLoaded"; wallets: ISupportedWallet[] }
+  | { type: "CurrentInboxLoaded"; inboxId: string }
   | {
       type: "WalletAccountConnected";
       account: ThirdwebEthereumWalletAccount;
@@ -151,6 +174,21 @@ function reducer(
         ...state,
         connectWalletBottomSheetMode: "chooseWallet",
       };
+
+    case "CurrentInboxLoaded":
+      return {
+        ...state,
+        connectWalletBottomSheetMode: "chooseWallet",
+        currentInboxId: action.inboxId,
+      };
+
+    case "WalletsLoaded":
+      return {
+        ...state,
+        connectWalletBottomSheetMode: "chooseWallet",
+        wallets: action.wallets,
+      };
+
     case "SetWalletToConnect":
       return {
         ...state,
@@ -166,6 +204,7 @@ function reducer(
         connectWalletBottomSheetMode: "promptForWalletSignature",
         connectingWalletAccount: action.account,
       };
+
     case "SignInToWallet":
       return {
         ...state,
@@ -203,6 +242,7 @@ function reducer(
         connectingWalletAccount: undefined,
         socialData: undefined,
       };
+
     default:
       return state;
   }
@@ -213,14 +253,32 @@ export function ConnectWalletBottomSheet({
   onClose,
   onWalletImported,
 }: ConnectWalletBottomSheetProps) {
+  const { connect } = useConnect();
   const { theme } = useAppTheme();
   const insets = useSafeAreaInsets();
 
   const { installedWallets, isLoading: areInstalledWalletsLoading } =
     useInstalledWallets();
-  const { connect } = useConnect();
 
-  const hasInstalledWallets = installedWallets && installedWallets.length > 0;
+  useEffect(() => {
+    if (!areInstalledWalletsLoading && installedWallets) {
+      dispatch({ type: "WalletsLoaded", wallets: installedWallets });
+    }
+  }, [areInstalledWalletsLoading, installedWallets]);
+
+  const {
+    ethereumAddress: currentSenderEthereumAddress,
+    inboxId: currentSenderInboxId,
+  } = useCurrentSender() ?? {};
+
+  const waitingForClientsToLoad =
+    !currentSenderEthereumAddress || !currentSenderInboxId;
+
+  useEffect(() => {
+    if (!waitingForClientsToLoad) {
+      dispatch({ type: "CurrentInboxLoaded", inboxId: currentSenderInboxId });
+    }
+  }, [waitingForClientsToLoad, currentSenderInboxId]);
 
   const bottomSheetRef = useBottomSheetModalRef();
   React.useEffect(() => {
@@ -231,52 +289,48 @@ export function ConnectWalletBottomSheet({
     }
   }, [isVisible, bottomSheetRef]);
 
-  const currentSender = useCurrentSender();
-  const isRestored =
-    useAccountsStore.getState().multiInboxClientRestorationState === "restored";
-
   const initialState: ConnectWalletBottomSheetState = {
     connectWalletBottomSheetMode: "welcome",
     thirdwebWalletIdThatIsConnecting: undefined,
     connectingWalletAccount: undefined,
     socialData: undefined,
+    wallets: undefined,
+    currentInboxId: undefined,
   };
+
   const [state, dispatch] = React.useReducer(reducer, initialState);
   const {
     thirdwebWalletIdThatIsConnecting,
     socialData,
+    wallets,
     connectWalletBottomSheetMode,
+    connectingWalletAccount,
   } = state;
 
-  if (!isRestored || !currentSender) {
-    return null;
-  }
+  const isShowingWelcomeMessage = connectWalletBottomSheetMode === "welcome";
+  const isShowingWalletList = connectWalletBottomSheetMode === "chooseWallet";
+  const isWalletListDisabled =
+    connectWalletBottomSheetMode === "waitingForWalletConnection";
+  const isShowingWalletsEmptyMessage =
+    connectWalletBottomSheetMode === "chooseWallet" &&
+    wallets !== undefined &&
+    wallets.length === 0;
 
-  const isInboxClientInitiated =
-    !!MultiInboxClient.instance.getInboxClientForAddress({
-      ethereumAddress: currentSender!.ethereumAddress,
-    })!;
-
-  const isShowingWalletList = connectWalletBottomSheetMode === "wallets";
-  const isWalletListDisabled = thirdwebWalletIdThatIsConnecting !== undefined;
+  const isShowingSignToConfirm =
+    connectWalletBottomSheetMode === "waitingForWalletSignature" ||
+    connectWalletBottomSheetMode === "waitingForSocialDataToLoad";
 
   const isShowingSocialIdentityList =
-    connectWalletBottomSheetMode === "socials" && socialData !== undefined;
+    connectWalletBottomSheetMode === "chooseSocialIdentity" &&
+    socialData !== undefined;
   const isShowingNoSocialsMessage =
-    connectWalletBottomSheetMode === "socials" && socialData === undefined;
+    connectWalletBottomSheetMode === "chooseSocialIdentity" &&
+    (socialData === undefined || socialData.length === 0);
 
   const handleConnectWalletTapped = async (
     walletType: WalletId,
     options?: any
   ) => {
-    if (!isInboxClientInitiated) {
-      throw new Error(
-        `[ConnectWalletBottomSheet] Inbox client not initiated for address ${
-          currentSender!.ethereumAddress
-        } when attempting to connect wallet ${walletType}`
-      );
-    }
-
     dispatch({ type: "SetWalletToConnect", walletId: walletType });
 
     logger.debug(
@@ -298,6 +352,8 @@ export function ConnectWalletBottomSheet({
       });
 
       const addressToLink = walletAccount.address;
+      // note we're likely going to have to save this in a ref due to
+      // state spreading in reducer...
       dispatch({
         type: "WalletAccountConnected",
         account: walletAccount,
@@ -311,6 +367,7 @@ export function ConnectWalletBottomSheet({
           2
         )}`
       );
+
       dispatch({
         type: "SocialDataLoaded",
         data: socialProfiles,
@@ -319,14 +376,9 @@ export function ConnectWalletBottomSheet({
         `[ConnectWalletBottomSheet] Got wallet address: ${addressToLink}`
       );
 
-      logger.debug(
-        `[ConnectWalletBottomSheet] Getting inbox client for current sender: ${
-          currentSender!.ethereumAddress
-        }`
-      );
       const currentInboxClient =
         MultiInboxClient.instance.getInboxClientForAddress({
-          ethereumAddress: currentSender.ethereumAddress,
+          ethereumAddress: currentSenderEthereumAddress,
         });
 
       logger.debug(
@@ -389,13 +441,31 @@ export function ConnectWalletBottomSheet({
     alert(`You tapped on ${socialIdentity.name}`);
   }
 
+  function getBottomSheetHeaderTitle(mode: WalletImportBottomSheetMode) {
+    switch (mode) {
+      case "welcome":
+        return "Import an onchain identity";
+      case "chooseWallet":
+      case "waitingForWalletConnection":
+        return "Choose an app";
+      case "chooseSocialIdentity":
+        return "Choose an name";
+      case "waitingForSocialDataToLoad":
+        return "Sign to confirm";
+      case "waitingForWalletSignature":
+        return "Sign to confirm";
+    }
+  }
+
   return (
     <BottomSheetModal
       ref={bottomSheetRef}
       snapPoints={["50%"]}
       onDismiss={onClose}
     >
-      <BottomSheetHeader title="Imiport an identity" />
+      <BottomSheetHeader
+        title={getBottomSheetHeaderTitle(connectWalletBottomSheetMode)}
+      />
       <BottomSheetContentContainer
         style={{
           flex: 1,
@@ -408,6 +478,31 @@ export function ConnectWalletBottomSheet({
             paddingBottom: insets.bottom,
           }}
         >
+          {isShowingWelcomeMessage && (
+            <VStack>
+              <Text>
+                Use your name and pic from an onchain identity like ENS, Base or
+                others.
+              </Text>
+              <Text>
+                Remember, using an onchain name may reveal other assets held in
+                the same wallet.
+              </Text>
+              <Button
+                text="Connect a wallet"
+                onPress={() => {
+                  dispatch({ type: "ConnectAWallet" });
+                }}
+              />
+              <Button
+                text="Back"
+                onPress={() => {
+                  bottomSheetRef.current?.dismiss();
+                }}
+              />
+            </VStack>
+          )}
+
           {isShowingWalletList && (
             <InstalledWalletsList
               installedWallets={installedWallets ?? []}
@@ -418,8 +513,27 @@ export function ConnectWalletBottomSheet({
             />
           )}
 
-          {isShowingNoSocialsMessage && (
-            <Text>No social identities found for this address.</Text>
+          {isShowingSignToConfirm && (
+            <VStack>
+              <Text>
+                By signing in your wallet app, you’re proving that you own this
+                wallet.
+              </Text>
+              <HStack>
+                <Text>{thirdwebWalletIdThatIsConnecting}</Text>
+
+                <VStack>
+                  <Text>Connected</Text>
+                  <Text>
+                    {shortAddress(connectingWalletAccount?.address ?? "")} -{" "}
+                  </Text>
+                </VStack>
+              </HStack>
+              <Button
+                text={`Sign into ${thirdwebWalletIdThatIsConnecting}`}
+                onPress={() => {}}
+              />
+            </VStack>
           )}
 
           {isShowingSocialIdentityList && (
@@ -429,13 +543,22 @@ export function ConnectWalletBottomSheet({
             />
           )}
 
-          {areInstalledWalletsLoading && <Text>Loading wallets</Text>}
-
-          {!hasInstalledWallets && (
+          {isShowingNoSocialsMessage && (
+            <Text>No social identities found for this address.</Text>
+          )}
+          {isShowingWalletsEmptyMessage && (
             <Text>
               No wallets found. Please install a wallet and try again.
             </Text>
           )}
+
+          <Button
+            text="Cancel"
+            variant="secondary"
+            onPress={() => {
+              bottomSheetRef.current?.dismiss();
+            }}
+          />
         </VStack>
       </BottomSheetContentContainer>
     </BottomSheetModal>
