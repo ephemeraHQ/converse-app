@@ -1,4 +1,4 @@
-import { ParsedText } from "@/components/Button/parsed-text/parsed-text";
+import { ParsedText } from "@/components/parsed-text/parsed-text";
 import Clipboard from "@react-native-clipboard/clipboard";
 import { actionSheetColors } from "@styles/colors";
 import * as Linking from "expo-linking";
