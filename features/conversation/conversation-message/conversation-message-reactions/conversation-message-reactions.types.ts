@@ -34,6 +34,6 @@ export type SortedReaction = {
  */
 export type ReactorDetails = {
   address: string;
-  userName: Nullable<string>;
+  username: Nullable<string>;
   avatar: Nullable<string>;
 };

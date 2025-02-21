@@ -65,7 +65,7 @@ export function useConversationMessageReactionsRolledUp(args: {
         isOwnReaction,
         reactor: {
           address: reaction.senderInboxId,
-          userName: profile?.name,
+          username: profile?.name,
           avatar: profile?.avatar,
         },
       });

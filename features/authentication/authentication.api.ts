@@ -1,9 +1,8 @@
-import { api } from "@/utils/api/api";
-import { handleApiError } from "@/utils/api/api.error";
-import { buildDeviceMetadata } from "@/utils/device-metadata";
 import { z } from "zod";
-import { logger } from "@/utils/logger";
-import { profileValidationSchema } from "@/features/profiles/profiles.api";
+import { profileValidationSchema } from "@/features/profiles/schemas/profile-validation.schema";
+import { api } from "@/utils/api/api";
+import { buildDeviceMetadata } from "@/utils/device-metadata";
+import { captureError } from "@/utils/capture-error";
 
 const deviceOSEnum = z.enum(["android", "ios", "web"]);
 
@@ -64,7 +63,6 @@ export const createUser = async (args: {
   const { privyUserId, smartContractWalletAddress, inboxId, profile } = args;
 
   try {
-    // Build the request payload
     const requestPayload = {
       privyUserId,
       device: buildDeviceMetadata(),
@@ -78,36 +76,37 @@ export const createUser = async (args: {
     // Validate request payload
     const validationResult = createUserRequestSchema.safeParse(requestPayload);
     if (!validationResult.success) {
-      logger.error(
-        `[createUser] Request validation failed:
-        ${JSON.stringify(validationResult.error.errors, null, 2)}
-        Payload: ${JSON.stringify(requestPayload, null, 2)}`
+      const error = new Error(
+        `Invalid request data: ${validationResult.error.message}`
       );
-      throw new Error("Invalid request data");
+      captureError(error);
+      throw error;
     }
 
-    // Make the API call with validated data
     const response = await api.post<CreateUserResponse>(
       "/api/v1/users",
       validationResult.data
     );
 
-    // Validate response
     const responseValidation = createUserResponseSchema.safeParse(
       response.data
     );
     if (!responseValidation.success) {
-      logger.error(
-        `[createUser] Response validation failed:
-        ${JSON.stringify(responseValidation.error.errors, null, 2)}
-        Response: ${JSON.stringify(response.data, null, 2)}`
+      const error = new Error(
+        `Response validation failed: ${responseValidation.error.message}`
       );
-      throw new Error("Invalid response data from server");
+      captureError(error);
+      return response.data as CreateUserResponse;
     }
 
     return responseValidation.data;
   } catch (error) {
-    throw handleApiError(error, "createUser");
+    if (error instanceof Error) {
+      captureError(error);
+    } else {
+      captureError(new Error("Unknown error occurred in createUser"));
+    }
+    throw error;
   }
 };
 
@@ -122,6 +121,11 @@ export async function fetchJwt(): Promise<FetchJwtResponse> {
     const response = await api.post<FetchJwtResponse>("/api/v1/authenticate");
     return fetchJwtResponseSchema.parse(response.data);
   } catch (error) {
-    throw handleApiError(error, "fetchJwt");
+    if (error instanceof Error) {
+      captureError(error);
+    } else {
+      captureError(new Error("Unknown error occurred in fetchJwt"));
+    }
+    throw error;
   }
 }

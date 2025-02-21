@@ -27,7 +27,7 @@ import { ProfileContactCardLayout } from "@/features/profiles/components/profile
 import { validateProfileName } from "@/features/profiles/utils/validate-profile-name";
 import { useHeader } from "@/navigation/use-header";
 import { formatRandomUserName } from "@/features/onboarding/utils/format-random-user-name";
-import { profileValidationSchema } from "@/features/profiles/profiles.api";
+import { profileValidationSchema } from "@/features/profiles/schemas/profile-validation.schema";
 
 // Request validation schema
 const createUserRequestSchema = z.object({
@@ -88,11 +88,6 @@ export function OnboardingContactCardScreen() {
         const errorMessage =
           profileValidation.error.errors[0]?.message || "Invalid profile data";
         throw new ValidationError({ message: errorMessage });
-      }
-
-      // Validate required fields before proceeding
-      if (!store.name || !store.username) {
-        throw new Error("Please enter your name to continue");
       }
 
       if (!currentSender) {
@@ -255,65 +250,21 @@ const ProfileContactCardNameInput = memo(
 
       if (!isValid) {
         setNameValidationError(error);
-        // Clear username if name is invalid
         useOnboardingContactCardStore.getState().actions.setUsername("");
         return;
       }
 
       setNameValidationError(undefined);
-
-      // Generate username from display name
       let username = formatRandomUserName({ displayName: text });
 
-      // Log the generated username
-      logger.debug(
-        `[ProfileContactCardNameInput] Generated username: ${username} from display name: ${text}`
-      );
-
-      // Validate username using profileValidationSchema
-      const usernameValidation =
-        profileValidationSchema.shape.username.safeParse(username);
-
-      if (!usernameValidation.success) {
-        // If invalid, generate a fallback username that meets the schema requirements
+      // Ensure username meets minimum requirements
+      if (username.length < 3) {
         username = `user${Math.floor(Math.random() * 100000)}`;
-
-        // Validate the fallback username
-        const fallbackValidation =
-          profileValidationSchema.shape.username.safeParse(username);
-
-        if (!fallbackValidation.success) {
-          logger.error(
-            `[ProfileContactCardNameInput] Both generated and fallback usernames failed validation:
-            Original username: ${username}
-            Validation errors: ${JSON.stringify(
-              usernameValidation.error.errors
-            )}
-            Fallback validation errors: ${JSON.stringify(
-              fallbackValidation.error.errors
-            )}`
-          );
-          return;
-        }
-
-        logger.debug(
-          `[ProfileContactCardNameInput] Using validated fallback username: ${username}`
-        );
       }
 
-      // Set both name and username
       const store = useOnboardingContactCardStore.getState();
       store.actions.setName(text);
       store.actions.setUsername(username);
-
-      // Log the final state
-      logger.debug(
-        `[ProfileContactCardNameInput] Final state:
-        name: ${text}
-        username: ${username}
-        store.name: ${store.name}
-        store.username: ${store.username}`
-      );
     }, []);
 
     return (
