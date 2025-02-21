@@ -30,12 +30,11 @@ export const ProfileContactCard = memo(function ProfileContactCard({
       >
         {profile?.name}
       </Text>
-      {/* TODO: Add main address */}
-      {/* {profile?.username && (
+      {profile?.username && (
         <Text inverted color="secondary" preset="smaller">
-          {profile?.username}
+          @{profile?.username}
         </Text>
-      )} */}
+      )}
     </VStack>
   );
 
