@@ -97,7 +97,6 @@ const settings: Record = {
   },
 };
 
- 
 export default (): ExpoConfig => {
   const expoEnv = (process.env.EXPO_ENV || "development") as Environment;
   const config = settings[expoEnv];

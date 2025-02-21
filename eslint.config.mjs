@@ -1,7 +1,6 @@
 // While eslint-plugin-react-native fix to handle eslint flat config (https://github.com/Intellicode/eslint-plugin-react-native/issues/333#issuecomment-2150582430)
 import { fixupPluginRules } from "@eslint/compat";
 import pluginQuery from "@tanstack/eslint-plugin-query";
-import prettier from "eslint-config-prettier";
 import pluginImport from "eslint-plugin-import";
 import pluginReact from "eslint-plugin-react";
 import pluginReactHooks from "eslint-plugin-react-hooks";
@@ -95,7 +94,6 @@ const config = {
       version: "detect",
     },
   },
-  ...prettier,
 };
 
 export default config;
