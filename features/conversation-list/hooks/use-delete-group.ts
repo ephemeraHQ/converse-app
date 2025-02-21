@@ -1,18 +1,18 @@
+import { useMutation } from "@tanstack/react-query";
+import { ConversationTopic } from "@xmtp/react-native-sdk";
+import { useCallback } from "react";
 import { showActionSheet } from "@/components/action-sheet";
+import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
 import { updateInboxIdsConsentForAccount } from "@/features/consent/update-inbox-ids-consent-for-account";
 import { deleteConversation } from "@/features/conversation/conversation-metadata/conversation-metadata.api";
 import {
   getConversationMetadataQueryData,
   updateConversationMetadataQueryData,
 } from "@/features/conversation/conversation-metadata/conversation-metadata.query";
-import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
 import { translate } from "@/i18n";
 import { getGroupQueryData } from "@/queries/useGroupQuery";
 import { useAppTheme } from "@/theme/use-app-theme";
 import { captureErrorWithToast } from "@/utils/capture-error";
-import { useMutation } from "@tanstack/react-query";
-import { ConversationTopic } from "@xmtp/react-native-sdk";
-import { useCallback } from "react";
 
 export const useDeleteGroup = (args: { groupTopic: ConversationTopic }) => {
   const { groupTopic } = args;

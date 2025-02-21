@@ -1,9 +1,12 @@
-import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
+import type { ConversationTopic, DecodedMessage } from "@xmtp/react-native-sdk";
+import React, { memo } from "react";
+import { FlatList } from "react-native";
+import { ActivityIndicator } from "@/design-system/activity-indicator";
 import { Center } from "@/design-system/Center";
+import { EmptyState } from "@/design-system/empty-state";
 import { Text } from "@/design-system/Text";
 import { VStack } from "@/design-system/VStack";
-import { EmptyState } from "@/design-system/empty-state";
-import { ActivityIndicator } from "@/design-system/activity-indicator";
+import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
 import { ConversationMessage } from "@/features/conversation/conversation-message/conversation-message";
 import { ConversationMessageLayout } from "@/features/conversation/conversation-message/conversation-message-layout";
 import { ConversationMessageReactions } from "@/features/conversation/conversation-message/conversation-message-reactions/conversation-message-reactions";
@@ -15,9 +18,6 @@ import { ConversationStoreProvider } from "@/features/conversation/conversation.
 import { useConversationMessagesQuery } from "@/queries/conversation-messages-query";
 import { useConversationQuery } from "@/queries/conversation-query";
 import { $globalStyles } from "@/theme/styles";
-import type { ConversationTopic, DecodedMessage } from "@xmtp/react-native-sdk";
-import React, { memo } from "react";
-import { FlatList } from "react-native";
 
 type ConversationPreviewProps = {
   topic: ConversationTopic;
@@ -103,8 +103,7 @@ const MessageWrapper = memo(function MessageWrapper({
     <MessageContextStoreProvider
       message={message}
       previousMessage={previousMessage}
-      nextMessage={nextMessage}
-    >
+      nextMessage={nextMessage}>
       <VStack>
         <ConversationMessageTimestamp />
         <ConversationMessageLayout

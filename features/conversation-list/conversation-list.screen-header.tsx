@@ -1,24 +1,24 @@
+import { useNavigation } from "@react-navigation/native";
+import React, { useCallback } from "react";
+import { Alert, ViewStyle } from "react-native";
 import { Avatar } from "@/components/avatar";
 import { Center } from "@/design-system/Center";
-import { HStack } from "@/design-system/HStack";
+import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu";
 import { HeaderAction } from "@/design-system/Header/HeaderAction";
+import { HStack } from "@/design-system/HStack";
 import { Icon, iconRegistry } from "@/design-system/Icon/Icon";
 import { Pressable } from "@/design-system/Pressable";
 import { Text } from "@/design-system/Text";
-import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu";
 import {
   useCurrentProfiles,
   useMultiInboxStore,
   useSafeCurrentSender,
   useSafeCurrentSenderProfile,
-} from "@/features/multi-inbox/multi-inbox.store";
+} from "@/features/authentication/multi-inbox.store";
 import { useProfileQuery } from "@/features/profiles/profiles.query";
 import { translate } from "@/i18n";
 import { useHeader } from "@/navigation/use-header";
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
-import { useNavigation } from "@react-navigation/native";
-import React, { useCallback } from "react";
-import { Alert, ViewStyle } from "react-native";
 
 export function useConversationListScreenHeader() {
   const { theme } = useAppTheme();
@@ -32,7 +32,7 @@ export function useConversationListScreenHeader() {
       RightActionComponent: <HeaderRightActions />,
       titleComponent: <HeaderTitle />,
     },
-    [theme]
+    [theme],
   );
 }
 
@@ -74,16 +74,18 @@ function HeaderTitle() {
         Alert.alert("Coming soon");
       } else if (profileXmtpInboxId === "new-account") {
         alert(
-          "Under Construction - waiting on Privy for multiple embedded passkey support"
+          "Under Construction - waiting on Privy for multiple embedded passkey support",
         );
         // navigation.navigate("NewAccountNavigator");
       } else if (profileXmtpInboxId === "app-settings") {
         navigation.navigate("AppSettings");
       } else {
-        useMultiInboxStore.getState().setCurrentInboxId(profileXmtpInboxId);
+        useMultiInboxStore.getState().actions.setCurrentSender({
+          inboxId: profileXmtpInboxId,
+        });
       }
     },
-    [navigation]
+    [navigation],
   );
 
   return (
@@ -110,8 +112,7 @@ function HeaderTitle() {
             title: translate("app_settings"),
             image: iconRegistry["settings"],
           },
-        ]}
-      >
+        ]}>
         <HStack style={themed($rowContainer)}>
           <Text>{currentProfile?.name}</Text>
           <Center style={themed($iconContainer)}>
@@ -142,8 +143,7 @@ function ProfileAvatar() {
           inboxId,
         });
       }}
-      hitSlop={theme.spacing.sm}
-    >
+      hitSlop={theme.spacing.sm}>
       <Center style={themed($avatarContainer)}>
         <Avatar
           uri={profile?.avatar}

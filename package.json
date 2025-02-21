@@ -3,28 +3,33 @@
   "version": "2.2.26",
   "private": true,
   "scripts": {
-    "start": "expo start",
-    "start:preview": "EXPO_ENV=preview expo start",
     "android": "expo run:android",
-    "android:clean": "expo prebuild --clean -p android && yarn android",
     "android:build:dev": "npx eas-cli build -p android --profile development --local",
+    "android:clean": "expo prebuild --clean -p android && yarn android",
     "android:reverse": "adb reverse tcp:8081 tcp:8081 && adb reverse tcp:9875 tcp:9875",
     "android:sendApk": "./scripts/android/send-apk.sh",
-    "ios": "expo run:ios",
-    "ios:preview": "EXPO_ENV=preview expo run:ios",
-    "ios:preview:clean": "EXPO_ENV=preview expo prebuild --clean -p ios && yarn ios:preview",
-    "ios:clean": "expo prebuild --clean -p ios && yarn ios",
     "env:pull:dev": "npx eas-cli env:pull --environment=development",
     "env:pull:preview": "npx eas-cli env:pull --environment=preview",
     "env:pull:prod": "npx eas-cli env:pull --environment=production",
+    "postinstall": "patch-package && husky install && cross-os postinstall",
+    "ios": "expo run:ios",
+    "ios:clean": "expo prebuild --clean -p ios && yarn ios",
+    "ios:preview": "EXPO_ENV=preview expo run:ios",
+    "ios:preview:clean": "EXPO_ENV=preview expo prebuild --clean -p ios && yarn ios:preview",
     "lint": "eslint --max-warnings 2500",
     "lint:errors": "eslint --quiet",
-    "typecheck": "echo \"➜ Typechecking project...\" && tsc --noEmit",
+    "start": "expo start --scheme=converse-dev",
+    "start:preview": "EXPO_ENV=preview expo start --scheme=converse-preview",
     "test": "echo \"➜ Running tests...\" && jest --testPathIgnorePatterns='.*\\.perf-test\\.tsx$'",
-    "test:perf:baseline": "echo \"➜ Running tests with performance...\" && echo \"➜ Capture baseline performance tests...\" && yarn reassure --baseline && echo \"➜ Running current performance tests...\"",
     "test:perf": "echo \"➜ Running tests with performance...\" && echo \"➜ Capturing performance tests...\" && yarn reassure && echo \"➜ Running current performance tests...\"",
+    "test:perf:baseline": "echo \"➜ Running tests with performance...\" && echo \"➜ Capture baseline performance tests...\" && yarn reassure --baseline && echo \"➜ Running current performance tests...\"",
     "test-deep-linking": "node scripts/test-deep-linking.js",
-    "postinstall": "patch-package && husky install && cross-os postinstall"
+    "typecheck": "echo \"➜ Typechecking project...\" && tsc --noEmit"
+  },
+  "lint-staged": {
+    "*.{tsx,ts}": [
+      "eslint --fix"
+    ]
   },
   "dependencies": {
     "@azure/core-asynciterator-polyfill": "^1.0.2",
@@ -195,6 +200,7 @@
     "@babel/runtime": "^7.25.0",
     "@babel/traverse": "^7.25.3",
     "@eslint/compat": "^1.2.2",
+    "@ianvs/prettier-plugin-sort-imports": "^4.4.1",
     "@tanstack/eslint-plugin-query": "^5.62.16",
     "@testing-library/react-native": "^12.6.1",
     "@total-typescript/ts-reset": "^0.6.1",
@@ -207,9 +213,11 @@
     "@types/react-native-shared-group-preferences": "^1.1.1",
     "@types/text-encoding": "^0.0.39",
     "@types/uuid": "^9.0.8",
+    "@typescript-eslint/parser": "^8.24.1",
     "@welldone-software/why-did-you-render": "^8.0.3",
     "cross-os": "^1.5.0",
     "eslint": "^9.14.0",
+    "eslint-config-prettier": "^10.0.1",
     "eslint-import-resolver-typescript": "^3.6.3",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-react": "^7.37.2",
@@ -228,7 +236,8 @@
     "nanoid": "^3.0.0",
     "patch-package": "^6.5.1",
     "plist": "^3.0.6",
-    "prettier": "^3.3.3",
+    "prettier": "^3.5.1",
+    "prettier-plugin-packagejson": "^2.5.8",
     "process": "^0.11.10",
     "prompts": "^2.4.2",
     "react-native-svg-transformer": "^1.5.0",
@@ -238,12 +247,6 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.3.0",
     "typescript-eslint": "^8.13.0"
-  },
-  "lint-staged": {
-    "*.{tsx,ts}": [
-      "eslint --fix",
-      "prettier --write"
-    ]
   },
   "packageManager": "yarn@4.6.0",
   "engines": {

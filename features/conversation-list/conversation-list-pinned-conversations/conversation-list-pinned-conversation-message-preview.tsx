@@ -1,17 +1,17 @@
+import { ViewStyle } from "react-native";
 import { AnimatedHStack, HStack } from "@/design-system/HStack";
 import { Text } from "@/design-system/Text";
 import { useMessagePlainText } from "@/features/conversation-list/hooks/use-message-plain-text";
+import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types";
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { captureError } from "@/utils/capture-error";
-import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
-import { ViewStyle } from "react-native";
 
 export type IPinnedConversationMessagePreviewProps = {
-  message: DecodedMessageWithCodecsType;
+  message: IXmtpDecodedMessage;
 };
 
 export const PinnedConversationMessagePreview = (
-  props: IPinnedConversationMessagePreviewProps
+  props: IPinnedConversationMessagePreviewProps,
 ) => {
   const { message } = props;
 
@@ -30,8 +30,7 @@ export const PinnedConversationMessagePreview = (
         entering={theme.animation.reanimatedFadeInScaleIn()}
         exiting={theme.animation.reanimatedFadeOutScaleOut()}
         layout={theme.animation.reanimatedLayoutSpringTransition}
-        style={themed($innerStyle)}
-      >
+        style={themed($innerStyle)}>
         <Text numberOfLines={2} preset="smaller">
           {textContent}
         </Text>

@@ -1,11 +1,14 @@
+import { InboxId } from "@xmtp/react-native-sdk";
+import React, { memo, useCallback, useEffect, useState } from "react";
 import { Screen } from "@/components/screen/screen";
 import { SettingsList } from "@/design-system/settings-list/settings-list";
-import { useAddPfp } from "@/features/onboarding/hooks/useAddPfp";
+import { useLogout } from "@/features/authentication/use-logout.hook";
 import { ProfileContactCard } from "@/features/profiles/components/profile-contact-card/profile-contact-card";
 import { ProfileContactCardEditableAvatar } from "@/features/profiles/components/profile-contact-card/profile-contact-card-editable-avatar";
 import { ProfileContactCardEditableNameInput } from "@/features/profiles/components/profile-contact-card/profile-contact-card-editable-name-input";
 import { ProfileContactCardLayout } from "@/features/profiles/components/profile-contact-card/profile-contact-card-layout";
 import { ProfileSection } from "@/features/profiles/components/profile-section";
+import { ProfileSocialsNames } from "@/features/profiles/components/profile-social-names";
 import { useProfileMeScreenHeader } from "@/features/profiles/profile-me.screen-header";
 import {
   useProfileMeStore,
@@ -14,14 +17,11 @@ import {
 import { useProfileQuery } from "@/features/profiles/profiles.query";
 import { validateProfileName } from "@/features/profiles/utils/validate-profile-name";
 import { useSocialProfilesForAddressQuery } from "@/features/social-profiles/social-lookup.query";
+import { useAddPfp } from "@/hooks/use-add-pfp";
 import { translate } from "@/i18n";
-import { useAppTheme } from "@/theme/use-app-theme";
-import { useLogout } from "@/features/authentication/use-logout.hook";
 import { useRouter } from "@/navigation/use-navigation";
-import { InboxId } from "@xmtp/react-native-sdk";
-import React, { memo, useCallback, useEffect, useState } from "react";
-import { useCurrentSender } from "../multi-inbox/multi-inbox.store";
-import { ProfileSocialsNames } from "@/features/profiles/components/profile-social-names";
+import { useAppTheme } from "@/theme/use-app-theme";
+import { useCurrentSender } from "../authentication/multi-inbox.store";
 
 export function ProfileMe(props: { inboxId: InboxId }) {
   const { inboxId } = props;
@@ -115,7 +115,7 @@ const EditableProfileContactCardNameInput = memo(
 
         profileMeStore.getState().actions.setNameTextValue(text);
       },
-      [profileMeStore]
+      [profileMeStore],
     );
 
     return (
@@ -126,7 +126,7 @@ const EditableProfileContactCardNameInput = memo(
         helper={nameValidationError}
       />
     );
-  }
+  },
 );
 
 const EditableProfileContactCardAvatar = memo(
@@ -150,5 +150,5 @@ const EditableProfileContactCardAvatar = memo(
         onPress={addPFP}
       />
     );
-  }
+  },
 );

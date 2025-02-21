@@ -1,6 +1,10 @@
+import { getCompactRelativeTime } from "@utils/date";
+import { ConversationTopic } from "@xmtp/react-native-sdk";
+import { memo, useCallback, useMemo } from "react";
 import { Avatar } from "@/components/avatar";
 import { ISwipeableRenderActionsArgs } from "@/components/swipeable";
 import { MIDDLE_DOT } from "@/design-system/middle-dot";
+import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
 import { ConversationListItemSwipeable } from "@/features/conversation-list/conversation-list-item/conversation-list-item-swipeable/conversation-list-item-swipeable";
 import { RestoreSwipeableAction } from "@/features/conversation-list/conversation-list-item/conversation-list-item-swipeable/conversation-list-item-swipeable-restore-action";
 import { useConversationIsDeleted } from "@/features/conversation-list/hooks/use-conversation-is-deleted";
@@ -9,16 +13,13 @@ import { useDeleteDm } from "@/features/conversation-list/hooks/use-delete-dm";
 import { useMessagePlainText } from "@/features/conversation-list/hooks/use-message-plain-text";
 import { useRestoreConversation } from "@/features/conversation-list/hooks/use-restore-conversation";
 import { useToggleReadStatus } from "@/features/conversation-list/hooks/use-toggle-read-status";
-import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
 import { useProfileQuery } from "@/features/profiles/profiles.query";
+import { useFocusRerender } from "@/hooks/use-focus-rerender";
+import { navigate } from "@/navigation/navigation.utils";
 import { useConversationQuery } from "@/queries/conversation-query";
 import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query";
 import { useAppTheme } from "@/theme/use-app-theme";
 import { captureErrorWithToast } from "@/utils/capture-error";
-import { getCompactRelativeTime } from "@utils/date";
-import { navigate } from "@/navigation/navigation.utils";
-import { ConversationTopic } from "@xmtp/react-native-sdk";
-import { memo, useCallback, useMemo } from "react";
 import { ConversationListItem } from "./conversation-list-item";
 import { DeleteSwipeableAction } from "./conversation-list-item-swipeable/conversation-list-item-swipeable-delete-action";
 import { ToggleUnreadSwipeableAction } from "./conversation-list-item-swipeable/conversation-list-item-swipeable-toggle-read-action";
@@ -33,6 +34,9 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
   const currentAccount = useCurrentSenderEthAddress()!;
   const { theme } = useAppTheme();
 
+  // Need this so the timestamp is updated on every focus
+  useFocusRerender();
+
   // Conversation related hooks
   const { data: conversation } = useConversationQuery({
     account: currentAccount,
@@ -40,12 +44,11 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
     caller: "Conversation List Item Dm",
   });
 
-  const { data: peerInboxId, isLoading: isLoadingPeerInboxId } =
-    useDmPeerInboxIdQuery({
-      account: currentAccount,
-      topic: conversationTopic,
-      caller: "ConversationListItemDm",
-    });
+  const { data: peerInboxId } = useDmPeerInboxIdQuery({
+    account: currentAccount,
+    topic: conversationTopic,
+    caller: "ConversationListItemDm",
+  });
 
   // Peer info hooks
   const { data: profile } = useProfileQuery({ xmtpId: peerInboxId });
@@ -64,23 +67,16 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
     topic: conversationTopic,
   });
 
-  // Computed values
-  const title = useMemo(() => {
-    if (profile?.name) return profile.name;
-    return isLoadingPeerInboxId ? " " : "";
-  }, [profile, isLoadingPeerInboxId]);
-
   const timestamp = conversation?.lastMessage?.sentNs ?? 0;
-  const timeToShow = getCompactRelativeTime(timestamp);
 
-  const subtitle = useMemo(() => {
-    if (!timeToShow || !messageText) return "";
-    return `${timeToShow} ${MIDDLE_DOT} ${messageText}`;
-  }, [timeToShow, messageText]);
+  // No need for timeToShow variable anymore
+  const subtitle = !messageText
+    ? ""
+    : `${getCompactRelativeTime(timestamp)} ${MIDDLE_DOT} ${messageText}`;
 
   const leftActionsBackgroundColor = useMemo(
     () => (isDeleted ? theme.colors.fill.tertiary : theme.colors.fill.caution),
-    [isDeleted, theme]
+    [isDeleted, theme],
   );
 
   // Handlers
@@ -112,14 +108,14 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
       ) : (
         <DeleteSwipeableAction {...args} />
       ),
-    [isDeleted]
+    [isDeleted],
   );
 
   const renderRightActions = useCallback(
     (args: ISwipeableRenderActionsArgs) => (
       <ToggleUnreadSwipeableAction {...args} topic={conversationTopic} />
     ),
-    [conversationTopic]
+    [conversationTopic],
   );
 
   return (
@@ -128,8 +124,7 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
       renderLeftActions={renderLeftActions}
       onLeftSwipe={onLeftSwipe}
       onRightSwipe={onRightSwipe}
-      leftActionsBackgroundColor={leftActionsBackgroundColor}
-    >
+      leftActionsBackgroundColor={leftActionsBackgroundColor}>
       <ConversationListItem
         onPress={onPress}
         showError={false}
@@ -137,10 +132,10 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
           <Avatar
             size={theme.avatarSize.lg}
             uri={profile?.avatar}
-            name={title}
+            name={profile?.name}
           />
         }
-        title={title}
+        title={profile?.name}
         subtitle={subtitle}
         isUnread={isUnread}
       />

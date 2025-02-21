@@ -1,7 +1,7 @@
 import EventEmitter from "eventemitter3";
 import { Account, Wallet } from "thirdweb/wallets";
 import type { TransactionReceipt } from "viem";
-import { GroupWithCodecsType } from "./xmtpRN/xmtp-client/xmtp-client.types";
+import { IXmtpGroupWithCodecs } from "../features/xmtp/xmtp.types";
 
 type ShowActionSheetEvent<T extends string> = `showActionSheetForTxRef-${T}`;
 type OpenAttachmentMessage<T extends string> = `openAttachmentForMessage-${T}`;
@@ -9,7 +9,7 @@ type AttachmentMessageProcessed<T extends string> =
   `attachmentMessageProcessed-${T}`;
 
 type ConverseEvents = {
-  newGroup: (group: GroupWithCodecsType) => void;
+  newGroup: (group: IXmtpGroupWithCodecs) => void;
   "enable-transaction-mode": (enabled: boolean) => void;
   toggleSpamRequests: () => void;
   displayExternalWalletPicker: (title?: string, subtitle?: string) => void;
@@ -40,7 +40,7 @@ type Events = ConverseEvents &
 export const converseEventEmitter = new EventEmitter<Events>();
 
 export async function waitForConverseEvent<K extends keyof Events>(
-  eventName: K
+  eventName: K,
 ): Promise<Parameters<Events[K]>> {
   return new Promise<Parameters<Events[K]>>((resolve) => {
     converseEventEmitter.once(eventName, (...args: unknown[]) => {

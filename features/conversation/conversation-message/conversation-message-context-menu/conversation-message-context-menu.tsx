@@ -1,5 +1,9 @@
-import { AnimatedVStack, VStack } from "@/design-system/VStack";
+import { memo, useCallback, useMemo } from "react";
+import { Modal, Platform, StyleSheet } from "react-native";
+import Animated from "react-native-reanimated";
 import { useDropdownMenuCustomStyles } from "@/design-system/dropdown-menu/dropdown-menu-custom";
+import { AnimatedVStack, VStack } from "@/design-system/VStack";
+import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store";
 import { ConversationMessage } from "@/features/conversation/conversation-message/conversation-message";
 import { MessageContextMenuBackdrop } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu-backdrop";
 import { MessageContextMenuEmojiPicker } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu-emoji-picker/conversation-message-context-menu-emoji-picker";
@@ -23,19 +27,15 @@ import { useReactOnMessage } from "@/features/conversation/hooks/use-react-on-me
 import { useRemoveReactionOnMessage } from "@/features/conversation/hooks/use-remove-reaction-on-message";
 import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
 import { getConversationMessagesQueryData } from "@/queries/conversation-messages-query";
-import { memo, useCallback, useMemo } from "react";
-import { Modal, Platform, StyleSheet } from "react-native";
-import Animated from "react-native-reanimated";
 import { MessageContextMenuAboveMessageReactions } from "./conversation-message-context-menu-above-message-reactions";
 import { MessageContextMenuContainer } from "./conversation-message-context-menu-container";
 import { useMessageContextMenuItems } from "./conversation-message-context-menu.utils";
-import { getSafeCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
 
 export const ConversationMessageContextMenu = memo(
   function ConversationMessageContextMenu() {
     const messageContextMenuData =
       useConversationMessageContextMenuStoreContext(
-        (state) => state.messageContextMenuData
+        (state) => state.messageContextMenuData,
       );
 
     if (!messageContextMenuData) {
@@ -43,7 +43,7 @@ export const ConversationMessageContextMenu = memo(
     }
 
     return <Content messageContextMenuData={messageContextMenuData} />;
-  }
+  },
 );
 
 const Content = memo(function Content(props: {
@@ -82,17 +82,17 @@ const Content = memo(function Content(props: {
       : undefined;
 
     const nextMessage = nextMessageId
-      ? getMessageById({
+      ? (getMessageById({
           messageId: nextMessageId,
           topic,
-        }) ?? undefined
+        }) ?? undefined)
       : undefined;
 
     const previousMessage = previousMessageId
-      ? getMessageById({
+      ? (getMessageById({
           messageId: previousMessageId,
           topic,
-        }) ?? undefined
+        }) ?? undefined)
       : undefined;
 
     return {
@@ -146,7 +146,7 @@ const Content = memo(function Content(props: {
       removeReactionOnMessage,
       messageContextMenuStore,
       topic,
-    ]
+    ],
   );
 
   const handleChooseMoreEmojis = useCallback(() => {
@@ -164,8 +164,7 @@ const Content = memo(function Content(props: {
         visible={true}
         transparent={true}
         animationType="fade"
-        statusBarTranslucent={Platform.OS === "android"}
-      >
+        statusBarTranslucent={Platform.OS === "android"}>
         <Animated.View style={StyleSheet.absoluteFill}>
           <MessageContextMenuBackdrop handlePressBackdrop={handlePressBackdrop}>
             <AnimatedVStack style={StyleSheet.absoluteFill}>
@@ -177,8 +176,7 @@ const Content = memo(function Content(props: {
                 itemRectWidth={itemRectWidth}
                 menuHeight={menuHeight}
                 fromMe={fromMe}
-                hasReactions={hasReactions}
-              >
+                hasReactions={hasReactions}>
                 <MessageContextMenuAboveMessageReactions
                   topic={topic}
                   reactors={bySender ?? {}}
@@ -199,8 +197,7 @@ const Content = memo(function Content(props: {
                 <MessageContextStoreProvider
                   message={message}
                   nextMessage={nextMessage}
-                  previousMessage={previousMessage}
-                >
+                  previousMessage={previousMessage}>
                   {/* TODO: maybe make ConversationMessage more dumb to not need any context? */}
 
                   <ConversationMessage message={message} />

@@ -1,9 +1,10 @@
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import { z } from "zod";
 import { getCurrentUserQueryData } from "@/features/current-user/curent-user.query";
 import { getOrFetchConversation } from "@/queries/conversation-query";
 import { api } from "@/utils/api/api";
 import { captureError } from "@/utils/capture-error";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import { z } from "zod";
+import { enhanceError } from "@/utils/error";
 
 const ConversationMetadataSchema = z.object({
   deleted: z.boolean(),
@@ -51,7 +52,7 @@ export async function getConversationMetadata(args: {
   const conversationId = await getConversationId({ account, topic });
 
   const { data } = await api.get<IConversationMetadata>(
-    `/api/v1/metadata/conversation/${conversationId}`
+    `/api/v1/metadata/conversation/${conversationId}`,
   );
 
   const parseResult = ConversationMetadataSchema.safeParse(data);
@@ -59,9 +60,9 @@ export async function getConversationMetadata(args: {
     captureError(
       new Error(
         `Failed to parse conversation metadata response: ${JSON.stringify(
-          parseResult.error
-        )}`
-      )
+          parseResult.error,
+        )}`,
+      ),
     );
   }
 
@@ -184,6 +185,8 @@ async function updateConversationMetadata(args: {
 
   const currentUser = getCurrentUserQueryData();
 
+  console.log("currentUser:", currentUser);
+
   if (!currentUser) {
     throw new Error("No current user found");
   }
@@ -193,10 +196,10 @@ async function updateConversationMetadata(args: {
     {
       conversationId,
       deviceIdentityId: currentUser.identities.find(
-        (identity) => identity.privyAddress === account
+        (identity) => identity.privyAddress === account,
       )?.id,
       ...updates,
-    }
+    },
   );
 
   const parseResult = ConversationMetadataSchema.safeParse(data);
@@ -204,9 +207,9 @@ async function updateConversationMetadata(args: {
     captureError(
       new Error(
         `Failed to parse metadata update response: ${JSON.stringify(
-          parseResult.error
-        )}`
-      )
+          parseResult.error,
+        )}`,
+      ),
     );
   }
 

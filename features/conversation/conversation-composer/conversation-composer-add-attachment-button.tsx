@@ -1,13 +1,5 @@
-import { Center } from "@/design-system/Center";
-import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu";
-import { useConversationComposerStore } from "@/features/conversation/conversation-composer/conversation-composer.store-context";
-import { useConversationComposerIsEnabled } from "@/features/conversation/conversation-composer/hooks/conversation-composer-is-enabled";
-import { getCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
-import { captureErrorWithToast } from "@/utils/capture-error";
-import { encryptRemoteAttachment } from "@/utils/xmtpRN/attachments";
 import { Icon, iconRegistry } from "@design-system/Icon/Icon";
 import { translate } from "@i18n";
-import { useAppTheme } from "@/theme/use-app-theme";
 import { uploadRemoteAttachment } from "@utils/attachment/uploadRemoteAttachment";
 import {
   compressAndResizeImage,
@@ -17,6 +9,14 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import mime from "mime";
 import { useCallback } from "react";
+import { Center } from "@/design-system/Center";
+import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu";
+import { getCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
+import { useConversationComposerStore } from "@/features/conversation/conversation-composer/conversation-composer.store-context";
+import { useConversationComposerIsEnabled } from "@/features/conversation/conversation-composer/hooks/conversation-composer-is-enabled";
+import { encryptRemoteAttachment } from "@/features/xmtp/xmtp-codecs/xmtp-codecs-attachments";
+import { useAppTheme } from "@/theme/use-app-theme";
+import { captureErrorWithToast } from "@/utils/capture-error";
 
 const DATA_MIMETYPE_REGEX = /data:(.*?);/;
 
@@ -56,12 +56,11 @@ export function AddAttachmentButton() {
         const encryptedAttachment = await encryptRemoteAttachment(
           currentAccount,
           resizedImage.uri,
-          mimeType || undefined
+          mimeType || undefined,
         );
 
-        const uploadedAttachment = await uploadRemoteAttachment(
-          encryptedAttachment
-        );
+        const uploadedAttachment =
+          await uploadRemoteAttachment(encryptedAttachment);
 
         store.getState().updateMediaPreviewStatus("uploaded");
         store.getState().setComposerUploadedAttachment(uploadedAttachment);
@@ -70,7 +69,7 @@ export function AddAttachmentButton() {
         throw error;
       }
     },
-    [store]
+    [store],
   );
 
   const pickMedia = useCallback(async () => {
@@ -104,7 +103,7 @@ export function AddAttachmentButton() {
           break;
       }
     },
-    [openCamera, pickMedia]
+    [openCamera, pickMedia],
   );
 
   return (
@@ -126,16 +125,14 @@ export function AddAttachmentButton() {
           title: translate("camera"),
           image: iconRegistry["camera"],
         },
-      ]}
-    >
+      ]}>
       <Center
         style={{
           height: 36, // Value from Figma
           width: 36, // Value from Figma
           backgroundColor: theme.colors.fill.minimal,
           borderRadius: 36,
-        }}
-      >
+        }}>
         <Icon
           color={theme.colors.text.secondary}
           icon="plus"

@@ -1,3 +1,10 @@
+import { useMutation } from "@tanstack/react-query";
+import { ConversationTopic } from "@xmtp/react-native-sdk";
+import { useCallback } from "react";
+import {
+  getCurrentSenderEthAddress,
+  useCurrentSenderEthAddress,
+} from "@/features/authentication/multi-inbox.store";
 import {
   pinConversation,
   unpinConversation,
@@ -6,13 +13,6 @@ import {
   getConversationMetadataQueryData,
   updateConversationMetadataQueryData,
 } from "@/features/conversation/conversation-metadata/conversation-metadata.query";
-import {
-  getCurrentSenderEthAddress,
-  useCurrentSenderEthAddress,
-} from "@/features/multi-inbox/multi-inbox.store";
-import { useMutation } from "@tanstack/react-query";
-import { ConversationTopic } from "@xmtp/react-native-sdk";
-import { useCallback } from "react";
 
 export function usePinOrUnpinConversation(args: {
   conversationTopic: ConversationTopic;

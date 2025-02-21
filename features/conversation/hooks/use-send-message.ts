@@ -1,6 +1,3 @@
-import { getCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
-import { getOrFetchConversation } from "@/queries/conversation-query";
-import { captureErrorWithToast } from "@/utils/capture-error";
 import { useMutation } from "@tanstack/react-query";
 import {
   ConversationTopic,
@@ -8,6 +5,9 @@ import {
   RemoteAttachmentContent,
 } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
+import { getCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
+import { getOrFetchConversation } from "@/queries/conversation-query";
+import { captureErrorWithToast } from "@/utils/capture-error";
 
 export type ISendMessageParams = {
   topic: ConversationTopic;
@@ -23,7 +23,7 @@ export async function sendMessage(args: ISendMessageParams) {
   // Need at least a text or remoteAttachment
   if (!content.remoteAttachment && !content.text) {
     throw new Error(
-      "Invalid content: Either text or remoteAttachment must be provided"
+      "Invalid content: Either text or remoteAttachment must be provided",
     );
   }
 
@@ -51,7 +51,7 @@ export async function sendMessage(args: ISendMessageParams) {
   return conversation.send(
     content.remoteAttachment
       ? { remoteAttachment: content.remoteAttachment }
-      : { text: content.text! }
+      : { text: content.text! },
   );
 }
 
@@ -138,7 +138,7 @@ export function useSendMessage() {
         captureErrorWithToast(error);
       }
     },
-    [mutateAsync]
+    [mutateAsync],
   );
 
   return {

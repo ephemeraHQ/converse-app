@@ -9,6 +9,13 @@ export function ensureError(error: unknown): Error {
   return new Error("Unknown error occurred");
 }
 
+export function enhanceError(error: unknown, context: string): Error {
+  const originalError = ensureError(error);
+  originalError.message = `${context} - ${originalError.message}`;
+  return originalError;
+}
+
+
 export function ensureErrorHandler<T>(
   handler: (error: Error) => T
 ): (error: unknown) => T {
@@ -65,3 +72,4 @@ export class ApiError extends BaseError {
     super(`[API] ${message}`, cause);
   }
 }
+

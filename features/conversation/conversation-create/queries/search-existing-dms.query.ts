@@ -1,16 +1,16 @@
+import { queryOptions, useQuery } from "@tanstack/react-query";
+import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
+import { getCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm";
-import { getCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
 import { ensureProfileQueryData } from "@/features/profiles/profiles.query";
 import { doesSocialProfilesMatchTextQuery } from "@/features/profiles/utils/does-social-profiles-match-text-query";
 import { ensureSocialProfilesQueryData } from "@/features/social-profiles/social-lookup.query";
-import { getSearchExistingDmsQueryKey } from "@/queries/QueryKeys";
 import { getAllowedConsentConversationsQueryData } from "@/queries/conversations-allowed-consent-query";
+import { getSearchExistingDmsQueryKey } from "@/queries/QueryKeys";
 import { ensureDmPeerInboxIdQueryData } from "@/queries/use-dm-peer-inbox-id-query";
 import { ensureGroupMembersQueryData } from "@/queries/useGroupMembersQuery";
 import { captureError } from "@/utils/capture-error";
 import { normalizeString } from "@/utils/str";
-import { queryOptions, useQuery } from "@tanstack/react-query";
-import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 
 export function getSearchExistingDmsQueryOptions(args: {
   searchQuery: string;
@@ -20,7 +20,7 @@ export function getSearchExistingDmsQueryOptions(args: {
   const normalizedSearchQuery = normalizeString(args.searchQuery);
   return queryOptions({
     // NOT sure why this Eslint error
-    // eslint-disable-next-line @tanstack/query/exhaustive-deps
+     
     queryKey: getSearchExistingDmsQueryKey({
       searchQuery: normalizedSearchQuery,
       inboxId,
@@ -113,7 +113,7 @@ async function searchExistingDms(args: {
         captureError(e);
         return null;
       }
-    })
+    }),
   );
 
   // Filter out nulls and add matching topics to results

@@ -1,12 +1,3 @@
-import { ActionSheet } from "@/components/action-sheet";
-import { DebugProvider } from "@/components/debug-provider";
-import { Snackbars } from "@/components/snackbar/snackbars";
-import { useHydrateAuth } from "@/features/authentication/use-hydrate-auth";
-import { useLogoutOnJwtRefreshError } from "@/features/authentication/use-logout-on-jwt-refresh-error";
-import { useInitializeMultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
-import { useSetupStreamingSubscriptions } from "@/features/streams/streams";
-import { $globalStyles } from "@/theme/styles";
-import { useThemeProvider } from "@/theme/use-app-theme";
 import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
 import { BottomSheetModalProvider } from "@design-system/BottomSheet/BottomSheetModalProvider";
 import { useReactQueryDevTools } from "@dev-plugins/react-query";
@@ -17,6 +8,14 @@ import { queryClient } from "@queries/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { useCoinbaseWalletListener } from "@utils/coinbaseWallet";
 import * as Clipboard from "expo-clipboard";
+import { ActionSheet } from "@/components/action-sheet";
+import { DebugProvider } from "@/components/debug-provider";
+import { Snackbars } from "@/components/snackbar/snackbars";
+import { useHydrateAuth } from "@/features/authentication/use-hydrate-auth";
+import { useLogoutOnJwtRefreshError } from "@/features/authentication/use-logout-on-jwt-refresh-error";
+import { useSetupStreamingSubscriptions } from "@/features/streams/streams";
+import { $globalStyles } from "@/theme/styles";
+import { useThemeProvider } from "@/theme/use-app-theme";
 import "expo-dev-client";
 import React, { useEffect } from "react";
 import { Platform } from "react-native";
@@ -25,8 +24,8 @@ import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
 import { DevToolsBubble } from "react-native-react-query-devtools";
 import {
-  ReanimatedLogLevel,
   configureReanimatedLogger,
+  ReanimatedLogLevel,
 } from "react-native-reanimated";
 import { ThirdwebProvider } from "thirdweb/react";
 import { config } from "./config";
@@ -60,7 +59,6 @@ configureCoinbase({
 const coinbaseUrl = new URL(`https://${config.websiteDomain}/coinbase`);
 
 export function App() {
-  useInitializeMultiInboxClient();
   useLogoutOnJwtRefreshError();
   useMonitorNetworkConnectivity();
   useHydrateAuth();
@@ -90,8 +88,7 @@ export function App() {
     <QueryClientProvider client={queryClient}>
       <PrivyProvider
         appId={config.privy.appId}
-        clientId={config.privy.clientId}
-      >
+        clientId={config.privy.clientId}>
         <SmartWalletsProvider>
           <ThirdwebProvider>
             <AppKeyboardProvider>

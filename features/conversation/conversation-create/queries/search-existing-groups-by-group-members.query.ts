@@ -1,14 +1,14 @@
+import { queryOptions, useQuery } from "@tanstack/react-query";
+import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
+import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store";
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
-import { getSafeCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
 import { doesSocialProfilesMatchTextQuery } from "@/features/profiles/utils/does-social-profiles-match-text-query";
 import { ensureSocialProfilesQueryData } from "@/features/social-profiles/social-lookup.query";
-import { getSearchExistingGroupsByMemberNameQueryKey } from "@/queries/QueryKeys";
 import { getAllowedConsentConversationsQueryData } from "@/queries/conversations-allowed-consent-query";
+import { getSearchExistingGroupsByMemberNameQueryKey } from "@/queries/QueryKeys";
 import { ensureGroupMembersQueryData } from "@/queries/useGroupMembersQuery";
 import { captureError } from "@/utils/capture-error";
 import { normalizeString } from "@/utils/str";
-import { queryOptions, useQuery } from "@tanstack/react-query";
-import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 
 export async function searchExistingGroupsByGroupMembers(args: {
   searchQuery: string;
@@ -38,7 +38,7 @@ export async function searchExistingGroupsByGroupMembers(args: {
         });
 
         const otherMembersInboxIds = members.ids.filter(
-          (id) => id !== searcherInboxId
+          (id) => id !== searcherInboxId,
         );
 
         // Use Promise.race to get the first matching member
@@ -63,7 +63,7 @@ export async function searchExistingGroupsByGroupMembers(args: {
       } catch (error) {
         captureError(error);
       }
-    })
+    }),
   );
 
   return matchingTopics;
@@ -77,7 +77,7 @@ export function getSearchExistingGroupsByGroupMembersQueryOptions(args: {
   const normalizedSearchQuery = normalizeString(searchQuery);
   return queryOptions({
     // False positive
-    // eslint-disable-next-line @tanstack/query/exhaustive-deps
+     
     queryKey: getSearchExistingGroupsByMemberNameQueryKey({
       searchQuery: normalizedSearchQuery,
       inboxId: searcherInboxId,

@@ -1,16 +1,3 @@
-import {
-  getCurrentSenderEthAddress,
-  getSafeCurrentSender,
-} from "@/features/multi-inbox/multi-inbox.store";
-import { getConversationForCurrentAccount } from "@/features/conversation/utils/get-conversation-for-current-account";
-import {
-  addConversationMessageQuery,
-  refetchConversationMessages,
-} from "@/queries/conversation-messages-query";
-import { captureErrorWithToast } from "@/utils/capture-error";
-import { getTodayNs } from "@/utils/date";
-import { getRandomId } from "@/utils/general";
-import { contentTypesPrefixes } from "@/utils/xmtpRN/xmtp-content-types/xmtp-content-types";
 import { useMutation } from "@tanstack/react-query";
 import {
   ConversationTopic,
@@ -19,6 +6,19 @@ import {
   ReactionContent,
 } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
+import {
+  getCurrentSenderEthAddress,
+  getSafeCurrentSender,
+} from "@/features/authentication/multi-inbox.store";
+import { getConversationForCurrentAccount } from "@/features/conversation/utils/get-conversation-for-current-account";
+import { contentTypesPrefixes } from "@/features/xmtp/xmtp-content-types/xmtp-content-types";
+import {
+  addConversationMessageQuery,
+  refetchConversationMessages,
+} from "@/queries/conversation-messages-query";
+import { captureErrorWithToast } from "@/utils/capture-error";
+import { getTodayNs } from "@/utils/date";
+import { getRandomId } from "@/utils/general";
 
 export function useRemoveReactionOnMessage(props: {
   topic: ConversationTopic;
@@ -87,7 +87,7 @@ export function useRemoveReactionOnMessage(props: {
         captureErrorWithToast(error);
       }
     },
-    [removeReactionMutationAsync]
+    [removeReactionMutationAsync],
   );
 
   return removeReactionFromMessage;

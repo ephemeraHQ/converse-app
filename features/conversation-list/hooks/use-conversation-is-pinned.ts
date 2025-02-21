@@ -1,7 +1,7 @@
-import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
-import { getConversationMetadataQueryOptions } from "@/features/conversation/conversation-metadata/conversation-metadata.query";
 import { useQuery } from "@tanstack/react-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
+import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
+import { getConversationMetadataQueryOptions } from "@/features/conversation/conversation-metadata/conversation-metadata.query";
 
 export function useConversationIsPinned(args: {
   conversationTopic: ConversationTopic;

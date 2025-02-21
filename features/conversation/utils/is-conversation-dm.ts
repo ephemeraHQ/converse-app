@@ -1,11 +1,11 @@
-import {
-  ConversationWithCodecsType,
-  DmWithCodecsType,
-} from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { ConversationVersion } from "@xmtp/react-native-sdk";
+import {
+  IXmtpConversationWithCodecs,
+  IXmtpDmWithCodecs,
+} from "@/features/xmtp/xmtp.types";
 
 export function isConversationDm(
-  conversation: ConversationWithCodecsType
-): conversation is DmWithCodecsType {
+  conversation: IXmtpConversationWithCodecs,
+): conversation is IXmtpDmWithCodecs {
   return conversation.version === ConversationVersion.DM;
 }

@@ -1,12 +1,12 @@
-import { getCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
+import { InboxId } from "@xmtp/react-native-sdk";
+import { getCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm";
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
+import { isSameInboxId } from "@/features/xmtp/xmtp-inbox-id/xmtp-inbox-id";
 import { getAllowedConsentConversationsQueryOptions } from "@/queries/conversations-allowed-consent-query";
 import { queryClient } from "@/queries/queryClient";
 import { ensureDmPeerInboxIdQueryData } from "@/queries/use-dm-peer-inbox-id-query";
 import { ensureGroupMembersQueryData } from "@/queries/useGroupMembersQuery";
-import { isSameInboxId } from "@/utils/xmtpRN/xmtp-inbox-id/xmtp-inbox-id";
-import { InboxId } from "@xmtp/react-native-sdk";
 
 export async function findConversationByInboxIds(args: {
   inboxIds: InboxId[];
@@ -27,7 +27,7 @@ export async function findConversationByInboxIds(args: {
     getAllowedConsentConversationsQueryOptions({
       account,
       caller: "findConversationByMembers",
-    })
+    }),
   );
 
   if (!conversations) {
@@ -44,8 +44,8 @@ export async function findConversationByInboxIds(args: {
         caller: "findConversationByMembers",
         account,
         topic: conversation.topic,
-      })
-    )
+      }),
+    ),
   );
 
   // Check if we have a group with all the selected inboxIds
@@ -58,7 +58,7 @@ export async function findConversationByInboxIds(args: {
 
     // Then check that every memberId matches either currentUserInboxId or one of inboxIds
     return groupMembersInboxIds.every((groupMemberInboxId) =>
-      inboxIds.some((inboxId) => isSameInboxId(groupMemberInboxId, inboxId))
+      inboxIds.some((inboxId) => isSameInboxId(groupMemberInboxId, inboxId)),
     );
   });
 
@@ -74,8 +74,8 @@ export async function findConversationByInboxIds(args: {
         account,
         topic: dm.topic,
         caller: "findConversationByMembers",
-      })
-    )
+      }),
+    ),
   );
 
   const matchingDm = dms.find((_, index) => {

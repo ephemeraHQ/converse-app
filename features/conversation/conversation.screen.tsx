@@ -1,7 +1,10 @@
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import React, { memo } from "react";
 import { Screen } from "@/components/screen/screen";
+import { ActivityIndicator } from "@/design-system/activity-indicator";
 import { Center } from "@/design-system/Center";
 import { VStack } from "@/design-system/VStack";
-import { ActivityIndicator } from "@/design-system/activity-indicator";
+import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
 import { ConversationComposer } from "@/features/conversation/conversation-composer/conversation-composer";
 import { ConversationComposerStoreProvider } from "@/features/conversation/conversation-composer/conversation-composer.store-context";
 import { ConversationCreateSearchInput } from "@/features/conversation/conversation-create/components/conversation-create-search-input";
@@ -14,15 +17,12 @@ import { DmConversationTitle } from "@/features/conversation/conversation-screen
 import { GroupConversationTitle } from "@/features/conversation/conversation-screen-header/conversation-screen-group-header-title";
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm";
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
-import { useHeader } from "@/navigation/use-header";
-import { useConversationQuery } from "@/queries/conversation-query";
 import { NavigationParamList } from "@/navigation/navigation.types";
+import { useHeader } from "@/navigation/use-header";
+import { useRouter } from "@/navigation/use-navigation";
+import { useConversationQuery } from "@/queries/conversation-query";
 import { $globalStyles } from "@/theme/styles";
 import { useAppTheme } from "@/theme/use-app-theme";
-import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
-import { useRouter } from "@/navigation/use-navigation";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React, { memo } from "react";
 import { ConversationMessages } from "./conversation-messages";
 import {
   ConversationStoreProvider,
@@ -30,7 +30,7 @@ import {
 } from "./conversation.store-context";
 
 export const ConversationScreen = memo(function ConversationScreen(
-  props: NativeStackScreenProps<NavigationParamList, "Conversation">
+  props: NativeStackScreenProps<NavigationParamList, "Conversation">,
 ) {
   const {
     topic,
@@ -44,8 +44,7 @@ export const ConversationScreen = memo(function ConversationScreen(
       <ConversationStoreProvider
         topic={topic ?? null}
         isCreatingNewConversation={isNew}
-        searchSelectedUserInboxIds={searchSelectedUserInboxIds}
-      >
+        searchSelectedUserInboxIds={searchSelectedUserInboxIds}>
         <ConversationMessageContextMenuStoreProvider>
           <ConversationComposerStoreProvider inputValue={composerTextPrefill}>
             <Content />
@@ -63,7 +62,7 @@ const Content = memo(function Content() {
   const navigation = useRouter();
   const topic = useConversationStoreContext((state) => state.topic);
   const isCreatingNewConversation = useConversationStoreContext(
-    (state) => state.isCreatingNewConversation
+    (state) => state.isCreatingNewConversation,
   );
 
   const { data: conversation, isLoading: isLoadingConversation } =
@@ -100,7 +99,7 @@ const Content = memo(function Content() {
         },
       }),
     },
-    [conversation, isCreatingNewConversation]
+    [conversation, isCreatingNewConversation],
   );
 
   if (isLoadingConversation) {

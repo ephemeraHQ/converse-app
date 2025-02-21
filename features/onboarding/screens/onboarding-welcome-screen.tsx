@@ -1,12 +1,14 @@
+import { memo, useCallback, useEffect } from "react";
+import { Button, TextStyle } from "react-native";
 import { Screen } from "@/components/screen/screen";
 import { showSnackbar } from "@/components/snackbar/snackbar.service";
 import { Center } from "@/design-system/Center";
+import { Loader } from "@/design-system/loader";
 import { Pressable } from "@/design-system/Pressable";
 import { AnimatedText, Text } from "@/design-system/Text";
 import { VStack } from "@/design-system/VStack";
-import { Loader } from "@/design-system/loader";
+import { useMultiInboxStore } from "@/features/authentication/multi-inbox.store";
 import { useLogout } from "@/features/authentication/use-logout.hook";
-import { useMultiInboxStore } from "@/features/multi-inbox/multi-inbox.store";
 import { OnboardingSubtitle } from "@/features/onboarding/components/onboarding-subtitle";
 import { OnboardingTitle } from "@/features/onboarding/components/onboarding-title";
 import { useLoginWithPasskey } from "@/features/onboarding/hooks/use-login-with-passkey";
@@ -14,8 +16,6 @@ import { useSignupWithPasskey } from "@/features/onboarding/hooks/use-signup-wit
 import { $globalStyles } from "@/theme/styles";
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { captureErrorWithToast } from "@/utils/capture-error";
-import { memo, useCallback, useEffect } from "react";
-import { Button, TextStyle } from "react-native";
 
 export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
   const { themed, theme } = useAppTheme();
@@ -28,13 +28,13 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
   // Safer to fully logout when we're here
   useEffect(() => {
     logout();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   const handleSignup = useCallback(async () => {
     try {
       const { inboxId, ethereumAddress } = await signup();
-      useMultiInboxStore.getState().addSender({
+      useMultiInboxStore.getState().actions.addSender({
         inboxId,
         ethereumAddress,
       });
@@ -48,7 +48,7 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
   const handleLogin = useCallback(async () => {
     try {
       const { inboxId, ethereumAddress } = await login();
-      useMultiInboxStore.getState().addSender({
+      useMultiInboxStore.getState().actions.addSender({
         inboxId,
         ethereumAddress,
       });
@@ -77,8 +77,7 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
       <Screen
         contentContainerStyle={$globalStyles.flex1}
         safeAreaEdges={["bottom"]}
-        preset="scroll"
-      >
+        preset="scroll">
         <Center style={$globalStyles.flex1}>
           <VStack>
             <OnboardingSubtitle>Welcome to Convos</OnboardingSubtitle>
@@ -95,8 +94,7 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
         <VStack
           style={{
             height: 100,
-          }}
-        >
+          }}>
           {isSigningUp || isLoggingIn ? (
             <Center style={$globalStyles.flex1}>
               <Loader />
@@ -113,16 +111,14 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
           style={{
             paddingHorizontal: theme.spacing.lg,
             marginTop: theme.spacing.lg,
-          }}
-        >
+          }}>
           <Pressable onPress={handleReset}>
             <Text
               preset="smaller"
               color="secondary"
               style={{
                 textAlign: "center",
-              }}
-            >
+              }}>
               Press me to clear stuff and restart{"\n"}(use this if you get in a
               funky state)
             </Text>

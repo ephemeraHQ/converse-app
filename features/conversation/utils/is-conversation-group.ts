@@ -1,11 +1,11 @@
-import {
-  ConversationWithCodecsType,
-  GroupWithCodecsType,
-} from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { ConversationVersion } from "@xmtp/react-native-sdk";
+import {
+  IXmtpConversationWithCodecs,
+  IXmtpGroupWithCodecs,
+} from "@/features/xmtp/xmtp.types";
 
 export function isConversationGroup(
-  conversation: ConversationWithCodecsType
-): conversation is GroupWithCodecsType {
+  conversation: IXmtpConversationWithCodecs,
+): conversation is IXmtpGroupWithCodecs {
   return conversation.version === ConversationVersion.GROUP;
 }

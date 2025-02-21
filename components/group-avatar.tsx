@@ -1,16 +1,16 @@
+import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
+import React, { memo, useMemo } from "react";
+import { StyleProp, TextStyle, ViewStyle } from "react-native";
 import { Center } from "@/design-system/Center";
 import { Text } from "@/design-system/Text";
 import { VStack } from "@/design-system/VStack";
-import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
+import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
 import { useProfilesQueries } from "@/features/profiles/profiles.query";
 import { useGroupMembersQuery } from "@/queries/useGroupMembersQuery";
 import { useGroupQuery } from "@/queries/useGroupQuery";
 import { $globalStyles } from "@/theme/styles";
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { Nullable } from "@/types/general";
-import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
-import React, { memo, useMemo } from "react";
-import { StyleProp, TextStyle, ViewStyle } from "react-native";
 import { Avatar } from "./avatar";
 
 /**
@@ -34,7 +34,7 @@ export const GroupAvatarInboxIds = memo(function GroupAvatarInboxIds(props: {
               uri: profile.avatar,
               name: profile.name,
             }
-          : null
+          : null,
       )
       .filter(Boolean);
   }, [profiles]);
@@ -97,7 +97,7 @@ export const GroupAvatar = memo(function GroupAvatar(props: {
                 uri: profile.avatar,
                 name: profile.name,
               }
-            : null
+            : null,
         )
         .filter(Boolean) ?? []
     );
@@ -148,7 +148,7 @@ const GroupAvatarUI = memo(function GroupAvatarUI(props: IGroupAvatarUIProps) {
 
   const positions = useMemo(
     () => calculatePositions(memberCount, MAIN_CIRCLE_RADIUS),
-    [memberCount]
+    [memberCount],
   );
 
   return (
@@ -194,7 +194,7 @@ const GroupAvatarUI = memo(function GroupAvatarUI(props: IGroupAvatarUIProps) {
 
 const calculatePositions = (
   memberCount: number,
-  mainCircleRadius: number
+  mainCircleRadius: number,
 ): Position[] => {
   const positionMaps: { [key: number]: Position[] } = {
     0: [],
@@ -245,8 +245,7 @@ const ExtraMembersIndicator: React.FC<{
           height: (pos.size / 100) * size,
           borderRadius: ((pos.size / 100) * size) / 2,
         },
-      ]}
-    >
+      ]}>
       <Text
         style={[
           themed($extraMembersText),
@@ -254,8 +253,7 @@ const ExtraMembersIndicator: React.FC<{
             color: theme.colors.global.white,
             fontSize: ((pos.size / 100) * size) / 2,
           },
-        ]}
-      >
+        ]}>
         +{extraMembersCount}
       </Text>
     </Center>

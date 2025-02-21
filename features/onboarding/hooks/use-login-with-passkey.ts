@@ -1,12 +1,10 @@
-import { RELYING_PARTY } from "@/features/onboarding/passkey.constants";
-import {
-  createInboxWithSigner,
-  createSmartWalletSigner,
-} from "@/features/onboarding/utils/passkey";
-import { logger } from "@/utils/logger";
 import { useLoginWithPasskey as usePrivyLoginWithPasskey } from "@privy-io/expo/passkey";
 import { useSmartWallets } from "@privy-io/expo/smart-wallets";
 import { useEffect, useRef, useState } from "react";
+import { createXmtpSignerFromPrivySwc } from "@/features/onboarding/utils/create-xmtp-signer-from-privy-swc";
+import { createXmtpClient } from "@/features/xmtp/xmtp-client/xmtp-client.service";
+import { logger } from "@/utils/logger";
+import { RELYING_PARTY } from "../onboarding.constants";
 
 export function useLoginWithPasskey() {
   const { client: smartWalletClient } = useSmartWallets();
@@ -33,18 +31,27 @@ export function useLoginWithPasskey() {
     try {
       setIsLoggingIn(true);
 
+      // Step 1: Passkey login
+      logger.debug(`[Passkey Login] Starting passkey authentication`);
       await privyLoginWithPasskey({
         relyingParty: RELYING_PARTY,
       });
 
+      // Step 2: Wallet setup
+      logger.debug(`[Wallet Setup] Getting smart wallet client`);
       const client = await waitForSmartWalletClient();
+      const signer = createXmtpSignerFromPrivySwc(client);
 
-      const signer = createSmartWalletSigner(client);
-
-      const { inboxId } = await createInboxWithSigner(signer);
+      // Step 3: Inbox setup
+      logger.debug(
+        `[Inbox Setup] Creating inbox for address: ${client.account.address}`,
+      );
+      const xmtpClient = await createXmtpClient({
+        inboxSigner: signer,
+      });
 
       return {
-        inboxId,
+        inboxId: xmtpClient.inboxId,
         ethereumAddress: client.account.address,
       };
     } catch (error) {

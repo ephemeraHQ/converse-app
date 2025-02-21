@@ -1,14 +1,14 @@
-import { GroupAvatarInboxIds } from "@/components/group-avatar";
-import { AnimatedCenter, Center } from "@/design-system/Center";
-import { HStack } from "@/design-system/HStack";
-import { ObjectTyped } from "@/utils/object-typed";
-import { getReactionContent } from "@/utils/xmtpRN/reactions";
 import { Text } from "@design-system/Text";
-import { useAppTheme } from "@/theme/use-app-theme";
 import { InboxId, ReactionContent } from "@xmtp/react-native-sdk";
 import React, { FC, memo, useMemo } from "react";
 import { FlatList } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { GroupAvatarInboxIds } from "@/components/group-avatar";
+import { AnimatedCenter, Center } from "@/design-system/Center";
+import { HStack } from "@/design-system/HStack";
+import { getReactionContent } from "@/features/xmtp/xmtp-codecs/xmtp-codecs-reaction";
+import { useAppTheme } from "@/theme/use-app-theme";
+import { ObjectTyped } from "@/utils/object-typed";
 
 type MessageContextMenuReactorsProps = {
   reactors: {
@@ -38,7 +38,7 @@ export const MessageContextMenuReactors: FC<
           reactionMap[getReactionContent(reaction)] = [];
         }
         reactionMap[getReactionContent(reaction)].push(
-          reactorInboxId as InboxId
+          reactorInboxId as InboxId,
         );
       }
     });
@@ -54,8 +54,7 @@ export const MessageContextMenuReactors: FC<
         top: safeAreaInsets.top + theme.spacing.xs,
         left: 0,
         right: 0,
-      }}
-    >
+      }}>
       <FlatList
         data={listData}
         horizontal
@@ -91,15 +90,13 @@ const Item = memo(function Item({
       vertical
       style={{
         rowGap: theme.spacing.xxs,
-      }}
-    >
+      }}>
       <GroupAvatarInboxIds inboxIds={inboxIds} />
       <HStack
         style={{
           alignItems: "center",
           columnGap: theme.spacing.xxxs,
-        }}
-      >
+        }}>
         <Text>{content}</Text>
         <Text color="secondary" preset="small">
           {inboxIds.length}

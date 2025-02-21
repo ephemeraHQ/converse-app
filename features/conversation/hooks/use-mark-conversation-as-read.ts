@@ -1,11 +1,11 @@
-import { getCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
+import { MutationOptions, useMutation } from "@tanstack/react-query";
+import { ConversationTopic } from "@xmtp/react-native-sdk";
+import { getCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
+import { markConversationAsRead } from "@/features/conversation/conversation-metadata/conversation-metadata.api";
 import {
   getConversationMetadataQueryData,
   updateConversationMetadataQueryData,
 } from "@/features/conversation/conversation-metadata/conversation-metadata.query";
-import { markConversationAsRead } from "@/features/conversation/conversation-metadata/conversation-metadata.api";
-import { MutationOptions, useMutation } from "@tanstack/react-query";
-import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { formatDateForApi } from "@/utils/api/api.utils";
 
 // Define the type for the mutation context
@@ -22,6 +22,7 @@ export function getMarkConversationAsReadMutationOptions(args: {
   const { topic } = args;
 
   return {
+    mutationKey: ["markConversationAsRead", topic],
     mutationFn: async () => {
       const currentAccount = getCurrentSenderEthAddress()!;
       const readUntil = formatDateForApi(new Date());
@@ -72,7 +73,7 @@ export function getMarkConversationAsReadMutationOptions(args: {
 
 export function useMarkConversationAsRead(args: { topic: ConversationTopic }) {
   const { mutateAsync: markAsReadAsync } = useMutation(
-    getMarkConversationAsReadMutationOptions(args)
+    getMarkConversationAsReadMutationOptions(args),
   );
 
   return {

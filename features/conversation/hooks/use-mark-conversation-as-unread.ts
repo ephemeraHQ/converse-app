@@ -1,14 +1,14 @@
+import { useMutation } from "@tanstack/react-query";
+import { ConversationTopic } from "@xmtp/react-native-sdk";
 import {
   getCurrentSenderEthAddress,
   useCurrentSenderEthAddress,
-} from "@/features/multi-inbox/multi-inbox.store";
+} from "@/features/authentication/multi-inbox.store";
+import { markConversationAsUnread } from "@/features/conversation/conversation-metadata/conversation-metadata.api";
 import {
   getConversationMetadataQueryData,
   updateConversationMetadataQueryData,
 } from "@/features/conversation/conversation-metadata/conversation-metadata.query";
-import { markConversationAsUnread } from "@/features/conversation/conversation-metadata/conversation-metadata.api";
-import { useMutation } from "@tanstack/react-query";
-import { ConversationTopic } from "@xmtp/react-native-sdk";
 
 export function useMarkConversationAsUnread(args: {
   topic: ConversationTopic;

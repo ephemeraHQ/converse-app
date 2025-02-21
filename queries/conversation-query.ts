@@ -1,12 +1,12 @@
-import { ensureConversationSyncAllQuery } from "@/queries/conversation-sync-all-query";
-import { captureError } from "@/utils/capture-error";
-import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
-import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import { conversationQueryKey } from "./QueryKeys";
-import { queryClient } from "./queryClient";
+import { getXmtpClientByEthAddress } from "@/features/xmtp/xmtp-client/xmtp-client.service";
+import { ensureConversationSyncAllQuery } from "@/queries/conversation-sync-all-query";
 import { Optional } from "@/types/general";
+import { captureError } from "@/utils/capture-error";
+import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
+import { queryClient } from "./queryClient";
+import { conversationQueryKey } from "./QueryKeys";
 
 export type ConversationQueryData = Awaited<ReturnType<typeof getConversation>>;
 
@@ -48,7 +48,7 @@ async function getConversation(args: IGetConversationArgs) {
     }),
   ]);
 
-  const client = MultiInboxClient.instance.getInboxClientForAddress({
+  const client = await getXmtpClientByEthAddress({
     ethereumAddress: account,
   });
 
@@ -97,8 +97,8 @@ async function getConversation(args: IGetConversationArgs) {
   if (totalTimeDiff > 3000) {
     captureError(
       new Error(
-        `[useConversationQuery] Fetched conversation for ${topic} in ${totalTimeDiff}ms`
-      )
+        `[useConversationQuery] Fetched conversation for ${topic} in ${totalTimeDiff}ms`,
+      ),
     );
   }
 
@@ -110,7 +110,7 @@ export const useConversationQuery = (args: IGetConversationArgsWithCaller) => {
 };
 
 export function getConversationQueryOptions(
-  args: Optional<IGetConversationArgsWithCaller, "caller">
+  args: Optional<IGetConversationArgsWithCaller, "caller">,
 ) {
   const { account, topic, caller } = args;
   const enabled = !!topic && !!account;
@@ -127,7 +127,7 @@ export function getConversationQueryOptions(
 export const setConversationQueryData = (
   args: IGetConversationArgs & {
     conversation: ConversationQueryData;
-  }
+  },
 ) => {
   const { account, topic, conversation } = args;
   queryClient.setQueryData(
@@ -135,14 +135,14 @@ export const setConversationQueryData = (
       account,
       topic,
     }).queryKey,
-    conversation
+    conversation,
   );
 };
 
 export function updateConversationQueryData(
   args: IGetConversationArgs & {
     conversationUpdate: Partial<ConversationQueryData>;
-  }
+  },
 ) {
   const { conversationUpdate } = args;
   queryClient.setQueryData(
@@ -152,7 +152,7 @@ export function updateConversationQueryData(
         return undefined;
       }
       return updateObjectAndMethods(previousConversation, conversationUpdate);
-    }
+    },
   );
 }
 

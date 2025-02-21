@@ -28,7 +28,7 @@ const EXPO_ENV = process.env.EXPO_ENV;
 if (API_URL.includes("localhost")) {
   if (EXPO_ENV && EXPO_ENV !== "development") {
     throw new Error(
-      "Using localhost API URL in non-dev environment. Did you forget to pull env vars?"
+      "Using localhost API URL in non-dev environment. Did you forget to pull env vars?",
     );
   }
 }

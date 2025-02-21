@@ -1,15 +1,15 @@
+import { ConversationTopic, GroupUpdatedContent } from "@xmtp/react-native-sdk";
+import {
+  stopStreamingAllMessage,
+  streamAllMessages,
+} from "@/features/xmtp/xmtp-messages/xmtp-messages-stream";
+import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types";
 import { addConversationMessageQuery } from "@/queries/conversation-messages-query";
 import { updateConversationQueryData } from "@/queries/conversation-query";
 import { updateConversationInAllowedConsentConversationsQueryData } from "@/queries/conversations-allowed-consent-query";
 import { refetchGroupMembersQuery } from "@/queries/useGroupMembersQuery";
 import { captureError } from "@/utils/capture-error";
 import { streamLogger } from "@/utils/logger";
-import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
-import {
-  stopStreamingAllMessage,
-  streamAllMessages,
-} from "@/utils/xmtpRN/xmtp-messages/xmtp-messages-stream";
-import { ConversationTopic, GroupUpdatedContent } from "@xmtp/react-native-sdk";
 
 export async function startMessageStreaming(args: { account: string }) {
   const { account } = args;
@@ -23,7 +23,7 @@ export { stopStreamingAllMessage };
 
 async function handleNewMessage(args: {
   account: string;
-  message: DecodedMessageWithCodecsType;
+  message: IXmtpDecodedMessage;
 }) {
   const { account, message } = args;
 
@@ -87,7 +87,7 @@ type MetadataField = keyof typeof METADATA_FIELD_MAP;
 function handleNewGroupUpdatedMessage(args: {
   account: string;
   topic: ConversationTopic;
-  message: DecodedMessageWithCodecsType;
+  message: IXmtpDecodedMessage;
 }) {
   const { account, topic, message } = args;
 
@@ -109,7 +109,7 @@ function handleNewGroupUpdatedMessage(args: {
       // Validate that the field is supported
       if (!(fieldName in METADATA_FIELD_MAP)) {
         captureError(
-          new Error(`Unsupported metadata field name: ${fieldName}`)
+          new Error(`Unsupported metadata field name: ${fieldName}`),
         );
         return;
       }

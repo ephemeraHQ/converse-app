@@ -1,8 +1,8 @@
-import { getConversationMessageQueryOptions } from "@/queries/useConversationMessage";
-import { useConversationMessagesQuery } from "@/queries/conversation-messages-query";
-import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
 import { useQuery } from "@tanstack/react-query";
 import { ConversationTopic, MessageId } from "@xmtp/react-native-sdk";
+import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
+import { useConversationMessagesQuery } from "@/queries/conversation-messages-query";
+import { getConversationMessageQueryOptions } from "@/queries/useConversationMessage";
 
 export function useConversationMessageById(args: {
   messageId: MessageId;

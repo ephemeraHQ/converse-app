@@ -1,35 +1,35 @@
-import { VStack } from "@/design-system/VStack";
-import { useConversationStore } from "@/features/conversation/conversation.store-context";
-import { $globalStyles } from "@/theme/styles";
-import { useAppTheme } from "@/theme/use-app-theme";
-import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 // import { LegendList } from "@legendapp/list";
-import { ReactElement, memo, useEffect } from "react";
+import { memo, ReactElement, useEffect } from "react";
 import { FlatList, FlatListProps, Platform } from "react-native";
 import Animated, {
   AnimatedProps,
   useAnimatedRef,
 } from "react-native-reanimated";
+import { VStack } from "@/design-system/VStack";
+import { useConversationStore } from "@/features/conversation/conversation.store-context";
+import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types";
+import { $globalStyles } from "@/theme/styles";
+import { useAppTheme } from "@/theme/use-app-theme";
 
 type ConversationMessagesListProps = Omit<
-  AnimatedProps<FlatListProps<DecodedMessageWithCodecsType>>,
+  AnimatedProps<FlatListProps<IXmtpDecodedMessage>>,
   "renderItem" | "data"
 > & {
-  messages: DecodedMessageWithCodecsType[];
+  messages: IXmtpDecodedMessage[];
   renderMessage: (args: {
-    message: DecodedMessageWithCodecsType;
+    message: IXmtpDecodedMessage;
     index: number;
   }) => ReactElement;
 };
 
 export const ConversationMessagesList = memo(function ConversationMessagesList(
-  props: ConversationMessagesListProps
+  props: ConversationMessagesListProps,
 ) {
   const { messages, renderMessage, ...rest } = props;
 
   const { theme } = useAppTheme();
 
-  const scrollRef = useAnimatedRef<FlatList<DecodedMessageWithCodecsType>>();
+  const scrollRef = useAnimatedRef<FlatList<IXmtpDecodedMessage>>();
 
   const conversationStore = useConversationStore();
 
@@ -39,7 +39,7 @@ export const ConversationMessagesList = memo(function ConversationMessagesList(
       (scrollToMessageId) => {
         if (!scrollToMessageId) return;
         const index = messages.findIndex(
-          (message) => message.id === scrollToMessageId
+          (message) => message.id === scrollToMessageId,
         );
         if (index === -1) return;
         scrollRef.current?.scrollToIndex({
@@ -50,7 +50,7 @@ export const ConversationMessagesList = memo(function ConversationMessagesList(
         conversationStore.setState({
           scrollToMessageId: undefined,
         });
-      }
+      },
     );
 
     return () => {
@@ -111,7 +111,7 @@ export const ConversationMessagesList = memo(function ConversationMessagesList(
   );
 });
 
-const keyExtractor = (message: DecodedMessageWithCodecsType) => {
+const keyExtractor = (message: IXmtpDecodedMessage) => {
   return (
     // @ts-expect-error
     message.tempOptimisticId || // Check use-send-message.ts
@@ -126,4 +126,4 @@ export const conversationListDefaultProps = {
   keyboardShouldPersistTaps: "handled" as const,
   showsVerticalScrollIndicator: Platform.OS === "ios", // Size glitch on Android
   keyExtractor,
-} satisfies Partial<FlatListProps<DecodedMessageWithCodecsType>>;
+} satisfies Partial<FlatListProps<IXmtpDecodedMessage>>;

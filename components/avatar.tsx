@@ -1,12 +1,12 @@
+import { Image } from "expo-image";
+import React, { memo, useCallback, useState } from "react";
+import { Platform, StyleProp, ViewStyle } from "react-native";
 import { Center } from "@/design-system/Center";
 import { Icon } from "@/design-system/Icon/Icon";
 import { Text } from "@/design-system/Text";
 import { useAppTheme } from "@/theme/use-app-theme";
 import { Nullable } from "@/types/general";
 import { getCapitalizedLettersForAvatar } from "@/utils/get-capitalized-letters-for-avatar";
-import { Image } from "expo-image";
-import React, { memo, useCallback, useState } from "react";
-import { Platform, StyleProp, ViewStyle } from "react-native";
 
 export type IAvatarProps = {
   uri: Nullable<string>;
@@ -34,25 +34,6 @@ export const Avatar = memo(function Avatar({
     setDidError(false);
   }, []);
 
-  if (uri && !didError) {
-    return (
-      <Center style={style}>
-        <Image
-          onLoad={handleImageLoad}
-          onError={handleImageError}
-          source={{ uri }}
-          style={{
-            borderRadius: avatarSize / 2,
-            width: avatarSize,
-            height: avatarSize,
-          }}
-          cachePolicy="memory-disk"
-          testID="avatar-image"
-        />
-      </Center>
-    );
-  }
-
   return (
     <Center
       style={[
@@ -64,9 +45,22 @@ export const Avatar = memo(function Avatar({
         },
         style,
       ]}
-      testID="avatar-placeholder"
-    >
-      {name ? (
+      testID="avatar-placeholder">
+      {uri && !didError ? (
+        <Image
+          onLoad={handleImageLoad}
+          onError={handleImageError}
+          source={{ uri }}
+          style={{
+            position: "absolute",
+            borderRadius: avatarSize / 2,
+            width: avatarSize,
+            height: avatarSize,
+          }}
+          cachePolicy="memory-disk"
+          testID="avatar-image"
+        />
+      ) : name ? (
         <Text
           weight="medium"
           style={{
@@ -74,8 +68,7 @@ export const Avatar = memo(function Avatar({
             fontSize: avatarSize / 2.4, // 2.4 is the ratio in the Figma design
             lineHeight: avatarSize / 2.4, // 2.4 is the ratio in the Figma design
             paddingTop: avatarSize / 15, // 15 is totally random and padding top shouldn't be needed but otherwise the text is not centered
-          }}
-        >
+          }}>
           {firstLetter}
         </Text>
       ) : (

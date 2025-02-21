@@ -1,19 +1,19 @@
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { ConversationTopic } from "@xmtp/react-native-sdk";
+import { useCallback } from "react";
 import { showActionSheet } from "@/components/action-sheet";
+import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
 import { useDenyDmMutation } from "@/features/consent/use-deny-dm.mutation";
 import { deleteConversation } from "@/features/conversation/conversation-metadata/conversation-metadata.api";
 import {
   getConversationMetadataQueryData,
   updateConversationMetadataQueryData,
 } from "@/features/conversation/conversation-metadata/conversation-metadata.query";
-import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
 import { useProfileQuery } from "@/features/profiles/profiles.query";
 import { translate } from "@/i18n";
 import { getConversationQueryOptions } from "@/queries/conversation-query";
 import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query";
 import { captureErrorWithToast } from "@/utils/capture-error";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { ConversationTopic } from "@xmtp/react-native-sdk";
-import { useCallback } from "react";
 
 export const useDeleteDm = ({ topic }: { topic: ConversationTopic }) => {
   const currentAccount = useCurrentSenderEthAddress()!;

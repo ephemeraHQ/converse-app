@@ -1,6 +1,6 @@
 // import { IXmtpEnv } from "@/utils/xmtpRN/xmtp.types";
 
-import type { IXmtpEnv } from "@/utils/xmtpRN/xmtp.types";
+import type { IXmtpEnv } from "@/features/xmtp/xmtp.types";
 
 type IWalletConnectConfig = {
   projectId: string | undefined;

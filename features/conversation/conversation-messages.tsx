@@ -1,4 +1,13 @@
+import { MessageId } from "@xmtp/react-native-sdk";
+import React, { memo, useCallback, useEffect, useMemo, useRef } from "react";
+import {
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  Platform,
+} from "react-native";
+import { FadeInDown } from "react-native-reanimated";
 import { AnimatedVStack } from "@/design-system/VStack";
+import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store";
 import { useConversationIsUnread } from "@/features/conversation-list/hooks/use-conversation-is-unread";
 import { useConversationComposerStore } from "@/features/conversation/conversation-composer/conversation-composer.store-context";
 import { ConversationConsentPopupDm } from "@/features/conversation/conversation-consent-popup/conversation-consent-popup-dm";
@@ -31,24 +40,15 @@ import { useRemoveReactionOnMessage } from "@/features/conversation/hooks/use-re
 import { isConversationAllowed } from "@/features/conversation/utils/is-conversation-allowed";
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm";
 import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
+import {
+  IXmtpConversationWithCodecs,
+  IXmtpDecodedMessage,
+} from "@/features/xmtp/xmtp.types";
 import { useScreenFocusEffectOnce } from "@/hooks/use-screen-focus-effect-once";
 import { useAppStateHandlers } from "@/hooks/useAppStateHandlers";
 import { useConversationMessagesQuery } from "@/queries/conversation-messages-query";
 import { useAppTheme } from "@/theme/use-app-theme";
 import { captureError } from "@/utils/capture-error";
-import {
-  ConversationWithCodecsType,
-  DecodedMessageWithCodecsType,
-} from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
-import { useSafeCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
-import { MessageId } from "@xmtp/react-native-sdk";
-import React, { memo, useCallback, useEffect, useMemo, useRef } from "react";
-import {
-  NativeScrollEvent,
-  NativeSyntheticEvent,
-  Platform,
-} from "react-native";
-import { FadeInDown } from "react-native-reanimated";
 import { CONVERSATION_LIST_REFRESH_THRESHOLD } from "./conversation-list.contstants";
 import { ConversationMessageHighlighted } from "./conversation-message/conversation-message-highlighted";
 import {
@@ -58,7 +58,7 @@ import {
 import { useCurrentConversationTopic } from "./conversation.store-context";
 
 export const ConversationMessages = memo(function ConversationMessages(props: {
-  conversation: ConversationWithCodecsType;
+  conversation: IXmtpConversationWithCodecs;
 }) {
   const { conversation } = props;
 
@@ -100,7 +100,7 @@ export const ConversationMessages = memo(function ConversationMessages(props: {
     const messageId = messages.ids.find(
       (messageId) =>
         isAnActualMessage(messages.byId[messageId]) &&
-        messages.byId[messageId].senderInboxId === currentAccountInboxId
+        messages.byId[messageId].senderInboxId === currentAccountInboxId,
     );
 
     return messageId;
@@ -139,7 +139,7 @@ export const ConversationMessages = memo(function ConversationMessages(props: {
         handleRefresh();
       }
     },
-    [handleRefresh, isRefetchingMessages]
+    [handleRefresh, isRefetchingMessages],
   );
 
   const allMessages = Object.values(messages?.byId ?? {});
@@ -196,9 +196,9 @@ export const ConversationMessages = memo(function ConversationMessages(props: {
 
 const ConversationMessagesListItem = memo(
   function ConversationMessagesListItem(props: {
-    message: DecodedMessageWithCodecsType;
-    previousMessage: DecodedMessageWithCodecsType | undefined;
-    nextMessage: DecodedMessageWithCodecsType | undefined;
+    message: IXmtpDecodedMessage;
+    previousMessage: IXmtpDecodedMessage | undefined;
+    nextMessage: IXmtpDecodedMessage | undefined;
     isLatestMessageSentByCurrentUser: boolean;
     animateEntering: boolean;
   }) {
@@ -228,8 +228,7 @@ const ConversationMessagesListItem = memo(
       <MessageContextStoreProvider
         message={message}
         previousMessage={previousMessage}
-        nextMessage={nextMessage}
-      >
+        nextMessage={nextMessage}>
         <AnimatedVStack
           {...(animateEntering && {
             entering: FadeInDown.springify()
@@ -242,13 +241,11 @@ const ConversationMessagesListItem = memo(
                   },
                 ],
               }),
-          })}
-        >
+          })}>
           <ConversationMessageTimestamp />
           <ConversationMessageRepliable
             onReply={handleReply}
-            messageIsFromCurrentUser={isFromCurrentUser}
-          >
+            messageIsFromCurrentUser={isFromCurrentUser}>
             <ConversationMessageLayout
               message={
                 <ConversationMessageGesturesWrapper>
@@ -272,7 +269,7 @@ const ConversationMessagesListItem = memo(
         </AnimatedVStack>
       </MessageContextStoreProvider>
     );
-  }
+  },
 );
 
 const ConversationMessageGesturesWrapper = memo(
@@ -301,7 +298,7 @@ const ConversationMessageGesturesWrapper = memo(
           itemRectWidth: e.width,
         });
       },
-      [messageContextMenuStore, messageStore]
+      [messageContextMenuStore, messageStore],
     );
 
     const handleTap = useCallback(() => {
@@ -335,10 +332,9 @@ const ConversationMessageGesturesWrapper = memo(
       <ConversationMessageGestures
         onLongPress={handleLongPress}
         onTap={handleTap}
-        onDoubleTap={handleDoubleTap}
-      >
+        onDoubleTap={handleDoubleTap}>
         {props.children}
       </ConversationMessageGestures>
     );
-  }
+  },
 );

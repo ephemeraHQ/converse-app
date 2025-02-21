@@ -1,6 +1,6 @@
 import { logger } from "@utils/logger";
 import { InboxId } from "@xmtp/react-native-sdk";
-import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
+import { getXmtpClientByEthAddress } from "../xmtp/xmtp-client/xmtp-client.service";
 
 type UpdateInboxIdsConsentForAccountParams = {
   account: string;
@@ -13,14 +13,14 @@ export const updateInboxIdsConsentForAccount = async ({
   inboxIds,
   consent,
 }: UpdateInboxIdsConsentForAccountParams): Promise<void> => {
-  const client = MultiInboxClient.instance.getInboxClientForAddress({
+  const client = await getXmtpClientByEthAddress({
     ethereumAddress: account,
   });
 
   logger.debug(
     `[XMTPRN Contacts] Consenting to inboxIds on protocol: ${inboxIds.join(
-      ", "
-    )}`
+      ", ",
+    )}`,
   );
   const start = new Date().getTime();
 
@@ -38,6 +38,6 @@ export const updateInboxIdsConsentForAccount = async ({
   logger.debug(
     `[XMTPRN Contacts] Consented to inboxIds on protocol in ${
       (end - start) / 1000
-    } sec`
+    } sec`,
   );
 };

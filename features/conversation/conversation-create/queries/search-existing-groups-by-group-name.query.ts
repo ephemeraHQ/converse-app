@@ -1,10 +1,11 @@
-import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
-import { getSearchExistingGroupsByGroupNameQueryKey } from "@/queries/QueryKeys";
-import { getAllowedConsentConversationsQueryData } from "@/queries/conversations-allowed-consent-query";
-import { normalizeString } from "@/utils/str";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { InboxId } from "@xmtp/react-native-sdk";
-import { getSafeCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
+import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store";
+import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
+import { getAllowedConsentConversationsQueryData } from "@/queries/conversations-allowed-consent-query";
+import { getSearchExistingGroupsByGroupNameQueryKey } from "@/queries/QueryKeys";
+import { normalizeString } from "@/utils/str";
+
 export async function searchExistingGroupsByGroupName(args: {
   searchQuery: string;
 }) {
@@ -33,7 +34,7 @@ export function getSearchExistingGroupsByGroupNameQueryOptions(args: {
   const normalizedSearchQuery = normalizeString(searchQuery);
   return queryOptions({
     // False positive
-    // eslint-disable-next-line @tanstack/query/exhaustive-deps
+     
     queryKey: getSearchExistingGroupsByGroupNameQueryKey({
       searchQuery: normalizedSearchQuery,
       inboxId: searcherInboxId,
