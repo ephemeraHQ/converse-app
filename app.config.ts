@@ -28,7 +28,7 @@ const env = process.env as {
   EXPO_ENV?: string;
 };
 
-const settings: Record<Environment, EnvironmentConfig> = {
+const settings: Record = {
   development: {
     scheme: "converse-dev",
     ios: {
@@ -97,7 +97,7 @@ const settings: Record<Environment, EnvironmentConfig> = {
   },
 };
 
-// eslint-disable-next-line import/no-default-export
+ 
 export default (): ExpoConfig => {
   const expoEnv = (process.env.EXPO_ENV || "development") as Environment;
   const config = settings[expoEnv];
