@@ -2,12 +2,19 @@ import { Screen } from "@/components/screen/screen";
 import { OnboardingSubtitle } from "@/features/onboarding/components/onboarding-subtitle";
 import { OnboardingTitle } from "@/features/onboarding/components/onboarding-title";
 import React, { memo, useCallback, useEffect, useState } from "react";
+import { Alert, TextStyle, ViewStyle } from "react-native";
+import { usePrivy } from "@privy-io/expo";
+import { create } from "zustand";
+import { z } from "zod";
 
 import { Center } from "@/design-system/Center";
 import { VStack } from "@/design-system/VStack";
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { captureErrorWithToast } from "@/utils/capture-error";
-import { Alert, TextStyle, ViewStyle } from "react-native";
+import { ValidationError } from "@/utils/api/api.error";
+import { isAxiosError } from "axios";
+import { logger } from "@/utils/logger";
+
 import { useAddPfp } from "../hooks/useAddPfp";
 // import { useProfile } from "../hooks/useProfile";
 import { useAuthStore } from "@/features/authentication/authentication.store";
@@ -19,9 +26,45 @@ import { ProfileContactCardEditableNameInput } from "@/features/profiles/compone
 import { ProfileContactCardLayout } from "@/features/profiles/components/profile-contact-card/profile-contact-card-layout";
 import { validateProfileName } from "@/features/profiles/utils/validate-profile-name";
 import { useHeader } from "@/navigation/use-header";
-import { ValidationError } from "@/utils/api/api.error";
-import { usePrivy } from "@privy-io/expo";
-import { create } from "zustand";
+import { formatRandomUserName } from "@/features/onboarding/utils/format-random-user-name";
+import { profileValidationSchema } from "@/features/profiles/profiles.api";
+
+// Request validation schema
+const createUserRequestSchema = z.object({
+  inboxId: z.string(),
+  privyUserId: z.string(),
+  smartContractWalletAddress: z.string(),
+  profile: profileValidationSchema.pick({ name: true, username: true }),
+});
+
+type IOnboardingContactCardStore = {
+  name: string;
+  username: string;
+  nameValidationError: string;
+  avatar: string;
+  actions: {
+    setName: (name: string) => void;
+    setUsername: (username: string) => void;
+    setNameValidationError: (nameValidationError: string) => void;
+    setAvatar: (avatar: string) => void;
+  };
+};
+
+const useOnboardingContactCardStore = create<IOnboardingContactCardStore>(
+  (set) => ({
+    name: "",
+    username: "",
+    nameValidationError: "",
+    avatar: "",
+    actions: {
+      setName: (name: string) => set({ name }),
+      setUsername: (username: string) => set({ username }),
+      setNameValidationError: (nameValidationError: string) =>
+        set({ nameValidationError }),
+      setAvatar: (avatar: string) => set({ avatar }),
+    },
+  })
+);
 
 export function OnboardingContactCardScreen() {
   const { themed } = useAppTheme();
@@ -33,6 +76,24 @@ export function OnboardingContactCardScreen() {
   const handleRealContinue = useCallback(async () => {
     try {
       const currentSender = useMultiInboxStore.getState().currentSender;
+      const store = useOnboardingContactCardStore.getState();
+
+      // Validate profile data first using profileValidationSchema
+      const profileValidation = profileValidationSchema.safeParse({
+        name: store.name,
+        username: store.username,
+      });
+
+      if (!profileValidation.success) {
+        const errorMessage =
+          profileValidation.error.errors[0]?.message || "Invalid profile data";
+        throw new ValidationError({ message: errorMessage });
+      }
+
+      // Validate required fields before proceeding
+      if (!store.name || !store.username) {
+        throw new Error("Please enter your name to continue");
+      }
 
       if (!currentSender) {
         throw new Error("No current sender found, please logout");
@@ -42,15 +103,25 @@ export function OnboardingContactCardScreen() {
         throw new Error("No Privy user found, please logout");
       }
 
-      await createUserAsync({
-        inboxId: currentSender?.inboxId,
-        privyUserId: privyUser?.id,
-        smartContractWalletAddress: currentSender?.ethereumAddress,
+      // Create and validate the request payload
+      const payload = {
+        inboxId: currentSender.inboxId,
+        privyUserId: privyUser.id,
+        smartContractWalletAddress: currentSender.ethereumAddress,
         profile: {
-          name: useOnboardingContactCardStore.getState().name,
+          name: store.name,
+          username: store.username,
         },
-      });
+      };
 
+      // Validate the payload against our schema
+      const validationResult = createUserRequestSchema.safeParse(payload);
+
+      if (!validationResult.success) {
+        throw new Error("Invalid request data. Please check your input.");
+      }
+
+      await createUserAsync(validationResult.data);
       useAuthStore.getState().actions.setStatus("signedIn");
 
       // TODO: Notification permissions screen
@@ -63,14 +134,20 @@ export function OnboardingContactCardScreen() {
       // }
     } catch (error) {
       if (error instanceof ValidationError) {
-        useOnboardingContactCardStore
-          .getState()
-          .actions.setNameValidationError(Object.values(error.errors)[0]);
         captureErrorWithToast(error, {
-          message: Object.values(error.errors)[0],
+          message: error.message,
         });
+      } else if (isAxiosError(error)) {
+        const userMessage =
+          error.response?.status === 409
+            ? "This username is already taken"
+            : "Failed to create profile. Please try again.";
+
+        captureErrorWithToast(error, { message: userMessage });
       } else {
-        captureErrorWithToast(error);
+        captureErrorWithToast(error, {
+          message: "An unexpected error occurred. Please try again.",
+        });
       }
     }
   }, [createUserAsync, privyUser]);
@@ -178,11 +255,65 @@ const ProfileContactCardNameInput = memo(
 
       if (!isValid) {
         setNameValidationError(error);
-      } else {
-        setNameValidationError(undefined);
+        // Clear username if name is invalid
+        useOnboardingContactCardStore.getState().actions.setUsername("");
+        return;
       }
 
-      useOnboardingContactCardStore.getState().actions.setName(text);
+      setNameValidationError(undefined);
+
+      // Generate username from display name
+      let username = formatRandomUserName({ displayName: text });
+
+      // Log the generated username
+      logger.debug(
+        `[ProfileContactCardNameInput] Generated username: ${username} from display name: ${text}`
+      );
+
+      // Validate username using profileValidationSchema
+      const usernameValidation =
+        profileValidationSchema.shape.username.safeParse(username);
+
+      if (!usernameValidation.success) {
+        // If invalid, generate a fallback username that meets the schema requirements
+        username = `user${Math.floor(Math.random() * 100000)}`;
+
+        // Validate the fallback username
+        const fallbackValidation =
+          profileValidationSchema.shape.username.safeParse(username);
+
+        if (!fallbackValidation.success) {
+          logger.error(
+            `[ProfileContactCardNameInput] Both generated and fallback usernames failed validation:
+            Original username: ${username}
+            Validation errors: ${JSON.stringify(
+              usernameValidation.error.errors
+            )}
+            Fallback validation errors: ${JSON.stringify(
+              fallbackValidation.error.errors
+            )}`
+          );
+          return;
+        }
+
+        logger.debug(
+          `[ProfileContactCardNameInput] Using validated fallback username: ${username}`
+        );
+      }
+
+      // Set both name and username
+      const store = useOnboardingContactCardStore.getState();
+      store.actions.setName(text);
+      store.actions.setUsername(username);
+
+      // Log the final state
+      logger.debug(
+        `[ProfileContactCardNameInput] Final state:
+        name: ${text}
+        username: ${username}
+        store.name: ${store.name}
+        store.username: ${store.username}`
+      );
     }, []);
 
     return (
@@ -217,28 +348,3 @@ const ProfileContactCardAvatar = memo(function ProfileContactCardAvatar() {
     />
   );
 });
-
-type IOnboardingContactCardStore = {
-  name: string;
-  nameValidationError: string;
-  avatar: string;
-  actions: {
-    setName: (name: string) => void;
-    setNameValidationError: (nameValidationError: string) => void;
-    setAvatar: (avatar: string) => void;
-  };
-};
-
-const useOnboardingContactCardStore = create<IOnboardingContactCardStore>(
-  (set, get) => ({
-    name: "",
-    nameValidationError: "",
-    avatar: "",
-    actions: {
-      setName: (name: string) => set({ name }),
-      setNameValidationError: (nameValidationError: string) =>
-        set({ nameValidationError }),
-      setAvatar: (avatar: string) => set({ avatar }),
-    },
-  })
-);
