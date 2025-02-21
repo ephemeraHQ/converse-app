@@ -28,7 +28,7 @@ const env = process.env as {
   EXPO_ENV?: string;
 };
 
-const settings: Record = {
+const settings: Record<Environment, EnvironmentConfig> = {
   development: {
     scheme: "converse-dev",
     ios: {
