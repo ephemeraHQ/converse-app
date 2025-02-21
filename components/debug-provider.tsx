@@ -3,6 +3,7 @@ import { useLogout } from "@/features/authentication/use-logout.hook";
 import { translate } from "@/i18n";
 import { navigate } from "@/navigation/navigation.utils";
 import { $globalStyles } from "@/theme/styles";
+import { getEnv } from "@/utils/getEnv";
 import { getNativeLogFile } from "@/utils/xmtpRN/logs";
 import * as Sentry from "@sentry/react-native";
 import {
@@ -22,6 +23,8 @@ export function DebugProvider(props: { children: React.ReactNode }) {
   const { children } = props;
 
   const { logout } = useLogout();
+
+  const { currentlyRunning } = Updates.useUpdates();
 
   const methods = useMemo(() => {
     // Debug menu options and their corresponding actions
@@ -64,6 +67,70 @@ export function DebugProvider(props: { children: React.ReactNode }) {
           }mediacache`
         );
         alert("Done!");
+      },
+      "Show App Info": () => {
+        const appVersion = Constants.expoConfig?.version;
+        const buildNumber =
+          Platform.OS === "ios"
+            ? Constants.expoConfig?.ios?.buildNumber
+            : Constants.expoConfig?.android?.versionCode;
+        const environment = getEnv();
+
+        Alert.alert(
+          "App Information",
+          [
+            `Version: ${appVersion}`,
+            `Build: ${buildNumber}`,
+            `Environment: ${environment}`,
+            `Update ID: ${currentlyRunning.updateId || "embedded"}`,
+            `Created At: ${
+              currentlyRunning.createdAt?.toLocaleString() || "N/A"
+            }`,
+            `Runtime Version: ${currentlyRunning.runtimeVersion}`,
+            `Channel: ${currentlyRunning.channel || "N/A"}`,
+            `Is Embedded: ${currentlyRunning.isEmbeddedLaunch}`,
+            currentlyRunning.isEmergencyLaunch ? `Emergency Launch: Yes` : "",
+            currentlyRunning.emergencyLaunchReason
+              ? `Emergency Reason: ${currentlyRunning.emergencyLaunchReason}`
+              : "",
+          ]
+            .filter(Boolean)
+            .join("\n")
+        );
+      },
+      "Check for Updates": async () => {
+        try {
+          const update = await Updates.checkForUpdateAsync();
+          if (update.isAvailable) {
+            Alert.alert(
+              "Update Available",
+              "Would you like to download and install the update?",
+              [
+                {
+                  text: "Cancel",
+                  style: "cancel",
+                },
+                {
+                  text: "Update",
+                  onPress: async () => {
+                    try {
+                      const fetchedUpdate = await Updates.fetchUpdateAsync();
+                      if (fetchedUpdate.isNew) {
+                        await Updates.reloadAsync();
+                      }
+                    } catch (error) {
+                      Alert.alert("Error", JSON.stringify(error));
+                    }
+                  },
+                },
+              ]
+            );
+          } else {
+            Alert.alert("No Updates", "You are running the latest version");
+          }
+        } catch (error) {
+          Alert.alert("Error", JSON.stringify(error));
+        }
       },
     };
 
@@ -112,7 +179,7 @@ export function DebugProvider(props: { children: React.ReactNode }) {
       },
       Cancel: undefined,
     };
-  }, [logout]);
+  }, [logout, currentlyRunning]);
 
   const showDebugMenu = useCallback(() => {
     const options = Object.keys(methods);
@@ -151,13 +218,13 @@ export function DebugProvider(props: { children: React.ReactNode }) {
       clearTimeout(tapTimeoutRef.current);
     }
 
-    // Set new timeout to reset count after 2 seconds
+    // Set new timeout to reset count after 500ms
     tapTimeoutRef.current = setTimeout(() => {
       tapCountRef.current = 0;
-    }, 2000);
+    }, 500);
 
-    // Show debug menu after 4 taps
-    if (tapCountRef.current >= 4) {
+    // Show debug menu after 5 taps
+    if (tapCountRef.current >= 5) {
       showDebugMenu();
       tapCountRef.current = 0;
     }
