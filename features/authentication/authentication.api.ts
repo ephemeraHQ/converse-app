@@ -3,10 +3,10 @@ import { handleApiError } from "@/utils/api/api.error";
 import { buildDeviceMetadata } from "@/utils/device-metadata";
 import { z } from "zod";
 import { logger } from "@/utils/logger";
+import { profileValidationSchema } from "@/features/profiles/profiles.api";
 
 const deviceOSEnum = z.enum(["android", "ios", "web"]);
 
-// Request validation schema
 const createUserRequestSchema = z
   .object({
     privyUserId: z.string(),
@@ -18,17 +18,10 @@ const createUserRequestSchema = z
       privyAddress: z.string(),
       xmtpId: z.string(),
     }),
-    profile: z.object({
-      name: z.string(),
-      username: z
-        .string()
-        .min(3, "Username must be at least 3 characters long")
-        .max(30, "Username cannot exceed 30 characters")
-        .regex(
-          /^[a-zA-Z0-9]+$/,
-          "Username can only contain letters and numbers"
-        ),
-      avatar: z.string().optional(),
+    profile: profileValidationSchema.pick({
+      name: true,
+      username: true,
+      avatar: true,
     }),
   })
   .strict();

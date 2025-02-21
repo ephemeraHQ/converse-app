@@ -104,3 +104,6 @@ export const profileValidationSchema = z.object({
     .optional(),
   avatar: z.string().url({ message: "Avatar must be a valid URL" }).optional(),
 });
+
+// Export the type for reuse
+export type IProfileValidation = z.infer<typeof profileValidationSchema>;
