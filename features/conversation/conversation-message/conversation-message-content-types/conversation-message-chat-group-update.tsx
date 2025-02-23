@@ -15,7 +15,6 @@ import { Center } from "@/design-system/Center";
 import { useProfileQuery } from "@/features/profiles/profiles.query";
 import { navigate } from "@/navigation/navigation.utils";
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
-import { debugBorder } from "@/utils/debug-style";
 
 type IMessageChatGroupUpdateProps = {
   message: DecodedMessage<GroupUpdatedCodec>;
@@ -230,6 +229,7 @@ const $memberContainer: ThemedStyle<ViewStyle> = () => ({
   alignItems: "center",
   flexWrap: "wrap",
   justifyContent: "center",
+  width: "100%",
 });
 
 const $pressableContent: ThemedStyle<ViewStyle> = ({ spacing }) => ({

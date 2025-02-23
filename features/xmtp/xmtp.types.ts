@@ -8,7 +8,7 @@ import {
   Group as XmtpGroup,
   GroupUpdatedCodec as XmtpGroupUpdatedCodec,
   ReactionCodec as XmtpReactionCodec,
-  ReadReceiptCodec as XmtpReadReceiptCodec,
+  // ReadReceiptCodec as XmtpReadReceiptCodec,
   RemoteAttachmentCodec as XmtpRemoteAttachmentCodec,
   ReplyCodec as XmtpReplyCodec,
   Signer as XmtpSigner,

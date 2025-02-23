@@ -33,6 +33,9 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
 
   const handleSignup = useCallback(async () => {
     try {
+      // If the user decides to sign up again, make sure we're fully logged out
+      await logout();
+
       const { inboxId, ethereumAddress } = await signup();
       useMultiInboxStore.getState().actions.addSender({
         inboxId,
@@ -47,7 +50,7 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
         message: "Error signing up with passkey",
       });
     }
-  }, [signup]);
+  }, [signup, logout]);
 
   const handleLogin = useCallback(async () => {
     try {

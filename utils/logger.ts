@@ -160,7 +160,8 @@ initLogFile().catch(console.error);
 export const logger = baseLogger;
 export const authLogger = createPrefixedLogger("AUTH");
 export const streamLogger = createPrefixedLogger("STREAM");
-export const apiLog = createPrefixedLogger("API");
+export const apiLogger = createPrefixedLogger("API");
+export const xmtpLogger = createPrefixedLogger("XMTP");
 
 /**
  * @deprecated Use { logger } instead

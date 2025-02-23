@@ -1,6 +1,7 @@
 import { InboxId } from "@xmtp/react-native-sdk";
+import { captureError } from "@/utils/capture-error";
 import { XMTPError } from "@/utils/error";
-import logger from "@/utils/logger";
+import { XMTP_MAX_MS_UNTIL_LOG_ERROR } from "../utils/xmtp-logs";
 import { getXmtpClientByEthAddress } from "../xmtp-client/xmtp-client.service";
 
 export async function getXmtpDmByInboxId(args: {
@@ -18,17 +19,21 @@ export async function getXmtpDmByInboxId(args: {
     const conversation = await client.conversations.findDmByInboxId(inboxId);
 
     const duration = Date.now() - startTime;
-
-    if (duration > 3000) {
-      logger.warn(
-        `[getConversationByInboxId] Took ${duration}ms to get conversation by inboxId: ${inboxId}`,
+    if (duration > XMTP_MAX_MS_UNTIL_LOG_ERROR) {
+      captureError(
+        new XMTPError({
+          error: new Error(
+            `Getting conversation by inboxId took ${duration}ms for inboxId: ${inboxId}`,
+          ),
+        }),
       );
     }
 
     return conversation;
   } catch (error) {
-    throw new XMTPError("Failed to get conversation by inbox ID", {
-      cause: error,
+    throw new XMTPError({
+      error,
+      additionalMessage: `Failed to get conversation for inbox ID: ${inboxId}`,
     });
   }
 }
@@ -38,28 +43,32 @@ export async function createXmtpDm(args: {
   peerInboxId: InboxId;
 }) {
   const { senderEthAddress, peerInboxId } = args;
+  const startTime = Date.now();
+
   try {
     const client = await getXmtpClientByEthAddress({
       ethereumAddress: senderEthAddress,
     });
 
-    const startTime = Date.now();
-
     const conversation =
       await client.conversations.findOrCreateDmWithInboxId(peerInboxId);
 
     const duration = Date.now() - startTime;
-
-    if (duration > 3000) {
-      logger.warn(
-        `[createXmtpDm] Took ${duration}ms to create DM with inboxId: ${peerInboxId}`,
+    if (duration > XMTP_MAX_MS_UNTIL_LOG_ERROR) {
+      captureError(
+        new XMTPError({
+          error: new Error(
+            `Creating DM took ${duration}ms for inboxId: ${peerInboxId}`,
+          ),
+        }),
       );
     }
 
     return conversation;
   } catch (error) {
-    throw new XMTPError("Failed to create XMTP DM", {
-      cause: error,
+    throw new XMTPError({
+      error,
+      additionalMessage: `Failed to create XMTP DM with inbox ID: ${peerInboxId}`,
     });
   }
 }

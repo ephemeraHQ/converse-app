@@ -1,13 +1,13 @@
-import { HStack } from "@/design-system/HStack";
-import { Text } from "@/design-system/Text";
-import { VStack } from "@/design-system/VStack";
-import { Chip, ChipText } from "@/design-system/chip";
-import { ISocialProfile } from "@/features/social-profiles/social-lookup.api";
-import { translate } from "@/i18n";
-import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import Clipboard from "@react-native-clipboard/clipboard";
 import React from "react";
 import { Alert, ViewStyle } from "react-native";
+import { Chip, ChipText } from "@/design-system/chip";
+import { HStack } from "@/design-system/HStack";
+import { Text } from "@/design-system/Text";
+import { VStack } from "@/design-system/VStack";
+import { ISocialProfile } from "@/features/social-profiles/social-profiles.api";
+import { translate } from "@/i18n";
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 
 type IProfileSocialsNamesProps = {
   socialProfiles: ISocialProfile[];

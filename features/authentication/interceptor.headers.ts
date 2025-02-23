@@ -3,7 +3,7 @@ import {
   getConvosAuthenticatedHeaders,
   getConvosAuthenticationHeaders,
 } from "@/features/authentication/authentication.headers";
-import { apiLog } from "@/utils/logger";
+import { apiLogger } from "@/utils/logger";
 import { AuthenticationError } from "../../utils/error";
 
 /**
@@ -26,12 +26,14 @@ export const headersInterceptor = async (config: AxiosRequestConfig) => {
   const url = config.url;
 
   if (!url) {
-    apiLog.error("[headersInterceptor] No URL provided in request config");
-    throw new AuthenticationError("No URL provided in request config");
+    throw new AuthenticationError({
+      error: new Error("No URL provided in request config"),
+      additionalMessage: "failed to generate headers",
+    });
   }
 
-  apiLog.debug(
-    `[headersInterceptor] Processing request for URL: ${url}, method: ${config.method}, body: ${JSON.stringify(
+  apiLogger.debug(
+    `Processing request for URL: ${url}, method: ${config.method}, body: ${JSON.stringify(
       config.data,
     )}`,
   );
@@ -39,25 +41,17 @@ export const headersInterceptor = async (config: AxiosRequestConfig) => {
   const needsAuthenticationHeaders = AuthenticationRoutes.some((route) =>
     url.includes(route),
   );
-  apiLog.debug(
-    `[headersInterceptor] Needs authentication headers: ${needsAuthenticationHeaders}`,
-  );
+
   let headers;
   try {
     headers = needsAuthenticationHeaders
       ? await getConvosAuthenticationHeaders()
       : await getConvosAuthenticatedHeaders();
-
-    apiLog.debug(
-      `[headersInterceptor] Headers generated successfully, ${JSON.stringify(
-        headers,
-        null,
-        2,
-      )}`,
-    );
   } catch (error) {
-    apiLog.error(`[headersInterceptor] Failed to generate headers: ${error}`);
-    throw error;
+    throw new AuthenticationError({
+      error,
+      additionalMessage: "failed to generate headers",
+    });
   }
 
   config.headers = {

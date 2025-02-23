@@ -1,6 +1,6 @@
+import { z } from "zod";
 import { api } from "@/utils/api/api";
 import { captureError } from "@/utils/capture-error";
-import { z } from "zod";
 
 // Define the profile type enum to match backend
 const ProfileType = z.enum([
@@ -66,11 +66,13 @@ export type ISocialProfilesResponse = z.infer<
   typeof SocialProfilesResponseSchema
 >;
 
-export async function fetchSocialProfilesForAddress(args: { address: string }) {
-  const { address } = args;
+export async function fetchSocialProfilesForAddress(args: {
+  ethAddress: string;
+}) {
+  const { ethAddress } = args;
 
   const { data } = await api.get<ISocialProfilesResponse>(
-    `/api/v1/lookup/address/${address}`
+    `/api/v1/lookup/address/${ethAddress}`,
   );
 
   const response = SocialProfilesResponseSchema.safeParse(data);
@@ -78,8 +80,8 @@ export async function fetchSocialProfilesForAddress(args: { address: string }) {
   if (!response.success) {
     captureError(
       new Error(
-        `Invalid social profiles response: ${JSON.stringify(response.error)}`
-      )
+        `Invalid social profiles response: ${JSON.stringify(response.error)}`,
+      ),
     );
   }
 

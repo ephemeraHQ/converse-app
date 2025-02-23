@@ -10,6 +10,7 @@ import { useConversationIsUnread } from "@/features/conversation-list/hooks/use-
 import { useDeleteGroup } from "@/features/conversation-list/hooks/use-delete-group";
 import { useMessagePlainText } from "@/features/conversation-list/hooks/use-message-plain-text";
 import { useToggleReadStatus } from "@/features/conversation-list/hooks/use-toggle-read-status";
+import { useFocusRerender } from "@/hooks/use-focus-rerender";
 import { useGroupName } from "@/hooks/useGroupName";
 import { useRouter } from "@/navigation/use-navigation";
 import { useGroupQuery } from "@/queries/useGroupQuery";
@@ -27,6 +28,9 @@ export const ConversationListItemGroup = memo(
   }: IConversationListItemGroupProps) {
     const currentAccount = useCurrentSenderEthAddress()!;
     const router = useRouter();
+
+    // Need this so the timestamp is updated on every focus
+    useFocusRerender();
 
     const { data: group } = useGroupQuery({
       account: currentAccount,
@@ -88,7 +92,8 @@ export const ConversationListItemGroup = memo(
         renderRightActions={renderRightActions}
         renderLeftActions={renderLeftActions}
         onLeftSwipe={onDeleteGroup}
-        onRightSwipe={toggleReadStatusAsync}>
+        onRightSwipe={toggleReadStatusAsync}
+      >
         <ConversationListItem
           onPress={onPress}
           showError={false}

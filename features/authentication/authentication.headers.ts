@@ -48,9 +48,12 @@ export async function getConvosAuthenticationHeaders(): Promise<XmtpApiHeaders> 
   });
 
   if (!inboxClient) {
-    throw new AuthenticationError(
-      "[getConvosAuthenticationHeaders] No inbox client found for account",
-    );
+    throw new AuthenticationError({
+      error: new Error(
+        "[getConvosAuthenticationHeaders] No inbox client found for account",
+      ),
+      additionalMessage: "failed to generate headers",
+    });
   }
 
   logger.debug(

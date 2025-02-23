@@ -16,7 +16,7 @@ import {
 } from "@/features/profiles/profile-me.store";
 import { useProfileQuery } from "@/features/profiles/profiles.query";
 import { validateProfileName } from "@/features/profiles/utils/validate-profile-name";
-import { useSocialProfilesForAddressQuery } from "@/features/social-profiles/social-lookup.query";
+import { useSocialProfilesForAddressQuery } from "@/features/social-profiles/social-profiles.query";
 import { useAddPfp } from "@/hooks/use-add-pfp";
 import { translate } from "@/i18n";
 import { useRouter } from "@/navigation/use-navigation";

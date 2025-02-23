@@ -124,7 +124,8 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
       renderLeftActions={renderLeftActions}
       onLeftSwipe={onLeftSwipe}
       onRightSwipe={onRightSwipe}
-      leftActionsBackgroundColor={leftActionsBackgroundColor}>
+      leftActionsBackgroundColor={leftActionsBackgroundColor}
+    >
       <ConversationListItem
         onPress={onPress}
         showError={false}

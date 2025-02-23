@@ -140,22 +140,50 @@ export const getMessagesQueryOptions = (args: { id: string }) => {
 
 ## Error Handling
 
-- Use captureError for error handling.
-- Add context to errors when needed.
+- Prefer throwing errors over catching them, unless the catch block is where we want to handle the error UI/UX.
+- When catching errors, only do so at the level where you need to handle the user experience.
+- Use captureError only when you need to log the error but continue execution.
+- Add context to errors when throwing them up the chain.
+- Always throw XMTPError to maintain consistent error handling.
 
 ```typescript
-// ❌ Bad: Console logging errors
+// ❌ Bad: Catching and capturing error when we should throw
 try {
   await sendMessage(content);
 } catch (error) {
-  console.error(error);
+  captureError(new XMTPError({ error }));
 }
 
-// ✅ Good: Using captureError
-try {
-  await sendMessage(content);
-} catch (error) {
-  captureError(error, { context: "sendMessage", content });
-  throw error;
+// ❌ Bad: Catching error too early
+async function sendMessage(args: { content: string }) {
+  try {
+    await xmtpClient.send(args.content);
+  } catch (error) {
+    captureError(new XMTPError({ error }));
+  }
+}
+
+// ✅ Good: Throwing error for parent to handle
+async function sendMessage(args: { content: string }) {
+  try {
+    await xmtpClient.send(args.content);
+  } catch (error) {
+    throw new XMTPError({
+      error,
+      additionalMessage: "Failed to send message",
+    });
+  }
+}
+
+// ✅ Good: Catching error where we handle the UX
+function MessageComponent() {
+  const sendMessage = async () => {
+    try {
+      await messagingService.sendMessage({ content });
+    } catch (error) {
+      // Here we actually handle the error for the user
+      captureErrorWithToast(error);
+    }
+  };
 }
 ```

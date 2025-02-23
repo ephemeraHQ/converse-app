@@ -15,9 +15,8 @@ export function enhanceError(error: unknown, context: string): Error {
   return originalError;
 }
 
-
 export function ensureErrorHandler<T>(
-  handler: (error: Error) => T
+  handler: (error: Error) => T,
 ): (error: unknown) => T {
   return (error: unknown) => handler(ensureError(error));
 }
@@ -29,47 +28,56 @@ export class UserCancelledError extends Error {
   }
 }
 
+type ErrorArgs = {
+  error: unknown;
+  additionalMessage?: string;
+};
+
 class BaseError extends Error {
-  constructor(message: string, cause?: unknown) {
+  constructor(prefix: string, args: ErrorArgs) {
+    const originalError = ensureError(args.error);
+    const message = args.additionalMessage
+      ? `${prefix} - ${args.additionalMessage} - ${originalError.message}`
+      : `${prefix} - ${originalError.message}`;
+
     super(message);
     this.name = this.constructor.name;
-    this.cause = cause;
+    this.cause = args.error;
   }
 }
 
 export class GenericError extends BaseError {
-  constructor(args: { message: string; cause: unknown }) {
-    super(args.message, args.cause);
+  constructor(args: ErrorArgs) {
+    super("", args);
   }
 }
 
 export class HydrationError extends BaseError {
-  constructor(message: string, cause?: unknown) {
-    super(`[Hydration] ${message}`, cause);
+  constructor(args: ErrorArgs) {
+    super("[Hydration]", args);
   }
 }
 
 export class XMTPError extends BaseError {
-  constructor(message: string, cause?: unknown) {
-    super(`[XMTP SDK] ${message}`, cause);
+  constructor(args: ErrorArgs) {
+    super("[XMTP SDK]", args);
   }
 }
 
 export class StreamError extends BaseError {
-  constructor(message: string, cause?: unknown) {
-    super(`[Stream] ${message}`, cause);
+  constructor(args: ErrorArgs) {
+    super("[Stream]", args);
   }
 }
 
 export class AuthenticationError extends BaseError {
-  constructor(message: string, cause?: unknown) {
-    super(`[Authentication] ${message}`, cause);
+  constructor(args: ErrorArgs) {
+    super("[Authentication]", args);
   }
 }
 
 export class ApiError extends BaseError {
-  constructor(message: string, cause?: unknown) {
-    super(`[API] ${message}`, cause);
+  constructor(args: ErrorArgs) {
+    super("[API]", args);
   }
 }
-

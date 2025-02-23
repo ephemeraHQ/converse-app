@@ -1,9 +1,11 @@
 import { InboxId, Client as XmtpClient } from "@xmtp/react-native-sdk";
 import { getRandomBytesAsync } from "expo-crypto";
 import { config } from "@/config";
-import { enhanceError } from "@/utils/error";
+import { XMTP_MAX_MS_UNTIL_LOG_ERROR } from "@/features/xmtp/utils/xmtp-logs";
+import { captureError } from "@/utils/capture-error";
+import { XMTPError } from "@/utils/error";
 import { getSecureItemAsync, setSecureItemAsync } from "@/utils/keychain";
-import { logger } from "@/utils/logger";
+import { xmtpLogger } from "@/utils/logger";
 import {
   ISupportedXmtpCodecs,
   supportedXmtpCodecs,
@@ -14,17 +16,32 @@ export async function createXmtpClientInstance(args: {
   inboxSigner: IXmtpSigner;
 }): Promise<IXmtpClient> {
   const { inboxSigner } = args;
+  const startTime = Date.now();
 
-  logger.debug(`[createXmtpClientInstance] Creating new XMTP client`);
+  xmtpLogger.debug(`Creating new XMTP client`);
 
   try {
-    return await XmtpClient.create<ISupportedXmtpCodecs>(inboxSigner, {
+    const client = await XmtpClient.create<ISupportedXmtpCodecs>(inboxSigner, {
       env: config.xmtpEnv,
       dbEncryptionKey: await getDbEncryptionKey(),
       codecs: supportedXmtpCodecs,
     });
+
+    const duration = Date.now() - startTime;
+    if (duration > XMTP_MAX_MS_UNTIL_LOG_ERROR) {
+      captureError(
+        new XMTPError({
+          error: new Error(`Creating XMTP client took ${duration}ms`),
+        }),
+      );
+    }
+
+    return client;
   } catch (error) {
-    throw enhanceError(error, "Failed to create XMTP client instance");
+    throw new XMTPError({
+      error,
+      additionalMessage: "Failed to create XMTP client instance",
+    });
   }
 }
 
@@ -33,8 +50,10 @@ export async function buildXmtpClientInstance(args: {
   inboxId?: InboxId;
 }): Promise<IXmtpClient> {
   const { ethereumAddress, inboxId } = args;
+  const startTime = Date.now();
+
   try {
-    return await XmtpClient.build<ISupportedXmtpCodecs>(
+    const client = await XmtpClient.build<ISupportedXmtpCodecs>(
       ethereumAddress,
       {
         env: config.xmtpEnv,
@@ -43,28 +62,49 @@ export async function buildXmtpClientInstance(args: {
       },
       inboxId,
     );
+
+    const duration = Date.now() - startTime;
+    if (duration > XMTP_MAX_MS_UNTIL_LOG_ERROR) {
+      captureError(
+        new XMTPError({
+          error: new Error(
+            `Building XMTP client took ${duration}ms for address: ${ethereumAddress}`,
+          ),
+        }),
+      );
+    }
+
+    return client;
   } catch (error) {
-    throw enhanceError(
+    throw new XMTPError({
       error,
-      `Failed to build XMTP client for address: ${ethereumAddress}`,
-    );
+      additionalMessage: `Failed to build XMTP client for address: ${ethereumAddress}`,
+    });
   }
 }
 
 async function getDbEncryptionKey() {
   const DB_ENCRYPTION_KEY = "LIBXMTP_DB_ENCRYPTION_KEY";
 
-  logger.debug("[getDbEncryptionKey] Getting DB encryption key");
-  const existingKey = await getSecureItemAsync(DB_ENCRYPTION_KEY);
+  xmtpLogger.debug(`Getting DB encryption key`);
 
-  if (existingKey) {
-    logger.debug("[getDbEncryptionKey] Found existing DB encryption key");
-    return new Uint8Array(Buffer.from(existingKey, "base64"));
+  try {
+    const existingKey = await getSecureItemAsync(DB_ENCRYPTION_KEY);
+
+    if (existingKey) {
+      xmtpLogger.debug(`Found existing DB encryption key`);
+      return new Uint8Array(Buffer.from(existingKey, "base64"));
+    }
+
+    xmtpLogger.debug(`Creating new DB encryption key`);
+    const newKey = Buffer.from(await getRandomBytesAsync(32));
+    await setSecureItemAsync(DB_ENCRYPTION_KEY, newKey.toString("base64"));
+
+    return new Uint8Array(newKey);
+  } catch (error) {
+    throw new XMTPError({
+      error,
+      additionalMessage: "Failed to get or create DB encryption key",
+    });
   }
-
-  logger.debug("[getDbEncryptionKey] Creating new DB encryption key");
-  const newKey = Buffer.from(await getRandomBytesAsync(32));
-  await setSecureItemAsync(DB_ENCRYPTION_KEY, newKey.toString("base64"));
-
-  return new Uint8Array(newKey);
 }

@@ -1,16 +1,16 @@
 import { getAllowedConsentConversationsQueryData } from "@/queries/conversations-allowed-consent-query";
 import { captureError } from "@/utils/capture-error";
-import { logger } from "@/utils/logger";
+import { xmtpLogger } from "@/utils/logger";
 import { getXmtpClientByEthAddress } from "../xmtp-client/xmtp-client.service";
 
 export const streamConsent = async (account: string) => {
   try {
-    logger.info(`[XMTPRN Contacts] Streaming consent for ${account}`);
+    xmtpLogger.info(`Streaming consent for ${account}`);
     const client = await getXmtpClientByEthAddress({
       ethereumAddress: account,
     });
     await client.preferences.streamConsent(async () => {
-      logger.info(`[XMTPRN Contacts] Consent has been updated`);
+      xmtpLogger.info(`Consent has been updated`);
       try {
         const conversations = getAllowedConsentConversationsQueryData({
           account,
@@ -32,7 +32,7 @@ export const stopStreamingConsent = async (account: string) => {
   const client = await getXmtpClientByEthAddress({
     ethereumAddress: account,
   });
-  logger.info(`[XMTPRN Contacts] Stopping streaming consent for ${account}`);
+  xmtpLogger.info(`Stopping consent stream for ${account}`);
   return client.preferences.cancelStreamConsent();
 };
 
@@ -42,12 +42,12 @@ export const stopStreamingConsent = async (account: string) => {
  */
 export const streamPreferences = async (account: string) => {
   try {
-    logger.info(`[XMTPRN Contacts] Streaming preferences for ${account}`);
+    xmtpLogger.info(`Streaming preferences for ${account}`);
     const client = await getXmtpClientByEthAddress({
       ethereumAddress: account,
     });
     await client.preferences.streamPreferenceUpdates(async (preference) => {
-      logger.info(`[XMTPRN Contacts] Preference has been updated`);
+      xmtpLogger.info(`Preference has been updated`);
     });
   } catch (e) {
     captureError(e);

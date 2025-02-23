@@ -8,6 +8,9 @@ export const syncConsent = async (account: string) => {
   try {
     await client.preferences.syncConsent();
   } catch (error) {
-    throw new XMTPError("Failed to sync consent", error);
+    throw new XMTPError({
+      error,
+      additionalMessage: "failed to sync consent",
+    });
   }
 };

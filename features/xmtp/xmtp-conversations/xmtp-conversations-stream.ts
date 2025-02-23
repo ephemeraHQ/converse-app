@@ -1,4 +1,4 @@
-import { logger } from "@utils/logger";
+import { xmtpLogger } from "@utils/logger";
 import { IXmtpConversationWithCodecs } from "@/features/xmtp/xmtp.types";
 import { getXmtpClientByEthAddress } from "../xmtp-client/xmtp-client.service";
 
@@ -17,14 +17,12 @@ export async function streamConversations(args: {
     ethereumAddress: ethAddress,
   });
 
-  logger.debug(
-    `[XMTP - streamConversations] Started streaming conversations for account: ${ethAddress}`,
+  xmtpLogger.debug(
+    `Started streaming conversations for account: ${ethAddress}`,
   );
 
   await client.conversations.stream(async (conversation) => {
-    logger.debug(
-      `[XMTP - streamConversations] Received new conversation for account: ${ethAddress}`,
-    );
+    xmtpLogger.debug(`Received new conversation for account: ${ethAddress}`);
     onNewConversation(conversation);
   });
 }
@@ -38,7 +36,7 @@ export async function stopStreamingConversations(args: { ethAddress: string }) {
 
   await client.conversations.cancelStream();
 
-  logger.debug(
-    `[XMTP - stopStreamingConversations] Stopped streaming conversations for account: ${ethAddress}`,
+  xmtpLogger.debug(
+    `Stopped streaming conversations for account: ${ethAddress}`,
   );
 }

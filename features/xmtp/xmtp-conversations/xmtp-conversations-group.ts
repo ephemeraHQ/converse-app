@@ -1,7 +1,7 @@
 import { InboxId } from "@xmtp/react-native-sdk";
 import { PermissionPolicySet } from "@xmtp/react-native-sdk/build/lib/types/PermissionPolicySet";
 import { XMTPError } from "@/utils/error";
-import logger from "@/utils/logger";
+import { xmtpLogger } from "@/utils/logger";
 import { getXmtpClientByEthAddress } from "../xmtp-client/xmtp-client.service";
 
 const defaultPermissionPolicySet: PermissionPolicySet = {
@@ -53,13 +53,14 @@ export async function createXmtpGroup(args: {
     const duration = Date.now() - startTime;
 
     if (duration > 3000) {
-      logger.warn(`[createXmtpGroup] Took ${duration}ms to create group`);
+      xmtpLogger.warn(`Creating group took ${duration}ms`);
     }
 
     return group;
   } catch (error) {
-    throw new XMTPError("Failed to create XMTP group", {
-      cause: error,
+    throw new XMTPError({
+      error,
+      additionalMessage: "failed to create XMTP group",
     });
   }
 }

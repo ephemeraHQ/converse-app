@@ -27,10 +27,10 @@ export async function startConversationStreaming(ethAddress: string) {
     });
   } catch (error) {
     captureError(
-      new StreamError(
-        `Failed to stream conversations for ${ethAddress}`,
+      new StreamError({
         error,
-      ),
+        additionalMessage: `Failed to stream conversations for ${ethAddress}`,
+      }),
     );
   }
 }

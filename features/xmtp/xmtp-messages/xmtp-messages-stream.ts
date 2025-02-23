@@ -1,4 +1,4 @@
-import { logger } from "@utils/logger";
+import { xmtpLogger } from "@utils/logger";
 import { XMTPError } from "@/utils/error";
 import { isProd } from "@/utils/getEnv";
 import { getXmtpClientByEthAddress } from "../xmtp-client/xmtp-client.service";
@@ -17,16 +17,12 @@ export const streamAllMessages = async (args: {
     ethereumAddress: account,
   });
 
-  logger.debug(
-    `[XMTP - streamAllMessages] Streaming messages for ${client.address}`,
-  );
+  xmtpLogger.debug(`Streaming messages for ${client.address}`);
 
   try {
     await client.conversations.streamAllMessages(async (message) => {
-      logger.debug(
-        `[XMTP - streamAllMessages] Received a message for ${
-          client.address
-        } with id: ${message.id}, text: ${
+      xmtpLogger.debug(
+        `Received message for ${client.address} with id: ${message.id}, text: ${
           isProd ? "Redacted" : message.nativeContent.text
         }, topic: ${message.topic}`,
       );
@@ -34,7 +30,10 @@ export const streamAllMessages = async (args: {
       await onNewMessage(message);
     });
   } catch (error) {
-    throw new XMTPError("Failed to stream messages", error);
+    throw new XMTPError({
+      error,
+      additionalMessage: "failed to stream messages",
+    });
   }
 };
 
@@ -48,10 +47,11 @@ export const stopStreamingAllMessage = async (args: { ethAddress: string }) => {
   try {
     await client.conversations.cancelStreamAllMessages();
 
-    logger.debug(
-      `[XMTP - stopStreamingAllMessage] Stopped streaming messages for ${client.address}`,
-    );
+    xmtpLogger.debug(`Stopped streaming messages for ${client.address}`);
   } catch (error) {
-    throw new XMTPError("Failed to cancel message streaming", error);
+    throw new XMTPError({
+      error,
+      additionalMessage: "failed to cancel message streaming",
+    });
   }
 };

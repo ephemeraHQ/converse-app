@@ -11,3 +11,5 @@ export const getXmtpNativeLogFile = async () => {
   await RNFS.writeFile(nativeLogFilePath, nativeLogs, "utf8");
   return nativeLogFilePath;
 };
+
+export const XMTP_MAX_MS_UNTIL_LOG_ERROR = 3000; // 3 seconds
