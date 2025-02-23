@@ -113,8 +113,11 @@ export const useMultiInboxStore = create<IMultiInboxStoreType>()(
       {
         name: STORE_NAME,
         storage: createJSONStorage(() => zustandMMKVStorage),
-        partialize: (state) => ({ ...state }),
-
+        partialize: (state) => {
+          // Remove the actions from partialized state
+          const { actions, ...rest } = state;
+          return rest;
+        },
         onRehydrateStorage: () => (state, error) => {
           if (error) {
             captureError(
@@ -122,7 +125,6 @@ export const useMultiInboxStore = create<IMultiInboxStoreType>()(
             );
             return;
           }
-
           logger.debug(
             `[useMultiInboxStore#onRehydrateStorage] State hydrated successfully: ${JSON.stringify(
               state,

@@ -1,4 +1,4 @@
-import { useSelect } from "@/stores/stores.utils";
+import { memo, ReactNode } from "react";
 import { HStack } from "@/design-system/HStack";
 import { AnimatedVStack, VStack } from "@/design-system/VStack";
 import { ConversationMessageSender } from "@/features/conversation/conversation-message/conversation-message-sender";
@@ -6,8 +6,9 @@ import { ConversationSenderAvatar } from "@/features/conversation/conversation-m
 import { useMessageContextStoreContext } from "@/features/conversation/conversation-message/conversation-message.store-context";
 import { useConversationMessageStyles } from "@/features/conversation/conversation-message/conversation-message.styles";
 import { isGroupUpdatedMessage } from "@/features/conversation/conversation-message/conversation-message.utils";
+import { useSelect } from "@/stores/stores.utils";
 import { useAppTheme } from "@/theme/use-app-theme";
-import { ReactNode, memo } from "react";
+import { debugBorder } from "@/utils/debug-style";
 
 type IConversationMessageLayoutProps = {
   reactions?: ReactNode;
@@ -51,7 +52,7 @@ export const ConversationMessageLayout = memo(
         "isSystemMessage",
         "nextMessage",
         "message",
-      ])
+      ]),
     );
 
     const isGroupUpdate = isGroupUpdatedMessage(messageData);
@@ -78,6 +79,7 @@ export const ConversationMessageLayout = memo(
 
     return (
       <AnimatedVStack
+        // {...debugBorder()}
         layout={theme.animation.reanimatedLayoutSpringTransition}
         style={{
           marginBottom: getMessageSpacing(),
@@ -114,6 +116,7 @@ export const ConversationMessageLayout = memo(
           <VStack
             // {...debugBorder("red")}
             style={{
+              width: "100%",
               alignItems: fromMe ? "flex-end" : "flex-start",
               ...(Boolean(reactions) && {
                 marginBottom: spaceBetweenMessagesInSeries,
@@ -172,5 +175,5 @@ export const ConversationMessageLayout = memo(
         )}
       </AnimatedVStack>
     );
-  }
+  },
 );

@@ -185,8 +185,6 @@ async function updateConversationMetadata(args: {
 
   const currentUser = getCurrentUserQueryData();
 
-  console.log("currentUser:", currentUser);
-
   if (!currentUser) {
     throw new Error("No current user found");
   }

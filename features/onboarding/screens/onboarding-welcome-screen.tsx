@@ -28,7 +28,7 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
   // Safer to fully logout when we're here
   useEffect(() => {
     logout();
-     
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSignup = useCallback(async () => {
@@ -37,6 +37,10 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
       useMultiInboxStore.getState().actions.addSender({
         inboxId,
         ethereumAddress,
+      });
+      useMultiInboxStore.getState().actions.setCurrentSender({
+        ethereumAddress,
+        inboxId,
       });
     } catch (error) {
       captureErrorWithToast(error, {
@@ -51,6 +55,10 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
       useMultiInboxStore.getState().actions.addSender({
         inboxId,
         ethereumAddress,
+      });
+      useMultiInboxStore.getState().actions.setCurrentSender({
+        ethereumAddress,
+        inboxId,
       });
     } catch (error) {
       captureErrorWithToast(error, {
@@ -77,7 +85,8 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
       <Screen
         contentContainerStyle={$globalStyles.flex1}
         safeAreaEdges={["bottom"]}
-        preset="scroll">
+        preset="scroll"
+      >
         <Center style={$globalStyles.flex1}>
           <VStack>
             <OnboardingSubtitle>Welcome to Convos</OnboardingSubtitle>
@@ -94,7 +103,8 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
         <VStack
           style={{
             height: 100,
-          }}>
+          }}
+        >
           {isSigningUp || isLoggingIn ? (
             <Center style={$globalStyles.flex1}>
               <Loader />
@@ -111,14 +121,16 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
           style={{
             paddingHorizontal: theme.spacing.lg,
             marginTop: theme.spacing.lg,
-          }}>
+          }}
+        >
           <Pressable onPress={handleReset}>
             <Text
               preset="smaller"
               color="secondary"
               style={{
                 textAlign: "center",
-              }}>
+              }}
+            >
               Press me to clear stuff and restart{"\n"}(use this if you get in a
               funky state)
             </Text>

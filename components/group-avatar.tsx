@@ -4,7 +4,7 @@ import { StyleProp, TextStyle, ViewStyle } from "react-native";
 import { Center } from "@/design-system/Center";
 import { Text } from "@/design-system/Text";
 import { VStack } from "@/design-system/VStack";
-import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
+import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store";
 import { useProfilesQueries } from "@/features/profiles/profiles.query";
 import { useGroupMembersQuery } from "@/queries/useGroupMembersQuery";
 import { useGroupQuery } from "@/queries/useGroupQuery";
@@ -53,16 +53,16 @@ export const GroupAvatar = memo(function GroupAvatar(props: {
 
   const { theme } = useAppTheme();
 
-  const currentAccount = useCurrentSenderEthAddress()!;
+  const currentSender = useSafeCurrentSender();
 
   const { data: group } = useGroupQuery({
-    account: currentAccount,
+    account: currentSender.ethereumAddress,
     topic: groupTopic,
   });
 
   const { data: members } = useGroupMembersQuery({
     caller: "GroupAvatar",
-    account: currentAccount,
+    account: currentSender.ethereumAddress,
     topic: groupTopic,
   });
 
@@ -71,17 +71,17 @@ export const GroupAvatar = memo(function GroupAvatar(props: {
       return [];
     }
 
-    return members.ids.reduce<string[]>((addresses, memberId) => {
-      const memberAddress = members.byId[memberId]?.addresses[0];
+    return members.ids.reduce<InboxId[]>((inboxIds, memberId) => {
+      const memberInboxId = members.byId[memberId].inboxId;
       if (
-        memberAddress &&
-        memberAddress.toLowerCase() !== currentAccount?.toLowerCase()
+        memberInboxId &&
+        memberInboxId.toLowerCase() !== currentSender?.inboxId?.toLowerCase()
       ) {
-        addresses.push(memberAddress);
+        inboxIds.push(memberInboxId);
       }
-      return addresses;
+      return inboxIds;
     }, []);
-  }, [members, currentAccount]);
+  }, [members, currentSender]);
 
   const { data: profiles } = useProfilesQueries({
     xmtpInboxIds: memberAddresses,
@@ -245,7 +245,8 @@ const ExtraMembersIndicator: React.FC<{
           height: (pos.size / 100) * size,
           borderRadius: ((pos.size / 100) * size) / 2,
         },
-      ]}>
+      ]}
+    >
       <Text
         style={[
           themed($extraMembersText),
@@ -253,7 +254,8 @@ const ExtraMembersIndicator: React.FC<{
             color: theme.colors.global.white,
             fontSize: ((pos.size / 100) * size) / 2,
           },
-        ]}>
+        ]}
+      >
         +{extraMembersCount}
       </Text>
     </Center>

@@ -228,7 +228,8 @@ const ConversationMessagesListItem = memo(
       <MessageContextStoreProvider
         message={message}
         previousMessage={previousMessage}
-        nextMessage={nextMessage}>
+        nextMessage={nextMessage}
+      >
         <AnimatedVStack
           {...(animateEntering && {
             entering: FadeInDown.springify()
@@ -241,11 +242,13 @@ const ConversationMessagesListItem = memo(
                   },
                 ],
               }),
-          })}>
+          })}
+        >
           <ConversationMessageTimestamp />
           <ConversationMessageRepliable
             onReply={handleReply}
-            messageIsFromCurrentUser={isFromCurrentUser}>
+            messageIsFromCurrentUser={isFromCurrentUser}
+          >
             <ConversationMessageLayout
               message={
                 <ConversationMessageGesturesWrapper>
@@ -332,7 +335,11 @@ const ConversationMessageGesturesWrapper = memo(
       <ConversationMessageGestures
         onLongPress={handleLongPress}
         onTap={handleTap}
-        onDoubleTap={handleDoubleTap}>
+        onDoubleTap={handleDoubleTap}
+        style={{
+          width: "100%",
+        }}
+      >
         {props.children}
       </ConversationMessageGestures>
     );

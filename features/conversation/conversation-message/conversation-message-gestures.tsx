@@ -1,9 +1,5 @@
-import { AnimatedHStack } from "@/design-system/HStack";
-import { useAppTheme } from "@/theme/use-app-theme";
-import { debugBorder } from "@/utils/debug-style";
-import { Haptics } from "@/utils/haptics";
 import { memo } from "react";
-import { View } from "react-native";
+import { View, ViewStyle } from "react-native";
 import {
   Gesture,
   GestureDetector,
@@ -19,6 +15,10 @@ import {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import { AnimatedHStack } from "@/design-system/HStack";
+import { useAppTheme } from "@/theme/use-app-theme";
+import { debugBorder } from "@/utils/debug-style";
+import { Haptics } from "@/utils/haptics";
 
 // Super fast because it's better UX to have a quick response
 const MESSAGE_GESTURE_LONG_PRESS_MIN_DURATION = 150;
@@ -38,6 +38,7 @@ export type IMessageGesturesOnLongPressArgs =
 
 export type IMessageGesturesProps = {
   children: React.ReactNode;
+  style?: ViewStyle;
   onTap?: () => void;
   onDoubleTap?: () => void;
   onLongPress?: (e: IMessageGesturesOnLongPressArgs) => void;
@@ -45,7 +46,7 @@ export type IMessageGesturesProps = {
 
 export const ConversationMessageGestures = memo(
   function ConversationMessageGestures(args: IMessageGesturesProps) {
-    const { children, onTap, onDoubleTap, onLongPress } = args;
+    const { children, onTap, onDoubleTap, onLongPress, style } = args;
 
     const { theme } = useAppTheme();
 
@@ -104,11 +105,11 @@ export const ConversationMessageGestures = memo(
         <AnimatedHStack
           // {...debugBorder("orange")}
           ref={containerRef}
-          style={animatedStyle}
+          style={[animatedStyle, style]}
         >
           {children}
         </AnimatedHStack>
       </GestureDetector>
     );
-  }
+  },
 );

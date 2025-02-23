@@ -101,7 +101,7 @@ export function App() {
                           {/* <AuthenticateWithPasskeyProvider> */}
                           <AppNavigator />
                           {/* </AuthenticateWithPasskeyProvider> */}
-                          {__DEV__ && <DevToolsBubble onCopy={onCopy} />}
+                          {/* {__DEV__ && <DevToolsBubble onCopy={onCopy} />} */}
                           <ActionSheet />
                           <Snackbars />
                         </BottomSheetModalProvider>
