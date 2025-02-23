@@ -9,7 +9,7 @@ const queryClientManager = new QueryClientManager({
   queryClient,
 });
 
- 
+// eslint-disable-next-line react-hooks/rules-of-hooks
 Reactotron.use(reactotronReactQuery(queryClientManager))
   .configure({
     onDisconnect: () => {

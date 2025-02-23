@@ -33,13 +33,14 @@ export function getSearchExistingGroupsByGroupNameQueryOptions(args: {
   const { searchQuery, searcherInboxId } = args;
   const normalizedSearchQuery = normalizeString(searchQuery);
   return queryOptions({
-    // False positive
-     
     queryKey: getSearchExistingGroupsByGroupNameQueryKey({
       searchQuery: normalizedSearchQuery,
       inboxId: searcherInboxId,
     }),
-    queryFn: () => searchExistingGroupsByGroupName(args),
+    queryFn: () =>
+      searchExistingGroupsByGroupName({
+        searchQuery: normalizedSearchQuery,
+      }),
     enabled: !!normalizedSearchQuery && !!searcherInboxId,
     staleTime: 0,
   });
