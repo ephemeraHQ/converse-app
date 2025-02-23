@@ -1,9 +1,3 @@
-import { isReactionMessage } from "@/features/conversation/conversation-message/conversation-message.utils";
-import { captureError } from "@/utils/capture-error";
-import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
-import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
-import { contentTypesPrefixes } from "@/utils/xmtpRN/xmtp-content-types/xmtp-content-types";
-import { isSupportedMessage } from "@/utils/xmtpRN/xmtp-messages/xmtp-messages";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { logger } from "@utils/logger";
 import {
@@ -12,12 +6,18 @@ import {
   type ReactionContent,
 } from "@xmtp/react-native-sdk";
 import { MessageId } from "@xmtp/react-native-sdk/build/lib/types";
-import { conversationMessagesQueryKey } from "./QueryKeys";
+import { isReactionMessage } from "@/features/conversation/conversation-message/conversation-message.utils";
+import { contentTypesPrefixes } from "@/features/xmtp/xmtp-content-types/xmtp-content-types";
+import { isSupportedMessage } from "@/features/xmtp/xmtp-messages/xmtp-messages";
+import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types";
+import { captureError } from "@/utils/capture-error";
+import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
 import {
   getConversationQueryData,
   getOrFetchConversation,
 } from "./conversation-query";
 import { queryClient } from "./queryClient";
+import { conversationMessagesQueryKey } from "./QueryKeys";
 
 export type ConversationMessagesQueryData = Awaited<
   ReturnType<typeof conversationMessagesQueryFn>
@@ -61,8 +61,8 @@ const conversationMessagesQueryFn = async (args: {
   if (timeDiff > 3000) {
     captureError(
       new Error(
-        `[useConversationMessages] Fetched ${messages.length} messages in ${timeDiff}ms for conversation ${topic}`
-      )
+        `[useConversationMessages] Fetched ${messages.length} messages in ${timeDiff}ms for conversation ${topic}`,
+      ),
     );
   }
 
@@ -84,7 +84,7 @@ export const getConversationMessagesQueryData = (args: {
   topic: ConversationTopic;
 }) => {
   return queryClient.getQueryData(
-    getConversationMessagesQueryOptions(args).queryKey
+    getConversationMessagesQueryOptions(args).queryKey,
   );
 };
 
@@ -100,7 +100,7 @@ export function refetchConversationMessages(args: {
 export const addConversationMessageQuery = (args: {
   account: string;
   topic: ConversationTopic;
-  message: DecodedMessageWithCodecsType;
+  message: IXmtpDecodedMessage;
 }) => {
   const { account, topic, message } = args;
 
@@ -112,7 +112,7 @@ export const addConversationMessageQuery = (args: {
         existingData: previousMessages,
         prependNewMessages: true,
       });
-    }
+    },
   );
 };
 
@@ -145,15 +145,11 @@ export function getConversationMessagesQueryOptions(args: {
   });
 }
 
-const ignoredContentTypesPrefixes = [
-  contentTypesPrefixes.coinbasePayment,
-  contentTypesPrefixes.transactionReference,
-  contentTypesPrefixes.readReceipt,
-];
+const ignoredContentTypesPrefixes = [contentTypesPrefixes.readReceipt];
 
 export type IMessageAccumulator = {
   ids: MessageId[];
-  byId: Record<MessageId, DecodedMessageWithCodecsType>;
+  byId: Record<MessageId, IXmtpDecodedMessage>;
   reactions: Record<
     MessageId,
     {
@@ -164,7 +160,7 @@ export type IMessageAccumulator = {
 };
 
 function processMessages(args: {
-  newMessages: DecodedMessageWithCodecsType[];
+  newMessages: IXmtpDecodedMessage[];
   existingData?: IMessageAccumulator;
   prependNewMessages?: boolean;
 }): IMessageAccumulator {
@@ -182,8 +178,8 @@ function processMessages(args: {
   const validMessages = newMessages.filter(
     (message) =>
       !ignoredContentTypesPrefixes.some((prefix) =>
-        message.contentTypeId.startsWith(prefix)
-      )
+        message.contentTypeId.startsWith(prefix),
+      ),
   );
 
   // First process regular messages
@@ -275,7 +271,7 @@ export function replaceOptimisticMessageWithReal(args: {
   tempId: string;
   topic: ConversationTopic;
   account: string;
-  realMessage: DecodedMessageWithCodecsType;
+  realMessage: IXmtpDecodedMessage;
 }) {
   const { tempId, topic, account, realMessage } = args;
   logger.debug(
@@ -283,7 +279,7 @@ export function replaceOptimisticMessageWithReal(args: {
     {
       tempId,
       messageId: realMessage.id,
-    }
+    },
   );
 
   queryClient.setQueryData(
@@ -295,7 +291,7 @@ export function replaceOptimisticMessageWithReal(args: {
           previousMessagesExists: !!previousMessages,
           realMessageId: realMessage.id,
           tempId,
-        }
+        },
       );
 
       if (!previousMessages) {
@@ -311,7 +307,7 @@ export function replaceOptimisticMessageWithReal(args: {
           "[replaceOptimisticMessageWithReal] No previous messages, creating new state",
           {
             newState: JSON.stringify(newState, null, 2),
-          }
+          },
         );
 
         return newState;
@@ -325,12 +321,12 @@ export function replaceOptimisticMessageWithReal(args: {
         {
           tempIndex,
           messageIds: previousMessages.ids,
-        }
+        },
       );
 
       if (tempIndex === -1) {
         logger.debug(
-          "[replaceOptimisticMessageWithReal] Temp message not found, returning previous state"
+          "[replaceOptimisticMessageWithReal] Temp message not found, returning previous state",
         );
         return previousMessages;
       }
@@ -361,7 +357,7 @@ export function replaceOptimisticMessageWithReal(args: {
       });
 
       return updatedState;
-    }
+    },
   );
 }
 
@@ -373,6 +369,6 @@ export function setConversationMessagesQueryData(args: {
   const { account, topic, data } = args;
   return queryClient.setQueryData(
     getConversationMessagesQueryOptions({ account, topic }).queryKey,
-    data
+    data,
   );
 }

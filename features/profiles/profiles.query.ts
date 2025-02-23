@@ -1,15 +1,15 @@
 import {
-  IConvosProfileForInbox,
-  fetchProfile,
-} from "@/features/profiles/profiles.api";
-import { reactQueryPersister } from "@/utils/mmkv";
-import { DateUtils } from "@/utils/time.utils";
-import {
   queryOptions,
   skipToken,
   useQueries,
   useQuery,
 } from "@tanstack/react-query";
+import {
+  fetchProfile,
+  IConvosProfileForInbox,
+} from "@/features/profiles/profiles.api";
+import { reactQueryPersister } from "@/utils/mmkv";
+import { DateUtils } from "@/utils/time.utils";
 import { queryClient } from "../../queries/queryClient";
 
 const profileQueryKey = ({ xmtpId }: { xmtpId: string }) =>
@@ -46,22 +46,18 @@ export type IConvosProfileForInboxUpdate = Partial<
   Omit<IConvosProfileForInbox, "updatedAt" | "createdAt">
 >;
 
-export type ISetProfileQueryDataArgs = {
+export const setProfileQueryData = (args: {
   xmtpId: string;
   data: IConvosProfileForInboxUpdate;
   updatedAt?: number;
-};
-export const setProfileQueryData = ({
-  xmtpId,
-  data,
-  updatedAt,
-}: ISetProfileQueryDataArgs) => {
+}) => {
+  const { xmtpId, data } = args;
   return queryClient.setQueryData<Partial<IConvosProfileForInbox>>(
     profileQueryKey({ xmtpId }),
     {
       ...data,
       // updatedAt: updatedAt ? updatedAt.toString() : Date.now().toString(),
-    }
+    },
   );
 };
 
@@ -85,10 +81,6 @@ export const removeProfileQueryData = ({ xmtpId }: { xmtpId: string }) => {
   });
 };
 
-export const useProfile = ({ xmtpId }: { xmtpId: string | undefined }) => {
-  return useQuery(profileQueryConfig({ xmtpId }));
-};
-
 export const useProfilesQueries = ({
   xmtpInboxIds,
 }: {
@@ -96,7 +88,7 @@ export const useProfilesQueries = ({
 }) => {
   return useQueries({
     queries: (xmtpInboxIds ?? []).map((xmtpInboxId) =>
-      profileQueryConfig({ xmtpId: xmtpInboxId })
+      profileQueryConfig({ xmtpId: xmtpInboxId }),
     ),
     combine: (results) => ({
       data: results.map((result) => result.data),

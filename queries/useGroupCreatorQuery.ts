@@ -1,7 +1,7 @@
-import { groupCreatorQueryKey } from "@/queries/QueryKeys";
-import { useQuery, queryOptions, skipToken } from "@tanstack/react-query";
+import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import { getSafeCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
+import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store";
+import { groupCreatorQueryKey } from "@/queries/QueryKeys";
 import { getGroupQueryData } from "./useGroupQuery";
 
 const getGroupCreatorQueryOptions = (args: {

@@ -1,8 +1,3 @@
-import { useSelect } from "@/stores/stores.utils";
-import { AnimatedVStack } from "@/design-system/VStack";
-import { useMessageContextStoreContext } from "@/features/conversation/conversation-message/conversation-message.store-context";
-import { useConversationStore } from "@/features/conversation/conversation.store-context";
-import { useAppTheme } from "@/theme/use-app-theme";
 import { memo, useEffect } from "react";
 import {
   cancelAnimation,
@@ -12,6 +7,11 @@ import {
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
+import { AnimatedVStack } from "@/design-system/VStack";
+import { useMessageContextStoreContext } from "@/features/conversation/conversation-message/conversation-message.store-context";
+import { useConversationStore } from "@/features/conversation/conversation.store-context";
+import { useSelect } from "@/stores/stores.utils";
+import { useAppTheme } from "@/theme/use-app-theme";
 
 export const ConversationMessageHighlighted = memo(
   function ConversationMessageHighlighted(props: {
@@ -19,12 +19,23 @@ export const ConversationMessageHighlighted = memo(
   }) {
     const { children } = props;
     const { messageId } = useMessageContextStoreContext(
-      useSelect(["messageId"])
+      useSelect(["messageId"]),
     );
     const { animatedStyle } = useHighlightAnimation({ messageId });
 
-    return <AnimatedVStack style={animatedStyle}>{children}</AnimatedVStack>;
-  }
+    return (
+      <AnimatedVStack
+        style={[
+          animatedStyle,
+          {
+            width: "100%",
+          },
+        ]}
+      >
+        {children}
+      </AnimatedVStack>
+    );
+  },
 );
 
 type IUseHighlightAnimationArgs = {
@@ -65,9 +76,9 @@ function useHighlightAnimation(args: IUseHighlightAnimationArgs) {
             runOnJS(conversationStore.setState)({
               highlightedMessageId: undefined,
             });
-          }
+          },
         );
-      }
+      },
     );
     return () => unsubscribe();
   }, [conversationStore, isHighlightedAV, theme, messageId]);

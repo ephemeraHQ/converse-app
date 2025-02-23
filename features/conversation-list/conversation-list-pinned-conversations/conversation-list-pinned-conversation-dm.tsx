@@ -1,19 +1,19 @@
+import { useCallback } from "react";
 import { VStack } from "@/design-system/VStack";
+import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
 import { PinnedConversationAvatar } from "@/features/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversation-avatar";
 import { useConversationIsUnread } from "@/features/conversation-list/hooks/use-conversation-is-unread";
 import { useDmConversationContextMenuViewProps } from "@/features/conversation-list/hooks/use-conversation-list-item-context-menu-props";
-import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query";
-import { DmWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
-import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
+import { useProfileQuery } from "@/features/profiles/profiles.query";
+import { IXmtpDmWithCodecs } from "@/features/xmtp/xmtp.types";
 import { navigate } from "@/navigation/navigation.utils";
-import { useCallback } from "react";
+import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query";
 import { isTextMessage } from "../../conversation/conversation-message/conversation-message.utils";
 import { ConversationListPinnedConversation } from "./conversation-list-pinned-conversation";
 import { PinnedConversationMessagePreview } from "./conversation-list-pinned-conversation-message-preview";
-import { useProfileQuery } from "@/features/profiles/profiles.query";
 
 type IConversationListPinnedConversationDmProps = {
-  conversation: DmWithCodecsType;
+  conversation: IXmtpDmWithCodecs;
 };
 
 export const ConversationListPinnedConversationDm = ({

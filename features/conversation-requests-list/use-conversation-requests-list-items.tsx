@@ -1,10 +1,9 @@
+import { useQueries, useQuery } from "@tanstack/react-query";
+import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
 import { getMessageSpamScore } from "@/features/conversation-requests-list/utils/get-message-spam-score";
-import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
 import { getMessageStringContent } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { getUnknownConsentConversationsQueryOptions } from "@/queries/conversations-unknown-consent-query";
 import { captureError } from "@/utils/capture-error";
-import { getMessageContentType } from "@/utils/xmtpRN/xmtp-content-types/xmtp-content-types";
-import { useQueries, useQuery } from "@tanstack/react-query";
 
 export function useConversationRequestsListItem() {
   const currentAccount = useCurrentSenderEthAddress();
@@ -35,17 +34,12 @@ export function useConversationRequestsListItem() {
           return true;
         }
 
-        const contentType = getMessageContentType(lastMessage.contentTypeId!);
-        if (!contentType) {
-          return true;
-        }
-
         try {
           const spamScore = await getMessageSpamScore({
-            messageText,
-            contentType,
+            message: lastMessage,
           });
-          return spamScore !== 0;
+          const isSpam = spamScore !== 0;
+          return isSpam;
         } catch (error) {
           captureError(error);
           return true;
@@ -72,7 +66,7 @@ export function useConversationRequestsListItem() {
         .map(
           (r) =>
             // ! because we do .filter above
-            r.conversation!
+            r.conversation!,
         ) ?? [],
     likelySpam:
       spamResults
@@ -80,7 +74,7 @@ export function useConversationRequestsListItem() {
         .map(
           (r) =>
             // ! because we do .filter above
-            r.conversation!
+            r.conversation!,
         ) ?? [],
     isLoading,
   };

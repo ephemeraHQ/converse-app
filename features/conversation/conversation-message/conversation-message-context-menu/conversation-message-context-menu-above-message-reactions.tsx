@@ -1,13 +1,4 @@
-import { HStack } from "@/design-system/HStack";
-import { Icon } from "@/design-system/Icon/Icon";
-import { TouchableOpacity } from "@/design-system/TouchableOpacity";
-import { AnimatedVStack, VStack } from "@/design-system/VStack";
-import { StaggeredAnimation } from "@/design-system/staggered-animation";
-import { useConversationMessageById } from "../use-conversation-message";
-import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
-import { getReactionContent } from "@/utils/xmtpRN/reactions";
 import { Text } from "@design-system/Text";
-import { useAppTheme } from "@/theme/use-app-theme";
 import { favoritedEmojis } from "@utils/emojis/favoritedEmojis";
 import {
   ConversationTopic,
@@ -17,8 +8,17 @@ import {
 } from "@xmtp/react-native-sdk";
 import React, { memo, useCallback, useMemo } from "react";
 import { EntryAnimationsValues, withSpring } from "react-native-reanimated";
+import { HStack } from "@/design-system/HStack";
+import { Icon } from "@/design-system/Icon/Icon";
+import { StaggeredAnimation } from "@/design-system/staggered-animation";
+import { TouchableOpacity } from "@/design-system/TouchableOpacity";
+import { AnimatedVStack, VStack } from "@/design-system/VStack";
+import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store";
+import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
+import { getReactionContent } from "@/features/xmtp/xmtp-codecs/xmtp-codecs-reaction";
+import { useAppTheme } from "@/theme/use-app-theme";
+import { useConversationMessageById } from "../use-conversation-message";
 import { MESSAGE_CONTEXT_MENU_ABOVE_MESSAGE_REACTIONS_HEIGHT } from "./conversation-message-context-menu.constants";
-import { useSafeCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
 
 export const MessageContextMenuAboveMessageReactions = memo(
   function MessageContextMenuAboveMessageReactions({
@@ -64,7 +64,7 @@ export const MessageContextMenuAboveMessageReactions = memo(
         reactors[currentUserInboxId].map((reaction) => [
           getReactionContent(reaction),
           true,
-        ])
+        ]),
       );
     }, [reactors, currentUserInboxId]);
 
@@ -79,11 +79,11 @@ export const MessageContextMenuAboveMessageReactions = memo(
         const animations = {
           originX: withSpring(
             targetValues.targetOriginX,
-            theme.animation.contextMenuSpring
+            theme.animation.contextMenuSpring,
           ),
           originY: withSpring(
             targetValues.targetOriginY,
-            theme.animation.contextMenuSpring
+            theme.animation.contextMenuSpring,
           ),
           opacity: withSpring(1, theme.animation.contextMenuSpring),
           transform: [
@@ -111,7 +111,7 @@ export const MessageContextMenuAboveMessageReactions = memo(
         originX,
         originY,
         theme.layout.screen.width,
-      ]
+      ],
     );
 
     return (
@@ -119,8 +119,7 @@ export const MessageContextMenuAboveMessageReactions = memo(
         entering={customEnteringAnimation}
         style={{
           flex: 1,
-        }}
-      >
+        }}>
         <HStack
           style={[
             {
@@ -134,16 +133,14 @@ export const MessageContextMenuAboveMessageReactions = memo(
             messageFromMe
               ? { alignSelf: "flex-end" }
               : { alignSelf: "flex-start" },
-          ]}
-        >
+          ]}>
           {favoritedEmojis.getEmojis().map((emoji, index) => (
             <StaggeredAnimation
               key={emoji}
               index={index}
               totalItems={favoritedEmojis.getEmojis().length}
               isReverse={messageFromMe}
-              delayBetweenItems={20}
-            >
+              delayBetweenItems={20}>
               <Emoji
                 content={emoji}
                 alreadySelected={!!currentUserEmojiSelectedMap.get(emoji)}
@@ -153,8 +150,7 @@ export const MessageContextMenuAboveMessageReactions = memo(
           ))}
           <TouchableOpacity
             hitSlop={theme.spacing.xs}
-            onPress={handlePlusPress}
-          >
+            onPress={handlePlusPress}>
             <VStack
               style={{
                 height: theme.spacing.xxl,
@@ -162,8 +158,7 @@ export const MessageContextMenuAboveMessageReactions = memo(
                 borderRadius: theme.spacing.sm,
                 justifyContent: "center",
                 alignItems: "center",
-              }}
-            >
+              }}>
               <Icon
                 icon="plus"
                 size={theme.iconSize.md}
@@ -174,7 +169,7 @@ export const MessageContextMenuAboveMessageReactions = memo(
         </HStack>
       </AnimatedVStack>
     );
-  }
+  },
 );
 
 const Emoji = memo(
@@ -201,8 +196,7 @@ const Emoji = memo(
           left: 10,
           right: 10,
         }}
-        onPress={handlePress}
-      >
+        onPress={handlePress}>
         <VStack
           style={[
             {
@@ -216,11 +210,10 @@ const Emoji = memo(
               backgroundColor: theme.colors.fill.minimal,
               borderRadius: theme.spacing.sm,
             },
-          ]}
-        >
+          ]}>
           <Text preset="emojiSymbol">{content}</Text>
         </VStack>
       </TouchableOpacity>
     );
-  }
+  },
 );

@@ -1,3 +1,14 @@
+import { allowedConsentConversationsQueryKey } from "@queries/QueryKeys";
+import {
+  QueryObserver,
+  queryOptions,
+  skipToken,
+  useQuery,
+} from "@tanstack/react-query";
+import { ConversationTopic } from "@xmtp/react-native-sdk";
+import { useMultiInboxStore } from "@/features/authentication/multi-inbox.store";
+import { getXmtpClientByEthAddress } from "@/features/xmtp/xmtp-client/xmtp-client.service";
+import { IXmtpConversationWithCodecs } from "@/features/xmtp/xmtp.types";
 import {
   getConversationQueryData,
   setConversationQueryData,
@@ -6,19 +17,8 @@ import { ensureConversationSyncAllQuery } from "@/queries/conversation-sync-all-
 import { Optional } from "@/types/general";
 import { captureError } from "@/utils/capture-error";
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
-import { ConversationWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
-import { allowedConsentConversationsQueryKey } from "@queries/QueryKeys";
-import {
-  QueryObserver,
-  queryOptions,
-  useQuery,
-  skipToken,
-} from "@tanstack/react-query";
-import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { queryClient } from "./queryClient";
 import { ensureGroupMembersQueryData } from "./useGroupMembersQuery";
-import { useMultiInboxStore } from "@/features/multi-inbox/multi-inbox.store";
-import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
 
 export type IAllowedConsentConversationsQuery = Awaited<
   ReturnType<typeof getAllowedConsentConversations>
@@ -31,24 +31,24 @@ type IArgs = {
 type IArgsWithCaller = IArgs & { caller: string };
 
 export const createAllowedConsentConversationsQueryObserver = (
-  args: IArgs & { caller: string }
+  args: IArgs & { caller: string },
 ) => {
   return new QueryObserver(
     queryClient,
-    getAllowedConsentConversationsQueryOptions(args)
+    getAllowedConsentConversationsQueryOptions(args),
   );
 };
 
 export const useAllowedConsentConversationsQuery = (
-  args: IArgs & { caller: string }
+  args: IArgs & { caller: string },
 ) => {
   return useQuery(getAllowedConsentConversationsQueryOptions(args));
 };
 
 export function addConversationToAllowedConsentConversationsQuery(
   args: IArgs & {
-    conversation: ConversationWithCodecsType;
-  }
+    conversation: IXmtpConversationWithCodecs;
+  },
 ) {
   const { account, conversation } = args;
 
@@ -59,13 +59,13 @@ export function addConversationToAllowedConsentConversationsQuery(
   if (!previousConversationsData) {
     queryClient.setQueryData(
       getAllowedConsentConversationsQueryOptions({ account }).queryKey,
-      [conversation]
+      [conversation],
     );
     return;
   }
 
   const conversationExists = previousConversationsData.some(
-    (c) => c.topic === conversation.topic
+    (c) => c.topic === conversation.topic,
   );
 
   if (conversationExists) {
@@ -78,14 +78,14 @@ export function addConversationToAllowedConsentConversationsQuery(
 
   queryClient.setQueryData<IAllowedConsentConversationsQuery>(
     getAllowedConsentConversationsQueryOptions({ account }).queryKey,
-    [conversation, ...previousConversationsData]
+    [conversation, ...previousConversationsData],
   );
 }
 
 export const removeConversationFromAllowedConsentConversationsQuery = (
   args: IArgs & {
     topic: ConversationTopic;
-  }
+  },
 ) => {
   const { account, topic } = args;
 
@@ -99,13 +99,13 @@ export const removeConversationFromAllowedConsentConversationsQuery = (
 
   queryClient.setQueryData(
     getAllowedConsentConversationsQueryOptions({ account }).queryKey,
-    previousConversationsData.filter((c) => c.topic !== topic)
+    previousConversationsData.filter((c) => c.topic !== topic),
   );
 };
 
 export const getAllowedConsentConversationsQueryData = (args: IArgs) => {
   return queryClient.getQueryData(
-    getAllowedConsentConversationsQueryOptions(args).queryKey
+    getAllowedConsentConversationsQueryOptions(args).queryKey,
   );
 };
 
@@ -117,7 +117,7 @@ const getAllowedConsentConversations = async (args: IArgs) => {
     consentStates: ["allowed"],
   });
 
-  const client = MultiInboxClient.instance.getInboxClientForAddress({
+  const client = await getXmtpClientByEthAddress({
     ethereumAddress: account,
   });
 
@@ -132,7 +132,7 @@ const getAllowedConsentConversations = async (args: IArgs) => {
       description: true,
     },
     9999, // All of them
-    ["allowed"]
+    ["allowed"],
   );
 
   for (const conversation of conversations) {
@@ -159,7 +159,7 @@ const getAllowedConsentConversations = async (args: IArgs) => {
 };
 
 export const getAllowedConsentConversationsQueryOptions = (
-  args: Optional<IArgsWithCaller, "caller">
+  args: Optional<IArgsWithCaller, "caller">,
 ) => {
   const { account, caller } = args;
   const enabled = !!account;
@@ -178,8 +178,8 @@ export const getAllowedConsentConversationsQueryOptions = (
 export const updateConversationInAllowedConsentConversationsQueryData = (
   args: IArgs & {
     topic: ConversationTopic;
-    conversationUpdate: Partial<ConversationWithCodecsType>;
-  }
+    conversationUpdate: Partial<IXmtpConversationWithCodecs>;
+  },
 ) => {
   const { account, topic, conversationUpdate } = args;
 
@@ -191,9 +191,9 @@ export const updateConversationInAllowedConsentConversationsQueryData = (
     captureError(
       new Error(
         `No previous conversations data found for account: ${account} when updating conversation in allowed consent conversations query data: ${JSON.stringify(
-          conversationUpdate
-        )}`
-      )
+          conversationUpdate,
+        )}`,
+      ),
     );
     return;
   }
@@ -209,12 +209,12 @@ export const updateConversationInAllowedConsentConversationsQueryData = (
     getAllowedConsentConversationsQueryOptions({
       account,
     }).queryKey,
-    newConversations
+    newConversations,
   );
 };
 
 export function fetchAllowedConsentConversationsQuery(args: IArgsWithCaller) {
   return queryClient.fetchQuery(
-    getAllowedConsentConversationsQueryOptions(args)
+    getAllowedConsentConversationsQueryOptions(args),
   );
 }

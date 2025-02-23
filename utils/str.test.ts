@@ -23,14 +23,10 @@ jest.mock("expo-secure-store", () => ({
   getItemAsync: jest.fn().mockReturnValue(""),
 }));
 
-jest.mock("../data/store/chatStore", () => ({
-  XmtpConversation: jest.fn(),
-}));
-
 describe("shortDisplayName", () => {
   it("should shorten the domain correctly based on screen width", () => {
     expect(shortDisplayName("thisisaverylongdomainname.com")).toBe(
-      "thisisaverylong..."
+      "thisisaverylong...",
     );
   });
 

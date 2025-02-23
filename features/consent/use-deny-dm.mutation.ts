@@ -1,7 +1,19 @@
+import { useMutation } from "@tanstack/react-query";
+import {
+  ConversationId,
+  ConversationTopic,
+  InboxId,
+} from "@xmtp/react-native-sdk";
 import {
   getCurrentSenderEthAddress,
   useCurrentSenderEthAddress,
-} from "@/features/multi-inbox/multi-inbox.store";
+} from "@/features/authentication/multi-inbox.store";
+import { updateConsentForGroupsForAccount } from "@/features/consent/update-consent-for-groups-for-account";
+import { updateInboxIdsConsentForAccount } from "@/features/consent/update-inbox-ids-consent-for-account";
+import {
+  IXmtpConversationWithCodecs,
+  IXmtpDmWithCodecs,
+} from "@/features/xmtp/xmtp.types";
 import { getConversationQueryData } from "@/queries/conversation-query";
 import {
   addConversationToAllowedConsentConversationsQuery,
@@ -13,18 +25,6 @@ import {
 } from "@/queries/conversations-unknown-consent-query";
 import { getDmQueryData, setDmQueryData } from "@/queries/useDmQuery";
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
-import {
-  ConversationWithCodecsType,
-  DmWithCodecsType,
-} from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
-import { useMutation } from "@tanstack/react-query";
-import {
-  ConversationId,
-  ConversationTopic,
-  InboxId,
-} from "@xmtp/react-native-sdk";
-import { updateInboxIdsConsentForAccount } from "@/features/consent/update-inbox-ids-consent-for-account";
-import { updateConsentForGroupsForAccount } from "@/features/consent/update-consent-for-groups-for-account";
 
 export function useDenyDmMutation() {
   const currentAccount = useCurrentSenderEthAddress()!;
@@ -66,7 +66,7 @@ export function useDenyDmMutation() {
         setDmQueryData({
           ethAccountAddress: currentAccount,
           inboxId: peerInboxId,
-          dm: updatedDm as DmWithCodecsType,
+          dm: updatedDm as IXmtpDmWithCodecs,
         });
 
         // Remove from main conversations list
@@ -109,13 +109,13 @@ export function useDenyDmMutation() {
         // Add back to main conversations list
         addConversationToAllowedConsentConversationsQuery({
           account: currentAccount,
-          conversation: previousDm as ConversationWithCodecsType,
+          conversation: previousDm as IXmtpConversationWithCodecs,
         });
 
         // Add back to requests
         addConversationToUnknownConsentConversationsQuery({
           account: currentAccount,
-          conversation: previousDm as ConversationWithCodecsType,
+          conversation: previousDm as IXmtpConversationWithCodecs,
         });
       }
     },

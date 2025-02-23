@@ -1,89 +1,81 @@
 import {
-  getConversationMessagesQueryData,
-  useConversationMessagesQuery,
-} from "@/queries/conversation-messages-query";
-import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
-import { CoinbaseMessagingPaymentCodec } from "@/utils/xmtpRN/xmtp-content-types/xmtp-coinbase-payment";
-import { getMessageContentType } from "@/utils/xmtpRN/xmtp-content-types/xmtp-content-types";
+  ConversationTopic,
+  MessageDeliveryStatus,
+  MessageId,
+  ReactionContent,
+  RemoteAttachmentContent,
+  ReplyContent,
+  StaticAttachmentContent,
+} from "@xmtp/react-native-sdk";
+import emojiRegex from "emoji-regex";
 import {
   getCurrentSenderEthAddress,
   getSafeCurrentSender,
   useCurrentSenderEthAddress,
-} from "@/features/multi-inbox/multi-inbox.store";
-import { TransactionReferenceCodec } from "@xmtp/content-type-transaction-reference";
+} from "@/features/authentication/multi-inbox.store";
+import { getMessageContentType } from "@/features/xmtp/xmtp-content-types/xmtp-content-types";
 import {
-  ConversationTopic,
-  DecodedMessage,
-  GroupUpdatedCodec,
-  MessageDeliveryStatus,
-  MessageId,
-  ReactionCodec,
-  ReactionContent,
-  ReadReceiptCodec,
-  RemoteAttachmentCodec,
-  RemoteAttachmentContent,
-  ReplyCodec,
-  ReplyContent,
-  StaticAttachmentCodec,
-  StaticAttachmentContent,
-  TextCodec,
-} from "@xmtp/react-native-sdk";
-import emojiRegex from "emoji-regex";
+  IXmtpDecodedActualMessage,
+  IXmtpDecodedGroupUpdatedMessage,
+  IXmtpDecodedMessage,
+  IXmtpDecodedReactionMessage,
+  IXmtpDecodedRemoteAttachmentMessage,
+  IXmtpDecodedReplyMessage,
+  IXmtpDecodedStaticAttachmentMessage,
+  IXmtpDecodedTextMessage,
+} from "@/features/xmtp/xmtp.types";
+import {
+  getConversationMessagesQueryData,
+  useConversationMessagesQuery,
+} from "@/queries/conversation-messages-query";
 import { useCurrentConversationTopicSafe } from "../conversation.store-context";
 
 export function isAnActualMessage(
-  message: DecodedMessageWithCodecsType
-): message is DecodedMessage<TextCodec> {
+  message: IXmtpDecodedMessage,
+): message is IXmtpDecodedActualMessage {
   return !isReadReceiptMessage(message) && !isGroupUpdatedMessage(message);
 }
 
 export function isTextMessage(
-  message: DecodedMessageWithCodecsType
-): message is DecodedMessage<TextCodec> {
-  return getMessageContentType(message.contentTypeId) === "text";
+  message: IXmtpDecodedMessage,
+): message is IXmtpDecodedTextMessage {
+  return getMessageContentType({ message }) === "text";
 }
 
 export function isReactionMessage(
-  message: DecodedMessageWithCodecsType
-): message is DecodedMessage<ReactionCodec> {
-  return getMessageContentType(message.contentTypeId) === "reaction";
+  message: IXmtpDecodedMessage,
+): message is IXmtpDecodedReactionMessage {
+  return getMessageContentType({ message }) === "reaction";
 }
-export function isReadReceiptMessage(
-  message: DecodedMessageWithCodecsType
-): message is DecodedMessage<ReadReceiptCodec> {
-  return getMessageContentType(message.contentTypeId) === "readReceipt";
+
+export function isReadReceiptMessage(message: IXmtpDecodedMessage) {
+  // return getMessageContentType({message}) === "readReceipt";
+  // TODO
+  return false;
 }
+
 export function isGroupUpdatedMessage(
-  message: DecodedMessageWithCodecsType
-): message is DecodedMessage<GroupUpdatedCodec> {
-  return getMessageContentType(message.contentTypeId) === "groupUpdated";
+  message: IXmtpDecodedMessage,
+): message is IXmtpDecodedGroupUpdatedMessage {
+  return getMessageContentType({ message }) === "groupUpdated";
 }
+
 export function isReplyMessage(
-  message: DecodedMessageWithCodecsType
-): message is DecodedMessage<ReplyCodec> {
-  return getMessageContentType(message.contentTypeId) === "reply";
+  message: IXmtpDecodedMessage,
+): message is IXmtpDecodedReplyMessage {
+  return getMessageContentType({ message }) === "reply";
 }
+
 export function isRemoteAttachmentMessage(
-  message: DecodedMessageWithCodecsType
-): message is DecodedMessage<RemoteAttachmentCodec> {
-  return getMessageContentType(message.contentTypeId) === "remoteAttachment";
+  message: IXmtpDecodedMessage,
+): message is IXmtpDecodedRemoteAttachmentMessage {
+  return getMessageContentType({ message }) === "remoteAttachment";
 }
+
 export function isStaticAttachmentMessage(
-  message: DecodedMessageWithCodecsType
-): message is DecodedMessage<StaticAttachmentCodec> {
-  return getMessageContentType(message.contentTypeId) === "attachment";
-}
-export function isTransactionReferenceMessage(
-  message: DecodedMessageWithCodecsType
-): message is DecodedMessage<TransactionReferenceCodec> {
-  return (
-    getMessageContentType(message.contentTypeId) === "transactionReference"
-  );
-}
-export function isCoinbasePaymentMessage(
-  message: DecodedMessageWithCodecsType
-): message is DecodedMessage<CoinbaseMessagingPaymentCodec> {
-  return getMessageContentType(message.contentTypeId) === "coinbasePayment";
+  message: IXmtpDecodedMessage,
+): message is IXmtpDecodedStaticAttachmentMessage {
+  return getMessageContentType({ message }) === "attachment";
 }
 
 export function getMessageById({
@@ -104,7 +96,7 @@ export function getMessageById({
   return messages.byId[messageId];
 }
 
-export function getMessageStringContent(message: DecodedMessageWithCodecsType) {
+export function getMessageStringContent(message: IXmtpDecodedMessage) {
   const content = message.content();
 
   if (typeof content === "string") {
@@ -123,10 +115,6 @@ export function getMessageStringContent(message: DecodedMessageWithCodecsType) {
   if (isStaticAttachmentMessage(message)) {
     const content = message.content() as StaticAttachmentContent;
     return content.filename;
-  }
-
-  if (isTransactionReferenceMessage(message)) {
-    return "Transaction";
   }
 
   if (isReactionMessage(message)) {
@@ -163,10 +151,6 @@ export function getMessageStringContent(message: DecodedMessageWithCodecsType) {
     return "Group updated";
   }
 
-  if (isCoinbasePaymentMessage(message)) {
-    return "Coinbase payment";
-  }
-
   return "";
 }
 
@@ -174,7 +158,7 @@ export function useMessageHasReactions(args: { messageId: MessageId }) {
   const { messageId } = args;
   const reactions = useConversationMessageReactions(messageId);
   return Object.values(reactions.bySender || {}).some(
-    (reactions) => reactions.length > 0
+    (reactions) => reactions.length > 0,
   );
 }
 
@@ -211,12 +195,12 @@ export function getCurrentUserAlreadyReactedOnMessage(args: {
   const reactions = messages?.reactions[messageId];
   const bySender = reactions?.bySender;
   return bySender?.[currentUserInboxId!]?.some(
-    (reaction) => !emoji || reaction.content === emoji
+    (reaction) => !emoji || reaction.content === emoji,
   );
 }
 
 export function getConvosMessageStatusForXmtpMessage(
-  message: DecodedMessageWithCodecsType
+  message: IXmtpDecodedMessage,
 ) {
   // @ts-ignore - Custom for optimistic message, we might want to have our custom ConvoMessage
   if (message.deliveryStatus === "sending") {
@@ -259,7 +243,7 @@ export const shouldRenderBigEmoji = (text: string) => {
 //     status: getConvosMessageStatusForXmtpMessage(message),
 //     senderInboxId: message.senderInboxId,
 //     sentNs: message.sentNs,
-//     type: getMessageContentType(message.contentTypeId),
+//     type: getMessageContentType({message}),
 //     content: message.content() as NativeMessageContent,
 //   };
 // }

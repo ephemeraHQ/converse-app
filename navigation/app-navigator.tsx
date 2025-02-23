@@ -1,3 +1,11 @@
+import {
+  ConversationNav,
+  ConversationScreenConfig,
+} from "@features/conversation/conversation.nav";
+import { LinkingOptions, NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import * as Linking from "expo-linking";
+import React, { useEffect } from "react";
 import { config } from "@/config";
 import { AppSettingsScreen } from "@/features/app-settings/app-settings.screen";
 import { useAuthStore } from "@/features/authentication/authentication.store";
@@ -16,14 +24,6 @@ import { WebviewPreviewNav } from "@/screens/WebviewPreviewNav";
 import { useThemeProvider } from "@/theme/use-app-theme";
 import { captureError } from "@/utils/capture-error";
 import { hideSplashScreen } from "@/utils/splash/splash";
-import {
-  ConversationNav,
-  ConversationScreenConfig,
-} from "@features/conversation/conversation.nav";
-import { LinkingOptions, NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import * as Linking from "expo-linking";
-import React, { useEffect } from "react";
 import {
   ShareProfileNav,
   ShareProfileScreenConfig,
@@ -67,8 +67,7 @@ export function AppNavigator() {
             // Since we're handling multiple navigators,
             // let's silence errors when the action
             // is not meant for this one
-          }}
-        >
+          }}>
           <AppStacks />
         </NavigationContainer>
       </ThemeProvider>
@@ -96,8 +95,7 @@ function AppStacks() {
       screenOptions={{
         // Since we handle with useHeader hook
         header: () => null,
-      }}
-    >
+      }}>
       {isUndetermined ? (
         // Show idle screen during restoration
         <AppNativeStack.Screen

@@ -1,7 +1,8 @@
+import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 import {
   getCurrentSenderEthAddress,
   getSafeCurrentSender,
-} from "@/features/multi-inbox/multi-inbox.store";
+} from "@/features/authentication/multi-inbox.store";
 import {
   ensureDmPeerInboxIdQueryData,
   getDmPeerInboxIdQueryData,
@@ -10,7 +11,6 @@ import {
   ensureGroupMembersQueryData,
   getGroupMembersQueryData,
 } from "@/queries/useGroupMembersQuery";
-import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 
 export function inboxIdIsPartOfConversationUsingCacheData(args: {
   inboxId: InboxId;

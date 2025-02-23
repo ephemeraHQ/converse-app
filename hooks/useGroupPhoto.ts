@@ -1,5 +1,5 @@
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import { useCurrentSenderEthAddress } from "../features/multi-inbox/multi-inbox.store";
+import { useCurrentSenderEthAddress } from "../features/authentication/multi-inbox.store";
 import { useGroupPhotoMutation } from "../queries/useGroupPhotoMutation";
 import { useGroupPhotoQuery } from "../queries/useGroupPhotoQuery";
 

@@ -2,22 +2,22 @@
  * This store/context is to avoid prop drilling in message components.
  */
 
+import { InboxId, MessageId } from "@xmtp/react-native-sdk";
+import { createContext, memo, useContext, useEffect, useRef } from "react";
+import { createStore, useStore } from "zustand";
+import { subscribeWithSelector } from "zustand/middleware";
 import { isGroupUpdatedMessage } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { hasNextMessageInSeries } from "@/features/conversation/utils/has-next-message-in-serie";
 import { hasPreviousMessageInSeries } from "@/features/conversation/utils/has-previous-message-in-serie";
 import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
 import { messageShouldShowDateChange } from "@/features/conversation/utils/message-should-show-date-change";
+import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types";
 import { convertNanosecondsToMilliseconds } from "@/utils/date";
-import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
-import { InboxId, MessageId } from "@xmtp/react-native-sdk";
-import { createContext, memo, useContext, useEffect, useRef } from "react";
-import { createStore, useStore } from "zustand";
-import { subscribeWithSelector } from "zustand/middleware";
 
 type IMessageContextStoreProps = {
-  message: DecodedMessageWithCodecsType;
-  previousMessage: DecodedMessageWithCodecsType | undefined;
-  nextMessage: DecodedMessageWithCodecsType | undefined;
+  message: IXmtpDecodedMessage;
+  previousMessage: IXmtpDecodedMessage | undefined;
+  nextMessage: IXmtpDecodedMessage | undefined;
 };
 
 type IMessageContextStoreState = IMessageContextStoreProps & {
@@ -57,7 +57,7 @@ export const MessageContextStoreProvider = memo(
         {children}
       </MessageContextStoreContext.Provider>
     );
-  }
+  },
 );
 
 function getStoreStateBasedOnProps(props: IMessageContextStoreProps) {
@@ -88,16 +88,16 @@ function getStoreStateBasedOnProps(props: IMessageContextStoreProps) {
 
 const createMessageContextStore = (initProps: IMessageContextStoreProps) => {
   return createStore<IMessageContextStoreState>()(
-    subscribeWithSelector((set) => getStoreStateBasedOnProps(initProps))
+    subscribeWithSelector((set) => getStoreStateBasedOnProps(initProps)),
   );
 };
 
 const MessageContextStoreContext = createContext<IMessageContextStore | null>(
-  null
+  null,
 );
 
 export function useMessageContextStoreContext<T>(
-  selector: (state: IMessageContextStoreState) => T
+  selector: (state: IMessageContextStoreState) => T,
 ): T {
   const store = useContext(MessageContextStoreContext);
   if (!store)

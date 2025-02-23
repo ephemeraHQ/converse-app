@@ -1,9 +1,3 @@
-import { AnimatedVStack } from "@/design-system/VStack";
-import { ConversationListItemDm } from "@/features/conversation-list/conversation-list-item/conversation-list-item-dm";
-import { ConversationListItemGroup } from "@/features/conversation-list/conversation-list-item/conversation-list-item-group";
-import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
-import { useAppTheme } from "@/theme/use-app-theme";
-import { ConversationWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { useCallback, useRef } from "react";
 import {
   FlatListProps,
@@ -13,13 +7,19 @@ import {
   Platform,
 } from "react-native";
 import Animated, { AnimatedProps } from "react-native-reanimated";
+import { AnimatedVStack } from "@/design-system/VStack";
+import { ConversationListItemDm } from "@/features/conversation-list/conversation-list-item/conversation-list-item-dm";
+import { ConversationListItemGroup } from "@/features/conversation-list/conversation-list-item/conversation-list-item-group";
+import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
+import { IXmtpConversationWithCodecs } from "@/features/xmtp/xmtp.types";
+import { useAppTheme } from "@/theme/use-app-theme";
 
 type IConversationListProps = Omit<
-  AnimatedProps<FlatListProps<ConversationWithCodecsType>>,
+  AnimatedProps<FlatListProps<IXmtpConversationWithCodecs>>,
   "data" | "renderItem"
 > & {
-  conversations: ConversationWithCodecsType[];
-  renderConversation?: ListRenderItem<ConversationWithCodecsType>;
+  conversations: IXmtpConversationWithCodecs[];
+  renderConversation?: ListRenderItem<IXmtpConversationWithCodecs>;
   onRefetch?: () => Promise<void>;
 };
 
@@ -50,8 +50,7 @@ export function ConversationList(props: IConversationListProps) {
       renderItem={(args) => (
         <AnimatedVStack
           entering={theme.animation.reanimatedFadeInSpring}
-          exiting={theme.animation.reanimatedFadeOutSpring}
-        >
+          exiting={theme.animation.reanimatedFadeOutSpring}>
           {renderConversation(args)}
         </AnimatedVStack>
       )}
@@ -60,7 +59,7 @@ export function ConversationList(props: IConversationListProps) {
   );
 }
 
-const defaultRenderItem: ListRenderItem<ConversationWithCodecsType> = ({
+const defaultRenderItem: ListRenderItem<IXmtpConversationWithCodecs> = ({
   item,
 }) => {
   const conversation = item;
@@ -70,7 +69,7 @@ const defaultRenderItem: ListRenderItem<ConversationWithCodecsType> = ({
   return <ConversationListItemDm conversationTopic={conversation.topic} />;
 };
 
-function keyExtractor(item: ConversationWithCodecsType) {
+function keyExtractor(item: IXmtpConversationWithCodecs) {
   if ("lastMessage" in item) {
     return item.topic;
   }
@@ -105,7 +104,7 @@ function useRefreshHandler(args: { onRefetch?: () => Promise<void> }) {
         handleRefresh();
       }
     },
-    [handleRefresh]
+    [handleRefresh],
   );
 
   return {

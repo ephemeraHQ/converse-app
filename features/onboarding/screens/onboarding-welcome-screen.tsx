@@ -1,12 +1,14 @@
+import { memo, useCallback, useEffect } from "react";
+import { Button, TextStyle } from "react-native";
 import { Screen } from "@/components/screen/screen";
 import { showSnackbar } from "@/components/snackbar/snackbar.service";
 import { Center } from "@/design-system/Center";
+import { Loader } from "@/design-system/loader";
 import { Pressable } from "@/design-system/Pressable";
 import { AnimatedText, Text } from "@/design-system/Text";
 import { VStack } from "@/design-system/VStack";
-import { Loader } from "@/design-system/loader";
+import { useMultiInboxStore } from "@/features/authentication/multi-inbox.store";
 import { useLogout } from "@/features/authentication/use-logout.hook";
-import { useMultiInboxStore } from "@/features/multi-inbox/multi-inbox.store";
 import { OnboardingSubtitle } from "@/features/onboarding/components/onboarding-subtitle";
 import { OnboardingTitle } from "@/features/onboarding/components/onboarding-title";
 import { useLoginWithPasskey } from "@/features/onboarding/hooks/use-login-with-passkey";
@@ -14,8 +16,6 @@ import { useSignupWithPasskey } from "@/features/onboarding/hooks/use-signup-wit
 import { $globalStyles } from "@/theme/styles";
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { captureErrorWithToast } from "@/utils/capture-error";
-import { memo, useCallback, useEffect } from "react";
-import { Button, TextStyle } from "react-native";
 
 export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
   const { themed, theme } = useAppTheme();
@@ -33,24 +33,35 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
 
   const handleSignup = useCallback(async () => {
     try {
+      // If the user decides to sign up again, make sure we're fully logged out
+      await logout();
+
       const { inboxId, ethereumAddress } = await signup();
-      useMultiInboxStore.getState().addSender({
+      useMultiInboxStore.getState().actions.addSender({
         inboxId,
         ethereumAddress,
+      });
+      useMultiInboxStore.getState().actions.setCurrentSender({
+        ethereumAddress,
+        inboxId,
       });
     } catch (error) {
       captureErrorWithToast(error, {
         message: "Error signing up with passkey",
       });
     }
-  }, [signup]);
+  }, [signup, logout]);
 
   const handleLogin = useCallback(async () => {
     try {
       const { inboxId, ethereumAddress } = await login();
-      useMultiInboxStore.getState().addSender({
+      useMultiInboxStore.getState().actions.addSender({
         inboxId,
         ethereumAddress,
+      });
+      useMultiInboxStore.getState().actions.setCurrentSender({
+        ethereumAddress,
+        inboxId,
       });
     } catch (error) {
       captureErrorWithToast(error, {

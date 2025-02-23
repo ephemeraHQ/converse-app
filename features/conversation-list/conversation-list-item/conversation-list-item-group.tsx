@@ -1,18 +1,19 @@
-import { GroupAvatar } from "@/components/group-avatar";
-import { ISwipeableRenderActionsArgs } from "@/components/swipeable";
-import { MIDDLE_DOT } from "@/design-system/middle-dot";
-import { ConversationListItemSwipeable } from "@/features/conversation-list/conversation-list-item/conversation-list-item-swipeable/conversation-list-item-swipeable";
-import { useConversationIsUnread } from "@/features/conversation-list/hooks/use-conversation-is-unread";
-import { useDeleteGroup } from "@/features/conversation-list/hooks/use-delete-group";
-import { useToggleReadStatus } from "@/features/conversation-list/hooks/use-toggle-read-status";
-import { useMessagePlainText } from "@/features/conversation-list/hooks/use-message-plain-text";
-import { useGroupName } from "@/hooks/useGroupName";
-import { useGroupQuery } from "@/queries/useGroupQuery";
-import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
-import { useRouter } from "@/navigation/use-navigation";
 import { getCompactRelativeTime } from "@utils/date";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { memo, useCallback } from "react";
+import { GroupAvatar } from "@/components/group-avatar";
+import { ISwipeableRenderActionsArgs } from "@/components/swipeable";
+import { MIDDLE_DOT } from "@/design-system/middle-dot";
+import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
+import { ConversationListItemSwipeable } from "@/features/conversation-list/conversation-list-item/conversation-list-item-swipeable/conversation-list-item-swipeable";
+import { useConversationIsUnread } from "@/features/conversation-list/hooks/use-conversation-is-unread";
+import { useDeleteGroup } from "@/features/conversation-list/hooks/use-delete-group";
+import { useMessagePlainText } from "@/features/conversation-list/hooks/use-message-plain-text";
+import { useToggleReadStatus } from "@/features/conversation-list/hooks/use-toggle-read-status";
+import { useFocusRerender } from "@/hooks/use-focus-rerender";
+import { useGroupName } from "@/hooks/useGroupName";
+import { useRouter } from "@/navigation/use-navigation";
+import { useGroupQuery } from "@/queries/useGroupQuery";
 import { ConversationListItem } from "./conversation-list-item";
 import { DeleteSwipeableAction } from "./conversation-list-item-swipeable/conversation-list-item-swipeable-delete-action";
 import { ToggleUnreadSwipeableAction } from "./conversation-list-item-swipeable/conversation-list-item-swipeable-toggle-read-action";
@@ -27,6 +28,9 @@ export const ConversationListItemGroup = memo(
   }: IConversationListItemGroupProps) {
     const currentAccount = useCurrentSenderEthAddress()!;
     const router = useRouter();
+
+    // Need this so the timestamp is updated on every focus
+    useFocusRerender();
 
     const { data: group } = useGroupQuery({
       account: currentAccount,
@@ -67,7 +71,7 @@ export const ConversationListItemGroup = memo(
       (args: ISwipeableRenderActionsArgs) => {
         return <DeleteSwipeableAction {...args} />;
       },
-      []
+      [],
     );
 
     const renderRightActions = useCallback(
@@ -76,7 +80,7 @@ export const ConversationListItemGroup = memo(
           <ToggleUnreadSwipeableAction {...args} topic={conversationTopic} />
         );
       },
-      [conversationTopic]
+      [conversationTopic],
     );
 
     const onDeleteGroup = useDeleteGroup({
@@ -102,5 +106,5 @@ export const ConversationListItemGroup = memo(
         />
       </ConversationListItemSwipeable>
     );
-  }
+  },
 );

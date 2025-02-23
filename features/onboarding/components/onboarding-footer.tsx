@@ -1,14 +1,14 @@
-import { IIconName } from "@/design-system/Icon/Icon.types";
-import { AnimatedVStack } from "@/design-system/VStack";
-import { ActivityIndicator } from "@/design-system/activity-indicator";
-import { OnboardingIconButton } from "@/features/onboarding/components/onboarding-icon-button";
-import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { ViewStyle } from "react-native";
 import { useAnimatedKeyboard, useAnimatedStyle } from "react-native-reanimated";
+import { ActivityIndicator } from "@/design-system/activity-indicator";
+import { IIconName } from "@/design-system/Icon/Icon.types";
+import { AnimatedVStack } from "@/design-system/VStack";
+import { OnboardingIconButton } from "@/features/onboarding/components/onboarding-icon-button";
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import {
   ONBOARDING_ENTERING_DELAY,
   ONBOARDING_ENTERING_DURATION,
-} from "../constants/animation-constants";
+} from "../onboarding.constants";
 import { OnboardingFooterText } from "./onboarding-footer-text";
 
 type IOnboardingFooterProps = {
@@ -48,8 +48,7 @@ export function OnboardingFooter({
       entering={animation
         .fadeInDownSpring()
         .delay(ONBOARDING_ENTERING_DELAY.THIRD)
-        .duration(ONBOARDING_ENTERING_DURATION)}
-    >
+        .duration(ONBOARDING_ENTERING_DURATION)}>
       <OnboardingIconButton
         action="primary"
         size="xl"

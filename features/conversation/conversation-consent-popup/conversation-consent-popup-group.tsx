@@ -1,4 +1,8 @@
-import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
+import { translate } from "@i18n";
+import { groupRemoveRestoreHandler } from "@utils/groupUtils/groupActionHandlers";
+import React, { useCallback } from "react";
+import { useColorScheme } from "react-native";
+import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
 import { useGroupConsentForCurrentAccount } from "@/features/consent/use-group-consent-for-current-account";
 import {
   ConsentPopupButtonsContainer,
@@ -9,10 +13,6 @@ import {
 import { useRouter } from "@/navigation/use-navigation";
 import { useGroupNameQuery } from "@/queries/useGroupNameQuery";
 import { captureErrorWithToast } from "@/utils/capture-error";
-import { translate } from "@i18n";
-import { groupRemoveRestoreHandler } from "@utils/groupUtils/groupActionHandlers";
-import React, { useCallback } from "react";
-import { useColorScheme } from "react-native";
 import { useCurrentConversationTopicSafe } from "../conversation.store-context";
 
 export function ConversationConsentPopupGroup() {
@@ -34,7 +34,7 @@ export function ConversationConsentPopupGroup() {
       colorScheme,
       groupName,
       allowGroup,
-      denyGroup
+      denyGroup,
     )((success: boolean) => {
       if (success) {
         navigation.pop();

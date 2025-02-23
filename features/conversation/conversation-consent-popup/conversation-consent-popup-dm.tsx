@@ -1,14 +1,14 @@
+import { translate } from "@i18n";
+import React, { useCallback } from "react";
 import { showActionSheet } from "@/components/action-sheet";
+import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
 import { useAllowDmMutation } from "@/features/consent/use-allow-dm.mutation";
 import { useDenyDmMutation } from "@/features/consent/use-deny-dm.mutation";
-import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
 import { useRouter } from "@/navigation/use-navigation";
 import { getConversationQueryData } from "@/queries/conversation-query";
 import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { ensureError } from "@/utils/error";
-import { translate } from "@i18n";
-import React, { useCallback } from "react";
 import { useCurrentConversationTopicSafe } from "../conversation.store-context";
 import {
   ConsentPopupButtonsContainer,

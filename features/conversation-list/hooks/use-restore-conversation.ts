@@ -1,10 +1,10 @@
+import { useMutation } from "@tanstack/react-query";
+import { ConversationTopic } from "@xmtp/react-native-sdk";
+import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
 import {
   getConversationMetadataQueryData,
   updateConversationMetadataQueryData,
 } from "@/features/conversation/conversation-metadata/conversation-metadata.query";
-import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
-import { useMutation } from "@tanstack/react-query";
-import { ConversationTopic } from "@xmtp/react-native-sdk";
 
 export function useRestoreConversation(args: { topic: ConversationTopic }) {
   const { topic } = args;

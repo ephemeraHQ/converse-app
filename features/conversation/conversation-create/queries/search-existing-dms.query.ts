@@ -1,41 +1,32 @@
+import { queryOptions, useQuery } from "@tanstack/react-query";
+import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
+import { getCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm";
-import { getCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
 import { ensureProfileQueryData } from "@/features/profiles/profiles.query";
 import { doesSocialProfilesMatchTextQuery } from "@/features/profiles/utils/does-social-profiles-match-text-query";
-import { ensureSocialProfilesQueryData } from "@/features/social-profiles/social-lookup.query";
-import { getSearchExistingDmsQueryKey } from "@/queries/QueryKeys";
+import { ensureSocialProfilesQueryData } from "@/features/social-profiles/social-profiles.query";
 import { getAllowedConsentConversationsQueryData } from "@/queries/conversations-allowed-consent-query";
 import { ensureDmPeerInboxIdQueryData } from "@/queries/use-dm-peer-inbox-id-query";
 import { ensureGroupMembersQueryData } from "@/queries/useGroupMembersQuery";
 import { captureError } from "@/utils/capture-error";
 import { normalizeString } from "@/utils/str";
-import { queryOptions, useQuery } from "@tanstack/react-query";
-import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 
 export function getSearchExistingDmsQueryOptions(args: {
   searchQuery: string;
   inboxId: InboxId;
 }) {
   const { searchQuery, inboxId } = args;
-  const normalizedSearchQuery = normalizeString(args.searchQuery);
+  const normalizedSearchQuery = normalizeString(searchQuery);
   return queryOptions({
-    // NOT sure why this Eslint error
-    // eslint-disable-next-line @tanstack/query/exhaustive-deps
-    queryKey: getSearchExistingDmsQueryKey({
-      searchQuery: normalizedSearchQuery,
-      inboxId,
-    }),
-    queryFn: () => searchExistingDms(args),
-    enabled: !!inboxId && !!searchQuery,
+    queryKey: ["conversations-search", "dms", normalizedSearchQuery, inboxId],
+    queryFn: () =>
+      searchExistingDms({
+        searchQuery: normalizedSearchQuery,
+        inboxId,
+      }),
+    enabled: !!inboxId && !!normalizedSearchQuery,
     staleTime: 0,
   });
-}
-
-export function useSearchExistingDms(args: {
-  searchQuery: string;
-  inboxId: InboxId;
-}) {
-  return useQuery(getSearchExistingDmsQueryOptions(args));
 }
 
 async function searchExistingDms(args: {
@@ -98,7 +89,7 @@ async function searchExistingDms(args: {
           .includes(normalizedSearchQuery);
 
         const socialProfiles = await ensureSocialProfilesQueryData({
-          ethAddress: otherMemberInboxId,
+          ethAddress: profile.privyAddress,
         });
 
         const hasSocialProfileMatch = doesSocialProfilesMatchTextQuery({
@@ -113,11 +104,18 @@ async function searchExistingDms(args: {
         captureError(e);
         return null;
       }
-    })
+    }),
   );
 
   // Filter out nulls and add matching topics to results
   matchingTopics.push(...results.filter(Boolean));
 
   return matchingTopics;
+}
+
+export function useSearchExistingDms(args: {
+  searchQuery: string;
+  inboxId: InboxId;
+}) {
+  return useQuery(getSearchExistingDmsQueryOptions(args));
 }

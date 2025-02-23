@@ -1,22 +1,25 @@
-import { IConvosContentType } from "@/utils/xmtpRN/xmtp-content-types/xmtp-content-types";
-import {
-  InboxId,
-  MessageId,
-  NativeMessageContent,
-} from "@xmtp/react-native-sdk";
+import { NativeMessageContent } from "@xmtp/react-native-sdk";
+import { IXmtpDecodedMessage, IXmtpInboxId } from "@/features/xmtp/xmtp.types";
 
 export type IConvosMessageStatus = "sending" | "sent" | "error";
 
-export type IConvosMessageContent = NativeMessageContent & {}; // Add any custom content types content here
+export type IConvosMessageContentType =
+  | "text"
+  | "reaction"
+  | "readReceipt"
+  | "groupUpdated"
+  | "reply"
+  | "remoteAttachment"
+  | "staticAttachment";
 
 export type IConvosMessage = {
-  convosMessageId: MessageId;
-  xmtpMessageId: MessageId;
+  convosMessageId: string;
+  xmtpMessageId: IXmtpDecodedMessage["id"];
   status: IConvosMessageStatus;
-  senderInboxId: InboxId;
+  senderInboxId: IXmtpInboxId;
   sentNs: number;
-  type: IConvosContentType;
-  content: NativeMessageContent;
+  type: IConvosMessageContentType;
+  content: NativeMessageContent; // TODO
 };
 
 export type IConvosMessageId = IConvosMessage["convosMessageId"];

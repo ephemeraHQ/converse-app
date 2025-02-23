@@ -1,12 +1,7 @@
-import { Center } from "@/design-system/Center";
-import { useProfileQuery } from "@/features/profiles/profiles.query";
-import { Avatar } from "@/components/avatar";
 import { HStack } from "@design-system/HStack";
 import { Pressable } from "@design-system/Pressable";
 import { ITextProps, Text } from "@design-system/Text";
-import { TxKeyPath, translate } from "@i18n";
-import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
-import { navigate } from "@/navigation/navigation.utils";
+import { translate, TxKeyPath } from "@i18n";
 import {
   DecodedMessage,
   GroupUpdatedCodec,
@@ -15,6 +10,11 @@ import {
 } from "@xmtp/react-native-sdk";
 import { memo } from "react";
 import { ViewStyle } from "react-native";
+import { Avatar } from "@/components/avatar";
+import { Center } from "@/design-system/Center";
+import { useProfileQuery } from "@/features/profiles/profiles.query";
+import { navigate } from "@/navigation/navigation.utils";
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 
 type IMessageChatGroupUpdateProps = {
   message: DecodedMessage<GroupUpdatedCodec>;
@@ -34,11 +34,13 @@ export function MessageChatGroupUpdate({
 
   return (
     <Center
+      // {...debugBorder()}
       style={{
         paddingVertical: theme.spacing.sm,
         paddingHorizontal: theme.spacing.sm,
         flexWrap: "wrap",
         rowGap: theme.spacing.sm,
+        width: "100%",
       }}
     >
       {/* Member additions */}
@@ -210,7 +212,7 @@ function ChatGroupMetadataUpdate({
 }
 
 const ChatGroupUpdateText = memo(function ChatGroupUpdateText(
-  props: ITextProps
+  props: ITextProps,
 ) {
   const { style, ...rest } = props;
   return (
@@ -227,6 +229,7 @@ const $memberContainer: ThemedStyle<ViewStyle> = () => ({
   alignItems: "center",
   flexWrap: "wrap",
   justifyContent: "center",
+  width: "100%",
 });
 
 const $pressableContent: ThemedStyle<ViewStyle> = ({ spacing }) => ({

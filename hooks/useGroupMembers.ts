@@ -1,4 +1,5 @@
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store";
 import { useAddToGroupMutation } from "../queries/useAddToGroupMutation";
 import { useGroupMembersQuery } from "../queries/useGroupMembersQuery";
 import { usePromoteToAdminMutation } from "../queries/usePromoteToAdminMutation";
@@ -6,7 +7,6 @@ import { usePromoteToSuperAdminMutation } from "../queries/usePromoteToSuperAdmi
 import { useRemoveFromGroupMutation } from "../queries/useRemoveFromGroupMutation";
 import { useRevokeAdminMutation } from "../queries/useRevokeAdminMutation";
 import { useRevokeSuperAdminMutation } from "../queries/useRevokeSuperAdminMutation";
-import { getSafeCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
 
 export const useGroupMembers = (topic: ConversationTopic) => {
   const account = getSafeCurrentSender().ethereumAddress;
@@ -22,22 +22,22 @@ export const useGroupMembers = (topic: ConversationTopic) => {
   });
   const { mutateAsync: promoteToAdmin } = usePromoteToAdminMutation(
     account,
-    topic
+    topic,
   );
   const { mutateAsync: promoteToSuperAdmin } = usePromoteToSuperAdminMutation(
     account,
-    topic
+    topic,
   );
   const { mutateAsync: revokeSuperAdmin } = useRevokeSuperAdminMutation(
     account,
-    topic
+    topic,
   );
 
   const { mutateAsync: revokeAdmin } = useRevokeAdminMutation(account, topic);
 
   const { mutateAsync: removeMember } = useRemoveFromGroupMutation(
     account,
-    topic
+    topic,
   );
 
   const { mutateAsync: addMembers } = useAddToGroupMutation(account, topic);

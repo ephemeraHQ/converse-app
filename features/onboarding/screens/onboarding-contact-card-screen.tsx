@@ -1,27 +1,26 @@
-import { Screen } from "@/components/screen/screen";
-import { OnboardingSubtitle } from "@/features/onboarding/components/onboarding-subtitle";
-import { OnboardingTitle } from "@/features/onboarding/components/onboarding-title";
+import { usePrivy } from "@privy-io/expo";
 import React, { memo, useCallback, useEffect, useState } from "react";
-
+import { Alert, TextStyle, ViewStyle } from "react-native";
+import { create } from "zustand";
+import { Screen } from "@/components/screen/screen";
 import { Center } from "@/design-system/Center";
 import { VStack } from "@/design-system/VStack";
-import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
-import { captureErrorWithToast } from "@/utils/capture-error";
-import { Alert, TextStyle, ViewStyle } from "react-native";
-import { useAddPfp } from "../hooks/useAddPfp";
 // import { useProfile } from "../hooks/useProfile";
 import { useAuthStore } from "@/features/authentication/authentication.store";
+import { useMultiInboxStore } from "@/features/authentication/multi-inbox.store";
 import { useCreateUser } from "@/features/current-user/use-create-user";
-import { useMultiInboxStore } from "@/features/multi-inbox/multi-inbox.store";
 import { OnboardingFooter } from "@/features/onboarding/components/onboarding-footer";
+import { OnboardingSubtitle } from "@/features/onboarding/components/onboarding-subtitle";
+import { OnboardingTitle } from "@/features/onboarding/components/onboarding-title";
 import { ProfileContactCardEditableAvatar } from "@/features/profiles/components/profile-contact-card/profile-contact-card-editable-avatar";
 import { ProfileContactCardEditableNameInput } from "@/features/profiles/components/profile-contact-card/profile-contact-card-editable-name-input";
 import { ProfileContactCardLayout } from "@/features/profiles/components/profile-contact-card/profile-contact-card-layout";
 import { validateProfileName } from "@/features/profiles/utils/validate-profile-name";
 import { useHeader } from "@/navigation/use-header";
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { ValidationError } from "@/utils/api/api.error";
-import { usePrivy } from "@privy-io/expo";
-import { create } from "zustand";
+import { captureErrorWithToast } from "@/utils/capture-error";
+import { useAddPfp } from "../../../hooks/use-add-pfp";
 
 export function OnboardingContactCardScreen() {
   const { themed } = useAppTheme();
@@ -93,13 +92,18 @@ export function OnboardingContactCardScreen() {
     },
   });
 
+  useEffect(() => {
+    return () => {
+      useOnboardingContactCardStore.getState().actions.reset();
+    };
+  }, []);
+
   return (
     <>
       <Screen
         preset="scroll"
         contentContainerStyle={$screenContainer}
-        safeAreaEdges={["bottom"]}
-      >
+        safeAreaEdges={["bottom"]}>
         <Center style={$centerContainerStyle}>
           <VStack style={$titleContainer}>
             <OnboardingTitle size={"xl"}>
@@ -193,7 +197,7 @@ const ProfileContactCardNameInput = memo(
         helper={nameValidationError}
       />
     );
-  }
+  },
 );
 
 const ProfileContactCardAvatar = memo(function ProfileContactCardAvatar() {
@@ -218,27 +222,38 @@ const ProfileContactCardAvatar = memo(function ProfileContactCardAvatar() {
   );
 });
 
-type IOnboardingContactCardStore = {
+type IOnboardingContactCardState = {
   name: string;
   nameValidationError: string;
   avatar: string;
-  actions: {
-    setName: (name: string) => void;
-    setNameValidationError: (nameValidationError: string) => void;
-    setAvatar: (avatar: string) => void;
-  };
+};
+
+type IOnboardingContactCardActions = {
+  setName: (name: string) => void;
+  setNameValidationError: (nameValidationError: string) => void;
+  setAvatar: (avatar: string) => void;
+  reset: () => void;
+};
+
+type IOnboardingContactCardStore = IOnboardingContactCardState & {
+  actions: IOnboardingContactCardActions;
+};
+
+const initialState: IOnboardingContactCardState = {
+  name: "",
+  nameValidationError: "",
+  avatar: "",
 };
 
 const useOnboardingContactCardStore = create<IOnboardingContactCardStore>(
   (set, get) => ({
-    name: "",
-    nameValidationError: "",
-    avatar: "",
+    ...initialState,
     actions: {
       setName: (name: string) => set({ name }),
       setNameValidationError: (nameValidationError: string) =>
         set({ nameValidationError }),
       setAvatar: (avatar: string) => set({ avatar }),
+      reset: () => set(initialState),
     },
-  })
+  }),
 );

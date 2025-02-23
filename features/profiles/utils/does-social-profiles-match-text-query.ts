@@ -1,4 +1,4 @@
-import { ISocialProfile } from "@/features/social-profiles/social-lookup.api";
+import { ISocialProfile } from "@/features/social-profiles/social-profiles.api";
 
 export function doesSocialProfilesMatchTextQuery(args: {
   socialProfiles: ISocialProfile[];

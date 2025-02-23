@@ -1,15 +1,15 @@
+import { translate } from "@i18n";
+import { ConversationTopic } from "@xmtp/react-native-sdk";
+import React, { memo, useCallback } from "react";
 import { GroupAvatar } from "@/components/group-avatar";
 import { Text } from "@/design-system/Text";
+import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
 import { ConversationHeaderTitle } from "@/features/conversation/conversation-screen-header/conversation-screen-header-title";
 import { useGroupName } from "@/hooks/useGroupName";
+import { useRouter } from "@/navigation/use-navigation";
 // import { useGroupPendingRequests } from "@/hooks/useGroupPendingRequests";
 import { useGroupMembersQuery } from "@/queries/useGroupMembersQuery";
 import { copyToClipboard } from "@/utils/clipboard";
-import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
-import { translate } from "@i18n";
-import { useRouter } from "@/navigation/use-navigation";
-import { ConversationTopic } from "@xmtp/react-native-sdk";
-import React, { memo, useCallback } from "react";
 
 type GroupConversationTitleProps = {
   conversationTopic: ConversationTopic;
@@ -76,5 +76,5 @@ export const GroupConversationTitle = memo(
         }
       />
     );
-  }
+  },
 );

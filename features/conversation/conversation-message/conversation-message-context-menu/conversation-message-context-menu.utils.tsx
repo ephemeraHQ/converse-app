@@ -1,3 +1,5 @@
+import Clipboard from "@react-native-clipboard/clipboard";
+import { ConversationTopic, MessageId } from "@xmtp/react-native-sdk";
 import { showSnackbar } from "@/components/snackbar/snackbar.service";
 import { IDropdownMenuCustomItemProps } from "@/design-system/dropdown-menu/dropdown-menu-custom";
 import { useConversationComposerStore } from "@/features/conversation/conversation-composer/conversation-composer.store-context";
@@ -7,12 +9,9 @@ import {
   getMessageStringContent,
   isRemoteAttachmentMessage,
   isStaticAttachmentMessage,
-  isTransactionReferenceMessage,
 } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { translate } from "@/i18n";
 import { captureErrorWithToast } from "@/utils/capture-error";
-import Clipboard from "@react-native-clipboard/clipboard";
-import { ConversationTopic, MessageId } from "@xmtp/react-native-sdk";
 
 export function useMessageContextMenuItems(args: {
   messageId: MessageId;
@@ -28,7 +27,7 @@ export function useMessageContextMenuItems(args: {
   if (!message) {
     captureErrorWithToast(
       new Error("No message found in triggerMessageContextMenu"),
-      { message: "Couldn't find message" }
+      { message: "Couldn't find message" },
     );
     return [];
   }
@@ -46,9 +45,8 @@ export function useMessageContextMenuItems(args: {
 
   const isAttachment =
     isRemoteAttachmentMessage(message) || isStaticAttachmentMessage(message);
-  const isTransaction = isTransactionReferenceMessage(message);
 
-  if (!isAttachment && !isTransaction) {
+  if (!isAttachment) {
     items.push({
       label: translate("copy"),
       iconName: "doc.on.doc",

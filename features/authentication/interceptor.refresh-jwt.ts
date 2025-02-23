@@ -8,6 +8,12 @@
  * 3. Retries the original request
  * 4. If refresh fails, user is logged out
  */
+import {
+  AxiosError,
+  AxiosInstance,
+  AxiosRequestConfig,
+  AxiosResponse,
+} from "axios";
 import { getConvosAuthenticatedHeaders } from "@/features/authentication/authentication.headers";
 import {
   ensureJwtQueryData,
@@ -15,12 +21,6 @@ import {
 } from "@/features/authentication/jwt.query";
 import { captureError } from "@/utils/capture-error";
 import { logger } from "@/utils/logger";
-import {
-  AxiosError,
-  AxiosInstance,
-  AxiosRequestConfig,
-  AxiosResponse,
-} from "axios";
 import { AuthenticationError } from "../../utils/error";
 
 type ExtendedAxiosRequestConfig = AxiosRequestConfig & {
@@ -29,7 +29,7 @@ type ExtendedAxiosRequestConfig = AxiosRequestConfig & {
 
 export const refreshJwtInterceptor = (
   api: AxiosInstance,
-  handleRefreshJwtFailure: () => void
+  handleRefreshJwtFailure: () => void,
 ) => {
   return async (error: AxiosError): Promise<AxiosResponse> => {
     if (!error.response) {
@@ -42,7 +42,7 @@ export const refreshJwtInterceptor = (
 
     // Only attempt token refresh for 401 errors that haven't been retried
     const shouldRetry = Boolean(
-      isUnauthorizedError && hasNotTriedTokenRefresh && originalRequest
+      isUnauthorizedError && hasNotTriedTokenRefresh && originalRequest,
     );
 
     if (shouldRetry) {
@@ -58,7 +58,9 @@ export const refreshJwtInterceptor = (
         const isTokenRefreshSuccessful = !!refreshedJwtResponse;
 
         if (!isTokenRefreshSuccessful) {
-          throw new AuthenticationError("Failed to refresh token");
+          throw new AuthenticationError({
+            error: new Error("Failed to refresh token"),
+          });
         }
 
         // Step 2: Get new headers with the fresh token
@@ -90,9 +92,9 @@ export const refreshJwtInterceptor = (
           !hasNotTriedTokenRefresh
             ? "already attempted refresh"
             : !originalRequest
-            ? "no original request config"
-            : "unknown reason"
-        }`
+              ? "no original request config"
+              : "unknown reason"
+        }`,
       );
     }
 

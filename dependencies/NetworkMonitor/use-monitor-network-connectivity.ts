@@ -1,7 +1,6 @@
 import NetInfo from "@react-native-community/netinfo";
 import { logger } from "@utils/logger";
 import { useEffect } from "react";
-
 import { config } from "../../config";
 import { useAppStore } from "../../stores/app-store";
 import { useSelect } from "../../stores/stores.utils";
@@ -14,7 +13,7 @@ NetInfo.configure({
 
 export function useMonitorNetworkConnectivity() {
   const { isInternetReachable, setIsInternetReachable } = useAppStore(
-    useSelect(["isInternetReachable", "setIsInternetReachable"])
+    useSelect(["isInternetReachable", "setIsInternetReachable"]),
   );
 
   useEffect(() => {
