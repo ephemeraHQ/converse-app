@@ -164,12 +164,6 @@ export function OnboardingContactCardScreen() {
     },
   });
 
-  useEffect(() => {
-    return () => {
-      useOnboardingContactCardStore.getState().actions.reset();
-    };
-  }, []);
-
   return (
     <>
       <Screen
