@@ -245,42 +245,35 @@ const $subtitleStyle: ThemedStyle<TextStyle> = ({ spacing }) => ({
   marginBottom: spacing.sm,
 });
 
-const ProfileContactCardNameInput = memo(
-  function ProfileContactCardNameInput() {
-    const [nameValidationError, setNameValidationError] = useState<string>();
+const ProfileContactCardNameInput = memo(function ProfileContactCardNameInput() {
+  const [nameValidationError, setNameValidationError] = useState<string>();
 
-    const handleDisplayNameChange = useCallback((text: string) => {
-      const { isValid, error } = validateProfileName(text);
+  const handleDisplayNameChange = useCallback((text: string) => {
+    const { isValid, error } = validateProfileName(text);
 
-      if (!isValid) {
-        setNameValidationError(error);
-        useOnboardingContactCardStore.getState().actions.setUsername("");
-        return;
-      }
+    if (!isValid) {
+      setNameValidationError(error);
+      useOnboardingContactCardStore.getState().actions.setUsername("");
+      return;
+    }
 
-      setNameValidationError(undefined);
-      let username = formatRandomUserName({ displayName: text });
+    setNameValidationError(undefined);
+    const username = formatRandomUserName({ displayName: text });
 
-      // Ensure username meets minimum requirements
-      if (username.length < 3) {
-        username = `user${Math.floor(Math.random() * 100000)}`;
-      }
+    const store = useOnboardingContactCardStore.getState();
+    store.actions.setName(text);
+    store.actions.setUsername(username);
+  }, []);
 
-      const store = useOnboardingContactCardStore.getState();
-      store.actions.setName(text);
-      store.actions.setUsername(username);
-    }, []);
-
-    return (
-      <ProfileContactCardEditableNameInput
-        defaultValue={useOnboardingContactCardStore.getState().name}
-        onChangeText={handleDisplayNameChange}
-        status={nameValidationError ? "error" : undefined}
-        helper={nameValidationError}
-      />
-    );
-  },
-);
+  return (
+    <ProfileContactCardEditableNameInput
+      defaultValue={useOnboardingContactCardStore.getState().name}
+      onChangeText={handleDisplayNameChange}
+      status={nameValidationError ? "error" : undefined}
+      helper={nameValidationError}
+    />
+  );
+});
 
 const ProfileContactCardAvatar = memo(function ProfileContactCardAvatar() {
   const { asset, addPFP } = useAddPfp();
