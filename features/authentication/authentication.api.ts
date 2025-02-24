@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { profileValidationSchema } from "@/features/profiles/schemas/profile-validation.schema";
 import { api } from "@/utils/api/api";
+import { handleApiError } from "@/utils/api/api.error";
 import { buildDeviceMetadata } from "@/utils/device-metadata";
-import { captureError } from "@/utils/capture-error";
 
 const deviceOSEnum = z.enum(["android", "ios", "web"]);
 
@@ -73,14 +73,11 @@ export const createUser = async (args: {
       profile,
     };
 
-    // Validate request payload
     const validationResult = createUserRequestSchema.safeParse(requestPayload);
     if (!validationResult.success) {
-      const error = new Error(
+      throw new Error(
         `Invalid request data: ${validationResult.error.message}`
       );
-      captureError(error);
-      throw error;
     }
 
     const response = await api.post<CreateUserResponse>(
@@ -92,21 +89,14 @@ export const createUser = async (args: {
       response.data
     );
     if (!responseValidation.success) {
-      const error = new Error(
+      throw new Error(
         `Response validation failed: ${responseValidation.error.message}`
       );
-      captureError(error);
-      return response.data as CreateUserResponse;
     }
 
     return responseValidation.data;
   } catch (error) {
-    if (error instanceof Error) {
-      captureError(error);
-    } else {
-      captureError(new Error("Unknown error occurred in createUser"));
-    }
-    throw error;
+    throw handleApiError(error, "createUser");
   }
 };
 
@@ -121,11 +111,6 @@ export async function fetchJwt(): Promise<FetchJwtResponse> {
     const response = await api.post<FetchJwtResponse>("/api/v1/authenticate");
     return fetchJwtResponseSchema.parse(response.data);
   } catch (error) {
-    if (error instanceof Error) {
-      captureError(error);
-    } else {
-      captureError(new Error("Unknown error occurred in fetchJwt"));
-    }
-    throw error;
+    throw handleApiError(error, "fetchJwt");
   }
 }
