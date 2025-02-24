@@ -114,7 +114,7 @@ export const ConversationMessages = memo(function ConversationMessages(props: {
     topic,
   });
 
-  // TODO: Need improvment but okay for now
+  // TODO: Need improvement but okay for now
   useEffect(() => {
     if (isUnread && !messagesLoading) {
       markAsReadAsync().catch(captureError);
