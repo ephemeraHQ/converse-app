@@ -1,6 +1,3 @@
-import { useCurrentConversationTopic } from "@/features/conversation/conversation.store-context";
-import { usePrevious } from "@/hooks/use-previous-value";
-import { LocalAttachment } from "@/utils/attachment/types";
 import { zustandMMKVStorage } from "@utils/mmkv";
 import {
   ConversationTopic,
@@ -14,6 +11,9 @@ import {
   persist,
   subscribeWithSelector,
 } from "zustand/middleware";
+import { useCurrentConversationTopic } from "@/features/conversation/conversation.store-context";
+import { usePrevious } from "@/hooks/use-previous-value";
+import { LocalAttachment } from "@/utils/attachment/types";
 
 export type IComposerMediaPreviewStatus =
   | "picked"
@@ -46,7 +46,7 @@ type IConversationComposerActions = {
   setReplyToMessageId: (messageId: MessageId | null) => void;
   setComposerMediaPreview: (mediaPreview: IComposerMediaPreview) => void;
   setComposerUploadedAttachment: (
-    attachment: RemoteAttachmentContent | null
+    attachment: RemoteAttachmentContent | null,
   ) => void;
   updateMediaPreviewStatus: (status: IComposerMediaPreviewStatus) => void;
 };
@@ -80,11 +80,11 @@ export const ConversationComposerStoreProvider = memo(
         {children}
       </ConversationComposerStoreContext.Provider>
     );
-  }
+  },
 );
 
 const createConversationComposerStore = (
-  initProps: IConversationComposerStoreProps & { storeName: string }
+  initProps: IConversationComposerStoreProps & { storeName: string },
 ) => {
   const DEFAULT_STATE: IConversationComposerState = {
     inputValue: initProps.inputValue ?? "",
@@ -128,9 +128,9 @@ const createConversationComposerStore = (
             composerMediaPreview: state.composerMediaPreview,
             composerUploadedAttachment: state.composerUploadedAttachment,
           }),
-        }
-      )
-    )
+        },
+      ),
+    ),
   );
 };
 
@@ -142,7 +142,7 @@ const ConversationComposerStoreContext =
   createContext<IConversationComposerStore | null>(null);
 
 export function useConversationComposerStoreContext<T>(
-  selector: (state: IConversationComposerStoreState) => T
+  selector: (state: IConversationComposerStoreState) => T,
 ): T {
   const store = useContext(ConversationComposerStoreContext);
   if (!store)

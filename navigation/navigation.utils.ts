@@ -1,18 +1,17 @@
+import { createNavigationContainerRef } from "@react-navigation/native";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import * as Linking from "expo-linking";
 import { Linking as RNLinking } from "react-native";
-
-import logger from "../utils/logger";
 import { config } from "../config";
+import logger from "../utils/logger";
 import { NavigationParamList } from "./navigation.types";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import { createNavigationContainerRef } from "@react-navigation/native";
 
 // https://reactnavigation.org/docs/navigating-without-navigation-prop/#usage
 export const navigationRef = createNavigationContainerRef();
 
 export const navigate = async <T extends keyof NavigationParamList>(
   screen: T,
-  params?: NavigationParamList[T]
+  params?: NavigationParamList[T],
 ) => {
   logger.debug("[Navigation] Navigating to:", screen, params);
   if (!navigationRef) {
@@ -22,7 +21,7 @@ export const navigate = async <T extends keyof NavigationParamList>(
 
   if (!navigationRef.isReady()) {
     logger.error(
-      "[Navigation] Conversation navigator is not ready (wait for appStore#hydrated to be true using waitForAppStoreHydration)"
+      "[Navigation] Conversation navigator is not ready (wait for appStore#hydrated to be true using waitForAppStoreHydration)",
     );
     return;
   }
@@ -30,7 +29,7 @@ export const navigate = async <T extends keyof NavigationParamList>(
   logger.debug(
     `[Navigation] Navigating to ${screen} ${
       params ? JSON.stringify(params) : ""
-    }`
+    }`,
   );
 
   // todo(any): figure out proper typing here

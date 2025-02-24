@@ -7,7 +7,7 @@ const WORD_CONTENT = /[^()/\s]/.source; // Not a space, not a ( or ), not a /
 const getDomainExpression = (suffix: RegExp) =>
   new RegExp(
     `${BOUNDARY_START}${WORD_CONTENT}*${suffix.source}${BOUNDARY_END}`,
-    "gi"
+    "gi",
   );
 
 export const URL_REGEX =
@@ -15,7 +15,7 @@ export const URL_REGEX =
 
 export const ADDRESS_REGEX = new RegExp(
   `${BOUNDARY_START}0x[a-fA-F0-9]{40}${BOUNDARY_END}`,
-  "gi"
+  "gi",
 );
 
 export const LENS_REGEX = getDomainExpression(/\.lens/);
@@ -23,7 +23,7 @@ export const ETH_REGEX = getDomainExpression(/\.eth/);
 export const FARCASTER_REGEX = getDomainExpression(/\.fc/);
 export const CB_ID_REGEX = getDomainExpression(/\.cb\.id/);
 export const UNS_REGEX = getDomainExpression(
-  /\.(crypto|bitcoin|blockchain|dao|nft|888|wallet|x|klever|zil|hi|kresus|polygon|anime|manga|binanceus)/
+  /\.(crypto|bitcoin|blockchain|dao|nft|888|wallet|x|klever|zil|hi|kresus|polygon|anime|manga|binanceus)/,
 );
 
 export const EMAIL_REGEX =

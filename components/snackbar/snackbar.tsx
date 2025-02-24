@@ -1,15 +1,3 @@
-import {
-  SNACKBARS_MAX_VISIBLE,
-  SNACKBAR_BOTTOM_OFFSET,
-  SNACKBAR_HEIGHT,
-  SNACKBAR_LARGE_TEXT_HEIGHT,
-  SNACKBAR_SPACE_BETWEEN_SNACKBARS,
-} from "@/components/snackbar/snackbar.constants";
-import {
-  getNumberOfSnackbars,
-  onSnackbarsChange,
-} from "@/components/snackbar/snackbar.service";
-import { ISnackbar } from "@/components/snackbar/snackbar.types";
 import { Button } from "@design-system/Button/Button";
 import { Center } from "@design-system/Center";
 import { AnimatedHStack, HStack } from "@design-system/HStack";
@@ -17,7 +5,6 @@ import { IconButton } from "@design-system/IconButton/IconButton";
 import { Text } from "@design-system/Text";
 import { AnimatedVStack } from "@design-system/VStack";
 import { SICK_SPRING_CONFIG } from "@theme/animations";
-import { useAppTheme } from "@/theme/use-app-theme";
 import { memo, useCallback, useEffect } from "react";
 import { useWindowDimensions } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
@@ -29,6 +16,19 @@ import {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
+import {
+  SNACKBAR_BOTTOM_OFFSET,
+  SNACKBAR_HEIGHT,
+  SNACKBAR_LARGE_TEXT_HEIGHT,
+  SNACKBAR_SPACE_BETWEEN_SNACKBARS,
+  SNACKBARS_MAX_VISIBLE,
+} from "@/components/snackbar/snackbar.constants";
+import {
+  getNumberOfSnackbars,
+  onSnackbarsChange,
+} from "@/components/snackbar/snackbar.service";
+import { ISnackbar } from "@/components/snackbar/snackbar.types";
+import { useAppTheme } from "@/theme/use-app-theme";
 
 type SnackbarProps = {
   snackbar: ISnackbar;
@@ -52,7 +52,7 @@ export const Snackbar = memo(
     const isSwipingAV = useSharedValue(false);
     const firstSnackbarRenderProgressAV = useSharedValue(
       // We only want the first snackbar to animate in with a special animation
-      isFirstSnack ? 0 : 1
+      isFirstSnack ? 0 : 1,
     );
 
     useEffect(() => {
@@ -63,7 +63,7 @@ export const Snackbar = memo(
     useEffect(() => {
       const unsubscribe = onSnackbarsChange((snackbars) => {
         const snackbarIndex = snackbars.findIndex(
-          (item) => item.key === snackbar.key
+          (item) => item.key === snackbar.key,
         );
 
         // Set the new new index of the current snackbar
@@ -84,7 +84,7 @@ export const Snackbar = memo(
 
         bottomAV.value = withSpring(
           SNACKBAR_BOTTOM_OFFSET + totalHeightBeforeThisSnackbar,
-          SICK_SPRING_CONFIG
+          SICK_SPRING_CONFIG,
         );
       });
 
@@ -100,7 +100,7 @@ export const Snackbar = memo(
           if (isFinished) {
             runOnJS(onDismiss)();
           }
-        }
+        },
       );
     }, [onDismiss, translateXAV, windowWidth]);
 
@@ -139,14 +139,14 @@ export const Snackbar = memo(
         shadowOpacity: interpolate(
           snackbarIndexAV.value,
           [0, 3, 10],
-          [1, 1, 0]
+          [1, 1, 0],
         ),
         // The content of the first two StackedToasts is visible
         // The content of the other StackedToasts is hidden
         opacity: interpolate(
           snackbarIndexAV.value,
           [0, SNACKBARS_MAX_VISIBLE - 1, SNACKBARS_MAX_VISIBLE],
-          [1, 1, 0]
+          [1, 1, 0],
         ),
         transform: [
           // For the dragging animation
@@ -155,12 +155,12 @@ export const Snackbar = memo(
             scale: interpolate(
               firstSnackbarRenderProgressAV.value,
               [0, 1],
-              [0.9, 1]
+              [0.9, 1],
             ),
           },
         ],
       }),
-      []
+      [],
     );
 
     const SnackContainer = snackbar.isMultiLine
@@ -267,5 +267,5 @@ export const Snackbar = memo(
     );
   },
   // We don't need to rerender a snackbar
-  () => true
+  () => true,
 );

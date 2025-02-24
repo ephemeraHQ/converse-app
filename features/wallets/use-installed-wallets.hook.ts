@@ -1,8 +1,5 @@
-import { config } from "@/config";
-import logger from "@/utils/logger";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import * as Linking from "expo-linking";
-
 // TODO: move out of ConnectViaWallet
 import {
   arbitrum,
@@ -15,6 +12,9 @@ import {
   zora,
 } from "thirdweb/chains";
 import { WalletId } from "thirdweb/wallets";
+import { config } from "@/config";
+import logger from "@/utils/logger";
+
 export type ISupportedWallet = {
   name: string;
   iconURL: string;
@@ -79,10 +79,10 @@ const SupportedWallets: ISupportedWallet[] = [
 ];
 
 async function getInstalledWallets(
-  supportedWallets: ISupportedWallet[]
+  supportedWallets: ISupportedWallet[],
 ): Promise<ISupportedWallet[]> {
   logger.debug(
-    `[getInstalledWallets] Checking ${supportedWallets.length} supported wallets`
+    `[getInstalledWallets] Checking ${supportedWallets.length} supported wallets`,
   );
   let installedWalletChecks: boolean[] = [];
   try {
@@ -90,37 +90,37 @@ async function getInstalledWallets(
       supportedWallets.map(async (w) => {
         try {
           logger.debug(
-            `[getInstalledWallets] Checking if ${w.name} is installed at ${w.customScheme}wc`
+            `[getInstalledWallets] Checking if ${w.name} is installed at ${w.customScheme}wc`,
           );
           const canOpen = await Linking.canOpenURL(`${w.customScheme}wc`);
           logger.debug(
-            `[getInstalledWallets] ${w.name} is installed: ${canOpen}`
+            `[getInstalledWallets] ${w.name} is installed: ${canOpen}`,
           );
 
           return canOpen;
         } catch (e) {
           logger.error(
-            `[getInstalledWallets] Error checking if ${w.name} is installed: ${e}`
+            `[getInstalledWallets] Error checking if ${w.name} is installed: ${e}`,
           );
           return false;
         }
-      })
+      }),
     );
   } catch (e) {
     logger.error(
-      `[getInstalledWallets] Error checking installed wallets: ${e}`
+      `[getInstalledWallets] Error checking installed wallets: ${e}`,
     );
     installedWalletChecks = [];
   }
 
   const installedWallets = supportedWallets.filter(
-    (_, index) => installedWalletChecks[index]
+    (_, index) => installedWalletChecks[index],
   ) as ISupportedWallet[];
 
   logger.debug(
     `[getInstalledWallets] Found ${
       installedWallets.length
-    } installed wallets: ${installedWallets.map((w) => w.name).join(", ")}`
+    } installed wallets: ${installedWallets.map((w) => w.name).join(", ")}`,
   );
 
   return installedWallets;
@@ -140,7 +140,7 @@ function getInstalledWalletsQueryOptions() {
 
 export const useInstalledWallets = () => {
   const { data: installedWallets, isLoading } = useQuery(
-    getInstalledWalletsQueryOptions()
+    getInstalledWalletsQueryOptions(),
   );
 
   return { installedWallets, isLoading };

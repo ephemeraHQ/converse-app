@@ -88,7 +88,7 @@ export function Swipeable({
         swipeableRef.current?.close();
       }
     },
-    [onLeftSwipe, onRightSwipe, closeOnOpen]
+    [onLeftSwipe, onRightSwipe, closeOnOpen],
   );
 
   const onSwipeableOpenStartDrag = useCallback(
@@ -96,14 +96,14 @@ export function Swipeable({
       // logger.debug("[Swipeable] onSwipeableWillBegin", { direction });
       swipeDirectionAV.value = direction;
     },
-    [swipeDirectionAV]
+    [swipeDirectionAV],
   );
 
   const renderLeftActionsCallback = useCallback(
     (
       progress: SharedValue<number>,
       drag: SharedValue<number>,
-      swipeable: SwipeableMethods
+      swipeable: SwipeableMethods,
     ) => {
       return renderLeftActions?.({
         progressAnimatedValue: progress,
@@ -111,14 +111,14 @@ export function Swipeable({
         swipeable,
       });
     },
-    [renderLeftActions]
+    [renderLeftActions],
   );
 
   const renderRightActionsCallback = useCallback(
     (
       progress: SharedValue<number>,
       drag: SharedValue<number>,
-      swipeable: SwipeableMethods
+      swipeable: SwipeableMethods,
     ) => {
       return renderRightActions?.({
         progressAnimatedValue: progress,
@@ -126,7 +126,7 @@ export function Swipeable({
         swipeable,
       });
     },
-    [renderRightActions]
+    [renderRightActions],
   );
 
   /**

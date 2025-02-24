@@ -1,6 +1,6 @@
-import { captureError } from "@/utils/capture-error";
 import * as ExpoHaptics from "expo-haptics";
 import { runOnJS } from "react-native-reanimated";
+import { captureError } from "@/utils/capture-error";
 
 const impactFeedbackStyle = ExpoHaptics.ImpactFeedbackStyle;
 
@@ -12,19 +12,19 @@ const selectionAsync = () => {
 
 const successNotificationAsync = () => {
   ExpoHaptics.notificationAsync(notificationFeedbackStyles.Success).catch(
-    captureError
+    captureError,
   );
 };
 
 const warningNotificationAsync = () => {
   ExpoHaptics.notificationAsync(notificationFeedbackStyles.Warning).catch(
-    captureError
+    captureError,
   );
 };
 
 const errorNotificationAsync = () => {
   ExpoHaptics.notificationAsync(notificationFeedbackStyles.Error).catch(
-    captureError
+    captureError,
   );
 };
 

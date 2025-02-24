@@ -1,6 +1,3 @@
-import { AnimatedVStack } from "@/design-system/VStack";
-import { ILoaderSize } from "@/theme/loader";
-import { useAppTheme } from "@/theme/use-app-theme";
 import {
   Canvas,
   Path,
@@ -20,6 +17,9 @@ import {
   withRepeat,
   withTiming,
 } from "react-native-reanimated";
+import { AnimatedVStack } from "@/design-system/VStack";
+import { ILoaderSize } from "@/theme/loader";
+import { useAppTheme } from "@/theme/use-app-theme";
 
 type ILoaderProps = {
   size?: keyof ILoaderSize;
@@ -52,7 +52,7 @@ export const Loader = memo(function Loader({
         easing: Easing.linear,
       }),
       -1,
-      false
+      false,
     );
   }, [progress]);
 
@@ -62,7 +62,7 @@ export const Loader = memo(function Loader({
 
   const startPath = useDerivedValue(
     () => interpolate(progress.value, [0, 0.5, 1], [0.6, 0.3, 0.6]),
-    []
+    [],
   );
 
   return (

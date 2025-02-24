@@ -1,23 +1,23 @@
-import { AnimatedTextCarousel } from "@/components/animated-text-carousel";
-import { useHeaderHeight } from "@/design-system/Header/Header.utils";
-import { Text } from "@/design-system/Text";
-import { AnimatableText } from "@/design-system/Text/AnimatedText";
-import { getTextStyle } from "@/design-system/Text/Text.utils";
-import { AnimatedVStack, VStack } from "@/design-system/VStack";
-import { Loader } from "@/design-system/loader";
-import { ConversationListEmpty } from "@/features/conversation-list/conversation-list-empty";
-import { translate } from "@/i18n";
-import { $globalStyles } from "@/theme/styles";
-import { useAppTheme } from "@/theme/use-app-theme";
 import React, { memo, useEffect } from "react";
 import {
-  Easing,
   cancelAnimation,
+  Easing,
   useDerivedValue,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { AnimatedTextCarousel } from "@/components/animated-text-carousel";
+import { useHeaderHeight } from "@/design-system/Header/Header.utils";
+import { Loader } from "@/design-system/loader";
+import { Text } from "@/design-system/Text";
+import { AnimatableText } from "@/design-system/Text/AnimatedText";
+import { getTextStyle } from "@/design-system/Text/Text.utils";
+import { AnimatedVStack, VStack } from "@/design-system/VStack";
+import { ConversationListEmpty } from "@/features/conversation-list/conversation-list-empty";
+import { translate } from "@/i18n";
+import { $globalStyles } from "@/theme/styles";
+import { useAppTheme } from "@/theme/use-app-theme";
 
 export const ConversationListLoading = memo(function ConversationListLoading() {
   const { theme, themed } = useAppTheme();
@@ -96,7 +96,7 @@ const TimeCounter = memo(function TimeCounter() {
     // We want format to be 00:00:000
     return `${String(minutes).padStart(2, "0")}.${String(seconds).padStart(
       2,
-      "0"
+      "0",
     )}.${String(milliseconds).padStart(3, "0")}`;
   });
 

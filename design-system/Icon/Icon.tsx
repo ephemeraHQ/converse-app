@@ -1,7 +1,7 @@
-import { useAppTheme } from "@/theme/use-app-theme";
 import { logger } from "@utils/logger";
 import { useMemo } from "react";
 import { SFSymbol } from "react-native-sfsymbols";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { IIconName, IIconProps } from "./Icon.types";
 
 // For now we don't have tpying for SFSymbols but we use a 1-1 with the key name
@@ -97,21 +97,21 @@ export function Icon(props: IIconProps) {
 
   if (icon && picto) {
     logger.warn(
-      "Both 'icon' and 'picto' provided, 'icon' will take precedence"
+      "Both 'icon' and 'picto' provided, 'icon' will take precedence",
     );
   }
 
   const iconName = icon
     ? iconRegistry[icon]
     : picto
-    ? iconRegistry[picto]
-    : null;
+      ? iconRegistry[picto]
+      : null;
 
   if (!iconName) {
     logger.warn(
       `Invalid icon name: "${
         icon || picto
-      }". Please check design-system/Icon/Icon.types.ts for valid options.`
+      }". Please check design-system/Icon/Icon.types.ts for valid options.`,
     );
     return null;
   }

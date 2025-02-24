@@ -7,5 +7,5 @@ import { memo } from "react";
 export const BottomSheetContentContainer = memo(
   function BottomSheetContentContainer(props: BottomSheetViewProps) {
     return <GorhomBottomSheetView {...props} />;
-  }
+  },
 );

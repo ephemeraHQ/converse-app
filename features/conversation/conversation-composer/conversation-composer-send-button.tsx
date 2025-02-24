@@ -1,7 +1,7 @@
 import { IconButton } from "@design-system/IconButton/IconButton";
 import { VStack } from "@design-system/VStack";
-import { useAppTheme } from "@/theme/use-app-theme";
 import React, { memo } from "react";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { useConversationComposerStoreContext } from "./conversation-composer.store-context";
 
 export const SendButton = memo(function SendButton(props: {
@@ -12,10 +12,10 @@ export const SendButton = memo(function SendButton(props: {
   const { theme } = useAppTheme();
 
   const mediaPreview = useConversationComposerStoreContext(
-    (state) => state.composerMediaPreview
+    (state) => state.composerMediaPreview,
   );
   const composerInputValue = useConversationComposerStoreContext(
-    (state) => state.inputValue
+    (state) => state.inputValue,
   );
 
   const canSend =

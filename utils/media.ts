@@ -2,7 +2,6 @@ import Big from "big.js";
 import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
 import { Alert, Image, Linking } from "react-native";
-
 import { Nullable } from "../types/general";
 import logger from "./logger";
 
@@ -305,7 +304,7 @@ export const isAllowedMimeType = (mimeType: Nullable<string>) =>
   !!mimeType && allowedMimeTypes.includes(mimeType.toLowerCase());
 
 export const getImageSize = (
-  imageURI: string
+  imageURI: string,
 ): Promise<{ width: number; height: number }> =>
   new Promise((resolve, reject) => {
     Image.getSize(
@@ -315,7 +314,7 @@ export const getImageSize = (
       },
       (error: any) => {
         reject(error);
-      }
+      },
     );
   });
 
@@ -324,14 +323,14 @@ const calculateImageOptiSize = (
     width: number;
     height: number;
   },
-  avatar?: boolean
+  avatar?: boolean,
 ) => {
   const maxBig = avatar ? 400 : 1600;
   const maxSmall = avatar ? 400 : 1200;
   const isPortrait = imageSize.height > imageSize.width;
   const biggestValue = new Big(isPortrait ? imageSize.height : imageSize.width);
   const smallestValue = new Big(
-    isPortrait ? imageSize.width : imageSize.height
+    isPortrait ? imageSize.width : imageSize.height,
   );
   const ratio1 = biggestValue.gt(maxBig)
     ? biggestValue.div(maxBig)
@@ -355,12 +354,12 @@ const calculateImageOptiSize = (
 
 export const compressAndResizeImage = async (
   imageURI: string,
-  avatar?: boolean
+  avatar?: boolean,
 ) => {
   const imageSize = await getImageSize(imageURI);
   const newSize = calculateImageOptiSize(imageSize, avatar);
   logger.debug(
-    `[ImageUtils] Resizing and compressing image to ${newSize.height}x${newSize.width} (was ${imageSize.height}x${imageSize.width})`
+    `[ImageUtils] Resizing and compressing image to ${newSize.height}x${newSize.width} (was ${imageSize.height}x${imageSize.width})`,
   );
   const manipResult = await manipulateAsync(imageURI, [{ resize: newSize }], {
     base64: false,
@@ -371,7 +370,7 @@ export const compressAndResizeImage = async (
 };
 
 export const pickMediaFromLibrary = async (
-  options?: ImagePicker.ImagePickerOptions | undefined
+  options?: ImagePicker.ImagePickerOptions | undefined,
 ) => {
   const mediaPicked = await ImagePicker.launchImageLibraryAsync({
     mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -388,7 +387,7 @@ export const pickMediaFromLibrary = async (
 };
 
 export const takePictureFromCamera = async (
-  options?: ImagePicker.ImagePickerOptions | undefined
+  options?: ImagePicker.ImagePickerOptions | undefined,
 ) => {
   let cameraPermissions = await ImagePicker.getCameraPermissionsAsync();
   if (!cameraPermissions?.granted && cameraPermissions?.canAskAgain) {
@@ -407,7 +406,7 @@ export const takePictureFromCamera = async (
           },
         },
         { text: "Close" },
-      ]
+      ],
     );
     return;
   }

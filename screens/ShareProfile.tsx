@@ -59,7 +59,8 @@ export function ShareProfileScreen({
         style={{
           flex: 1,
           backgroundColor: theme.colors.background.surface,
-        }}>
+        }}
+      >
         <View style={{ alignItems: "center" }}>
           <Avatar
             uri={profile?.avatar}
@@ -71,7 +72,8 @@ export function ShareProfileScreen({
             style={{
               marginTop: 8,
               textAlign: "center",
-            }}>
+            }}
+          >
             {profile?.name || shortAddress(inboxId)}
           </Text>
           {profile?.name && (
@@ -80,7 +82,8 @@ export function ShareProfileScreen({
               style={{
                 marginHorizontal: 20,
                 textAlign: "center",
-              }}>
+              }}
+            >
               {profile.name || shortAddress(inboxId)}
             </Text>
           )}
@@ -91,7 +94,8 @@ export function ShareProfileScreen({
             alignSelf: "center",
             justifyContent: "center",
             marginTop: 40,
-          }}>
+          }}
+        >
           <QRCode
             size={220}
             value={profileUrl}
@@ -106,7 +110,8 @@ export function ShareProfileScreen({
             justifyContent: "flex-end",
             alignItems: "center",
             paddingHorizontal: theme.spacing.lg,
-          }}>
+          }}
+        >
           <Button
             style={{ width: "100%" }}
             title={shareButtonText}

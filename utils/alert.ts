@@ -1,12 +1,11 @@
 import { Alert, AlertButton } from "react-native";
-
 import { waitUntilAppActive } from "./appState/wait-until-app-is-active";
 
 export const awaitableAlert = (
   title: string,
   message?: string,
   okButton?: string,
-  cancelButton?: string
+  cancelButton?: string,
 ): Promise<boolean> =>
   new Promise(async (resolve) => {
     await waitUntilAppActive(500);

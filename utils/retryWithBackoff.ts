@@ -32,7 +32,7 @@ export const retryWithBackoff = async <T>({
       logger.warn(
         `Retry attempt ${attempt} failed. Retrying in ${currentDelay}ms...${
           context ?? ""
-        }`
+        }`,
       );
       if (onError) {
         await onError(error);
@@ -44,6 +44,6 @@ export const retryWithBackoff = async <T>({
   throw new Error(
     context
       ? `Failed to execute: ${context}`
-      : "Failed to execute function after max retries"
+      : "Failed to execute function after max retries",
   );
 };

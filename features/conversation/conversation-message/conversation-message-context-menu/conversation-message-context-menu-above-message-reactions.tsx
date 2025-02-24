@@ -119,7 +119,8 @@ export const MessageContextMenuAboveMessageReactions = memo(
         entering={customEnteringAnimation}
         style={{
           flex: 1,
-        }}>
+        }}
+      >
         <HStack
           style={[
             {
@@ -133,14 +134,16 @@ export const MessageContextMenuAboveMessageReactions = memo(
             messageFromMe
               ? { alignSelf: "flex-end" }
               : { alignSelf: "flex-start" },
-          ]}>
+          ]}
+        >
           {favoritedEmojis.getEmojis().map((emoji, index) => (
             <StaggeredAnimation
               key={emoji}
               index={index}
               totalItems={favoritedEmojis.getEmojis().length}
               isReverse={messageFromMe}
-              delayBetweenItems={20}>
+              delayBetweenItems={20}
+            >
               <Emoji
                 content={emoji}
                 alreadySelected={!!currentUserEmojiSelectedMap.get(emoji)}
@@ -150,7 +153,8 @@ export const MessageContextMenuAboveMessageReactions = memo(
           ))}
           <TouchableOpacity
             hitSlop={theme.spacing.xs}
-            onPress={handlePlusPress}>
+            onPress={handlePlusPress}
+          >
             <VStack
               style={{
                 height: theme.spacing.xxl,
@@ -158,7 +162,8 @@ export const MessageContextMenuAboveMessageReactions = memo(
                 borderRadius: theme.spacing.sm,
                 justifyContent: "center",
                 alignItems: "center",
-              }}>
+              }}
+            >
               <Icon
                 icon="plus"
                 size={theme.iconSize.md}
@@ -196,7 +201,8 @@ const Emoji = memo(
           left: 10,
           right: 10,
         }}
-        onPress={handlePress}>
+        onPress={handlePress}
+      >
         <VStack
           style={[
             {
@@ -210,7 +216,8 @@ const Emoji = memo(
               backgroundColor: theme.colors.fill.minimal,
               borderRadius: theme.spacing.sm,
             },
-          ]}>
+          ]}
+        >
           <Text preset="emojiSymbol">{content}</Text>
         </VStack>
       </TouchableOpacity>

@@ -1,9 +1,9 @@
+import { Button } from "@design-system/Button/Button";
+import React from "react";
 import { IButtonProps } from "@/design-system/Button/Button.props";
 import { ITextProps, Text } from "@/design-system/Text";
 import { IVStackProps, VStack } from "@/design-system/VStack";
 import { useAppTheme } from "@/theme/use-app-theme";
-import { Button } from "@design-system/Button/Button";
-import React from "react";
 
 export function ConversationConsentPopupButton({
   style,

@@ -1,5 +1,4 @@
 import { memo, useCallback } from "react";
-
 import { useAppTheme } from "../../theme/use-app-theme";
 import { HStack } from "../HStack";
 import { IconButton } from "../IconButton/IconButton";

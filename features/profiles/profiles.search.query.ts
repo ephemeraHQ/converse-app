@@ -4,12 +4,12 @@ import {
   skipToken,
   useQuery,
 } from "@tanstack/react-query";
-import { queryClient } from "../../queries/queryClient";
-import { DateUtils } from "@/utils/time.utils";
 import {
-  searchProfiles,
   ISearchProfilesResult,
+  searchProfiles,
 } from "@/features/profiles/profiles.search.api";
+import { DateUtils } from "@/utils/time.utils";
+import { queryClient } from "../../queries/queryClient";
 
 const profileSearchQueryKey = (args: { query: string }): QueryKey => [
   "profileSearch",
@@ -39,7 +39,7 @@ export const prefetchProfileSearchQuery = (args: { query: string }) => {
 
 export const fetchProfileSearchQuery = (args: { query: string }) => {
   return queryClient.fetchQuery<ISearchProfilesResult[]>(
-    profileSearchQueryConfig(args)
+    profileSearchQueryConfig(args),
   );
 };
 

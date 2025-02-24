@@ -1,9 +1,8 @@
 import { TextStyle, ViewStyle } from "react-native";
-
 import {
+  flattenThemedStyles,
   Theme,
   ThemedStyle,
-  flattenThemedStyles,
 } from "../../theme/use-app-theme";
 import { textPresets } from "./../Text/Text.presets";
 import { IButtonAction, IButtonSize, IButtonVariant } from "./Button.props";

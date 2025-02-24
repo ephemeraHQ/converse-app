@@ -1,21 +1,3 @@
-import { Center } from "@/design-system/Center";
-import { HStack } from "@/design-system/HStack";
-import { Text } from "@/design-system/Text";
-import { VStack } from "@/design-system/VStack";
-import {
-  Chip,
-  ChipAvatar,
-  ChipText,
-  useChipStyles,
-} from "@/design-system/chip";
-import { TextInput } from "@/design-system/text-input";
-import {
-  useConversationStore,
-  useConversationStoreContext,
-} from "@/features/conversation/conversation.store-context";
-import { useProfileQuery } from "@/features/profiles/profiles.query";
-import { useAppTheme } from "@/theme/use-app-theme";
-import { Haptics } from "@/utils/haptics";
 import { InboxId } from "@xmtp/react-native-sdk";
 import React, { memo, useCallback, useEffect, useRef } from "react";
 import {
@@ -26,6 +8,24 @@ import {
   ViewStyle,
 } from "react-native";
 import { create } from "zustand";
+import { Center } from "@/design-system/Center";
+import {
+  Chip,
+  ChipAvatar,
+  ChipText,
+  useChipStyles,
+} from "@/design-system/chip";
+import { HStack } from "@/design-system/HStack";
+import { Text } from "@/design-system/Text";
+import { TextInput } from "@/design-system/text-input";
+import { VStack } from "@/design-system/VStack";
+import {
+  useConversationStore,
+  useConversationStoreContext,
+} from "@/features/conversation/conversation.store-context";
+import { useProfileQuery } from "@/features/profiles/profiles.query";
+import { useAppTheme } from "@/theme/use-app-theme";
+import { Haptics } from "@/utils/haptics";
 
 export const ConversationCreateSearchInput = memo(
   function ConversationCreateSearchInput() {
@@ -36,13 +36,13 @@ export const ConversationCreateSearchInput = memo(
     const conversationStore = useConversationStore();
 
     const searchSelectedUserInboxIds = useConversationStoreContext(
-      (state) => state.searchSelectedUserInboxIds
+      (state) => state.searchSelectedUserInboxIds,
     );
 
     const defaultSearchTextValue = conversationStore.getState().searchTextValue;
 
     const handleKeyPress = (
-      e: NativeSyntheticEvent<TextInputKeyPressEventData>
+      e: NativeSyntheticEvent<TextInputKeyPressEventData>,
     ) => {
       const { key } = e.nativeEvent;
       const { searchTextValue, searchSelectedUserInboxIds } =
@@ -56,7 +56,7 @@ export const ConversationCreateSearchInput = memo(
           // Remove selected chip
           conversationStore.setState({
             searchSelectedUserInboxIds: searchSelectedUserInboxIds.filter(
-              (inboxId) => inboxId !== selectedInboxIdChip
+              (inboxId) => inboxId !== selectedInboxIdChip,
             ),
           });
           useStore.getState().actions.setSelectedChipInboxId(null);
@@ -65,7 +65,7 @@ export const ConversationCreateSearchInput = memo(
           useStore
             .getState()
             .actions.setSelectedChipInboxId(
-              searchSelectedUserInboxIds[searchSelectedUserInboxIds.length - 1]
+              searchSelectedUserInboxIds[searchSelectedUserInboxIds.length - 1],
             );
         }
       } else {
@@ -79,7 +79,7 @@ export const ConversationCreateSearchInput = memo(
           searchTextValue: text,
         });
       },
-      [conversationStore]
+      [conversationStore],
     );
 
     useEffect(() => {
@@ -89,7 +89,7 @@ export const ConversationCreateSearchInput = memo(
           if (searchTextValue === "") {
             inputRef.current?.clear();
           }
-        }
+        },
       );
     }, [conversationStore]);
 
@@ -122,7 +122,7 @@ export const ConversationCreateSearchInput = memo(
         </HStack>
       </VStack>
     );
-  }
+  },
 );
 
 function useConversationCreateSearchStyles() {

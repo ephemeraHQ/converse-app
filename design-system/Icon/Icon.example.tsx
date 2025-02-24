@@ -1,8 +1,8 @@
 import { HStack } from "@design-system/HStack";
 import { Text } from "@design-system/Text";
 import { VStack } from "@design-system/VStack";
-import { useAppTheme } from "@/theme/use-app-theme";
 import { ScrollView } from "react-native";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { Icon, iconRegistry } from "./Icon";
 
 type IExampleProps = {

@@ -1,3 +1,5 @@
+import { translate } from "@i18n";
+import { $globalStyles } from "@theme/styles";
 import React, {
   forwardRef,
   Ref,
@@ -6,8 +8,7 @@ import React, {
   useRef,
 } from "react";
 import { TextInput as RNTextInput, TextStyle, ViewStyle } from "react-native";
-import { translate } from "@i18n";
-import { $globalStyles } from "@theme/styles";
+import { TextInput } from "@/design-system/text-input";
 import {
   ThemedStyle,
   ThemedStyleArray,
@@ -19,11 +20,10 @@ import { textPresets } from "../Text/Text.presets";
 import { TouchableOpacity } from "../TouchableOpacity";
 import { VStack } from "../VStack";
 import { TextFieldProps } from "./TextField.props";
-import { TextInput } from "@/design-system/text-input";
 
 export const TextField = forwardRef(function TextField(
   props: TextFieldProps,
-  ref: Ref<RNTextInput>
+  ref: Ref<RNTextInput>,
 ) {
   const {
     labelTx,

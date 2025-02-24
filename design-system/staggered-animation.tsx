@@ -1,7 +1,7 @@
-import { useAppTheme } from "@/theme/use-app-theme";
-import { EntryOrExitLayoutType } from "@/utils/react-native-reanimated";
 import { PropsWithChildren } from "react";
 import { ViewStyle } from "react-native";
+import { useAppTheme } from "@/theme/use-app-theme";
+import { EntryOrExitLayoutType } from "@/utils/react-native-reanimated";
 import { AnimatedVStack } from "./VStack";
 
 type IStaggeredAnimationProps = PropsWithChildren<{

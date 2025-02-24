@@ -1,6 +1,6 @@
 import {
-  getMessageAttachmentLocalPath,
   getMessageAttachmentLocalMetadataPath,
+  getMessageAttachmentLocalPath,
   saveLocalAttachmentMetaData,
 } from "@utils/attachment/attachment.utils";
 import { LocalAttachmentMetadata } from "@utils/attachment/types";
@@ -10,7 +10,7 @@ import { getImageSize, isImageMimetype } from "../media";
 export const getLocalAttachment = async (
   messageId: string,
   filename: string,
-  mimeType: string | undefined
+  mimeType: string | undefined,
 ) => {
   const attachmentPath = getMessageAttachmentLocalPath(messageId, filename);
   const attachmentJsonPath = getMessageAttachmentLocalMetadataPath(messageId);
@@ -29,7 +29,7 @@ export const getLocalAttachment = async (
   await RNFS.writeFile(
     attachmentJsonPath,
     JSON.stringify(attachmentMetaData),
-    "utf8"
+    "utf8",
   );
 
   await saveLocalAttachmentMetaData({

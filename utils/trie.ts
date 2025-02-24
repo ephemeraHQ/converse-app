@@ -93,7 +93,7 @@ export class Trie<T> {
   private deleteRecursive(
     current: TrieNode<T>,
     word: string,
-    index: number
+    index: number,
   ): boolean {
     if (index === word.length) {
       if (!current.isEndOfWord) {
@@ -112,7 +112,7 @@ export class Trie<T> {
     const shouldDeleteChild = this.deleteRecursive(
       current.children.get(char)!,
       word,
-      index + 1
+      index + 1,
     );
 
     if (shouldDeleteChild) {

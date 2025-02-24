@@ -1,4 +1,3 @@
-import { AnimatedVStack } from "@/design-system/VStack";
 import { BottomSheetFlashList } from "@design-system/BottomSheet/BottomSheetFlashList";
 import { BottomSheetFlatList } from "@design-system/BottomSheet/BottomSheetFlatList";
 import { ListRenderItem as FlashListRenderItem } from "@shopify/flash-list";
@@ -8,8 +7,8 @@ import {
   ListRenderItem,
   Platform,
   StyleSheet,
-  View,
   useWindowDimensions,
+  View,
 } from "react-native";
 import {
   useAnimatedStyle,
@@ -17,6 +16,7 @@ import {
   withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { AnimatedVStack } from "@/design-system/VStack";
 import { EmojiRow } from "./conversation-message-context-menu-emoji-picker-row";
 
 type EmojiRowListProps = {
@@ -39,7 +39,7 @@ export const EmojiRowList: FC<EmojiRowListProps> = ({
   const styles = useStyles();
   const { height: windowHeight } = useWindowDimensions();
   const height = useSharedValue(
-    Math.min(emojis.length * 50, windowHeight * 0.75)
+    Math.min(emojis.length * 50, windowHeight * 0.75),
   );
 
   useEffect(() => {
@@ -47,14 +47,14 @@ export const EmojiRowList: FC<EmojiRowListProps> = ({
       Math.min(emojis.length * 50, windowHeight * 0.75),
       {
         duration: 400,
-      }
+      },
     );
   }, [emojis.length, height, windowHeight]);
 
   const renderItem: ListRenderItem<ICategorizedEmojisRecord> &
     FlashListRenderItem<ICategorizedEmojisRecord> = useCallback(
     ({ item }) => <EmojiRow onPress={onPress} item={item} />,
-    [onPress]
+    [onPress],
   );
 
   const animatedStyle = useAnimatedStyle(() => {

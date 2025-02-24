@@ -1,6 +1,6 @@
-import { IImageProps, Image } from "@/design-system/image";
 import { useLayoutEffect, useState } from "react";
 import { ImageURISource, Platform, Image as RNImage } from "react-native";
+import { IImageProps, Image } from "@/design-system/image";
 
 export type IAutoSizedImageProps = IImageProps & {
   /**
@@ -28,7 +28,7 @@ export function AutoSizedImage(props: IAutoSizedImageProps) {
       web: (source?.uri as string) ?? (source as string),
       default: source?.uri as string,
     }),
-    [maxWidth, maxHeight]
+    [maxWidth, maxHeight],
   );
 
   return <Image {...ImageProps} style={[{ width, height }, props.style]} />;
@@ -48,7 +48,7 @@ export function AutoSizedImage(props: IAutoSizedImageProps) {
  */
 export function useAutoSizeImage(
   remoteUri: string,
-  dimensions?: [maxWidth?: number, maxHeight?: number]
+  dimensions?: [maxWidth?: number, maxHeight?: number],
 ): [width: number, height: number] {
   const [[remoteWidth, remoteHeight], setRemoteImageDimensions] = useState([
     0, 0,
@@ -67,7 +67,7 @@ export function useAutoSizeImage(
   if (maxWidth && maxHeight) {
     const aspectRatio = Math.min(
       maxWidth / remoteWidth,
-      maxHeight / remoteHeight
+      maxHeight / remoteHeight,
     );
     return [remoteWidth * aspectRatio, remoteHeight * aspectRatio];
   } else if (maxWidth) {

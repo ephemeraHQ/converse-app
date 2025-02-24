@@ -1,6 +1,6 @@
-import { Icon } from "@/design-system/Icon/Icon";
 import React from "react";
 import { View } from "react-native";
+import { Icon } from "@/design-system/Icon/Icon";
 import { Chip, ChipAvatar, ChipIcon, ChipText } from "./chip";
 
 export default {

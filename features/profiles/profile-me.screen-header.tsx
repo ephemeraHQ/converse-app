@@ -1,23 +1,23 @@
+import { InboxId } from "@xmtp/react-native-sdk";
+import { memo, useCallback } from "react";
+import { ViewStyle } from "react-native";
 import { Button } from "@/design-system/Button/Button";
-import { HStack } from "@/design-system/HStack";
+import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu";
 import { HeaderAction } from "@/design-system/Header/HeaderAction";
+import { HStack } from "@/design-system/HStack";
 import { iconRegistry } from "@/design-system/Icon/Icon";
 import { Text } from "@/design-system/Text";
-import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu";
 import {
   useProfileMeStore,
   useProfileMeStoreValue,
 } from "@/features/profiles/profile-me.store";
 import { translate } from "@/i18n";
+import { navigate } from "@/navigation/navigation.utils";
 import { useHeader } from "@/navigation/use-header";
 import { useRouter } from "@/navigation/use-navigation";
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { Haptics } from "@/utils/haptics";
-import { navigate } from "@/navigation/navigation.utils";
-import { InboxId } from "@xmtp/react-native-sdk";
-import { memo, useCallback } from "react";
-import { ViewStyle } from "react-native";
 
 export function useProfileMeScreenHeader(args: { inboxId: InboxId }) {
   const { inboxId } = args;
@@ -42,7 +42,7 @@ export function useProfileMeScreenHeader(args: { inboxId: InboxId }) {
           break;
       }
     },
-    [profileMeStore, router]
+    [profileMeStore, router],
   );
 
   useHeader(
@@ -99,7 +99,7 @@ export function useProfileMeScreenHeader(args: { inboxId: InboxId }) {
         </HStack>
       ),
     },
-    [router, theme, editMode, handleContextMenuAction, inboxId]
+    [router, theme, editMode, handleContextMenuAction, inboxId],
   );
 }
 

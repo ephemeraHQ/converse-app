@@ -20,7 +20,7 @@ export const userCanDoGroupActions = (
   groupPermissionPolicy: PermissionPolicySet | undefined,
   action: keyof PermissionPolicySet,
   isSuperAdmin: boolean,
-  isAdmin: boolean
+  isAdmin: boolean,
 ) => {
   const memberRole = getMemberRole({ isSuperAdmin, isAdmin });
   const policy = groupPermissionPolicy?.[action];

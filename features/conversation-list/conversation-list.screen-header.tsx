@@ -112,7 +112,8 @@ function HeaderTitle() {
             title: translate("app_settings"),
             image: iconRegistry["settings"],
           },
-        ]}>
+        ]}
+      >
         <HStack style={themed($rowContainer)}>
           <Text>{currentProfile?.name}</Text>
           <Center style={themed($iconContainer)}>
@@ -143,7 +144,8 @@ function ProfileAvatar() {
           inboxId,
         });
       }}
-      hitSlop={theme.spacing.sm}>
+      hitSlop={theme.spacing.sm}
+    >
       <Center style={themed($avatarContainer)}>
         <Avatar
           uri={profile?.avatar}

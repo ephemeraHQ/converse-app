@@ -1,11 +1,11 @@
+import { memo, useCallback, useState } from "react";
 import { Screen } from "@/components/screen/screen";
 import { ConversationList } from "@/features/conversation-list/conversation-list";
 import { ConversationRequestsToggle } from "@/features/conversation-requests-list/conversation-requests-list-toggle";
 import { useConversationRequestsListScreenHeader } from "@/features/conversation-requests-list/conversation-requests-list.screen-header";
 import { translate } from "@/i18n";
-import { memo, useCallback, useState } from "react";
-import { useConversationRequestsListItem } from "./use-conversation-requests-list-items";
 import { $globalStyles } from "@/theme/styles";
+import { useConversationRequestsListItem } from "./use-conversation-requests-list-items";
 
 export const ConversationRequestsListScreen = memo(function () {
   const [selectedIndex, setSelectedIndex] = useState(0);

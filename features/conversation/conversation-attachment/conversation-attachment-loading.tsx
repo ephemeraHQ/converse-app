@@ -1,6 +1,6 @@
+import { memo } from "react";
 import { ActivityIndicator } from "@/design-system/activity-indicator";
 import { useAppTheme } from "@/theme/use-app-theme";
-import { memo } from "react";
 
 export const AttachmentLoading = memo(function AttachmentLoading() {
   const { theme } = useAppTheme();

@@ -14,7 +14,7 @@ type IActionSheetState = {
   actions: {
     showActionSheet: (
       options: ActionSheetOptions,
-      callback: ActionSheetCallback
+      callback: ActionSheetCallback,
     ) => void;
     hideActionSheet: () => void;
   };

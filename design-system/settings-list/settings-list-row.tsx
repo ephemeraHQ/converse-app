@@ -1,10 +1,10 @@
 import React, { memo } from "react";
-import { View, ViewStyle, Switch, TouchableOpacity } from "react-native";
-import { Text } from "@/design-system/Text";
-import { useAppTheme, ThemedStyle } from "@/theme/use-app-theme";
+import { Switch, TouchableOpacity, View, ViewStyle } from "react-native";
 import { HStack } from "@/design-system/HStack";
-import { VStack } from "@/design-system/VStack";
 import { Icon } from "@/design-system/Icon/Icon";
+import { Text } from "@/design-system/Text";
+import { VStack } from "@/design-system/VStack";
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { ISettingsListRow } from "./settings-list.types";
 
 type ISettingsListRowProps = {

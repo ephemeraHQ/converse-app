@@ -1,10 +1,9 @@
 import { memo, useCallback } from "react";
 import {
+  GestureResponderEvent,
   TouchableOpacity as RNTouchableOpacity,
   TouchableOpacityProps,
-  GestureResponderEvent,
 } from "react-native";
-
 import { Haptics } from "../utils/haptics";
 
 export type ITouchableOpacityProps = TouchableOpacityProps & {
@@ -14,7 +13,7 @@ export type ITouchableOpacityProps = TouchableOpacityProps & {
 export const TOUCHABLE_OPACITY_ACTIVE_OPACITY = 0.7;
 
 export const TouchableOpacity = memo(function TouchableOpacity(
-  props: ITouchableOpacityProps
+  props: ITouchableOpacityProps,
 ) {
   const { withHaptics, onPress: onPressProps, ...rest } = props;
 
@@ -27,7 +26,7 @@ export const TouchableOpacity = memo(function TouchableOpacity(
         onPressProps(e);
       }
     },
-    [onPressProps, withHaptics]
+    [onPressProps, withHaptics],
   );
 
   return (

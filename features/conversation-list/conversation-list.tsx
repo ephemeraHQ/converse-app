@@ -50,7 +50,8 @@ export function ConversationList(props: IConversationListProps) {
       renderItem={(args) => (
         <AnimatedVStack
           entering={theme.animation.reanimatedFadeInSpring}
-          exiting={theme.animation.reanimatedFadeOutSpring}>
+          exiting={theme.animation.reanimatedFadeOutSpring}
+        >
           {renderConversation(args)}
         </AnimatedVStack>
       )}

@@ -41,7 +41,7 @@ describe("retryWithBackoff", () => {
     expect(wait).toHaveBeenCalledWith(1000); // default delay
     expect(logger.warn).toHaveBeenCalledTimes(1);
     expect(logger.warn).toHaveBeenCalledWith(
-      "Retry attempt 1 failed. Retrying in 1000ms..."
+      "Retry attempt 1 failed. Retrying in 1000ms...",
     );
   });
 
@@ -50,7 +50,7 @@ describe("retryWithBackoff", () => {
     const retries = 3;
 
     await expect(retryWithBackoff({ fn, retries })).rejects.toThrow(
-      "Always fails"
+      "Always fails",
     );
 
     expect(fn).toHaveBeenCalledTimes(retries);
@@ -66,7 +66,7 @@ describe("retryWithBackoff", () => {
     const maxDelay = 8000;
 
     await expect(
-      retryWithBackoff({ fn, retries, delay, factor, maxDelay })
+      retryWithBackoff({ fn, retries, delay, factor, maxDelay }),
     ).rejects.toThrow();
 
     expect(wait).toHaveBeenCalledTimes(retries - 1);
@@ -102,11 +102,11 @@ describe("retryWithBackoff", () => {
     expect(logger.warn).toHaveBeenCalledTimes(2);
     expect(logger.warn).toHaveBeenNthCalledWith(
       1,
-      "Retry attempt 1 failed. Retrying in 1000ms..."
+      "Retry attempt 1 failed. Retrying in 1000ms...",
     );
     expect(logger.warn).toHaveBeenNthCalledWith(
       2,
-      "Retry attempt 2 failed. Retrying in 2000ms..."
+      "Retry attempt 2 failed. Retrying in 2000ms...",
     );
   });
 
@@ -118,7 +118,7 @@ describe("retryWithBackoff", () => {
     const maxDelay = 5000;
 
     await expect(
-      retryWithBackoff({ fn, retries, delay, factor, maxDelay })
+      retryWithBackoff({ fn, retries, delay, factor, maxDelay }),
     ).rejects.toThrow();
 
     expect(wait).toHaveBeenCalledTimes(retries - 1);
@@ -133,7 +133,7 @@ describe("retryWithBackoff", () => {
     const onError = jest.fn().mockRejectedValue(new Error("onError failed"));
 
     await expect(retryWithBackoff({ fn, onError })).rejects.toThrow(
-      "onError failed"
+      "onError failed",
     );
 
     expect(fn).toHaveBeenCalledTimes(1);

@@ -57,12 +57,14 @@ export const MessageReply = memo(function MessageReply(props: {
     <BubbleContainer fromMe={fromMe}>
       <BubbleContentContainer
         fromMe={fromMe}
-        hasNextMessageInSeries={hasNextMessageInSeries}>
+        hasNextMessageInSeries={hasNextMessageInSeries}
+      >
         <VStack
           style={{
             rowGap: theme.spacing.xxs,
             marginTop: theme.spacing.xxxs, // Because for reply bubble we want the padding to be same for horizontal and vertial
-          }}>
+          }}
+        >
           <MessageReplyReference
             referenceMessageId={replyMessageContent.reference as MessageId}
           />
@@ -72,7 +74,8 @@ export const MessageReply = memo(function MessageReply(props: {
               style={{
                 marginTop: theme.spacing.xxxs,
                 marginBottom: theme.spacing.xxxs,
-              }}>
+              }}
+            >
               <AttachmentRemoteImage
                 fitAspectRatio
                 messageId={replyMessageContent.reference}
@@ -149,12 +152,14 @@ const MessageReplyReference = memo(function MessageReplyReference(props: {
             theme.spacing.message.replyMessage.horizontalPadding / 2, // / 2 so the border fits the border radius of BubbleContentContainer
           paddingHorizontal: theme.spacing.xs,
           paddingVertical: theme.spacing.xxs,
-        }}>
+        }}
+      >
         <HStack
           style={{
             alignItems: "center",
             columnGap: theme.spacing.xxxs,
-          }}>
+          }}
+        >
           <Icon
             size={theme.iconSize.xxs}
             icon="arrowshape.turn.up.left.fill"

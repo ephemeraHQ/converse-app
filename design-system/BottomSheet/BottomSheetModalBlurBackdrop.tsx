@@ -2,7 +2,6 @@ import { BottomSheetBackdropProps, useBottomSheet } from "@gorhom/bottom-sheet";
 import React, { memo, useCallback } from "react";
 import { StyleSheet } from "react-native";
 import { interpolate, useAnimatedStyle } from "react-native-reanimated";
-
 import { BlurView } from "../BlurView";
 import { Pressable } from "../Pressable";
 import { AnimatedVStack } from "../VStack";
@@ -13,7 +12,7 @@ type IBottomSheetBlurBackdropProps = BottomSheetBackdropProps & {
 };
 
 export const BottomSheetBlurBackdrop = memo(function BottomSheetBlurBackdrop(
-  props: IBottomSheetBlurBackdropProps
+  props: IBottomSheetBlurBackdropProps,
 ) {
   const { animatedIndex, style, children, onPress } = props;
 

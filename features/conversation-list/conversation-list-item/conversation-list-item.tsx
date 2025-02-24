@@ -1,11 +1,11 @@
-import { AnimatedCenter, Center } from "@/design-system/Center";
-import { ITextProps, Text } from "@/design-system/Text";
-import { VStack } from "@/design-system/VStack";
-import { TouchableHighlight } from "@/design-system/touchable-highlight";
-import { useConversationListStyles } from "@/features/conversation-list/conversation-list.styles";
-import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import React, { memo } from "react";
 import { ViewStyle } from "react-native";
+import { AnimatedCenter, Center } from "@/design-system/Center";
+import { ITextProps, Text } from "@/design-system/Text";
+import { TouchableHighlight } from "@/design-system/touchable-highlight";
+import { VStack } from "@/design-system/VStack";
+import { useConversationListStyles } from "@/features/conversation-list/conversation-list.styles";
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 
 export type IConversationListItemProps = {
   title?: string | React.ReactNode;
@@ -75,7 +75,7 @@ export const ConversationListItemTitle = memo(
     return (
       <Text preset="bodyBold" weight="medium" numberOfLines={1} {...props} />
     );
-  }
+  },
 );
 
 export const ConversationListItemSubtitle = memo(
@@ -83,7 +83,7 @@ export const ConversationListItemSubtitle = memo(
     return (
       <Text preset="small" color="secondary" numberOfLines={2} {...props} />
     );
-  }
+  },
 );
 
 const $avatarWrapper: ViewStyle = {

@@ -35,7 +35,7 @@ export const isV3Topic = (topic: string): topic is ConversationTopic => {
 };
 
 export const getTopicFromV3Id = (
-  conversationId: ConversationId
+  conversationId: ConversationId,
 ): ConversationTopic => {
   if (!isV3Topic(conversationId)) {
     throw new Error("Invalid V3 topic");

@@ -1,6 +1,6 @@
+import { createHash } from "crypto";
 import type { Storage as PrivyStorage } from "@privy-io/js-sdk-core";
 import { logger } from "@utils/logger";
-import { createHash } from "crypto";
 import { getRandomBytesAsync } from "expo-crypto";
 import * as SecureStore from "expo-secure-store";
 import { v4 as uuidv4 } from "uuid";
@@ -49,13 +49,13 @@ export const loadXmtpKey = async (account: string): Promise<string | null> =>
 
 export const getTopicDataFromKeychain = async (
   account: string,
-  topics: string[]
+  topics: string[],
 ): Promise<string[]> => {
   const keys = topics.map((topic) =>
-    createHash("sha256").update(topic).digest("hex")
+    createHash("sha256").update(topic).digest("hex"),
   );
   const keychainValues = await Promise.all(
-    keys.map((key) => getSecureItemAsync(`XMTP_TOPIC_DATA_${account}_${key}`))
+    keys.map((key) => getSecureItemAsync(`XMTP_TOPIC_DATA_${account}_${key}`)),
   );
   const topicData = keychainValues.filter((v) => !!v) as string[];
   return topicData;
@@ -63,7 +63,7 @@ export const getTopicDataFromKeychain = async (
 
 export const deleteConversationsFromKeychain = async (
   account: string,
-  topics: string[]
+  topics: string[],
 ) => {
   const promises: Promise<void>[] = [];
   for (const topic of topics) {
@@ -98,22 +98,21 @@ export const getDeviceId = async () => {
 // 16 bytes is used for MMKV secure encryption
 
 export const getAccountEncryptionKey = async (
-  account: string
+  account: string,
 ): Promise<Buffer> => {
   const existingKey = await getSecureItemAsync(
-    `CONVERSE_ACCOUNT_ENCRYPTION_KEY_${account}`
+    `CONVERSE_ACCOUNT_ENCRYPTION_KEY_${account}`,
   );
   if (existingKey) {
     return Buffer.from(existingKey, "base64");
   }
   logger.debug(
-    `[Keychain] Creating account encryption key for account ${account}`
+    `[Keychain] Creating account encryption key for account ${account}`,
   );
   const newKey = Buffer.from(await getRandomBytesAsync(64));
   await setSecureItemAsync(
     `CONVERSE_ACCOUNT_ENCRYPTION_KEY_${account}`,
-    newKey.toString("base64")
+    newKey.toString("base64"),
   );
   return newKey;
 };
-

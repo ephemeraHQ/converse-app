@@ -2,7 +2,7 @@ import { useNavigation } from "@react-navigation/native";
 import { useEffect } from "react";
 
 export const useScreenFocusEffectOnce = (
-  callback: () => void | Promise<void>
+  callback: () => void | Promise<void>,
 ) => {
   const navigation = useNavigation();
   // useFocusEffect will run the callback on mount as well

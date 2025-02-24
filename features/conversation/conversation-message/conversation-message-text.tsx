@@ -1,6 +1,6 @@
+import { memo } from "react";
 import { ClickableText } from "@/components/clickable-text";
 import { useAppTheme } from "@/theme/use-app-theme";
-import { memo } from "react";
 
 type IMessageTextProps = {
   children: React.ReactNode;

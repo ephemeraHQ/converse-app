@@ -1,8 +1,8 @@
 import React, { memo } from "react";
-import { VStack } from "@/design-system/VStack";
-import { ProfileContactCardContainer } from "./profile-contact-card-container";
 import { HStack } from "@/design-system/HStack";
+import { VStack } from "@/design-system/VStack";
 import { ICardLayoutProps } from "../../profile.types";
+import { ProfileContactCardContainer } from "./profile-contact-card-container";
 
 export const ProfileContactCardLayout = memo(function CardLayout({
   avatar,

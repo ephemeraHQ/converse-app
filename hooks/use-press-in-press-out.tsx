@@ -4,7 +4,6 @@ import {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-
 import { useAppTheme } from "@/theme/use-app-theme";
 
 export function usePressInOut() {
@@ -20,7 +19,7 @@ export function usePressInOut() {
       if (v) {
         hasTriggeredHapticAV.value = false;
       }
-    }
+    },
   );
 
   const handlePressIn = useCallback(() => {

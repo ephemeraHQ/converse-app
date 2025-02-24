@@ -1,9 +1,8 @@
-import { useAppTheme } from "@/theme/use-app-theme";
 import {
-  TextProps as RNTextProps,
-  TextStyle,
   Platform,
+  TextProps as RNTextProps,
   StyleProp,
+  TextStyle,
 } from "react-native";
 import AnimateableText from "react-native-animateable-text";
 import Animated, {
@@ -12,6 +11,7 @@ import Animated, {
   useAnimatedProps,
   useAnimatedStyle,
 } from "react-native-reanimated";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { Text } from "./Text";
 import { ITextProps } from "./Text.props";
 
@@ -51,7 +51,7 @@ export function AnimatableText({ style, text, ...rest }: IAnimatableTextProps) {
       "fontWeight" in style
     ) {
       baseStyle.fontWeight = String(
-        style.fontWeight
+        style.fontWeight,
       ) as TextStyle["fontWeight"];
     } else if (style && typeof style === "object" && !Array.isArray(style)) {
       Object.assign(baseStyle, style);

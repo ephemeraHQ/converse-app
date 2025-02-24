@@ -1,13 +1,14 @@
 import { Member } from "@xmtp/react-native-sdk";
 import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
 import { EntityObjectWithAddress } from "@/queries/entify";
-
 import {
   getAccountIsAdmin,
   getAccountIsSuperAdmin,
   getAddressIsAdmin,
   getAddressIsSuperAdmin,
-} from "./adminUtils"; // adjust the import path
+} from "./adminUtils";
+
+// adjust the import path
 
 const mockMembers: EntityObjectWithAddress<Member, InboxId> = {
   byId: {

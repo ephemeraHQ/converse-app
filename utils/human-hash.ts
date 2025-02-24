@@ -278,7 +278,7 @@ export function humanize(
     numWords = 4,
     separator = "-",
     shouldCapitalize = false,
-  }: HumanizeOptions = {}
+  }: HumanizeOptions = {},
 ): string {
   if (!/^[a-fA-F0-9]+$/.test(digest)) {
     throw new Error("Digest must be hexadecimal characters only");
@@ -360,7 +360,7 @@ export function uuid(numWords?: number, separator?: Separator): UUIDResult {
  */
 export function dehumanize(
   human: string,
-  separator: Separator = "-"
+  separator: Separator = "-",
 ): string | false {
   const words = human.split(separator);
   const result: string[] = [];

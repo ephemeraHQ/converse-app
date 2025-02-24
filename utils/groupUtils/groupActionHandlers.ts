@@ -1,7 +1,7 @@
-import { showActionSheet } from "@/components/action-sheet";
 import { translate } from "@i18n";
 import { ConsentState } from "@xmtp/react-native-sdk";
 import { ColorSchemeName } from "react-native";
+import { showActionSheet } from "@/components/action-sheet";
 
 type GroupAction = {
   includeAddedBy: boolean;
@@ -15,13 +15,13 @@ export const groupRemoveRestoreHandler = (
   colorScheme: ColorSchemeName,
   groupName: string | undefined,
   allowGroup: GroupActionHandler,
-  blockGroup: GroupActionHandler
+  blockGroup: GroupActionHandler,
 ) => {
   return (callback: (success: boolean) => void) => {
     const showOptions = (
       options: string[],
       title: string,
-      actions: (() => void)[]
+      actions: (() => void)[],
     ) => {
       showActionSheet({
         options: {
@@ -52,7 +52,7 @@ export const groupRemoveRestoreHandler = (
         [
           () => allowGroup({ includeAddedBy: false, includeCreator: false }),
           () => allowGroup({ includeAddedBy: true, includeCreator: false }),
-        ]
+        ],
       );
     } else {
       showOptions(
@@ -65,7 +65,7 @@ export const groupRemoveRestoreHandler = (
         [
           () => blockGroup({ includeAddedBy: false, includeCreator: false }),
           () => blockGroup({ includeAddedBy: true, includeCreator: false }),
-        ]
+        ],
       );
     }
   };

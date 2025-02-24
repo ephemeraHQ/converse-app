@@ -1,5 +1,4 @@
 import Animated, { AnimatedProps } from "react-native-reanimated";
-
 import { IconButton } from "./IconButton";
 import { IIconButtonProps } from "./IconButton.props";
 

@@ -1,8 +1,3 @@
-import { showActionSheet } from "@/components/action-sheet";
-import { AnimatedVStack } from "@/design-system/VStack";
-import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu";
-import { useAppTheme } from "@/theme/use-app-theme";
-import { Haptics } from "@/utils/haptics";
 import { memo, useCallback } from "react";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import {
@@ -10,10 +5,15 @@ import {
   useAnimatedStyle,
   useSharedValue,
 } from "react-native-reanimated";
+import { showActionSheet } from "@/components/action-sheet";
+import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu";
+import { AnimatedVStack } from "@/design-system/VStack";
+import { useAppTheme } from "@/theme/use-app-theme";
+import { Haptics } from "@/utils/haptics";
 import type { IContextMenuViewProps } from "./context-menu.types";
 
 export const ContextMenuView = memo(function ContextMenuView(
-  props: IContextMenuViewProps
+  props: IContextMenuViewProps,
 ) {
   // Not sure which one has best UX
   // I think ActionSheet is better since not sure dropdown has support JUST for long press.
@@ -23,7 +23,7 @@ export const ContextMenuView = memo(function ContextMenuView(
 });
 
 export const ContextMenuDropdown = memo(function ContextMenuDropdown(
-  props: IContextMenuViewProps
+  props: IContextMenuViewProps,
 ) {
   const { menuConfig, onPressMenuItem, children, style } = props;
 
@@ -58,7 +58,7 @@ export const ContextMenuDropdown = memo(function ContextMenuDropdown(
 });
 
 const ContextMenuActionSheet = memo(function ContextMenuActionSheet(
-  props: IContextMenuViewProps
+  props: IContextMenuViewProps,
 ) {
   const { theme } = useAppTheme();
 
@@ -90,7 +90,7 @@ const ContextMenuActionSheet = memo(function ContextMenuActionSheet(
     ];
     const cancelButtonIndex = options.length - 1;
     const destructiveButtonIndex = menuConfig.menuItems.findIndex((item) =>
-      item.menuAttributes?.includes("destructive")
+      item.menuAttributes?.includes("destructive"),
     );
 
     if (onMenuWillShow) {

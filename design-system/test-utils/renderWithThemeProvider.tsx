@@ -1,7 +1,7 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { render } from "@testing-library/react-native";
-import { useThemeProvider } from "@/theme/use-app-theme";
 import { measureRenders, MeasureRendersOptions } from "reassure";
+import { useThemeProvider } from "@/theme/use-app-theme";
 
 export const TestThemeProvider = ({
   children,
@@ -29,5 +29,5 @@ export const renderWithThemeProvider = (ui: React.ReactElement) =>
 
 export const measureRendersWithThemeProvider = (
   ui: React.ReactElement,
-  options: MeasureRendersOptions
+  options: MeasureRendersOptions,
 ) => measureRenders(<TestThemeProvider>{ui}</TestThemeProvider>, options);

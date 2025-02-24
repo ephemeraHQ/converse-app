@@ -1,4 +1,3 @@
-import { captureError } from "@/utils/capture-error";
 import {
   getGroupQueryData,
   updateGroupQueryData,
@@ -6,8 +5,9 @@ import {
 } from "@queries/useGroupQuery";
 import { useMutation } from "@tanstack/react-query";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import { setGroupNameMutationKey } from "./MutationKeys";
 import { updateConversationInAllowedConsentConversationsQueryData } from "@/queries/conversations-allowed-consent-query";
+import { captureError } from "@/utils/capture-error";
+import { setGroupNameMutationKey } from "./MutationKeys";
 
 type IArgs = {
   account: string;

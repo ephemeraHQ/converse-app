@@ -44,7 +44,8 @@ export const ConversationScreen = memo(function ConversationScreen(
       <ConversationStoreProvider
         topic={topic ?? null}
         isCreatingNewConversation={isNew}
-        searchSelectedUserInboxIds={searchSelectedUserInboxIds}>
+        searchSelectedUserInboxIds={searchSelectedUserInboxIds}
+      >
         <ConversationMessageContextMenuStoreProvider>
           <ConversationComposerStoreProvider inputValue={composerTextPrefill}>
             <Content />

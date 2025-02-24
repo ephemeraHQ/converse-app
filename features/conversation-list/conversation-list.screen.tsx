@@ -111,12 +111,14 @@ const ConversationListItemDmWrapper = memo(
         style={{
           width: "100%",
           overflow: "hidden",
-        }}>
+        }}
+      >
         <ContextMenuView
           style={{
             width: "100%",
           }}
-          {...contextMenuProps}>
+          {...contextMenuProps}
+        >
           <ConversationListItemDm conversationTopic={dm.topic} />
         </ContextMenuView>
       </HStack>
@@ -140,12 +142,14 @@ const ConversationListItemGroupWrapper = memo(
         style={{
           width: "100%",
           overflow: "hidden",
-        }}>
+        }}
+      >
         <ContextMenuView
           style={{
             width: "100%",
           }}
-          {...contextMenuProps}>
+          {...contextMenuProps}
+        >
           <ConversationListItemGroup conversationTopic={group.topic} />
         </ContextMenuView>
       </HStack>

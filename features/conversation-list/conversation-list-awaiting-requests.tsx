@@ -67,7 +67,8 @@ export const ConversationListAwaitingRequests = memo(
           style={{
             alignItems: "center",
             columnGap: theme.spacing.xxs,
-          }}>
+          }}
+        >
           <ConversationListItemTitle>Requests</ConversationListItemTitle>
         </HStack>
       );
@@ -92,7 +93,8 @@ export const ConversationListAwaitingRequests = memo(
         <AnimatedHStack
           key={text} // Doing this to make sure the animation is triggered
           entering={theme.animation.reanimatedFadeInSpring}
-          exiting={theme.animation.reanimatedFadeOutSpring}>
+          exiting={theme.animation.reanimatedFadeOutSpring}
+        >
           <ConversationListItemSubtitle>{text}</ConversationListItemSubtitle>
         </AnimatedHStack>
       );
@@ -101,7 +103,8 @@ export const ConversationListAwaitingRequests = memo(
     return (
       <AnimatedVStack
         layout={theme.animation.reanimatedLayoutSpringTransition}
-        entering={theme.animation.reanimatedFadeInSpring}>
+        entering={theme.animation.reanimatedFadeInSpring}
+      >
         <ConversationListItem
           title={title}
           subtitle={subtitle}
@@ -117,7 +120,8 @@ export const ConversationListAwaitingRequests = memo(
                 height: theme.avatarSize.lg,
                 backgroundColor: theme.colors.fill.tertiary,
                 borderRadius: 999,
-              }}>
+              }}
+            >
               {/* TODO: Add skia to make it better and add the little "shield" icon */}
               <Image
                 source={

@@ -1,5 +1,4 @@
 import { ScrollViewProps, StyleProp, ViewStyle } from "react-native";
-
 import { ExtendedEdge } from "./screen.helpers";
 
 type BaseScreenProps = {

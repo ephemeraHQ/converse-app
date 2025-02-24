@@ -1,12 +1,12 @@
-import { IVStackProps, VStack } from "@/design-system/VStack";
-import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { memo } from "react";
 import { ViewStyle } from "react-native";
+import { IVStackProps, VStack } from "@/design-system/VStack";
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 
 export const ProfileSection = memo(function ProfileSection(
   props: IVStackProps & {
     withTopBorder?: boolean;
-  }
+  },
 ) {
   const { withTopBorder, ...rest } = props;
 

@@ -3,7 +3,6 @@ import React, { useRef } from "react";
 import { ScrollView, View, ViewStyle } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
 import { VStack } from "../../design-system/VStack";
 import { useAppTheme } from "../../theme/use-app-theme";
 import {
@@ -44,7 +43,7 @@ function ScreenWithScrolling(props: IScreenProps) {
   const ref = useRef<ScrollView>(null);
 
   const { scrollEnabled, onContentSizeChange, onLayout } = useAutoPreset(
-    props as AutoScreenProps
+    props as AutoScreenProps,
   );
 
   // Add native behavior of pressing the active tab to scroll to the top of the content

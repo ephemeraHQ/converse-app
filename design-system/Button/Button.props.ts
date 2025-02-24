@@ -7,7 +7,6 @@ import {
   TextStyle,
   ViewStyle,
 } from "react-native";
-
 import { ITextProps } from "../Text";
 
 export type IButtonVariant =

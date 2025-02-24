@@ -1,19 +1,19 @@
-import { Screen } from "@/components/screen/screen";
-import { SnackbarExample } from "@/components/snackbar/snackbar.example";
 import { BottomSheetExample } from "@design-system/BottomSheet/BottomSheet.example";
 import { Button } from "@design-system/Button/Button";
 import { ButtonExample } from "@design-system/Button/Button.example";
 import { IconExample } from "@design-system/Icon/Icon.example";
 import { IconButtonExample } from "@design-system/IconButton/IconButton.example";
+import { Text } from "@design-system/Text/Text";
 import { TextExample } from "@design-system/Text/Text.example";
 import { TextFieldExample } from "@design-system/TextField/TextField.example";
 import { VStack } from "@design-system/VStack";
-import { useAppTheme } from "@/theme/use-app-theme";
 import { useState } from "react";
 import { Switch, useColorScheme } from "react-native";
-import { Text } from "@design-system/Text/Text";
-import { HStack } from "./HStack";
+import { Screen } from "@/components/screen/screen";
+import { SnackbarExample } from "@/components/snackbar/snackbar.example";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { HeaderExample } from "./Header/Header.example";
+import { HStack } from "./HStack";
 
 type IDesignSystemComponent =
   | "buttons"

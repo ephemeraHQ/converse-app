@@ -14,7 +14,7 @@ type IUsernameResult = {
  * @returns Object containing isConverseUsername flag and formatted/raw username
  */
 export function formatConverseUsername(
-  username: string | undefined
+  username: string | undefined,
 ): IUsernameResult | undefined {
   if (!username) return undefined;
 

@@ -1,7 +1,7 @@
 import { api } from "@/utils/api/api";
 
 export const getPresignedUriForUpload = async (
-  contentType?: string | undefined
+  contentType?: string | undefined,
 ) => {
   const { data } = await api.get("/api/attachment/presigned", {
     params: { contentType },

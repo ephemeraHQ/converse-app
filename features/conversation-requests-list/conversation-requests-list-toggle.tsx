@@ -1,8 +1,8 @@
+import React from "react";
+import { View } from "react-native";
 import { Chip, ChipText } from "@/design-system/chip";
 import { HStack } from "@/design-system/HStack";
 import { useAppTheme } from "@/theme/use-app-theme";
-import React from "react";
-import { View } from "react-native";
 
 type IConversationRequestsToggleProps = {
   options: string[];

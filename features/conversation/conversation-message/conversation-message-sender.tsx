@@ -1,13 +1,13 @@
-import { useProfileQuery } from "@/features/profiles/profiles.query";
 import { Text } from "@design-system/Text";
 import { InboxId } from "@xmtp/react-native-sdk";
+import { useProfileQuery } from "@/features/profiles/profiles.query";
 
 type IConversationMessageSenderProps = {
   inboxId: InboxId;
 };
 
 export function ConversationMessageSender(
-  args: IConversationMessageSenderProps
+  args: IConversationMessageSenderProps,
 ) {
   const { inboxId } = args;
 

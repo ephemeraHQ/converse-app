@@ -1,15 +1,15 @@
-import { AnimatedVStack } from "@/design-system/VStack";
+import { memo, useCallback } from "react";
+import { EntryAnimationsValues, withSpring } from "react-native-reanimated";
 import {
   DropdownMenuContainer,
   DropdownMenuCustomItem,
   IDropdownMenuCustomItemProps,
 } from "@/design-system/dropdown-menu/dropdown-menu-custom";
+import { AnimatedVStack } from "@/design-system/VStack";
+import { useConversationMessageContextMenuStyles } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu.styles";
 import { useAppTheme } from "@/theme/use-app-theme";
 import { debugBorder } from "@/utils/debug-style";
-import { memo, useCallback } from "react";
-import { EntryAnimationsValues, withSpring } from "react-native-reanimated";
 import { MENU_ITEMS_WIDTH } from "./conversation-message-context-menu.constants";
-import { useConversationMessageContextMenuStyles } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu.styles";
 
 export const MessageContextMenuItems = memo(
   function MessageContextMenuItems(props: {
@@ -31,11 +31,11 @@ export const MessageContextMenuItems = memo(
         const animations = {
           originX: withSpring(
             targetValues.targetOriginX,
-            theme.animation.contextMenuSpring
+            theme.animation.contextMenuSpring,
           ),
           originY: withSpring(
             targetValues.targetOriginY,
-            theme.animation.contextMenuSpring
+            theme.animation.contextMenuSpring,
           ),
           opacity: withSpring(1, theme.animation.contextMenuSpring),
           transform: [
@@ -55,7 +55,7 @@ export const MessageContextMenuItems = memo(
           animations,
         };
       },
-      [theme.animation.contextMenuSpring, originX, originY]
+      [theme.animation.contextMenuSpring, originX, originY],
     );
 
     return (
@@ -81,5 +81,5 @@ export const MessageContextMenuItems = memo(
         /> */}
       </AnimatedVStack>
     );
-  }
+  },
 );

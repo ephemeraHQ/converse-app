@@ -1,14 +1,14 @@
+import { memo } from "react";
 import { TextField } from "@/design-system/TextField/TextField";
 import { TextFieldProps } from "@/design-system/TextField/TextField.props";
 import { translate } from "@/i18n";
 import { useAppTheme } from "@/theme/use-app-theme";
-import { memo } from "react";
 
 type IProfileContactCardEditableNameInputProps = TextFieldProps;
 
 export const ProfileContactCardEditableNameInput = memo(
   function ProfileContactCardEditableNameInput(
-    props: IProfileContactCardEditableNameInputProps
+    props: IProfileContactCardEditableNameInputProps,
   ) {
     const { theme } = useAppTheme();
 
@@ -31,5 +31,5 @@ export const ProfileContactCardEditableNameInput = memo(
         {...props}
       />
     );
-  }
+  },
 );

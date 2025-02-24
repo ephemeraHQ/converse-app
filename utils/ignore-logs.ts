@@ -17,7 +17,7 @@ if (__DEV__) {
       .slice(1)
       .reduce(
         (baseString, currentString) => baseString.replace("%s", currentString),
-        arrayOfStrings[0]
+        arrayOfStrings[0],
       );
 
   const filterIgnoredMessages =

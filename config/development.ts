@@ -9,7 +9,7 @@ export const developmentConfig: IConfig = {
   websiteDomain: "dev.converse.xyz",
   usernameSuffix: ".conversedev.eth",
   universalLinks: ["dev.converse.xyz/", "dev.getconverse.app/"].flatMap(
-    (domain) => [`https://${domain}`, `http://${domain}`, domain]
+    (domain) => [`https://${domain}`, `http://${domain}`, domain],
   ),
   evm: {
     rpcEndpoint: process.env.EXPO_PUBLIC_EVM_RPC_ENDPOINT,

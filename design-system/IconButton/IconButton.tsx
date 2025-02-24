@@ -19,7 +19,7 @@ import {
 
 export const IconButton = React.forwardRef(function IconButton(
   props: IIconButtonProps,
-  ref
+  ref,
 ) {
   const {
     icon,
@@ -48,7 +48,7 @@ export const IconButton = React.forwardRef(function IconButton(
           action,
           pressed,
           disabled,
-        })
+        }),
       ),
       styleOverride,
       pressed && pressedStyleOverride,
@@ -63,7 +63,7 @@ export const IconButton = React.forwardRef(function IconButton(
       styleOverride,
       pressedStyleOverride,
       disabledStyleOverride,
-    ]
+    ],
   );
 
   const iconStyle = useCallback(
@@ -75,9 +75,9 @@ export const IconButton = React.forwardRef(function IconButton(
           action,
           pressed,
           disabled,
-        })
+        }),
       ),
-    [themed, variant, size, action, disabled]
+    [themed, variant, size, action, disabled],
   );
 
   // For now until we fix Icon
@@ -91,9 +91,9 @@ export const IconButton = React.forwardRef(function IconButton(
           action,
           pressed,
           disabled,
-        })
+        }),
       ),
-    [themed, variant, size, action, disabled]
+    [themed, variant, size, action, disabled],
   );
 
   const handlePress = useCallback(
@@ -107,7 +107,7 @@ export const IconButton = React.forwardRef(function IconButton(
       }
       onPress?.(e);
     },
-    [withHaptics, onPress, disabled]
+    [withHaptics, onPress, disabled],
   );
 
   return (

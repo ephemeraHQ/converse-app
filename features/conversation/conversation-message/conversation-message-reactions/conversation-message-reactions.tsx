@@ -1,17 +1,17 @@
-import { useSelect } from "@/stores/stores.utils";
-import { useMessageContextStoreContext } from "@/features/conversation/conversation-message/conversation-message.store-context";
 import { AnimatedHStack, HStack } from "@design-system/HStack";
 import { Text } from "@design-system/Text";
 import { VStack } from "@design-system/VStack";
-import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { memo, useCallback } from "react";
 import { TextStyle, TouchableHighlight, ViewStyle } from "react-native";
+import { useMessageContextStoreContext } from "@/features/conversation/conversation-message/conversation-message.store-context";
+import { useSelect } from "@/stores/stores.utils";
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { openMessageReactionsDrawer } from "./conversation-message-reaction-drawer/conversation-message-reaction-drawer.service";
-import { useConversationMessageReactionsRolledUp } from "./use-conversation-message-reactions-rolled-up";
 import {
   RolledUpReactions,
   SortedReaction,
 } from "./conversation-message-reactions.types";
+import { useConversationMessageReactionsRolledUp } from "./use-conversation-message-reactions-rolled-up";
 
 const MAX_REACTION_EMOJIS_SHOWN = 3;
 
@@ -20,7 +20,7 @@ export const ConversationMessageReactions = memo(
     const { themed, theme } = useAppTheme();
 
     const { fromMe, messageId } = useMessageContextStoreContext(
-      useSelect(["fromMe", "messageId"])
+      useSelect(["fromMe", "messageId"]),
     );
 
     const rolledUpReactions = useConversationMessageReactionsRolledUp({
@@ -72,7 +72,7 @@ export const ConversationMessageReactions = memo(
         </TouchableHighlight>
       </AnimatedHStack>
     );
-  }
+  },
 );
 
 const $reactionButton: ThemedStyle<ViewStyle> = ({

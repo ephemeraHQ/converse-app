@@ -1,7 +1,7 @@
-import { AnimatedText, IAnimatedTextProps } from "@/design-system/Text";
-import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { memo } from "react";
 import { TextStyle } from "react-native";
+import { AnimatedText, IAnimatedTextProps } from "@/design-system/Text";
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 
 const $defaultStyle: ThemedStyle<TextStyle> = ({ spacing }) => ({
   textAlign: "center",
@@ -10,7 +10,7 @@ const $defaultStyle: ThemedStyle<TextStyle> = ({ spacing }) => ({
 });
 
 export const OnboardingFooterText = memo(function OnboardingFooterText(
-  props: IAnimatedTextProps
+  props: IAnimatedTextProps,
 ) {
   const { style, ...rest } = props;
   const { themed } = useAppTheme();

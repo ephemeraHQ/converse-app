@@ -9,65 +9,64 @@ export type IBottomSheetProps = BottomSheetProps & {
 };
 
 export const BottomSheet = memo(
-  forwardRef<BottomSheetMethods, IBottomSheetProps>(function BottomSheet(
-    props,
-    ref
-  ) {
-    const {
-      children,
-      backdropComponent = BottomSheetBackdropOpacity,
-      handleIndicatorStyle,
-      handleStyle,
-      backgroundStyle,
-      ...rest
-    } = props;
-
-    const { theme } = useAppTheme();
-
-    const combinedHandleIndicatorStyle = useMemo(
-      () => [
-        {
-          backgroundColor: theme.colors.background.raised,
-        },
+  forwardRef<BottomSheetMethods, IBottomSheetProps>(
+    function BottomSheet(props, ref) {
+      const {
+        children,
+        backdropComponent = BottomSheetBackdropOpacity,
         handleIndicatorStyle,
-      ],
-      [theme.colors.background.raised, handleIndicatorStyle]
-    );
-
-    const combinedHandleStyle = useMemo(
-      () => [
-        {
-          backgroundColor: theme.colors.background.raised,
-          borderTopLeftRadius: theme.borderRadius.sm,
-          borderTopRightRadius: theme.borderRadius.sm,
-        },
         handleStyle,
-      ],
-      [theme.colors.background.raised, theme.borderRadius.sm, handleStyle]
-    );
-
-    const combinedBackgroundStyle = useMemo(
-      () => [
-        {
-          backgroundColor: theme.colors.background.raised,
-        },
         backgroundStyle,
-      ],
-      [theme.colors.background.raised, backgroundStyle]
-    );
+        ...rest
+      } = props;
 
-    return (
-      <BottomSheetBase
-        ref={ref}
-        enableDynamicSizing={false}
-        backdropComponent={backdropComponent}
-        handleIndicatorStyle={combinedHandleIndicatorStyle}
-        handleStyle={combinedHandleStyle}
-        backgroundStyle={combinedBackgroundStyle}
-        {...rest}
-      >
-        {children}
-      </BottomSheetBase>
-    );
-  })
+      const { theme } = useAppTheme();
+
+      const combinedHandleIndicatorStyle = useMemo(
+        () => [
+          {
+            backgroundColor: theme.colors.background.raised,
+          },
+          handleIndicatorStyle,
+        ],
+        [theme.colors.background.raised, handleIndicatorStyle],
+      );
+
+      const combinedHandleStyle = useMemo(
+        () => [
+          {
+            backgroundColor: theme.colors.background.raised,
+            borderTopLeftRadius: theme.borderRadius.sm,
+            borderTopRightRadius: theme.borderRadius.sm,
+          },
+          handleStyle,
+        ],
+        [theme.colors.background.raised, theme.borderRadius.sm, handleStyle],
+      );
+
+      const combinedBackgroundStyle = useMemo(
+        () => [
+          {
+            backgroundColor: theme.colors.background.raised,
+          },
+          backgroundStyle,
+        ],
+        [theme.colors.background.raised, backgroundStyle],
+      );
+
+      return (
+        <BottomSheetBase
+          ref={ref}
+          enableDynamicSizing={false}
+          backdropComponent={backdropComponent}
+          handleIndicatorStyle={combinedHandleIndicatorStyle}
+          handleStyle={combinedHandleStyle}
+          backgroundStyle={combinedBackgroundStyle}
+          {...rest}
+        >
+          {children}
+        </BottomSheetBase>
+      );
+    },
+  ),
 );

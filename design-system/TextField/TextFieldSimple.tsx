@@ -1,8 +1,7 @@
 import { memo } from "react";
-
+import { useAppTheme } from "../../theme/use-app-theme";
 import { TextField } from "./TextField";
 import { TextFieldProps } from "./TextField.props";
-import { useAppTheme } from "../../theme/use-app-theme";
 
 type ITextFieldSimpleSize = "md" | "lg";
 
@@ -19,7 +18,7 @@ type ITextFieldSimpleProps = Omit<
 };
 
 export const TextFieldSimple = memo(function TextFieldSimple(
-  props: ITextFieldSimpleProps
+  props: ITextFieldSimpleProps,
 ) {
   const { theme } = useAppTheme();
 

@@ -13,7 +13,7 @@ type State = {
 type StoreActions = {
   updateStreamingState: (
     account: string,
-    updates: Partial<StreamingState>
+    updates: Partial<StreamingState>,
   ) => void;
   resetAccount: (account: string) => void;
 };
@@ -38,5 +38,5 @@ export const useStreamingStore = create<State & { actions: StoreActions }>(
           return { accountStreamingStates: rest };
         }),
     },
-  })
+  }),
 );

@@ -1,19 +1,19 @@
+import { useGroupQuery } from "@queries/useGroupQuery";
 import { useMutation } from "@tanstack/react-query";
 import { logger } from "@utils/logger";
-
-import { captureError } from "@/utils/capture-error";
-import { useGroupQuery } from "@queries/useGroupQuery";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import { captureError } from "@/utils/capture-error";
 import { addMemberMutationKey } from "./MutationKeys";
 import {
   cancelGroupMembersQuery,
   invalidateGroupMembersQuery,
 } from "./useGroupMembersQuery";
+
 // import { refreshGroup } from "../utils/xmtpRN/conversations";
 
 export const useAddToGroupMutation = (
   account: string,
-  topic: ConversationTopic
+  topic: ConversationTopic,
 ) => {
   const { data: group } = useGroupQuery({ account, topic });
 

@@ -53,6 +53,6 @@ export const handleDecryptedLocalAttachment = async (args: {
   return getLocalAttachment(
     messageId,
     filename,
-    decryptedLocalAttachment.mimeType
+    decryptedLocalAttachment.mimeType,
   );
 };

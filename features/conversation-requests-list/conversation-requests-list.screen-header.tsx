@@ -1,8 +1,8 @@
+import { Alert } from "react-native";
+import { HeaderAction } from "@/design-system/Header/HeaderAction";
 import { translate } from "@/i18n";
 import { useHeader } from "@/navigation/use-header";
 import { useRouter } from "@/navigation/use-navigation";
-import { HeaderAction } from "@/design-system/Header/HeaderAction";
-import { Alert } from "react-native";
 
 export function useConversationRequestsListScreenHeader() {
   const router = useRouter();
@@ -25,7 +25,7 @@ export function useConversationRequestsListScreenHeader() {
             router.goBack();
           },
         },
-      ]
+      ],
     );
   };
 

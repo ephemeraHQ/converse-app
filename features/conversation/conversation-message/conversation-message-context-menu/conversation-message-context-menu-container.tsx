@@ -1,6 +1,3 @@
-import { AnimatedVStack, VStack } from "@/design-system/VStack";
-import { useConversationMessageContextMenuStyles } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu.styles";
-import { useAppTheme } from "@/theme/use-app-theme";
 import { memo, useEffect } from "react";
 import { Platform, StatusBar, useWindowDimensions } from "react-native";
 import {
@@ -9,6 +6,9 @@ import {
   withSpring,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { AnimatedVStack, VStack } from "@/design-system/VStack";
+import { useConversationMessageContextMenuStyles } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu.styles";
+import { useAppTheme } from "@/theme/use-app-theme";
 import {
   MESSAGE_CONTEXT_MENU_ABOVE_MESSAGE_REACTIONS_HEIGHT,
   MESSAGE_CONTEXT_REACTIONS_HEIGHT,
@@ -75,7 +75,7 @@ export const MessageContextMenuContainer = memo(
 
       translateYAV.value = withSpring(
         translateY,
-        theme.animation.contextMenuSpring
+        theme.animation.contextMenuSpring,
       );
     }, [
       hasReactions,
@@ -130,5 +130,5 @@ export const MessageContextMenuContainer = memo(
         </VStack>
       </AnimatedVStack>
     );
-  }
+  },
 );

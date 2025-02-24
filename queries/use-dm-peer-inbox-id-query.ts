@@ -1,12 +1,12 @@
+import { queryOptions, useQuery } from "@tanstack/react-query";
+import { type ConversationTopic } from "@xmtp/react-native-sdk";
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm";
 import { queryClient } from "@/queries/queryClient";
 import { Optional } from "@/types/general";
 import logger from "@/utils/logger";
 import { reactQueryPersister } from "@/utils/mmkv";
-import { queryOptions, useQuery } from "@tanstack/react-query";
-import { type ConversationTopic } from "@xmtp/react-native-sdk";
-import { dmPeerInboxIdQueryKey } from "./QueryKeys";
 import { getOrFetchConversation } from "./conversation-query";
+import { dmPeerInboxIdQueryKey } from "./QueryKeys";
 
 type IArgs = {
   account: string;
@@ -16,7 +16,7 @@ type IArgs = {
 type IArgsWithCaller = IArgs & { caller: string };
 
 export function getDmPeerInboxIdQueryOptions(
-  args: Optional<IArgsWithCaller, "caller">
+  args: Optional<IArgsWithCaller, "caller">,
 ) {
   const { account, topic, caller } = args;
 
@@ -38,7 +38,7 @@ export function getDmPeerInboxIdQueryOptions(
       }
 
       logger.debug(
-        `[getPeerInboxId] getting peer inbox id for ${topic}, account: ${account} and caller ${caller}`
+        `[getPeerInboxId] getting peer inbox id for ${topic}, account: ${account} and caller ${caller}`,
       );
 
       return conversation.peerInboxId();

@@ -1,18 +1,17 @@
-import { useRouter } from "@/navigation/use-navigation";
-
-import { config } from "@/config";
-import { HStack } from "@/design-system/HStack";
-import { HeaderAction } from "@/design-system/Header/HeaderAction";
-import { iconRegistry } from "@/design-system/Icon/Icon";
-import { Text } from "@/design-system/Text";
-import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu";
-import { translate } from "@/i18n";
-import { useHeader } from "@/navigation/use-header";
-import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
-import { Haptics } from "@/utils/haptics";
 import { InboxId } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
 import { Share, ViewStyle } from "react-native";
+import { config } from "@/config";
+import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu";
+import { HeaderAction } from "@/design-system/Header/HeaderAction";
+import { HStack } from "@/design-system/HStack";
+import { iconRegistry } from "@/design-system/Icon/Icon";
+import { Text } from "@/design-system/Text";
+import { translate } from "@/i18n";
+import { useHeader } from "@/navigation/use-header";
+import { useRouter } from "@/navigation/use-navigation";
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
+import { Haptics } from "@/utils/haptics";
 
 export function useProfileOtherScreenHeader({ inboxId }: { inboxId: InboxId }) {
   const { theme, themed } = useAppTheme();
@@ -77,7 +76,7 @@ export function useProfileOtherScreenHeader({ inboxId }: { inboxId: InboxId }) {
         // break;
       }
     },
-    [inboxId]
+    [inboxId],
   );
 
   useHeader(
@@ -135,7 +134,7 @@ export function useProfileOtherScreenHeader({ inboxId }: { inboxId: InboxId }) {
         </HStack>
       ),
     },
-    [router, theme, handleChatPress, handleContextMenuAction]
+    [router, theme, handleChatPress, handleContextMenuAction],
   );
 }
 

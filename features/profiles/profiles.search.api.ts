@@ -1,6 +1,6 @@
+import { z } from "zod";
 import { api } from "@/utils/api/api";
 import { captureError } from "@/utils/capture-error";
-import { z } from "zod";
 
 // Schema for individual profile
 const ProfileSchema = z.object({
@@ -28,7 +28,7 @@ export const searchProfiles = async ({
     "/api/v1/profiles/search",
     {
       params: { query: searchQuery },
-    }
+    },
   );
 
   const result = SearchProfilesResponseSchema.safeParse(data);

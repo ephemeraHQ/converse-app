@@ -1,17 +1,17 @@
-import { textPresets } from "@/design-system/Text/Text.presets";
-import { useAppTheme } from "@/theme/use-app-theme";
 import { forwardRef, memo } from "react";
 import {
   TextInput as RNTextInput,
   TextInputProps as RNTextInputProps,
 } from "react-native";
+import { textPresets } from "@/design-system/Text/Text.presets";
+import { useAppTheme } from "@/theme/use-app-theme";
 
 export type ITextInputProps = RNTextInputProps;
 
 export const TextInput = memo(
   forwardRef(function TextInput(
     props: ITextInputProps,
-    ref: React.ForwardedRef<RNTextInput>
+    ref: React.ForwardedRef<RNTextInput>,
   ) {
     const { theme, themed } = useAppTheme();
 
@@ -32,5 +32,5 @@ export const TextInput = memo(
         {...rest}
       />
     );
-  })
+  }),
 );

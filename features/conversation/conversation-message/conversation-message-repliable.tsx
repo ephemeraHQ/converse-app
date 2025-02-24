@@ -1,9 +1,4 @@
-import { ISwipeableRenderActionsArgs, Swipeable } from "@/components/swipeable";
-import { AnimatedVStack } from "@/design-system/VStack";
-import { useConversationMessageStyles } from "@/features/conversation/conversation-message/conversation-message.styles";
-import logger from "@/utils/logger";
 import { Icon } from "@design-system/Icon/Icon";
-import { useAppTheme } from "@/theme/use-app-theme";
 import { Haptics } from "@utils/haptics";
 import { memo, useCallback } from "react";
 import {
@@ -12,6 +7,11 @@ import {
   useAnimatedStyle,
   useSharedValue,
 } from "react-native-reanimated";
+import { ISwipeableRenderActionsArgs, Swipeable } from "@/components/swipeable";
+import { AnimatedVStack } from "@/design-system/VStack";
+import { useConversationMessageStyles } from "@/features/conversation/conversation-message/conversation-message.styles";
+import { useAppTheme } from "@/theme/use-app-theme";
+import logger from "@/utils/logger";
 
 type IProps = {
   children: React.ReactNode;
@@ -38,7 +38,7 @@ export const ConversationMessageRepliable = memo(
 
     const renderLeftActions = useCallback(
       (args: ISwipeableRenderActionsArgs) => <SwipeReplyLeftAction {...args} />,
-      []
+      [],
     );
 
     return (
@@ -58,7 +58,7 @@ export const ConversationMessageRepliable = memo(
         {children}
       </Swipeable>
     );
-  }
+  },
 );
 
 const SwipeReplyLeftAction = memo(function SwipeReplyLeftAction({
@@ -75,7 +75,7 @@ const SwipeReplyLeftAction = memo(function SwipeReplyLeftAction({
       if (progress > 1 && (!previousProgress || previousProgress <= 1)) {
         Haptics.softImpactAsyncAnimated();
       }
-    }
+    },
   );
 
   const as = useAnimatedStyle(() => {
@@ -87,7 +87,7 @@ const SwipeReplyLeftAction = memo(function SwipeReplyLeftAction({
             progressAnimatedValue.value,
             [0, 0.7, 1],
             [0, 0, 1],
-            "clamp"
+            "clamp",
           ),
         },
         {
@@ -95,7 +95,7 @@ const SwipeReplyLeftAction = memo(function SwipeReplyLeftAction({
             progressAnimatedValue.value,
             [0, 0.8, 1],
             [0, 0, 0],
-            "clamp"
+            "clamp",
           ),
         },
       ],

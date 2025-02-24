@@ -103,7 +103,8 @@ const MessageWrapper = memo(function MessageWrapper({
     <MessageContextStoreProvider
       message={message}
       previousMessage={previousMessage}
-      nextMessage={nextMessage}>
+      nextMessage={nextMessage}
+    >
       <VStack>
         <ConversationMessageTimestamp />
         <ConversationMessageLayout

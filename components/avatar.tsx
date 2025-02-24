@@ -45,7 +45,8 @@ export const Avatar = memo(function Avatar({
         },
         style,
       ]}
-      testID="avatar-placeholder">
+      testID="avatar-placeholder"
+    >
       {uri && !didError ? (
         <Image
           onLoad={handleImageLoad}
@@ -68,7 +69,8 @@ export const Avatar = memo(function Avatar({
             fontSize: avatarSize / 2.4, // 2.4 is the ratio in the Figma design
             lineHeight: avatarSize / 2.4, // 2.4 is the ratio in the Figma design
             paddingTop: avatarSize / 15, // 15 is totally random and padding top shouldn't be needed but otherwise the text is not centered
-          }}>
+          }}
+        >
           {firstLetter}
         </Text>
       ) : (

@@ -1,8 +1,3 @@
-import { Text } from "@/design-system/Text";
-import { AttachmentContainer } from "@/features/conversation/conversation-attachment/conversation-attachment-container";
-import { AttachmentLoading } from "@/features/conversation/conversation-attachment/conversation-attachment-loading";
-import { translate } from "@/i18n";
-import { getLocalAttachment } from "@/utils/attachment/handleAttachment";
 import { useQuery } from "@tanstack/react-query";
 import {
   getMessageAttachmentLocalPath,
@@ -16,6 +11,11 @@ import {
 import { Image } from "expo-image";
 import { memo } from "react";
 import RNFS from "react-native-fs";
+import { Text } from "@/design-system/Text";
+import { AttachmentContainer } from "@/features/conversation/conversation-attachment/conversation-attachment-container";
+import { AttachmentLoading } from "@/features/conversation/conversation-attachment/conversation-attachment-loading";
+import { translate } from "@/i18n";
+import { getLocalAttachment } from "@/utils/attachment/handleAttachment";
 
 type IMessageStaticAttachmentProps = {
   message: DecodedMessage<StaticAttachmentCodec>;
@@ -56,7 +56,7 @@ const Content = memo(function Content(props: {
 
       const attachmentPath = getMessageAttachmentLocalPath(
         messageId,
-        staticAttachment.filename
+        staticAttachment.filename,
       );
 
       await RNFS.writeFile(attachmentPath, staticAttachment.data, "base64");
@@ -64,7 +64,7 @@ const Content = memo(function Content(props: {
       return getLocalAttachment(
         messageId,
         staticAttachment.filename,
-        staticAttachment.mimeType
+        staticAttachment.mimeType,
       );
     },
   });

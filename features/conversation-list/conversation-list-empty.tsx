@@ -1,12 +1,12 @@
-import { AnimatedVStack, VStack } from "@/design-system/VStack";
+import React, { memo } from "react";
 import { LinearGradient } from "@/design-system/linear-gradient";
+import { AnimatedVStack, VStack } from "@/design-system/VStack";
 import { ConversationListItem } from "@/features/conversation-list/conversation-list-item/conversation-list-item";
 import { ConversationListItemAvatarSkeleton } from "@/features/conversation-list/conversation-list-item/conversation-list-item-avatar-skeleton";
 import { useConversationListStyles } from "@/features/conversation-list/conversation-list.styles";
 import { usePinnedConversations } from "@/features/conversation-list/hooks/use-pinned-conversations";
 import { useAppTheme } from "@/theme/use-app-theme";
 import { hexToRGBA } from "@/utils/colors";
-import React, { memo } from "react";
 
 export const ConversationListEmpty = memo(function ConversationListEmpty() {
   const { pinnedConversations = [] } = usePinnedConversations();

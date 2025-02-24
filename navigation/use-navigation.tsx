@@ -6,7 +6,6 @@ import {
 } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useEffect } from "react";
-
 import { NavigationParamList } from "@/navigation/navigation.types";
 
 // Extend global namespace for type safety
@@ -17,7 +16,7 @@ declare global {
 }
 
 export function useRoute<
-  ScreenName extends keyof NavigationParamList
+  ScreenName extends keyof NavigationParamList,
 >(): RouteProp<NavigationParamList, ScreenName> {
   return useRouteNavigation<RouteProp<NavigationParamList, ScreenName>>();
 }

@@ -1,31 +1,29 @@
 import { usePrivy } from "@privy-io/expo";
+import { isAxiosError } from "axios";
 import React, { memo, useCallback, useEffect, useState } from "react";
 import { Alert, TextStyle, ViewStyle } from "react-native";
-import { create } from "zustand";
 import { z } from "zod";
-
+import { create } from "zustand";
+import { Screen } from "@/components/screen/screen";
 import { Center } from "@/design-system/Center";
 import { VStack } from "@/design-system/VStack";
-import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
-import { captureErrorWithToast } from "@/utils/capture-error";
-import { ValidationError } from "@/utils/api/api.error";
-import { useAddPfp } from "../../../hooks/use-add-pfp";
-import { isAxiosError } from "axios";
-
-import { Screen } from "@/components/screen/screen";
 import { useAuthStore } from "@/features/authentication/authentication.store";
 import { useMultiInboxStore } from "@/features/authentication/multi-inbox.store";
 import { useCreateUser } from "@/features/current-user/use-create-user";
 import { OnboardingFooter } from "@/features/onboarding/components/onboarding-footer";
 import { OnboardingSubtitle } from "@/features/onboarding/components/onboarding-subtitle";
 import { OnboardingTitle } from "@/features/onboarding/components/onboarding-title";
+import { formatRandomUserName } from "@/features/onboarding/utils/format-random-user-name";
 import { ProfileContactCardEditableAvatar } from "@/features/profiles/components/profile-contact-card/profile-contact-card-editable-avatar";
 import { ProfileContactCardEditableNameInput } from "@/features/profiles/components/profile-contact-card/profile-contact-card-editable-name-input";
 import { ProfileContactCardLayout } from "@/features/profiles/components/profile-contact-card/profile-contact-card-layout";
+import { profileValidationSchema } from "@/features/profiles/schemas/profile-validation.schema";
 import { validateProfileName } from "@/features/profiles/utils/validate-profile-name";
 import { useHeader } from "@/navigation/use-header";
-import { formatRandomUserName } from "@/features/onboarding/utils/format-random-user-name";
-import { profileValidationSchema } from "@/features/profiles/schemas/profile-validation.schema";
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
+import { ValidationError } from "@/utils/api/api.error";
+import { captureErrorWithToast } from "@/utils/capture-error";
+import { useAddPfp } from "../../../hooks/use-add-pfp";
 
 // Request validation schema
 const createUserRequestSchema = z.object({
@@ -61,9 +59,10 @@ const useOnboardingContactCardStore = create<IOnboardingContactCardStore>(
       setNameValidationError: (nameValidationError: string) =>
         set({ nameValidationError }),
       setAvatar: (avatar: string) => set({ avatar }),
-      reset: () => set({ name: "", username: "", nameValidationError: "", avatar: "" }),
+      reset: () =>
+        set({ name: "", username: "", nameValidationError: "", avatar: "" }),
     },
-  })
+  }),
 );
 
 export function OnboardingContactCardScreen() {
@@ -176,7 +175,8 @@ export function OnboardingContactCardScreen() {
       <Screen
         preset="scroll"
         contentContainerStyle={$screenContainer}
-        safeAreaEdges={["bottom"]}>
+        safeAreaEdges={["bottom"]}
+      >
         <Center style={$centerContainerStyle}>
           <VStack style={$titleContainer}>
             <OnboardingTitle size={"xl"}>
@@ -246,35 +246,37 @@ const $subtitleStyle: ThemedStyle<TextStyle> = ({ spacing }) => ({
   marginBottom: spacing.sm,
 });
 
-const ProfileContactCardNameInput = memo(function ProfileContactCardNameInput() {
-  const [nameValidationError, setNameValidationError] = useState<string>();
+const ProfileContactCardNameInput = memo(
+  function ProfileContactCardNameInput() {
+    const [nameValidationError, setNameValidationError] = useState<string>();
 
-  const handleDisplayNameChange = useCallback((text: string) => {
-    const { isValid, error } = validateProfileName(text);
+    const handleDisplayNameChange = useCallback((text: string) => {
+      const { isValid, error } = validateProfileName(text);
 
-    if (!isValid) {
-      setNameValidationError(error);
-      useOnboardingContactCardStore.getState().actions.setUsername("");
-      return;
-    }
+      if (!isValid) {
+        setNameValidationError(error);
+        useOnboardingContactCardStore.getState().actions.setUsername("");
+        return;
+      }
 
-    setNameValidationError(undefined);
-    const username = formatRandomUserName({ displayName: text });
+      setNameValidationError(undefined);
+      const username = formatRandomUserName({ displayName: text });
 
-    const store = useOnboardingContactCardStore.getState();
-    store.actions.setName(text);
-    store.actions.setUsername(username);
-  }, []);
+      const store = useOnboardingContactCardStore.getState();
+      store.actions.setName(text);
+      store.actions.setUsername(username);
+    }, []);
 
-  return (
-    <ProfileContactCardEditableNameInput
-      defaultValue={useOnboardingContactCardStore.getState().name}
-      onChangeText={handleDisplayNameChange}
-      status={nameValidationError ? "error" : undefined}
-      helper={nameValidationError}
-    />
-  );
-});
+    return (
+      <ProfileContactCardEditableNameInput
+        defaultValue={useOnboardingContactCardStore.getState().name}
+        onChangeText={handleDisplayNameChange}
+        status={nameValidationError ? "error" : undefined}
+        helper={nameValidationError}
+      />
+    );
+  },
+);
 
 const ProfileContactCardAvatar = memo(function ProfileContactCardAvatar() {
   const { asset, addPFP } = useAddPfp();

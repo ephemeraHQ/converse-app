@@ -18,7 +18,7 @@ function getGroupPermissionPolicySet(args: {
 
 export const useGroupPermissionsQuery = (
   account: string,
-  topic: ConversationTopic
+  topic: ConversationTopic,
 ) => {
   return useQuery(getGroupPermissionsQueryOptions({ account, topic }));
 };

@@ -3,13 +3,12 @@ import {
   BottomSheetHandleProps as GorhomBottomSheetHandleProps,
 } from "@gorhom/bottom-sheet";
 import { memo } from "react";
-
 import { useAppTheme } from "../../theme/use-app-theme";
 
 export const BottomSheetHandleBar = memo(function BottomSheetHandleBar(
   props: GorhomBottomSheetHandleProps & {
     isAbsolute?: boolean;
-  }
+  },
 ) {
   const { isAbsolute, animatedIndex, animatedPosition } = props;
 

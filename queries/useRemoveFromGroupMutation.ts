@@ -1,21 +1,20 @@
+import { useGroupQuery } from "@queries/useGroupQuery";
 import { useMutation } from "@tanstack/react-query";
 import { logger } from "@utils/logger";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
-
-import { useGroupQuery } from "@queries/useGroupQuery";
+// import { refreshGroup } from "../utils/xmtpRN/conversations";
+import { captureError } from "@/utils/capture-error";
 import { removeMemberMutationKey } from "./MutationKeys";
 import {
   cancelGroupMembersQuery,
   getGroupMembersQueryData,
   setGroupMembersQueryData,
 } from "./useGroupMembersQuery";
-// import { refreshGroup } from "../utils/xmtpRN/conversations";
-import { captureError } from "@/utils/capture-error";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
 export const useRemoveFromGroupMutation = (
   account: string,
-  topic: ConversationTopic
+  topic: ConversationTopic,
 ) => {
   const { data: group } = useGroupQuery({ account, topic });
 
@@ -46,7 +45,7 @@ export const useRemoveFromGroupMutation = (
       const newGroupMembers = {
         ...previousGroupMembers,
         ids: previousGroupMembers.ids.filter(
-          (member) => !removeSet.has(member)
+          (member) => !removeSet.has(member),
         ),
       };
       setGroupMembersQueryData({

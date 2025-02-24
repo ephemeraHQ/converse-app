@@ -1,6 +1,6 @@
-import { BlurView } from "@/design-system/BlurView";
 import { memo } from "react";
 import { TouchableWithoutFeedback } from "react-native";
+import { BlurView } from "@/design-system/BlurView";
 
 export const MessageContextMenuBackdrop = memo(
   function MessageContextMenuBackdrop({
@@ -17,5 +17,5 @@ export const MessageContextMenuBackdrop = memo(
         </TouchableWithoutFeedback>
       </BlurView>
     );
-  }
+  },
 );

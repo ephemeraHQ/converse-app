@@ -30,7 +30,8 @@ export const PinnedConversationMessagePreview = (
         entering={theme.animation.reanimatedFadeInScaleIn()}
         exiting={theme.animation.reanimatedFadeOutScaleOut()}
         layout={theme.animation.reanimatedLayoutSpringTransition}
-        style={themed($innerStyle)}>
+        style={themed($innerStyle)}
+      >
         <Text numberOfLines={2} preset="smaller">
           {textContent}
         </Text>

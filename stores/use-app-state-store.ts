@@ -1,6 +1,6 @@
-import { create } from "zustand";
-import { AppState, AppStateStatus } from "react-native";
 import { focusManager } from "@tanstack/react-query";
+import { AppState, AppStateStatus } from "react-native";
+import { create } from "zustand";
 
 type State = {
   currentState: AppStateStatus;

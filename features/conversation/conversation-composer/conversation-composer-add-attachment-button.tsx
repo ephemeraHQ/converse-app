@@ -125,14 +125,16 @@ export function AddAttachmentButton() {
           title: translate("camera"),
           image: iconRegistry["camera"],
         },
-      ]}>
+      ]}
+    >
       <Center
         style={{
           height: 36, // Value from Figma
           width: 36, // Value from Figma
           backgroundColor: theme.colors.fill.minimal,
           borderRadius: 36,
-        }}>
+        }}
+      >
         <Icon
           color={theme.colors.text.secondary}
           icon="plus"

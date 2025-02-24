@@ -1,12 +1,12 @@
-import { Button } from "@/design-system/Button/Button";
-import { Text } from "@/design-system/Text";
-import { VStack } from "@/design-system/VStack";
-import { SettingsList } from "@/design-system/settings-list/settings-list";
-import { ISettingsListRow } from "@/design-system/settings-list/settings-list.types";
-import { useUpdatesLogEntries } from "@/features/app-settings/hooks/use-updates-log-entries";
-import { useAppTheme } from "@/theme/use-app-theme";
 import * as Updates from "expo-updates";
 import { memo, useMemo, useState } from "react";
+import { Button } from "@/design-system/Button/Button";
+import { SettingsList } from "@/design-system/settings-list/settings-list";
+import { ISettingsListRow } from "@/design-system/settings-list/settings-list.types";
+import { Text } from "@/design-system/Text";
+import { VStack } from "@/design-system/VStack";
+import { useUpdatesLogEntries } from "@/features/app-settings/hooks/use-updates-log-entries";
+import { useAppTheme } from "@/theme/use-app-theme";
 
 export const OtaUpdatesList = memo(function OtaUpdatesList() {
   const { theme } = useAppTheme();
@@ -61,8 +61,8 @@ export const OtaUpdatesList = memo(function OtaUpdatesList() {
         value: isChecking
           ? "Checking for Updates..."
           : isDownloading
-          ? "Downloading Update..."
-          : "...",
+            ? "Downloading Update..."
+            : "...",
       },
 
       // Current Update Info

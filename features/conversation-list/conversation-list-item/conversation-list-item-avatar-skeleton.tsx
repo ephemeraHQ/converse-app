@@ -1,5 +1,5 @@
-import { Center } from "@/design-system/Center";
 import { memo } from "react";
+import { Center } from "@/design-system/Center";
 
 export const ConversationListItemAvatarSkeleton = memo(
   function ConversationListItemAvatarSkeleton(props: {
@@ -33,5 +33,5 @@ export const ConversationListItemAvatarSkeleton = memo(
         /> */}
       </Center>
     );
-  }
+  },
 );

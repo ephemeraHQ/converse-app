@@ -1,10 +1,9 @@
 import { ethers } from "ethers";
 import { isAddress } from "ethers/lib/utils";
-
+import { config } from "../../config";
 import erc20abi from "./abis/erc20.json";
 import { evmHelpers } from "./helpers";
 import provider from "./provider";
-import { config } from "../../config";
 
 export const TransferWithAuthorizationTypes = {
   TransferWithAuthorization: [
@@ -20,7 +19,7 @@ export const TransferWithAuthorizationTypes = {
 export async function getErc20BalanceForAddress(
   erc20ContractAddress: string,
   address: string,
-  provider: ethers.providers.Provider
+  provider: ethers.providers.Provider,
 ) {
   if (!isAddress(address)) {
     return "0";
@@ -28,7 +27,7 @@ export async function getErc20BalanceForAddress(
   const contract = new ethers.Contract(
     erc20ContractAddress,
     erc20abi,
-    provider
+    provider,
   );
   const balance = await contract.balanceOf(address);
   return evmHelpers.hexToNumberString(balance);
@@ -41,7 +40,7 @@ export async function getErc20BalanceForAddress(
  */
 export async function getErc20Decimals(
   erc20ContractAddress: string,
-  provider: ethers.providers.Provider
+  provider: ethers.providers.Provider,
 ) {
   if (
     erc20ContractAddress.toLowerCase() ===
@@ -52,7 +51,7 @@ export async function getErc20Decimals(
   const contract = new ethers.Contract(
     erc20ContractAddress,
     erc20abi,
-    provider
+    provider,
   );
   let decimals;
   try {
@@ -71,12 +70,12 @@ export async function getErc20Decimals(
  */
 export async function getErc20TokenSymbol(
   erc20ContractAddress: string,
-  provider: ethers.providers.Provider
+  provider: ethers.providers.Provider,
 ) {
   const contract = new ethers.Contract(
     erc20ContractAddress,
     erc20abi,
-    provider
+    provider,
   );
   let symbol;
   try {
@@ -108,7 +107,7 @@ export type TransferAuthorizationMessage = {
 const getDomain = async (
   chainId: number,
   erc20ContractAddress: string,
-  provider: ethers.providers.Provider
+  provider: ethers.providers.Provider,
 ) => {
   let version = "1";
   let name = "";
@@ -123,13 +122,13 @@ const getDomain = async (
     const contract = new ethers.Contract(
       erc20ContractAddress,
       erc20abi,
-      provider
+      provider,
     );
     try {
       version = await contract.version();
     } catch (error) {
       console.warn(
-        `We could not retrieve the version of ${erc20ContractAddress} using the version() method. Defaulting to ${version}`
+        `We could not retrieve the version of ${erc20ContractAddress} using the version() method. Defaulting to ${version}`,
       );
     }
     name = await contract.name();
@@ -161,7 +160,7 @@ export async function signTransferAuthorization(
   erc20ContractAddress: string,
   message: TransferAuthorizationMessage,
   provider: ethers.providers.Provider,
-  signer: ethers.Signer
+  signer: ethers.Signer,
 ) {
   const { chainId } = await provider.getNetwork();
   const domain = await getDomain(chainId, erc20ContractAddress, provider);
@@ -173,7 +172,7 @@ export const getTransferAuthorization = async (
   erc20ContractAddress: string,
   amount: string,
   recipientAddress: string,
-  signer: ethers.Signer
+  signer: ethers.Signer,
 ) => {
   const authorizationMessage = {
     from: await signer.getAddress(),
@@ -187,7 +186,7 @@ export const getTransferAuthorization = async (
     erc20ContractAddress,
     authorizationMessage,
     provider,
-    signer
+    signer,
   );
   return { message: authorizationMessage, signature };
 };

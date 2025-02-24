@@ -1,10 +1,10 @@
-import { useSnackbars } from "@/components/snackbar/snackbar.service";
-import { useGradientHeight } from "@/components/snackbar/snackbar-backdrop/snackbar-backdrop.utils";
 import { AnimatedVStack } from "@design-system/VStack";
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import { StyleSheet, useWindowDimensions } from "react-native";
 import { useAnimatedStyle, withTiming } from "react-native-reanimated";
+import { useGradientHeight } from "@/components/snackbar/snackbar-backdrop/snackbar-backdrop.utils";
+import { useSnackbars } from "@/components/snackbar/snackbar.service";
 
 /**
  * On Android, blur doesn't work

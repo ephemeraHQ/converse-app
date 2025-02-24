@@ -1,6 +1,6 @@
 // All types here should be in global.d.ts but for some reason they are not working in global.d.ts
 
-import { ReactNode, ReactElement } from "react";
+import { ReactElement, ReactNode } from "react";
 
 // so we put them here and import them...
 export type Nullable<T> = T | null | undefined;

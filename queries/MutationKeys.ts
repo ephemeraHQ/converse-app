@@ -28,60 +28,60 @@ export enum MutationKeys {
 export const sendMessageMutationKey = (
   account: string,
   topic: ConversationTopic,
-  messageId: string
+  messageId: string,
 ) => [MutationKeys.SEND_MESSAGE, account, topic, messageId];
 
 export const addMemberMutationKey = (
   account: string,
-  topic: ConversationTopic
+  topic: ConversationTopic,
 ) => [MutationKeys.ADD_MEMBER, account, topic];
 
 export const removeMemberMutationKey = (
   account: string,
-  topic: ConversationTopic
+  topic: ConversationTopic,
 ) => [MutationKeys.REMOVE_MEMBER, account, topic];
 
 export const promoteAdminMutationKey = (
   account: string,
-  topic: ConversationTopic
+  topic: ConversationTopic,
 ) => [MutationKeys.PROMOTE_ADMIN, account, topic];
 
 export const revokeAdminMutationKey = (
   account: string,
-  topic: ConversationTopic
+  topic: ConversationTopic,
 ) => [MutationKeys.REVOKE_ADMIN, account, topic];
 
 export const promoteSuperAdminMutationKey = (
   account: string,
-  topic: ConversationTopic
+  topic: ConversationTopic,
 ) => [MutationKeys.PROMOTE_SUPER_ADMIN, account, topic];
 
 export const revokeSuperAdminMutationKey = (
   account: string,
-  topic: ConversationTopic
+  topic: ConversationTopic,
 ) => [MutationKeys.REVOKE_SUPER_ADMIN, account, topic];
 
 export const setGroupNameMutationKey = (
   account: string,
-  topic: ConversationTopic
+  topic: ConversationTopic,
 ) => [MutationKeys.SET_GROUP_NAME, account, topic];
 
 export const setGroupDescriptionMutationKey = (
   account: string,
-  topic: ConversationTopic
+  topic: ConversationTopic,
 ) => [MutationKeys.SET_GROUP_DESCRIPTION, account, topic];
 
 export const setGroupPhotoMutationKey = (
   account: string,
-  topic: ConversationTopic
+  topic: ConversationTopic,
 ) => [MutationKeys.SET_GROUP_PHOTO, account, topic];
 
 export const setPinnedFrameMutationKey = (
   account: string,
-  topic: ConversationTopic
+  topic: ConversationTopic,
 ) => [MutationKeys.SET_PINNED_FRAME, account, topic];
 
 export const blockGroupMutationKey = (
   account: string,
-  topic: ConversationTopic
+  topic: ConversationTopic,
 ) => [MutationKeys.BLOCK_GROUP, account, topic];

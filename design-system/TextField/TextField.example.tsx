@@ -1,12 +1,12 @@
 import { memo } from "react";
+import { ViewStyle } from "react-native";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { Center } from "../Center";
 import { IconButton } from "../IconButton/IconButton";
 import { Text } from "../Text/Text";
 import { VStack } from "../VStack";
 import { TextField } from "./TextField";
 import { TextFieldSimple } from "./TextFieldSimple";
-import { useAppTheme } from "@/theme/use-app-theme";
-import { ViewStyle } from "react-native";
 
 export const TextFieldExample = memo(function TextFieldExample() {
   const { theme } = useAppTheme();

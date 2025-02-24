@@ -1,6 +1,5 @@
-import { ILoaderSize, loaderSize } from "@/theme/loader";
 import { DarkTheme, DefaultTheme } from "@react-navigation/native";
-import { IAnimation, animation } from "@theme/animations";
+import { animation, IAnimation } from "@theme/animations";
 import { ILayout, layout } from "@theme/layout";
 import { IShadow, shadow } from "@theme/shadow";
 import * as SystemUI from "expo-system-ui";
@@ -13,12 +12,13 @@ import {
   useState,
 } from "react";
 import { StyleProp, useColorScheme } from "react-native";
-import { IAvatarSize, avatarSize } from "./avatar";
-import { IBorderRadius, borderRadius } from "./border-radius";
-import { IBorderWidth, borderWidth } from "./borders";
+import { ILoaderSize, loaderSize } from "@/theme/loader";
+import { avatarSize, IAvatarSize } from "./avatar";
+import { borderRadius, IBorderRadius } from "./border-radius";
+import { borderWidth, IBorderWidth } from "./borders";
 import { colorsDark } from "./colorsDark";
-import { IColors, colorsLight } from "./colorsLight";
-import { IIconSize, iconSize } from "./icon";
+import { colorsLight, IColors } from "./colorsLight";
+import { iconSize, IIconSize } from "./icon";
 import { ISpacing, spacing } from "./spacing";
 import { Timing, timing } from "./timing";
 import { ITypography, typography } from "./typography";
@@ -110,7 +110,7 @@ export const ThemeContext = createContext<ThemeContextType>({
   themeScheme: undefined, // default to the system theme
   setThemeContextOverride: (_newTheme: ThemeContexts) => {
     console.error(
-      "Tried to call setThemeContextOverride before the ThemeProvider was initialized"
+      "Tried to call setThemeContextOverride before the ThemeProvider was initialized",
     );
   },
 });
@@ -156,7 +156,7 @@ type UseAppThemeValue = {
   // See examples in the components directory or read the docs here:
   // https://docs.infinite.red/ignite-cli/boilerplate/app/utils/
   themed: <T>(
-    styleOrStyleFn: ThemedStyle<T> | StyleProp<T> | ThemedStyleArray<T>
+    styleOrStyleFn: ThemedStyle<T> | StyleProp<T> | ThemedStyleArray<T>,
   ) => T;
   // Change color scheme to test design system
   toggleTheme: () => void;
@@ -181,12 +181,12 @@ export const useAppTheme = (): UseAppThemeValue => {
 
   const themeContext: ThemeContexts = useMemo(
     () => overrideTheme || (colorScheme === "dark" ? "dark" : "light"),
-    [overrideTheme, colorScheme]
+    [overrideTheme, colorScheme],
   );
 
   const themeVariant: Theme = useMemo(
     () => themeContextToTheme(themeContext),
-    [themeContext]
+    [themeContext],
   );
 
   const toggleTheme = useCallback(() => {
@@ -196,7 +196,7 @@ export const useAppTheme = (): UseAppThemeValue => {
 
   const themed = useCallback(
     <T>(
-      styleOrStyleFn: ThemedStyle<T> | StyleProp<T> | ThemedStyleArray<T>
+      styleOrStyleFn: ThemedStyle<T> | StyleProp<T> | ThemedStyleArray<T>,
     ) => {
       const flatStyles = [styleOrStyleFn].flat(3);
       const stylesArray = flatStyles.map((f) => {
@@ -210,7 +210,7 @@ export const useAppTheme = (): UseAppThemeValue => {
       // Flatten the array of styles into a single object
       return Object.assign({}, ...stylesArray) as T;
     },
-    [themeVariant]
+    [themeVariant],
   );
 
   return {

@@ -1,8 +1,8 @@
-import { ParsedText } from "@/components/parsed-text/parsed-text";
 import Clipboard from "@react-native-clipboard/clipboard";
 import * as Linking from "expo-linking";
 import { useCallback } from "react";
 import { StyleProp, StyleSheet, TextStyle } from "react-native";
+import { ParsedText } from "@/components/parsed-text/parsed-text";
 import {
   ADDRESS_REGEX,
   CB_ID_REGEX,
@@ -64,7 +64,7 @@ export function ClickableText({ children, style }: Props) {
         },
       });
     },
-    []
+    [],
   );
 
   return (

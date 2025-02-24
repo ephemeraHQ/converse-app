@@ -1,6 +1,6 @@
 import { Trie } from "../trie";
-import { emojis } from "./emojis";
 import { IEmoji } from "./emoji-types";
+import { emojis } from "./emojis";
 
 export const emojiTrie = new Trie<IEmoji>();
 

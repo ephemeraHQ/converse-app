@@ -1,9 +1,9 @@
-import { useConversationMessageStyles } from "@/features/conversation/conversation-message/conversation-message.styles";
-import { navigate } from "@/navigation/navigation.utils";
-import { Avatar } from "@/components/avatar";
 import { useCallback } from "react";
 import { TouchableOpacity } from "react-native";
+import { Avatar } from "@/components/avatar";
+import { useConversationMessageStyles } from "@/features/conversation/conversation-message/conversation-message.styles";
 import { useProfileQuery } from "@/features/profiles/profiles.query";
+import { navigate } from "@/navigation/navigation.utils";
 
 type IConversationSenderAvatarProps = {
   inboxId: string;

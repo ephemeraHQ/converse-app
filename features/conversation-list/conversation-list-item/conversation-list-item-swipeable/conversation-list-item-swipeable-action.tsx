@@ -1,7 +1,3 @@
-import { AnimatedCenter, Center } from "@/design-system/Center";
-import { IIconName, IIconProps } from "@/design-system/Icon/Icon.types";
-import { useAppTheme } from "@/theme/use-app-theme";
-import { Haptics } from "@/utils/haptics";
 import { Icon } from "@design-system/Icon/Icon";
 import React from "react";
 import { ViewStyle } from "react-native";
@@ -12,6 +8,10 @@ import {
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
+import { AnimatedCenter, Center } from "@/design-system/Center";
+import { IIconName, IIconProps } from "@/design-system/Icon/Icon.types";
+import { useAppTheme } from "@/theme/use-app-theme";
+import { Haptics } from "@/utils/haptics";
 import { useConversationListItemSwipeableStyles } from "./conversation-list-item-swipeable.styles";
 
 type IConversationListItemSwipeableActionProps = {
@@ -51,7 +51,7 @@ export function ConversationListItemSwipeableAction({
           duration: theme.timing.veryFast,
         });
       }
-    }
+    },
   );
 
   const iconAnimatedStyle = useAnimatedStyle(() => {

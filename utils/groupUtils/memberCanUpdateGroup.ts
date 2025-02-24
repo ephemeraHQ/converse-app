@@ -3,7 +3,7 @@ import { PermissionOption } from "@xmtp/react-native-sdk/build/lib/types/Permiss
 export const memberCanUpdateGroup = (
   fieldPermission: PermissionOption | undefined,
   isAdmin: boolean,
-  isSuperAdmin: boolean
+  isSuperAdmin: boolean,
 ) => {
   if (fieldPermission === "deny") {
     return false;

@@ -11,7 +11,7 @@ export function captureErrorWithToast(
   error: unknown,
   options?: {
     message?: string;
-  }
+  },
 ) {
   const message =
     options?.message || (error as Error)?.message || `Something went wrong`;

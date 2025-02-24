@@ -1,6 +1,6 @@
+import React, { memo } from "react";
 import { ISwipeableProps, Swipeable } from "@/components/swipeable";
 import { useAppTheme } from "@/theme/use-app-theme";
-import React, { memo } from "react";
 import { useConversationListItemSwipeableStyles } from "./conversation-list-item-swipeable.styles";
 
 export const ConversationListItemSwipeable = memo(
@@ -21,5 +21,5 @@ export const ConversationListItemSwipeable = memo(
         {children}
       </Swipeable>
     );
-  }
+  },
 );

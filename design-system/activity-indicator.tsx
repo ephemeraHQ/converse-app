@@ -30,7 +30,7 @@ type IActivityIndicatorProps = {
 };
 
 export const ActivityIndicator = memo(function ActivityIndicator(
-  props: IActivityIndicatorProps
+  props: IActivityIndicatorProps,
 ) {
   const { size, animating, color, hidesWhenStopped, style } = props;
 

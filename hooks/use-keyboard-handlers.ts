@@ -1,8 +1,8 @@
 import {
-  runOnJS,
   KeyboardState,
-  useAnimatedReaction,
+  runOnJS,
   useAnimatedKeyboard,
+  useAnimatedReaction,
 } from "react-native-reanimated";
 
 type IKeyboardHandlersArgs = {
@@ -21,6 +21,6 @@ export function useKeyboardHandlers(args: IKeyboardHandlersArgs) {
       } else if (state === KeyboardState.CLOSED) {
         runOnJS(args.onKeyboardClose)();
       }
-    }
+    },
   );
 }

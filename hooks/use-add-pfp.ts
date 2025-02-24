@@ -1,9 +1,9 @@
-import { ImagePickerAsset } from "expo-image-picker";
-import { useCallback, useState } from "react";
-import { showActionSheet } from "@/components/action-sheet";
 import { translate } from "@i18n";
 import { executeAfterKeyboardClosed } from "@utils/keyboard";
 import { pickMediaFromLibrary, takePictureFromCamera } from "@utils/media";
+import { ImagePickerAsset } from "expo-image-picker";
+import { useCallback, useState } from "react";
+import { showActionSheet } from "@/components/action-sheet";
 
 export function useAddPfp() {
   const [asset, setAsset] = useState<ImagePickerAsset>();

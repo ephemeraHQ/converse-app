@@ -1,6 +1,3 @@
-import { AnimatedCenter } from "@/design-system/Center";
-import { AnimatableText } from "@/design-system/Text/AnimatedText";
-import { ITextProps } from "@/design-system/Text/Text.props";
 import React, { memo, useEffect, useRef } from "react";
 import {
   cancelAnimation,
@@ -11,6 +8,9 @@ import {
   withSequence,
   withTiming,
 } from "react-native-reanimated";
+import { AnimatedCenter } from "@/design-system/Center";
+import { AnimatableText } from "@/design-system/Text/AnimatedText";
+import { ITextProps } from "@/design-system/Text/Text.props";
 
 type IAnimatedTextCarouselProps = {
   texts: string[];
@@ -54,7 +54,7 @@ export const AnimatedTextCarousel = memo(function AnimatedTextCarousel({
             withTiming(0.5, { duration: 0 }),
             withTiming(1, {
               duration: msDelayBetweenTextChange / 2,
-            })
+            }),
           );
         } else {
           // Normal case: animate to the next index + 1 for the fade effect
@@ -80,7 +80,7 @@ export const AnimatedTextCarousel = memo(function AnimatedTextCarousel({
       progress,
       [0, 0.4, 0.6, 1],
       [1, 0, 0, 1],
-      "clamp"
+      "clamp",
     );
 
     return {

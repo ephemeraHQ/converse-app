@@ -1,12 +1,11 @@
 // IconButton.styles.ts
 import { TextStyle, ViewStyle } from "react-native";
-
+import { Theme } from "../../theme/use-app-theme";
 import {
   IIconButtonAction,
   IIconButtonSize,
   IIconButtonVariant,
 } from "./IconButton.props";
-import { Theme } from "../../theme/use-app-theme";
 
 type IconButtonStyleProps = {
   variant: IIconButtonVariant;
@@ -180,7 +179,7 @@ export const getIconProps =
     disabled = false,
   }: IconButtonStyleProps) =>
   (
-    theme: Theme // TODO: fix once we fixed IconProps
+    theme: Theme, // TODO: fix once we fixed IconProps
     // : Partial<IIconProps>
   ) => {
     const { colors, spacing } = theme;

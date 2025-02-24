@@ -1,7 +1,6 @@
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import React, { memo, useCallback } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-
 import { Button } from "../Button/Button";
 import { Text } from "../Text";
 import { VStack } from "../VStack";

@@ -13,7 +13,7 @@ type ILinearGradientProps = ExpoLinearGradientProps & {
 const DEBUG_COLORS = ["blue", "red"] as const;
 
 export const LinearGradient = memo(function LinearGradient(
-  props: ILinearGradientProps
+  props: ILinearGradientProps,
 ) {
   const {
     isAbsoluteFill,

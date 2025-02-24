@@ -1,9 +1,8 @@
 import { Member } from "@xmtp/react-native-sdk";
 import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
-
+import { EntityObjectWithAddress } from "../../queries/entify";
 import { getAccountIsAdmin, getAccountIsSuperAdmin } from "./adminUtils";
 import { sortGroupMembersByAdminStatus } from "./sortGroupMembersByAdminStatus"; // adjust the import path
-import { EntityObjectWithAddress } from "../../queries/entify";
 
 jest.mock("./adminUtils", () => ({
   getAccountIsAdmin: jest.fn(),
@@ -71,7 +70,7 @@ describe("sortGroupMembersByAdminStatus", () => {
   it("should handle case where current account is not in members", () => {
     const result = sortGroupMembersByAdminStatus(
       mockMembers,
-      "nonexistentAccount"
+      "nonexistentAccount",
     );
 
     expect(result).toEqual([

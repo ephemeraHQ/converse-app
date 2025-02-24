@@ -2,7 +2,7 @@ import RNFS from "react-native-fs";
 
 export const moveFileAndReplace = async (
   filePath: string,
-  destPath: string
+  destPath: string,
 ) => {
   const [filePathExists, destPathExists] = await Promise.all([
     RNFS.exists(filePath),

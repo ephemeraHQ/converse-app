@@ -1,11 +1,10 @@
 import { TextStyle } from "react-native";
-
+import { ThemedStyleArray } from "../../theme/use-app-theme";
 import {
   textBaseStyle,
   textFontWeightStyles,
   textSizeStyles,
 } from "./Text.styles";
-import { ThemedStyleArray } from "../../theme/use-app-theme";
 
 export type IPresets =
   | "title"

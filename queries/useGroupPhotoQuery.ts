@@ -1,7 +1,7 @@
-import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
-import { getGroupQueryOptions } from "@/queries/useGroupQuery";
 import { useQuery } from "@tanstack/react-query";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
+import { getGroupQueryOptions } from "@/queries/useGroupQuery";
 
 export const useGroupPhotoQuery = (args: {
   account: string;

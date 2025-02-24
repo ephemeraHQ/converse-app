@@ -18,7 +18,7 @@ export const HStack = memo(
         ]}
       />
     );
-  })
+  }),
 );
 
 export type IAnimatedHStackProps = AnimatedProps<IHStackProps>;

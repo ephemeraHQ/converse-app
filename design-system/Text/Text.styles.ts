@@ -1,5 +1,5 @@
-import { TextStyle } from "react-native";
 import { typography } from "@theme/typography";
+import { TextStyle } from "react-native";
 import { Theme, ThemedStyle } from "@/theme/use-app-theme";
 import { IInvertedTextColors, ITextColors, IWeights } from "./Text.props";
 
@@ -30,7 +30,7 @@ export const textFontWeightStyles = Object.entries(typography.primary).reduce(
       [weight]: { fontFamily, fontWeight: numericWeights[weight as IWeights] },
     };
   },
-  {}
+  {},
 ) as Record<IWeights, TextStyle>;
 
 export const textBaseStyle: ThemedStyle<TextStyle> = (theme) => ({
@@ -45,7 +45,7 @@ export const textColorStyle = (theme: Theme, color: ITextColors) => ({
 
 export const invertedTextColorStyle = (
   theme: Theme,
-  color: IInvertedTextColors
+  color: IInvertedTextColors,
 ) => ({
   color: theme.colors.text.inverted[color],
 });

@@ -54,7 +54,8 @@ export const ConversationListPinnedConversations = memo(
       <AnimatedVStack
         style={themed($container)}
         layout={theme.animation.reanimatedLayoutSpringTransition}
-        exiting={theme.animation.reanimatedFadeOutSpring}>
+        exiting={theme.animation.reanimatedFadeOutSpring}
+      >
         {chunk(pinnedConversations, 3).map((row, rowIndex) => (
           <AnimatedHStack
             key={`row-${rowIndex}`}
@@ -65,12 +66,14 @@ export const ConversationListPinnedConversations = memo(
                   (width - screenHorizontalPadding * 2 - avatarSize * 3) / 2,
               },
             ]}
-            layout={theme.animation.reanimatedLayoutSpringTransition}>
+            layout={theme.animation.reanimatedLayoutSpringTransition}
+          >
             {row.map((conversation) => (
               <AnimatedCenter
                 key={conversation.topic}
                 layout={theme.animation.reanimatedLayoutSpringTransition}
-                entering={theme.animation.reanimatedFadeInSpring}>
+                entering={theme.animation.reanimatedFadeInSpring}
+              >
                 <PinnedConversationWrapper topic={conversation.topic} />
               </AnimatedCenter>
             ))}

@@ -5,7 +5,7 @@ import {
 } from "react-native";
 
 export const TouchableWithoutFeedback = memo(function TouchableWithoutFeedback(
-  props: TouchableWithoutFeedbackProps
+  props: TouchableWithoutFeedbackProps,
 ) {
   return <RNTouchableWithoutFeedback {...props} />;
 });

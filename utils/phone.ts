@@ -1,7 +1,7 @@
-import type { CountryCode } from "libphonenumber-js";
 import {
   getCountryCallingCode,
   parsePhoneNumberFromString,
+  type CountryCode,
 } from "libphonenumber-js";
 
 export function getAreaCodeForCountryId(countryId: CountryCode) {

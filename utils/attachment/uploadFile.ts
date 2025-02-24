@@ -1,5 +1,5 @@
-import { getPresignedUriForUpload } from "@/utils/api/upload";
 import RNFetchBlob from "rn-fetch-blob";
+import { getPresignedUriForUpload } from "@/utils/api/upload";
 
 export const uploadFile = async ({
   filePath,
@@ -20,7 +20,7 @@ export const uploadFile = async ({
       "content-type": contentType || "application/octet-stream",
       "x-amz-acl": "public-read",
     },
-    RNFetchBlob.wrap(filePath.replace("file:///", "/"))
+    RNFetchBlob.wrap(filePath.replace("file:///", "/")),
   );
   const fileURL = new URL(url);
   const publicURL = fileURL.origin + fileURL.pathname;

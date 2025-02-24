@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-
 import { getRandomId } from "./general";
 import logger from "./logger";
 
@@ -29,7 +28,7 @@ export const debugTimeSpent = ({
     const timeSpentSinceLast = (now - timestamps[timestampId].last) / 1000;
     const timeSpentSinceStart = (now - timestamps[timestampId].start) / 1000;
     logger.debug(
-      `    ⌛  [${timestampId}] “${actionToLog}” took ${timeSpentSinceLast} seconds (since start: ${timeSpentSinceStart} seconds)`
+      `    ⌛  [${timestampId}] “${actionToLog}” took ${timeSpentSinceLast} seconds (since start: ${timeSpentSinceStart} seconds)`,
     );
   }
   if (!noReset) {
@@ -53,7 +52,7 @@ export const useLogRenderCount = (componentName: string, id: string) => {
     componentRenderCount[componentName].byId[id] =
       (componentRenderCount[componentName].byId[id] || 0) + 1;
     logger.warn(
-      `${componentName} rendered - for ${id} ${componentRenderCount[componentName].byId[id]} - total ${componentRenderCount[componentName].total}`
+      `${componentName} rendered - for ${id} ${componentRenderCount[componentName].byId[id]} - total ${componentRenderCount[componentName].total}`,
     );
   });
 };

@@ -33,7 +33,7 @@ export type EntityObject<T, KeyType extends string = string> = {
  */
 export function entify<T, KeyType extends string = string>(
   items: T[],
-  idFunc: (item: T) => KeyType
+  idFunc: (item: T) => KeyType,
 ): EntityObject<T, KeyType> {
   return items.reduce<EntityObject<T, KeyType>>(
     (acc, item) => {
@@ -45,7 +45,7 @@ export function entify<T, KeyType extends string = string>(
     {
       byId: {} as Record<KeyType, T>,
       ids: [],
-    }
+    },
   );
 }
 
@@ -93,7 +93,7 @@ export type EntityObjectWithAddress<T, KeyType extends string = string> = {
 export function entifyWithAddress<T, KeyType extends string = string>(
   items: T[],
   idFunc: (item: T) => KeyType,
-  addressFunc: (item: T) => string
+  addressFunc: (item: T) => string,
 ): EntityObjectWithAddress<T, KeyType> {
   return items.reduce<EntityObjectWithAddress<T, KeyType>>(
     (acc, item) => {
@@ -110,7 +110,7 @@ export function entifyWithAddress<T, KeyType extends string = string>(
       byAddress: {},
       ids: [],
       addresses: [],
-    }
+    },
   );
 }
 
@@ -136,7 +136,7 @@ export function entifyWithAddress<T, KeyType extends string = string>(
  */
 export function enitifyPages<T>(
   pages: T[][],
-  idFunc: (item: T) => string
+  idFunc: (item: T) => string,
 ): EntityObject<T> {
   return pages.reduce<EntityObject<T>>(
     (acc, page) => {
@@ -148,6 +148,6 @@ export function enitifyPages<T>(
     {
       byId: {},
       ids: [],
-    }
+    },
   );
 }

@@ -1,19 +1,19 @@
-import { IPicto } from "@/components/Picto/Picto.types";
 import { ReactElement } from "react";
 import { StyleProp, TextStyle, ViewStyle } from "react-native";
+import { IPicto } from "@/components/Picto/Picto.types";
 import {
   ExtendedEdge,
   useSafeAreaInsetsStyle,
 } from "@/components/screen/screen.helpers";
+import { useHeaderHeight } from "@/design-system/Header/Header.utils";
 import { translate } from "@/i18n";
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
+import { debugBorder } from "@/utils/debug-style";
 import { HStack } from "../HStack";
 import { ITextProps, Text } from "../Text";
 import { ITouchableOpacityProps } from "../TouchableOpacity";
 import { VStack } from "../VStack";
 import { HeaderAction } from "./HeaderAction";
-import { useHeaderHeight } from "@/design-system/Header/Header.utils";
-import { debugBorder } from "@/utils/debug-style";
 
 export type HeaderProps = {
   titleStyle?: StyleProp<TextStyle>;

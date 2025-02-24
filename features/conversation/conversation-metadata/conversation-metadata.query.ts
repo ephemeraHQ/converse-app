@@ -1,7 +1,7 @@
-import { getConversationMetadata } from "@/features/conversation/conversation-metadata/conversation-metadata.api";
-import { conversationMetadataQueryKey } from "@/queries/QueryKeys";
 import { queryOptions, skipToken } from "@tanstack/react-query";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import { getConversationMetadata } from "@/features/conversation/conversation-metadata/conversation-metadata.api";
+import { conversationMetadataQueryKey } from "@/queries/QueryKeys";
 import { queryClient } from "../../../queries/queryClient";
 
 export type IConversationMetadataQueryData = Awaited<
@@ -26,22 +26,22 @@ export function getConversationMetadataQueryOptions({ account, topic }: IArgs) {
 
 export function prefetchConversationMetadataQuery(
   account: string,
-  topic: ConversationTopic
+  topic: ConversationTopic,
 ) {
   return queryClient.prefetchQuery(
-    getConversationMetadataQueryOptions({ account, topic })
+    getConversationMetadataQueryOptions({ account, topic }),
   );
 }
 
 export const getConversationMetadataQueryData = (args: IArgs) => {
   const { account, topic } = args;
   return queryClient.getQueryData(
-    getConversationMetadataQueryOptions({ account, topic }).queryKey
+    getConversationMetadataQueryOptions({ account, topic }).queryKey,
   );
 };
 
 export function updateConversationMetadataQueryData(
-  args: IArgs & { updateData: Partial<IConversationMetadataQueryData> }
+  args: IArgs & { updateData: Partial<IConversationMetadataQueryData> },
 ) {
   const { updateData, account, topic } = args;
   queryClient.setQueryData(
@@ -55,7 +55,7 @@ export function updateConversationMetadataQueryData(
       updatedAt: new Date().toISOString(),
       ...(previousData ?? {}),
       ...updateData,
-    })
+    }),
   );
 }
 

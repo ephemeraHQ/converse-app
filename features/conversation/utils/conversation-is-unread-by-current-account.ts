@@ -1,5 +1,5 @@
-import { normalizeTimestampToMs } from "@/utils/date";
 import { InboxId } from "@xmtp/react-native-sdk";
+import { normalizeTimestampToMs } from "@/utils/date";
 
 export function conversationIsUnreadForInboxId(args: {
   lastMessageSent: number | null;

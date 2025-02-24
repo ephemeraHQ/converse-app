@@ -1,7 +1,7 @@
-import { useSnackBarStore } from "@/components/snackbar/snackbar.store";
-import { ISnackbar } from "@/components/snackbar/snackbar.types";
 import { Haptics } from "@utils/haptics";
 import { v4 as uuidv4 } from "uuid";
+import { useSnackBarStore } from "@/components/snackbar/snackbar.store";
+import { ISnackbar } from "@/components/snackbar/snackbar.types";
 
 export type INewSnackbar = Partial<Exclude<ISnackbar, "key">> & {
   message: string;
@@ -54,7 +54,7 @@ export function onNewSnackbar(callback: (snackbar: ISnackbar) => void) {
       if (firstSnackbar) {
         callback(firstSnackbar);
       }
-    }
+    },
   );
 }
 

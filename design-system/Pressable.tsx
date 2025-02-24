@@ -23,7 +23,7 @@ export const Pressable = memo(function Pressable(props: IPressableProps) {
         onPressProps(e);
       }
     },
-    [withHaptics, onPressProps]
+    [withHaptics, onPressProps],
   );
 
   return <RNPressable onPress={onPress} {...rest} />;

@@ -1,7 +1,7 @@
-import { NavigationParamList } from "@/navigation/navigation.types";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useState } from "react";
 import { WebView } from "react-native-webview";
+import { NavigationParamList } from "@/navigation/navigation.types";
 
 export function WebviewPreview({
   route,

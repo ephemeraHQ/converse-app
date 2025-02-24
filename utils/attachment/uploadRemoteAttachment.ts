@@ -5,7 +5,7 @@ import {
 import { uploadFile } from "./uploadFile";
 
 export const uploadRemoteAttachment = async (
-  attachment: EncryptedLocalAttachment
+  attachment: EncryptedLocalAttachment,
 ): Promise<RemoteAttachmentContent> => {
   const publicURL = await uploadFile({
     filePath: attachment.encryptedLocalFileUri,

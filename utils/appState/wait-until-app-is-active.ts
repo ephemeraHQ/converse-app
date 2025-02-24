@@ -18,7 +18,7 @@ export const waitUntilAppActive = async (endDelayMs: number) => {
         if (nextAppState === "active") {
           subscription.remove();
           logger.debug(
-            `App was inactive for a while, waiting ${endDelayMs}ms more`
+            `App was inactive for a while, waiting ${endDelayMs}ms more`,
           );
           await new Promise((r) => setTimeout(r, endDelayMs));
           // Check if app is still active after endDelayMs
@@ -28,7 +28,7 @@ export const waitUntilAppActive = async (endDelayMs: number) => {
             resolve(undefined);
           }
         }
-      }
+      },
     );
   });
 };

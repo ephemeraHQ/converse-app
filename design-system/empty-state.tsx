@@ -3,13 +3,13 @@
  * Feel free to extend it and add more props.
  */
 
+import { memo } from "react";
+import { View } from "react-native";
 import { Icon } from "@/design-system/Icon/Icon";
 import { IIconName } from "@/design-system/Icon/Icon.types";
 import { Text } from "@/design-system/Text";
 import { IVStackProps, VStack } from "@/design-system/VStack";
 import { useAppTheme } from "@/theme/use-app-theme";
-import { memo } from "react";
-import { View } from "react-native";
 
 type IEmptyStateProps = {
   title?: string;

@@ -1,5 +1,5 @@
-import { IConfig } from "@/config/config.types";
 import { Platform } from "react-native";
+import { IConfig } from "@/config/config.types";
 import { shared } from "./shared";
 
 export const productionConfig: IConfig = {

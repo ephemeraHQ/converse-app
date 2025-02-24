@@ -1,13 +1,13 @@
-import { IPicto } from "@/components/Picto/Picto.types";
 import { ReactElement } from "react";
 import { TextStyle, View, ViewStyle } from "react-native";
+import { IPicto } from "@/components/Picto/Picto.types";
 import { translate } from "@/i18n";
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
+import { debugBorder } from "@/utils/debug-style";
 import { Icon } from "../Icon/Icon";
 import { Pressable } from "../Pressable";
 import { ITextProps, Text } from "../Text";
 import { ITouchableOpacityProps, TouchableOpacity } from "../TouchableOpacity";
-import { debugBorder } from "@/utils/debug-style";
 
 type HeaderActionProps = {
   backgroundColor?: string;

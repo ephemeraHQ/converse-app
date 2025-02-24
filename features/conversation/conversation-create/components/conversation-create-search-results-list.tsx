@@ -185,7 +185,8 @@ export function ConversationSearchResultsList() {
             style={{
               paddingBottom: insets.bottom,
               flex: 1,
-            }}>
+            }}
+          >
             {isStillLoadingSearchResults ? (
               <Loader size="sm" />
             ) : searchQuery ? (
@@ -283,7 +284,8 @@ const Container = memo(function Container(props: { children: ReactNode }) {
         {
           backgroundColor: theme.colors.background.surfaceless,
         },
-      ]}>
+      ]}
+    >
       {children}
     </AnimatedVStack>
   );

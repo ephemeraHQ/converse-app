@@ -1,9 +1,9 @@
 import { IVStackProps, VStack } from "@design-system/VStack";
-import { useAppTheme } from "@/theme/use-app-theme";
 import { memo } from "react";
+import { useAppTheme } from "@/theme/use-app-theme";
 
 export const AttachmentContainer = memo(function AttachmentContainer(
-  props: IVStackProps
+  props: IVStackProps,
 ) {
   const { style, ...rest } = props;
 

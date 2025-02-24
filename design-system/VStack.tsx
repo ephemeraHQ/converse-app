@@ -34,7 +34,7 @@ export const VStack = memo(
         {separator ? renderChildren : children}
       </View>
     );
-  })
+  }),
 );
 
 export type IAnimatedVStackProps = AnimatedProps<IVStackProps>;

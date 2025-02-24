@@ -1,5 +1,5 @@
-import { Nullable } from "@/types/general";
 import { MessageId } from "@xmtp/react-native-sdk";
+import { Nullable } from "@/types/general";
 
 /**
  * Aggregated reaction data including top emojis, total count, and detailed breakdown.

@@ -76,21 +76,21 @@ export const createUser = async (args: {
     const validationResult = createUserRequestSchema.safeParse(requestPayload);
     if (!validationResult.success) {
       throw new Error(
-        `Invalid request data: ${validationResult.error.message}`
+        `Invalid request data: ${validationResult.error.message}`,
       );
     }
 
     const response = await api.post<CreateUserResponse>(
       "/api/v1/users",
-      validationResult.data
+      validationResult.data,
     );
 
     const responseValidation = createUserResponseSchema.safeParse(
-      response.data
+      response.data,
     );
     if (!responseValidation.success) {
       throw new Error(
-        `Response validation failed: ${responseValidation.error.message}`
+        `Response validation failed: ${responseValidation.error.message}`,
       );
     }
 

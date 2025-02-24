@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Avatar } from "@/components/avatar";
 import { Center } from "@/design-system/Center";
 import { Icon } from "@/design-system/Icon/Icon";
@@ -5,7 +6,6 @@ import { Pressable } from "@/design-system/Pressable";
 import { VStack } from "@/design-system/VStack";
 import { useAppTheme } from "@/theme/use-app-theme";
 import { Nullable } from "@/types/general";
-import { memo } from "react";
 
 export const ProfileContactCardEditableAvatar = memo(function (props: {
   avatarUri: Nullable<string>;

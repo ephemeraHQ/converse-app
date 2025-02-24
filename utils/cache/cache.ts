@@ -4,7 +4,7 @@ import RNFS from "react-native-fs";
 const getCacheKey = async (mediaURI: string) => {
   const digest = await Crypto.digestStringAsync(
     Crypto.CryptoDigestAlgorithm.SHA256,
-    mediaURI
+    mediaURI,
   );
   return digest;
 };

@@ -3,9 +3,9 @@ import {
   LocalAttachmentMetadata,
 } from "@utils/attachment/types";
 import RNFS from "react-native-fs";
-import { getImageSize, isImageMimetype } from "../media";
-import { moveFileAndReplace } from "@/utils/fileSystem";
 import { v4 as uuidv4 } from "uuid";
+import { moveFileAndReplace } from "@/utils/fileSystem";
+import { getImageSize, isImageMimetype } from "../media";
 
 export function getMessagesAttachmentsLocalFolderPath(messageId: string) {
   return `${RNFS.DocumentDirectoryPath}/messages/${messageId}`;
@@ -18,7 +18,7 @@ export function getMessageAttachmentLocalMetadataPath(messageId: string) {
 
 export function getMessageAttachmentLocalPath(
   messageId: string,
-  filename: string
+  filename: string,
 ) {
   const messageFolder = getMessagesAttachmentsLocalFolderPath(messageId);
   return `${messageFolder}/${filename}`;
@@ -55,7 +55,7 @@ export async function saveLocalAttachmentMetaData(args: {
   await RNFS.writeFile(
     attachmentJsonPath,
     JSON.stringify(attachmentMetaData),
-    "utf8"
+    "utf8",
   );
 }
 
@@ -78,7 +78,7 @@ export async function saveAttachmentLocally(attachment: LocalAttachment) {
 
   const attachmentLocalPath = getMessageAttachmentLocalPath(
     messageId,
-    filename
+    filename,
   );
 
   await moveFileAndReplace(attachment.mediaURI, attachmentLocalPath);

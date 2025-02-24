@@ -7,7 +7,6 @@ import {
   TextStyle,
   ViewStyle,
 } from "react-native";
-
 import { ITextProps } from "../Text/Text.props";
 
 export type TextFieldAccessoryProps = {

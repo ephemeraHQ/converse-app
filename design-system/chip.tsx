@@ -1,10 +1,10 @@
-import { Avatar, IAvatarProps } from "@/components/avatar";
-import { Center } from "@/design-system/Center";
-import { ITextProps, Text } from "@/design-system/Text";
-import { useAppTheme } from "@/theme/use-app-theme";
-import { Pressable } from "@/design-system/Pressable";
 import React from "react";
 import { StyleProp, ViewStyle } from "react-native";
+import { Avatar, IAvatarProps } from "@/components/avatar";
+import { Center } from "@/design-system/Center";
+import { Pressable } from "@/design-system/Pressable";
+import { ITextProps, Text } from "@/design-system/Text";
+import { useAppTheme } from "@/theme/use-app-theme";
 
 type IChipSize = "sm" | "md";
 

@@ -1,13 +1,13 @@
-import { useCallback, useMemo } from "react";
 import {
   MenuView,
   NativeActionEvent,
   MenuAction as RNMenuAction,
 } from "@react-native-menu/menu";
+import { useCallback, useMemo } from "react";
 import { Platform, StyleProp, ViewStyle } from "react-native";
-import { Pressable } from "../Pressable";
 import { useAppTheme } from "@/theme/use-app-theme";
 import { Haptics } from "@/utils/haptics";
+import { Pressable } from "../Pressable";
 import { getInlinedItem } from "./dropdown-menu.utils";
 
 export type IDropdownMenuAction = Omit<
@@ -57,7 +57,7 @@ export const DropdownMenu = ({
       Haptics.selectionAsync();
       onPress?.(nativeEvent.event);
     },
-    [onPress]
+    [onPress],
   );
 
   if (disabled) {

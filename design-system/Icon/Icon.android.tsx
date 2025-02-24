@@ -1,8 +1,7 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { useAppTheme } from "@/theme/use-app-theme";
 import { logger } from "@utils/logger";
-
 import { StyleProp, TextStyle } from "react-native";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { IIconName, IIconProps } from "./Icon.types";
 
 export const iconRegistry: Record<
@@ -96,8 +95,8 @@ export function Icon(props: IIconProps) {
   const iconName = icon
     ? iconRegistry[icon]
     : picto
-    ? iconRegistry[picto]
-    : null;
+      ? iconRegistry[picto]
+      : null;
 
   if (!iconName) {
     logger.warn(`Invalid icon name ${icon || picto}`);

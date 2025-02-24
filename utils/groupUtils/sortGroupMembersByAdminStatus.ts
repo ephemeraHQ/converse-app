@@ -1,12 +1,11 @@
-import { getCleanAddress } from "@utils/evm/getCleanAddress";
-import type { Member, InboxId } from "@xmtp/react-native-sdk";
-
-import { getAccountIsAdmin, getAccountIsSuperAdmin } from "./adminUtils";
 import { EntityObjectWithAddress } from "@queries/entify";
+import { getCleanAddress } from "@utils/evm/getCleanAddress";
+import type { InboxId, Member } from "@xmtp/react-native-sdk";
+import { getAccountIsAdmin, getAccountIsSuperAdmin } from "./adminUtils";
 
 export const sortGroupMembersByAdminStatus = (
   members: EntityObjectWithAddress<Member, InboxId> | undefined,
-  currentAccount: string
+  currentAccount: string,
 ): { inboxId: InboxId; address: string }[] => {
   if (!members) {
     return [];

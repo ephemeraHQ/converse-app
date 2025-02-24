@@ -1,11 +1,10 @@
 import { experimental_createPersister } from "@tanstack/react-query-persist-client";
 import { MMKV } from "react-native-mmkv";
 import { StateStorage } from "zustand/middleware";
-
+import { config } from "@/config";
 import { DEFAULT_GC_TIME } from "@/queries/queryClient.constants";
 import { getAccountEncryptionKey } from "./keychain";
 import logger from "./logger";
-import { config } from "@/config";
 
 const storage = new MMKV();
 

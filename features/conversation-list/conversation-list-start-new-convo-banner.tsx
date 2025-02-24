@@ -1,10 +1,3 @@
-import { AnimatedCenter } from "@/design-system/Center";
-import { AnimatedHStack } from "@/design-system/HStack";
-import { Icon } from "@/design-system/Icon/Icon";
-import { Text } from "@/design-system/Text";
-import { VStack } from "@/design-system/VStack";
-import { useConversationListStyles } from "@/features/conversation-list/conversation-list.styles";
-import { useAppTheme } from "@/theme/use-app-theme";
 import React, { memo, useEffect } from "react";
 import {
   useAnimatedStyle,
@@ -13,6 +6,13 @@ import {
   withSequence,
   withTiming,
 } from "react-native-reanimated";
+import { AnimatedCenter } from "@/design-system/Center";
+import { AnimatedHStack } from "@/design-system/HStack";
+import { Icon } from "@/design-system/Icon/Icon";
+import { Text } from "@/design-system/Text";
+import { VStack } from "@/design-system/VStack";
+import { useConversationListStyles } from "@/features/conversation-list/conversation-list.styles";
+import { useAppTheme } from "@/theme/use-app-theme";
 
 export const ConversationListStartNewConvoBanner = memo(
   function ConversationListStartNewConvoBanner() {
@@ -33,7 +33,7 @@ export const ConversationListStartNewConvoBanner = memo(
       };
       bounceTranslateYAV.value = withSequence(
         withTiming(0, timingConfig),
-        withRepeat(withTiming(-theme.spacing.xs, timingConfig), -1, true)
+        withRepeat(withTiming(-theme.spacing.xs, timingConfig), -1, true),
       );
     }, [bounceTranslateYAV, theme]);
 
@@ -72,5 +72,5 @@ export const ConversationListStartNewConvoBanner = memo(
         </AnimatedCenter>
       </AnimatedHStack>
     );
-  }
+  },
 );

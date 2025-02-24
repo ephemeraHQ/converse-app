@@ -1,8 +1,8 @@
-import { captureError } from "@/utils/capture-error";
 import { useMutation } from "@tanstack/react-query";
 import { logger } from "@utils/logger";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
+import { captureError } from "@/utils/capture-error";
 import { promoteSuperAdminMutationKey } from "./MutationKeys";
 import {
   cancelGroupMembersQuery,
@@ -13,7 +13,7 @@ import { useGroupQuery } from "./useGroupQuery";
 
 export const usePromoteToSuperAdminMutation = (
   account: string,
-  topic: ConversationTopic
+  topic: ConversationTopic,
 ) => {
   const { data: group } = useGroupQuery({ account, topic });
 

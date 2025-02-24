@@ -1,6 +1,5 @@
 // eslint-disable-next-line no-restricted-imports
 import i18n from "i18n-js";
-
 import { TxKeyPath } from "./i18n";
 
 /**
@@ -11,7 +10,7 @@ import { TxKeyPath } from "./i18n";
  */
 export function translate(
   key: TxKeyPath | string,
-  options?: Record<string, any>
+  options?: Record<string, any>,
 ): string {
   // Get the current language's translations
   const translations = i18n.translations[i18n.locale];

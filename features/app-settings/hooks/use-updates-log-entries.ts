@@ -1,5 +1,5 @@
-import * as Updates from "expo-updates";
 import { useQuery } from "@tanstack/react-query";
+import * as Updates from "expo-updates";
 
 // Enhanced type based on UpdatesLogEntry from Expo docs
 type LogEntry = {

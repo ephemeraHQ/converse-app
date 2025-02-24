@@ -61,9 +61,9 @@ function createProfileMeStore(inboxId: InboxId) {
             nameTextValue: state.nameTextValue,
             avatarUri: state.avatarUri,
           }),
-        }
-      )
-    )
+        },
+      ),
+    ),
   );
 }
 
@@ -90,7 +90,7 @@ export function useProfileMeStore(inboxId: InboxId) {
  */
 export function useProfileMeStoreValue<T>(
   inboxId: InboxId,
-  selector: (state: IProfileMeStore) => T
+  selector: (state: IProfileMeStore) => T,
 ): T {
   const store = useProfileMeStore(inboxId);
   return useStore(store, selector);

@@ -1,6 +1,6 @@
+import { z } from "zod";
 import { api } from "@/utils/api/api";
 import { logger } from "@/utils/logger";
-import { z } from "zod";
 
 const PresignedUrlResponseSchema = z.object({
   objectKey: z.string(),
@@ -15,11 +15,11 @@ export type IPresignedUrlResponse = z.infer<typeof PresignedUrlResponseSchema>;
  * @returns A presigned URL and object key for the upload
  */
 export const getPresignedUploadUrl = async (
-  contentType?: string
+  contentType?: string,
 ): Promise<IPresignedUrlResponse> => {
   logger.debug(
     "[API ATTACHMENTS] Getting presigned URL for content type:",
-    contentType
+    contentType,
   );
   const { data } = await api.get("/api/v1/attachments/presigned", {
     params: { contentType },
@@ -38,7 +38,7 @@ export const getPresignedUploadUrl = async (
 export const uploadFileWithPresignedUrl = async (
   presignedUrl: string,
   file: Blob | File,
-  contentType: string
+  contentType: string,
 ): Promise<string> => {
   logger.debug("[API ATTACHMENTS] Uploading file to presigned URL:", {
     presignedUrl,
@@ -67,7 +67,7 @@ export const uploadFileWithPresignedUrl = async (
  * @returns The public URL and object key of the uploaded file
  */
 export const uploadFile = async (
-  file: File
+  file: File,
 ): Promise<{ publicUrl: string; objectKey: string }> => {
   logger.debug("[API ATTACHMENTS] Starting file upload:", {
     fileName: file.name,

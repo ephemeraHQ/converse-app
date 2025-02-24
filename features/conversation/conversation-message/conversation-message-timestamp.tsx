@@ -1,13 +1,8 @@
-import {
-  useMessageContextStore,
-  useMessageContextStoreContext,
-} from "@/features/conversation/conversation-message/conversation-message.store-context";
 import { AnimatedHStack } from "@design-system/HStack";
 import { AnimatedText, Text } from "@design-system/Text";
 import { getTextStyle } from "@design-system/Text/Text.utils";
 import { AnimatedVStack } from "@design-system/VStack";
 import { SICK_DAMPING, SICK_STIFFNESS } from "@theme/animations";
-import { useAppTheme } from "@/theme/use-app-theme";
 import { getLocalizedTime, getRelativeDate } from "@utils/date";
 import { flattenStyles } from "@utils/styles";
 import { memo, useEffect } from "react";
@@ -18,6 +13,11 @@ import {
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
+import {
+  useMessageContextStore,
+  useMessageContextStoreContext,
+} from "@/features/conversation/conversation-message/conversation-message.store-context";
+import { useAppTheme } from "@/theme/use-app-theme";
 
 const StandaloneTime = memo(function StandaloneTime({
   messageTime,
@@ -33,13 +33,13 @@ const StandaloneTime = memo(function StandaloneTime({
       (state) => state.isShowingTime,
       (isShowingTime) => {
         showTimeAV.value = isShowingTime ? 1 : 0;
-      }
+      },
     );
     return () => unsubscribe();
   }, [messageStore, showTimeAV]);
 
   const textHeight = flattenStyles(
-    getTextStyle(themed, { preset: "smaller" })
+    getTextStyle(themed, { preset: "smaller" }),
   ).lineHeight;
 
   const showTimeProgressAV = useDerivedValue(() => {
@@ -54,13 +54,13 @@ const StandaloneTime = memo(function StandaloneTime({
       height: interpolate(
         showTimeProgressAV.value,
         [0, 1],
-        [0, textHeight || 14]
+        [0, textHeight || 14],
       ),
       opacity: interpolate(showTimeProgressAV.value, [0, 1], [0, 1]),
       marginVertical: interpolate(
         showTimeProgressAV.value,
         [0, 1],
-        [0, theme.spacing.sm]
+        [0, theme.spacing.sm],
       ),
       transform: [
         { scale: showTimeProgressAV.value },
@@ -68,12 +68,12 @@ const StandaloneTime = memo(function StandaloneTime({
           translateY: interpolate(
             showTimeProgressAV.value,
             [0, 1],
-            [theme.spacing.xl, 0]
+            [theme.spacing.xl, 0],
           ),
         },
       ],
     }),
-    [textHeight]
+    [textHeight],
   );
 
   return (
@@ -110,7 +110,7 @@ const InlineTime = memo(function InlineTime({
       (state) => state.isShowingTime,
       (isShowingTime) => {
         showTimeAV.value = isShowingTime ? 1 : 0;
-      }
+      },
     );
     return () => unsubscribe();
   }, [messageStore, showTimeAV]);
@@ -163,5 +163,5 @@ export const ConversationMessageTimestamp = memo(
     }
 
     return <StandaloneTime messageTime={messageTime} />;
-  }
+  },
 );

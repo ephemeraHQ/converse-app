@@ -36,7 +36,7 @@ describe("getUrlToRender", () => {
     expect(getUrlToRender("https://example.com/path")).toBe("example.com");
     expect(getUrlToRender("http://example.com")).toBe("example.com");
     expect(getUrlToRender("https://subdomain.example.com/path")).toBe(
-      "subdomain.example.com"
+      "subdomain.example.com",
     );
     expect(getUrlToRender("www://example.com")).toBe("example.com");
     expect(getUrlToRender("ftp://example.com/resource")).toBe("example.com");
@@ -49,19 +49,19 @@ describe("getUrlToRender", () => {
 
   it("should return the hostname for URLs with query parameters", () => {
     expect(getUrlToRender("https://example.com/path?query=123")).toBe(
-      "example.com"
+      "example.com",
     );
     expect(
-      getUrlToRender("https://example.com/path?query=123&another=456")
+      getUrlToRender("https://example.com/path?query=123&another=456"),
     ).toBe("example.com");
   });
 
   it("should handle URLs with fragments", () => {
     expect(getUrlToRender("https://example.com/path#fragment")).toBe(
-      "example.com"
+      "example.com",
     );
     expect(getUrlToRender("https://example.com/path?query=123#fragment")).toBe(
-      "example.com"
+      "example.com",
     );
   });
 });

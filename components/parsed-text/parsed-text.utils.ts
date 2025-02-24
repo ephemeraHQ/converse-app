@@ -30,7 +30,7 @@ export function parseText(args: {
             pattern.pattern.source,
             pattern.pattern.flags.includes("g")
               ? pattern.pattern.flags
-              : pattern.pattern.flags + "g"
+              : pattern.pattern.flags + "g",
           );
           const results: ITextPart[] = [];
           let textLeft = part.children;
@@ -60,7 +60,7 @@ export function parseText(args: {
           return results;
         });
       },
-      [{ children: text }]
+      [{ children: text }],
     )
     .filter((part) => part.children);
 }
@@ -73,22 +73,27 @@ function createMatchedPart(args: {
   const { pattern, match, index } = args;
   const text = match[0];
 
-  const props = ObjectTyped.entries(pattern).reduce((acc, [key, value]) => {
-    if (["pattern", "renderText", "nonExhaustiveMaxMatchCount"].includes(key)) {
-      return acc;
-    }
+  const props = ObjectTyped.entries(pattern).reduce(
+    (acc, [key, value]) => {
+      if (
+        ["pattern", "renderText", "nonExhaustiveMaxMatchCount"].includes(key)
+      ) {
+        return acc;
+      }
 
-    if (typeof value === "function") {
-      // Support onPress / onLongPress functions
-      acc[key] = () =>
-        // @ts-ignore
-        value(text, index);
-    } else {
-      // Set a prop with an arbitrary name to the value in the match-config
-      acc[key] = value;
-    }
-    return acc;
-  }, {} as Record<string, any>);
+      if (typeof value === "function") {
+        // Support onPress / onLongPress functions
+        acc[key] = () =>
+          // @ts-ignore
+          value(text, index);
+      } else {
+        // Set a prop with an arbitrary name to the value in the match-config
+        acc[key] = value;
+      }
+      return acc;
+    },
+    {} as Record<string, any>,
+  );
 
   return {
     ...props,
@@ -98,13 +103,13 @@ function createMatchedPart(args: {
 }
 
 export function isDefaultPattern(
-  pattern: IParseShape
+  pattern: IParseShape,
 ): pattern is IDefaultParseShape {
   return "type" in pattern;
 }
 
 export function isCustomPattern(
-  pattern: IParseShape
+  pattern: IParseShape,
 ): pattern is ICustomParseShape {
   return !("type" in pattern);
 }

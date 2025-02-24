@@ -77,12 +77,14 @@ export const AttachmentRemoteImage = memo(function AttachmentRemoteImage(
       <PressableScale
         onPress={() => {
           // openInWebview
-        }}>
+        }}
+      >
         <AttachmentPreviewContainer {...containerProps}>
           <Text
             style={{
               textDecorationLine: "underline",
-            }}>
+            }}
+          >
             {translate("attachment_message_view_in_browser")}
           </Text>
         </AttachmentPreviewContainer>

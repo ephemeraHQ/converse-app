@@ -40,7 +40,7 @@ describe("getRelativeDateTime with en-US locale", () => {
     const date = new Date();
     date.setDate(date.getDate() - 3);
     expect(getRelativeDateTime(date)).toBe(
-      format(date, "EEEE", { locale: enUS })
+      format(date, "EEEE", { locale: enUS }),
     );
   });
 
@@ -108,7 +108,7 @@ describe("getRelativeDateTime with fr-FR locale", () => {
     const date = new Date();
     date.setDate(date.getDate() - 3);
     expect(getRelativeDateTime(date)).toBe(
-      format(date, "EEEE", { locale: fr })
+      format(date, "EEEE", { locale: fr }),
     );
   });
 
@@ -185,7 +185,7 @@ describe("getMinimalDate", () => {
 
   it("should return correct minimal timestamp for years", () => {
     expect(getCompactRelativeTime(now - 2 * 365 * 24 * 60 * 60 * 1000)).toBe(
-      "2y"
+      "2y",
     );
   });
 

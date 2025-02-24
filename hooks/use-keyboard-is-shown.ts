@@ -19,7 +19,7 @@ export function useKeyboardIsShown() {
       } else if (state === KeyboardState.CLOSED) {
         runOnJS(setIsKeyboardShown)(false);
       }
-    }
+    },
   );
 
   return isKeyboardShown;

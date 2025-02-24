@@ -1,4 +1,4 @@
-import { isAddress, getAddress } from "ethers/lib/utils";
+import { getAddress, isAddress } from "ethers/lib/utils";
 
 export const getCleanAddress = (address: string) => {
   const lowercased = address.toLowerCase();

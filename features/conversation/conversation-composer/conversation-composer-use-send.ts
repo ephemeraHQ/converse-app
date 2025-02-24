@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { useCreateConversationAndSendFirstMessage } from "@/features/conversation/conversation-create/hooks/use-create-conversation-and-send-first-message";
 import { useConversationStore } from "@/features/conversation/conversation.store-context";
 import {
@@ -6,7 +7,6 @@ import {
 } from "@/features/conversation/hooks/use-send-message";
 import { saveAttachmentLocally } from "@/utils/attachment/attachment.utils";
 import { captureError, captureErrorWithToast } from "@/utils/capture-error";
-import { useCallback } from "react";
 import { useConversationComposerStore } from "./conversation-composer.store-context";
 
 export function useSend() {
@@ -33,7 +33,7 @@ export function useSend() {
         captureErrorWithToast(error, { message: "Failed to send message" });
       }
     },
-    [conversationStore, sendMessage]
+    [conversationStore, sendMessage],
   );
 
   const createNewConversation = useCallback(
@@ -64,7 +64,7 @@ export function useSend() {
         });
       }
     },
-    [conversationStore, createConversationAndSendFirstMessage]
+    [conversationStore, createConversationAndSendFirstMessage],
   );
 
   const send = useCallback(async () => {

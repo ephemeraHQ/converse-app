@@ -1,9 +1,7 @@
 import * as Localization from "expo-localization";
-
 // eslint-disable-next-line no-restricted-imports
 import i18n from "i18n-js";
 import { I18nManager } from "react-native";
-
 import { en, Translations } from "./translations/en";
 import { fr } from "./translations/fr";
 
@@ -62,9 +60,9 @@ type RecursiveKeyOfInner<TObj extends object> = {
 
 type RecursiveKeyOfHandleValue<
   TValue,
-  Text extends string
+  Text extends string,
 > = TValue extends any[]
   ? Text
   : TValue extends object
-  ? Text | `${Text}${RecursiveKeyOfInner<TValue>}`
-  : Text;
+    ? Text | `${Text}${RecursiveKeyOfInner<TValue>}`
+    : Text;

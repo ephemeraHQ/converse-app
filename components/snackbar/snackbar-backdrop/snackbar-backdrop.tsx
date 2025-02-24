@@ -1,8 +1,3 @@
-import { LinearGradient } from "@/design-system/linear-gradient";
-import { useAppTheme } from "@/theme/use-app-theme";
-import { hexToRGBA } from "@/utils/colors";
-import { useSnackbars } from "@/components/snackbar/snackbar.service";
-import { useGradientHeight } from "@/components/snackbar/snackbar-backdrop/snackbar-backdrop.utils";
 // import MaskedView from "@react-native-masked-view/masked-view";
 import { SICK_SPRING_CONFIG } from "@theme/animations";
 import { memo } from "react";
@@ -11,6 +6,11 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
 } from "react-native-reanimated";
+import { useGradientHeight } from "@/components/snackbar/snackbar-backdrop/snackbar-backdrop.utils";
+import { useSnackbars } from "@/components/snackbar/snackbar.service";
+import { LinearGradient } from "@/design-system/linear-gradient";
+import { useAppTheme } from "@/theme/use-app-theme";
+import { hexToRGBA } from "@/utils/colors";
 
 // The Backdrop component creates a visually appealing background for stacked snackbars.
 // It uses a combination of a masked view, linear gradient, and blur effect to create

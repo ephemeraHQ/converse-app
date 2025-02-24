@@ -108,7 +108,8 @@ const Content = memo(function Content(props: {
           overflow: "hidden",
         },
         containerAS,
-      ]}>
+      ]}
+    >
       {!!replyMessage && (
         <AnimatedVStack
           entering={theme.animation.reanimatedFadeInSpring}
@@ -127,23 +128,27 @@ const Content = memo(function Content(props: {
             minHeight: replyMessage
               ? 56 // Value from Figma. Not the best but we need minHeight for this to work. If the content end up being bigger it will adjust automatically
               : 0,
-          }}>
+          }}
+        >
           <HStack
             style={{
               // ...debugBorder("blue"),
               alignItems: "center",
               columnGap: theme.spacing.xs,
-            }}>
+            }}
+          >
             <VStack
               style={{
                 rowGap: theme.spacing.xxxs,
                 flex: 1,
-              }}>
+              }}
+            >
               <HStack
                 style={{
                   alignItems: "center",
                   columnGap: theme.spacing.xxxs,
-                }}>
+                }}
+              >
                 <Icon
                   size={theme.iconSize.xxs}
                   icon="arrowshape.turn.up.left.fill"

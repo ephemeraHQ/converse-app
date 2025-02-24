@@ -1,6 +1,6 @@
-import { ISnackbar } from "@/components/snackbar/snackbar.types";
 import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
+import { ISnackbar } from "@/components/snackbar/snackbar.types";
 
 export type ISnackBarStore = {
   snackbars: ISnackbar[];
@@ -19,7 +19,7 @@ export const useSnackBarStore = create<ISnackBarStore>()(
     clearAllSnackbars: () => {
       set({ snackbars: [] });
     },
-  }))
+  })),
 );
 
 // Initialize store

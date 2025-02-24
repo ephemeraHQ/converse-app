@@ -1,17 +1,17 @@
-import { Pressable } from "@/design-system/Pressable";
-import {
-  ContextMenuView,
-  IContextMenuViewProps,
-} from "@/design-system/context-menu/context-menu";
-import { useConversationListPinnedConversationsStyles } from "@/features/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversations.styles";
-import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
-import logger from "@/utils/logger";
 import { Center } from "@design-system/Center";
 import { HStack } from "@design-system/HStack";
 import { Text } from "@design-system/Text";
 import { AnimatedVStack } from "@design-system/VStack";
 import React, { FC, useCallback, useRef } from "react";
 import { TextStyle, ViewStyle } from "react-native";
+import {
+  ContextMenuView,
+  IContextMenuViewProps,
+} from "@/design-system/context-menu/context-menu";
+import { Pressable } from "@/design-system/Pressable";
+import { useConversationListPinnedConversationsStyles } from "@/features/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversations.styles";
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
+import logger from "@/utils/logger";
 
 type IConversationListPinnedConversationProps = {
   avatarComponent: React.ReactNode;

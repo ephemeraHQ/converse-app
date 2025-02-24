@@ -2,7 +2,7 @@ export function mergeOrderedLists<L1, L2>(
   list1: L1[],
   list2: L2[],
   list1Order: (a: L1) => number,
-  list2Order: (a: L2) => number
+  list2Order: (a: L2) => number,
 ): (L1 | L2)[] {
   // Merge 2 sorted lists
   const merged = [];

@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /**
  * Hook that ensures a loading state persists for a minimum duration.

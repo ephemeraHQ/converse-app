@@ -25,8 +25,8 @@ export function handleApiError(error: unknown, context: string): never {
     // If parsing failed, log and throw the original error
     logger.error(
       `[${context}] Unexpected error response format: ${JSON.stringify(
-        error.response.data
-      )}`
+        error.response.data,
+      )}`,
     );
   }
   throw error;

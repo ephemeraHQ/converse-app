@@ -5,11 +5,11 @@ import {
 
 export function useConversationComposerIsEnabled() {
   const isCreatingNewConversation = useConversationStoreContext(
-    (state) => state.isCreatingNewConversation
+    (state) => state.isCreatingNewConversation,
   );
   const topic = useCurrentConversationTopic();
   const searchSelectedUserInboxIds = useConversationStoreContext(
-    (state) => state.searchSelectedUserInboxIds
+    (state) => state.searchSelectedUserInboxIds,
   );
 
   return !isCreatingNewConversation || !!topic || !!searchSelectedUserInboxIds;

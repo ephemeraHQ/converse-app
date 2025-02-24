@@ -1,8 +1,8 @@
 import { useMutation } from "@tanstack/react-query";
 import { logger } from "@utils/logger";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
 import { captureError } from "@/utils/capture-error";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { revokeAdminMutationKey } from "./MutationKeys";
 import {
   cancelGroupMembersQuery,
@@ -13,7 +13,7 @@ import { useGroupQuery } from "./useGroupQuery";
 
 export const useRevokeAdminMutation = (
   account: string,
-  topic: ConversationTopic
+  topic: ConversationTopic,
 ) => {
   const { data: group } = useGroupQuery({ account, topic });
 

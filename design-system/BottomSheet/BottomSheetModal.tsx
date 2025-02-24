@@ -8,10 +8,9 @@ import { BottomSheetModalMethods as GorhomBottomSheetModalMethods } from "@gorho
 import { forwardRef, memo, useCallback, useMemo } from "react";
 import { Platform } from "react-native";
 import { FullWindowOverlay } from "react-native-screens";
-
+import { useAppTheme } from "../../theme/use-app-theme";
 import { BottomSheetBackdropOpacity } from "./BottomSheetBackdropOpacity";
 import { BottomSheetHandleBar } from "./BottomSheetHandleBar";
-import { useAppTheme } from "../../theme/use-app-theme";
 
 export type IBottomSheetModalProps = GorhomBottomSheetModalProps & {
   absoluteHandleBar?: boolean;
@@ -43,7 +42,7 @@ export const BottomSheetModal = memo(
             <BottomSheetHandleBar isAbsolute={absoluteHandleBar} {...props} />
           );
         },
-        [absoluteHandleBar]
+        [absoluteHandleBar],
       );
 
       const combinedBackgroundStyle = useMemo(
@@ -53,7 +52,7 @@ export const BottomSheetModal = memo(
           },
           backgroundStyle,
         ],
-        [theme.colors.background.raised, backgroundStyle]
+        [theme.colors.background.raised, backgroundStyle],
       );
 
       const handleOnChange = useCallback(
@@ -66,7 +65,7 @@ export const BottomSheetModal = memo(
             onChange(index, position, type);
           }
         },
-        [onClose, onChange]
+        [onClose, onChange],
       );
 
       return (
@@ -83,6 +82,6 @@ export const BottomSheetModal = memo(
           {...rest}
         />
       );
-    }
-  )
+    },
+  ),
 );

@@ -52,7 +52,7 @@ export const useAppStateHandlers = (settings?: AppStateHookSettings) => {
 
     listenerRef.current = AppState.addEventListener(
       "change",
-      handleAppStateChange
+      handleAppStateChange,
     );
 
     return () => {

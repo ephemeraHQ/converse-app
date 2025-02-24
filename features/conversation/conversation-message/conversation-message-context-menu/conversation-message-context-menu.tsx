@@ -164,7 +164,8 @@ const Content = memo(function Content(props: {
         visible={true}
         transparent={true}
         animationType="fade"
-        statusBarTranslucent={Platform.OS === "android"}>
+        statusBarTranslucent={Platform.OS === "android"}
+      >
         <Animated.View style={StyleSheet.absoluteFill}>
           <MessageContextMenuBackdrop handlePressBackdrop={handlePressBackdrop}>
             <AnimatedVStack style={StyleSheet.absoluteFill}>
@@ -176,7 +177,8 @@ const Content = memo(function Content(props: {
                 itemRectWidth={itemRectWidth}
                 menuHeight={menuHeight}
                 fromMe={fromMe}
-                hasReactions={hasReactions}>
+                hasReactions={hasReactions}
+              >
                 <MessageContextMenuAboveMessageReactions
                   topic={topic}
                   reactors={bySender ?? {}}
@@ -197,7 +199,8 @@ const Content = memo(function Content(props: {
                 <MessageContextStoreProvider
                   message={message}
                   nextMessage={nextMessage}
-                  previousMessage={previousMessage}>
+                  previousMessage={previousMessage}
+                >
                   {/* TODO: maybe make ConversationMessage more dumb to not need any context? */}
 
                   <ConversationMessage message={message} />

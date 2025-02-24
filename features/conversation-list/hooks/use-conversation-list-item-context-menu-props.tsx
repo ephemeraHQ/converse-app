@@ -1,9 +1,11 @@
-import { iconRegistry } from "@/design-system/Icon/Icon";
-import { VStack } from "@/design-system/VStack";
+import { ConversationTopic } from "@xmtp/react-native-sdk";
+import { useCallback } from "react";
 import {
   IContextMenuViewProps,
   IMenuActionConfig,
 } from "@/design-system/context-menu/context-menu";
+import { iconRegistry } from "@/design-system/Icon/Icon";
+import { VStack } from "@/design-system/VStack";
 import { useConversationIsPinned } from "@/features/conversation-list/hooks/use-conversation-is-pinned";
 import { useConversationIsUnread } from "@/features/conversation-list/hooks/use-conversation-is-unread";
 import { useDeleteDm } from "@/features/conversation-list/hooks/use-delete-dm";
@@ -14,8 +16,6 @@ import { translate } from "@/i18n";
 import { useAppTheme } from "@/theme/use-app-theme";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { Haptics } from "@/utils/haptics";
-import { ConversationTopic } from "@xmtp/react-native-sdk";
-import { useCallback } from "react";
 import { usePinOrUnpinConversation } from "./use-pin-or-unpin-conversation";
 
 // Specific hook for DM conversations
@@ -85,7 +85,7 @@ function useBaseConversationContextMenuViewProps(args: {
     onPressMenuItem: (event) => {
       Haptics.selectionAsync();
       const action = menuItems.find(
-        (item) => item.actionKey === event.nativeEvent.actionKey
+        (item) => item.actionKey === event.nativeEvent.actionKey,
       );
       if (action) {
         action.onPress();

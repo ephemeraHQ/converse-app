@@ -1,7 +1,6 @@
-import { create } from "zustand";
-
-import { RolledUpReactions } from "../conversation-message-reactions.types";
 import { MessageId } from "@xmtp/react-native-sdk";
+import { create } from "zustand";
+import { RolledUpReactions } from "../conversation-message-reactions.types";
 
 const initialMessageReactionsState: RolledUpReactions = {
   totalCount: 0,
@@ -23,7 +22,7 @@ export const useMessageReactionsStore = create<IMessageReactionsStore>(
   (set) => ({
     rolledUpReactions: initialMessageReactionsState,
     setRolledUpReactions: (reactions) => set({ rolledUpReactions: reactions }),
-  })
+  }),
 );
 
 export const resetMessageReactionsStore = () => {

@@ -25,7 +25,7 @@ export const useAppStore = create<AppStoreType>()(
         partialize: (state) => ({
           isInternetReachable: state.isInternetReachable,
         }),
-      }
-    )
-  )
+      },
+    ),
+  ),
 );

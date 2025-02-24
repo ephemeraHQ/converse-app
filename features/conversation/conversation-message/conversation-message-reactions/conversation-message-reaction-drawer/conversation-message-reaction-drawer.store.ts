@@ -14,7 +14,7 @@ export const useMessageReactionsStore = create<IMessageReactionsStore>(
     actions: {
       setMessageId: (messageId) => set({ messageId }),
     },
-  })
+  }),
 );
 
 export function resetMessageReactionsStore() {

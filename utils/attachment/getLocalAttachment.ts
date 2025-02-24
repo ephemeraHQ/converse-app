@@ -22,7 +22,7 @@ export const getLocalAttachmentForMessageId = async (messageId: string) => {
       // Get path to actual attachment file
       const attachmentLocalPath = getMessageAttachmentLocalPath(
         messageId,
-        attachmentMetaData.filename
+        attachmentMetaData.filename,
       );
 
       const fileExists = await RNFS.exists(attachmentLocalPath);

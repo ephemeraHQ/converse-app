@@ -1,11 +1,11 @@
-import { captureError } from "@/utils/capture-error";
-import { logger } from "@/utils/logger";
 import {
   Mutation,
   MutationCache,
   QueryCache,
   QueryClient,
 } from "@tanstack/react-query";
+import { captureError } from "@/utils/capture-error";
+import { logger } from "@/utils/logger";
 import { DEFAULT_GC_TIME, DEFAULT_STALE_TIME } from "./queryClient.constants";
 
 export const queryClient = new QueryClient({
@@ -14,7 +14,7 @@ export const queryClient = new QueryClient({
       error: Error,
       variables: unknown,
       context: unknown,
-      mutation: Mutation<unknown, unknown, unknown, unknown>
+      mutation: Mutation<unknown, unknown, unknown, unknown>,
     ) => {
       // Example: [Mutation] markConversationAsRead (caller: Conversation Messages) (variables: {"topic":"0x1234567890abcdef1234567890abcdef1234567890"})
       const mutationInfo = `${
@@ -29,7 +29,7 @@ export const queryClient = new QueryClient({
         `[Mutation] ${mutationInfo}${error.message}`,
         {
           cause: error.cause,
-        }
+        },
       );
 
       enhancedError.stack = error.stack;
@@ -44,7 +44,7 @@ export const queryClient = new QueryClient({
       logger.debug(
         `[Query] success fetching ${JSON.stringify(query.queryKey)}${
           query.meta?.caller ? ` (caller: ${query.meta.caller})` : ""
-        }`
+        }`,
       );
     },
     onError: (error: Error, query) => {

@@ -15,7 +15,7 @@ export type IConversationMessageContextMenuStoreState =
       itemRectWidth: number;
     } | null;
     setMessageContextMenuData: (
-      data: IConversationMessageContextMenuStoreState["messageContextMenuData"]
+      data: IConversationMessageContextMenuStoreState["messageContextMenuData"],
     ) => void;
   };
 
@@ -42,11 +42,11 @@ export const ConversationMessageContextMenuStoreProvider = memo(
         {children}
       </ConversationMessageContextMenuStoreContext.Provider>
     );
-  }
+  },
 );
 
 const createConversationMessageContextMenuStore = (
-  initProps: IConversationMessageContextMenuStoreProps
+  initProps: IConversationMessageContextMenuStoreProps,
 ) => {
   return createStore<IConversationMessageContextMenuStoreState>()(
     subscribeWithSelector((set) => ({
@@ -54,7 +54,7 @@ const createConversationMessageContextMenuStore = (
       setMessageContextMenuData: (data) =>
         set({ messageContextMenuData: data }),
       ...initProps,
-    }))
+    })),
   );
 };
 
@@ -62,12 +62,12 @@ const ConversationMessageContextMenuStoreContext =
   createContext<IConversationMessageContextMenuStore | null>(null);
 
 export function useConversationMessageContextMenuStoreContext<T>(
-  selector: (state: IConversationMessageContextMenuStoreState) => T
+  selector: (state: IConversationMessageContextMenuStoreState) => T,
 ): T {
   const store = useContext(ConversationMessageContextMenuStoreContext);
   if (!store)
     throw new Error(
-      "Missing ConversationMessageContextMenuStore.Provider in the tree"
+      "Missing ConversationMessageContextMenuStore.Provider in the tree",
     );
   return useStore(store, selector);
 }
@@ -76,7 +76,7 @@ export function useConversationMessageContextMenuStore() {
   const store = useContext(ConversationMessageContextMenuStoreContext);
   if (!store)
     throw new Error(
-      `Missing ConversationMessageContextMenuStore.Provider in the tree`
+      `Missing ConversationMessageContextMenuStore.Provider in the tree`,
     );
   return store;
 }

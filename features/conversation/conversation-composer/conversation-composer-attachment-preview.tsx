@@ -1,10 +1,10 @@
-import { SendAttachmentPreview } from "@/features/conversation/conversation-composer/conversation-composer-send-attachment-preview";
 import { HStack } from "@design-system/HStack";
 import { AnimatedVStack } from "@design-system/VStack";
 import { SICK_DAMPING, SICK_STIFFNESS } from "@theme/animations";
-import { useAppTheme } from "@/theme/use-app-theme";
 import React, { memo, useCallback } from "react";
 import { useAnimatedStyle, withSpring } from "react-native-reanimated";
+import { SendAttachmentPreview } from "@/features/conversation/conversation-composer/conversation-composer-send-attachment-preview";
+import { useAppTheme } from "@/theme/use-app-theme";
 import {
   useConversationComposerStore,
   useConversationComposerStoreContext,
@@ -15,7 +15,7 @@ export const ConversationComposerAttachmentPreview = memo(
     const { theme } = useAppTheme();
 
     const mediaPreview = useConversationComposerStoreContext(
-      (state) => state.composerMediaPreview
+      (state) => state.composerMediaPreview,
     );
 
     const store = useConversationComposerStore();
@@ -69,5 +69,5 @@ export const ConversationComposerAttachmentPreview = memo(
         )}
       </AnimatedVStack>
     );
-  }
+  },
 );

@@ -13,12 +13,12 @@ export const ObjectTyped = {
    * Object.entries, but with nice typing
    */
   entries: Object.entries as <O extends {}>(
-    yourObject: O
+    yourObject: O,
   ) => Array<[keyof O, O[keyof O]]>,
   /**
    * Object.fromEntries, but with nice typing
    */
   fromEntries: Object.fromEntries as <K extends string, V>(
-    yourObjectEntries: [K, V][]
+    yourObjectEntries: [K, V][],
   ) => Record<K, V>,
 };

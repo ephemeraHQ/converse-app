@@ -4,21 +4,21 @@ import {
   avalanche,
   base,
   blast,
-  ethereum,
-  optimism,
-  polygon,
-  zora,
-  sepolia,
   bsc,
+  celo,
+  ethereum,
   fantom,
   gnosis,
-  celo,
-  zkSync,
-  polygonZkEvm,
   linea,
-  scroll,
   mantaPacific,
+  optimism,
+  polygon,
+  polygonZkEvm,
+  scroll,
+  sepolia,
   xai,
+  zkSync,
+  zora,
 } from "thirdweb/chains";
 
 export const DEFAULT_SUPPORTED_CHAINS = [
@@ -48,5 +48,5 @@ export const CHAIN_BY_ID = DEFAULT_SUPPORTED_CHAINS.reduce(
     acc[chain.id] = chain;
     return acc;
   },
-  {} as Record<number, (typeof DEFAULT_SUPPORTED_CHAINS)[number]>
+  {} as Record<number, (typeof DEFAULT_SUPPORTED_CHAINS)[number]>,
 );

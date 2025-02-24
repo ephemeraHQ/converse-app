@@ -1,8 +1,7 @@
-import { useAppTheme } from "@/theme/use-app-theme";
 import { BlurViewProps, BlurView as RNBlurView } from "expo-blur";
 import { memo } from "react";
 import Animated, { AnimatedProps } from "react-native-reanimated";
-
+import { useAppTheme } from "@/theme/use-app-theme";
 import { IVStackProps } from "./VStack";
 
 const AnimatedBlurView = Animated.createAnimatedComponent(RNBlurView);

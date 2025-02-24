@@ -1,9 +1,9 @@
-import { VStack } from "@design-system/VStack";
-import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
-import { Header } from "./Header";
 import { Icon } from "@design-system/Icon/Icon";
 import { Text } from "@design-system/Text/Text";
+import { VStack } from "@design-system/VStack";
 import { TextStyle } from "react-native";
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
+import { Header } from "./Header";
 
 type IExampleProps = {
   onPress?: () => void;

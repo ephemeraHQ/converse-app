@@ -1,12 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
-
-import { groupPinnedFrameQueryKey } from "./QueryKeys";
 import { getGroupQueryData } from "@queries/useGroupQuery";
+import { useQuery } from "@tanstack/react-query";
 import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import { groupPinnedFrameQueryKey } from "./QueryKeys";
 
 export const useGroupPinnedFrameQuery = (
   account: string,
-  topic: ConversationTopic
+  topic: ConversationTopic,
 ) => {
   return useQuery({
     queryKey: groupPinnedFrameQueryKey(account, topic),

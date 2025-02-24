@@ -2,10 +2,10 @@ import NetInfo from "@react-native-community/netinfo";
 import {
   BehaviorSubject,
   Observable,
-  Subscription,
   PartialObserver,
+  Subscription,
 } from "rxjs";
-import { switchMap, shareReplay, distinctUntilChanged } from "rxjs/operators";
+import { distinctUntilChanged, shareReplay, switchMap } from "rxjs/operators";
 
 /*
  * NetworkMonitorClient provides a flexible API to monitor
@@ -115,7 +115,7 @@ export class NetworkMonitorClient {
     this.networkObservable = this.networkObservableSubject.pipe(
       switchMap((observable) => observable),
       distinctUntilChanged((a, b) => a.status === b.status),
-      shareReplay(1)
+      shareReplay(1),
     );
   }
 
@@ -134,7 +134,7 @@ export class NetworkMonitorClient {
     if (!NetworkMonitorClient.instance) {
       // Default to unimplemented to catch any unintended usage
       NetworkMonitorClient.instance = new NetworkMonitorClient(
-        NetworkMonitorClient.unimplementedObservable()
+        NetworkMonitorClient.unimplementedObservable(),
       );
     }
     return NetworkMonitorClient.instance;
@@ -174,7 +174,7 @@ export class NetworkMonitorClient {
   subscribe(
     observerOrNext:
       | PartialObserver<NetworkAvailability>
-      | ((value: NetworkAvailability) => void)
+      | ((value: NetworkAvailability) => void),
   ): Subscription {
     if (typeof observerOrNext === "function") {
       return this.networkObservable.subscribe(observerOrNext);
@@ -235,7 +235,7 @@ export class NetworkMonitorClient {
       };
     }).pipe(
       distinctUntilChanged((a, b) => a.status === b.status),
-      shareReplay(1)
+      shareReplay(1),
     );
 
     NetworkMonitorClient.getInstance().setNetworkObservable(liveObservable);
@@ -263,7 +263,7 @@ export class NetworkMonitorClient {
     });
 
     NetworkMonitorClient.getInstance().setNetworkObservable(
-      satisfiedObservable
+      satisfiedObservable,
     );
     return NetworkMonitorClient.getInstance();
   }
@@ -289,7 +289,7 @@ export class NetworkMonitorClient {
     });
 
     NetworkMonitorClient.getInstance().setNetworkObservable(
-      unsatisfiedObservable
+      unsatisfiedObservable,
     );
     return NetworkMonitorClient.getInstance();
   }
@@ -338,7 +338,7 @@ export class NetworkMonitorClient {
    * const networkMonitor = NetworkMonitorClient.custom(customObservable);
    */
   static custom(
-    observable: Observable<NetworkAvailability>
+    observable: Observable<NetworkAvailability>,
   ): NetworkMonitorClient {
     NetworkMonitorClient.getInstance().setNetworkObservable(observable);
     return NetworkMonitorClient.getInstance();
@@ -357,7 +357,7 @@ export class NetworkMonitorClient {
     const unimplementedObservable =
       NetworkMonitorClient.unimplementedObservable();
     NetworkMonitorClient.getInstance().setNetworkObservable(
-      unimplementedObservable
+      unimplementedObservable,
     );
     return NetworkMonitorClient.getInstance();
   }
@@ -373,8 +373,8 @@ export class NetworkMonitorClient {
           "[NetworkMonitor] ERROR: unimplemented - Your code has subscribed to NetworkMonitor " +
             "without specifying an implementation. This unimplemented dependency is here to " +
             "ensure you don't invoke code you don't intend to, ensuring your tests are truly " +
-            "testing what they are expected to"
-        )
+            "testing what they are expected to",
+        ),
       );
     }).pipe(shareReplay(1));
   }

@@ -1,7 +1,7 @@
+import { z } from "zod";
 import { api } from "@/utils/api/api";
 import { captureError } from "@/utils/capture-error";
 import { logger } from "@/utils/logger";
-import { z } from "zod";
 
 export const ConvosProfileForInboxSchema = z.object({
   id: z.string(),

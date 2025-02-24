@@ -1,5 +1,7 @@
-import type { ImageProps as ExpoImageProps } from "expo-image";
-import { Image as ExpoImage } from "expo-image";
+import {
+  Image as ExpoImage,
+  type ImageProps as ExpoImageProps,
+} from "expo-image";
 import { memo } from "react";
 
 export type IImageProps = ExpoImageProps;

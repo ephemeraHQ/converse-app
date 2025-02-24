@@ -1,13 +1,13 @@
 import React, { memo } from "react";
 import { Dimensions, ViewStyle } from "react-native";
-import { useAppTheme } from "@/theme/use-app-theme";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   useAnimatedStyle,
-  withSpring,
   useSharedValue,
+  withSpring,
 } from "react-native-reanimated";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { IAnimatedVStackProps } from "@/design-system/VStack";
+import { useAppTheme } from "@/theme/use-app-theme";
 
 /**
  * AnimatedCardContainer Component
@@ -82,5 +82,5 @@ export const ProfileContactCardContainer = memo(
         </Animated.View>
       </GestureDetector>
     );
-  }
+  },
 );

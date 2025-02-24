@@ -1,7 +1,6 @@
 import { ForwardedRef, forwardRef } from "react";
 import { View } from "react-native";
 import Animated, { AnimatedProps } from "react-native-reanimated";
-
 import { HStack, IHStackProps } from "./HStack";
 import { VStack } from "./VStack";
 
@@ -22,7 +21,7 @@ export const Center = forwardRef(
         {...rest}
       />
     );
-  }
+  },
 );
 
 export type IAnimatedCenterProps = AnimatedProps<ICenterProps>;

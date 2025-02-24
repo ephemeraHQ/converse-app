@@ -1,6 +1,3 @@
-import { useConversationMessageContextMenuEmojiPickerStore } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu-emoji-picker/conversation-message-context-menu-emoji-picker.store";
-import { useConversationMessageContextMenuStoreContext } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu.store-context";
-import { useKeyboardIsShown } from "@/hooks/use-keyboard-is-shown";
 import { AnimatedVStack } from "@design-system/VStack";
 import { memo, useEffect, useRef } from "react";
 import { Keyboard, TextInput } from "react-native";
@@ -10,6 +7,9 @@ import {
   useSharedValue,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useConversationMessageContextMenuEmojiPickerStore } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu-emoji-picker/conversation-message-context-menu-emoji-picker.store";
+import { useConversationMessageContextMenuStoreContext } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu.store-context";
+import { useKeyboardIsShown } from "@/hooks/use-keyboard-is-shown";
 
 type IConversationKeyboardFillerProps = {};
 
@@ -24,11 +24,11 @@ export const ConversationKeyboardFiller = memo(
 
     const messageContextMenuData =
       useConversationMessageContextMenuStoreContext(
-        (state) => state.messageContextMenuData
+        (state) => state.messageContextMenuData,
       );
 
     const isEmojiPickerOpen = useConversationMessageContextMenuEmojiPickerStore(
-      (state) => state.isEmojiPickerOpen
+      (state) => state.isEmojiPickerOpen,
     );
 
     useEffect(() => {
@@ -78,7 +78,7 @@ export const ConversationKeyboardFiller = memo(
         height: Math.max(
           Math.max(lastKeyboardHeight.value, keyboardHeight.value) -
             insets.bottom,
-          0
+          0,
         ),
       };
     });
@@ -93,5 +93,5 @@ export const ConversationKeyboardFiller = memo(
         />
       </>
     );
-  }
+  },
 );

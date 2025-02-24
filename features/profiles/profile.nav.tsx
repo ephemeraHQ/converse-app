@@ -1,5 +1,5 @@
-import { AppNativeStack } from "@/navigation/app-navigator";
 import { InboxId } from "@xmtp/react-native-sdk";
+import { AppNativeStack } from "@/navigation/app-navigator";
 import { ProfileScreen } from "./profile.screen";
 
 export type ProfileNavParams = {

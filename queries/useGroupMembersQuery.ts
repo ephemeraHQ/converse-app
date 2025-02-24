@@ -1,16 +1,16 @@
-import { getOrFetchConversation } from "@/queries/conversation-query";
 import {
   queryOptions as reactQueryOptions,
-  useQuery,
   skipToken,
+  useQuery,
 } from "@tanstack/react-query";
 import { getCleanAddress } from "@utils/evm/getCleanAddress";
 import { ConversationTopic, Member } from "@xmtp/react-native-sdk";
 import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
-import { groupMembersQueryKey } from "./QueryKeys";
-import { EntityObjectWithAddress, entifyWithAddress } from "./entify";
-import { queryClient } from "./queryClient";
+import { getOrFetchConversation } from "@/queries/conversation-query";
 import { Optional } from "@/types/general";
+import { entifyWithAddress, EntityObjectWithAddress } from "./entify";
+import { queryClient } from "./queryClient";
+import { groupMembersQueryKey } from "./QueryKeys";
 
 export type GroupMembersSelectData = EntityObjectWithAddress<Member, InboxId>;
 
@@ -22,7 +22,7 @@ type IGroupMembersArgs = {
 type IGroupMembersArgsWithCaller = IGroupMembersArgs & { caller: string };
 
 const fetchGroupMembers = async (
-  args: IGroupMembersArgsWithCaller
+  args: IGroupMembersArgsWithCaller,
 ): Promise<EntityObjectWithAddress<Member, InboxId>> => {
   const { account, topic, caller } = args;
 
@@ -51,12 +51,12 @@ const fetchGroupMembers = async (
   return entifyWithAddress(
     members,
     (member) => member.inboxId,
-    (member) => getCleanAddress(member.addresses[0])
+    (member) => getCleanAddress(member.addresses[0]),
   );
 };
 
 export const getGroupMembersQueryOptions = (
-  args: Optional<IGroupMembersArgsWithCaller, "caller">
+  args: Optional<IGroupMembersArgsWithCaller, "caller">,
 ) => {
   const { account, topic, caller } = args;
   const enabled = !!topic;
@@ -88,23 +88,23 @@ export const useGroupMembersQuery = (args: IGroupMembersArgsWithCaller) => {
 };
 
 export const getGroupMembersQueryData = (
-  args: IGroupMembersArgs
+  args: IGroupMembersArgs,
 ): GroupMembersSelectData | undefined => {
   const { account, topic } = args;
   return queryClient.getQueryData(
-    getGroupMembersQueryOptions({ account, topic }).queryKey
+    getGroupMembersQueryOptions({ account, topic }).queryKey,
   );
 };
 
 export const setGroupMembersQueryData = (
   args: IGroupMembersArgs & {
     members: GroupMembersSelectData;
-  }
+  },
 ) => {
   const { account, topic, members } = args;
   queryClient.setQueryData(
     getGroupMembersQueryOptions({ account, topic }).queryKey,
-    members
+    members,
   );
 };
 
@@ -130,7 +130,7 @@ export function refetchGroupMembersQuery(args: IGroupMembersArgs) {
 }
 
 export async function ensureGroupMembersQueryData(
-  args: IGroupMembersArgsWithCaller
+  args: IGroupMembersArgsWithCaller,
 ) {
   const { account, topic, caller } = args;
   return queryClient.ensureQueryData(
@@ -138,6 +138,6 @@ export async function ensureGroupMembersQueryData(
       account,
       topic,
       caller,
-    })
+    }),
   );
 }

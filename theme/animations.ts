@@ -11,7 +11,6 @@ import {
   withTiming,
   type WithSpringConfig,
 } from "react-native-reanimated";
-
 import { timing } from "./timing";
 
 export const SICK_EASE_OUT = Easing.out(Easing.cubic);
@@ -66,7 +65,7 @@ export const animation = {
       withTiming(1, {
         duration: 300,
         easing: Easing.bezier(0.25, 0.1, 0.25, 1),
-      })
+      }),
     ),
     end: withTiming(1, {
       duration: 100,

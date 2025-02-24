@@ -54,7 +54,8 @@ export const MessageContextMenuReactors: FC<
         top: safeAreaInsets.top + theme.spacing.xs,
         left: 0,
         right: 0,
-      }}>
+      }}
+    >
       <FlatList
         data={listData}
         horizontal
@@ -90,13 +91,15 @@ const Item = memo(function Item({
       vertical
       style={{
         rowGap: theme.spacing.xxs,
-      }}>
+      }}
+    >
       <GroupAvatarInboxIds inboxIds={inboxIds} />
       <HStack
         style={{
           alignItems: "center",
           columnGap: theme.spacing.xxxs,
-        }}>
+        }}
+      >
         <Text>{content}</Text>
         <Text color="secondary" preset="small">
           {inboxIds.length}

@@ -25,7 +25,7 @@ export const getGroupMemberActions = ({
       groupPermissionLevel,
       "removeMemberPolicy",
       currentAccountIsSuperAdmin,
-      currentAccountIsAdmin
+      currentAccountIsAdmin,
     );
   const canPromoteToSuperAdmin =
     !isSuperAdmin && !isCurrentUser && currentAccountIsSuperAdmin;
@@ -37,7 +37,7 @@ export const getGroupMemberActions = ({
       groupPermissionLevel,
       "addAdminPolicy",
       currentAccountIsSuperAdmin,
-      currentAccountIsAdmin
+      currentAccountIsAdmin,
     );
 
   const canRevokeAdmin =
@@ -48,7 +48,7 @@ export const getGroupMemberActions = ({
       groupPermissionLevel,
       "removeAdminPolicy",
       currentAccountIsSuperAdmin,
-      currentAccountIsAdmin
+      currentAccountIsAdmin,
     );
   const canRevokeSuperAdmin =
     !isCurrentUser && currentAccountIsSuperAdmin && isSuperAdmin;
@@ -64,7 +64,7 @@ export const getGroupMemberActions = ({
   if (canPromoteToSuperAdmin) {
     promoteSuperAdminIndex = options.length;
     options.push(
-      translate("group_screen_member_actions.promote_to_super_admin")
+      translate("group_screen_member_actions.promote_to_super_admin"),
     );
     cancelButtonIndex++;
   }

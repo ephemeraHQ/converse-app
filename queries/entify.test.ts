@@ -42,7 +42,7 @@ describe("entify functions", () => {
       const result = entifyWithAddress(
         items,
         (item) => item.id,
-        (item) => item.address
+        (item) => item.address,
       );
 
       expect(result).toEqual({
@@ -65,7 +65,7 @@ describe("entify functions", () => {
       const result = entifyWithAddress(
         [] as any[],
         (item) => item.id,
-        (item) => item.address
+        (item) => item.address,
       );
 
       expect(result).toEqual({

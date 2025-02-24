@@ -5,7 +5,7 @@ import { getGroupQueryData } from "./useGroupQuery";
 
 export const useGroupPermissionPolicyQuery = (
   account: string,
-  topic: ConversationTopic
+  topic: ConversationTopic,
 ) => {
   return useQuery({
     queryKey: groupPermissionPolicyQueryKey(account, topic!),

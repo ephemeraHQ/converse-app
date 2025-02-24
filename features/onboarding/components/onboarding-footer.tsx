@@ -48,7 +48,8 @@ export function OnboardingFooter({
       entering={animation
         .fadeInDownSpring()
         .delay(ONBOARDING_ENTERING_DELAY.THIRD)
-        .duration(ONBOARDING_ENTERING_DURATION)}>
+        .duration(ONBOARDING_ENTERING_DURATION)}
+    >
       <OnboardingIconButton
         action="primary"
         size="xl"

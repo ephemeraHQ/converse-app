@@ -12,7 +12,7 @@ import { Haptics } from "../utils/haptics";
 export type IPressableScaleProps = IPressableProps;
 
 export const PressableScale = memo(function PressableScale(
-  props: IPressableScaleProps
+  props: IPressableScaleProps,
 ) {
   const { withHaptics, onPress: onPressProps, style, ...rest } = props;
 
@@ -29,7 +29,7 @@ export const PressableScale = memo(function PressableScale(
         onPressProps(e);
       }
     },
-    [onPressProps, withHaptics]
+    [onPressProps, withHaptics],
   );
 
   return (
@@ -64,7 +64,7 @@ function usePressInDepth(options?: { withHapticFeedback?: boolean }) {
         // Haptics.softImpactAsyncAnimated()
       }
     },
-    [withHapticFeedback]
+    [withHapticFeedback],
   );
 
   useAnimatedReaction(
@@ -73,7 +73,7 @@ function usePressInDepth(options?: { withHapticFeedback?: boolean }) {
       if (v) {
         hasTriggeredHapticAV.value = false;
       }
-    }
+    },
   );
 
   const handlePressIn = useCallback(() => {

@@ -1,7 +1,3 @@
-import { EmojiRowList } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu-emoji-picker/conversation-message-context-menu-emoji-picker-list";
-import { messageContextMenuEmojiPickerBottomSheetRef } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu-emoji-picker/conversation-message-context-menu-emoji-picker-utils";
-import { useConversationMessageContextMenuEmojiPickerStore } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu-emoji-picker/conversation-message-context-menu-emoji-picker.store";
-import { emojiTrie } from "@/utils/emojis/emoji-trie";
 import { BottomSheetContentContainer } from "@design-system/BottomSheet/BottomSheetContentContainer";
 import { BottomSheetHeader } from "@design-system/BottomSheet/BottomSheetHeader";
 import { BottomSheetModal } from "@design-system/BottomSheet/BottomSheetModal";
@@ -9,12 +5,16 @@ import { Text } from "@design-system/Text";
 import { TextField } from "@design-system/TextField/TextField";
 import { VStack } from "@design-system/VStack";
 import { translate } from "@i18n";
-import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { ICategorizedEmojisRecord, IEmoji } from "@utils/emojis/emoji-types";
 import { emojis } from "@utils/emojis/emojis";
 import { memo, useCallback, useRef, useState } from "react";
 import { TextInput, TextStyle, ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { EmojiRowList } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu-emoji-picker/conversation-message-context-menu-emoji-picker-list";
+import { messageContextMenuEmojiPickerBottomSheetRef } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu-emoji-picker/conversation-message-context-menu-emoji-picker-utils";
+import { useConversationMessageContextMenuEmojiPickerStore } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu-emoji-picker/conversation-message-context-menu-emoji-picker.store";
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
+import { emojiTrie } from "@/utils/emojis/emoji-trie";
 
 const flatEmojis = emojis.flatMap((category) => category.data);
 
@@ -68,7 +68,7 @@ export const MessageContextMenuEmojiPicker = memo(
         onSelectReaction(emoji);
         closeMenu();
       },
-      [onSelectReaction, closeMenu]
+      [onSelectReaction, closeMenu],
     );
 
     const onTextInputChange = useCallback((value: string) => {
@@ -139,7 +139,7 @@ export const MessageContextMenuEmojiPicker = memo(
         </VStack>
       </BottomSheetModal>
     );
-  }
+  },
 );
 
 const $inputContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({

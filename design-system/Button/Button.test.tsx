@@ -1,9 +1,8 @@
 import { fireEvent } from "@testing-library/react-native";
 import React from "react";
 import { Platform } from "react-native";
-
-import { Button } from "./Button";
 import { renderWithThemeProvider } from "@/design-system/test-utils/renderWithThemeProvider";
+import { Button } from "./Button";
 
 // Mock useColorScheme for consistent testing
 jest.mock("react-native/Libraries/Utilities/useColorScheme", () => ({
@@ -17,7 +16,7 @@ describe("Button Component", () => {
       Platform.OS = "ios"; // Set the platform to iOS
 
       const { toJSON, getByText } = renderWithThemeProvider(
-        <Button title="Primary Button" action="primary" />
+        <Button title="Primary Button" action="primary" />,
       );
 
       // Verify snapshot
@@ -36,7 +35,7 @@ describe("Button Component", () => {
           title="Clickable Button"
           action="primary"
           onPress={onPressMock}
-        />
+        />,
       );
 
       fireEvent.press(getByText("Clickable Button"));
@@ -51,7 +50,7 @@ describe("Button Component", () => {
       Platform.OS = "android"; // Set the platform to Android (or default)
 
       const { toJSON, getByText } = renderWithThemeProvider(
-        <Button title="Secondary Danger Button" action="danger" />
+        <Button title="Secondary Danger Button" action="danger" />,
       );
 
       // Verify snapshot
@@ -65,7 +64,7 @@ describe("Button Component", () => {
       Platform.OS = "android";
 
       const { toJSON, getByText } = renderWithThemeProvider(
-        <Button title="Button with Picto" picto="star" />
+        <Button title="Button with Picto" picto="star" />,
       );
 
       // Verify snapshot
