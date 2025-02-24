@@ -50,7 +50,7 @@ jobs:
       - name: Get Sentry Token
         id: sentry_token
         run: |
-          TOKEN=$(eas env:get --variable-name=SENTRY_AUTH_TOKEN --variable-environment=preview --json | jq -r '.value')
+          TOKEN=$(eas env:get --variable-name=SENTRY_AUTH_TOKEN --variable-environment=preview | tr -d ' ' | cut -d'=' -f2)
           echo "sentry_token=${TOKEN}"
           echo "sentry_token=${TOKEN}" >> $GITHUB_OUTPUT
 
