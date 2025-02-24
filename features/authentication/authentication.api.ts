@@ -1,9 +1,29 @@
+import { z } from "zod";
+import { profileValidationSchema } from "@/features/profiles/schemas/profile-validation.schema";
 import { api } from "@/utils/api/api";
 import { handleApiError } from "@/utils/api/api.error";
 import { buildDeviceMetadata } from "@/utils/device-metadata";
-import { z } from "zod";
 
 const deviceOSEnum = z.enum(["android", "ios", "web"]);
+
+const createUserRequestSchema = z
+  .object({
+    privyUserId: z.string(),
+    device: z.object({
+      os: deviceOSEnum,
+      name: z.string().nullable(),
+    }),
+    identity: z.object({
+      privyAddress: z.string(),
+      xmtpId: z.string(),
+    }),
+    profile: profileValidationSchema.pick({
+      name: true,
+      username: true,
+      avatar: true,
+    }),
+  })
+  .strict();
 
 const createUserResponseSchema = z
   .object({
@@ -22,6 +42,7 @@ const createUserResponseSchema = z
     profile: z.object({
       id: z.string(),
       name: z.string(),
+      username: z.string(),
       description: z.string().nullable(),
     }),
   })
@@ -35,13 +56,14 @@ export const createUser = async (args: {
   inboxId: string;
   profile: {
     name: string;
+    username: string;
     avatar?: string;
   };
 }): Promise<CreateUserResponse> => {
   const { privyUserId, smartContractWalletAddress, inboxId, profile } = args;
 
   try {
-    const response = await api.post<CreateUserResponse>("/api/v1/users", {
+    const requestPayload = {
       privyUserId,
       device: buildDeviceMetadata(),
       identity: {
@@ -49,9 +71,30 @@ export const createUser = async (args: {
         xmtpId: inboxId,
       },
       profile,
-    });
+    };
 
-    return createUserResponseSchema.parse(response.data);
+    const validationResult = createUserRequestSchema.safeParse(requestPayload);
+    if (!validationResult.success) {
+      throw new Error(
+        `Invalid request data: ${validationResult.error.message}`
+      );
+    }
+
+    const response = await api.post<CreateUserResponse>(
+      "/api/v1/users",
+      validationResult.data
+    );
+
+    const responseValidation = createUserResponseSchema.safeParse(
+      response.data
+    );
+    if (!responseValidation.success) {
+      throw new Error(
+        `Response validation failed: ${responseValidation.error.message}`
+      );
+    }
+
+    return responseValidation.data;
   } catch (error) {
     throw handleApiError(error, "createUser");
   }

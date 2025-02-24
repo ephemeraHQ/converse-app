@@ -6,6 +6,7 @@ import { z } from "zod";
 export const ConvosProfileForInboxSchema = z.object({
   id: z.string(),
   name: z.string(),
+  username: z.string(),
   description: z.string().nullable(),
   // deviceIdentityId: z.string(),
   // createdAt: z.string(),
@@ -81,24 +82,3 @@ export const claimProfile = async ({
   logger.debug("[API PROFILES] claimProfile response:", data);
   return ClaimProfileResponseSchema.parse(data);
 };
-
-const profileValidationSchema = z.object({
-  name: z
-    .string()
-    .min(3, { message: "Name must be at least 3 characters long" })
-    .max(50, { message: "Name cannot exceed 50 characters" })
-    .optional(),
-  description: z
-    .string()
-    .max(500, { message: "Description cannot exceed 500 characters" })
-    .optional(),
-  username: z
-    .string()
-    .min(3, { message: "Username must be at least 3 characters long" })
-    .max(30, { message: "Username cannot exceed 30 characters" })
-    .regex(/^[a-zA-Z0-9]+$/, {
-      message: "Username can only contain letters and numbers",
-    })
-    .optional(),
-  avatar: z.string().url({ message: "Avatar must be a valid URL" }).optional(),
-});

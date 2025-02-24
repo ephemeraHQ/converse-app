@@ -13,6 +13,7 @@ type ICreateUserArgs = {
   inboxId: string;
   profile: {
     name: string;
+    username: string;
     avatar?: string;
     description?: string;
   };
@@ -35,6 +36,7 @@ const buildOptimisticUser = (args: ICreateUserArgs): CreateUserResponse => {
     profile: {
       id: "123",
       name: args.profile.name,
+      username: args.profile.username,
       description: args.profile.description ?? null,
     },
   };
@@ -102,6 +104,7 @@ export function useCreateUser() {
         data: {
           id: data.profile.id,
           name: data.profile.name,
+          username: data.profile.username,
           description: data.profile.description ?? null,
         },
       });

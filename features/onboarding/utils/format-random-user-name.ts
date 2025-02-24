@@ -1,10 +1,20 @@
-import { v4 } from "uuid";
+export function formatRandomUserName(args: { displayName?: string }) {
+  const { displayName = "" } = args;
 
-export const formatRandomUserName = (displayName: string) => {
-  const randomUserGuid = v4().replace(/-/g, "").slice(0, 30);
-  // Remove all whitespace characters from the display name
-  const profileUserName = (
-    displayName?.replace(/\s+/g, "") + randomUserGuid
-  ).slice(0, 7);
-  return profileUserName;
-};
+  // Remove all whitespace characters and convert to lowercase
+  let cleanDisplayName = displayName.replace(/\s+/g, "").toLowerCase();
+
+  // Ensure we have a base string that will generate a valid username
+  // @TODO: This is a temporary solution to ensure we have a base string that will generate a valid username
+  if (cleanDisplayName.length === 0) {
+    cleanDisplayName = "user";
+  }
+
+  // Generate 4 random digits
+  const randomNumbers = Math.floor(Math.random() * 10000)
+    .toString()
+    .padStart(4, "0");
+
+  // Combine name and numbers, ensuring total length doesn't exceed reasonable length
+  return `${cleanDisplayName}${randomNumbers}`.slice(0, 20);
+}

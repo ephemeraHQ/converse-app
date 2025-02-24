@@ -15,7 +15,7 @@ export type ICardLayoutProps = {
 
 export type IEditableContactCardProps = {
   displayName: string;
-  userName: string | undefined;
+  username: string;
   avatarUri: string | undefined;
   onAvatarPress: () => void;
   onDisplayNameChange: (text: string) => void;
@@ -27,13 +27,13 @@ export type IEditableContactCardProps = {
 
 export type IReadOnlyContactCardProps = {
   displayName: string;
-  userName: string | undefined;
+  username: string;
   avatarUri: string | undefined;
 };
 
 export type IContactCardProps = {
   displayName: string;
-  userName: string | undefined;
+  username: string;
   avatarUri: string | undefined;
   isMyProfile: boolean;
   editMode: boolean;

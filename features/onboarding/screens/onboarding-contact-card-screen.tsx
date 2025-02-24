@@ -2,10 +2,17 @@ import { usePrivy } from "@privy-io/expo";
 import React, { memo, useCallback, useEffect, useState } from "react";
 import { Alert, TextStyle, ViewStyle } from "react-native";
 import { create } from "zustand";
-import { Screen } from "@/components/screen/screen";
+import { z } from "zod";
+
 import { Center } from "@/design-system/Center";
 import { VStack } from "@/design-system/VStack";
-// import { useProfile } from "../hooks/useProfile";
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
+import { captureErrorWithToast } from "@/utils/capture-error";
+import { ValidationError } from "@/utils/api/api.error";
+import { useAddPfp } from "../../../hooks/use-add-pfp";
+import { isAxiosError } from "axios";
+
+import { Screen } from "@/components/screen/screen";
 import { useAuthStore } from "@/features/authentication/authentication.store";
 import { useMultiInboxStore } from "@/features/authentication/multi-inbox.store";
 import { useCreateUser } from "@/features/current-user/use-create-user";
@@ -17,10 +24,47 @@ import { ProfileContactCardEditableNameInput } from "@/features/profiles/compone
 import { ProfileContactCardLayout } from "@/features/profiles/components/profile-contact-card/profile-contact-card-layout";
 import { validateProfileName } from "@/features/profiles/utils/validate-profile-name";
 import { useHeader } from "@/navigation/use-header";
-import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
-import { ValidationError } from "@/utils/api/api.error";
-import { captureErrorWithToast } from "@/utils/capture-error";
-import { useAddPfp } from "../../../hooks/use-add-pfp";
+import { formatRandomUserName } from "@/features/onboarding/utils/format-random-user-name";
+import { profileValidationSchema } from "@/features/profiles/schemas/profile-validation.schema";
+
+// Request validation schema
+const createUserRequestSchema = z.object({
+  inboxId: z.string(),
+  privyUserId: z.string(),
+  smartContractWalletAddress: z.string(),
+  profile: profileValidationSchema.pick({ name: true, username: true }),
+});
+
+type IOnboardingContactCardStore = {
+  name: string;
+  username: string;
+  nameValidationError: string;
+  avatar: string;
+  actions: {
+    setName: (name: string) => void;
+    setUsername: (username: string) => void;
+    setNameValidationError: (nameValidationError: string) => void;
+    setAvatar: (avatar: string) => void;
+    reset: () => void;
+  };
+};
+
+const useOnboardingContactCardStore = create<IOnboardingContactCardStore>(
+  (set) => ({
+    name: "",
+    username: "",
+    nameValidationError: "",
+    avatar: "",
+    actions: {
+      setName: (name: string) => set({ name }),
+      setUsername: (username: string) => set({ username }),
+      setNameValidationError: (nameValidationError: string) =>
+        set({ nameValidationError }),
+      setAvatar: (avatar: string) => set({ avatar }),
+      reset: () => set({ name: "", username: "", nameValidationError: "", avatar: "" }),
+    },
+  })
+);
 
 export function OnboardingContactCardScreen() {
   const { themed } = useAppTheme();
@@ -32,6 +76,19 @@ export function OnboardingContactCardScreen() {
   const handleRealContinue = useCallback(async () => {
     try {
       const currentSender = useMultiInboxStore.getState().currentSender;
+      const store = useOnboardingContactCardStore.getState();
+
+      // Validate profile data first using profileValidationSchema
+      const profileValidation = profileValidationSchema.safeParse({
+        name: store.name,
+        username: store.username,
+      });
+
+      if (!profileValidation.success) {
+        const errorMessage =
+          profileValidation.error.errors[0]?.message || "Invalid profile data";
+        throw new ValidationError({ message: errorMessage });
+      }
 
       if (!currentSender) {
         throw new Error("No current sender found, please logout");
@@ -41,15 +98,25 @@ export function OnboardingContactCardScreen() {
         throw new Error("No Privy user found, please logout");
       }
 
-      await createUserAsync({
-        inboxId: currentSender?.inboxId,
-        privyUserId: privyUser?.id,
-        smartContractWalletAddress: currentSender?.ethereumAddress,
+      // Create and validate the request payload
+      const payload = {
+        inboxId: currentSender.inboxId,
+        privyUserId: privyUser.id,
+        smartContractWalletAddress: currentSender.ethereumAddress,
         profile: {
-          name: useOnboardingContactCardStore.getState().name,
+          name: store.name,
+          username: store.username,
         },
-      });
+      };
 
+      // Validate the payload against our schema
+      const validationResult = createUserRequestSchema.safeParse(payload);
+
+      if (!validationResult.success) {
+        throw new Error("Invalid request data. Please check your input.");
+      }
+
+      await createUserAsync(validationResult.data);
       useAuthStore.getState().actions.setStatus("signedIn");
 
       // TODO: Notification permissions screen
@@ -62,14 +129,20 @@ export function OnboardingContactCardScreen() {
       // }
     } catch (error) {
       if (error instanceof ValidationError) {
-        useOnboardingContactCardStore
-          .getState()
-          .actions.setNameValidationError(Object.values(error.errors)[0]);
         captureErrorWithToast(error, {
-          message: Object.values(error.errors)[0],
+          message: error.message,
         });
+      } else if (isAxiosError(error)) {
+        const userMessage =
+          error.response?.status === 409
+            ? "This username is already taken"
+            : "Failed to create profile. Please try again.";
+
+        captureErrorWithToast(error, { message: userMessage });
       } else {
-        captureErrorWithToast(error);
+        captureErrorWithToast(error, {
+          message: "An unexpected error occurred. Please try again.",
+        });
       }
     }
   }, [createUserAsync, privyUser]);
@@ -173,32 +246,35 @@ const $subtitleStyle: ThemedStyle<TextStyle> = ({ spacing }) => ({
   marginBottom: spacing.sm,
 });
 
-const ProfileContactCardNameInput = memo(
-  function ProfileContactCardNameInput() {
-    const [nameValidationError, setNameValidationError] = useState<string>();
+const ProfileContactCardNameInput = memo(function ProfileContactCardNameInput() {
+  const [nameValidationError, setNameValidationError] = useState<string>();
 
-    const handleDisplayNameChange = useCallback((text: string) => {
-      const { isValid, error } = validateProfileName(text);
+  const handleDisplayNameChange = useCallback((text: string) => {
+    const { isValid, error } = validateProfileName(text);
 
-      if (!isValid) {
-        setNameValidationError(error);
-      } else {
-        setNameValidationError(undefined);
-      }
+    if (!isValid) {
+      setNameValidationError(error);
+      useOnboardingContactCardStore.getState().actions.setUsername("");
+      return;
+    }
 
-      useOnboardingContactCardStore.getState().actions.setName(text);
-    }, []);
+    setNameValidationError(undefined);
+    const username = formatRandomUserName({ displayName: text });
 
-    return (
-      <ProfileContactCardEditableNameInput
-        defaultValue={useOnboardingContactCardStore.getState().name}
-        onChangeText={handleDisplayNameChange}
-        status={nameValidationError ? "error" : undefined}
-        helper={nameValidationError}
-      />
-    );
-  },
-);
+    const store = useOnboardingContactCardStore.getState();
+    store.actions.setName(text);
+    store.actions.setUsername(username);
+  }, []);
+
+  return (
+    <ProfileContactCardEditableNameInput
+      defaultValue={useOnboardingContactCardStore.getState().name}
+      onChangeText={handleDisplayNameChange}
+      status={nameValidationError ? "error" : undefined}
+      helper={nameValidationError}
+    />
+  );
+});
 
 const ProfileContactCardAvatar = memo(function ProfileContactCardAvatar() {
   const { asset, addPFP } = useAddPfp();
@@ -221,39 +297,3 @@ const ProfileContactCardAvatar = memo(function ProfileContactCardAvatar() {
     />
   );
 });
-
-type IOnboardingContactCardState = {
-  name: string;
-  nameValidationError: string;
-  avatar: string;
-};
-
-type IOnboardingContactCardActions = {
-  setName: (name: string) => void;
-  setNameValidationError: (nameValidationError: string) => void;
-  setAvatar: (avatar: string) => void;
-  reset: () => void;
-};
-
-type IOnboardingContactCardStore = IOnboardingContactCardState & {
-  actions: IOnboardingContactCardActions;
-};
-
-const initialState: IOnboardingContactCardState = {
-  name: "",
-  nameValidationError: "",
-  avatar: "",
-};
-
-const useOnboardingContactCardStore = create<IOnboardingContactCardStore>(
-  (set, get) => ({
-    ...initialState,
-    actions: {
-      setName: (name: string) => set({ name }),
-      setNameValidationError: (nameValidationError: string) =>
-        set({ nameValidationError }),
-      setAvatar: (avatar: string) => set({ avatar }),
-      reset: () => set(initialState),
-    },
-  }),
-);

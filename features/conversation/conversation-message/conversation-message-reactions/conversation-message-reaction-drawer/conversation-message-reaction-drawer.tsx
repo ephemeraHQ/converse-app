@@ -185,9 +185,9 @@ const BottomSheetContent = memo(function BottomSheetContent() {
                   <Avatar
                     size={theme.avatarSize.md}
                     uri={item.reactor.avatar}
-                    name={item.reactor.userName}
+                    name={item.reactor.username}
                   />
-                  <Text style={themed($userName)}>{item.reactor.userName}</Text>
+                  <Text style={themed($username)}>{item.reactor.username}</Text>
                   <Text style={themed($reactionContent)}>{item.content}</Text>
                 </HStack>
               </ReactionContainer>
@@ -233,7 +233,7 @@ const $reactionInner: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flex: 1,
 });
 
-const $userName: ThemedStyle<TextStyle> = ({ spacing, colors }) => ({
+const $username: ThemedStyle<TextStyle> = ({ spacing, colors }) => ({
   flex: 1,
   display: "flex",
   alignItems: "flex-end",
