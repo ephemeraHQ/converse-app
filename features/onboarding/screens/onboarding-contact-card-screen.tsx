@@ -11,7 +11,6 @@ import { captureErrorWithToast } from "@/utils/capture-error";
 import { ValidationError } from "@/utils/api/api.error";
 import { useAddPfp } from "../../../hooks/use-add-pfp";
 import { isAxiosError } from "axios";
-import { logger } from "@/utils/logger";
 
 import { Screen } from "@/components/screen/screen";
 import { useAuthStore } from "@/features/authentication/authentication.store";
@@ -46,6 +45,7 @@ type IOnboardingContactCardStore = {
     setUsername: (username: string) => void;
     setNameValidationError: (nameValidationError: string) => void;
     setAvatar: (avatar: string) => void;
+    reset: () => void;
   };
 };
 
@@ -61,6 +61,7 @@ const useOnboardingContactCardStore = create<IOnboardingContactCardStore>(
       setNameValidationError: (nameValidationError: string) =>
         set({ nameValidationError }),
       setAvatar: (avatar: string) => set({ avatar }),
+      reset: () => set({ name: "", username: "", nameValidationError: "", avatar: "" }),
     },
   })
 );
@@ -163,6 +164,12 @@ export function OnboardingContactCardScreen() {
       useAuthStore.getState().actions.setStatus("signedOut");
     },
   });
+
+  useEffect(() => {
+    return () => {
+      useOnboardingContactCardStore.getState().actions.reset();
+    };
+  }, []);
 
   return (
     <>
