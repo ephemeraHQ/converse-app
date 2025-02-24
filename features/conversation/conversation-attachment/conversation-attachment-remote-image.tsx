@@ -1,22 +1,22 @@
-import { AttachmentLoading } from "@/features/conversation/conversation-attachment/conversation-attachment-loading";
-import { getCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
 import { Icon } from "@design-system/Icon/Icon";
+import { PressableScale } from "@design-system/pressable-scale";
 import { Text } from "@design-system/Text";
 import { IVStackProps, VStack } from "@design-system/VStack";
-import { PressableScale } from "@design-system/pressable-scale";
 import { translate } from "@i18n";
 import { useQuery } from "@tanstack/react-query";
-import { useAppTheme } from "@/theme/use-app-theme";
 import { getLocalAttachmentForMessageId } from "@utils/attachment/getLocalAttachment";
 import { handleDecryptedLocalAttachment } from "@utils/attachment/handleDecryptedLocalAttachment";
-import {
-  MAX_AUTOMATIC_DOWNLOAD_ATTACHMENT_SIZE,
-  fetchAndDecodeRemoteAttachment,
-} from "@/utils/xmtpRN/attachments";
 import { RemoteAttachmentContent } from "@xmtp/react-native-sdk";
 import { Image } from "expo-image";
 import prettyBytes from "pretty-bytes";
 import { memo } from "react";
+import { getCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
+import { AttachmentLoading } from "@/features/conversation/conversation-attachment/conversation-attachment-loading";
+import {
+  fetchAndDecodeRemoteAttachment,
+  MAX_AUTOMATIC_DOWNLOAD_ATTACHMENT_SIZE,
+} from "@/features/xmtp/xmtp-codecs/xmtp-codecs-attachments";
+import { useAppTheme } from "@/theme/use-app-theme";
 
 type IAttachmentRemoteImageProps = {
   messageId: string;
@@ -26,7 +26,7 @@ type IAttachmentRemoteImageProps = {
 };
 
 export const AttachmentRemoteImage = memo(function AttachmentRemoteImage(
-  props: IAttachmentRemoteImageProps
+  props: IAttachmentRemoteImageProps,
 ) {
   const { messageId, remoteMessageContent, fitAspectRatio, containerProps } =
     props;
@@ -77,14 +77,12 @@ export const AttachmentRemoteImage = memo(function AttachmentRemoteImage(
       <PressableScale
         onPress={() => {
           // openInWebview
-        }}
-      >
+        }}>
         <AttachmentPreviewContainer {...containerProps}>
           <Text
             style={{
               textDecorationLine: "underline",
-            }}
-          >
+            }}>
             {translate("attachment_message_view_in_browser")}
           </Text>
         </AttachmentPreviewContainer>
@@ -114,7 +112,7 @@ export const AttachmentRemoteImage = memo(function AttachmentRemoteImage(
 });
 
 const AttachmentPreviewContainer = memo(function AttachmentPreviewContainer(
-  props: IVStackProps
+  props: IVStackProps,
 ) {
   const { style, ...rest } = props;
 
@@ -142,7 +140,7 @@ const AttachmentPreviewContainer = memo(function AttachmentPreviewContainer(
 
 async function fetchAttachment(
   messageId: string,
-  content: RemoteAttachmentContent
+  content: RemoteAttachmentContent,
 ) {
   const localAttachment = await getLocalAttachmentForMessageId(messageId);
 

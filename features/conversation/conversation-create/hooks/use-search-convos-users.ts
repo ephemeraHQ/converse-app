@@ -1,12 +1,12 @@
+import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
+import { InboxId } from "@xmtp/react-native-sdk";
 import {
   ISearchProfilesResult,
   searchProfiles,
 } from "@/features/profiles/profiles.search.api";
+import { isSameInboxId } from "@/features/xmtp/xmtp-inbox-id/xmtp-inbox-id";
 import { getSearchConvosUsersQueryKey } from "@/queries/QueryKeys";
 import { DateUtils } from "@/utils/time.utils";
-import { isSameInboxId } from "@/utils/xmtpRN/xmtp-inbox-id/xmtp-inbox-id";
-import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
-import { InboxId } from "@xmtp/react-native-sdk";
 
 export function useSearchConvosUsers(args: {
   searchQuery: string;
@@ -21,8 +21,8 @@ export function useSearchConvosUsers(args: {
       return data.filter(
         (profile) =>
           !inboxIdsToOmit.some((inboxIdToOmit) =>
-            isSameInboxId(profile.xmtpId, inboxIdToOmit)
-          )
+            isSameInboxId(profile.xmtpId, inboxIdToOmit),
+          ),
       );
     },
   });

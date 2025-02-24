@@ -1,9 +1,9 @@
-import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
-import { conversationSyncAllQueryKey } from "@/queries/QueryKeys";
-import { queryClient } from "@/queries/queryClient";
-import { captureError } from "@/utils/capture-error";
 import { queryOptions, skipToken } from "@tanstack/react-query";
 import { ConsentState } from "@xmtp/react-native-sdk";
+import { getXmtpClientByEthAddress } from "@/features/xmtp/xmtp-client/xmtp-client.service";
+import { queryClient } from "@/queries/queryClient";
+import { conversationSyncAllQueryKey } from "@/queries/QueryKeys";
+import { captureError } from "@/utils/capture-error";
 
 type IArgs = {
   ethAddress: string;
@@ -25,7 +25,7 @@ export function getConversationSyncAllQueryOptions(args: IArgs) {
             throw new Error("consentStates is required");
           }
 
-          const client = MultiInboxClient.instance.getInboxClientForAddress({
+          const client = await getXmtpClientByEthAddress({
             ethereumAddress: args.ethAddress,
           });
 
@@ -37,8 +37,8 @@ export function getConversationSyncAllQueryOptions(args: IArgs) {
           if (timeDiff > 3000) {
             captureError(
               new Error(
-                `[getConversationSyncAllQuery] Syncing conversations from network took ${timeDiff}ms for account ${args.ethAddress}`
-              )
+                `[getConversationSyncAllQuery] Syncing conversations from network took ${timeDiff}ms for account ${args.ethAddress}`,
+              ),
             );
           }
 

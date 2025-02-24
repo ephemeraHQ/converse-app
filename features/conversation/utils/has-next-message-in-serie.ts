@@ -1,8 +1,8 @@
-import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
+import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types";
 
 type HasNextMessageInSeriesPayload = {
-  currentMessage: DecodedMessageWithCodecsType;
-  nextMessage: DecodedMessageWithCodecsType | undefined;
+  currentMessage: IXmtpDecodedMessage;
+  nextMessage: IXmtpDecodedMessage | undefined;
 };
 
 export const hasNextMessageInSeries = ({

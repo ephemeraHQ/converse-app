@@ -1,10 +1,3 @@
-import { VStack } from "@/design-system/VStack";
-import { useLogout } from "@/features/authentication/use-logout.hook";
-import { translate } from "@/i18n";
-import { navigate } from "@/navigation/navigation.utils";
-import { $globalStyles } from "@/theme/styles";
-import { getEnv } from "@/utils/getEnv";
-import { getNativeLogFile } from "@/utils/xmtpRN/logs";
 import * as Sentry from "@sentry/react-native";
 import {
   getPreviousSessionLoggingFile,
@@ -17,6 +10,13 @@ import { Image } from "expo-image";
 import * as Updates from "expo-updates";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { Alert, Platform } from "react-native";
+import { VStack } from "@/design-system/VStack";
+import { useLogout } from "@/features/authentication/use-logout.hook";
+import { getXmtpNativeLogFile } from "@/features/xmtp/utils/xmtp-logs";
+import { translate } from "@/i18n";
+import { navigate } from "@/navigation/navigation.utils";
+import { $globalStyles } from "@/theme/styles";
+import { getEnv } from "@/utils/getEnv";
 import { showActionSheet } from "./action-sheet";
 
 export function DebugProvider(props: { children: React.ReactNode }) {
@@ -64,7 +64,7 @@ export function DebugProvider(props: { children: React.ReactNode }) {
         await RNFS.unlink(
           `file://${RNFS.CachesDirectoryPath}${
             RNFS.CachesDirectoryPath.endsWith("/") ? "" : "/"
-          }mediacache`
+          }mediacache`,
         );
         alert("Done!");
       },
@@ -95,7 +95,7 @@ export function DebugProvider(props: { children: React.ReactNode }) {
               : "",
           ]
             .filter(Boolean)
-            .join("\n")
+            .join("\n"),
         );
       },
       "Check for Updates": async () => {
@@ -123,7 +123,7 @@ export function DebugProvider(props: { children: React.ReactNode }) {
                     }
                   },
                 },
-              ]
+              ],
             );
           } else {
             Alert.alert("No Updates", "You are running the latest version");
@@ -144,7 +144,7 @@ export function DebugProvider(props: { children: React.ReactNode }) {
         });
       },
       "Share native logs": async () => {
-        const nativeLogFilePath = await getNativeLogFile();
+        const nativeLogFilePath = await getXmtpNativeLogFile();
         Share.open({
           title: translate("debug.libxmtp_log_session"),
           url: `file://${nativeLogFilePath}`,
@@ -167,7 +167,7 @@ export function DebugProvider(props: { children: React.ReactNode }) {
         navigate("WebviewPreview", { uri: loggingFilePath });
       },
       "Display native logs": async () => {
-        const nativeLogFilePath = await getNativeLogFile();
+        const nativeLogFilePath = await getXmtpNativeLogFile();
         navigate("WebviewPreview", { uri: nativeLogFilePath });
       },
       "Display previous session logs": async () => {

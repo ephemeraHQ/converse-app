@@ -1,23 +1,23 @@
+import { useNavigation } from "@react-navigation/native";
+import { useQueries } from "@tanstack/react-query";
+import React, { memo, useMemo } from "react";
+import { Center } from "@/design-system/Center";
+import { AnimatedHStack, HStack } from "@/design-system/HStack";
+import { Image } from "@/design-system/image";
+import { AnimatedVStack } from "@/design-system/VStack";
 import {
   useCurrentSenderEthAddress,
   useSafeCurrentSender,
-} from "@/features/multi-inbox/multi-inbox.store";
-import { Center } from "@/design-system/Center";
-import { AnimatedHStack, HStack } from "@/design-system/HStack";
-import { AnimatedVStack } from "@/design-system/VStack";
-import { Image } from "@/design-system/image";
+} from "@/features/authentication/multi-inbox.store";
 import {
   ConversationListItem,
   ConversationListItemSubtitle,
   ConversationListItemTitle,
 } from "@/features/conversation-list/conversation-list-item/conversation-list-item";
 import { useConversationRequestsListItem } from "@/features/conversation-requests-list/use-conversation-requests-list-items";
-import { conversationIsUnreadForInboxId } from "@/features/conversation/utils/conversation-is-unread-by-current-account";
 import { getConversationMetadataQueryOptions } from "@/features/conversation/conversation-metadata/conversation-metadata.query";
+import { conversationIsUnreadForInboxId } from "@/features/conversation/utils/conversation-is-unread-by-current-account";
 import { useAppTheme } from "@/theme/use-app-theme";
-import { useNavigation } from "@react-navigation/native";
-import { useQueries } from "@tanstack/react-query";
-import React, { memo, useMemo } from "react";
 
 export const ConversationListAwaitingRequests = memo(
   function ConversationListAwaitingRequests() {
@@ -33,13 +33,13 @@ export const ConversationListAwaitingRequests = memo(
         getConversationMetadataQueryOptions({
           account: currentAccount,
           topic: conversation.topic,
-        })
+        }),
       ),
     });
 
     const numberOfRequestsLikelyNotSpam = useMemo(
       () => likelyNotSpam.length,
-      [likelyNotSpam]
+      [likelyNotSpam],
     );
 
     const hasUnreadMessages = useMemo(
@@ -58,7 +58,7 @@ export const ConversationListAwaitingRequests = memo(
               : null,
           });
         }),
-      [conversationsMetadataQueries, likelyNotSpam, currentAccountInboxId]
+      [conversationsMetadataQueries, likelyNotSpam, currentAccountInboxId],
     );
 
     const title = useMemo(() => {
@@ -67,8 +67,7 @@ export const ConversationListAwaitingRequests = memo(
           style={{
             alignItems: "center",
             columnGap: theme.spacing.xxs,
-          }}
-        >
+          }}>
           <ConversationListItemTitle>Requests</ConversationListItemTitle>
         </HStack>
       );
@@ -93,8 +92,7 @@ export const ConversationListAwaitingRequests = memo(
         <AnimatedHStack
           key={text} // Doing this to make sure the animation is triggered
           entering={theme.animation.reanimatedFadeInSpring}
-          exiting={theme.animation.reanimatedFadeOutSpring}
-        >
+          exiting={theme.animation.reanimatedFadeOutSpring}>
           <ConversationListItemSubtitle>{text}</ConversationListItemSubtitle>
         </AnimatedHStack>
       );
@@ -103,8 +101,7 @@ export const ConversationListAwaitingRequests = memo(
     return (
       <AnimatedVStack
         layout={theme.animation.reanimatedLayoutSpringTransition}
-        entering={theme.animation.reanimatedFadeInSpring}
-      >
+        entering={theme.animation.reanimatedFadeInSpring}>
         <ConversationListItem
           title={title}
           subtitle={subtitle}
@@ -120,8 +117,7 @@ export const ConversationListAwaitingRequests = memo(
                 height: theme.avatarSize.lg,
                 backgroundColor: theme.colors.fill.tertiary,
                 borderRadius: 999,
-              }}
-            >
+              }}>
               {/* TODO: Add skia to make it better and add the little "shield" icon */}
               <Image
                 source={
@@ -140,5 +136,5 @@ export const ConversationListAwaitingRequests = memo(
         />
       </AnimatedVStack>
     );
-  }
+  },
 );

@@ -71,7 +71,7 @@ export const unknownConsentConversationsQueryKey = (account: string) => [
 
 export const conversationQueryKey = (
   account: string,
-  topic: ConversationTopic
+  topic: ConversationTopic,
 ) => [QueryKeys.CONVERSATION, account?.toLowerCase(), topic];
 
 export const dmQueryKey = (args: { account: string; inboxId: InboxId }) => [
@@ -81,23 +81,23 @@ export const dmQueryKey = (args: { account: string; inboxId: InboxId }) => [
 ];
 export const conversationMetadataQueryKey = (
   account: string,
-  topic: ConversationTopic
+  topic: ConversationTopic,
 ) => [QueryKeys.CONVERSATION_METADATA, account.toLowerCase(), topic];
 
 // Messages
 export const conversationMessageQueryKey = (
   account: string,
-  messageId: string
+  messageId: string,
 ) => [QueryKeys.CONVERSATION_MESSAGE, account.toLowerCase(), messageId];
 
 export const conversationMessagesQueryKey = (
   account: string,
-  topic: ConversationTopic
+  topic: ConversationTopic,
 ) => [QueryKeys.CONVERSATION_MESSAGES, account?.toLowerCase(), topic];
 
 export const conversationPreviewMessagesQueryKey = (
   account: string,
-  topic: ConversationTopic
+  topic: ConversationTopic,
 ) => [QueryKeys.CONVERSATION_MESSAGES, account?.toLowerCase(), topic];
 
 // Members
@@ -109,29 +109,29 @@ export const groupMembersQueryKey = (args: {
 // Group Mutable Metadata
 export const groupPinnedFrameQueryKey = (
   account: string,
-  topic: ConversationTopic
+  topic: ConversationTopic,
 ) => [QueryKeys.PINNED_FRAME, account?.toLowerCase(), topic];
 
 export const groupPermissionPolicyQueryKey = (
   account: string,
-  topic: ConversationTopic
+  topic: ConversationTopic,
 ) => [QueryKeys.GROUP_PERMISSION_POLICY, account.toLowerCase(), topic];
 
 export const groupCreatorQueryKey = (
   account: string,
-  topic: ConversationTopic
+  topic: ConversationTopic,
 ) => [QueryKeys.GROUP_CREATOR, account.toLowerCase(), topic];
 
 // Permissions
 export const groupPermissionsQueryKey = (
   account: string,
-  topic: ConversationTopic
+  topic: ConversationTopic,
 ) => [QueryKeys.GROUP_PERMISSIONS, account?.toLowerCase(), topic];
 
 // Group Invites
 export const groupJoinRequestQueryKey = (
   account: string,
-  requestId: string
+  requestId: string,
 ) => [QueryKeys.GROUP_JOIN_REQUEST, account?.toLowerCase(), requestId];
 
 export const pendingJoinRequestsQueryKey = (account: string) => [
@@ -155,11 +155,6 @@ export const privyCustomMetadataQueryKey = (userId?: string) => [
   QueryKeys.PRIVY_CUSTOM_METADATA,
   userId?.toLowerCase(),
 ];
-
-export const getSearchExistingDmsQueryKey = (args: {
-  searchQuery: string;
-  inboxId: InboxId;
-}) => [QueryKeys.CONVERSATIONS_SEARCH, "dms", args.searchQuery, args.inboxId];
 
 export const getSearchExistingGroupsByGroupNameQueryKey = (args: {
   searchQuery: string;

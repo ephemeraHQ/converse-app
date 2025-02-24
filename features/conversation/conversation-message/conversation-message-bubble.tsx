@@ -1,7 +1,7 @@
-import { debugBorder } from "@/utils/debug-style";
 import { HStack } from "@design-system/HStack";
-import { useAppTheme } from "@/theme/use-app-theme";
 import { useMemo } from "react";
+import { useAppTheme } from "@/theme/use-app-theme";
+import { debugBorder } from "@/utils/debug-style";
 
 export const BubbleContainer = ({
   children,
@@ -12,8 +12,8 @@ export const BubbleContainer = ({
 }) => {
   return (
     <HStack
+      // {...debugBorder()}
       style={{
-        // ...debugBorder("red"),
         ...(fromMe
           ? { justifyContent: "flex-end" }
           : { justifyContent: "flex-start" }),

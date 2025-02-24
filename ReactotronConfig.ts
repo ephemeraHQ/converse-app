@@ -4,6 +4,7 @@ import {
   reactotronReactQuery,
 } from "reactotron-react-query";
 import { queryClient } from "./queries/queryClient";
+
 const queryClientManager = new QueryClientManager({
   queryClient,
 });

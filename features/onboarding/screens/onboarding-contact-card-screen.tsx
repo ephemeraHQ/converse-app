@@ -1,9 +1,6 @@
-import { Screen } from "@/components/screen/screen";
-import { OnboardingSubtitle } from "@/features/onboarding/components/onboarding-subtitle";
-import { OnboardingTitle } from "@/features/onboarding/components/onboarding-title";
+import { usePrivy } from "@privy-io/expo";
 import React, { memo, useCallback, useEffect, useState } from "react";
 import { Alert, TextStyle, ViewStyle } from "react-native";
-import { usePrivy } from "@privy-io/expo";
 import { create } from "zustand";
 import { z } from "zod";
 
@@ -12,15 +9,17 @@ import { VStack } from "@/design-system/VStack";
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { ValidationError } from "@/utils/api/api.error";
+import { useAddPfp } from "../../../hooks/use-add-pfp";
 import { isAxiosError } from "axios";
 import { logger } from "@/utils/logger";
 
-import { useAddPfp } from "../hooks/useAddPfp";
-// import { useProfile } from "../hooks/useProfile";
+import { Screen } from "@/components/screen/screen";
 import { useAuthStore } from "@/features/authentication/authentication.store";
+import { useMultiInboxStore } from "@/features/authentication/multi-inbox.store";
 import { useCreateUser } from "@/features/current-user/use-create-user";
-import { useMultiInboxStore } from "@/features/multi-inbox/multi-inbox.store";
 import { OnboardingFooter } from "@/features/onboarding/components/onboarding-footer";
+import { OnboardingSubtitle } from "@/features/onboarding/components/onboarding-subtitle";
+import { OnboardingTitle } from "@/features/onboarding/components/onboarding-title";
 import { ProfileContactCardEditableAvatar } from "@/features/profiles/components/profile-contact-card/profile-contact-card-editable-avatar";
 import { ProfileContactCardEditableNameInput } from "@/features/profiles/components/profile-contact-card/profile-contact-card-editable-name-input";
 import { ProfileContactCardLayout } from "@/features/profiles/components/profile-contact-card/profile-contact-card-layout";
@@ -165,13 +164,18 @@ export function OnboardingContactCardScreen() {
     },
   });
 
+  useEffect(() => {
+    return () => {
+      useOnboardingContactCardStore.getState().actions.reset();
+    };
+  }, []);
+
   return (
     <>
       <Screen
         preset="scroll"
         contentContainerStyle={$screenContainer}
-        safeAreaEdges={["bottom"]}
-      >
+        safeAreaEdges={["bottom"]}>
         <Center style={$centerContainerStyle}>
           <VStack style={$titleContainer}>
             <OnboardingTitle size={"xl"}>
@@ -275,7 +279,7 @@ const ProfileContactCardNameInput = memo(
         helper={nameValidationError}
       />
     );
-  }
+  },
 );
 
 const ProfileContactCardAvatar = memo(function ProfileContactCardAvatar() {

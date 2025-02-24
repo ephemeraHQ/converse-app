@@ -1,18 +1,3 @@
-import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
-import {
-  addConversationToUnknownConsentConversationsQuery,
-  removeConversationFromUnknownConsentConversationsQueryData,
-} from "@/queries/conversations-unknown-consent-query";
-import {
-  addConversationToAllowedConsentConversationsQuery,
-  removeConversationFromAllowedConsentConversationsQuery,
-} from "@/queries/conversations-allowed-consent-query";
-import {
-  getGroupQueryData,
-  getOrFetchGroupQuery,
-  setGroupQueryData,
-} from "@/queries/useGroupQuery";
-import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
 import { queryClient } from "@queries/queryClient";
 import {
   MutationObserver,
@@ -21,10 +6,26 @@ import {
 } from "@tanstack/react-query";
 import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
 import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
+import { updateInboxIdsConsentForAccount } from "@/features/consent/update-inbox-ids-consent-for-account";
+import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
+import { IXmtpGroupWithCodecs } from "@/features/xmtp/xmtp.types";
+import {
+  addConversationToAllowedConsentConversationsQuery,
+  removeConversationFromAllowedConsentConversationsQuery,
+} from "@/queries/conversations-allowed-consent-query";
+import {
+  addConversationToUnknownConsentConversationsQuery,
+  removeConversationFromUnknownConsentConversationsQueryData,
+} from "@/queries/conversations-unknown-consent-query";
+import {
+  getGroupQueryData,
+  getOrFetchGroupQuery,
+  setGroupQueryData,
+} from "@/queries/useGroupQuery";
+import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
 import { MutationKeys } from "../../queries/MutationKeys";
 import { updateConsentForGroupsForAccount } from "./update-consent-for-groups-for-account";
-import { GroupWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
-import { updateInboxIdsConsentForAccount } from "@/features/consent/update-inbox-ids-consent-for-account";
+
 type IAllowGroupMutationOptions = {
   account: string;
   topic: ConversationTopic;
@@ -92,12 +93,12 @@ async function allowGroup({
 }
 
 export const getAllowGroupMutationOptions = (
-  args: IAllowGroupMutationOptions
+  args: IAllowGroupMutationOptions,
 ): MutationOptions<
   IAllowGroupReturnType,
   unknown,
   IAllowGroupArgs,
-  { previousGroup: GroupWithCodecsType } | undefined
+  { previousGroup: IXmtpGroupWithCodecs } | undefined
 > => {
   const { account, topic } = args;
   return {
@@ -161,18 +162,18 @@ export const getAllowGroupMutationOptions = (
 };
 
 export const createAllowGroupMutationObserver = (
-  args: IAllowGroupMutationOptions
+  args: IAllowGroupMutationOptions,
 ) => {
   const allowGroupMutationObserver = new MutationObserver(
     queryClient,
-    getAllowGroupMutationOptions(args)
+    getAllowGroupMutationOptions(args),
   );
   return allowGroupMutationObserver;
 };
 
 export const useAllowGroupMutation = (
   account: string,
-  topic: ConversationTopic
+  topic: ConversationTopic,
 ) => {
   return useMutation(getAllowGroupMutationOptions({ account, topic }));
 };

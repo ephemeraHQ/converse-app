@@ -1,7 +1,10 @@
 /**
  * useGroupQuery is derived from useConversationQuery. Like useDmQuery, maybe worth considering if we should just use useConversationQuery instead.
  */
+import { queryOptions, useQuery } from "@tanstack/react-query";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
+import { IXmtpGroupWithCodecs } from "@/features/xmtp/xmtp.types";
 import {
   ConversationQueryData,
   getConversationQueryData,
@@ -10,9 +13,6 @@ import {
   setConversationQueryData,
   updateConversationQueryData,
 } from "@/queries/conversation-query";
-import { GroupWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
-import { queryOptions, useQuery } from "@tanstack/react-query";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
 export function useGroupQuery(args: {
   account: string;
@@ -23,7 +23,7 @@ export function useGroupQuery(args: {
     getGroupQueryOptions({
       account,
       topic,
-    })
+    }),
   );
 }
 
@@ -32,7 +32,7 @@ export function getGroupQueryData(args: {
   topic: ConversationTopic;
 }) {
   return getConversationQueryData(args) as
-    | GroupWithCodecsType
+    | IXmtpGroupWithCodecs
     | null
     | undefined;
 }
@@ -40,7 +40,7 @@ export function getGroupQueryData(args: {
 export function setGroupQueryData(args: {
   account: string;
   topic: ConversationTopic;
-  group: GroupWithCodecsType;
+  group: IXmtpGroupWithCodecs;
 }) {
   const { account, topic, group } = args;
   setConversationQueryData({
@@ -67,7 +67,7 @@ export function getGroupQueryOptions(args: {
       }
       if (!isConversationGroup(data)) {
         throw new Error(
-          "Expected group conversation but received different type"
+          "Expected group conversation but received different type",
         );
       }
       return data;

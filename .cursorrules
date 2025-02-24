@@ -1,95 +1,69 @@
 ## General
 
-- When I ask you to “clean” a file, rewrite the content following the rules and best practices listed below.
+- When I ask you to "clean" a file, rewrite the content following the rules and best practices listed below.
 - When I ask you to "Make more readable", rewrite the content following the rules and best practices listed below and add some comments to explain the code. The comments need to be short and direct. Don't add comments when it's obvious what the code is doing. Also add some comments to explain why we are doing something in a certain way.
 
 ## Core Principles
 
 - Write concise TypeScript code.
 - Use functional programming patterns.
-- Prefer clean, readable code over compact code, using empty lines to separate logical blocks and improve readability.
-- Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError). Doesn't mater if it's long. For example this is good: "useGroupMembersInfo".
-- Prefer clean and easy to read code over compact code.
-- Don't create function(s) inside other functions unless it's specified
-- Add clear, concise comments to explain non-obvious logic or unconventional implementation decisions.
-- When refactoring code, preserve existing comments unless explicitly instructed otherwise or the related code is removed. Comments often explain important context or implementation decisions that should be maintained.
-- Comments should be above the code they are describing.
-- Handle errors at the caller level. Unless if we really need to log something but make sure to throw back the error to the caller.
-- Minimize using external hooks inside custom hooks to prevent unnecessary rerenders. Instead, use getter functions to access data, especially in mutations.
-- Use Zod for external API response validation. Define zod schema and infer types from it.
-- Keep files small and focused. Place hooks and components in separate files unless they are small wrapper components. This improves code organization and maintainability.
-- Refactor a component using the composable pattern when you start seeing a lot of optional props.
+- Prefer clean, readable code over compact code, using empty lines to separate logical blocks.
+- Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError).
+- Don't create functions inside other functions unless specified.
+- Add clear, concise comments to explain non-obvious logic.
+- Handle errors at the caller level unless logging is needed.
+- Minimize using external hooks inside custom hooks to prevent unnecessary rerenders.
+- Use Zod for external API response validation.
+- Keep files small and focused.
 - Use logger for all logging operations:
 
-  - Prefer `logger.debug` over `console.log`
-  - Use template literals for inline logging:
+```typescript
+// ❌ Bad: Object-based logging
+logger.debug("[buildXmtpClient]", { address, inboxId });
 
-    ```typescript
-    // ❌ Bad: Object-based logging
-    logger.debug("[buildXmtpClient] Starting to build XMTP client", {
-      address,
-      inboxId,
-    });
-
-    // ✅ Good: Inline template literal logging
-    logger.debug(
-      `[buildXmtpClient] Starting to build XMTP client with address: ${address} and inboxId: ${inboxId}`
-    );
-    ```
+// ✅ Good: Template literal logging
+logger.debug(`[buildXmtpClient] Building client for address: ${address}`);
+```
 
 ## TypeScript
 
-- Use types over interfaces, prefixed with 'I' (e.g., IMyItem).
+- Use types over interfaces, prefixed with 'I'.
 - Never use 'any'.
-- Avoid enums, use maps or string literals instead.
-- Use functional components with TypeScript types.
-- Prefer inferring types if possible over explicit typing.
-- Prefer type assertions on return objects (`return {...} satisfies IType`) over function return type annotations (`function(): IType`) if we have to put a type because the inferring is not working well.
+- Avoid enums, use string literals instead.
+- Prefer type inference when possible.
+- Avoid explicit Promise return types - let TypeScript infer them.
 
-## Function Parameter
+```typescript
+// ❌ Bad: Explicit Promise return types
+async function fetchUser(id: string): Promise<IUser> {
+  return api.getUser(id);
+}
 
-### Guidelines
+// ✅ Good: Let TypeScript infer the Promise return type
+async function fetchUser(id: string) {
+  return api.getUser(id);
+}
 
-- Use the `function` keyword for pure functions.
-- Prefer object parameters: `function(args: { propertyOne: string })` over `function(propertyOne: string)`.
+// ✅ Good: Non-Promise return types are still fine to be explicit
+function calculateTotal(items: ICartItem[]): number {
+  return items.reduce((sum, item) => sum + item.price, 0);
+}
+```
+
+## Function Parameters
+
+- Use object parameters with inline types.
 - Destructure parameters at the top of the function body.
-- Don't create external types for the parameters unless we need to use them outside of the function.
 
-### Examples
-
-#### ❌ Bad: Extracting types unnecessarily
-
-```ts
-type MetadataOptions = { account: string; topic: string };
-
-function getMetadataOptions(args: MetadataOptions) {
-  const { account, topic } = args;
+```typescript
+// ❌ Bad: Individual parameters
+function sendMessage(recipientId: string, content: string) {
   // Function body
 }
-```
 
-✅ Good: Keeping types inline
-
-```ts
-function getMetadataOptions(args: { account: string; topic: string }) {
-  const { account, topic } = args;
-  // Function body
-}
-```
-
-#### ❌ Bad: Passing individual arguments
-
-```ts
-function getMetadataOptions(account: string, topic: string) {
-  // Function body
-}
-```
-
-#### ✅ Good: Using args and destructuring at the top level
-
-```ts
-function getMetadataOptions(args: { account: string; topic: string }) {
-  const { account, topic } = args;
+// ✅ Good: Object parameters with destructuring
+function sendMessage(args: { recipientId: string; content: string }) {
+  const { recipientId, content } = args;
   // Function body
 }
 ```
@@ -97,253 +71,119 @@ function getMetadataOptions(args: { account: string; topic: string }) {
 ## React & Components
 
 - Use named exports.
-- Write JSX inline rather than separate render functions.
+- Write JSX inline.
 - Prefer early returns over ternaries.
-- Use array syntax for merged styles: `style={[{ color: "red" }, style]}`.
-- Minimize useEffect and setState usage.
+- Minimize useEffect usage.
 - Wrap components in memo() for performance.
-- When creating a new component or custom hook, aim to minimize the number of props you pass. Instead, try to reuse existing hooks whenever possible. This is especially important if the props or arguments you want to pass are only needed within the new component or hook we wanted to pass are ONLY used in the new component or hook.
-- When asked to extract a component or some code for custom hooks, create those in the same file.
-- Keep related code close together by placing the exported component at the top of the file with related components directly underneath it.
-- Avoid default exports to maintain consistent imports and easier refactoring.
-  - Named exports make codebase more maintainable and
-  - refactoring safer.
-  -
-  - @example
-  - // ❌ Bad: Default export
-  - export default function ProfileScreen()
-  -
-  - // ✅ Good: Named export
-  - export function ProfileScreen()
+
+```typescript
+// ❌ Bad: Default export with separate render method
+export default function MessageList() {
+  const renderMessage = (message) => <div>{message.content}</div>;
+  return <div>{messages.map(renderMessage)}</div>;
+}
+
+// ✅ Good: Named export with inline JSX
+export function MessageList() {
+  if (!messages.length) {
+    return <EmptyState />;
+  }
+
+  return (
+    <div>
+      {messages.map((message) => (
+        <MessageItem key={message.id} message={message} />
+      ))}
+    </div>
+  );
+}
+```
 
 ## File Structure
 
-- Use lower-kebab-case for directories and files (e.g., components/auth-wizard).
-- Import paths from our project should start with @/.
-- Use the same name for the file and the component.
-- Keep features self-contained. Create a new feature folder if accessing features across boundaries.
-- Place queries within their respective feature folders, but maintain queryKeys at the root level for better visibility.
-
-## File Naming Convention
-
-Use descriptive suffixes:
+- Use lower-kebab-case for directories and files.
+- Import paths should start with @/.
+- Use descriptive suffixes for files.
 
 ```
-[featureName].screen.tsx
-[featureName].nav.tsx
-[featureName].store.ts
-[featureName].queries.ts
-[featureName].utils.ts
-[featureName].client.ts
-[featureName].types.ts
-[featureName].test.ts
-```
-
-// ❌ Bad: Generic or unclear names
-profile.ts
-group-chat.tsx
+// ❌ Bad: Unclear names
 utils.ts
 types.ts
 
-// ✅ Good: Clear, descriptive names with proper suffixes
+// ✅ Good: Clear names with suffixes
 profile.screen.tsx
-group-chat.nav.tsx
-conversation.store.ts
 messages.queries.ts
-profile.utils.ts
 auth.client.ts
-user.types.ts
-login.test.ts
-
-## Imports
-
-Always import using the @alias as examplified below:
-
-// ✅ Good: Using the @ to simplify imports
-import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
-import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm";
-import { IConversationMembershipSearchResult } from "@/features/search/search.types";
-
-// ❌ Bad: Using relative paths
-import { isConversationGroup } from "../../../features/conversation/utils/is-conversation-group";
-import { isConversationDm } from "../../../features/conversation/utils/is-conversation-dm";
-import { IConversationMembershipSearchResult } from "../../../features/search/search.types";
-
-## Theming & Styling
-
-- Always use the theme for styling. Import it from @/theme/useAppTheme like `const { theme } = useAppTheme();`.
-- Use components from @/design-system.
-- Use the theme for colors and spacing.
-
-## React Query Principles
+```
 
 ## React Query Best Practices
 
-### Query Key Management
+- Define query keys in QueryKeys.ts.
+- Use queryOptions helper for type safety.
+- Handle conditional fetching with enabled flag.
 
-- All query keys must be defined in `QueryKeys.ts` using factory functions
-- Follow naming pattern: `<entity>QueryKey` for key factories
-- Use query key factory functions from `QueryKeys.ts` when accessing query keys
+```typescript
+// ❌ Bad: Direct key usage
+const { data } = useQuery(["messages", id]);
 
-@example
-// queries/QueryKeys.ts
-export const conversationsQueryKey = (account: string) => [
-QueryKeys.CONVERSATIONS,
-account?.toLowerCase(),
-];
+// ✅ Good: Using query options
+export const getMessagesQueryOptions = (args: { id: string }) => {
+  const enabled = !!args.id;
 
-// queries/use-conversations-query.ts
-export const getConversationsQueryOptions = (args: IArgs) => ({
-queryKey: conversationsQueryKey(args.account),
-queryFn: () => getConversations(args),
-enabled: !!args.account
-});
-
-### Query Options Encapsulation
-
-- Use React Query's `queryOptions` helper for type safety
-- Export query options generators for cross-component usage
-- Handle conditional fetching with `enabled` and `skipToken`
-- Create an `enabled` variable before returning query options to avoid duplicating logic
-- Never create a conditional queryKey:
-  @example
-  // ❌ conditional queryKey
-  queryKey: enabled ? queryKeyFactory(args) : ["profile"],
-
-// ✅ Good: Explicit property usage
-queryKey: queryKeyFactory(args),
-
-- Always use a ternary checking enabled to return liveQueryFn if enabled is true and skipToken if enabled is false
-  - queryFn: enabled ? () => liveQueryFn(args) : skipToken,
-
-@example
-// queries/use-conversation-messages-query.ts
-import { queryOptions, skipToken } from "@tanstack/react-query";
-export const getConversationMessagesQueryOptions = (args: {
-account: string;
-topic: ConversationTopic;
-caller?: string;
-}) => {
-const enabled = !!args.account && !!args.topic;
-return queryOptions({
-queryKey: conversationMessagesQueryKey(args.account, args.topic),
-queryFn: enabled ? () => conversationMessagesQueryFn(args) : skipToken,
-enabled,
-});
+  return queryOptions({
+    queryKey: messagesQueryKey(args.id),
+    queryFn: enabled ? () => fetchMessages(args) : skipToken,
+    enabled,
+  });
 };
+```
 
-### Mutation Patterns
+## Error Handling
 
-- Follow mutation structure with optimistic updates and error rollbacks
-- Use service functions for API calls
-- Maintain query cache consistency through direct updates
+- Prefer throwing errors over catching them, unless the catch block is where we want to handle the error UI/UX.
+- When catching errors, only do so at the level where you need to handle the user experience.
+- Use captureError only when you need to log the error but continue execution.
+- Add context to errors when throwing them up the chain.
+- Always throw XMTPError to maintain consistent error handling.
 
-@example
-// features/conversation-list/hooks/use-pin-or-unpin-conversation.tsx
-const { mutateAsync: pinConversationAsync } = useMutation({
-mutationFn: () =>
-pinTopicService({
-account: currentAccount,
-topic: conversationTopic,
-}),
-
-onMutate: async () => {
-const previousData = getConversationMetadataQueryData({
-account,
-topic
-});
-updateConversationMetadataOptimistically({ isPinned: true });
-return { previousData };
-},
-
-onError: (error, variables, context) => {
-logger.error(`Failed to pin conversation: ${error}`);
-rollbackConversationMetadata(context.previousData);
-},
-
-onSettled: () => {
-queryClient.invalidateQueries({
-queryKey: conversationMetadataQueryKey(account, topic)
-});
-}
-});
-
-// Service function in api/conversations.ts
-export const pinTopicService = async (args: {
-account: string;
-topic: string;
-}) => {
-const response = await fetch(`${API_URL}/pin`, {
-method: "POST",
-body: JSON.stringify(args),
-});
-return PinResponseSchema.parse(await response.json());
-};
-
-### Cache Management
-
-- Use atomic updates with queryClient methods
-- Export cache update helpers with their related query
-- Access query keys through query options getters rather than directly using key factories
-- Let TypeScript infer types from query options instead of manually specifying generics
-
-@example
-// queries/use-conversations-query.ts
-export function updateConversationInCache(args: {
-account: string;
-topic: string;
-update: Partial<ConversationType>;
-}) {
-const queryOptions = getConversationsQueryOptions({ account: args.account });
-
-queryClient.setQueryData<ConversationType[]>(
-queryOptions.queryKey,
-(prev) => prev?.map(conv =>
-conv.topic === args.topic ? { ...conv, ...args.update } : conv
-)
-);
+```typescript
+// ❌ Bad: Catching and capturing error when we should throw
+try {
+  await sendMessage(content);
+} catch (error) {
+  captureError(new XMTPError({ error }));
 }
 
-### Query Key Access
+// ❌ Bad: Catching error too early
+async function sendMessage(args: { content: string }) {
+  try {
+    await xmtpClient.send(args.content);
+  } catch (error) {
+    captureError(new XMTPError({ error }));
+  }
+}
 
-- Always retrieve query keys through their associated query options
-- Avoid direct usage of query key factories in cache management functions
-- Leverage query options' built-in type inference instead of manual type assertions
+// ✅ Good: Throwing error for parent to handle
+async function sendMessage(args: { content: string }) {
+  try {
+    await xmtpClient.send(args.content);
+  } catch (error) {
+    throw new XMTPError({
+      error,
+      additionalMessage: "Failed to send message",
+    });
+  }
+}
 
-@example
-// Correct pattern using query options
-const options = getConversationsQueryOptions({ account });
-queryClient.getQueryData(options.queryKey);
-
-// ❌ Avoid direct key factory usage
-queryClient.getQueryData(conversationsQueryKey(account));
-
-## React Query Implementation Principles
-
-- Avoid destructuring rest operators with useQuery
-  - Be explicit about which properties you need from useQuery - to prevent excessive re-rendering and performance issues.
--
-- @example
-- // ❌ Bad: Causes unnecessary re-renders
-- const { data: conversations, ...rest } = useQuery()
--
-- // ✅ Good: Explicit property usage
-- const { data: conversations, isLoading, error } = useQuery()
-
-* Use object parameters for query options.
-  - Pass query options as objects for better maintainability
-  - and clearer intention.
-  -
-  - @example
-  - // ❌ Bad: Positional arguments
-  - useQuery(getConversationMessagesQueryOptions(account, topic))
-  -
-  - // ✅ Good: Object parameters
-  - useQuery(getConversationMessagesQueryOptions({ account, topic }))
-
-## Error handling
-
-### Guidelines
-
-- Use the `captureError` function to capture errors.
-- You can add context to the error my enhancing the error object with more information.
+// ✅ Good: Catching error where we handle the UX
+function MessageComponent() {
+  const sendMessage = async () => {
+    try {
+      await messagingService.sendMessage({ content });
+    } catch (error) {
+      // Here we actually handle the error for the user
+      captureErrorWithToast(error);
+    }
+  };
+}
+```

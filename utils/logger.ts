@@ -1,10 +1,10 @@
-import Constants from "expo-constants";
 import path from "path";
+import Constants from "expo-constants";
 import { Platform } from "react-native";
 import * as RNFS from "react-native-fs";
 import {
-  logger as RNLogger,
   consoleTransport,
+  logger as RNLogger,
   transportFunctionType,
 } from "react-native-logs";
 import { v4 as uuidv4 } from "uuid";
@@ -58,7 +58,7 @@ async function initLogFile() {
 
   await RNFS.writeFile(
     loggingFilePath,
-    `Converse ${Platform.OS} logs - v${appVersion} (${buildNumber})\n\n`
+    `Converse ${Platform.OS} logs - v${appVersion} (${buildNumber})\n\n`,
   );
 }
 
@@ -87,7 +87,11 @@ const converseTransport: transportFunctionType = async (props) => {
     const error = props.rawMsg[0];
     if (error.cause) {
       logMessage = `${logMessage} | Cause: ${
-        error.cause instanceof Error ? error.cause.message : error.cause
+        error.cause instanceof Error
+          ? error.cause.message
+          : error.cause
+            ? JSON.stringify(error.cause)
+            : "Unknown"
       }`;
     }
   }
@@ -106,7 +110,7 @@ const converseTransport: transportFunctionType = async (props) => {
       errorArg instanceof Error
         ? errorArg
         : new Error(
-            typeof errorArg === "string" ? errorArg : JSON.stringify(errorArg)
+            typeof errorArg === "string" ? errorArg : JSON.stringify(errorArg),
           );
     const context = props.rawMsg?.[1];
 
@@ -156,6 +160,8 @@ initLogFile().catch(console.error);
 export const logger = baseLogger;
 export const authLogger = createPrefixedLogger("AUTH");
 export const streamLogger = createPrefixedLogger("STREAM");
+export const apiLogger = createPrefixedLogger("API");
+export const xmtpLogger = createPrefixedLogger("XMTP");
 
 /**
  * @deprecated Use { logger } instead

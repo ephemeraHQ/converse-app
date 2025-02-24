@@ -1,12 +1,12 @@
-import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
-import { unknownConsentConversationsQueryKey } from "@/queries/QueryKeys";
-import { setConversationQueryData } from "@/queries/conversation-query";
-import { ensureConversationSyncAllQuery } from "@/queries/conversation-sync-all-query";
-import logger from "@/utils/logger";
-import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
-import { ConversationWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { queryOptions, skipToken } from "@tanstack/react-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
+import { getXmtpClientByEthAddress } from "@/features/xmtp/xmtp-client/xmtp-client.service";
+import { IXmtpConversationWithCodecs } from "@/features/xmtp/xmtp.types";
+import { setConversationQueryData } from "@/queries/conversation-query";
+import { ensureConversationSyncAllQuery } from "@/queries/conversation-sync-all-query";
+import { unknownConsentConversationsQueryKey } from "@/queries/QueryKeys";
+import logger from "@/utils/logger";
+import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
 import { queryClient } from "./queryClient";
 
 export type IUnknownConversationsQuery = Awaited<
@@ -25,7 +25,7 @@ async function getUnknownConversations(args: { account: string }) {
     consentStates: ["unknown"],
   });
 
-  const client = MultiInboxClient.instance.getInboxClientForAddress({
+  const client = await getXmtpClientByEthAddress({
     ethereumAddress: account,
   });
 
@@ -40,7 +40,7 @@ async function getUnknownConversations(args: { account: string }) {
       description: true,
     },
     20, // For now we only fetch 20 until we have the right pagination system. At least people will be able to see their conversations
-    ["unknown"]
+    ["unknown"],
   );
 
   // For now conversations have all the same properties as one conversation
@@ -59,13 +59,13 @@ export const prefetchUnknownConsentConversationsQuery = (args: {
   account: string;
 }) => {
   return queryClient.prefetchQuery(
-    getUnknownConsentConversationsQueryOptions(args)
+    getUnknownConsentConversationsQueryOptions(args),
   );
 };
 
 export const addConversationToUnknownConsentConversationsQuery = (args: {
   account: string;
-  conversation: ConversationWithCodecsType;
+  conversation: IXmtpConversationWithCodecs;
 }) => {
   const { account, conversation } = args;
 
@@ -76,13 +76,13 @@ export const addConversationToUnknownConsentConversationsQuery = (args: {
   if (!previousConversationsData) {
     queryClient.setQueryData<IUnknownConversationsQuery>(
       getUnknownConsentConversationsQueryOptions({ account }).queryKey,
-      [conversation]
+      [conversation],
     );
     return;
   }
 
   const conversationExists = previousConversationsData.some(
-    (c) => c.topic === conversation.topic
+    (c) => c.topic === conversation.topic,
   );
 
   if (conversationExists) {
@@ -91,7 +91,7 @@ export const addConversationToUnknownConsentConversationsQuery = (args: {
 
   queryClient.setQueryData<IUnknownConversationsQuery>(
     getUnknownConsentConversationsQueryOptions({ account }).queryKey,
-    [conversation, ...previousConversationsData]
+    [conversation, ...previousConversationsData],
   );
 };
 
@@ -99,19 +99,19 @@ export const getUnknownConsentConversationsQueryData = (args: {
   account: string;
 }) => {
   return queryClient.getQueryData<IUnknownConversationsQuery>(
-    getUnknownConsentConversationsQueryOptions(args).queryKey
+    getUnknownConsentConversationsQueryOptions(args).queryKey,
   );
 };
 
 export const updateConversationInUnknownConsentConversationsQueryData = (args: {
   account: string;
   topic: ConversationTopic;
-  conversationUpdate: Partial<ConversationWithCodecsType>;
+  conversationUpdate: Partial<IXmtpConversationWithCodecs>;
 }) => {
   const { account, topic, conversationUpdate } = args;
 
   logger.debug(
-    `[UnknownConversationsQuery] updateConversationInUnknownConsentConversationsQueryData for account ${account} and topic ${topic}`
+    `[UnknownConversationsQuery] updateConversationInUnknownConsentConversationsQueryData for account ${account} and topic ${topic}`,
   );
 
   const previousConversationsData = getUnknownConsentConversationsQueryData({
@@ -131,7 +131,7 @@ export const updateConversationInUnknownConsentConversationsQueryData = (args: {
     getUnknownConsentConversationsQueryOptions({
       account,
     }).queryKey,
-    newConversations
+    newConversations,
   );
 };
 
@@ -140,7 +140,7 @@ export const removeConversationFromUnknownConsentConversationsQueryData =
     const { account, topic } = args;
 
     logger.debug(
-      `[UnknownConversationsQuery] removeConversationFromUnknownConsentConversationsQueryData for account ${account} and topic ${topic}`
+      `[UnknownConversationsQuery] removeConversationFromUnknownConsentConversationsQueryData for account ${account} and topic ${topic}`,
     );
 
     const previousConversationsData = getUnknownConsentConversationsQueryData({
@@ -152,12 +152,12 @@ export const removeConversationFromUnknownConsentConversationsQueryData =
     }
 
     const newConversations = previousConversationsData.filter(
-      (conversation) => conversation.topic !== topic
+      (conversation) => conversation.topic !== topic,
     );
 
     queryClient.setQueryData<IUnknownConversationsQuery>(
       getUnknownConsentConversationsQueryOptions({ account }).queryKey,
-      newConversations
+      newConversations,
     );
   };
 

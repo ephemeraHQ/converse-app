@@ -1,9 +1,10 @@
-import { useAuthStore } from "@/features/authentication/authentication.store";
-import { ensureCurrentUserQueryData } from "@/features/current-user/curent-user.query";
-import { MultiInboxClientRestorationStates } from "@/features/multi-inbox/multi-inbox-client.types";
-import { useMultiInboxStore } from "@/features/multi-inbox/multi-inbox.store";
 import { usePrivy } from "@privy-io/expo";
 import { useEffect } from "react";
+import { useAuthStore } from "@/features/authentication/authentication.store";
+import { useMultiInboxStore } from "@/features/authentication/multi-inbox.store";
+import { ensureCurrentUserQueryData } from "@/features/current-user/curent-user.query";
+import { getXmtpClient } from "@/features/xmtp/xmtp-client/xmtp-client.service";
+import { captureError } from "@/utils/capture-error";
 
 export function useHydrateAuth() {
   const { user: privyUser, isReady } = usePrivy();
@@ -20,38 +21,25 @@ export function useHydrateAuth() {
     }
   }, [privyUser, isReady, authStatus]);
 
-  // Hydrate auth based on multi-inbox client restoration state and current sender
+  // Hydrate auth based on XMTP client state and current sender
   useEffect(() => {
     const unsub = useMultiInboxStore.subscribe(
-      (state) =>
-        [state.multiInboxClientRestorationState, state.currentSender] as const,
-      async ([multiInboxClientRestorationState, currentSender]) => {
+      (state) => state.currentSender,
+      async (currentSender) => {
         // No sender means user is not logged in
         if (!currentSender) {
           useAuthStore.getState().actions.setStatus("signedOut");
           return;
         }
 
-        // Wait until multi-inbox client is fully restored
-        const hasRestoredInMultiClientRestorationState =
-          multiInboxClientRestorationState ===
-          MultiInboxClientRestorationStates.restored;
-
-        if (!hasRestoredInMultiClientRestorationState) {
-          return;
-        }
-
-        // Check if there was an error during restoration
-        const hasErrorInMultiClientRestorationState =
-          typeof multiInboxClientRestorationState === "object" &&
-          "error" in multiInboxClientRestorationState;
-
-        if (hasErrorInMultiClientRestorationState) {
+        try {
+          await getXmtpClient({ ethAddress: currentSender.ethereumAddress });
+        } catch (error) {
+          captureError(error);
           useAuthStore.getState().actions.setStatus("signedOut");
           return;
         }
 
-        // TODO: Maybe only run this when we login and not signup
         try {
           // Verify user exists in our backend before signing in
           const user = await ensureCurrentUserQueryData();
@@ -61,16 +49,17 @@ export function useHydrateAuth() {
             return;
           }
         } catch {
-          // If we can't fetch user data, send to onboarding
+          // If we can't get XMTP client or fetch user data, send to onboarding
           useAuthStore.getState().actions.setStatus("onboarding");
           return;
         }
 
+        // We're good to go!
         useAuthStore.getState().actions.setStatus("signedIn");
       },
       {
         fireImmediately: true,
-      }
+      },
     );
 
     return () => unsub();

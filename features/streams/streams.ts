@@ -1,17 +1,14 @@
-import { useAppStore } from "@/stores/app-store";
-import {
-  MultiInboxClientRestorationStates,
-  useMultiInboxStore,
-} from "@/features/multi-inbox/multi-inbox.store";
-import { captureError } from "@/utils/capture-error";
-import { stopStreamingConversations } from "@/utils/xmtpRN/xmtp-conversations/xmtp-conversations-stream";
-import { stopStreamingAllMessage } from "@/utils/xmtpRN/xmtp-messages/xmtp-messages-stream";
-import { stopStreamingConsent } from "@/utils/xmtpRN/xmtp-preferences/xmtp-preferences-stream";
 import { logger } from "@utils/logger";
+import { useEffect } from "react";
+import { useMultiInboxStore } from "@/features/authentication/multi-inbox.store";
+import { stopStreamingConversations } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-stream";
+import { stopStreamingAllMessage } from "@/features/xmtp/xmtp-messages/xmtp-messages-stream";
+import { stopStreamingConsent } from "@/features/xmtp/xmtp-preferences/xmtp-preferences-stream";
+import { useAppStore } from "@/stores/app-store";
+import { captureError } from "@/utils/capture-error";
 import { startConversationStreaming } from "./stream-conversations";
 import { startMessageStreaming } from "./stream-messages";
 import { useStreamingStore } from "./stream-store";
-import { useEffect, useRef } from "react";
 
 // todo move this to multi-inbox-client
 // when clients are added and removed; start and stop respective streams
@@ -32,61 +29,51 @@ export function useSetupStreamingSubscriptions() {
   //   }
   // );
 
-  const firstRenderRef = useRef(true);
+  // Start streaming for all senders on first render
+  useEffect(() => {
+    const senders = useMultiInboxStore.getState().senders;
+    startStreaming(senders.map((sender) => sender.ethereumAddress));
+  }, []);
 
   useEffect(() => {
     const unsubscribe = useMultiInboxStore.subscribe(
-      (state) =>
-        [state.senders, state.multiInboxClientRestorationState] as const,
-      (
-        [senders, multiInboxClientRestorationState],
-        [previousSenders, previousMultiInboxClientRestorationState]
-      ) => {
+      (state) => [state.senders] as const,
+      ([senders], [previousSenders]) => {
         const { isInternetReachable } = useAppStore.getState();
 
         if (!isInternetReachable) {
           return;
         }
 
-        if (
-          multiInboxClientRestorationState !==
-          MultiInboxClientRestorationStates.restored
-        ) {
-          return;
+        const previousAddresses = previousSenders.map(
+          (sender) => sender.ethereumAddress,
+        );
+
+        const currentAddresses = senders.map(
+          (sender) => sender.ethereumAddress,
+        );
+
+        // Start streaming for new senders
+        const newAddresses = currentAddresses.filter(
+          (address) => !previousAddresses.includes(address),
+        );
+
+        if (newAddresses.length > 0) {
+          startStreaming(newAddresses);
         }
 
-        const previousAccounts = previousSenders.map(
-          (sender: { ethereumAddress: string }) => sender.ethereumAddress
+        // Stop streaming for removed senders
+        const removedAddresses = previousAddresses.filter(
+          (address) => !currentAddresses.includes(address),
         );
 
-        const currentAccounts = senders.map(
-          (sender: { ethereumAddress: string }) => sender.ethereumAddress
-        );
-
-        // Handle new accounts
-        const newAccounts = currentAccounts.filter(
-          (account: string) =>
-            !previousAccounts.includes(account) && !firstRenderRef.current
-        );
-
-        if (newAccounts.length > 0) {
-          startStreaming(newAccounts);
+        if (removedAddresses.length > 0) {
+          stopStreaming(removedAddresses);
         }
-
-        // Handle removed accounts
-        const removedAccounts = previousAccounts.filter(
-          (account: string) => !currentAccounts.includes(account)
-        );
-
-        if (removedAccounts.length > 0) {
-          stopStreaming(removedAccounts);
-        }
-
-        firstRenderRef.current = false;
       },
       {
         fireImmediately: true,
-      }
+      },
     );
 
     return () => unsubscribe();
@@ -161,6 +148,6 @@ async function stopStreaming(accounts: string[]) {
       } finally {
         store.actions.resetAccount(account);
       }
-    })
+    }),
   );
 }

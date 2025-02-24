@@ -1,13 +1,13 @@
-import { ConversationHeaderTitle } from "@/features/conversation/conversation-screen-header/conversation-screen-header-title";
-import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
-import { useProfileQuery } from "@/features/profiles/profiles.query";
-import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query";
-import { copyToClipboard } from "@/utils/clipboard";
-import { Avatar } from "@/components/avatar";
-import { useRouter } from "@/navigation/use-navigation";
-import { useAppTheme } from "@/theme/use-app-theme";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
+import { Avatar } from "@/components/avatar";
+import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
+import { ConversationHeaderTitle } from "@/features/conversation/conversation-screen-header/conversation-screen-header-title";
+import { useProfileQuery } from "@/features/profiles/profiles.query";
+import { useRouter } from "@/navigation/use-navigation";
+import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query";
+import { useAppTheme } from "@/theme/use-app-theme";
+import { copyToClipboard } from "@/utils/clipboard";
 
 type DmConversationTitleProps = {
   topic: ConversationTopic;

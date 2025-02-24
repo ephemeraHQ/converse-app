@@ -1,10 +1,10 @@
-import { findConversationByInboxIds } from "@/features/conversation/utils/find-conversations-by-inbox-ids";
-import { captureError } from "@/utils/capture-error";
 import { ConversationTopic, InboxId, MessageId } from "@xmtp/react-native-sdk";
 import { createContext, memo, useContext, useEffect, useRef } from "react";
 import { createStore, useStore } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
-import { getSafeCurrentSender } from "../multi-inbox/multi-inbox.store";
+import { findConversationByInboxIds } from "@/features/conversation/utils/find-conversations-by-inbox-ids";
+import { captureError } from "@/utils/capture-error";
+import { getSafeCurrentSender } from "../authentication/multi-inbox.store";
 
 type IConversationStoreProps = {
   topic?: ConversationTopic | null;
@@ -64,7 +64,7 @@ export const ConversationStoreProvider = memo(
         {children}
       </ConversationStoreContext.Provider>
     );
-  }
+  },
 );
 
 const createConversationStore = (initProps: IConversationStoreProps) => {
@@ -77,14 +77,14 @@ const createConversationStore = (initProps: IConversationStoreProps) => {
       isCreatingNewConversation: false,
       searchTextValue: "",
       ...initProps,
-    }))
+    })),
   );
 };
 
 const ConversationStoreContext = createContext<IConversationStore | null>(null);
 
 export function useConversationStoreContext<T>(
-  selector: (state: IConversationStoreState) => T
+  selector: (state: IConversationStoreState) => T,
 ): T {
   const store = useContext(ConversationStoreContext);
   if (!store) throw new Error("Missing ConversationStore.Provider in the tree");

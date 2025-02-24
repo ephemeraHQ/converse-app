@@ -1,39 +1,41 @@
-import {
-  IConvosContentType,
-  isContentType,
-} from "@/utils/xmtpRN/xmtp-content-types/xmtp-content-types";
 import { URL_REGEX } from "@utils/regex";
+import {
+  isRemoteAttachmentMessage,
+  isStaticAttachmentMessage,
+  isTextMessage,
+} from "@/features/conversation/conversation-message/conversation-message.utils";
+import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types";
 
-export function getMessageSpamScore(args: {
-  messageText: string;
-  contentType: IConvosContentType;
-}) {
-  const { messageText, contentType } = args;
-
-  // TODO: Check if adder has been approved already
+export function getMessageSpamScore(args: { message: IXmtpDecodedMessage }) {
+  const { message } = args;
 
   let spamScore = 0;
-  // TODO: Check spam score between sender and receiver
 
-  // Check contents of last message
-  spamScore += computeMessageContentSpamScore(messageText, contentType);
-  return spamScore;
-}
-
-export const computeMessageContentSpamScore = (
-  message: string,
-  contentType: IConvosContentType
-): number => {
-  let spamScore: number = 0.0;
-
+  // Reset regex lastIndex to avoid stateful behavior between tests
   URL_REGEX.lastIndex = 0;
 
-  if (isContentType({ type: "text", contentType }) && URL_REGEX.test(message)) {
+  if (isTextMessage(message)) {
+    const content = message.content();
+
+    if (typeof content === "string") {
+      if (URL_REGEX.test(content)) {
+        spamScore += 1;
+      }
+      if (content.includes("$")) {
+        spamScore += 1;
+      }
+    }
+  }
+
+  // For safety for now all attachments are spam
+  if (isRemoteAttachmentMessage(message)) {
     spamScore += 1;
   }
-  if (isContentType({ type: "text", contentType }) && message.includes("$")) {
+
+  // For safety for now all attachments are spam
+  if (isStaticAttachmentMessage(message)) {
     spamScore += 1;
   }
 
   return spamScore;
-};
+}

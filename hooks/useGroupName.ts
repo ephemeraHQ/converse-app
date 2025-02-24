@@ -1,10 +1,10 @@
-import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
+import { useQuery } from "@tanstack/react-query";
+import type { ConversationTopic } from "@xmtp/react-native-sdk";
+import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
 import { useProfilesQueries } from "@/features/profiles/profiles.query";
 import { getGroupMembersQueryOptions } from "@/queries/useGroupMembersQuery";
 import { useGroupNameMutation } from "@/queries/useGroupNameMutation";
 import { useGroupNameQuery } from "@/queries/useGroupNameQuery";
-import { useQuery } from "@tanstack/react-query";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
 
 export const useGroupName = (args: {
   conversationTopic: ConversationTopic;

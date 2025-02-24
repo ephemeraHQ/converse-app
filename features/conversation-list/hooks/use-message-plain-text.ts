@@ -1,18 +1,18 @@
+import { GroupUpdatedCodec } from "@xmtp/react-native-sdk";
+import { useMemo } from "react";
+import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
 import {
   isGroupUpdatedMessage,
   isRemoteAttachmentMessage,
   isReplyMessage,
   isStaticAttachmentMessage,
 } from "@/features/conversation/conversation-message/conversation-message.utils";
-import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
 import {
   useProfileQuery,
   useProfilesQueries,
 } from "@/features/profiles/profiles.query";
+import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types";
 import logger from "@/utils/logger";
-import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
-import { GroupUpdatedCodec } from "@xmtp/react-native-sdk";
-import { useMemo } from "react";
 
 // Handles group metadata changes (name, description, image)
 function handleGroupMetadataChange(args: {
@@ -39,9 +39,7 @@ function handleGroupMetadataChange(args: {
   }
 }
 
-export function useMessagePlainText(
-  message: DecodedMessageWithCodecsType | undefined
-) {
+export function useMessagePlainText(message: IXmtpDecodedMessage | undefined) {
   const account = useCurrentSenderEthAddress();
 
   // Get initiator profile for group updates
@@ -127,7 +125,7 @@ export function useMessagePlainText(
       return typeof content === "string" ? content : message.fallback;
     } catch (error) {
       logger.error(
-        `Error getting message text for content type ${message.contentTypeId}: ${error}`
+        `Error getting message text for content type ${message.contentTypeId}: ${error}`,
       );
       return message.fallback;
     }

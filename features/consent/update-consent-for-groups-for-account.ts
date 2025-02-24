@@ -1,5 +1,5 @@
 import { logger } from "@/utils/logger";
-import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
+import { getXmtpClientByEthAddress } from "../xmtp/xmtp-client/xmtp-client.service";
 
 type UpdateConsentForGroupsForAccountArgs = {
   account: string;
@@ -8,11 +8,11 @@ type UpdateConsentForGroupsForAccountArgs = {
 };
 
 export const updateConsentForGroupsForAccount = async (
-  args: UpdateConsentForGroupsForAccountArgs
+  args: UpdateConsentForGroupsForAccountArgs,
 ) => {
   const { account, groupIds, consent } = args;
 
-  const client = MultiInboxClient.instance.getInboxClientForAddress({
+  const client = await getXmtpClientByEthAddress({
     ethereumAddress: account,
   });
 
@@ -21,7 +21,7 @@ export const updateConsentForGroupsForAccount = async (
   }
 
   logger.debug(
-    `[XMTPRN Contacts] Consenting to groups on protocol: ${groupIds.join(", ")}`
+    `[XMTPRN Contacts] Consenting to groups on protocol: ${groupIds.join(", ")}`,
   );
   const start = new Date().getTime();
 
@@ -39,6 +39,6 @@ export const updateConsentForGroupsForAccount = async (
   logger.debug(
     `[XMTPRN Contacts] Consented to groups on protocol in ${
       (end - start) / 1000
-    } sec`
+    } sec`,
   );
 };

@@ -1,20 +1,20 @@
+import { useHeaderHeight } from "@react-navigation/elements";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { shortAddress } from "@utils/strings/shortAddress";
+import React, { useState } from "react";
+import { Platform, Share, View } from "react-native";
+import QRCode from "react-native-qrcode-svg";
 import { Avatar } from "@/components/avatar";
 import Button from "@/components/Button/Button";
 import { Screen } from "@/components/screen/screen";
 import { config } from "@/config";
 import { Text } from "@/design-system/Text";
-import { useSafeCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
+import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store";
 import { useProfileQuery } from "@/features/profiles/profiles.query";
 import { translate } from "@/i18n";
-import { useHeader } from "@/navigation/use-header";
 import { NavigationParamList } from "@/navigation/navigation.types";
-import { useHeaderHeight } from "@react-navigation/elements";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { useHeader } from "@/navigation/use-header";
 import { useAppTheme } from "@/theme/use-app-theme";
-import { shortAddress } from "@utils/strings/shortAddress";
-import React, { useState } from "react";
-import { Platform, Share, View } from "react-native";
-import QRCode from "react-native-qrcode-svg";
 
 type IShareProfileScreenProps = NativeStackScreenProps<
   NavigationParamList,
@@ -44,7 +44,7 @@ export function ShareProfileScreen({
     : translate("share_profile.copy_link");
 
   useHeader({
-    title: translate("share_profile.title"),
+    title: "Share Profile",
     onBack: () => navigation.goBack(),
   });
 
@@ -59,8 +59,7 @@ export function ShareProfileScreen({
         style={{
           flex: 1,
           backgroundColor: theme.colors.background.surface,
-        }}
-      >
+        }}>
         <View style={{ alignItems: "center" }}>
           <Avatar
             uri={profile?.avatar}
@@ -72,8 +71,7 @@ export function ShareProfileScreen({
             style={{
               marginTop: 8,
               textAlign: "center",
-            }}
-          >
+            }}>
             {profile?.name || shortAddress(inboxId)}
           </Text>
           {profile?.name && (
@@ -82,8 +80,7 @@ export function ShareProfileScreen({
               style={{
                 marginHorizontal: 20,
                 textAlign: "center",
-              }}
-            >
+              }}>
               {profile.name || shortAddress(inboxId)}
             </Text>
           )}
@@ -94,8 +91,7 @@ export function ShareProfileScreen({
             alignSelf: "center",
             justifyContent: "center",
             marginTop: 40,
-          }}
-        >
+          }}>
           <QRCode
             size={220}
             value={profileUrl}
@@ -110,8 +106,7 @@ export function ShareProfileScreen({
             justifyContent: "flex-end",
             alignItems: "center",
             paddingHorizontal: theme.spacing.lg,
-          }}
-        >
+          }}>
           <Button
             style={{ width: "100%" }}
             title={shareButtonText}

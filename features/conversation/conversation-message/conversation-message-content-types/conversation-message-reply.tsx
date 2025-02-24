@@ -1,4 +1,10 @@
-import { useSelect } from "@/stores/stores.utils";
+import { HStack } from "@design-system/HStack";
+import { Icon } from "@design-system/Icon/Icon";
+import { Text } from "@design-system/Text";
+import { VStack } from "@design-system/VStack";
+import { DecodedMessage, MessageId, ReplyCodec } from "@xmtp/react-native-sdk";
+import { memo } from "react";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { AttachmentRemoteImage } from "@/features/conversation/conversation-attachment/conversation-attachment-remote-image";
 import {
   BubbleContainer,
@@ -7,29 +13,21 @@ import {
 import { MessageText } from "@/features/conversation/conversation-message/conversation-message-text";
 import { useMessageContextStoreContext } from "@/features/conversation/conversation-message/conversation-message.store-context";
 import {
-  isCoinbasePaymentMessage,
+  isReadReceiptMessage,
   isRemoteAttachmentMessage,
   isReplyMessage,
   isTextMessage,
-  isTransactionReferenceMessage,
 } from "@/features/conversation/conversation-message/conversation-message.utils";
 import {
   useConversationStore,
   useCurrentConversationTopicSafe,
 } from "@/features/conversation/conversation.store-context";
-
-import { captureError } from "@/utils/capture-error";
-import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
-import { HStack } from "@design-system/HStack";
-import { Icon } from "@design-system/Icon/Icon";
-import { Text } from "@design-system/Text";
-import { VStack } from "@design-system/VStack";
-import { useAppTheme } from "@/theme/use-app-theme";
-import { DecodedMessage, MessageId, ReplyCodec } from "@xmtp/react-native-sdk";
-import { memo } from "react";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import { useConversationMessageById } from "../use-conversation-message";
 import { useProfileQuery } from "@/features/profiles/profiles.query";
+import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types";
+import { useSelect } from "@/stores/stores.utils";
+import { useAppTheme } from "@/theme/use-app-theme";
+import { captureError } from "@/utils/capture-error";
+import { useConversationMessageById } from "../use-conversation-message";
 
 export const MessageReply = memo(function MessageReply(props: {
   message: DecodedMessage<ReplyCodec>;
@@ -39,7 +37,7 @@ export const MessageReply = memo(function MessageReply(props: {
   const { theme } = useAppTheme();
 
   const { fromMe, hasNextMessageInSeries } = useMessageContextStoreContext(
-    useSelect(["fromMe", "hasNextMessageInSeries"])
+    useSelect(["fromMe", "hasNextMessageInSeries"]),
   );
 
   const replyMessageContent = message.content();
@@ -59,14 +57,12 @@ export const MessageReply = memo(function MessageReply(props: {
     <BubbleContainer fromMe={fromMe}>
       <BubbleContentContainer
         fromMe={fromMe}
-        hasNextMessageInSeries={hasNextMessageInSeries}
-      >
+        hasNextMessageInSeries={hasNextMessageInSeries}>
         <VStack
           style={{
             rowGap: theme.spacing.xxs,
             marginTop: theme.spacing.xxxs, // Because for reply bubble we want the padding to be same for horizontal and vertial
-          }}
-        >
+          }}>
           <MessageReplyReference
             referenceMessageId={replyMessageContent.reference as MessageId}
           />
@@ -76,8 +72,7 @@ export const MessageReply = memo(function MessageReply(props: {
               style={{
                 marginTop: theme.spacing.xxxs,
                 marginBottom: theme.spacing.xxxs,
-              }}
-            >
+              }}>
               <AttachmentRemoteImage
                 fitAspectRatio
                 messageId={replyMessageContent.reference}
@@ -154,14 +149,12 @@ const MessageReplyReference = memo(function MessageReplyReference(props: {
             theme.spacing.message.replyMessage.horizontalPadding / 2, // / 2 so the border fits the border radius of BubbleContentContainer
           paddingHorizontal: theme.spacing.xs,
           paddingVertical: theme.spacing.xxs,
-        }}
-      >
+        }}>
         <HStack
           style={{
             alignItems: "center",
             columnGap: theme.spacing.xxxs,
-          }}
-        >
+          }}>
           <Icon
             size={theme.iconSize.xxs}
             icon="arrowshape.turn.up.left.fill"
@@ -185,7 +178,7 @@ const MessageReplyReference = memo(function MessageReplyReference(props: {
 
 const MessageReplyReferenceContent = memo(
   function ReplyMessageReferenceMessageContent(props: {
-    replyMessage: DecodedMessageWithCodecsType;
+    replyMessage: IXmtpDecodedMessage;
   }) {
     const { replyMessage } = props;
     const { theme } = useAppTheme();
@@ -200,7 +193,11 @@ const MessageReplyReferenceContent = memo(
         theme.spacing.message.replyMessage.horizontalPadding,
     };
 
-    function renderMessageContent(message: DecodedMessageWithCodecsType) {
+    function renderMessageContent(message: IXmtpDecodedMessage) {
+      if (isReadReceiptMessage(message)) {
+        return null;
+      }
+
       if (isRemoteAttachmentMessage(message)) {
         const content = message.content();
         return (
@@ -216,22 +213,6 @@ const MessageReplyReferenceContent = memo(
         return (
           <Text numberOfLines={1} inverted={fromMe}>
             {message.content()}
-          </Text>
-        );
-      }
-
-      if (isTransactionReferenceMessage(message)) {
-        return (
-          <Text numberOfLines={1} inverted={fromMe}>
-            Transaction
-          </Text>
-        );
-      }
-
-      if (isCoinbasePaymentMessage(message)) {
-        return (
-          <Text numberOfLines={1} inverted={fromMe}>
-            Coinbase payment
           </Text>
         );
       }
@@ -280,12 +261,12 @@ const MessageReplyReferenceContent = memo(
 
       captureError(
         new Error(
-          `Reply message reference message content is not handled with message content type id ${message.contentTypeId}`
-        )
+          `Reply message reference message content is not handled with message content type id ${message.contentTypeId}`,
+        ),
       );
       return null;
     }
 
     return renderMessageContent(replyMessage);
-  }
+  },
 );

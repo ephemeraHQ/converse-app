@@ -1,5 +1,7 @@
-import { ConversationWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
+import { IXmtpConversationWithCodecs } from "@/features/xmtp/xmtp.types";
 
-export function isConversationDenied(conversation: ConversationWithCodecsType) {
+export function isConversationDenied(
+  conversation: IXmtpConversationWithCodecs,
+) {
   return conversation.state === "denied";
 }

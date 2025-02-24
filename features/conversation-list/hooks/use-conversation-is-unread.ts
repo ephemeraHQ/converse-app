@@ -1,13 +1,13 @@
-import { conversationIsUnreadForInboxId } from "@/features/conversation/utils/conversation-is-unread-by-current-account";
-import { getConversationMetadataQueryOptions } from "@/features/conversation/conversation-metadata/conversation-metadata.query";
-import { getConversationQueryOptions } from "@/queries/conversation-query";
-import {
-  useCurrentSenderEthAddress,
-  useSafeCurrentSender,
-} from "@/features/multi-inbox/multi-inbox.store";
 import { useQuery } from "@tanstack/react-query";
 import { ConversationTopic } from "@xmtp/react-native-sdk";
 import { useMemo } from "react";
+import {
+  useCurrentSenderEthAddress,
+  useSafeCurrentSender,
+} from "@/features/authentication/multi-inbox.store";
+import { getConversationMetadataQueryOptions } from "@/features/conversation/conversation-metadata/conversation-metadata.query";
+import { conversationIsUnreadForInboxId } from "@/features/conversation/utils/conversation-is-unread-by-current-account";
+import { getConversationQueryOptions } from "@/queries/conversation-query";
 
 type UseConversationIsUnreadArgs = {
   topic: ConversationTopic;
@@ -26,7 +26,7 @@ export const useConversationIsUnread = ({
     getConversationMetadataQueryOptions({
       account: currentAccount!,
       topic,
-    })
+    }),
   );
 
   const { data: lastMessage, isLoading: isLoadingLastMessage } = useQuery({

@@ -7,6 +7,10 @@ export const ShareProfileScreenConfig = {
 
 export function ShareProfileNav() {
   return (
-    <AppNativeStack.Screen name="ShareProfile" component={ShareProfileScreen} />
+    <AppNativeStack.Screen
+      options={{ presentation: "modal" }}
+      name="ShareProfile"
+      component={ShareProfileScreen}
+    />
   );
 }

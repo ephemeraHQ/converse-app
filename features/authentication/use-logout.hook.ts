@@ -1,10 +1,9 @@
-import { useAuthStore } from "@/features/authentication/authentication.store";
-import { MultiInboxClient } from "@/features/multi-inbox/multi-inbox.client";
-import { clearAllStores } from "@/features/multi-inbox/multi-inbox.store";
-import { queryClient } from "@/queries/queryClient";
-import { reactQueryMMKV, secureQueryMMKV } from "@/utils/mmkv";
 import { usePrivy } from "@privy-io/expo";
 import { useCallback } from "react";
+import { useAuthStore } from "@/features/authentication/authentication.store";
+import { resetAccountStore } from "@/features/authentication/multi-inbox.store";
+import { queryClient } from "@/queries/queryClient";
+import { reactQueryMMKV, secureQueryMMKV } from "@/utils/mmkv";
 import { logger } from "../../utils/logger";
 
 export const useLogout = () => {
@@ -17,15 +16,7 @@ export const useLogout = () => {
 
       await privy.logout();
 
-      logger.debug(
-        "[useLogout] Privy logout await completed, checking client user call"
-      );
-
-      clearAllStores();
-
-      // converseNavigatorRef.current?.dispatch(StackActions.popToTop());
-
-      MultiInboxClient.instance.logoutMessagingClients();
+      resetAccountStore();
 
       // Clear both in-memory cache and persisted data
       queryClient.getQueryCache().clear();
@@ -33,6 +24,10 @@ export const useLogout = () => {
       queryClient.removeQueries();
       reactQueryMMKV.clearAll();
       secureQueryMMKV.clearAll();
+
+      logger.debug(
+        `[useLogout] Privy, account store, query client, mmkv cleared successfully`,
+      );
     } catch (error) {
       logger.error("[useLogout] Error logging out", error);
     }

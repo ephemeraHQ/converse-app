@@ -1,13 +1,11 @@
-import {
-  RELYING_PARTY,
-  createInboxWithSigner,
-  createSmartWalletSigner,
-} from "@/features/onboarding/utils/passkey";
-import { authLogger } from "@/utils/logger";
 import { useEmbeddedEthereumWallet } from "@privy-io/expo";
 import { useSignupWithPasskey as usePrivySignupWithPasskey } from "@privy-io/expo/passkey";
 import { useSmartWallets } from "@privy-io/expo/smart-wallets";
 import { useEffect, useRef, useState } from "react";
+import { createXmtpSignerFromPrivySwc } from "@/features/onboarding/utils/create-xmtp-signer-from-privy-swc";
+import { createXmtpClient } from "@/features/xmtp/xmtp-client/xmtp-client.service";
+import { authLogger } from "@/utils/logger";
+import { RELYING_PARTY } from "../onboarding.constants";
 
 export function useSignupWithPasskey() {
   const { create: createEmbeddedWallet } = useEmbeddedEthereumWallet();
@@ -44,16 +42,18 @@ export function useSignupWithPasskey() {
       authLogger.debug(`[Wallet Setup] Creating embedded and smart wallets`);
       await createEmbeddedWallet();
       const smartWalletclient = await waitForSmartWalletClient();
-      const signer = createSmartWalletSigner(smartWalletclient);
+      const signer = createXmtpSignerFromPrivySwc(smartWalletclient);
 
       // Step 3: Inbox creation
       authLogger.debug(
-        `[Inbox Setup] Creating inbox for address: ${smartWalletclient.account.address}`
+        `[Inbox Setup] Creating inbox for address: ${smartWalletclient.account.address}`,
       );
-      const { inboxId } = await createInboxWithSigner(signer);
+      const xmtpClient = await createXmtpClient({
+        inboxSigner: signer,
+      });
 
       return {
-        inboxId,
+        inboxId: xmtpClient.inboxId,
         ethereumAddress: smartWalletclient.account.address,
       };
     } catch (error) {

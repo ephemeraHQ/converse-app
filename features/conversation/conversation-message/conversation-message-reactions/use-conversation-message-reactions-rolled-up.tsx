@@ -1,8 +1,8 @@
-import { useConversationMessageReactions } from "@/features/conversation/conversation-message/conversation-message.utils";
-import { isCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
-import { useProfilesQueries } from "@/features/profiles/profiles.query";
 import { MessageId } from "@xmtp/react-native-sdk";
 import { useMemo } from "react";
+import { isCurrentSender } from "@/features/authentication/multi-inbox.store";
+import { useConversationMessageReactions } from "@/features/conversation/conversation-message/conversation-message.utils";
+import { useProfilesQueries } from "@/features/profiles/profiles.query";
 import {
   RolledUpReactions,
   SortedReaction,
@@ -19,9 +19,9 @@ export function useConversationMessageReactionsRolledUp(args: {
   const inboxIds = Array.from(
     new Set(
       Object.entries(reactionsBySender ?? {}).map(
-        ([senderInboxId]) => senderInboxId
-      )
-    )
+        ([senderInboxId]) => senderInboxId,
+      ),
+    ),
   );
 
   const { data: profiles } = useProfilesQueries({
@@ -36,7 +36,7 @@ export function useConversationMessageReactionsRolledUp(args: {
     // Flatten reactions and track sender addresses
     const flatReactions = Object.entries(reactionsBySender ?? {}).flatMap(
       ([senderInboxId, senderReactions]) =>
-        senderReactions.map((reaction) => ({ senderInboxId, ...reaction }))
+        senderReactions.map((reaction) => ({ senderInboxId, ...reaction })),
     );
     totalCount = flatReactions.length;
 
@@ -55,7 +55,7 @@ export function useConversationMessageReactionsRolledUp(args: {
       // Count reactions for the preview
       previewCounts.set(
         reaction.content,
-        (previewCounts.get(reaction.content) || 0) + 1
+        (previewCounts.get(reaction.content) || 0) + 1,
       );
 
       const profile = profiles?.[inboxIds.indexOf(reaction.senderInboxId)];

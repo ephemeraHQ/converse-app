@@ -1,10 +1,10 @@
-import { getSafeCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
+import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store";
+import { isSameInboxId } from "@/features/xmtp/xmtp-inbox-id/xmtp-inbox-id";
+import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types";
 import logger from "@/utils/logger";
-import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
-import { isSameInboxId } from "@/utils/xmtpRN/xmtp-inbox-id/xmtp-inbox-id";
 
 type MessageFromCurrentUserPayload = {
-  message: DecodedMessageWithCodecsType;
+  message: IXmtpDecodedMessage;
 };
 
 export function messageIsFromCurrentAccountInboxId({
@@ -14,13 +14,13 @@ export function messageIsFromCurrentAccountInboxId({
   const messageSenderInboxId = message?.senderInboxId.toLowerCase();
   if (!currentInboxId) {
     logger.warn(
-      "[messageIsFromCurrentAccountInboxId] No current account inbox id"
+      "[messageIsFromCurrentAccountInboxId] No current account inbox id",
     );
     return false;
   }
   if (!messageSenderInboxId) {
     logger.warn(
-      "[messageIsFromCurrentAccountInboxId] No message sender inbox id"
+      "[messageIsFromCurrentAccountInboxId] No message sender inbox id",
     );
     return false;
   }

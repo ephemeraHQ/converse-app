@@ -1,9 +1,9 @@
-import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
+import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types";
 
 type MessageShouldShowDateChangePayload = {
-  message: DecodedMessageWithCodecsType | undefined;
-  previousMessage: DecodedMessageWithCodecsType | undefined;
+  message: IXmtpDecodedMessage | undefined;
+  previousMessage: IXmtpDecodedMessage | undefined;
 };
 
 export const messageShouldShowDateChange = ({
@@ -19,7 +19,7 @@ export const messageShouldShowDateChange = ({
   return (
     differenceInCalendarDays(
       convertNanosecondsToMilliseconds(message.sentNs),
-      convertNanosecondsToMilliseconds(previousMessage.sentNs)
+      convertNanosecondsToMilliseconds(previousMessage.sentNs),
     ) > 0
   );
 };

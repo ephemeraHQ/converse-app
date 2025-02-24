@@ -1,13 +1,12 @@
+// While eslint-plugin-react-native fix to handle eslint flat config (https://github.com/Intellicode/eslint-plugin-react-native/issues/333#issuecomment-2150582430)
+import { fixupPluginRules } from "@eslint/compat";
+import pluginQuery from "@tanstack/eslint-plugin-query";
 import pluginImport from "eslint-plugin-import";
 import pluginReact from "eslint-plugin-react";
 import pluginReactHooks from "eslint-plugin-react-hooks";
 import pluginReactNative from "eslint-plugin-react-native";
 import tsESLint from "typescript-eslint";
 import customPlugin from "./custom-eslint-plugin/index.js";
-import pluginQuery from "@tanstack/eslint-plugin-query";
-
-// While eslint-plugin-react-native fix to handle eslint flat config (https://github.com/Intellicode/eslint-plugin-react-native/issues/333#issuecomment-2150582430)
-import { fixupPluginRules } from "@eslint/compat";
 
 /** @type {import('eslint').Linter.Config} */
 const config = {
@@ -84,7 +83,6 @@ const config = {
     "typescript-eslint/consistent-type-definitions": ["warn", "type"],
 
     "padding-line-between-statements": "off",
-    "prettier/prettier": "off",
     "custom-plugin/padding-before-react-hooks": "warn",
   },
   settings: {

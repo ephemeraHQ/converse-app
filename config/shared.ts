@@ -1,7 +1,7 @@
 // @ts-nocheck note(lustig) env types aren't working for me OOTB
 
-import { IConfig, ILoggerColorScheme } from "@/config/config.types";
 import Constants from "expo-constants";
+import { IConfig, ILoggerColorScheme } from "@/config/config.types";
 
 function maybeReplaceLocalhost(uri: string) {
   try {

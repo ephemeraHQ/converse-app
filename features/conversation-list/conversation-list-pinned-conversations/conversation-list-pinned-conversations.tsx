@@ -1,7 +1,10 @@
-import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
+import { ConversationTopic } from "@xmtp/react-native-sdk";
+import { memo } from "react";
+import { useWindowDimensions, ViewStyle } from "react-native";
 import { AnimatedCenter } from "@/design-system/Center";
 import { AnimatedHStack } from "@/design-system/HStack";
 import { AnimatedVStack } from "@/design-system/VStack";
+import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
 import { ConversationListPinnedConversationDm } from "@/features/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversation-dm";
 import { ConversationListPinnedConversationGroup } from "@/features/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversation-group";
 import { useConversationListPinnedConversationsStyles } from "@/features/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversations.styles";
@@ -13,9 +16,6 @@ import { useConversationQuery } from "@/queries/conversation-query";
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { captureError } from "@/utils/capture-error";
 import { chunk } from "@/utils/general";
-import { ConversationTopic } from "@xmtp/react-native-sdk";
-import { memo } from "react";
-import { ViewStyle, useWindowDimensions } from "react-native";
 
 export const ConversationListPinnedConversations = memo(
   function ConversationListPinnedConversations() {
@@ -54,8 +54,7 @@ export const ConversationListPinnedConversations = memo(
       <AnimatedVStack
         style={themed($container)}
         layout={theme.animation.reanimatedLayoutSpringTransition}
-        exiting={theme.animation.reanimatedFadeOutSpring}
-      >
+        exiting={theme.animation.reanimatedFadeOutSpring}>
         {chunk(pinnedConversations, 3).map((row, rowIndex) => (
           <AnimatedHStack
             key={`row-${rowIndex}`}
@@ -66,14 +65,12 @@ export const ConversationListPinnedConversations = memo(
                   (width - screenHorizontalPadding * 2 - avatarSize * 3) / 2,
               },
             ]}
-            layout={theme.animation.reanimatedLayoutSpringTransition}
-          >
+            layout={theme.animation.reanimatedLayoutSpringTransition}>
             {row.map((conversation) => (
               <AnimatedCenter
                 key={conversation.topic}
                 layout={theme.animation.reanimatedLayoutSpringTransition}
-                entering={theme.animation.reanimatedFadeInSpring}
-              >
+                entering={theme.animation.reanimatedFadeInSpring}>
                 <PinnedConversationWrapper topic={conversation.topic} />
               </AnimatedCenter>
             ))}
@@ -81,7 +78,7 @@ export const ConversationListPinnedConversations = memo(
         ))}
       </AnimatedVStack>
     );
-  }
+  },
 );
 
 const PinnedConversationWrapper = memo(
@@ -99,8 +96,8 @@ const PinnedConversationWrapper = memo(
     if (!conversation) {
       captureError(
         new Error(
-          `Couldn't find conversation ${topic} in PinnedConversationWrapper`
-        )
+          `Couldn't find conversation ${topic} in PinnedConversationWrapper`,
+        ),
       );
       return null;
     }
@@ -110,7 +107,7 @@ const PinnedConversationWrapper = memo(
     }
 
     return <ConversationListPinnedConversationDm conversation={conversation} />;
-  }
+  },
 );
 const $container: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingVertical: spacing.xs,

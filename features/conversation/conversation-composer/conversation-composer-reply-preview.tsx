@@ -1,26 +1,9 @@
-import { useMessagePlainText } from "@/features/conversation-list/hooks/use-message-plain-text";
-import { AttachmentRemoteImage } from "@/features/conversation/conversation-attachment/conversation-attachment-remote-image";
-import {
-  isCoinbasePaymentMessage,
-  isGroupUpdatedMessage,
-  isReactionMessage,
-  isReadReceiptMessage,
-  isRemoteAttachmentMessage,
-  isReplyMessage,
-  isStaticAttachmentMessage,
-  isTransactionReferenceMessage,
-} from "@/features/conversation/conversation-message/conversation-message.utils";
-import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
-
-import { useProfileQuery } from "@/features/profiles/profiles.query";
-import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
 import { HStack } from "@design-system/HStack";
 import { Icon } from "@design-system/Icon/Icon";
 import { IconButton } from "@design-system/IconButton/IconButton";
 import { Text } from "@design-system/Text";
 import { AnimatedVStack, VStack } from "@design-system/VStack";
 import { SICK_DAMPING, SICK_STIFFNESS } from "@theme/animations";
-import { useAppTheme } from "@/theme/use-app-theme";
 import { Haptics } from "@utils/haptics";
 import {
   ConversationTopic,
@@ -35,12 +18,27 @@ import {
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
+import { useMessagePlainText } from "@/features/conversation-list/hooks/use-message-plain-text";
+import { AttachmentRemoteImage } from "@/features/conversation/conversation-attachment/conversation-attachment-remote-image";
+import {
+  isGroupUpdatedMessage,
+  isReactionMessage,
+  isReadReceiptMessage,
+  isRemoteAttachmentMessage,
+  isReplyMessage,
+  isStaticAttachmentMessage,
+} from "@/features/conversation/conversation-message/conversation-message.utils";
+import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
+import { useProfileQuery } from "@/features/profiles/profiles.query";
+import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { useConversationMessageById } from "../conversation-message/use-conversation-message";
 import { useCurrentConversationTopic } from "../conversation.store-context";
 import {
   useConversationComposerStore,
   useConversationComposerStoreContext,
 } from "./conversation-composer.store-context";
+
 export const ReplyPreview = memo(function ReplyPreview() {
   const topic = useCurrentConversationTopic();
 
@@ -55,7 +53,7 @@ const Content = memo(function Content(props: {
   const { conversationTopic } = props;
 
   const replyingToMessageId = useConversationComposerStoreContext(
-    (state) => state.replyingToMessageId
+    (state) => state.replyingToMessageId,
   );
 
   const { theme } = useAppTheme();
@@ -75,8 +73,8 @@ const Content = memo(function Content(props: {
     ? messageIsFromCurrentAccountInboxId({ message: replyMessage })
       ? `Replying to you`
       : profile?.name
-      ? `Replying to ${profile.name}`
-      : "Replying"
+        ? `Replying to ${profile.name}`
+        : "Replying"
     : "";
 
   const contentHeightAV = useSharedValue(0);
@@ -87,7 +85,7 @@ const Content = memo(function Content(props: {
         replyingToMessageId && contentHeightAV.value !== 0
           ? contentHeightAV.value
           : 0,
-        { damping: SICK_DAMPING, stiffness: SICK_STIFFNESS }
+        { damping: SICK_DAMPING, stiffness: SICK_STIFFNESS },
       ),
     };
   }, [replyingToMessageId]);
@@ -110,8 +108,7 @@ const Content = memo(function Content(props: {
           overflow: "hidden",
         },
         containerAS,
-      ]}
-    >
+      ]}>
       {!!replyMessage && (
         <AnimatedVStack
           entering={theme.animation.reanimatedFadeInSpring}
@@ -130,27 +127,23 @@ const Content = memo(function Content(props: {
             minHeight: replyMessage
               ? 56 // Value from Figma. Not the best but we need minHeight for this to work. If the content end up being bigger it will adjust automatically
               : 0,
-          }}
-        >
+          }}>
           <HStack
             style={{
               // ...debugBorder("blue"),
               alignItems: "center",
               columnGap: theme.spacing.xs,
-            }}
-          >
+            }}>
             <VStack
               style={{
                 rowGap: theme.spacing.xxxs,
                 flex: 1,
-              }}
-            >
+              }}>
               <HStack
                 style={{
                   alignItems: "center",
                   columnGap: theme.spacing.xxxs,
-                }}
-              >
+                }}>
                 <Icon
                   size={theme.iconSize.xxs}
                   icon="arrowshape.turn.up.left.fill"
@@ -179,7 +172,7 @@ const Content = memo(function Content(props: {
 });
 
 const ReplyPreviewEndContent = memo(function ReplyPreviewEndContent(props: {
-  replyMessage: DecodedMessageWithCodecsType;
+  replyMessage: IXmtpDecodedMessage;
 }) {
   const { replyMessage } = props;
 
@@ -240,7 +233,7 @@ const ReplyPreviewEndContent = memo(function ReplyPreviewEndContent(props: {
 
 const ReplyPreviewMessageContent = memo(
   function ReplyPreviewMessageContent(props: {
-    replyMessage: DecodedMessageWithCodecsType;
+    replyMessage: IXmtpDecodedMessage;
   }) {
     const { replyMessage } = props;
 
@@ -263,10 +256,6 @@ const ReplyPreviewMessageContent = memo(
       return <Text>Static attachment</Text>;
     }
 
-    if (isTransactionReferenceMessage(replyMessage)) {
-      return <Text>Transaction</Text>;
-    }
-
     if (isReactionMessage(replyMessage)) {
       return <Text>Reaction</Text>;
     }
@@ -281,10 +270,6 @@ const ReplyPreviewMessageContent = memo(
 
     if (isRemoteAttachmentMessage(replyMessage)) {
       return <Text>Remote Attachment</Text>;
-    }
-
-    if (isCoinbasePaymentMessage(replyMessage)) {
-      return <Text>Coinbase Payment</Text>;
     }
 
     if (isReplyMessage(replyMessage)) {
@@ -311,5 +296,5 @@ const ReplyPreviewMessageContent = memo(
     }
 
     return <Text numberOfLines={1}>{clearedMessage}</Text>;
-  }
+  },
 );

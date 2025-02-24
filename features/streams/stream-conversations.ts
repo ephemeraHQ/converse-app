@@ -1,31 +1,36 @@
+import { MutationObserver } from "@tanstack/react-query";
+import { StreamError } from "@utils/error";
 import { getMarkConversationAsReadMutationOptions } from "@/features/conversation/hooks/use-mark-conversation-as-read";
 import { isConversationAllowed } from "@/features/conversation/utils/is-conversation-allowed";
 import { isConversationConsentUnknown } from "@/features/conversation/utils/is-conversation-consent-unknown";
 import { startMessageStreaming } from "@/features/streams/stream-messages";
+import {
+  stopStreamingConversations,
+  streamConversations,
+} from "@/features/xmtp/xmtp-conversations/xmtp-conversations-stream";
+import { IXmtpConversationWithCodecs } from "@/features/xmtp/xmtp.types";
 import { setConversationQueryData } from "@/queries/conversation-query";
 import { addConversationToAllowedConsentConversationsQuery } from "@/queries/conversations-allowed-consent-query";
 import { addConversationToUnknownConsentConversationsQuery } from "@/queries/conversations-unknown-consent-query";
 import { queryClient } from "@/queries/queryClient";
 import { ensureGroupMembersQueryData } from "@/queries/useGroupMembersQuery";
 import { captureError } from "@/utils/capture-error";
-import { ConversationWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
-import {
-  stopStreamingConversations,
-  streamConversations,
-} from "@/utils/xmtpRN/xmtp-conversations/xmtp-conversations-stream";
-import { MutationObserver } from "@tanstack/react-query";
-import { StreamError } from "@utils/error";
 
-export async function startConversationStreaming(account: string) {
+export async function startConversationStreaming(ethAddress: string) {
   try {
     await streamConversations({
-      ethAddress: account,
+      ethAddress: ethAddress,
       onNewConversation: (conversation) =>
-        handleNewConversation({ account, conversation }).catch(captureError),
+        handleNewConversation({ account: ethAddress, conversation }).catch(
+          captureError,
+        ),
     });
   } catch (error) {
     captureError(
-      new StreamError(`Failed to stream conversations for ${account}`, error)
+      new StreamError({
+        error,
+        additionalMessage: `Failed to stream conversations for ${ethAddress}`,
+      }),
     );
   }
 }
@@ -34,9 +39,16 @@ export { stopStreamingConversations };
 
 async function handleNewConversation(args: {
   account: string;
-  conversation: ConversationWithCodecsType;
+  conversation: IXmtpConversationWithCodecs;
 }) {
   const { account, conversation } = args;
+
+  // For some reason, when receiving a new conversation, the group members are not available?
+  ensureGroupMembersQueryData({
+    caller: "handleNewConversation",
+    account,
+    topic: conversation.topic,
+  }).catch(captureError);
 
   if (isConversationAllowed(conversation)) {
     // Create conversation metadata
@@ -44,7 +56,7 @@ async function handleNewConversation(args: {
       queryClient,
       getMarkConversationAsReadMutationOptions({
         topic: conversation.topic,
-      })
+      }),
     );
     markAsReadMutationObserver.mutate().catch(captureError);
 
@@ -67,12 +79,6 @@ async function handleNewConversation(args: {
     topic: conversation.topic,
     conversation,
   });
-
-  ensureGroupMembersQueryData({
-    caller: "handleNewConversation",
-    account,
-    topic: conversation.topic,
-  }).catch(captureError);
 
   /**
    * Maybe replace the optimistic conversation with the real one

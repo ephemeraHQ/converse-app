@@ -1,12 +1,12 @@
 /**
  * TODO: Maybe delete this and just use the conversation query instead and add a "peer" argument?
  */
-import { queryClient } from "@/queries/queryClient";
-import { getXmtpDmByInboxId } from "@/utils/xmtpRN/xmtp-conversations/xmtp-conversations-dm";
 import { queryOptions } from "@tanstack/react-query";
 import { InboxId } from "@xmtp/react-native-sdk";
-import { dmQueryKey } from "./QueryKeys";
+import { getXmtpDmByInboxId } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-dm";
+import { queryClient } from "@/queries/queryClient";
 import { setConversationQueryData } from "./conversation-query";
+import { dmQueryKey } from "./QueryKeys";
 
 type IDmQueryArgs = {
   ethAccountAddress: string;
@@ -48,7 +48,7 @@ export function setDmQueryData(args: IDmQueryArgs & { dm: IDmQueryData }) {
   const { ethAccountAddress, inboxId, dm } = args;
   queryClient.setQueryData(
     getDmQueryOptions({ ethAccountAddress, inboxId }).queryKey,
-    dm
+    dm,
   );
 
   // Update the main conversation query because it's a 1-1

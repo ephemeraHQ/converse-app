@@ -1,36 +1,3 @@
-import { getCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
-import {
-  allowedConsentConversationsQueryKey,
-  conversationMessagesQueryKey,
-} from "@/queries/QueryKeys";
-import {
-  IMessageAccumulator,
-  addConversationMessageQuery,
-  getConversationMessagesQueryData,
-  getConversationMessagesQueryOptions,
-  replaceOptimisticMessageWithReal,
-  setConversationMessagesQueryData,
-} from "@/queries/conversation-messages-query";
-import {
-  addConversationToAllowedConsentConversationsQuery,
-  removeConversationFromAllowedConsentConversationsQuery,
-} from "@/queries/conversations-allowed-consent-query";
-import { queryClient } from "@/queries/queryClient";
-import { setDmQueryData } from "@/queries/useDmQuery";
-import { setGroupQueryData } from "@/queries/useGroupQuery";
-import { captureErrorWithToast } from "@/utils/capture-error";
-import { getTodayNs } from "@/utils/date";
-import { getRandomId } from "@/utils/general";
-import { sentryTrackError } from "@/utils/sentry";
-import {
-  ConversationWithCodecsType,
-  DmWithCodecsType,
-  GroupWithCodecsType,
-  SupportedCodecsType,
-} from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
-import { contentTypesPrefixes } from "@/utils/xmtpRN/xmtp-content-types/xmtp-content-types";
-import { createXmtpDm } from "@/utils/xmtpRN/xmtp-conversations/xmtp-conversations-dm";
-import { createXmtpGroup } from "@/utils/xmtpRN/xmtp-conversations/xmtp-conversations-group";
 import { useMutation } from "@tanstack/react-query";
 import {
   ConversationId,
@@ -48,13 +15,46 @@ import {
 } from "@xmtp/react-native-sdk/build/lib/Client";
 import { DmParams } from "@xmtp/react-native-sdk/build/lib/Dm";
 import { GroupParams } from "@xmtp/react-native-sdk/build/lib/Group";
-import { sendMessage } from "../../hooks/use-send-message";
+import { getCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
 import { useConversationStore } from "@/features/conversation/conversation.store-context";
-import logger from "@/utils/logger";
+import { ISupportedXmtpCodecs } from "@/features/xmtp/xmtp-codecs/xmtp-codecs";
+import { contentTypesPrefixes } from "@/features/xmtp/xmtp-content-types/xmtp-content-types";
+import { createXmtpDm } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-dm";
+import { createXmtpGroup } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-group";
+import {
+  IXmtpConversationWithCodecs,
+  IXmtpDmWithCodecs,
+  IXmtpGroupWithCodecs,
+} from "@/features/xmtp/xmtp.types";
+import {
+  addConversationMessageQuery,
+  getConversationMessagesQueryData,
+  getConversationMessagesQueryOptions,
+  IMessageAccumulator,
+  replaceOptimisticMessageWithReal,
+  setConversationMessagesQueryData,
+} from "@/queries/conversation-messages-query";
 import {
   getConversationQueryData,
   updateConversationQueryData,
 } from "@/queries/conversation-query";
+import {
+  addConversationToAllowedConsentConversationsQuery,
+  removeConversationFromAllowedConsentConversationsQuery,
+} from "@/queries/conversations-allowed-consent-query";
+import { queryClient } from "@/queries/queryClient";
+import {
+  allowedConsentConversationsQueryKey,
+  conversationMessagesQueryKey,
+} from "@/queries/QueryKeys";
+import { setDmQueryData } from "@/queries/useDmQuery";
+import { setGroupQueryData } from "@/queries/useGroupQuery";
+import { captureErrorWithToast } from "@/utils/capture-error";
+import { getTodayNs } from "@/utils/date";
+import { getRandomId } from "@/utils/general";
+import logger from "@/utils/logger";
+import { sentryTrackError } from "@/utils/sentry";
+import { sendMessage } from "../../hooks/use-send-message";
 
 export type ISendMessageParams = {
   topic: ConversationTopic;
@@ -109,7 +109,7 @@ export const TEMP_CONVERSATION_PREFIX = "tmp-";
 function getConversationTempTopic(args: { inboxIds: InboxId[] }) {
   const { inboxIds } = args;
   return `${TEMP_CONVERSATION_PREFIX}${generateGroupHashFromMemberIds(
-    inboxIds
+    inboxIds,
   )}` as ConversationTopic;
 }
 
@@ -134,7 +134,7 @@ export function useCreateConversationAndSendFirstMessage() {
       }
 
       // Create conversation
-      let conversation: GroupWithCodecsType | DmWithCodecsType;
+      let conversation: IXmtpGroupWithCodecs | IXmtpDmWithCodecs;
       if (inboxIds.length > 1) {
         conversation = await createXmtpGroup({
           account: currentAccount,
@@ -435,7 +435,7 @@ function generateGroupHashFromMemberIds(members: InboxId[]) {
 
   // 1) Sort members (case-insensitive) and deduplicate
   const sorted = [...new Set(members)].sort((a, b) =>
-    a.localeCompare(b, undefined, { sensitivity: "base" })
+    a.localeCompare(b, undefined, { sensitivity: "base" }),
   );
   // 2) Lowercase them
   const lowercased = sorted.map((m) => m.toLowerCase());

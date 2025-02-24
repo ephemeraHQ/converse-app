@@ -1,13 +1,13 @@
-import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
+import { useQueries, useQuery } from "@tanstack/react-query";
+import { useEffect, useMemo } from "react";
+import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
+import { getConversationMetadataQueryOptions } from "@/features/conversation/conversation-metadata/conversation-metadata.query";
 import { isConversationAllowed } from "@/features/conversation/utils/is-conversation-allowed";
 import { useScreenFocusEffectOnce } from "@/hooks/use-screen-focus-effect-once";
 import { useAppStateHandlers } from "@/hooks/useAppStateHandlers";
-import { getConversationMetadataQueryOptions } from "@/features/conversation/conversation-metadata/conversation-metadata.query";
 import { prefetchConversationMessages } from "@/queries/conversation-messages-query";
 import { getAllowedConsentConversationsQueryOptions } from "@/queries/conversations-allowed-consent-query";
 import { captureError } from "@/utils/capture-error";
-import { useQueries, useQuery } from "@tanstack/react-query";
-import { useEffect, useMemo } from "react";
 
 export const useConversationListConversations = () => {
   const currentAccount = useCurrentSenderEthAddress();
@@ -20,7 +20,7 @@ export const useConversationListConversations = () => {
     getAllowedConsentConversationsQueryOptions({
       account: currentAccount!,
       caller: "useConversationListConversations",
-    })
+    }),
   );
 
   // Let's prefetch the messages for all the conversations
@@ -53,7 +53,7 @@ export const useConversationListConversations = () => {
       getConversationMetadataQueryOptions({
         account: currentAccount!,
         topic: conversation.topic,
-      })
+      }),
     ),
     // note/todo(lustig): investigate combine to remove need for filteredConvresations (which utilizes conversationsDataQueries)
     // which is referentially unstable

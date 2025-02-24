@@ -1,14 +1,5 @@
-import { Center } from "@/design-system/Center";
-import { AnimatedVStack } from "@/design-system/VStack";
-import { EmptyState } from "@/design-system/empty-state";
-import { Loader } from "@/design-system/loader";
-import { useSearchConvosUsers } from "@/features/conversation/conversation-create/hooks/use-search-convos-users";
-import { inboxIdIsPartOfConversationUsingCacheData } from "@/features/conversation/utils/inbox-id-is-part-of-converastion";
-import { useConversationStoreContext } from "@/features/conversation/conversation.store-context";
-import { $globalStyles } from "@/theme/styles";
-import { useAppTheme } from "@/theme/use-app-theme";
 import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
-import { ReactNode, memo, useMemo } from "react";
+import { memo, ReactNode, useMemo } from "react";
 import { FlatList } from "react-native";
 import {
   useAnimatedKeyboard,
@@ -17,13 +8,23 @@ import {
   withSpring,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Center } from "@/design-system/Center";
+import { EmptyState } from "@/design-system/empty-state";
+import { Loader } from "@/design-system/loader";
+import { AnimatedVStack } from "@/design-system/VStack";
+import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store";
+import { useSearchConvosUsers } from "@/features/conversation/conversation-create/hooks/use-search-convos-users";
+import { useConversationStoreContext } from "@/features/conversation/conversation.store-context";
+import { inboxIdIsPartOfConversationUsingCacheData } from "@/features/conversation/utils/inbox-id-is-part-of-converastion";
+import { $globalStyles } from "@/theme/styles";
+import { useAppTheme } from "@/theme/use-app-theme";
 import { useSearchExistingDms } from "../queries/search-existing-dms.query";
 import { useSearchExistingGroupsByGroupMembers } from "../queries/search-existing-groups-by-group-members.query";
 import { useSearchExistingGroupsByGroupName } from "../queries/search-existing-groups-by-group-name.query";
 import { ConversationSearchResultsListItemGroup } from "./conversation-create-search-results-list-item-group";
 import { ConversationSearchResultsListItemUser } from "./conversation-create-search-results-list-item-user";
 import { ConversationSearchResultsListItemDm } from "./conversation-create-search-results-list-item-user-dm";
-import { useSafeCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
+
 // Because we want a mix of DMs, groups, and profiles
 const MAX_INITIAL_RESULTS = 3;
 
@@ -52,13 +53,13 @@ function searchResultIsDm(item: SearchResultItem): item is ISearchResultItemDm {
 }
 
 function searchResultIsGroup(
-  item: SearchResultItem
+  item: SearchResultItem,
 ): item is ISearchResultItemGroup {
   return item.type === "group";
 }
 
 function searchResultIsProfile(
-  item: SearchResultItem
+  item: SearchResultItem,
 ): item is ISearchResultItemProfile {
   return item.type === "profile";
 }
@@ -67,11 +68,11 @@ export function ConversationSearchResultsList() {
   const insets = useSafeAreaInsets();
 
   const searchQuery = useConversationStoreContext(
-    (state) => state.searchTextValue
+    (state) => state.searchTextValue,
   );
 
   const selectedSearchUserInboxIds = useConversationStoreContext(
-    (state) => state.searchSelectedUserInboxIds
+    (state) => state.searchSelectedUserInboxIds,
   );
 
   const currentUserInboxId = useSafeCurrentSender().inboxId;
@@ -117,7 +118,7 @@ export function ConversationSearchResultsList() {
             type: "dm" as const,
             conversationTopic,
           }))
-          .slice(0, MAX_INITIAL_RESULTS)
+          .slice(0, MAX_INITIAL_RESULTS),
       );
     }
 
@@ -128,7 +129,7 @@ export function ConversationSearchResultsList() {
           type: "group" as const,
           conversationTopic,
         }))
-        .slice(0, MAX_INITIAL_RESULTS)
+        .slice(0, MAX_INITIAL_RESULTS),
     );
 
     // 3. Add groups where group names match the search query
@@ -138,7 +139,7 @@ export function ConversationSearchResultsList() {
           type: "group" as const,
           conversationTopic,
         }))
-        .slice(0, MAX_INITIAL_RESULTS)
+        .slice(0, MAX_INITIAL_RESULTS),
     );
 
     // 4. Add user profiles that aren't already in DMs
@@ -184,8 +185,7 @@ export function ConversationSearchResultsList() {
             style={{
               paddingBottom: insets.bottom,
               flex: 1,
-            }}
-          >
+            }}>
             {isStillLoadingSearchResults ? (
               <Loader size="sm" />
             ) : searchQuery ? (
@@ -253,7 +253,7 @@ const Container = memo(function Container(props: { children: ReactNode }) {
   const { height } = useAnimatedKeyboard();
 
   const searchQuery = useConversationStoreContext(
-    (state) => state.searchTextValue
+    (state) => state.searchTextValue,
   );
 
   const containerVisibleAV = useDerivedValue(() => {
@@ -283,8 +283,7 @@ const Container = memo(function Container(props: { children: ReactNode }) {
         {
           backgroundColor: theme.colors.background.surfaceless,
         },
-      ]}
-    >
+      ]}>
       {children}
     </AnimatedVStack>
   );

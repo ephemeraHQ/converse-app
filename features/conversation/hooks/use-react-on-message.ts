@@ -1,17 +1,3 @@
-import {
-  getCurrentSenderEthAddress,
-  getSafeCurrentSender,
-} from "@/features/multi-inbox/multi-inbox.store";
-import { getConversationForCurrentAccount } from "@/features/conversation/utils/get-conversation-for-current-account";
-import {
-  addConversationMessageQuery,
-  refetchConversationMessages,
-} from "@/queries/conversation-messages-query";
-import { captureErrorWithToast } from "@/utils/capture-error";
-import { getTodayNs } from "@/utils/date";
-import { getRandomId } from "@/utils/general";
-import { Haptics } from "@/utils/haptics";
-import { contentTypesPrefixes } from "@/utils/xmtpRN/xmtp-content-types/xmtp-content-types";
 import { useMutation } from "@tanstack/react-query";
 import {
   ConversationTopic,
@@ -20,6 +6,20 @@ import {
   ReactionContent,
 } from "@xmtp/react-native-sdk";
 import { useCallback } from "react";
+import {
+  getCurrentSenderEthAddress,
+  getSafeCurrentSender,
+} from "@/features/authentication/multi-inbox.store";
+import { getConversationForCurrentAccount } from "@/features/conversation/utils/get-conversation-for-current-account";
+import { contentTypesPrefixes } from "@/features/xmtp/xmtp-content-types/xmtp-content-types";
+import {
+  addConversationMessageQuery,
+  refetchConversationMessages,
+} from "@/queries/conversation-messages-query";
+import { captureErrorWithToast } from "@/utils/capture-error";
+import { getTodayNs } from "@/utils/date";
+import { getRandomId } from "@/utils/general";
+import { Haptics } from "@/utils/haptics";
 
 export function useReactOnMessage(props: { topic: ConversationTopic }) {
   const { topic } = props;
@@ -89,7 +89,7 @@ export function useReactOnMessage(props: { topic: ConversationTopic }) {
         captureErrorWithToast(error);
       }
     },
-    [reactOnMessageMutationAsync]
+    [reactOnMessageMutationAsync],
   );
 
   return reactOnMessage;

@@ -1,10 +1,10 @@
+import { memo } from "react";
 import { MessageChatGroupUpdate } from "@/features/conversation/conversation-message/conversation-message-content-types/conversation-message-chat-group-update";
 import { MessageRemoteAttachment } from "@/features/conversation/conversation-message/conversation-message-content-types/conversation-message-remote-attachment";
 import { MessageReply } from "@/features/conversation/conversation-message/conversation-message-content-types/conversation-message-reply";
 import { MessageSimpleText } from "@/features/conversation/conversation-message/conversation-message-content-types/conversation-message-simple-text";
 import { MessageStaticAttachment } from "@/features/conversation/conversation-message/conversation-message-content-types/conversation-message-static-attachment";
 import {
-  isCoinbasePaymentMessage,
   isGroupUpdatedMessage,
   isReactionMessage,
   isReadReceiptMessage,
@@ -12,15 +12,11 @@ import {
   isReplyMessage,
   isStaticAttachmentMessage,
   isTextMessage,
-  isTransactionReferenceMessage,
 } from "@/features/conversation/conversation-message/conversation-message.utils";
-import { DecodedMessageWithCodecsType } from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
-import { memo } from "react";
+import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types";
 
 export const ConversationMessage = memo(
-  function ConversationMessage(props: {
-    message: DecodedMessageWithCodecsType;
-  }) {
+  function ConversationMessage(props: { message: IXmtpDecodedMessage }) {
     const { message } = props;
 
     if (isTextMessage(message)) {
@@ -49,17 +45,7 @@ export const ConversationMessage = memo(
     }
 
     if (isReadReceiptMessage(message)) {
-      // TODO
-      return null;
-    }
-
-    if (isTransactionReferenceMessage(message)) {
-      // TODO
-      return null;
-    }
-
-    if (isCoinbasePaymentMessage(message)) {
-      // TODO
+      // Not handled here
       return null;
     }
 
@@ -70,5 +56,5 @@ export const ConversationMessage = memo(
   // For now it's okay. For performance. A message shouldn't change
   (prevProps, nextProps) => {
     return prevProps.message.id === nextProps.message.id;
-  }
+  },
 );

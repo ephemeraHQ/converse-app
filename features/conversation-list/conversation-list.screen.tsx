@@ -1,4 +1,8 @@
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import React, { memo, useCallback } from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Screen } from "@/components/screen/screen";
+import { ContextMenuView } from "@/design-system/context-menu/context-menu";
 import { HStack } from "@/design-system/HStack";
 import { AnimatedVStack } from "@/design-system/VStack";
 import { ConversationList } from "@/features/conversation-list/conversation-list";
@@ -12,25 +16,21 @@ import {
 } from "@/features/conversation-list/hooks/use-conversation-list-item-context-menu-props";
 import { usePinnedConversations } from "@/features/conversation-list/hooks/use-pinned-conversations";
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
+import {
+  IXmtpDmWithCodecs,
+  IXmtpGroupWithCodecs,
+} from "@/features/xmtp/xmtp.types";
 import { useMinimumLoadingTime } from "@/hooks/use-minimum-loading-time";
 import { NavigationParamList } from "@/navigation/navigation.types";
 import { $globalStyles } from "@/theme/styles";
 import { useAppTheme } from "@/theme/use-app-theme";
 import { captureError } from "@/utils/capture-error";
 import { isDev } from "@/utils/getEnv";
-import {
-  DmWithCodecsType,
-  GroupWithCodecsType,
-} from "@/utils/xmtpRN/xmtp-client/xmtp-client.types";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React, { memo, useCallback } from "react";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ConversationListAwaitingRequests } from "./conversation-list-awaiting-requests";
 import { ConversationListEmpty } from "./conversation-list-empty";
 import { ConversationListStartNewConvoBanner } from "./conversation-list-start-new-convo-banner";
 import { useConversationListScreenHeader } from "./conversation-list.screen-header";
 import { useConversationListConversations } from "./use-conversation-list-conversations";
-import { ContextMenuView } from "@/design-system/context-menu/context-menu";
 
 type IConversationListProps = NativeStackScreenProps<
   NavigationParamList,
@@ -98,7 +98,7 @@ export function ConversationListScreen(props: IConversationListProps) {
 }
 
 const ConversationListItemDmWrapper = memo(
-  function ConversationListItemDmWrapper(props: { dm: DmWithCodecsType }) {
+  function ConversationListItemDmWrapper(props: { dm: IXmtpDmWithCodecs }) {
     const { dm } = props;
 
     const contextMenuProps = useDmConversationContextMenuViewProps({
@@ -111,24 +111,22 @@ const ConversationListItemDmWrapper = memo(
         style={{
           width: "100%",
           overflow: "hidden",
-        }}
-      >
+        }}>
         <ContextMenuView
           style={{
             width: "100%",
           }}
-          {...contextMenuProps}
-        >
+          {...contextMenuProps}>
           <ConversationListItemDm conversationTopic={dm.topic} />
         </ContextMenuView>
       </HStack>
     );
-  }
+  },
 );
 
 const ConversationListItemGroupWrapper = memo(
   function ConversationListItemGroupWrapper(props: {
-    group: GroupWithCodecsType;
+    group: IXmtpGroupWithCodecs;
   }) {
     const { group } = props;
 
@@ -142,19 +140,17 @@ const ConversationListItemGroupWrapper = memo(
         style={{
           width: "100%",
           overflow: "hidden",
-        }}
-      >
+        }}>
         <ContextMenuView
           style={{
             width: "100%",
           }}
-          {...contextMenuProps}
-        >
+          {...contextMenuProps}>
           <ConversationListItemGroup conversationTopic={group.topic} />
         </ContextMenuView>
       </HStack>
     );
-  }
+  },
 );
 
 const ListHeader = React.memo(function ListHeader() {

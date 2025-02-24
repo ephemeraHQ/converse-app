@@ -1,16 +1,16 @@
+import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
+import React, { memo, useMemo } from "react";
+import { StyleProp, TextStyle, ViewStyle } from "react-native";
 import { Center } from "@/design-system/Center";
 import { Text } from "@/design-system/Text";
 import { VStack } from "@/design-system/VStack";
-import { useCurrentSenderEthAddress } from "@/features/multi-inbox/multi-inbox.store";
+import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store";
 import { useProfilesQueries } from "@/features/profiles/profiles.query";
 import { useGroupMembersQuery } from "@/queries/useGroupMembersQuery";
 import { useGroupQuery } from "@/queries/useGroupQuery";
 import { $globalStyles } from "@/theme/styles";
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { Nullable } from "@/types/general";
-import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
-import React, { memo, useMemo } from "react";
-import { StyleProp, TextStyle, ViewStyle } from "react-native";
 import { Avatar } from "./avatar";
 
 /**
@@ -34,7 +34,7 @@ export const GroupAvatarInboxIds = memo(function GroupAvatarInboxIds(props: {
               uri: profile.avatar,
               name: profile.name,
             }
-          : null
+          : null,
       )
       .filter(Boolean);
   }, [profiles]);
@@ -53,16 +53,16 @@ export const GroupAvatar = memo(function GroupAvatar(props: {
 
   const { theme } = useAppTheme();
 
-  const currentAccount = useCurrentSenderEthAddress()!;
+  const currentSender = useSafeCurrentSender();
 
   const { data: group } = useGroupQuery({
-    account: currentAccount,
+    account: currentSender.ethereumAddress,
     topic: groupTopic,
   });
 
   const { data: members } = useGroupMembersQuery({
     caller: "GroupAvatar",
-    account: currentAccount,
+    account: currentSender.ethereumAddress,
     topic: groupTopic,
   });
 
@@ -71,17 +71,17 @@ export const GroupAvatar = memo(function GroupAvatar(props: {
       return [];
     }
 
-    return members.ids.reduce<string[]>((addresses, memberId) => {
-      const memberAddress = members.byId[memberId]?.addresses[0];
+    return members.ids.reduce<InboxId[]>((inboxIds, memberId) => {
+      const memberInboxId = members.byId[memberId].inboxId;
       if (
-        memberAddress &&
-        memberAddress.toLowerCase() !== currentAccount?.toLowerCase()
+        memberInboxId &&
+        memberInboxId.toLowerCase() !== currentSender?.inboxId?.toLowerCase()
       ) {
-        addresses.push(memberAddress);
+        inboxIds.push(memberInboxId);
       }
-      return addresses;
+      return inboxIds;
     }, []);
-  }, [members, currentAccount]);
+  }, [members, currentSender]);
 
   const { data: profiles } = useProfilesQueries({
     xmtpInboxIds: memberAddresses,
@@ -97,7 +97,7 @@ export const GroupAvatar = memo(function GroupAvatar(props: {
                 uri: profile.avatar,
                 name: profile.name,
               }
-            : null
+            : null,
         )
         .filter(Boolean) ?? []
     );
@@ -148,7 +148,7 @@ const GroupAvatarUI = memo(function GroupAvatarUI(props: IGroupAvatarUIProps) {
 
   const positions = useMemo(
     () => calculatePositions(memberCount, MAIN_CIRCLE_RADIUS),
-    [memberCount]
+    [memberCount],
   );
 
   return (
@@ -194,7 +194,7 @@ const GroupAvatarUI = memo(function GroupAvatarUI(props: IGroupAvatarUIProps) {
 
 const calculatePositions = (
   memberCount: number,
-  mainCircleRadius: number
+  mainCircleRadius: number,
 ): Position[] => {
   const positionMaps: { [key: number]: Position[] } = {
     0: [],

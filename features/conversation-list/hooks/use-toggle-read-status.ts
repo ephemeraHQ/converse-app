@@ -1,11 +1,11 @@
-import { getSafeCurrentSender } from "@/features/multi-inbox/multi-inbox.store";
+import { ConversationTopic } from "@xmtp/react-native-sdk";
+import { useCallback } from "react";
+import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store";
+import { getConversationMetadataQueryData } from "@/features/conversation/conversation-metadata/conversation-metadata.query";
 import { useMarkConversationAsRead } from "@/features/conversation/hooks/use-mark-conversation-as-read";
 import { useMarkConversationAsUnread } from "@/features/conversation/hooks/use-mark-conversation-as-unread";
 import { conversationIsUnreadForInboxId } from "@/features/conversation/utils/conversation-is-unread-by-current-account";
-import { getConversationMetadataQueryData } from "@/features/conversation/conversation-metadata/conversation-metadata.query";
 import { getConversationQueryData } from "@/queries/conversation-query";
-import { ConversationTopic } from "@xmtp/react-native-sdk";
-import { useCallback } from "react";
 
 type UseToggleReadStatusProps = {
   topic: ConversationTopic;

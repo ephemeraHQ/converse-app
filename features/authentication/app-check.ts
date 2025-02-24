@@ -1,10 +1,10 @@
 // helpful medium article: https://medium.com/@vibhavguria07/level-up-your-app-security-implementing-firebase-app-check-in-react-native-9c7409d56504
 // dashboards: https://console.firebase.google.com/u/0/project/converse-appcheck/appcheck/products
 // setup instructions: https://rnfirebase.io/app-check/usage
+import { firebase } from "@react-native-firebase/app-check";
 import { config } from "@/config";
 import { captureError } from "@/utils/capture-error";
-import { GenericError } from "@/utils/error";
-import { firebase } from "@react-native-firebase/app-check";
+import { AuthenticationError } from "@/utils/error";
 import { logger } from "../../utils/logger";
 
 const appCheck = firebase.appCheck();
@@ -27,10 +27,10 @@ export const tryGetAppCheckToken = async ({
     return appCheckTokenResult.token;
   } catch (error) {
     captureError(
-      new GenericError({
-        message: "Error getting App Check token",
-        cause: error,
-      })
+      new AuthenticationError({
+        error,
+        additionalMessage: "error getting App Check token",
+      }),
     );
     return undefined;
   }
@@ -41,7 +41,7 @@ export async function setupAppAttest() {
 
   const rnfbProvider = appCheck.newReactNativeFirebaseAppCheckProvider();
   logger.debug(
-    "[setupAppAttest] Created new React Native Firebase App Check provider"
+    "[setupAppAttest] Created new React Native Firebase App Check provider",
   );
 
   // Configure provider based on environment and platform
@@ -60,7 +60,7 @@ export async function setupAppAttest() {
   logger.debug(
     `[setupAppAttest] Configured provider for ${
       __DEV__ ? "debug" : "production"
-    } environment`
+    } environment`,
   );
 
   appCheck.initializeAppCheck({
@@ -68,6 +68,6 @@ export async function setupAppAttest() {
     isTokenAutoRefreshEnabled: true,
   });
   logger.debug(
-    "[setupAppAttest] Initialized App Check with auto token refresh enabled"
+    "[setupAppAttest] Initialized App Check with auto token refresh enabled",
   );
 }
