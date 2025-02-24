@@ -34,32 +34,7 @@ permissions:
   id-token: write
 
 jobs:
-  setup-env:
-    runs-on: ubuntu-latest
-    outputs:
-      sentry_token: ${{ steps.sentry_token.outputs.sentry_token }}
-
-    steps:
-      - name: Setup EAS
-        uses: expo/expo-github-action@v8
-        with:
-          eas-version: latest
-          token: ${{ secrets.EXPO_TOKEN }}
-          packager: yarn
-
-      - name: Get Sentry Token
-        id: sentry_token
-        run: |
-          TOKEN=$(eas env:get --variable-name=SENTRY_AUTH_TOKEN --variable-environment=preview | tr -d ' ' | cut -d'=' -f2)
-          echo "sentry_token=${TOKEN}"
-          echo "sentry_token=${TOKEN}" >> $GITHUB_OUTPUT
-
-      - name: Echo Sentry Token
-        run: |
-          echo "Sentry Token: ${{ steps.sentry_token.outputs.sentry_token }}"
-
   check-changes:
-    needs: setup-env
     runs-on: ubuntu-latest
     outputs:
       has_native_changes: ${{ steps.check-changes.outputs.has_native_changes }}
@@ -76,12 +51,12 @@ jobs:
         id: commit_msg
         run: |
           # Escape the commit message and store it in a variable
-          MSG=$(git log -1 --pretty=%B)
+          COMMIT_MESSAGE=$(git log -1 --pretty=%B)
           # Properly escape the message for GitHub Actions output
-          MSG="${MSG//'%'/'%25'}"
-          MSG="${MSG//$'\n'/'%0A'}"
-          MSG="${MSG//$'\r'/'%0D'}"
-          echo "message=$MSG" >> $GITHUB_OUTPUT
+          COMMIT_MESSAGE="${COMMIT_MESSAGE//'%'/'%25'}"
+          COMMIT_MESSAGE="${COMMIT_MESSAGE//$'\n'/'%0A'}"
+          COMMIT_MESSAGE="${COMMIT_MESSAGE//$'\r'/'%0D'}"
+          echo "message=$COMMIT_MESSAGE" >> $GITHUB_OUTPUT
 
       - name: Check for native changes
         id: check-changes
@@ -95,7 +70,7 @@ jobs:
           fi
 
   bump-version:
-    needs: [setup-env, check-changes]
+    needs: [check-changes]
     if: needs.check-changes.outputs.has_native_changes == 'true'
     runs-on: ubuntu-latest
     outputs:
@@ -128,7 +103,7 @@ jobs:
           git push https://${{ secrets.PAT_GITHUB }}@github.com/${{ github.repository }}.git HEAD:main
 
   ios-build:
-    needs: [setup-env, check-changes, bump-version]
+    needs: [check-changes, bump-version]
     if: needs.check-changes.outputs.has_native_changes == 'true'
     runs-on: ubuntu-latest
 
@@ -168,16 +143,16 @@ jobs:
 
       - name: Build and submit to store
         run: |
+          export SENTRY_AUTH_TOKEN=$(eas env:get --variable-name=SENTRY_AUTH_TOKEN --variable-environment=preview | tr -d ' ' | cut -d'=' -f2) 
           eas build --platform ios --profile preview --non-interactive --auto-submit
 
       - name: Resolve Sentry Issues
-        env:
-          SENTRY_AUTH_TOKEN: ${{ needs.setup-env.outputs.sentry_token }}
         run: |
+          export SENTRY_AUTH_TOKEN=$(eas env:get --variable-name=SENTRY_AUTH_TOKEN --variable-environment=preview | tr -d ' ' | cut -d'=' -f2)
           sentry-cli issues resolve --all
 
   android-build:
-    needs: [setup-env, check-changes, bump-version]
+    needs: [check-changes, bump-version]
     if: needs.check-changes.outputs.has_native_changes == 'true'
     runs-on: ubuntu-latest
 
@@ -217,16 +192,16 @@ jobs:
 
       - name: Build and submit to store
         run: |
+          export SENTRY_AUTH_TOKEN=$(eas env:get --variable-name=SENTRY_AUTH_TOKEN --variable-environment=preview | tr -d ' ' | cut -d'=' -f2) 
           eas build --platform android --profile preview --non-interactive --auto-submit
 
       - name: Resolve Sentry Issues
-        env:
-          SENTRY_AUTH_TOKEN: ${{ needs.setup-env.outputs.sentry_token }}
         run: |
+          export SENTRY_AUTH_TOKEN=$(eas env:get --variable-name=SENTRY_AUTH_TOKEN --variable-environment=preview | tr -d ' ' | cut -d'=' -f2)
           sentry-cli issues resolve --all
 
   ota-update:
-    needs: [setup-env, check-changes]
+    needs: [check-changes]
     if: needs.check-changes.outputs.has_native_changes == 'false'
     runs-on: ubuntu-latest
 
@@ -263,13 +238,11 @@ jobs:
           eas update --channel=preview --message "${{ needs.check-changes.outputs.commit_message }}" --non-interactive
 
       - name: Upload Sourcemaps to Sentry
-        env:
-          SENTRY_AUTH_TOKEN: ${{ needs.setup-env.outputs.sentry_token }}
         run: |
+          export SENTRY_AUTH_TOKEN=$(eas env:get --variable-name=SENTRY_AUTH_TOKEN --variable-environment=preview | tr -d ' ' | cut -d'=' -f2)
           npx sentry-expo-upload-sourcemaps dist
 
       - name: Resolve Sentry Issues
-        env:
-          SENTRY_AUTH_TOKEN: ${{ needs.setup-env.outputs.sentry_token }}
         run: |
+          export SENTRY_AUTH_TOKEN=$(eas env:get --variable-name=SENTRY_AUTH_TOKEN --variable-environment=preview | tr -d ' ' | cut -d'=' -f2)
           sentry-cli issues resolve --all
