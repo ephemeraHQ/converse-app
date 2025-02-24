@@ -1,15 +1,14 @@
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/queries/queryClient";
-import { reactQueryPersister } from "@/utils/mmkv";
 import { fetchCurrentUser, ICurrentUser } from "./current-user-api";
 
 const currentUserQueryKey = () => ["current-user"] as const;
 
-function getCurrentUserQueryOptions() {
+export function getCurrentUserQueryOptions() {
   return queryOptions({
     queryKey: currentUserQueryKey(),
     queryFn: fetchCurrentUser,
-    // persister: reactQueryPersister,
+    // persister: reactQueryPersister, // Remove tmp until we are solid with our persister
     refetchOnWindowFocus: true,
   });
 }

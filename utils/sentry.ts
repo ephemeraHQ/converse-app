@@ -1,8 +1,14 @@
-import { getEnv, isDev } from "@/utils/getEnv";
-import { logger } from "@/utils/logger";
 import * as Sentry from "@sentry/react-native";
 import type { ErrorEvent, EventHint } from "@sentry/types";
+import { QueryObserver } from "@tanstack/react-query";
 import * as Updates from "expo-updates";
+import { useEffect } from "react";
+import { useMultiInboxStore } from "@/features/authentication/multi-inbox.store";
+import { getCurrentUserQueryOptions } from "@/features/current-user/curent-user.query";
+import { getProfileQueryConfig } from "@/features/profiles/profiles.query";
+import { queryClient } from "@/queries/queryClient";
+import { getEnv, isDev } from "@/utils/getEnv";
+import { logger } from "@/utils/logger";
 import { config } from "../config";
 
 // Error patterns that should not be reported to Sentry
@@ -45,7 +51,7 @@ export function sentryInit() {
       if (event.exception?.values?.length === 1) {
         const exception = event.exception.values[0];
         const shouldFilter = errorsToFilterOut.some(
-          (e) => exception.type === e.type && exception.value === e.value
+          (e) => exception.type === e.type && exception.value === e.value,
         );
 
         if (shouldFilter) {
@@ -93,8 +99,68 @@ export function sentryTrackError({
   });
 }
 
-export function sentryIdentifyUser(args: { userId: string }) {
+export function sentryIdentifyUser(args: {
+  userId?: string;
+  username?: string;
+}) {
   Sentry.setUser({
-    id: args.userId,
+    ...(args.userId && { id: args.userId }),
+    ...(args.username && { username: args.username }),
   });
+}
+
+export function useUpdateSentry() {
+  useEffect(() => {
+    // Track user changes
+    const userQueryObserver = new QueryObserver(
+      queryClient,
+      getCurrentUserQueryOptions(),
+    );
+
+    const unsubscribeFromUserQueryObserver = userQueryObserver.subscribe(
+      (result) => {
+        if (result.data) {
+          sentryIdentifyUser({
+            userId: result.data.id,
+          });
+        }
+      },
+    );
+
+    // Track profile changes
+    const profileQueryObserver = new QueryObserver(
+      queryClient,
+      getProfileQueryConfig({
+        xmtpId: useMultiInboxStore.getState().currentSender?.inboxId,
+      }),
+    );
+
+    const unsubscribeFromProfileQueryObserver = profileQueryObserver.subscribe(
+      (result) => {
+        if (result.data?.name) {
+          sentryIdentifyUser({
+            username: result.data.name,
+          });
+        }
+      },
+    );
+
+    // Watch for inbox changes to update profile query
+    const unsubscribeFromStore = useMultiInboxStore.subscribe(
+      (state) => state.currentSender?.inboxId,
+      (inboxId) => {
+        if (inboxId) {
+          profileQueryObserver.setOptions(
+            getProfileQueryConfig({ xmtpId: inboxId }),
+          );
+        }
+      },
+    );
+
+    return () => {
+      unsubscribeFromUserQueryObserver();
+      unsubscribeFromProfileQueryObserver();
+      unsubscribeFromStore();
+    };
+  }, []);
 }

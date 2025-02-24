@@ -2,7 +2,7 @@ import { InboxId } from "@xmtp/react-native-sdk";
 import React, { memo, useCallback, useEffect, useState } from "react";
 import { Screen } from "@/components/screen/screen";
 import { SettingsList } from "@/design-system/settings-list/settings-list";
-import { useLogout } from "@/features/authentication/use-logout.hook";
+import { useLogout } from "@/features/authentication/use-logout";
 import { ProfileContactCard } from "@/features/profiles/components/profile-contact-card/profile-contact-card";
 import { ProfileContactCardEditableAvatar } from "@/features/profiles/components/profile-contact-card/profile-contact-card-editable-avatar";
 import { ProfileContactCardEditableNameInput } from "@/features/profiles/components/profile-contact-card/profile-contact-card-editable-name-input";

@@ -11,7 +11,7 @@ import * as Updates from "expo-updates";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { Alert, Platform } from "react-native";
 import { VStack } from "@/design-system/VStack";
-import { useLogout } from "@/features/authentication/use-logout.hook";
+import { useLogout } from "@/features/authentication/use-logout";
 import { getXmtpNativeLogFile } from "@/features/xmtp/utils/xmtp-logs";
 import { translate } from "@/i18n";
 import { navigate } from "@/navigation/navigation.utils";

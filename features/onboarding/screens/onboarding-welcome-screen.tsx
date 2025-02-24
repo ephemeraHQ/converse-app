@@ -8,7 +8,7 @@ import { Pressable } from "@/design-system/Pressable";
 import { AnimatedText, Text } from "@/design-system/Text";
 import { VStack } from "@/design-system/VStack";
 import { useMultiInboxStore } from "@/features/authentication/multi-inbox.store";
-import { useLogout } from "@/features/authentication/use-logout.hook";
+import { useLogout } from "@/features/authentication/use-logout";
 import { OnboardingSubtitle } from "@/features/onboarding/components/onboarding-subtitle";
 import { OnboardingTitle } from "@/features/onboarding/components/onboarding-title";
 import { useLoginWithPasskey } from "@/features/onboarding/hooks/use-login-with-passkey";

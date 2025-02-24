@@ -15,7 +15,11 @@ import { queryClient } from "../../queries/queryClient";
 const profileQueryKey = ({ xmtpId }: { xmtpId: string }) =>
   ["profile", xmtpId] as const;
 
-const profileQueryConfig = ({ xmtpId }: { xmtpId: string | undefined }) => {
+export const getProfileQueryConfig = ({
+  xmtpId,
+}: {
+  xmtpId: string | undefined;
+}) => {
   const enabled = !!xmtpId;
   return queryOptions({
     enabled,
@@ -31,15 +35,15 @@ const profileQueryConfig = ({ xmtpId }: { xmtpId: string | undefined }) => {
 };
 
 export const useProfileQuery = ({ xmtpId }: { xmtpId: string | undefined }) => {
-  return useQuery(profileQueryConfig({ xmtpId }));
+  return useQuery(getProfileQueryConfig({ xmtpId }));
 };
 
 export const prefetchProfileQuery = ({ xmtpId }: { xmtpId: string }) => {
-  return queryClient.prefetchQuery(profileQueryConfig({ xmtpId }));
+  return queryClient.prefetchQuery(getProfileQueryConfig({ xmtpId }));
 };
 
 export const fetchProfileQuery = ({ xmtpId }: { xmtpId: string }) => {
-  return queryClient.fetchQuery(profileQueryConfig({ xmtpId }));
+  return queryClient.fetchQuery(getProfileQueryConfig({ xmtpId }));
 };
 
 export type IConvosProfileForInboxUpdate = Partial<
@@ -62,11 +66,11 @@ export const setProfileQueryData = (args: {
 };
 
 export const getProfileQueryData = ({ xmtpId }: { xmtpId: string }) => {
-  return queryClient.getQueryData(profileQueryConfig({ xmtpId }).queryKey);
+  return queryClient.getQueryData(getProfileQueryConfig({ xmtpId }).queryKey);
 };
 
 export const ensureProfileQueryData = ({ xmtpId }: { xmtpId: string }) => {
-  return queryClient.ensureQueryData(profileQueryConfig({ xmtpId }));
+  return queryClient.ensureQueryData(getProfileQueryConfig({ xmtpId }));
 };
 
 export const invalidateProfileQuery = ({ xmtpId }: { xmtpId: string }) => {
@@ -88,7 +92,7 @@ export const useProfilesQueries = ({
 }) => {
   return useQueries({
     queries: (xmtpInboxIds ?? []).map((xmtpInboxId) =>
-      profileQueryConfig({ xmtpId: xmtpInboxId }),
+      getProfileQueryConfig({ xmtpId: xmtpInboxId }),
     ),
     combine: (results) => ({
       data: results.map((result) => result.data),

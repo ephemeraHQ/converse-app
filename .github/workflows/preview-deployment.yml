@@ -34,7 +34,27 @@ permissions:
   id-token: write
 
 jobs:
+  setup-env:
+    runs-on: ubuntu-latest
+    outputs:
+      sentry_token: ${{ steps.sentry_token.outputs.value }}
+
+    steps:
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+          packager: yarn
+
+      - name: Get Sentry Token
+        id: sentry_token
+        run: |
+          TOKEN=$(eas env:get --variable-name=SENTRY_AUTH_TOKEN --variable-environment=preview | tr -d ' ' | cut -d'=' -f2)
+          echo "value=$TOKEN" >> $GITHUB_OUTPUT
+
   check-changes:
+    needs: setup-env
     runs-on: ubuntu-latest
     outputs:
       has_native_changes: ${{ steps.check-changes.outputs.has_native_changes }}
@@ -70,7 +90,7 @@ jobs:
           fi
 
   bump-version:
-    needs: check-changes
+    needs: [setup-env, check-changes]
     if: needs.check-changes.outputs.has_native_changes == 'true'
     runs-on: ubuntu-latest
     outputs:
@@ -103,7 +123,7 @@ jobs:
           git push https://${{ secrets.PAT_GITHUB }}@github.com/${{ github.repository }}.git HEAD:main
 
   ios-build:
-    needs: [check-changes, bump-version]
+    needs: [setup-env, check-changes, bump-version]
     if: needs.check-changes.outputs.has_native_changes == 'true'
     runs-on: ubuntu-latest
 
@@ -145,8 +165,14 @@ jobs:
         run: |
           eas build --platform ios --profile preview --non-interactive --auto-submit
 
+      - name: Resolve Sentry Issues
+        env:
+          SENTRY_AUTH_TOKEN: ${{ needs.setup-env.outputs.sentry_token }}
+        run: |
+          sentry-cli issues resolve --all
+
   android-build:
-    needs: [check-changes, bump-version]
+    needs: [setup-env, check-changes, bump-version]
     if: needs.check-changes.outputs.has_native_changes == 'true'
     runs-on: ubuntu-latest
 
@@ -188,8 +214,14 @@ jobs:
         run: |
           eas build --platform android --profile preview --non-interactive --auto-submit
 
+      - name: Resolve Sentry Issues
+        env:
+          SENTRY_AUTH_TOKEN: ${{ needs.setup-env.outputs.sentry_token }}
+        run: |
+          sentry-cli issues resolve --all
+
   ota-update:
-    needs: check-changes
+    needs: [setup-env, check-changes]
     if: needs.check-changes.outputs.has_native_changes == 'false'
     runs-on: ubuntu-latest
 
@@ -226,7 +258,13 @@ jobs:
           eas update --channel=preview --message "${{ needs.check-changes.outputs.commit_message }}" --non-interactive
 
       - name: Upload Sourcemaps to Sentry
+        env:
+          SENTRY_AUTH_TOKEN: ${{ needs.setup-env.outputs.sentry_token }}
         run: |
-          # Get token from EAS environment
-          export SENTRY_AUTH_TOKEN=$(eas env:get --variable-name=SENTRY_AUTH_TOKEN --variable-environment=preview | tr -d ' ' | cut -d'=' -f2)
           npx sentry-expo-upload-sourcemaps dist
+
+      - name: Resolve Sentry Issues
+        env:
+          SENTRY_AUTH_TOKEN: ${{ needs.setup-env.outputs.sentry_token }}
+        run: |
+          sentry-cli issues resolve --all

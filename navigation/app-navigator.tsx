@@ -23,6 +23,7 @@ import { navigationRef } from "@/navigation/navigation.utils";
 import { WebviewPreviewNav } from "@/screens/WebviewPreviewNav";
 import { useThemeProvider } from "@/theme/use-app-theme";
 import { captureError } from "@/utils/capture-error";
+import { useUpdateSentry } from "@/utils/sentry";
 import { hideSplashScreen } from "@/utils/splash/splash";
 import {
   ShareProfileNav,
@@ -56,6 +57,8 @@ export function AppNavigator() {
     ThemeProvider,
   } = useThemeProvider();
 
+  useUpdateSentry();
+
   return (
     <>
       <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
@@ -67,7 +70,8 @@ export function AppNavigator() {
             // Since we're handling multiple navigators,
             // let's silence errors when the action
             // is not meant for this one
-          }}>
+          }}
+        >
           <AppStacks />
         </NavigationContainer>
       </ThemeProvider>
@@ -95,7 +99,8 @@ function AppStacks() {
       screenOptions={{
         // Since we handle with useHeader hook
         header: () => null,
-      }}>
+      }}
+    >
       {isUndetermined ? (
         // Show idle screen during restoration
         <AppNativeStack.Screen

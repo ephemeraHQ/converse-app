@@ -75,20 +75,21 @@ export function App() {
 
   useCoinbaseWalletListener(true, coinbaseUrl);
 
-  const onCopy = async (text: string) => {
-    try {
-      await Clipboard.setStringAsync(text);
-      return true;
-    } catch {
-      return false;
-    }
-  };
+  // const onCopy = async (text: string) => {
+  //   try {
+  //     await Clipboard.setStringAsync(text);
+  //     return true;
+  //   } catch {
+  //     return false;
+  //   }
+  // };
 
   return (
     <QueryClientProvider client={queryClient}>
       <PrivyProvider
         appId={config.privy.appId}
-        clientId={config.privy.clientId}>
+        clientId={config.privy.clientId}
+      >
         <SmartWalletsProvider>
           <ThirdwebProvider>
             <AppKeyboardProvider>

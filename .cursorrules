@@ -15,14 +15,17 @@
 - Minimize using external hooks inside custom hooks to prevent unnecessary rerenders.
 - Use Zod for external API response validation.
 - Keep files small and focused.
+- Use block-style if statements with curly braces instead of single-line statements.
 - Use logger for all logging operations:
 
 ```typescript
-// ❌ Bad: Object-based logging
-logger.debug("[buildXmtpClient]", { address, inboxId });
+// ❌ Bad: Single-line if statement
+if (isValid) return;
 
-// ✅ Good: Template literal logging
-logger.debug(`[buildXmtpClient] Building client for address: ${address}`);
+// ✅ Good: Block-style if statement
+if (isValid) {
+  return;
+}
 ```
 
 ## TypeScript
