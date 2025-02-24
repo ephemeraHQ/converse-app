@@ -49,7 +49,14 @@ jobs:
 
       - name: Get Sentry Token
         id: sentry_token
-        run: echo "sentry_token=$(eas env:get --variable-name=SENTRY_AUTH_TOKEN --variable-environment=preview)" >> $GITHUB_OUTPUT
+        run: |
+          TOKEN=$(eas env:get --variable-name=SENTRY_AUTH_TOKEN --variable-environment=preview --json | jq -r '.value')
+          echo "sentry_token=${TOKEN}"
+          echo "sentry_token=${TOKEN}" >> $GITHUB_OUTPUT
+
+      - name: Echo Sentry Token
+        run: |
+          echo "Sentry Token: ${{ steps.sentry_token.outputs.sentry_token }}"
 
   check-changes:
     needs: setup-env

@@ -237,6 +237,8 @@ export function DebugProvider(props: { children: React.ReactNode }) {
     };
   }, []);
 
+  const trigger = false;
+
   return (
     <VStack onTouchStart={handleTouchStart} style={$globalStyles.flex1}>
       {children}
