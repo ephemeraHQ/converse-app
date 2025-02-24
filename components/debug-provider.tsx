@@ -89,10 +89,8 @@ export function DebugProvider(props: { children: React.ReactNode }) {
             `Runtime Version: ${currentlyRunning.runtimeVersion}`,
             `Channel: ${currentlyRunning.channel || "N/A"}`,
             `Is Embedded: ${currentlyRunning.isEmbeddedLaunch}`,
-            currentlyRunning.isEmergencyLaunch ? `Emergency Launch: Yes` : "",
-            currentlyRunning.emergencyLaunchReason
-              ? `Emergency Reason: ${currentlyRunning.emergencyLaunchReason}`
-              : "",
+            `Is Emergency Launch: ${currentlyRunning.isEmergencyLaunch}`,
+            `Emergency Launch Reason: ${currentlyRunning.emergencyLaunchReason || "None"}`,
           ]
             .filter(Boolean)
             .join("\n"),
