@@ -37,7 +37,7 @@ jobs:
   setup-env:
     runs-on: ubuntu-latest
     outputs:
-      sentry_token: ${{ steps.sentry_token.outputs.value }}
+      sentry_token: ${{ steps.sentry_token.outputs.sentry_token }}
 
     steps:
       - name: Setup EAS
@@ -49,9 +49,7 @@ jobs:
 
       - name: Get Sentry Token
         id: sentry_token
-        run: |
-          TOKEN=$(eas env:get --variable-name=SENTRY_AUTH_TOKEN --variable-environment=preview | tr -d ' ' | cut -d'=' -f2)
-          echo "value=$TOKEN" >> $GITHUB_OUTPUT
+        run: echo "sentry_token=$(eas env:get --variable-name=SENTRY_AUTH_TOKEN --variable-environment=preview)" >> $GITHUB_OUTPUT
 
   check-changes:
     needs: setup-env
