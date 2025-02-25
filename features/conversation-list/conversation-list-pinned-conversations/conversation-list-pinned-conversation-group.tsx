@@ -1,6 +1,7 @@
 import { useCallback } from "react";
+import { GroupAvatar } from "@/components/group-avatar";
 import { VStack } from "@/design-system/VStack";
-import { PinnedConversationAvatar } from "@/features/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversation-avatar";
+import { useConversationListPinnedConversationsStyles } from "@/features/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversations.styles";
 import { useConversationIsUnread } from "@/features/conversation-list/hooks/use-conversation-is-unread";
 import { useGroupConversationContextMenuViewProps } from "@/features/conversation-list/hooks/use-conversation-list-item-context-menu-props";
 import { isTextMessage } from "@/features/conversation/conversation-message/conversation-message.utils";
@@ -18,6 +19,8 @@ export const ConversationListPinnedConversationGroup = ({
   group,
 }: IConversationListPinnedConversationGroupProps) => {
   const groupConversationTopic = group.topic;
+
+  const { avatarSize } = useConversationListPinnedConversationsStyles();
 
   const { isUnread } = useConversationIsUnread({
     topic: groupConversationTopic,
@@ -43,9 +46,9 @@ export const ConversationListPinnedConversationGroup = ({
       <ConversationListPinnedConversation
         contextMenuProps={contextMenuProps}
         avatarComponent={
-          <PinnedConversationAvatar
-            uri={group?.imageUrlSquare}
-            name={groupName}
+          <GroupAvatar
+            groupTopic={groupConversationTopic}
+            sizeNumber={avatarSize}
           />
         }
         onPress={onPress}

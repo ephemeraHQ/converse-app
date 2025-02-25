@@ -8,8 +8,6 @@ import {
   fetchProfile,
   IConvosProfileForInbox,
 } from "@/features/profiles/profiles.api";
-import { reactQueryPersister } from "@/utils/mmkv";
-import { DateUtils } from "@/utils/time.utils";
 import { queryClient } from "../../queries/queryClient";
 
 const profileQueryKey = ({ xmtpId }: { xmtpId: string }) =>
@@ -25,12 +23,6 @@ export const getProfileQueryConfig = ({
     enabled,
     queryKey: profileQueryKey({ xmtpId: xmtpId! }),
     queryFn: enabled ? () => fetchProfile({ xmtpId: xmtpId! }) : skipToken,
-    gcTime: DateUtils.days.toMilliseconds(30),
-    refetchIntervalInBackground: false,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    staleTime: DateUtils.hours.toMilliseconds(1),
-    persister: reactQueryPersister,
   });
 };
 

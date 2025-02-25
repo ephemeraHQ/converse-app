@@ -24,6 +24,7 @@ export const TextInput = memo(
         selectionHandleColor={cursorColor}
         selectionColor={cursorColor as string} // Not sure why "as string" is required
         hitSlop={theme.spacing.xs} // By default for better UX
+        placeholderTextColor={theme.colors.text.tertiary}
         style={[
           themed(textPresets["body"]),
           { padding: 0 }, // We want fully control over our TextInput layout

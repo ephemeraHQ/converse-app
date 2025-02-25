@@ -6,10 +6,8 @@ import { Text } from "@/design-system/Text";
 import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
 import { ConversationHeaderTitle } from "@/features/conversation/conversation-screen-header/conversation-screen-header-title";
 import { useGroupName } from "@/hooks/useGroupName";
-import { useRouter } from "@/navigation/use-navigation";
 // import { useGroupPendingRequests } from "@/hooks/useGroupPendingRequests";
 import { useGroupMembersQuery } from "@/queries/useGroupMembersQuery";
-import { copyToClipboard } from "@/utils/clipboard";
 
 type GroupConversationTitleProps = {
   conversationTopic: ConversationTopic;
@@ -29,15 +27,9 @@ export const GroupConversationTitle = memo(
       conversationTopic,
     });
 
-    const navigation = useRouter();
-
     const onPress = useCallback(() => {
-      navigation.push("Conversation", { topic: conversationTopic });
-    }, [navigation, conversationTopic]);
-
-    const onLongPress = useCallback(() => {
-      copyToClipboard(JSON.stringify(conversationTopic));
-    }, [conversationTopic]);
+      // TODO: Implement
+    }, []);
 
     const requestsCount = 0; // TODO useGroupPendingRequests(conversationTopic).length;
 
@@ -54,7 +46,6 @@ export const GroupConversationTitle = memo(
     return (
       <ConversationHeaderTitle
         title={groupName ?? undefined}
-        onLongPress={onLongPress}
         onPress={onPress}
         subtitle={
           displayMemberText ? (

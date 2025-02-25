@@ -1,4 +1,8 @@
-import { queryOptions, useQuery } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  queryOptions,
+  useQuery,
+} from "@tanstack/react-query";
 import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 import { matchSorter } from "match-sorter";
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store";
@@ -103,10 +107,13 @@ export function getSearchExistingGroupsByGroupMembersQueryOptions(args: {
     },
     enabled: !!normalizedSearchQuery && !!searcherInboxId,
     staleTime: 0,
+    // Keep showing previous search results while new results load
+    // to prevent UI flicker during search
+    placeholderData: keepPreviousData,
   });
 }
 
-export function useSearchExistingGroupsByGroupMembers(args: {
+export function useSearchExistingGroupsByGroupMembersQuery(args: {
   searchQuery: string;
   searcherInboxId: InboxId;
 }) {

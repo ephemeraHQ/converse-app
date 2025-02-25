@@ -1,7 +1,8 @@
 import { useCallback } from "react";
+import { Avatar } from "@/components/avatar";
 import { VStack } from "@/design-system/VStack";
 import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
-import { PinnedConversationAvatar } from "@/features/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversation-avatar";
+import { useConversationListPinnedConversationsStyles } from "@/features/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversations.styles";
 import { useConversationIsUnread } from "@/features/conversation-list/hooks/use-conversation-is-unread";
 import { useDmConversationContextMenuViewProps } from "@/features/conversation-list/hooks/use-conversation-list-item-context-menu-props";
 import { useProfileQuery } from "@/features/profiles/profiles.query";
@@ -22,6 +23,8 @@ export const ConversationListPinnedConversationDm = ({
   const currentAccount = useCurrentSenderEthAddress()!;
 
   const conversationTopic = conversation.topic;
+
+  const { avatarSize } = useConversationListPinnedConversationsStyles();
 
   const { data: peerInboxId } = useDmPeerInboxIdQuery({
     account: currentAccount!,
@@ -55,7 +58,7 @@ export const ConversationListPinnedConversationDm = ({
     <VStack>
       <ConversationListPinnedConversation
         avatarComponent={
-          <PinnedConversationAvatar uri={avatarUri} name={title} />
+          <Avatar size={avatarSize} uri={avatarUri} name={title} />
         }
         onPress={onPress}
         showUnread={isUnread}

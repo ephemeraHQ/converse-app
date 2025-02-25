@@ -1,4 +1,9 @@
-import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  queryOptions,
+  skipToken,
+  useQuery,
+} from "@tanstack/react-query";
 import { InboxId } from "@xmtp/react-native-sdk";
 import {
   ISearchProfilesResult,
@@ -8,7 +13,7 @@ import { isSameInboxId } from "@/features/xmtp/xmtp-inbox-id/xmtp-inbox-id.utils
 import { getSearchConvosUsersQueryKey } from "@/queries/QueryKeys";
 import { DateUtils } from "@/utils/time.utils";
 
-export function useSearchConvosUsers(args: {
+export function useSearchConvosUsersQuery(args: {
   searchQuery: string;
   inboxIdsToOmit: InboxId[];
 }) {
@@ -34,6 +39,9 @@ function getConvosUsersSearchQueryOptions(searchQuery: string) {
     enabled,
     queryKey: getSearchConvosUsersQueryKey(searchQuery),
     queryFn: enabled ? () => searchProfiles({ searchQuery }) : skipToken,
-    staleTime: DateUtils.minutes.toMilliseconds(1),
+    staleTime: DateUtils.minutes(5).toMilliseconds(),
+    // Keep showing previous search results while new results load
+    // to prevent UI flicker during search
+    placeholderData: keepPreviousData,
   });
 }

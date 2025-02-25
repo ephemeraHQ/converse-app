@@ -14,12 +14,10 @@ export async function streamConversations(args: {
     ethereumAddress: ethAddress,
   });
 
-  xmtpLogger.debug(
-    `Started streaming conversations for account: ${ethAddress}`,
-  );
+  xmtpLogger.debug(`Started streaming conversations for ${ethAddress}`);
 
   await client.conversations.stream(async (conversation) => {
-    xmtpLogger.debug(`Received new conversation for account: ${ethAddress}`);
+    xmtpLogger.debug(`Received new conversation for ${ethAddress}`);
     onNewConversation(conversation);
   });
 }
@@ -33,7 +31,5 @@ export async function stopStreamingConversations(args: { ethAddress: string }) {
 
   await client.conversations.cancelStream();
 
-  xmtpLogger.debug(
-    `Stopped streaming conversations for account: ${ethAddress}`,
-  );
+  xmtpLogger.debug(`Stopped streaming conversations for ${ethAddress}`);
 }

@@ -48,8 +48,9 @@ export const GroupAvatarInboxIds = memo(function GroupAvatarInboxIds(props: {
 export const GroupAvatar = memo(function GroupAvatar(props: {
   groupTopic: ConversationTopic;
   size?: "sm" | "md" | "lg";
+  sizeNumber?: number;
 }) {
-  const { groupTopic, size = "md" } = props;
+  const { groupTopic, size = "md", sizeNumber: sizeNumberProp } = props;
 
   const { theme } = useAppTheme();
 
@@ -104,6 +105,10 @@ export const GroupAvatar = memo(function GroupAvatar(props: {
   }, [profiles]);
 
   const sizeNumber = useMemo(() => {
+    if (sizeNumberProp) {
+      return sizeNumberProp;
+    }
+
     if (size === "sm") {
       return theme.avatarSize.sm;
     } else if (size === "md") {
@@ -111,7 +116,7 @@ export const GroupAvatar = memo(function GroupAvatar(props: {
     } else if (size === "lg") {
       return theme.avatarSize.lg;
     }
-  }, [size, theme]);
+  }, [size, theme, sizeNumberProp]);
 
   if (group?.imageUrlSquare) {
     return (

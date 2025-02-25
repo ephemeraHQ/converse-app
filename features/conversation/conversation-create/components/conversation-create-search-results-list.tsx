@@ -13,16 +13,16 @@ import { EmptyState } from "@/design-system/empty-state";
 import { Loader } from "@/design-system/loader";
 import { AnimatedVStack } from "@/design-system/VStack";
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store";
-import { useSearchConvosUsers } from "@/features/conversation/conversation-create/hooks/use-search-convos-users";
+import { useSearchConvosUsersQuery } from "@/features/conversation/conversation-create/hooks/use-search-convos-users";
 import { useConversationStoreContext } from "@/features/conversation/conversation.store-context";
 import { inboxIdIsPartOfConversationUsingCacheData } from "@/features/conversation/utils/inbox-id-is-part-of-converastion";
 import { ISocialProfile } from "@/features/social-profiles/social-profiles.api";
 import { useSocialProfilesForAddressQuery } from "@/features/social-profiles/social-profiles.query";
 import { $globalStyles } from "@/theme/styles";
 import { useAppTheme } from "@/theme/use-app-theme";
-import { useSearchExistingDms } from "../queries/search-existing-dms.query";
-import { useSearchExistingGroupsByGroupMembers } from "../queries/search-existing-groups-by-group-members.query";
-import { useSearchExistingGroupsByGroupName } from "../queries/search-existing-groups-by-group-name.query";
+import { useSearchExistingDmsQuery } from "../queries/search-existing-dms.query";
+import { useSearchExistingGroupsByGroupMembersQuery } from "../queries/search-existing-groups-by-group-members.query";
+import { useSearchExistingGroupsByGroupNameQuery } from "../queries/search-existing-groups-by-group-name.query";
 import { ConversationSearchResultsListItemGroup } from "./conversation-create-search-results-list-item-group";
 import { ConversationSearchResultsListItemNoConvosUser } from "./conversation-create-search-results-list-item-no-convos-user";
 import { ConversationSearchResultsListItemUser } from "./conversation-create-search-results-list-item-user";
@@ -93,13 +93,13 @@ export function ConversationSearchResultsList() {
   const currentUserInboxId = useSafeCurrentSender().inboxId;
 
   const { data: searchConvosUsersData, isLoading: isSearchingConvosUsers } =
-    useSearchConvosUsers({
+    useSearchConvosUsersQuery({
       searchQuery,
       inboxIdsToOmit: [...selectedSearchUserInboxIds, currentUserInboxId],
     });
 
   const { data: existingDmTopics = [], isLoading: isLoadingExistingDmTopics } =
-    useSearchExistingDms({
+    useSearchExistingDmsQuery({
       searchQuery,
       inboxId: currentUserInboxId,
     });
@@ -114,7 +114,7 @@ export function ConversationSearchResultsList() {
   const {
     data: existingGroupsByGroupNameTopics = [],
     isLoading: isLoadingExistingGroupsByName,
-  } = useSearchExistingGroupsByGroupName({
+  } = useSearchExistingGroupsByGroupNameQuery({
     searchQuery,
     searcherInboxId: currentUserInboxId,
   });
@@ -122,7 +122,7 @@ export function ConversationSearchResultsList() {
   const {
     data: existingGroupsByMemberNameTopics = [],
     isLoading: isLoadingExistingGroupsByMembers,
-  } = useSearchExistingGroupsByGroupMembers({
+  } = useSearchExistingGroupsByGroupMembersQuery({
     searchQuery,
     searcherInboxId: currentUserInboxId,
   });
@@ -154,9 +154,17 @@ export function ConversationSearchResultsList() {
         .slice(0, MAX_INITIAL_RESULTS),
     );
 
-    // 3. Add groups where group names match the search query
+    // 3. Add groups where group names match the search query if not already in the list
     items.push(
       ...existingGroupsByGroupNameTopics
+        .filter(
+          (conversationTopic) =>
+            !items.some(
+              (item) =>
+                item.type === "group" &&
+                item.conversationTopic === conversationTopic,
+            ),
+        )
         .map((conversationTopic) => ({
           type: "group" as const,
           conversationTopic,

@@ -41,8 +41,12 @@ class BaseError extends Error {
   constructor(prefix: string, args: ErrorArgs) {
     const originalError = ensureError(args.error);
     const message = args.additionalMessage
-      ? `${prefix} - ${args.additionalMessage} - ${originalError.message}`
-      : `${prefix} - ${originalError.message}`;
+      ? prefix
+        ? `${prefix} - ${args.additionalMessage} - ${originalError.message}`
+        : `${args.additionalMessage} - ${originalError.message}`
+      : prefix
+        ? `${prefix} - ${originalError.message}`
+        : originalError.message;
 
     super(message);
     this.name = this.constructor.name;
@@ -83,5 +87,17 @@ export class AuthenticationError extends BaseError {
 export class ApiError extends BaseError {
   constructor(args: ErrorArgs) {
     super("[API]", args);
+  }
+}
+
+export class ReactQueryError extends BaseError {
+  constructor(args: ErrorArgs) {
+    super("[React Query]", args);
+  }
+}
+
+export class FeedbackError extends BaseError {
+  constructor(args: ErrorArgs) {
+    super("", args);
   }
 }

@@ -1,6 +1,5 @@
 import { queryOptions, skipToken } from "@tanstack/react-query";
 import { queryClient } from "@/queries/queryClient";
-import { secureQueryPersister } from "@/utils/mmkv";
 import { fetchJwt } from "./authentication.api";
 import { getCurrentSender } from "./multi-inbox.store";
 
@@ -19,7 +18,6 @@ export function getJwtQueryOptions() {
         }
       : skipToken,
     staleTime: Infinity,
-    persister: secureQueryPersister,
   });
 }
 

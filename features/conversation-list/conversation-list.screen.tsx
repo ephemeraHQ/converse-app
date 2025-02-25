@@ -25,7 +25,6 @@ import { NavigationParamList } from "@/navigation/navigation.types";
 import { $globalStyles } from "@/theme/styles";
 import { useAppTheme } from "@/theme/use-app-theme";
 import { captureError } from "@/utils/capture-error";
-import { isDev } from "@/utils/getEnv";
 import { ConversationListAwaitingRequests } from "./conversation-list-awaiting-requests";
 import { ConversationListEmpty } from "./conversation-list-empty";
 import { ConversationListStartNewConvoBanner } from "./conversation-list-start-new-convo-banner";
@@ -59,9 +58,11 @@ export function ConversationListScreen(props: IConversationListProps) {
   }, [refetchConversations]);
 
   // Better UX to at least show loading for 2 seconds
+  // Or don't show if loading is quick (< 500ms)
   const isLoading = useMinimumLoadingTime({
     isLoading: isLoadingConversations,
-    minimumTime: isDev ? 0 : 2000,
+    minTimeBeforeShowing: __DEV__ ? 0 : 500,
+    minimumLoadingDuration: __DEV__ ? 0 : 2000,
   });
 
   return (

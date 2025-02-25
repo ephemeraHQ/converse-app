@@ -95,7 +95,7 @@ const Content = memo(function Content() {
       ...(isCreatingNewConversation && {
         title: "New chat",
         style: {
-          borderBottomWidth: theme.borderWidth.sm,
+          borderBottomWidth: theme.borderWidth.xs,
           borderBottomColor: theme.colors.border.subtle,
         },
       }),

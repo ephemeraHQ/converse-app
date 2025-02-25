@@ -8,8 +8,6 @@ export function getCurrentUserQueryOptions() {
   return queryOptions({
     queryKey: currentUserQueryKey(),
     queryFn: fetchCurrentUser,
-    // persister: reactQueryPersister, // Remove tmp until we are solid with our persister
-    refetchOnWindowFocus: true,
   });
 }
 

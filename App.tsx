@@ -30,7 +30,6 @@ import { config } from "./config";
 import { useMonitorNetworkConnectivity } from "./dependencies/NetworkMonitor/use-monitor-network-connectivity";
 import { AppNavigator } from "./navigation/app-navigator";
 import "./utils/ignore-logs";
-import { useIsCurrentVersionEnough } from "@/features/app-settings/hooks/use-is-current-version-enough";
 import { sentryInit } from "./utils/sentry";
 import { preventSplashScreenAutoHide } from "./utils/splash/splash";
 
@@ -84,6 +83,13 @@ export function App() {
   // };
 
   return (
+    // <PersistQueryClientProvider
+    //   client={queryClient}
+    //   persistOptions={{
+    //     persister: reactQueryPersister,
+    //     maxAge: DEFAULT_GC_TIME,
+    //   }}
+    // >
     <QueryClientProvider client={queryClient}>
       <PrivyProvider
         appId={config.privy.appId}
@@ -115,6 +121,7 @@ export function App() {
         </SmartWalletsProvider>
       </PrivyProvider>
     </QueryClientProvider>
+    // </PersistQueryClientProvider>
   );
 }
 

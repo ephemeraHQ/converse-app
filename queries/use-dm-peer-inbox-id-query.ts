@@ -47,7 +47,6 @@ export function getDmPeerInboxIdQueryOptions(
       caller,
     },
     enabled: !!account && !!topic,
-    persister: reactQueryPersister,
   });
 }
 

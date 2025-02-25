@@ -1,11 +1,11 @@
-import {
-  createUser,
-  CreateUserResponse,
-} from "@features/authentication/authentication.api";
 import { useMutation } from "@tanstack/react-query";
 import { setCurrentUserQueryData } from "@/features/current-user/curent-user.query";
 import { setProfileQueryData } from "@/features/profiles/profiles.query";
 import { buildDeviceMetadata } from "@/utils/device-metadata";
+import {
+  createUser,
+  CreateUserResponse,
+} from "../authentication/create-user.api";
 
 type ICreateUserArgs = {
   privyUserId: string;
