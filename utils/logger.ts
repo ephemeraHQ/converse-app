@@ -80,24 +80,8 @@ export async function getPreviousSessionLoggingFile() {
 const converseTransport: transportFunctionType = async (props) => {
   let logMessage = props.msg;
 
-  // Format log message to include error cause if it exists
-  if (props.rawMsg?.[0] instanceof Error) {
-    const error = props.rawMsg[0];
-    if (error.cause) {
-      logMessage = `${logMessage} | Cause: ${
-        error.cause instanceof Error
-          ? error.cause.message
-          : error.cause
-            ? JSON.stringify(error.cause)
-            : "Unknown"
-      }`;
-    }
-  }
-
   // Console logging in dev
   if (__DEV__) {
-    // Use the enhanced message for console logging
-    props.msg = logMessage;
     consoleTransport(props);
   }
 

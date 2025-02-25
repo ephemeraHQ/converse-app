@@ -5,6 +5,7 @@ import { Alert, TextStyle, ViewStyle } from "react-native";
 import { z } from "zod";
 import { create } from "zustand";
 import { Screen } from "@/components/screen/screen";
+import { showSnackbar } from "@/components/snackbar/snackbar.service";
 import { Center } from "@/design-system/Center";
 import { VStack } from "@/design-system/VStack";
 import { useAuthStore } from "@/features/authentication/authentication.store";
@@ -128,16 +129,19 @@ export function OnboardingContactCardScreen() {
       // }
     } catch (error) {
       if (error instanceof ValidationError) {
-        captureErrorWithToast(error, {
+        showSnackbar({
           message: error.message,
+          type: "error",
         });
       } else if (isAxiosError(error)) {
         const userMessage =
           error.response?.status === 409
             ? "This username is already taken"
             : "Failed to create profile. Please try again.";
-
-        captureErrorWithToast(error, { message: userMessage });
+        showSnackbar({
+          message: userMessage,
+          type: "error",
+        });
       } else {
         captureErrorWithToast(error, {
           message: "An unexpected error occurred. Please try again.",

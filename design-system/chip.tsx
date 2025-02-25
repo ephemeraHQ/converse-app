@@ -118,9 +118,8 @@ export function useChipStyles({
       variant === "outlined"
         ? theme.colors.background.surface
         : theme.colors.fill.minimal,
-    paddingVertical:
-      verticalPadding - (variant === "outlined" ? theme.borderWidth.sm * 2 : 0),
-    paddingHorizontal: horizontalPadding,
+    paddingVertical: verticalPadding - theme.borderWidth.sm * 2,
+    paddingHorizontal: horizontalPadding - theme.borderWidth.sm * 2,
   } satisfies StyleProp<ViewStyle>;
 
   const $content = {

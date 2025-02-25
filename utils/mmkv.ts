@@ -1,8 +1,11 @@
-import { experimental_createPersister } from "@tanstack/react-query-persist-client";
+import {
+  PersistedClient,
+  Persister,
+} from "@tanstack/react-query-persist-client";
 import { MMKV } from "react-native-mmkv";
 import { StateStorage } from "zustand/middleware";
 import { config } from "@/config";
-import { DEFAULT_GC_TIME } from "@/queries/queryClient.constants";
+import { captureError } from "@/utils/capture-error";
 import { getAccountEncryptionKey } from "./keychain";
 import logger from "./logger";
 
@@ -56,43 +59,76 @@ export const secureQueryMMKV = new MMKV({
   encryptionKey: config.reactQueryEncryptionKey,
 });
 
-type MaybePromise<T> = T | Promise<T>;
+// type MaybePromise<T> = T | Promise<T>;
 
-type PersistStorage<TStorageValue = string> = {
-  getItem: (key: string) => MaybePromise<TStorageValue | undefined | null>;
-  setItem: (key: string, value: TStorageValue) => MaybePromise<unknown>;
-  removeItem: (key: string) => MaybePromise<void>;
-};
+// type PersistStorage<TStorageValue = string> = {
+//   getItem: (key: string) => MaybePromise<TStorageValue | undefined | null>;
+//   setItem: (key: string, value: TStorageValue) => MaybePromise<unknown>;
+//   removeItem: (key: string) => MaybePromise<void>;
+// };
 
-type MMKVReactQueryStorage = PersistStorage & {
-  clearAll(): void;
-};
+// type MMKVReactQueryStorage = PersistStorage & {
+//   clearAll(): void;
+// };
 
-function createMMKVStorage(storage: MMKV): MMKVReactQueryStorage {
+// function createMMKVStorage(storage: MMKV): MMKVReactQueryStorage {
+//   return {
+//     getItem: (key: string) => {
+//       const stringValue = storage.getString(key);
+//       return stringValue ?? null;
+//     },
+//     setItem: (key: string, value: string) => {
+//       // Deleting before setting to avoid memory leak
+//       // relevant only until we upgrade to v3 of react-native-mmkv
+//       // https://github.com/mrousavy/react-native-mmkv/issues/440#issuecomment-2345737896
+//       storage.delete(key);
+//       if (value) {
+//         storage.set(key, value);
+//       }
+//     },
+//     removeItem: (key: string) => storage.delete(key),
+//     clearAll: () => storage.clearAll(),
+//   };
+// }
+
+function createMMKVPersister(storage: MMKV): Persister {
   return {
-    getItem: (key: string) => {
-      const stringValue = storage.getString(key);
-      return stringValue ?? null;
-    },
-    setItem: (key: string, value: string) => {
-      // Deleting before setting to avoid memory leak
-      // relevant only until we upgrade to v3 of react-native-mmkv
-      // https://github.com/mrousavy/react-native-mmkv/issues/440#issuecomment-2345737896
-      storage.delete(key);
-      if (value) {
-        storage.set(key, value);
+    persistClient: async (client: PersistedClient) => {
+      try {
+        const clientString = JSON.stringify(client);
+        // Delete before setting to avoid memory leak
+        storage.delete("reactQuery");
+        storage.set("reactQuery", clientString);
+      } catch (error) {
+        console.log("client:", client);
+        captureError(error, {
+          extras: {
+            type: "reactQueryPersister",
+            storage: storage.toString(),
+          },
+        });
       }
     },
-    removeItem: (key: string) => storage.delete(key),
-    clearAll: () => storage.clearAll(),
+    restoreClient: async () => {
+      try {
+        const clientString = storage.getString("reactQuery");
+        if (!clientString) {
+          return undefined;
+        }
+        return JSON.parse(clientString) as PersistedClient;
+      } catch (error) {
+        logger.error("Failed to restore React Query client", error);
+        return undefined;
+      }
+    },
+    removeClient: async () => {
+      try {
+        storage.delete("reactQuery");
+      } catch (error) {
+        logger.error("Failed to remove React Query client", error);
+      }
+    },
   };
 }
 
-export const reactQueryPersister = experimental_createPersister({
-  storage: createMMKVStorage(reactQueryMMKV),
-  maxAge: DEFAULT_GC_TIME,
-});
-
-export const secureQueryPersister = experimental_createPersister({
-  storage: createMMKVStorage(secureQueryMMKV),
-});
+export const reactQueryPersister = createMMKVPersister(reactQueryMMKV);

@@ -1,4 +1,3 @@
-import { InboxId } from "@xmtp/react-native-sdk";
 import React, { memo, useCallback, useEffect, useRef } from "react";
 import {
   NativeSyntheticEvent,
@@ -7,28 +6,20 @@ import {
   TextInputKeyPressEventData,
   ViewStyle,
 } from "react-native";
-import { create } from "zustand";
 import { Center } from "@/design-system/Center";
-import {
-  Chip,
-  ChipAvatar,
-  ChipText,
-  useChipStyles,
-} from "@/design-system/chip";
+import { useChipStyles } from "@/design-system/chip";
 import { HStack } from "@/design-system/HStack";
 import { Text } from "@/design-system/Text";
 import { TextInput } from "@/design-system/text-input";
 import { VStack } from "@/design-system/VStack";
-import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store";
 import {
   useConversationStore,
   useConversationStoreContext,
 } from "@/features/conversation/conversation.store-context";
-import { useProfileQuery } from "@/features/profiles/profiles.query";
-import { useSocialProfilesForEthAddressQueries } from "@/features/social-profiles/social-profiles.query";
-import { useEthAddressesForXmtpInboxId } from "@/features/xmtp/xmtp-inbox-id/eth-addresses-for-xmtp-inbox-id.query";
 import { useAppTheme } from "@/theme/use-app-theme";
 import { Haptics } from "@/utils/haptics";
+import { ConversationCreateSearchInputChip } from "./conversation-create-search-input-chip";
+import { useConversationCreateSearchInputStore } from "./conversation-create-search-input.store";
 
 export const ConversationCreateSearchInput = memo(
   function ConversationCreateSearchInput() {
@@ -41,6 +32,9 @@ export const ConversationCreateSearchInput = memo(
     const searchSelectedUserInboxIds = useConversationStoreContext(
       (state) => state.searchSelectedUserInboxIds,
     );
+    const selectedChipInboxId = useConversationCreateSearchInputStore(
+      (state) => state.selectedChipInboxId,
+    );
 
     const defaultSearchTextValue = conversationStore.getState().searchTextValue;
 
@@ -50,7 +44,8 @@ export const ConversationCreateSearchInput = memo(
       const { key } = e.nativeEvent;
       const { searchTextValue, searchSelectedUserInboxIds } =
         conversationStore.getState();
-      const selectedInboxIdChip = useStore.getState().selectedChipInboxId;
+      const selectedInboxIdChip =
+        useConversationCreateSearchInputStore.getState().selectedChipInboxId;
 
       if (key === "Backspace" && !searchTextValue) {
         Haptics.softImpactAsync();
@@ -62,17 +57,21 @@ export const ConversationCreateSearchInput = memo(
               (inboxId) => inboxId !== selectedInboxIdChip,
             ),
           });
-          useStore.getState().actions.setSelectedChipInboxId(null);
+          useConversationCreateSearchInputStore
+            .getState()
+            .actions.setSelectedChipInboxId(null);
         } else if (searchSelectedUserInboxIds.length > 0) {
           // Select last chip for deletion
-          useStore
+          useConversationCreateSearchInputStore
             .getState()
             .actions.setSelectedChipInboxId(
               searchSelectedUserInboxIds[searchSelectedUserInboxIds.length - 1],
             );
         }
       } else {
-        useStore.getState().actions.setSelectedChipInboxId(null);
+        useConversationCreateSearchInputStore
+          .getState()
+          .actions.setSelectedChipInboxId(null);
       }
     };
 
@@ -84,6 +83,12 @@ export const ConversationCreateSearchInput = memo(
       },
       [conversationStore],
     );
+
+    const handlePressOnTextInput = useCallback(() => {
+      useConversationCreateSearchInputStore
+        .getState()
+        .actions.setSelectedChipInboxId(null);
+    }, []);
 
     useEffect(() => {
       conversationStore.subscribe(
@@ -104,22 +109,27 @@ export const ConversationCreateSearchInput = memo(
           </Center>
           <HStack style={styles.$chipContainer}>
             {searchSelectedUserInboxIds.map((inboxId) => (
-              <UserChip key={inboxId} inboxId={inboxId} />
+              <ConversationCreateSearchInputChip
+                key={inboxId}
+                inboxId={inboxId}
+              />
             ))}
             <TextInput
+              onPress={handlePressOnTextInput}
+              autoFocus
               ref={inputRef}
               style={styles.$input}
               defaultValue={defaultSearchTextValue}
               onChangeText={handleChangeText}
               placeholder={
                 searchSelectedUserInboxIds.length === 0
-                  ? "Name, address or onchain ID"
+                  ? "Name, @username or onchain ID"
                   : ""
               }
-              placeholderTextColor={theme.colors.text.secondary}
               onKeyPress={handleKeyPress}
               autoCapitalize="none"
               autoCorrect={false}
+              caretHidden={Boolean(selectedChipInboxId)}
             />
           </HStack>
         </HStack>
@@ -153,7 +163,7 @@ function useConversationCreateSearchStyles() {
 
   const $chipContainer = {
     flex: 1,
-    gap: theme.spacing.xxxs,
+    gap: theme.spacing.xxs,
     alignItems: "center",
     flexWrap: "wrap",
   } satisfies StyleProp<ViewStyle>;
@@ -171,60 +181,3 @@ function useConversationCreateSearchStyles() {
     $input,
   } as const;
 }
-
-const UserChip = memo(function UserChip(props: { inboxId: InboxId }) {
-  const { inboxId } = props;
-
-  const { data: profile } = useProfileQuery({ xmtpId: inboxId });
-
-  const currentSender = useSafeCurrentSender();
-
-  const { data: ethAddresses } = useEthAddressesForXmtpInboxId({
-    clientEthAddress: currentSender.ethereumAddress,
-    inboxId,
-  });
-
-  const { data: socialProfiles } = useSocialProfilesForEthAddressQueries({
-    ethAddresses: ethAddresses ?? [],
-  });
-
-  const selectedChipInboxId = useStore((state) => state.selectedChipInboxId);
-
-  const handlePress = useCallback(() => {
-    Haptics.softImpactAsync();
-    useStore.getState().actions.setSelectedChipInboxId(inboxId);
-  }, [inboxId]);
-
-  const allValidSocialProfiles = socialProfiles?.filter(Boolean);
-  const firstAddressFirstSocialProfile = allValidSocialProfiles?.[0]?.[0];
-
-  return (
-    <Chip
-      isSelected={selectedChipInboxId === inboxId}
-      onPress={handlePress}
-      size="md"
-    >
-      <ChipAvatar
-        uri={profile?.avatar ?? firstAddressFirstSocialProfile?.avatar}
-        name={profile?.name ?? firstAddressFirstSocialProfile?.name}
-      />
-      <ChipText>
-        {profile?.name ?? firstAddressFirstSocialProfile?.name}
-      </ChipText>
-    </Chip>
-  );
-});
-
-type IStore = {
-  selectedChipInboxId: InboxId | null;
-  actions: {
-    setSelectedChipInboxId: (inboxId: InboxId | null) => void;
-  };
-};
-
-const useStore = create<IStore>((set, get) => ({
-  selectedChipInboxId: null,
-  actions: {
-    setSelectedChipInboxId: (inboxId) => set({ selectedChipInboxId: inboxId }),
-  },
-}));

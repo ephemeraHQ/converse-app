@@ -20,8 +20,7 @@ import {
   refetchJwtQuery,
 } from "@/features/authentication/jwt.query";
 import { captureError } from "@/utils/capture-error";
-import { logger } from "@/utils/logger";
-import { AuthenticationError } from "../../utils/error";
+import { ApiError, AuthenticationError } from "../../utils/error";
 
 type ExtendedAxiosRequestConfig = AxiosRequestConfig & {
   _retry?: boolean;
@@ -37,67 +36,64 @@ export const refreshJwtInterceptor = (
     }
 
     const isUnauthorizedError = error.response.status === 401;
+    if (!isUnauthorizedError) {
+      return Promise.reject(error);
+    }
+
     const originalRequest = error.config as ExtendedAxiosRequestConfig;
-    const hasNotTriedTokenRefresh = !originalRequest?._retry;
+    if (!originalRequest) {
+      captureError(
+        new ApiError({
+          error,
+          additionalMessage: `Skipping refreshing JWT because original request is missing`,
+        }),
+      );
+      return Promise.reject(error);
+    }
 
-    // Only attempt token refresh for 401 errors that haven't been retried
-    const shouldRetry = Boolean(
-      isUnauthorizedError && hasNotTriedTokenRefresh && originalRequest,
-    );
+    const hasTriedTokenRefresh = originalRequest._retry;
 
-    if (shouldRetry) {
+    // If we already tried refreshing and still got 401,
+    // this means our refresh token is invalid/expired
+    if (hasTriedTokenRefresh) {
+      captureError(
+        new ApiError({
+          error,
+          additionalMessage: `Skipping refreshing JWT because we already tried and failed. Maybe logout?`,
+        }),
+      );
+      // handleRefreshJwtFailure();
+      return Promise.reject(error);
+    }
+
+    try {
       // Mark this request as retried to prevent infinite refresh loops
       originalRequest._retry = true;
 
-      try {
-        // Step 1: Attempt to get a fresh JWT token
-        // Need to refetch, removeQuery or invalidateQuery doesn't work
-        await refetchJwtQuery();
-        const refreshedJwtResponse = await ensureJwtQueryData();
+      // 1. Attempt to get a fresh JWT token
+      await refetchJwtQuery();
+      const refreshedJwtResponse = await ensureJwtQueryData();
 
-        const isTokenRefreshSuccessful = !!refreshedJwtResponse;
-
-        if (!isTokenRefreshSuccessful) {
-          throw new AuthenticationError({
-            error: new Error("Failed to refresh token"),
-          });
-        }
-
-        // Step 2: Get new headers with the fresh token
-        const updatedHeaders = await getConvosAuthenticatedHeaders();
-
-        // Step 3: Update the original request with new headers
-        const updatedRequest = {
-          ...originalRequest,
-          headers: {
-            ...originalRequest.headers,
-            ...updatedHeaders,
-          },
-        };
-
-        // Step 4: Retry the original request with new token
-        return api(updatedRequest);
-      } catch (error) {
-        captureError(error);
-        // todo logout
-        handleRefreshJwtFailure();
-        return Promise.reject(error);
+      if (!refreshedJwtResponse) {
+        throw new AuthenticationError({
+          error: new Error("Failed to refresh token"),
+        });
       }
-    }
 
-    // Add logging to help debug why retry was skipped
-    if (isUnauthorizedError) {
-      logger.debug(
-        `[refreshJwtInterceptor] JWT refresh skipped: ${
-          !hasNotTriedTokenRefresh
-            ? "already attempted refresh"
-            : !originalRequest
-              ? "no original request config"
-              : "unknown reason"
-        }`,
-      );
-    }
+      // 2. Get new headers with the fresh token
+      const updatedHeaders = await getConvosAuthenticatedHeaders();
 
-    return Promise.reject(error);
+      // 3. Update and retry the original request with new token
+      return api({
+        ...originalRequest,
+        headers: {
+          ...originalRequest.headers,
+          ...updatedHeaders,
+        },
+      });
+    } catch (error) {
+      handleRefreshJwtFailure();
+      return Promise.reject(error);
+    }
   };
 };
