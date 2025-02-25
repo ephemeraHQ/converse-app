@@ -25,7 +25,7 @@ export const updateProfile = async ({
   updates,
 }: {
   id: string;
-  updates: { name?: string; description?: string };
+  updates: { name?: string; description?: string; username?: string; avatar?: string };
 }) => {
   const { data } = await api.put(`/api/v1/profiles/${id}`, updates);
   const result = ConvosProfileForInboxSchema.safeParse(data);
@@ -81,4 +81,58 @@ export const claimProfile = async ({
   const { data } = await api.post("/api/profile/username", profile);
   logger.debug("[API PROFILES] claimProfile response:", data);
   return ClaimProfileResponseSchema.parse(data);
+};
+
+/**
+ * Saves a profile by either updating an existing one or creating a new one.
+ * This function encapsulates the logic for both updating and creating profiles.
+ * 
+ * @param args - Object containing profile data and inbox ID
+ * @returns The updated or created profile data
+ */
+export const saveProfileAsync = async (args: {
+  profile: {
+    id?: string;
+    name?: string;
+    description?: string;
+    username?: string;
+    avatar?: string;
+  };
+  inboxId: string;
+}) => {
+  const { profile } = args;
+  
+  try {
+    let result;
+    
+    if (profile.id) {
+      // Update existing profile
+      const updates = {
+        name: profile.name,
+        description: profile.description || '',
+        username: profile.username || '',
+        avatar: profile.avatar || '',
+      };
+      
+      result = await updateProfile({
+        id: profile.id,
+        updates,
+      });
+    } else {
+      // Create new profile
+      result = await claimProfile({
+        profile: {
+          name: profile.name || '',
+          description: profile.description || '',
+          username: profile.username || '',
+          avatar: profile.avatar,
+        },
+      });
+    }
+    
+    return result;
+  } catch (error) {
+    logger.error("[API PROFILES] saveProfileAsync error:", error);
+    throw error;
+  }
 };
