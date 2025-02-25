@@ -156,26 +156,6 @@ export const privyCustomMetadataQueryKey = (userId?: string) => [
   userId?.toLowerCase(),
 ];
 
-export const getSearchExistingGroupsByGroupNameQueryKey = (args: {
-  searchQuery: string;
-  inboxId: InboxId;
-}) => [
-  QueryKeys.CONVERSATIONS_SEARCH,
-  "groups-by-name",
-  args.searchQuery,
-  args.inboxId,
-];
-
-export const getSearchExistingGroupsByMemberNameQueryKey = (args: {
-  searchQuery: string;
-  inboxId: InboxId;
-}) => [
-  QueryKeys.CONVERSATIONS_SEARCH,
-  "groups-by-member-name",
-  args.searchQuery,
-  args.inboxId,
-];
-
 // Profiles
 export const getProfileSocialsQueryKey = ({
   inboxId,

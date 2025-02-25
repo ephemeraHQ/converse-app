@@ -89,10 +89,10 @@ async function startStreaming(accountsToStream: string[]) {
     if (!streamingState?.isStreamingConversations) {
       logger.info(`[Streaming] Starting conversation stream for ${account}`);
       try {
+        await startConversationStreaming(account);
         store.actions.updateStreamingState(account, {
           isStreamingConversations: true,
         });
-        await startConversationStreaming(account);
       } catch (error) {
         store.actions.updateStreamingState(account, {
           isStreamingConversations: false,
@@ -104,10 +104,10 @@ async function startStreaming(accountsToStream: string[]) {
     if (!streamingState?.isStreamingMessages) {
       logger.info(`[Streaming] Starting messages stream for ${account}`);
       try {
+        await startMessageStreaming({ account });
         store.actions.updateStreamingState(account, {
           isStreamingMessages: true,
         });
-        await startMessageStreaming({ account });
       } catch (error) {
         store.actions.updateStreamingState(account, {
           isStreamingMessages: false,

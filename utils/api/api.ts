@@ -1,4 +1,5 @@
 import axios from "axios";
+import { apiLogger } from "@/utils/logger";
 import { config } from "../../config";
 import { headersInterceptor } from "../../features/authentication/interceptor.headers";
 
@@ -10,8 +11,18 @@ export const api = axios.create({
 // depending on the route in the request
 api.interceptors.request.use(headersInterceptor);
 
-// note(lustig) - We setup another interceptor in useLogoutOnJwtRefreshError
-// to handle 401 errors and logout the user.
-// This needs to be a hook because some of our logout apis are most
-// conveniently accessedl via hooks.
-// The hook is setup in App.tsx
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (axios.isAxiosError(error)) {
+      apiLogger.error(`API Error:`, {
+        url: error.config?.url,
+        method: error.config?.method,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+      });
+    }
+    return Promise.reject(error);
+  },
+);

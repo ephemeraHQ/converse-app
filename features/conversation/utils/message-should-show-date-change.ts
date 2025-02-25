@@ -1,4 +1,4 @@
-import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
+import differenceInMinutes from "date-fns/differenceInMinutes";
 import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types";
 
 type MessageShouldShowDateChangePayload = {
@@ -13,15 +13,17 @@ export const messageShouldShowDateChange = ({
   if (!message) {
     return false;
   }
+
   if (!previousMessage) {
     return true;
   }
-  return (
-    differenceInCalendarDays(
-      convertNanosecondsToMilliseconds(message.sentNs),
-      convertNanosecondsToMilliseconds(previousMessage.sentNs),
-    ) > 0
+
+  const currentMessageTime = convertNanosecondsToMilliseconds(message.sentNs);
+  const previousMessageTime = convertNanosecondsToMilliseconds(
+    previousMessage.sentNs,
   );
+
+  return differenceInMinutes(currentMessageTime, previousMessageTime) >= 5;
 };
 
 function convertNanosecondsToMilliseconds(nanoseconds: number) {

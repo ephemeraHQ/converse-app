@@ -25,7 +25,7 @@ type IMessageContextStoreState = IMessageContextStoreProps & {
   hasNextMessageInSeries: boolean;
   hasPreviousMessageInSeries: boolean;
   fromMe: boolean;
-  sentAt: number;
+  sentAtMs: number;
   showDateChange: boolean;
   senderInboxId: InboxId;
   isShowingTime: boolean;
@@ -37,7 +37,7 @@ type IMessageContextStoreProviderProps =
 
 type IMessageContextStore = ReturnType<typeof createMessageContextStore>;
 
-export const MessageContextStoreProvider = memo(
+export const ConversationMessageContextStoreProvider = memo(
   ({ children, ...props }: IMessageContextStoreProviderProps) => {
     const storeRef = useRef<IMessageContextStore>();
 
@@ -79,7 +79,9 @@ function getStoreStateBasedOnProps(props: IMessageContextStoreProps) {
       message: props.message,
       previousMessage: props.previousMessage,
     }),
-    sentAt: convertNanosecondsToMilliseconds(props.message.sentNs),
+    sentAtMs: Math.floor(
+      convertNanosecondsToMilliseconds(props.message.sentNs),
+    ),
     senderInboxId: props.message.senderInboxId,
     isShowingTime: false,
     isSystemMessage: isGroupUpdatedMessage(props.message),
@@ -96,18 +98,22 @@ const MessageContextStoreContext = createContext<IMessageContextStore | null>(
   null,
 );
 
-export function useMessageContextStoreContext<T>(
+export function useConversationMessageContextStoreContext<T>(
   selector: (state: IMessageContextStoreState) => T,
 ): T {
   const store = useContext(MessageContextStoreContext);
   if (!store)
-    throw new Error("Missing MessageContextStore.Provider in the tree");
+    throw new Error(
+      "Missing ConversationMessageContextStore.Provider in the tree",
+    );
   return useStore(store, selector);
 }
 
-export function useMessageContextStore() {
+export function useConversationMessageContextStore() {
   const store = useContext(MessageContextStoreContext);
   if (!store)
-    throw new Error(`Missing MessageContextStore.Provider in the tree`);
+    throw new Error(
+      `Missing ConversationMessageContextStore.Provider in the tree`,
+    );
   return store;
 }

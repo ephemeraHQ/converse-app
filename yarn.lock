@@ -2703,6 +2703,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/runtime@npm:^7.23.8":
+  version: 7.26.9
+  resolution: "@babel/runtime@npm:7.26.9"
+  dependencies:
+    regenerator-runtime: "npm:^0.14.0"
+  checksum: 10c0/e8517131110a6ec3a7360881438b85060e49824e007f4a64b5dfa9192cf2bb5c01e84bfc109f02d822c7edb0db926928dd6b991e3ee460b483fb0fac43152d9b
+  languageName: node
+  linkType: hard
+
 "@babel/runtime@npm:^7.25.0":
   version: 7.25.0
   resolution: "@babel/runtime@npm:7.25.0"
@@ -13240,6 +13249,7 @@ __metadata:
     knip: "npm:^2.19.1"
     libphonenumber-js: "npm:^1.10.49"
     lint-staged: "npm:^13.1.0"
+    match-sorter: "npm:^8.0.0"
     metro-react-native-babel-preset: "npm:^0.77.0"
     mime: "npm:^4.0.4"
     nanoid: "npm:^3.0.0"
@@ -20579,6 +20589,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"match-sorter@npm:^8.0.0":
+  version: 8.0.0
+  resolution: "match-sorter@npm:8.0.0"
+  dependencies:
+    "@babel/runtime": "npm:^7.23.8"
+    remove-accents: "npm:0.5.0"
+  checksum: 10c0/eb475c73ff85611ff0bda595f01b3d5083d15f449a2a22173d39752ff3a0eb7fba06b49c7c89d3dc0ea752f6fb36dc71ce4a59177553bce9255a69ad2dafc06d
+  languageName: node
+  linkType: hard
+
 "matcher@npm:^1.0.0":
   version: 1.1.1
   resolution: "matcher@npm:1.1.1"
@@ -24682,6 +24702,13 @@ __metadata:
   bin:
     regjsparser: bin/parser
   checksum: 10c0/fe44fcf19a99fe4f92809b0b6179530e5ef313ff7f87df143b08ce9a2eb3c4b6189b43735d645be6e8f4033bfb015ed1ca54f0583bc7561bed53fd379feb8225
+  languageName: node
+  linkType: hard
+
+"remove-accents@npm:0.5.0":
+  version: 0.5.0
+  resolution: "remove-accents@npm:0.5.0"
+  checksum: 10c0/a75321aa1b53d9abe82637115a492770bfe42bb38ed258be748bf6795871202bc8b4badff22013494a7029f5a241057ad8d3f72adf67884dbe15a9e37e87adc4
   languageName: node
   linkType: hard
 

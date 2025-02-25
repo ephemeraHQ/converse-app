@@ -1,5 +1,5 @@
-import { Text } from "@design-system/Text";
-import { ReactNode } from "react";
+import { ITextProps, Text } from "@design-system/Text";
+import { memo, ReactNode } from "react";
 import { ViewStyle } from "react-native";
 import { HStack } from "@/design-system/HStack";
 import { Pressable } from "@/design-system/Pressable";
@@ -9,8 +9,8 @@ import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 
 type ConversationSearchResultsListItemProps = {
   avatar?: ReactNode | undefined;
-  title: string;
-  subtitle: string;
+  title: ReactNode;
+  subtitle: ReactNode;
   onPress: () => void;
 };
 
@@ -27,17 +27,39 @@ export function ConversationSearchResultsListItem({
       <HStack style={themed($container)}>
         {avatar}
         <VStack style={$globalStyles.flex1}>
-          <Text preset="body" numberOfLines={1}>
-            {title}
-          </Text>
-          <Text color="secondary" preset="small" numberOfLines={1}>
-            {subtitle}
-          </Text>
+          {typeof title === "string" ? (
+            <ConversationSearchResultsListItemTitle>
+              {title}
+            </ConversationSearchResultsListItemTitle>
+          ) : (
+            title
+          )}
+          {typeof subtitle === "string" ? (
+            <ConversationSearchResultsListItemSubtitle>
+              {subtitle}
+            </ConversationSearchResultsListItemSubtitle>
+          ) : (
+            subtitle
+          )}
         </VStack>
       </HStack>
     </Pressable>
   );
 }
+
+export const ConversationSearchResultsListItemTitle = memo(
+  function ConversationSearchResultsListItemTitle(props: ITextProps) {
+    return <Text preset="body" numberOfLines={1} {...props} />;
+  },
+);
+
+export const ConversationSearchResultsListItemSubtitle = memo(
+  function ConversationSearchResultsListItemSubtitle(props: ITextProps) {
+    return (
+      <Text color="secondary" preset="small" numberOfLines={1} {...props} />
+    );
+  },
+);
 
 const $container: ThemedStyle<ViewStyle> = ({ spacing, colors }) => ({
   paddingVertical: spacing.xs,

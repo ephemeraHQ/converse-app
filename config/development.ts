@@ -3,6 +3,7 @@ import { shared } from "./shared";
 
 export const developmentConfig: IConfig = {
   ...shared,
+  appStoreUrl: "",
   debugMenu: true,
   bundleId: "com.converse.dev",
   scheme: "converse-dev",

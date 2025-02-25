@@ -77,14 +77,7 @@ type IChatGroupMemberLeftProps = {
 
 function ChatGroupMemberLeft({ inboxId }: IChatGroupMemberLeftProps) {
   const { themed, theme } = useAppTheme();
-
-  const { data: profile } = useProfileQuery({
-    xmtpId: inboxId,
-  });
-
-  if (!profile) {
-    return null;
-  }
+  const { data: profile } = useProfileQuery({ xmtpId: inboxId });
 
   return (
     <HStack style={themed($memberContainer)}>
@@ -98,11 +91,11 @@ function ChatGroupMemberLeft({ inboxId }: IChatGroupMemberLeftProps) {
       >
         <Avatar
           size={theme.avatarSize.xs}
-          uri={profile.avatar}
-          name={profile.name}
+          uri={profile?.avatar}
+          name={profile?.name}
         />
         <ChatGroupUpdateText weight="bold">
-          {profile?.name}{" "}
+          {profile?.name || inboxId}{" "}
         </ChatGroupUpdateText>
       </Pressable>
       <ChatGroupUpdateText>
@@ -118,14 +111,7 @@ type IChatGroupMemberJoinedProps = {
 
 function ChatGroupMemberJoined({ inboxId }: IChatGroupMemberJoinedProps) {
   const { themed, theme } = useAppTheme();
-
-  const { data: profile } = useProfileQuery({
-    xmtpId: inboxId,
-  });
-
-  if (!profile) {
-    return null;
-  }
+  const { data: profile } = useProfileQuery({ xmtpId: inboxId });
 
   return (
     <HStack style={themed($memberContainer)}>
@@ -139,10 +125,12 @@ function ChatGroupMemberJoined({ inboxId }: IChatGroupMemberJoinedProps) {
       >
         <Avatar
           size={theme.avatarSize.xs}
-          uri={profile.avatar}
-          name={profile.name}
+          uri={profile?.avatar}
+          name={profile?.name}
         />
-        <ChatGroupUpdateText weight="bold">{profile.name} </ChatGroupUpdateText>
+        <ChatGroupUpdateText weight="bold">
+          {profile?.name || inboxId}{" "}
+        </ChatGroupUpdateText>
       </Pressable>
       <ChatGroupUpdateText>
         {translate("group_member_joined")}
@@ -161,14 +149,7 @@ function ChatGroupMetadataUpdate({
   initiatorInboxId,
 }: IChatGroupMetadataUpdateProps) {
   const { themed, theme } = useAppTheme();
-
-  const { data: profile } = useProfileQuery({
-    xmtpId: initiatorInboxId,
-  });
-
-  if (!profile) {
-    return null;
-  }
+  const { data: profile } = useProfileQuery({ xmtpId: initiatorInboxId });
 
   let txKey: TxKeyPath;
   let txParams: Record<string, string> = {};
@@ -201,10 +182,12 @@ function ChatGroupMetadataUpdate({
       >
         <Avatar
           size={theme.avatarSize.xs}
-          uri={profile.avatar}
-          name={profile.name}
+          uri={profile?.avatar}
+          name={profile?.name}
         />
-        <ChatGroupUpdateText weight="bold">{profile.name} </ChatGroupUpdateText>
+        <ChatGroupUpdateText weight="bold">
+          {profile?.name || initiatorInboxId}{" "}
+        </ChatGroupUpdateText>
       </Pressable>
       <ChatGroupUpdateText>{translate(txKey, txParams)}</ChatGroupUpdateText>
     </HStack>

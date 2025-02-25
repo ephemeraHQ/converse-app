@@ -8,7 +8,7 @@ import {
   withSpring,
 } from "react-native-reanimated";
 import { AnimatedVStack } from "@/design-system/VStack";
-import { useMessageContextStoreContext } from "@/features/conversation/conversation-message/conversation-message.store-context";
+import { useConversationMessageContextStoreContext } from "@/features/conversation/conversation-message/conversation-message.store-context";
 import { useConversationStore } from "@/features/conversation/conversation.store-context";
 import { useSelect } from "@/stores/stores.utils";
 import { useAppTheme } from "@/theme/use-app-theme";
@@ -18,7 +18,7 @@ export const ConversationMessageHighlighted = memo(
     children: React.ReactNode;
   }) {
     const { children } = props;
-    const { messageId } = useMessageContextStoreContext(
+    const { messageId } = useConversationMessageContextStoreContext(
       useSelect(["messageId"]),
     );
     const { animatedStyle } = useHighlightAnimation({ messageId });

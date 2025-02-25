@@ -148,8 +148,8 @@ jobs:
 
       - name: Resolve Sentry Issues
         run: |
-          export SENTRY_AUTH_TOKEN=$(eas env:get --variable-name=SENTRY_AUTH_TOKEN --variable-environment=preview | tr -d ' ' | cut -d'=' -f2)
-          sentry-cli issues resolve --all
+          export SENTRY_USER_AUTH_TOKEN=$(eas env:get --variable-name=SENTRY_USER_AUTH_TOKEN --variable-environment=preview | tr -d ' ' | cut -d'=' -f2)
+          sentry-cli issues resolve --all --project convos-mobile-app
 
   android-build:
     needs: [check-changes, bump-version]
@@ -197,8 +197,8 @@ jobs:
 
       - name: Resolve Sentry Issues
         run: |
-          export SENTRY_AUTH_TOKEN=$(eas env:get --variable-name=SENTRY_AUTH_TOKEN --variable-environment=preview | tr -d ' ' | cut -d'=' -f2)
-          sentry-cli issues resolve --all
+          export SENTRY_USER_AUTH_TOKEN=$(eas env:get --variable-name=SENTRY_USER_AUTH_TOKEN --variable-environment=preview | tr -d ' ' | cut -d'=' -f2)
+          sentry-cli issues resolve --all --project convos-mobile-app
 
   ota-update:
     needs: [check-changes]
@@ -244,5 +244,5 @@ jobs:
 
       - name: Resolve Sentry Issues
         run: |
-          export SENTRY_AUTH_TOKEN=$(eas env:get --variable-name=SENTRY_AUTH_TOKEN --variable-environment=preview | tr -d ' ' | cut -d'=' -f2)
-          sentry-cli issues resolve --all
+          export SENTRY_USER_AUTH_TOKEN=$(eas env:get --variable-name=SENTRY_USER_AUTH_TOKEN --variable-environment=preview | tr -d ' ' | cut -d'=' -f2)
+          sentry-cli issues resolve --all --project convos-mobile-app

@@ -1,11 +1,11 @@
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
 import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
+import { prefetchConversationMessages } from "@/features/conversation/conversation-messages.query";
 import { getConversationMetadataQueryOptions } from "@/features/conversation/conversation-metadata/conversation-metadata.query";
 import { isConversationAllowed } from "@/features/conversation/utils/is-conversation-allowed";
 import { useScreenFocusEffectOnce } from "@/hooks/use-screen-focus-effect-once";
 import { useAppStateHandlers } from "@/hooks/useAppStateHandlers";
-import { prefetchConversationMessages } from "@/queries/conversation-messages-query";
 import { getAllowedConsentConversationsQueryOptions } from "@/queries/conversations-allowed-consent-query";
 import { captureError } from "@/utils/capture-error";
 

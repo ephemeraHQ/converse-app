@@ -3,11 +3,7 @@ import { StreamError } from "@utils/error";
 import { getMarkConversationAsReadMutationOptions } from "@/features/conversation/hooks/use-mark-conversation-as-read";
 import { isConversationAllowed } from "@/features/conversation/utils/is-conversation-allowed";
 import { isConversationConsentUnknown } from "@/features/conversation/utils/is-conversation-consent-unknown";
-import { startMessageStreaming } from "@/features/streams/stream-messages";
-import {
-  stopStreamingConversations,
-  streamConversations,
-} from "@/features/xmtp/xmtp-conversations/xmtp-conversations-stream";
+import { streamConversations } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-stream";
 import { IXmtpConversationWithCodecs } from "@/features/xmtp/xmtp.types";
 import { setConversationQueryData } from "@/queries/conversation-query";
 import { addConversationToAllowedConsentConversationsQuery } from "@/queries/conversations-allowed-consent-query";
@@ -26,16 +22,12 @@ export async function startConversationStreaming(ethAddress: string) {
         ),
     });
   } catch (error) {
-    captureError(
-      new StreamError({
-        error,
-        additionalMessage: `Failed to stream conversations for ${ethAddress}`,
-      }),
-    );
+    throw new StreamError({
+      error,
+      additionalMessage: `Failed to stream conversations for ${ethAddress}`,
+    });
   }
 }
-
-export { stopStreamingConversations };
 
 async function handleNewConversation(args: {
   account: string;
@@ -64,9 +56,6 @@ async function handleNewConversation(args: {
       account,
       conversation,
     });
-
-    // This is a temporary workaround related to https://github.com/xmtp/xmtp-react-native/issues/560
-    startMessageStreaming({ account });
   } else if (isConversationConsentUnknown(conversation)) {
     addConversationToUnknownConsentConversationsQuery({
       account,

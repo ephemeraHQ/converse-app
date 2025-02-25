@@ -15,9 +15,9 @@ import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
 import {
   getConversationQueryData,
   getOrFetchConversation,
-} from "./conversation-query";
-import { queryClient } from "./queryClient";
-import { conversationMessagesQueryKey } from "./QueryKeys";
+} from "../../queries/conversation-query";
+import { queryClient } from "../../queries/queryClient";
+import { conversationMessagesQueryKey } from "../../queries/QueryKeys";
 
 export type ConversationMessagesQueryData = Awaited<
   ReturnType<typeof conversationMessagesQueryFn>

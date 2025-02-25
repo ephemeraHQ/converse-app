@@ -10,9 +10,6 @@ export async function streamConversations(args: {
 }) {
   const { ethAddress, onNewConversation } = args;
 
-  // Stop before restarting just to be sure
-  await stopStreamingConversations({ ethAddress });
-
   const client = await getXmtpClientByEthAddress({
     ethereumAddress: ethAddress,
   });

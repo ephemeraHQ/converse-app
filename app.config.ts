@@ -346,7 +346,7 @@ export default (): ExpoConfig => {
         "@sentry/react-native/expo",
         {
           organization: "converse-app",
-          project: "converse-react-native",
+          project: "convos-mobile-app",
           url: "https://sentry.io/",
         },
       ],

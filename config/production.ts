@@ -4,6 +4,10 @@ import { shared } from "./shared";
 
 export const productionConfig: IConfig = {
   ...shared,
+  appStoreUrl: Platform.select({
+    default: "TODO",
+    android: "TODO",
+  }),
   bundleId:
     Platform.OS === "android" ? "com.converse.prod" : "com.converse.native",
   scheme: "converse",

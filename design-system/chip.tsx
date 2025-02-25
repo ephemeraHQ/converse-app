@@ -6,7 +6,7 @@ import { Pressable } from "@/design-system/Pressable";
 import { ITextProps, Text } from "@/design-system/Text";
 import { useAppTheme } from "@/theme/use-app-theme";
 
-type IChipSize = "sm" | "md";
+type IChipSize = "xs" | "sm" | "md";
 
 const ChipContext = React.createContext<{
   size: IChipSize;
@@ -39,7 +39,7 @@ export function Chip({
   disabled,
   variant = "outlined",
 }: IChipProps) {
-  const styles = useChipStyles({ variant });
+  const styles = useChipStyles({ variant, size });
 
   return (
     <ChipContext.Provider value={{ size, disabled, isSelected }}>
@@ -62,11 +62,11 @@ type IChipTextProps = ITextProps;
 
 export function ChipText({ children, style }: IChipTextProps) {
   const { size, disabled, isSelected } = useChipContext();
-  const styles = useChipStyles({ variant: "outlined" });
+  const styles = useChipStyles({ variant: "outlined", size });
 
   return (
     <Text
-      preset={size === "sm" ? "small" : "body"}
+      preset={size === "xs" ? "smaller" : size === "sm" ? "small" : "body"}
       style={[
         style,
         disabled && styles.$disabledText,
@@ -93,8 +93,22 @@ export function ChipAvatar({ uri, name }: IChipAvatarProps) {
   return <Avatar uri={uri} name={name} size={theme.avatarSize.xs} />;
 }
 
-export function useChipStyles({ variant }: { variant: "filled" | "outlined" }) {
+export function useChipStyles({
+  variant,
+  size = "sm",
+}: {
+  variant: "filled" | "outlined";
+  size?: IChipSize;
+}) {
   const { theme } = useAppTheme();
+
+  const verticalPadding =
+    size === "xs" ? theme.spacing.xxxs : theme.spacing.xxs;
+
+  const horizontalPadding =
+    size === "xs" ? theme.spacing.xxs : theme.spacing.xs;
+
+  const contentHeight = size === "xs" ? theme.spacing.sm : theme.spacing.md;
 
   const $container = {
     borderRadius: theme.spacing.xs,
@@ -105,14 +119,13 @@ export function useChipStyles({ variant }: { variant: "filled" | "outlined" }) {
         ? theme.colors.background.surface
         : theme.colors.fill.minimal,
     paddingVertical:
-      theme.spacing.xxs -
-      (variant === "outlined" ? theme.borderWidth.sm * 2 : 0),
-    paddingHorizontal: theme.spacing.xs,
+      verticalPadding - (variant === "outlined" ? theme.borderWidth.sm * 2 : 0),
+    paddingHorizontal: horizontalPadding,
   } satisfies StyleProp<ViewStyle>;
 
   const $content = {
     columnGap: theme.spacing.xxxs,
-    height: theme.spacing.md,
+    height: contentHeight,
   } satisfies StyleProp<ViewStyle>;
 
   return {

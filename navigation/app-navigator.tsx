@@ -8,6 +8,7 @@ import * as Linking from "expo-linking";
 import React, { useEffect } from "react";
 import { config } from "@/config";
 import { AppSettingsScreen } from "@/features/app-settings/app-settings.screen";
+import { useIsCurrentVersionEnough } from "@/features/app-settings/hooks/use-is-current-version-enough";
 import { useAuthStore } from "@/features/authentication/authentication.store";
 import { BlockedConversationsScreen } from "@/features/blocked-conversations/blocked-conversations.screen";
 import { ConversationListScreen } from "@/features/conversation-list/conversation-list.screen";
@@ -58,6 +59,7 @@ export function AppNavigator() {
   } = useThemeProvider();
 
   useUpdateSentry();
+  useIsCurrentVersionEnough();
 
   return (
     <>

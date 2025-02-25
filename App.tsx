@@ -7,7 +7,6 @@ import { SmartWalletsProvider } from "@privy-io/expo/smart-wallets";
 import { queryClient } from "@queries/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { useCoinbaseWalletListener } from "@utils/coinbaseWallet";
-import * as Clipboard from "expo-clipboard";
 import { ActionSheet } from "@/components/action-sheet";
 import { DebugProvider } from "@/components/debug-provider";
 import { Snackbars } from "@/components/snackbar/snackbars";
@@ -22,7 +21,6 @@ import { Platform } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
-import { DevToolsBubble } from "react-native-react-query-devtools";
 import {
   configureReanimatedLogger,
   ReanimatedLogLevel,
@@ -32,6 +30,7 @@ import { config } from "./config";
 import { useMonitorNetworkConnectivity } from "./dependencies/NetworkMonitor/use-monitor-network-connectivity";
 import { AppNavigator } from "./navigation/app-navigator";
 import "./utils/ignore-logs";
+import { useIsCurrentVersionEnough } from "@/features/app-settings/hooks/use-is-current-version-enough";
 import { sentryInit } from "./utils/sentry";
 import { preventSplashScreenAutoHide } from "./utils/splash/splash";
 

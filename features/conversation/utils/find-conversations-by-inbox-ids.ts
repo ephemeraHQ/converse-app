@@ -2,7 +2,7 @@ import { InboxId } from "@xmtp/react-native-sdk";
 import { getCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm";
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
-import { isSameInboxId } from "@/features/xmtp/xmtp-inbox-id/xmtp-inbox-id";
+import { isSameInboxId } from "@/features/xmtp/xmtp-inbox-id/xmtp-inbox-id.utils";
 import { getAllowedConsentConversationsQueryOptions } from "@/queries/conversations-allowed-consent-query";
 import { queryClient } from "@/queries/queryClient";
 import { ensureDmPeerInboxIdQueryData } from "@/queries/use-dm-peer-inbox-id-query";

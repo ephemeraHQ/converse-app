@@ -3,7 +3,7 @@ import { Text } from "@design-system/Text";
 import { VStack } from "@design-system/VStack";
 import { memo, useCallback } from "react";
 import { TextStyle, TouchableHighlight, ViewStyle } from "react-native";
-import { useMessageContextStoreContext } from "@/features/conversation/conversation-message/conversation-message.store-context";
+import { useConversationMessageContextStoreContext } from "@/features/conversation/conversation-message/conversation-message.store-context";
 import { useSelect } from "@/stores/stores.utils";
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { openMessageReactionsDrawer } from "./conversation-message-reaction-drawer/conversation-message-reaction-drawer.service";
@@ -19,7 +19,7 @@ export const ConversationMessageReactions = memo(
   function ConversationMessageReactions() {
     const { themed, theme } = useAppTheme();
 
-    const { fromMe, messageId } = useMessageContextStoreContext(
+    const { fromMe, messageId } = useConversationMessageContextStoreContext(
       useSelect(["fromMe", "messageId"]),
     );
 

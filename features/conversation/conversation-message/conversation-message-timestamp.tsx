@@ -5,6 +5,7 @@ import { AnimatedVStack } from "@design-system/VStack";
 import { SICK_DAMPING, SICK_STIFFNESS } from "@theme/animations";
 import { getLocalizedTime, getRelativeDate } from "@utils/date";
 import { flattenStyles } from "@utils/styles";
+import { isToday, isWithinInterval, subHours } from "date-fns";
 import { memo, useEffect } from "react";
 import {
   interpolate,
@@ -13,20 +14,96 @@ import {
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
-import {
-  useMessageContextStore,
-  useMessageContextStoreContext,
-} from "@/features/conversation/conversation-message/conversation-message.store-context";
 import { useAppTheme } from "@/theme/use-app-theme";
+import {
+  useConversationMessageContextStore,
+  useConversationMessageContextStoreContext,
+} from "./conversation-message.store-context";
 
-const StandaloneTime = memo(function StandaloneTime({
-  messageTime,
+// Determines if we should show only time (for messages less than 24h old)
+function shouldShowOnlyTime(timestamp: number): boolean {
+  const messageDate = new Date(timestamp);
+  const now = new Date();
+
+  return isWithinInterval(messageDate, {
+    start: subHours(now, 24),
+    end: now,
+  });
+}
+
+// For messages that can be tapped to show time
+const MessageTimestampVisible = memo(function MessageTimestamp({
+  timestamp,
 }: {
-  messageTime: string;
+  timestamp: number;
+}) {
+  const { theme } = useAppTheme();
+  const showTimeAV = useSharedValue(0);
+  const messageStore = useConversationMessageContextStore();
+
+  const messageTime = getLocalizedTime(timestamp);
+  const showOnlyTime = shouldShowOnlyTime(timestamp);
+  const messageDate = showOnlyTime ? messageTime : getRelativeDate(timestamp);
+
+  useEffect(() => {
+    const unsubscribe = messageStore.subscribe(
+      (state) => state.isShowingTime,
+      (isShowingTime) => {
+        showTimeAV.value = isShowingTime ? 1 : 0;
+      },
+    );
+    return () => unsubscribe();
+  }, [messageStore, showTimeAV]);
+
+  const timeAnimatedStyle = useAnimatedStyle(() => ({
+    display: showTimeAV.value ? "flex" : "none",
+    opacity: withSpring(showTimeAV.value ? 1 : 0, {
+      damping: SICK_DAMPING,
+      stiffness: SICK_STIFFNESS,
+    }),
+  }));
+
+  return (
+    <AnimatedHStack
+      layout={theme.animation.reanimatedLayoutSpringTransition}
+      style={{
+        alignSelf: "center",
+        alignItems: "center",
+        justifyContent: "center",
+        columnGap: theme.spacing["4xs"],
+        marginVertical: theme.spacing.sm,
+      }}
+    >
+      <Text preset="smaller" color="secondary">
+        {messageDate}
+      </Text>
+      {!showOnlyTime && (
+        <AnimatedText
+          preset="smaller"
+          color="secondary"
+          style={timeAnimatedStyle}
+        >
+          {messageTime}
+        </AnimatedText>
+      )}
+    </AnimatedHStack>
+  );
+});
+
+// For standalone time that's initially hidden
+const MessageTimestampHidden = memo(function MessageTimestampHidden({
+  timestamp,
+}: {
+  timestamp: number;
 }) {
   const { themed, theme } = useAppTheme();
   const showTimeAV = useSharedValue(0);
-  const messageStore = useMessageContextStore();
+  const messageStore = useConversationMessageContextStore();
+
+  const messageTime = getLocalizedTime(timestamp);
+  const messageDate = isToday(timestamp)
+    ? messageTime
+    : `${getRelativeDate(timestamp)} ${messageTime}`;
 
   useEffect(() => {
     const unsubscribe = messageStore.subscribe(
@@ -88,80 +165,24 @@ const StandaloneTime = memo(function StandaloneTime({
       ]}
     >
       <Text preset="smaller" color="secondary">
-        {messageTime}
+        {messageDate}
       </Text>
     </AnimatedVStack>
   );
 });
 
-const InlineTime = memo(function InlineTime({
-  messageTime,
-  messageDate,
-}: {
-  messageTime: string;
-  messageDate: string;
-}) {
-  const { theme } = useAppTheme();
-  const showTimeAV = useSharedValue(0);
-  const messageStore = useMessageContextStore();
-
-  useEffect(() => {
-    const unsubscribe = messageStore.subscribe(
-      (state) => state.isShowingTime,
-      (isShowingTime) => {
-        showTimeAV.value = isShowingTime ? 1 : 0;
-      },
-    );
-    return () => unsubscribe();
-  }, [messageStore, showTimeAV]);
-
-  const timeInlineAnimatedStyle = useAnimatedStyle(() => ({
-    display: showTimeAV.value ? "flex" : "none",
-    opacity: withSpring(showTimeAV.value ? 1 : 0, {
-      damping: SICK_DAMPING,
-      stiffness: SICK_STIFFNESS,
-    }),
-  }));
-
-  return (
-    <AnimatedHStack
-      layout={theme.animation.reanimatedLayoutSpringTransition}
-      style={{
-        alignSelf: "center",
-        alignItems: "center",
-        justifyContent: "center",
-        columnGap: theme.spacing["4xs"],
-        marginVertical: theme.spacing.sm,
-      }}
-    >
-      <Text preset="smaller" color="secondary">
-        {messageDate}
-      </Text>
-      <AnimatedText
-        preset="smaller"
-        color="secondary"
-        style={timeInlineAnimatedStyle}
-      >
-        {messageTime}
-      </AnimatedText>
-    </AnimatedHStack>
-  );
-});
-
 export const ConversationMessageTimestamp = memo(
   function ConversationMessageTimestamp() {
-    const [sentAt, showDateChange] = useMessageContextStoreContext((s) => [
-      s.sentAt,
-      s.showDateChange,
-    ]);
-
-    const messageTime = sentAt ? getLocalizedTime(sentAt) : "";
+    const [sentAtMs, showDateChange] =
+      useConversationMessageContextStoreContext((s) => [
+        s.sentAtMs,
+        s.showDateChange,
+      ]);
 
     if (showDateChange) {
-      const messageDate = getRelativeDate(sentAt);
-      return <InlineTime messageTime={messageTime} messageDate={messageDate} />;
+      return <MessageTimestampVisible timestamp={sentAtMs} />;
     }
 
-    return <StandaloneTime messageTime={messageTime} />;
+    return <MessageTimestampHidden timestamp={sentAtMs} />;
   },
 );

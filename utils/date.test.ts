@@ -57,30 +57,46 @@ describe("getRelativeDate with en-US locale", () => {
   });
 
   it("should return empty string if date is not provided", () => {
-    expect(getRelativeDate()).toBe("");
+    expect(getRelativeDate(0)).toBe("");
   });
 
-  it('should return "Today" if date is today', () => {
-    const date = new Date();
-    expect(getRelativeDate(date)).toBe("Today");
+  it('should return "Today" for any time today', () => {
+    const now = new Date();
+    // Set to early morning of today (1 AM)
+    const todayEarly = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+      1,
+      0,
+      0,
+    );
+    expect(getRelativeDate(todayEarly.getTime())).toBe("Today");
   });
 
   it('should return "Yesterday" if date is one day ago', () => {
-    const date = new Date();
-    date.setDate(date.getDate() - 1);
-    expect(getRelativeDate(date)).toBe("Yesterday");
+    const now = new Date();
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+    expect(getRelativeDate(yesterday.getTime())).toBe("Yesterday");
   });
 
   it("should return day of the week if date is within the last 7 days", () => {
-    const date = new Date();
-    date.setDate(date.getDate() - 3);
-    expect(getRelativeDate(date)).toBe(format(date, "EEEE", { locale: enUS }));
+    const now = new Date();
+    const threeDaysAgo = new Date(now);
+    threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+    expect(getRelativeDate(threeDaysAgo.getTime())).toBe(
+      format(threeDaysAgo, "EEEE", { locale: enUS }),
+    );
   });
 
-  it("should return date in locale format if date is older than 7 days", () => {
-    const date = new Date();
-    date.setDate(date.getDate() - 10);
-    expect(getRelativeDate(date)).toBe(format(date, "P", { locale: enUS }));
+  it("should return date in MMM d format if date is older than 7 days", () => {
+    const now = new Date();
+    const tenDaysAgo = new Date(now);
+    tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
+    expect(getRelativeDate(tenDaysAgo.getTime())).toBe(
+      format(tenDaysAgo, "MMM d", { locale: enUS }),
+    );
   });
 });
 
@@ -125,30 +141,46 @@ describe("getRelativeDate with fr-FR locale", () => {
   });
 
   it("should return empty string if date is not provided", () => {
-    expect(getRelativeDate()).toBe("");
+    expect(getRelativeDate(0)).toBe("");
   });
 
-  it('should return "Today" if date is today', () => {
-    const date = new Date();
-    expect(getRelativeDate(date)).toBe("Today");
+  it('should return "Today" for any time today', () => {
+    const now = new Date();
+    // Set to early morning of today (1 AM)
+    const todayEarly = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+      1,
+      0,
+      0,
+    );
+    expect(getRelativeDate(todayEarly.getTime())).toBe("Today");
   });
 
   it('should return "Yesterday" if date is one day ago', () => {
-    const date = new Date();
-    date.setDate(date.getDate() - 1);
-    expect(getRelativeDate(date)).toBe("Yesterday");
+    const now = new Date();
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+    expect(getRelativeDate(yesterday.getTime())).toBe("Yesterday");
   });
 
   it("should return day of the week if date is within the last 7 days", () => {
-    const date = new Date();
-    date.setDate(date.getDate() - 3);
-    expect(getRelativeDate(date)).toBe(format(date, "EEEE", { locale: fr }));
+    const now = new Date();
+    const threeDaysAgo = new Date(now);
+    threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+    expect(getRelativeDate(threeDaysAgo.getTime())).toBe(
+      format(threeDaysAgo, "EEEE", { locale: fr }),
+    );
   });
 
-  it("should return date in locale format if date is older than 7 days", () => {
-    const date = new Date();
-    date.setDate(date.getDate() - 10);
-    expect(getRelativeDate(date)).toBe(format(date, "P", { locale: fr }));
+  it("should return date in MMM d format if date is older than 7 days", () => {
+    const now = new Date();
+    const tenDaysAgo = new Date(now);
+    tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
+    expect(getRelativeDate(tenDaysAgo.getTime())).toBe(
+      format(tenDaysAgo, "MMM d", { locale: fr }),
+    );
   });
 });
 

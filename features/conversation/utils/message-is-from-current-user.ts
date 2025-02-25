@@ -1,5 +1,5 @@
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store";
-import { isSameInboxId } from "@/features/xmtp/xmtp-inbox-id/xmtp-inbox-id";
+import { isSameInboxId } from "@/features/xmtp/xmtp-inbox-id/xmtp-inbox-id.utils";
 import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types";
 import logger from "@/utils/logger";
 

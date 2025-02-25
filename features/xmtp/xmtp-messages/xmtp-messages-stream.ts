@@ -10,9 +10,6 @@ export const streamAllMessages = async (args: {
 }) => {
   const { account, onNewMessage } = args;
 
-  // Stop before restarting just to be sure
-  await stopStreamingAllMessage({ ethAddress: account });
-
   const client = await getXmtpClientByEthAddress({
     ethereumAddress: account,
   });
