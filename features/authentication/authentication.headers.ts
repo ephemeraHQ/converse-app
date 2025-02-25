@@ -22,14 +22,7 @@ export type XmtpApiHeaders = {
 };
 
 export async function getConvosAuthenticationHeaders(): Promise<XmtpApiHeaders> {
-  logger.debug(
-    "[getConvosAuthenticationHeaders] Starting to get authentication headers",
-  );
-
   const currentEthereumAddress = getSafeCurrentSender().ethereumAddress;
-  logger.debug(
-    `[getConvosAuthenticationHeaders] Current ethereum address: ${currentEthereumAddress}`,
-  );
 
   // Disabled for now until we go live and it works with bun
   const appCheckToken = "123";
@@ -56,17 +49,9 @@ export async function getConvosAuthenticationHeaders(): Promise<XmtpApiHeaders> 
     });
   }
 
-  logger.debug(
-    "[getConvosAuthenticationHeaders] Signing app check token with installation key",
-  );
-
   const rawAppCheckTokenSignature =
     await inboxClient.signWithInstallationKey(appCheckToken);
   const appCheckTokenSignatureHexString = toHex(rawAppCheckTokenSignature);
-
-  logger.debug(
-    "[getConvosAuthenticationHeaders] Successfully created authentication headers",
-  );
 
   return {
     [XMTP_INSTALLATION_ID_HEADER_KEY]: inboxClient.installationId,

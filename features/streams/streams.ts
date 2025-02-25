@@ -87,7 +87,7 @@ async function startStreaming(accountsToStream: string[]) {
     const streamingState = store.accountStreamingStates[account];
 
     if (!streamingState?.isStreamingConversations) {
-      logger.info(`[Streaming] Starting conversation stream for ${account}`);
+      logger.debug(`[Streaming] Starting conversation stream for ${account}`);
       try {
         await startConversationStreaming(account);
         store.actions.updateStreamingState(account, {
@@ -102,7 +102,7 @@ async function startStreaming(accountsToStream: string[]) {
     }
 
     if (!streamingState?.isStreamingMessages) {
-      logger.info(`[Streaming] Starting messages stream for ${account}`);
+      logger.debug(`[Streaming] Starting messages stream for ${account}`);
       try {
         await startMessageStreaming({ account });
         store.actions.updateStreamingState(account, {
@@ -118,7 +118,7 @@ async function startStreaming(accountsToStream: string[]) {
 
     // TODO: Fix and handle the consent stream. I think needed for notifications
     // if (!streamingState?.isStreamingConsent) {
-    //   logger.info(`[Streaming] Starting consent stream for ${account}`);
+    //   logger.debug(`[Streaming] Starting consent stream for ${account}`);
     //   try {
     //     store.actions.updateStreamingState(account, {
     //       isStreamingConsent: true,

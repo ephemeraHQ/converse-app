@@ -1,4 +1,5 @@
 import { AxiosRequestConfig } from "axios";
+import { AUTHENTICATION_ROUTES } from "@/features/authentication/authentication.constants";
 import {
   getConvosAuthenticatedHeaders,
   getConvosAuthenticationHeaders,
@@ -20,7 +21,7 @@ import { AuthenticationError } from "../../utils/error";
  * See authentication.readme.md for more details on the authentication flow
  * and how these headers are used to establish trust before issuing a JWT.
  */
-const AuthenticationRoutes = ["/api/v1/authenticate"] as const;
+const AuthenticationRoutes = [AUTHENTICATION_ROUTES.AUTHENTICATE] as const;
 
 export const headersInterceptor = async (config: AxiosRequestConfig) => {
   const url = config.url;
@@ -34,8 +35,8 @@ export const headersInterceptor = async (config: AxiosRequestConfig) => {
 
   apiLogger.debug(
     `Processing request for URL: ${url}, method: ${config.method}, body: ${JSON.stringify(
-      config.data,
-    )}`,
+      config.data ?? "",
+    )}, params: ${JSON.stringify(config.params ?? "")}`,
   );
 
   const needsAuthenticationHeaders = AuthenticationRoutes.some((route) =>

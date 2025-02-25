@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import { showSnackbar } from "@/components/snackbar/snackbar.service";
 import { useCreateConversationAndSendFirstMessage } from "@/features/conversation/conversation-create/hooks/use-create-conversation-and-send-first-message";
 import { useConversationStore } from "@/features/conversation/conversation.store-context";
 import {
@@ -7,6 +8,7 @@ import {
 } from "@/features/conversation/hooks/use-send-message";
 import { saveAttachmentLocally } from "@/utils/attachment/attachment.utils";
 import { captureError, captureErrorWithToast } from "@/utils/capture-error";
+import { FeedbackError } from "@/utils/error";
 import { useConversationComposerStore } from "./conversation-composer.store-context";
 
 export function useSend() {
@@ -42,8 +44,10 @@ export function useSend() {
         const inboxIds =
           conversationStore.getState().searchSelectedUserInboxIds;
 
-        if (!inboxIds) {
-          throw new Error("No inbox ids selected");
+        if (inboxIds.length === 0) {
+          throw new FeedbackError({
+            error: new Error("No users selected"),
+          });
         }
 
         const { conversation } = await createConversationAndSendFirstMessage({
@@ -59,6 +63,15 @@ export function useSend() {
           isCreatingNewConversation: false,
         });
       } catch (error) {
+        // TODO: Maybe find a better way to handle this
+        if (error instanceof FeedbackError) {
+          showSnackbar({
+            message: error.message,
+            type: "error",
+          });
+          return;
+        }
+
         captureErrorWithToast(error, {
           message: "Failed to create conversation",
         });

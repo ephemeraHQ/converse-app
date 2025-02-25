@@ -5,6 +5,7 @@ import {
   QueryClient,
 } from "@tanstack/react-query";
 import { captureError } from "@/utils/capture-error";
+import { ReactQueryError } from "@/utils/error";
 import { logger } from "@/utils/logger";
 import { DEFAULT_GC_TIME, DEFAULT_STALE_TIME } from "./queryClient.constants";
 
@@ -31,7 +32,13 @@ export const queryClient = new QueryClient({
         extras.variables = JSON.stringify(variables);
       }
 
-      captureError(error, { extras });
+      // Wrap the error in ReactQueryError
+      const wrappedError = new ReactQueryError({
+        error,
+        additionalMessage: `Mutation failed: ${mutation.options.mutationKey ?? "unknown"}`,
+      });
+
+      captureError(wrappedError, { extras });
     },
   }),
   queryCache: new QueryCache({
@@ -54,41 +61,35 @@ export const queryClient = new QueryClient({
         extras.caller = query.meta.caller as string;
       }
 
-      captureError(error, { extras });
+      // Wrap the error in ReactQueryError
+      const wrappedError = new ReactQueryError({
+        error,
+        additionalMessage: `Query failed: ${JSON.stringify(query.queryKey)}`,
+      });
+
+      captureError(wrappedError, { extras });
     },
   }),
 
   defaultOptions: {
     queries: {
-      // libXmtp handles retries
-      retry: false,
-      // Prevent infinite refetch loops by manually controlling when queries should retry on component mount
-      retryOnMount: false,
       gcTime: DEFAULT_GC_TIME,
       staleTime: DEFAULT_STALE_TIME,
+
+      // For now let's control our retries
+      retry: false,
+
+      // For now let's control our retries
+      retryOnMount: false,
+
       // Prevent infinite refetch loops by manually controlling when queries should refetch when components mount
       refetchOnMount: false,
-      // Prevent infinite refetch loops by manually controlling when queries should refetch when window regains focus
-      refetchOnWindowFocus: false,
-      // Prevent infinite refetch loops by manually controlling when queries should refetch when network reconnects
-      refetchOnReconnect: false,
-      structuralSharing: false,
-      // DON'T USE HERE
-      // Use a query based persister instead of the whole tree.
-      // Using it here seems to break the query client.
-      // persister: reactQueryPersister,
 
-      // enabled(query) {
-      //   const restorationState =
-      //     useAccountsStore.getState().multiInboxClientRestorationState;
-      //   const currentSender = useAccountsStore.getState().currentSender;
-      //   const enabled =
-      //     restorationState === "restored" && currentSender !== undefined;
-      //   // logger.debug(
-      //   //   `[QueryClient] Checking if query ${JSON.stringify(query.queryKey)} is enabled. Restoration state: ${restorationState}, current sender: ${currentSender?.ethereumAddress}`
-      //   // );
-      //   return enabled;
-      // },
+      refetchOnWindowFocus: true,
+      refetchOnReconnect: true,
+
+      // Offers better performance by avoiding deep equality checks
+      structuralSharing: false,
     },
   },
 });

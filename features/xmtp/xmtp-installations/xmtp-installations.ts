@@ -1,4 +1,3 @@
-import { xmtpLogger } from "@utils/logger";
 import { IXmtpClient } from "@/features/xmtp/xmtp.types";
 
 export const getOtherInstallations = async (args: { client: IXmtpClient }) => {
@@ -6,10 +5,6 @@ export const getOtherInstallations = async (args: { client: IXmtpClient }) => {
 
   const inboxState = await client.inboxState(true);
   const installationIds = inboxState.installations.map((i) => i.id);
-
-  xmtpLogger.debug(
-    `Current installation: ${client.installationId}, all installations: ${installationIds}`,
-  );
 
   const otherInstallations = installationIds.filter(
     (id) => id !== client.installationId,
@@ -24,10 +19,5 @@ export async function validateClientInstallation(args: {
   const { client } = args;
   const inboxState = await client.inboxState(true);
   const installationsIds = inboxState.installations.map((i) => i.id);
-
-  xmtpLogger.debug(
-    `Current installation: ${client.installationId}, all installations: ${installationsIds}`,
-  );
-
   return installationsIds.includes(client.installationId);
 }

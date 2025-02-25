@@ -24,8 +24,8 @@ const profileSearchQueryConfig = (args: { query?: string }) => {
     queryFn: enabled
       ? () => searchProfiles({ searchQuery: args.query! })
       : skipToken,
-    gcTime: DateUtils.minutes.toMilliseconds(5),
-    staleTime: DateUtils.minutes.toMilliseconds(5),
+    gcTime: DateUtils.minutes(5).toMilliseconds(),
+    staleTime: DateUtils.minutes(5).toMilliseconds(),
   });
 };
 

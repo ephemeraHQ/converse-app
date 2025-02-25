@@ -1,4 +1,8 @@
-import { queryOptions, useQuery } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  queryOptions,
+  useQuery,
+} from "@tanstack/react-query";
 import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
 import { getCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm";
@@ -26,6 +30,9 @@ export function getSearchExistingDmsQueryOptions(args: {
       }),
     enabled: !!inboxId && !!normalizedSearchQuery,
     staleTime: 0,
+    // Keep showing previous search results while new results load
+    // to prevent UI flicker during search
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -113,7 +120,7 @@ async function searchExistingDms(args: {
   return matchingTopics;
 }
 
-export function useSearchExistingDms(args: {
+export function useSearchExistingDmsQuery(args: {
   searchQuery: string;
   inboxId: InboxId;
 }) {

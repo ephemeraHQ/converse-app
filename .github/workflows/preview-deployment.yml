@@ -141,14 +141,18 @@ jobs:
           eas-cache: true
           patch-watchers: true # Prevents ENOSPC errors on Ubuntu runners
 
+      - name: Install Sentry CLI
+        run: npm install -g @sentry/cli
+
       - name: Build and submit to store
         run: |
           export SENTRY_AUTH_TOKEN=$(eas env:get --variable-name=SENTRY_AUTH_TOKEN --variable-environment=preview | tr -d ' ' | cut -d'=' -f2) 
           eas build --platform ios --profile preview --non-interactive --auto-submit
 
       - name: Resolve Sentry Issues
+        env:
+          SENTRY_USER_AUTH_TOKEN: ${{ secrets.SENTRY_USER_AUTH_TOKEN }}
         run: |
-          export SENTRY_USER_AUTH_TOKEN=$(eas env:get --variable-name=SENTRY_USER_AUTH_TOKEN --variable-environment=preview | tr -d ' ' | cut -d'=' -f2)
           sentry-cli issues resolve --all --project convos-mobile-app
 
   android-build:
@@ -190,14 +194,18 @@ jobs:
           eas-cache: true
           patch-watchers: true # Prevents ENOSPC errors on Ubuntu runners
 
+      - name: Install Sentry CLI
+        run: npm install -g @sentry/cli
+
       - name: Build and submit to store
         run: |
           export SENTRY_AUTH_TOKEN=$(eas env:get --variable-name=SENTRY_AUTH_TOKEN --variable-environment=preview | tr -d ' ' | cut -d'=' -f2) 
           eas build --platform android --profile preview --non-interactive --auto-submit
 
       - name: Resolve Sentry Issues
+        env:
+          SENTRY_USER_AUTH_TOKEN: ${{ secrets.SENTRY_USER_AUTH_TOKEN }}
         run: |
-          export SENTRY_USER_AUTH_TOKEN=$(eas env:get --variable-name=SENTRY_USER_AUTH_TOKEN --variable-environment=preview | tr -d ' ' | cut -d'=' -f2)
           sentry-cli issues resolve --all --project convos-mobile-app
 
   ota-update:
@@ -233,6 +241,9 @@ jobs:
           eas-cache: true
           patch-watchers: true # Prevents ENOSPC errors on Ubuntu runners
 
+      - name: Install Sentry CLI
+        run: npm install -g @sentry/cli
+
       - name: Run EAS Update
         run: |
           eas update --channel=preview --message "${{ needs.check-changes.outputs.commit_message }}" --non-interactive
@@ -243,6 +254,7 @@ jobs:
           npx sentry-expo-upload-sourcemaps dist
 
       - name: Resolve Sentry Issues
+        env:
+          SENTRY_USER_AUTH_TOKEN: ${{ secrets.SENTRY_USER_AUTH_TOKEN }}
         run: |
-          export SENTRY_USER_AUTH_TOKEN=$(eas env:get --variable-name=SENTRY_USER_AUTH_TOKEN --variable-environment=preview | tr -d ' ' | cut -d'=' -f2)
           sentry-cli issues resolve --all --project convos-mobile-app

@@ -1,6 +1,7 @@
 import { textSizeStyles } from "@design-system/Text/Text.styles";
 import React, { memo, useCallback, useEffect, useRef } from "react";
 import { Platform, TextInput as RNTextInput } from "react-native";
+import { TextInput } from "@/design-system/text-input";
 import { useConversationComposerIsEnabled } from "@/features/conversation/conversation-composer/hooks/conversation-composer-is-enabled";
 import { useAppTheme } from "@/theme/use-app-theme";
 import { useConversationComposerStore } from "./conversation-composer.store-context";
@@ -47,7 +48,7 @@ export const ConversationComposerTextInput = memo(
     }, [onSubmitEditing]);
 
     return (
-      <RNTextInput
+      <TextInput
         style={{
           ...textSizeStyles.sm,
           color: theme.colors.text.primary,
@@ -81,6 +82,7 @@ export const ConversationComposerTextInput = memo(
         multiline
         defaultValue={inputDefaultValue}
         placeholder="Message"
+        autoCorrect={false}
         placeholderTextColor={theme.colors.text.tertiary}
       />
     );

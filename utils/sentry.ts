@@ -45,8 +45,6 @@ export function sentryInit() {
     },
 
     beforeSend: (event: ErrorEvent, hint: EventHint) => {
-      logger.debug(`[Sentry] Sending event: ${event.event_id}`);
-
       // Filter out specific errors
       if (event.exception?.values?.length === 1) {
         const exception = event.exception.values[0];

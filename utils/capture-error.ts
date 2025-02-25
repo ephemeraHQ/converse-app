@@ -1,5 +1,5 @@
 import { showSnackbar } from "@/components/snackbar/snackbar.service";
-import { ensureError } from "@/utils/error";
+import { ensureError, FeedbackError } from "@/utils/error";
 import { logger } from "@/utils/logger";
 import { sentryTrackError } from "@/utils/sentry";
 
@@ -19,6 +19,10 @@ export function captureError(
     }
   }
 
+  if (error instanceof FeedbackError) {
+    return;
+  }
+
   sentryTrackError({
     error: ensureError(error),
     extras,
@@ -31,11 +35,15 @@ export function captureErrorWithToast(
     message?: string;
   },
 ) {
-  const message =
-    options?.message || (error as Error)?.message || `Something went wrong`;
+  const { message } = options || {};
+
   captureError(error);
+
+  const snackMessage =
+    message || (error as Error)?.message || "Something went wrong";
+
   showSnackbar({
-    message,
+    message: snackMessage,
     type: "error",
   });
 }
