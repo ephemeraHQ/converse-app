@@ -5,6 +5,34 @@ import { config } from "@/config";
 import { getAppSettingsQueryOptions } from "@/features/app-settings/app-settings.query";
 import { openLink } from "@/utils/linking";
 
+type VersionComparisonArgs = {
+  currentVersion: string;
+  minimumVersion: string;
+};
+
+function parseVersion(version: string): number[] {
+  return version.split(".").map(Number);
+}
+
+// Compare version strings like "1.2.3"
+function isVersionGreaterOrEqual(args: VersionComparisonArgs) {
+  const { currentVersion, minimumVersion } = args;
+
+  const current = parseVersion(currentVersion);
+  const minimum = parseVersion(minimumVersion);
+
+  // Compare each version segment
+  for (let i = 0; i < 3; i++) {
+    if (current[i] > minimum[i]) {
+      return true;
+    }
+    if (current[i] < minimum[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
 export function useIsCurrentVersionEnough() {
   const {
     data: currentVersionIsEnough,
@@ -12,56 +40,35 @@ export function useIsCurrentVersionEnough() {
   } = useQuery({
     ...getAppSettingsQueryOptions(),
     select: (backendConfig) => {
-      const currentVersion = config.appVersion;
-
-      const isCurrentVersionEnough = isVersionGreaterOrEqual({
-        currentVersion,
-        minimumVersion: Platform.select({
-          android: backendConfig.minimumAppVersion.android,
-          default: backendConfig.minimumAppVersion.ios,
-        }),
+      const minimumVersion = Platform.select({
+        android: backendConfig.minimumAppVersion.android,
+        default: backendConfig.minimumAppVersion.ios,
       });
 
-      return isCurrentVersionEnough;
+      return isVersionGreaterOrEqual({
+        currentVersion: config.appVersion,
+        minimumVersion,
+      });
     },
   });
 
   useEffect(() => {
-    if (currentVersionIsEnough && !isCheckingIfCurrentVersionIsEnough) {
+    const shouldShowUpdateAlert =
+      !currentVersionIsEnough && !isCheckingIfCurrentVersionIsEnough;
+
+    if (shouldShowUpdateAlert) {
       Alert.alert(
         "Version is out of date",
         "Please update to the latest version",
         [
           {
             text: "Update",
-            onPress: () =>
-              openLink({
-                url: config.appStoreUrl,
-              }),
+            onPress: () => openLink({ url: config.appStoreUrl }),
           },
         ],
+        // Prevent dismissing the alert by tapping outside
+        { cancelable: false },
       );
     }
   }, [currentVersionIsEnough, isCheckingIfCurrentVersionIsEnough]);
-}
-
-// Compare version strings like "1.2.3" by splitting into numbers
-function isVersionGreaterOrEqual(args: {
-  currentVersion: string;
-  minimumVersion: string;
-}) {
-  const { currentVersion, minimumVersion } = args;
-
-  const currentVersionParts = currentVersion.split(".").map(Number);
-  const minimumVersionParts = minimumVersion.split(".").map(Number);
-
-  for (let i = 0; i < 3; i++) {
-    if (currentVersionParts[i] > minimumVersionParts[i]) {
-      return true;
-    }
-    if (currentVersionParts[i] < minimumVersionParts[i]) {
-      return false;
-    }
-  }
-  return true;
 }
