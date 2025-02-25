@@ -10,8 +10,9 @@ import {
   BubbleContainer,
   BubbleContentContainer,
 } from "@/features/conversation/conversation-message/conversation-message-bubble";
+import { ConversationMessageGestures } from "@/features/conversation/conversation-message/conversation-message-gestures";
 import { MessageText } from "@/features/conversation/conversation-message/conversation-message-text";
-import { useMessageContextStoreContext } from "@/features/conversation/conversation-message/conversation-message.store-context";
+import { useConversationMessageContextStoreContext } from "@/features/conversation/conversation-message/conversation-message.store-context";
 import {
   isReadReceiptMessage,
   isRemoteAttachmentMessage,
@@ -36,9 +37,10 @@ export const MessageReply = memo(function MessageReply(props: {
 
   const { theme } = useAppTheme();
 
-  const { fromMe, hasNextMessageInSeries } = useMessageContextStoreContext(
-    useSelect(["fromMe", "hasNextMessageInSeries"]),
-  );
+  const { fromMe, hasNextMessageInSeries } =
+    useConversationMessageContextStoreContext(
+      useSelect(["fromMe", "hasNextMessageInSeries"]),
+    );
 
   const replyMessageContent = message.content();
 
@@ -55,52 +57,55 @@ export const MessageReply = memo(function MessageReply(props: {
 
   return (
     <BubbleContainer fromMe={fromMe}>
-      <BubbleContentContainer
-        fromMe={fromMe}
-        hasNextMessageInSeries={hasNextMessageInSeries}
-      >
-        <VStack
-          style={{
-            rowGap: theme.spacing.xxs,
-            marginTop: theme.spacing.xxxs, // Because for reply bubble we want the padding to be same for horizontal and vertial
-          }}
+      <ConversationMessageGestures>
+        <BubbleContentContainer
+          fromMe={fromMe}
+          hasNextMessageInSeries={hasNextMessageInSeries}
         >
-          <MessageReplyReference
-            referenceMessageId={replyMessageContent.reference as MessageId}
-          />
+          <VStack
+            style={{
+              rowGap: theme.spacing.xxs,
+              marginTop: theme.spacing.xxxs, // Because for reply bubble we want the padding to be same for horizontal and vertial
+            }}
+          >
+            <MessageReplyReference
+              referenceMessageId={replyMessageContent.reference as MessageId}
+            />
 
-          {!!replyMessageContent.content.remoteAttachment && (
-            <VStack
-              style={{
-                marginTop: theme.spacing.xxxs,
-                marginBottom: theme.spacing.xxxs,
-              }}
-            >
-              <AttachmentRemoteImage
-                fitAspectRatio
-                messageId={replyMessageContent.reference}
-                remoteMessageContent={
-                  replyMessageContent.content.remoteAttachment
-                }
-                containerProps={{
-                  style: {
-                    width: "100%",
-                    borderRadius:
-                      theme.borderRadius.message.attachment -
-                      theme.spacing.message.replyMessage.horizontalPadding / 2,
-                  },
+            {!!replyMessageContent.content.remoteAttachment && (
+              <VStack
+                style={{
+                  marginTop: theme.spacing.xxxs,
+                  marginBottom: theme.spacing.xxxs,
                 }}
-              />
-            </VStack>
-          )}
+              >
+                <AttachmentRemoteImage
+                  fitAspectRatio
+                  messageId={replyMessageContent.reference}
+                  remoteMessageContent={
+                    replyMessageContent.content.remoteAttachment
+                  }
+                  containerProps={{
+                    style: {
+                      width: "100%",
+                      borderRadius:
+                        theme.borderRadius.message.attachment -
+                        theme.spacing.message.replyMessage.horizontalPadding /
+                          2,
+                    },
+                  }}
+                />
+              </VStack>
+            )}
 
-          {!!replyMessageContent.content.text && (
-            <MessageText inverted={fromMe}>
-              {replyMessageContent.content.text}
-            </MessageText>
-          )}
-        </VStack>
-      </BubbleContentContainer>
+            {!!replyMessageContent.content.text && (
+              <MessageText inverted={fromMe}>
+                {replyMessageContent.content.text}
+              </MessageText>
+            )}
+          </VStack>
+        </BubbleContentContainer>
+      </ConversationMessageGestures>
     </BubbleContainer>
   );
 });
@@ -112,7 +117,9 @@ const MessageReplyReference = memo(function MessageReplyReference(props: {
 
   const { theme } = useAppTheme();
 
-  const { fromMe } = useMessageContextStoreContext(useSelect(["fromMe"]));
+  const { fromMe } = useConversationMessageContextStoreContext(
+    useSelect(["fromMe"]),
+  );
 
   const conversationStore = useConversationStore();
 
@@ -187,7 +194,7 @@ const MessageReplyReferenceContent = memo(
   }) {
     const { replyMessage } = props;
     const { theme } = useAppTheme();
-    const fromMe = useMessageContextStoreContext((s) => s.fromMe);
+    const fromMe = useConversationMessageContextStoreContext((s) => s.fromMe);
 
     const attachmentStyle = {
       height: theme.avatarSize.md,

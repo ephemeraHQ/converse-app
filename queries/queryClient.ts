@@ -16,25 +16,22 @@ export const queryClient = new QueryClient({
       context: unknown,
       mutation: Mutation<unknown, unknown, unknown, unknown>,
     ) => {
-      // Example: [Mutation] markConversationAsRead (caller: Conversation Messages) (variables: {"topic":"0x1234567890abcdef1234567890abcdef1234567890"})
-      const mutationInfo = `${
-        mutation.options.mutationKey
-          ? `${JSON.stringify(mutation.options.mutationKey)} `
-          : ""
-      }${mutation.meta?.caller ? `(caller: ${mutation.meta.caller}) ` : ""}${
-        variables ? `(variables: ${JSON.stringify(variables)}) ` : ""
-      }`;
+      const extras: Record<string, string> = {
+        type: "mutation",
+        mutationKey: mutation.options.mutationKey
+          ? JSON.stringify(mutation.options.mutationKey)
+          : "",
+      };
 
-      const enhancedError = new Error(
-        `[Mutation] ${mutationInfo}${error.message}`,
-        {
-          cause: error.cause,
-        },
-      );
+      if (mutation.meta?.caller) {
+        extras.caller = mutation.meta.caller as string;
+      }
 
-      enhancedError.stack = error.stack;
+      if (variables) {
+        extras.variables = JSON.stringify(variables);
+      }
 
-      captureError(enhancedError);
+      captureError(error, { extras });
     },
   }),
   queryCache: new QueryCache({
@@ -48,18 +45,16 @@ export const queryClient = new QueryClient({
       );
     },
     onError: (error: Error, query) => {
-      // Example: [Query] error fetching ["conversation", "0x1234567890abcdef1234567890abcdef1234567890"] (caller: Conversation Messages)
-      const queryInfo = `${JSON.stringify(query.queryKey)}${
-        query.meta?.caller ? ` (caller: ${query.meta.caller})` : ""
-      }`;
+      const extras: Record<string, string> = {
+        type: "query",
+        queryKey: JSON.stringify(query.queryKey),
+      };
 
-      const enhancedError = new Error(`[Query] ${queryInfo} ${error.message}`, {
-        cause: error.cause,
-      });
+      if (query.meta?.caller) {
+        extras.caller = query.meta.caller as string;
+      }
 
-      enhancedError.stack = error.stack;
-
-      captureError(enhancedError);
+      captureError(error, { extras });
     },
   }),
 

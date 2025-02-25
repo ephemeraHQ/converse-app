@@ -16,12 +16,15 @@ import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.stor
 import { useSearchConvosUsers } from "@/features/conversation/conversation-create/hooks/use-search-convos-users";
 import { useConversationStoreContext } from "@/features/conversation/conversation.store-context";
 import { inboxIdIsPartOfConversationUsingCacheData } from "@/features/conversation/utils/inbox-id-is-part-of-converastion";
+import { ISocialProfile } from "@/features/social-profiles/social-profiles.api";
+import { useSocialProfilesForAddressQuery } from "@/features/social-profiles/social-profiles.query";
 import { $globalStyles } from "@/theme/styles";
 import { useAppTheme } from "@/theme/use-app-theme";
 import { useSearchExistingDms } from "../queries/search-existing-dms.query";
 import { useSearchExistingGroupsByGroupMembers } from "../queries/search-existing-groups-by-group-members.query";
 import { useSearchExistingGroupsByGroupName } from "../queries/search-existing-groups-by-group-name.query";
 import { ConversationSearchResultsListItemGroup } from "./conversation-create-search-results-list-item-group";
+import { ConversationSearchResultsListItemNoConvosUser } from "./conversation-create-search-results-list-item-no-convos-user";
 import { ConversationSearchResultsListItemUser } from "./conversation-create-search-results-list-item-user";
 import { ConversationSearchResultsListItemDm } from "./conversation-create-search-results-list-item-user-dm";
 
@@ -43,10 +46,16 @@ type ISearchResultItemProfile = {
   inboxId: InboxId;
 };
 
+type ISearchResultItemSocialProfile = {
+  type: "socialProfile";
+  profile: ISocialProfile;
+};
+
 type SearchResultItem =
   | ISearchResultItemDm
   | ISearchResultItemGroup
-  | ISearchResultItemProfile;
+  | ISearchResultItemProfile
+  | ISearchResultItemSocialProfile;
 
 function searchResultIsDm(item: SearchResultItem): item is ISearchResultItemDm {
   return item.type === "dm";
@@ -62,6 +71,12 @@ function searchResultIsProfile(
   item: SearchResultItem,
 ): item is ISearchResultItemProfile {
   return item.type === "profile";
+}
+
+function searchResultIsSocialProfile(
+  item: SearchResultItem,
+): item is ISearchResultItemSocialProfile {
+  return item.type === "socialProfile";
 }
 
 export function ConversationSearchResultsList() {
@@ -88,6 +103,13 @@ export function ConversationSearchResultsList() {
       searchQuery,
       inboxId: currentUserInboxId,
     });
+
+  const {
+    data: socialProfilesForEthAddress = [],
+    isLoading: isLoadingSocialProfilesForEthAddress,
+  } = useSocialProfilesForAddressQuery({
+    ethAddress: searchQuery,
+  });
 
   const {
     data: existingGroupsByGroupNameTopics = [],
@@ -161,6 +183,19 @@ export function ConversationSearchResultsList() {
 
     items.push(...(profilesNotInDms ?? []));
 
+    // 5. Add social profiles only if we don't have any conversation users
+    if (
+      searchConvosUsersData?.length === 0 &&
+      socialProfilesForEthAddress.length > 0
+    ) {
+      items.push(
+        ...socialProfilesForEthAddress.map((profile) => ({
+          type: "socialProfile" as const,
+          profile,
+        })),
+      );
+    }
+
     return items;
   }, [
     existingDmTopics,
@@ -168,13 +203,15 @@ export function ConversationSearchResultsList() {
     existingGroupsByGroupNameTopics,
     searchConvosUsersData,
     selectedSearchUserInboxIds,
+    socialProfilesForEthAddress,
   ]);
 
   const isStillLoadingSearchResults =
     isLoadingExistingDmTopics ||
     isLoadingExistingGroupsByName ||
     isLoadingExistingGroupsByMembers ||
-    isSearchingConvosUsers;
+    isSearchingConvosUsers ||
+    isLoadingSocialProfilesForEthAddress;
 
   return (
     <Container>
@@ -221,6 +258,13 @@ export function ConversationSearchResultsList() {
               <ConversationSearchResultsListItemUser inboxId={item.inboxId} />
             );
           }
+          if (searchResultIsSocialProfile(item)) {
+            return (
+              <ConversationSearchResultsListItemNoConvosUser
+                socialProfile={item.profile}
+              />
+            );
+          }
           const _ensureNever: never = item;
           return null;
         }}
@@ -237,6 +281,9 @@ export function ConversationSearchResultsList() {
           }
           if (searchResultIsProfile(item)) {
             return `profile-${item.inboxId}`;
+          }
+          if (searchResultIsSocialProfile(item)) {
+            return `social-profile-${item.profile.type}-${item.profile.address}`;
           }
           const _ensureNever: never = item;
           throw new Error("Invalid item type");

@@ -3,7 +3,7 @@ import { HStack } from "@/design-system/HStack";
 import { AnimatedVStack, VStack } from "@/design-system/VStack";
 import { ConversationMessageSender } from "@/features/conversation/conversation-message/conversation-message-sender";
 import { ConversationSenderAvatar } from "@/features/conversation/conversation-message/conversation-message-sender-avatar";
-import { useMessageContextStoreContext } from "@/features/conversation/conversation-message/conversation-message.store-context";
+import { useConversationMessageContextStoreContext } from "@/features/conversation/conversation-message/conversation-message.store-context";
 import { useConversationMessageStyles } from "@/features/conversation/conversation-message/conversation-message.styles";
 import { isGroupUpdatedMessage } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { useSelect } from "@/stores/stores.utils";
@@ -43,7 +43,7 @@ export const ConversationMessageLayout = memo(
       isSystemMessage,
       nextMessage,
       message: messageData,
-    } = useMessageContextStoreContext(
+    } = useConversationMessageContextStoreContext(
       useSelect([
         "senderInboxId",
         "fromMe",

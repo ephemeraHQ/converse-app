@@ -40,8 +40,7 @@ export function ConversationSearchResultsListItemUser({
         />
       }
       title={profile?.name ?? " "}
-      // TODO: add username/address
-      subtitle=""
+      subtitle={profile?.username ?? ""}
       onPress={handlePress}
     />
   );

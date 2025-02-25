@@ -16,17 +16,17 @@ import {
   useConversationMessageContextMenuStoreContext,
 } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu.store-context";
 import { useConversationMessageContextMenuStyles } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu.styles";
-import { MessageContextStoreProvider } from "@/features/conversation/conversation-message/conversation-message.store-context";
+import { ConversationMessageContextStoreProvider } from "@/features/conversation/conversation-message/conversation-message.store-context";
 import {
   getCurrentUserAlreadyReactedOnMessage,
   getMessageById,
   useConversationMessageReactions,
 } from "@/features/conversation/conversation-message/conversation-message.utils";
+import { getConversationMessagesQueryData } from "@/features/conversation/conversation-messages.query";
 import { useCurrentConversationTopicSafe } from "@/features/conversation/conversation.store-context";
 import { useReactOnMessage } from "@/features/conversation/hooks/use-react-on-message";
 import { useRemoveReactionOnMessage } from "@/features/conversation/hooks/use-remove-reaction-on-message";
 import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
-import { getConversationMessagesQueryData } from "@/queries/conversation-messages-query";
 import { MessageContextMenuAboveMessageReactions } from "./conversation-message-context-menu-above-message-reactions";
 import { MessageContextMenuContainer } from "./conversation-message-context-menu-container";
 import { useMessageContextMenuItems } from "./conversation-message-context-menu.utils";
@@ -196,7 +196,7 @@ const Content = memo(function Content(props: {
                   }}
                 />
 
-                <MessageContextStoreProvider
+                <ConversationMessageContextStoreProvider
                   message={message}
                   nextMessage={nextMessage}
                   previousMessage={previousMessage}
@@ -204,7 +204,7 @@ const Content = memo(function Content(props: {
                   {/* TODO: maybe make ConversationMessage more dumb to not need any context? */}
 
                   <ConversationMessage message={message} />
-                </MessageContextStoreProvider>
+                </ConversationMessageContextStoreProvider>
 
                 <MessageContextMenuItems
                   originX={fromMe ? itemRectX + itemRectWidth : itemRectX}

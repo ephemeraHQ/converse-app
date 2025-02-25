@@ -8,8 +8,6 @@ import {
   transportFunctionType,
 } from "react-native-logs";
 import { v4 as uuidv4 } from "uuid";
-import { isDev } from "./getEnv";
-import { sentryTrackError } from "./sentry";
 
 // Types
 type LogMethod = (...args: any[]) => void;
@@ -101,27 +99,6 @@ const converseTransport: transportFunctionType = async (props) => {
     // Use the enhanced message for console logging
     props.msg = logMessage;
     consoleTransport(props);
-  }
-
-  // Error tracking
-  if (props.level.severity >= LOG_LEVELS.error) {
-    const errorArg = props.rawMsg?.[0];
-    const error =
-      errorArg instanceof Error
-        ? errorArg
-        : new Error(
-            typeof errorArg === "string" ? errorArg : JSON.stringify(errorArg),
-          );
-    const context = props.rawMsg?.[1];
-
-    sentryTrackError({
-      error,
-      extras: context
-        ? typeof context === "object"
-          ? context
-          : { value: context }
-        : undefined,
-    });
   }
 
   // File logging with enhanced message

@@ -32,6 +32,8 @@ type IPrivyConfig = {
 export type ILoggerColorScheme = "light" | "dark";
 
 export type IConfig = {
+  appVersion: string;
+  appStoreUrl: string;
   loggerColorScheme: ILoggerColorScheme;
   debugMenu: boolean;
   debugAddresses: string[];

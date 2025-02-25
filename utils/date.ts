@@ -1,4 +1,4 @@
-import { translate } from "@i18n";
+import { isToday as _isToday, isYesterday } from "date-fns";
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
 import format from "date-fns/format";
 // Long term we should only import used locales
@@ -26,24 +26,6 @@ export const getRelativeDateTime = (date?: number | Date) => {
     relativeDateTime = format(date, "p", { locale });
   } else if (days === 1) {
     relativeDateTime = "Yesterday";
-  } else if (days < 7) {
-    relativeDateTime = format(date, "EEEE", { locale });
-  } else {
-    relativeDateTime = format(date, "P", { locale });
-  }
-  return relativeDateTime;
-};
-
-export const getRelativeDate = (date?: number | Date) => {
-  if (!date) return "";
-  let relativeDateTime = "";
-  const days = differenceInCalendarDays(new Date(), date);
-  const locale = getLocale();
-
-  if (days === 0) {
-    relativeDateTime = translate("today");
-  } else if (days === 1) {
-    relativeDateTime = translate("yesterday");
   } else if (days < 7) {
     relativeDateTime = format(date, "EEEE", { locale });
   } else {
@@ -106,4 +88,37 @@ export function getTodayNs() {
 
 export function convertNanosecondsToMilliseconds(nanoseconds: number) {
   return nanoseconds / 1000000;
+}
+
+export function isToday(timestamp: number) {
+  return _isToday(new Date(timestamp));
+}
+
+export function getRelativeDate(timestamp: number): string {
+  if (!timestamp) {
+    return "";
+  }
+
+  const date = new Date(timestamp);
+  const now = new Date();
+  const diffInDays = differenceInCalendarDays(now, date);
+  const locale = getLocale();
+
+  // For messages from today
+  if (_isToday(date)) {
+    return "Today";
+  }
+
+  // For messages from yesterday
+  if (isYesterday(date)) {
+    return "Yesterday";
+  }
+
+  // For messages within the last 7 days
+  if (diffInDays < 7) {
+    return format(date, "EEEE", { locale }); // Returns day name (Monday, Tuesday, etc.)
+  }
+
+  // For older messages
+  return format(date, "MMM d", { locale }); // Returns "Jan 15" format
 }

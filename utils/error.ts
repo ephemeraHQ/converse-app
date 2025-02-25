@@ -1,3 +1,7 @@
+export function isError(error: unknown): error is Error {
+  return error instanceof Error;
+}
+
 export function ensureError(error: unknown): Error {
   if (error instanceof Error) {
     return error;

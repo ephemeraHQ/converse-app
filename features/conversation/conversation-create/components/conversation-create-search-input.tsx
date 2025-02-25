@@ -19,11 +19,14 @@ import { HStack } from "@/design-system/HStack";
 import { Text } from "@/design-system/Text";
 import { TextInput } from "@/design-system/text-input";
 import { VStack } from "@/design-system/VStack";
+import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store";
 import {
   useConversationStore,
   useConversationStoreContext,
 } from "@/features/conversation/conversation.store-context";
 import { useProfileQuery } from "@/features/profiles/profiles.query";
+import { useSocialProfilesForEthAddressQueries } from "@/features/social-profiles/social-profiles.query";
+import { useEthAddressesForXmtpInboxId } from "@/features/xmtp/xmtp-inbox-id/eth-addresses-for-xmtp-inbox-id.query";
 import { useAppTheme } from "@/theme/use-app-theme";
 import { Haptics } from "@/utils/haptics";
 
@@ -174,6 +177,17 @@ const UserChip = memo(function UserChip(props: { inboxId: InboxId }) {
 
   const { data: profile } = useProfileQuery({ xmtpId: inboxId });
 
+  const currentSender = useSafeCurrentSender();
+
+  const { data: ethAddresses } = useEthAddressesForXmtpInboxId({
+    clientEthAddress: currentSender.ethereumAddress,
+    inboxId,
+  });
+
+  const { data: socialProfiles } = useSocialProfilesForEthAddressQueries({
+    ethAddresses: ethAddresses ?? [],
+  });
+
   const selectedChipInboxId = useStore((state) => state.selectedChipInboxId);
 
   const handlePress = useCallback(() => {
@@ -181,14 +195,22 @@ const UserChip = memo(function UserChip(props: { inboxId: InboxId }) {
     useStore.getState().actions.setSelectedChipInboxId(inboxId);
   }, [inboxId]);
 
+  const allValidSocialProfiles = socialProfiles?.filter(Boolean);
+  const firstAddressFirstSocialProfile = allValidSocialProfiles?.[0]?.[0];
+
   return (
     <Chip
       isSelected={selectedChipInboxId === inboxId}
       onPress={handlePress}
       size="md"
     >
-      <ChipAvatar uri={profile?.avatar} name={profile?.name} />
-      <ChipText>{profile?.name}</ChipText>
+      <ChipAvatar
+        uri={profile?.avatar ?? firstAddressFirstSocialProfile?.avatar}
+        name={profile?.name ?? firstAddressFirstSocialProfile?.name}
+      />
+      <ChipText>
+        {profile?.name ?? firstAddressFirstSocialProfile?.name}
+      </ChipText>
     </Chip>
   );
 });

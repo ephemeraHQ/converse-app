@@ -1,25 +1,29 @@
 import { ConversationTopic, GroupUpdatedContent } from "@xmtp/react-native-sdk";
-import {
-  stopStreamingAllMessage,
-  streamAllMessages,
-} from "@/features/xmtp/xmtp-messages/xmtp-messages-stream";
+import { addConversationMessageQuery } from "@/features/conversation/conversation-messages.query";
+import { streamAllMessages } from "@/features/xmtp/xmtp-messages/xmtp-messages-stream";
 import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types";
-import { addConversationMessageQuery } from "@/queries/conversation-messages-query";
 import { updateConversationQueryData } from "@/queries/conversation-query";
 import { updateConversationInAllowedConsentConversationsQueryData } from "@/queries/conversations-allowed-consent-query";
 import { refetchGroupMembersQuery } from "@/queries/useGroupMembersQuery";
 import { captureError } from "@/utils/capture-error";
+import { StreamError } from "@/utils/error";
 import { streamLogger } from "@/utils/logger";
 
 export async function startMessageStreaming(args: { account: string }) {
   const { account } = args;
-  await streamAllMessages({
-    account,
-    onNewMessage: (message) => handleNewMessage({ account, message }),
-  });
-}
 
-export { stopStreamingAllMessage };
+  try {
+    await streamAllMessages({
+      account,
+      onNewMessage: (message) => handleNewMessage({ account, message }),
+    });
+  } catch (error) {
+    throw new StreamError({
+      error,
+      additionalMessage: `Failed to stream messages for ${account}`,
+    });
+  }
+}
 
 async function handleNewMessage(args: {
   account: string;

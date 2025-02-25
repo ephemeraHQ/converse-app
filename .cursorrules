@@ -78,28 +78,19 @@ function sendMessage(args: { recipientId: string; content: string }) {
 - Prefer early returns over ternaries.
 - Minimize useEffect usage.
 - Wrap components in memo() for performance.
+- For styling components, use the style prop with an object instead of direct props:
 
 ```typescript
-// ❌ Bad: Default export with separate render method
-export default function MessageList() {
-  const renderMessage = (message) => <div>{message.content}</div>;
-  return <div>{messages.map(renderMessage)}</div>;
-}
+// ❌ Bad: Using style props directly
+<HStack alignItems="center" gap={theme.spacing.sm}>
 
-// ✅ Good: Named export with inline JSX
-export function MessageList() {
-  if (!messages.length) {
-    return <EmptyState />;
-  }
-
-  return (
-    <div>
-      {messages.map((message) => (
-        <MessageItem key={message.id} message={message} />
-      ))}
-    </div>
-  );
-}
+// ✅ Good: Using style object
+<HStack
+  style={{
+    alignItems: "center",
+    gap: theme.spacing.sm,
+  }}
+>
 ```
 
 ## File Structure

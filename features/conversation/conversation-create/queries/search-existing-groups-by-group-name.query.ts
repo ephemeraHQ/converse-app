@@ -3,7 +3,6 @@ import { InboxId } from "@xmtp/react-native-sdk";
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store";
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
 import { getAllowedConsentConversationsQueryData } from "@/queries/conversations-allowed-consent-query";
-import { getSearchExistingGroupsByGroupNameQueryKey } from "@/queries/QueryKeys";
 import { normalizeString } from "@/utils/str";
 
 export async function searchExistingGroupsByGroupName(args: {
@@ -33,14 +32,16 @@ export function getSearchExistingGroupsByGroupNameQueryOptions(args: {
   const { searchQuery, searcherInboxId } = args;
   const normalizedSearchQuery = normalizeString(searchQuery);
   return queryOptions({
-    queryKey: getSearchExistingGroupsByGroupNameQueryKey({
-      searchQuery: normalizedSearchQuery,
-      inboxId: searcherInboxId,
-    }),
-    queryFn: () =>
-      searchExistingGroupsByGroupName({
+    queryKey: [
+      "search-existing-groups-by-group-name",
+      normalizedSearchQuery,
+      searcherInboxId,
+    ],
+    queryFn: () => {
+      return searchExistingGroupsByGroupName({
         searchQuery: normalizedSearchQuery,
-      }),
+      });
+    },
     enabled: !!normalizedSearchQuery && !!searcherInboxId,
     staleTime: 0,
   });

@@ -16,6 +16,14 @@ import {
 import { DmParams } from "@xmtp/react-native-sdk/build/lib/Dm";
 import { GroupParams } from "@xmtp/react-native-sdk/build/lib/Group";
 import { getCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
+import {
+  addConversationMessageQuery,
+  getConversationMessagesQueryData,
+  getConversationMessagesQueryOptions,
+  IMessageAccumulator,
+  replaceOptimisticMessageWithReal,
+  setConversationMessagesQueryData,
+} from "@/features/conversation/conversation-messages.query";
 import { useConversationStore } from "@/features/conversation/conversation.store-context";
 import { ISupportedXmtpCodecs } from "@/features/xmtp/xmtp-codecs/xmtp-codecs";
 import { contentTypesPrefixes } from "@/features/xmtp/xmtp-content-types/xmtp-content-types";
@@ -26,14 +34,6 @@ import {
   IXmtpDmWithCodecs,
   IXmtpGroupWithCodecs,
 } from "@/features/xmtp/xmtp.types";
-import {
-  addConversationMessageQuery,
-  getConversationMessagesQueryData,
-  getConversationMessagesQueryOptions,
-  IMessageAccumulator,
-  replaceOptimisticMessageWithReal,
-  setConversationMessagesQueryData,
-} from "@/queries/conversation-messages-query";
 import {
   getConversationQueryData,
   updateConversationQueryData,

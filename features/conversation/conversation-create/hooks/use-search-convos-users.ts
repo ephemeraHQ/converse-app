@@ -4,7 +4,7 @@ import {
   ISearchProfilesResult,
   searchProfiles,
 } from "@/features/profiles/profiles.search.api";
-import { isSameInboxId } from "@/features/xmtp/xmtp-inbox-id/xmtp-inbox-id";
+import { isSameInboxId } from "@/features/xmtp/xmtp-inbox-id/xmtp-inbox-id.utils";
 import { getSearchConvosUsersQueryKey } from "@/queries/QueryKeys";
 import { DateUtils } from "@/utils/time.utils";
 

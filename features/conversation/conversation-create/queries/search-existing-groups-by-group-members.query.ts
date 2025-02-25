@@ -1,12 +1,12 @@
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
+import { matchSorter } from "match-sorter";
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store";
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
 import { ensureProfileQueryData } from "@/features/profiles/profiles.query";
 import { doesSocialProfilesMatchTextQuery } from "@/features/profiles/utils/does-social-profiles-match-text-query";
 import { ensureSocialProfilesQueryData } from "@/features/social-profiles/social-profiles.query";
 import { getAllowedConsentConversationsQueryData } from "@/queries/conversations-allowed-consent-query";
-import { getSearchExistingGroupsByMemberNameQueryKey } from "@/queries/QueryKeys";
 import { ensureGroupMembersQueryData } from "@/queries/useGroupMembersQuery";
 import { captureError } from "@/utils/capture-error";
 import { normalizeString } from "@/utils/str";
@@ -49,11 +49,20 @@ export async function searchExistingGroupsByGroupMembers(args: {
               xmtpId: inboxId,
             });
 
+            if (
+              matchSorter([profile.name, profile.username], searchQuery)
+                .length > 0
+            ) {
+              return true;
+            }
+
             const socialProfiles = await ensureSocialProfilesQueryData({
               ethAddress: profile.privyAddress,
             });
 
-            if (!socialProfiles) return false;
+            if (!socialProfiles) {
+              return false;
+            }
 
             return doesSocialProfilesMatchTextQuery({
               socialProfiles,
@@ -81,15 +90,17 @@ export function getSearchExistingGroupsByGroupMembersQueryOptions(args: {
   const { searchQuery, searcherInboxId } = args;
   const normalizedSearchQuery = normalizeString(searchQuery);
   return queryOptions({
-    queryKey: getSearchExistingGroupsByMemberNameQueryKey({
-      searchQuery: normalizedSearchQuery,
-      inboxId: searcherInboxId,
-    }),
-    queryFn: () =>
-      searchExistingGroupsByGroupMembers({
+    queryKey: [
+      "search-existing-groups-by-group-members",
+      normalizedSearchQuery,
+      searcherInboxId,
+    ],
+    queryFn: () => {
+      return searchExistingGroupsByGroupMembers({
         searchQuery: normalizedSearchQuery,
         searcherInboxId,
-      }),
+      });
+    },
     enabled: !!normalizedSearchQuery && !!searcherInboxId,
     staleTime: 0,
   });

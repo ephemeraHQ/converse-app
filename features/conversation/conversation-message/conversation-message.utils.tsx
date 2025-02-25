@@ -13,6 +13,10 @@ import {
   getSafeCurrentSender,
   useCurrentSenderEthAddress,
 } from "@/features/authentication/multi-inbox.store";
+import {
+  getConversationMessagesQueryData,
+  useConversationMessagesQuery,
+} from "@/features/conversation/conversation-messages.query";
 import { getMessageContentType } from "@/features/xmtp/xmtp-content-types/xmtp-content-types";
 import {
   IXmtpDecodedActualMessage,
@@ -24,10 +28,6 @@ import {
   IXmtpDecodedStaticAttachmentMessage,
   IXmtpDecodedTextMessage,
 } from "@/features/xmtp/xmtp.types";
-import {
-  getConversationMessagesQueryData,
-  useConversationMessagesQuery,
-} from "@/queries/conversation-messages-query";
 import { useCurrentConversationTopicSafe } from "../conversation.store-context";
 
 export function isAnActualMessage(

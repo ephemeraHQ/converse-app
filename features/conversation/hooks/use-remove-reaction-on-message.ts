@@ -10,12 +10,12 @@ import {
   getCurrentSenderEthAddress,
   getSafeCurrentSender,
 } from "@/features/authentication/multi-inbox.store";
-import { getConversationForCurrentAccount } from "@/features/conversation/utils/get-conversation-for-current-account";
-import { contentTypesPrefixes } from "@/features/xmtp/xmtp-content-types/xmtp-content-types";
 import {
   addConversationMessageQuery,
   refetchConversationMessages,
-} from "@/queries/conversation-messages-query";
+} from "@/features/conversation/conversation-messages.query";
+import { getConversationForCurrentAccount } from "@/features/conversation/utils/get-conversation-for-current-account";
+import { contentTypesPrefixes } from "@/features/xmtp/xmtp-content-types/xmtp-content-types";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { getTodayNs } from "@/utils/date";
 import { getRandomId } from "@/utils/general";

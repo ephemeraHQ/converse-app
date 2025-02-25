@@ -5,7 +5,6 @@ import Animated, {
   AnimatedProps,
   useAnimatedRef,
 } from "react-native-reanimated";
-import { VStack } from "@/design-system/VStack";
 import { useConversationStore } from "@/features/conversation/conversation.store-context";
 import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types";
 import { $globalStyles } from "@/theme/styles";

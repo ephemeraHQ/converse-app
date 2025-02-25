@@ -30,3 +30,7 @@ export const addressPrefix = (address: string) =>
 export function normalizeString(str: string) {
   return str.toLowerCase().trim();
 }
+
+export function isSameTrimmedAndNormalizedString(str1: string, str2: string) {
+  return normalizeString(str1) === normalizeString(str2);
+}
