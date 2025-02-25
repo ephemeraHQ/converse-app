@@ -54,7 +54,9 @@ export function useIsCurrentVersionEnough() {
 
   useEffect(() => {
     const shouldShowUpdateAlert =
-      !currentVersionIsEnough && !isCheckingIfCurrentVersionIsEnough;
+      !currentVersionIsEnough &&
+      !isCheckingIfCurrentVersionIsEnough &&
+      !__DEV__;
 
     if (shouldShowUpdateAlert) {
       Alert.alert(
