@@ -16,6 +16,7 @@ export type IPresets =
   | "bigBold"
   | "formHelper"
   | "formLabel"
+  | "formInput"
   | "emojiSymbol";
 
 export const textPresets: Record<IPresets, ThemedStyleArray<TextStyle>> = {
@@ -35,14 +36,22 @@ export const textPresets: Record<IPresets, ThemedStyleArray<TextStyle>> = {
 
   formHelper: [
     textBaseStyle,
-    textSizeStyles.xs,
+    textSizeStyles.xxs,
     ({ colors }) => ({ color: colors.fill.secondary }),
   ],
+  
 
   formLabel: [
     textBaseStyle,
-    textSizeStyles.xs,
+    textSizeStyles.xxs,
     ({ colors }) => ({ color: colors.text.secondary }),
+  ],
+
+  formInput: [
+    textBaseStyle,
+    textSizeStyles.sm,
+    textFontWeightStyles.normal,
+    ({ colors }) => ({ color: colors.text.primary }),
   ],
 
   emojiSymbol: [textBaseStyle, { fontSize: 22, lineHeight: 28 }],

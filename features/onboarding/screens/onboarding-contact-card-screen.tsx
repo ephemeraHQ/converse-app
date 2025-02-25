@@ -32,7 +32,7 @@ import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { ValidationError } from "@/utils/api/api.error";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { debugBorder } from "@/utils/debug-style";
-import { useAddPfp } from "../../../hooks/use-add-pfp";
+import { useAddPfp } from "@/hooks/use-add-pfp";
 
 // Request validation schema
 const createUserRequestSchema = z.object({

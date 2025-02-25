@@ -10,12 +10,16 @@ import {
 type IProfileMeStoreState = {
   editMode: boolean;
   nameTextValue: string;
+  usernameTextValue: string;
+  descriptionTextValue: string;
   avatarUri: string;
 };
 
 type IProfileMeStoreActions = {
   setEditMode: (editMode: boolean) => void;
   setNameTextValue: (nameTextValue: string) => void;
+  setUsernameTextValue: (usernameTextValue: string) => void;
+  setDescriptionTextValue: (descriptionTextValue: string) => void;
   setAvatarUri: (avatarUri: string) => void;
   reset: () => void;
 };
@@ -27,6 +31,8 @@ export type IProfileMeStore = IProfileMeStoreState & {
 const DEFAULT_STATE: IProfileMeStoreState = {
   editMode: false,
   nameTextValue: "",
+  usernameTextValue: "",
+  descriptionTextValue: "",
   avatarUri: "",
 };
 
@@ -45,6 +51,8 @@ function createProfileMeStore(inboxId: InboxId) {
           actions: {
             setEditMode: (editMode) => set({ editMode }),
             setNameTextValue: (nameTextValue) => set({ nameTextValue }),
+            setUsernameTextValue: (usernameTextValue) => set({ usernameTextValue }),
+            setDescriptionTextValue: (descriptionTextValue) => set({ descriptionTextValue }),
             setAvatarUri: (avatarUri) => set({ avatarUri }),
             reset: () => {
               set(DEFAULT_STATE);
@@ -59,6 +67,8 @@ function createProfileMeStore(inboxId: InboxId) {
           partialize: (state) => ({
             editMode: state.editMode,
             nameTextValue: state.nameTextValue,
+            usernameTextValue: state.usernameTextValue,
+            descriptionTextValue: state.descriptionTextValue,
             avatarUri: state.avatarUri,
           }),
         },
