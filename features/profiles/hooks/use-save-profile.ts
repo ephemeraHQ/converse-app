@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { saveProfileAsync } from "@/features/profiles/profiles.api";
+import { saveProfileAsync , IConvosProfileForInbox } from "@/features/profiles/profiles.api";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { setProfileQueryData } from "@/features/profiles/profiles.query";
 
@@ -11,6 +11,7 @@ type SaveProfileArgs = {
     description?: string;
     username?: string;
     avatar?: string;
+    xmtpId?: string;
   };
   inboxId: string;
 };
@@ -28,17 +29,26 @@ export function useSaveProfile() {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: (args: SaveProfileArgs) => saveProfileAsync(args),
+    mutationFn: (args: SaveProfileArgs) => {
+      return saveProfileAsync({
+        profile: {
+          ...args.profile,
+          xmtpId: args.inboxId,
+        },
+        inboxId: args.inboxId,
+      });
+    },
     onMutate: async (args) => {
       // Capture the previous profile data for rollback
       const previousProfile = queryClient.getQueryData(
         profileQueryKey(args.inboxId)
-      );
+      ) as IConvosProfileForInbox | undefined;
 
       // Optimistically update the profile in the cache
       setProfileQueryData({
         xmtpId: args.inboxId,
         data: {
+          ...(previousProfile || {}),
           ...args.profile,
         },
       });
@@ -63,12 +73,13 @@ export function useSaveProfile() {
     },
   });
 
-  // Destructure mutateAsync to avoid referential stability issues
+  // Extract mutateAsync to avoid the linter warning about dependencies
   const { mutateAsync } = mutation;
-
-  const saveProfile = useCallback(async (args: SaveProfileArgs) => {
-    return mutateAsync(args);
-  }, [mutateAsync]);
+  
+  const saveProfile = useCallback(
+    (args: SaveProfileArgs) => mutateAsync(args),
+    [mutateAsync]
+  );
 
   return {
     saveProfile,

@@ -39,7 +39,6 @@ export const textPresets: Record<IPresets, ThemedStyleArray<TextStyle>> = {
     textSizeStyles.xxs,
     ({ colors }) => ({ color: colors.fill.secondary }),
   ],
-  
 
   formLabel: [
     textBaseStyle,
