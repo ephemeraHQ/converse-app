@@ -25,7 +25,7 @@ export const TextInput = memo(
         selectionColor={cursorColor as string} // Not sure why "as string" is required
         hitSlop={theme.spacing.xs} // By default for better UX
         style={[
-          themed(textPresets["body"]),
+          themed(textPresets["formInput"]),
           { padding: 0 }, // We want fully control over our TextInput layout
           style,
         ]}

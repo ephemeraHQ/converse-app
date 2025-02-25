@@ -112,11 +112,6 @@ export const en = {
     },
     names: "Names",
     copied: "Copied",
-    settings: {
-      notifications: "Turn on notifications",
-      archive: "Archive",
-      keep_messages: "Keep messages",
-    },
   },
   walletSelector: {
     title: "Your messages.\nYour privacy.",
@@ -335,7 +330,6 @@ export const en = {
   invite_more_friends: "Invite more friends",
   top_up_your_account: "Top up your account",
   you_parentheses: " (you)",
-  log_out: "Log out",
   disconnect_delete_local_data: "Disconnect and delete local data",
   disconnect_this_account: "Disconnect this account",
   disconnect_account_description:
@@ -429,8 +423,6 @@ export const en = {
     copied: "Copied",
     settings: {
       notifications: "Notifications",
-      archive: "Archive",
-      keep_messages: "Keep messages",
     },
   },
 

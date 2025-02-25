@@ -21,17 +21,32 @@ export type IConvosProfileForInbox = z.infer<
 >;
 
 export const updateProfile = async ({
-  id,
+  xmtpId,
   updates,
 }: {
-  id: string;
-  updates: { name?: string; description?: string };
+  xmtpId: string;
+  updates: Record<string, string | null>;
 }) => {
-  const { data } = await api.put(`/api/v1/profiles/${id}`, updates);
+  logger.debug("[updateProfile]", { xmtpId, updates });
+
+  // If no updates are provided, just fetch the current profile
+  if (Object.keys(updates).length === 0) {
+    return fetchProfile({ xmtpId });
+  }
+
+  // Sanitize updates by replacing null values with empty strings
+  const sanitizedUpdates = Object.fromEntries(
+    Object.entries(updates).map(([key, value]) => [key, value ?? ''])
+  );
+
+  const { data } = await api.put(`/api/v1/profiles/${xmtpId}`, sanitizedUpdates);
+  logger.debug("[updateProfile] Response", { data });
+
   const result = ConvosProfileForInboxSchema.safeParse(data);
   if (!result.success) {
     captureError(result.error);
   }
+  
   return data;
 };
 
@@ -40,11 +55,15 @@ export const fetchProfile = async ({
 }: {
   xmtpId: string;
 }): Promise<IConvosProfileForInbox> => {
+  logger.debug("[fetchProfile]", { xmtpId });
+  
   const { data } = await api.get(`/api/v1/profiles/${xmtpId}`);
+  
   const result = ConvosProfileForInboxSchema.safeParse(data);
   if (!result.success) {
     captureError(result.error);
   }
+  
   return data;
 };
 
@@ -53,11 +72,15 @@ export const fetchAllProfilesForUser = async ({
 }: {
   convosUserId: string;
 }): Promise<IConvosProfileForInbox[]> => {
+  logger.debug("[fetchAllProfilesForUser]", { convosUserId });
+  
   const { data } = await api.get(`/api/v1/profiles/user/${convosUserId}`);
+  
   const result = z.array(ConvosProfileForInboxSchema).safeParse(data);
   if (!result.success) {
     captureError(result.error);
   }
+  
   return data;
 };
 
@@ -78,7 +101,66 @@ export const claimProfile = async ({
 }: {
   profile: ClaimProfileRequest;
 }) => {
+  logger.debug("[claimProfile]", { profile });
+  
   const { data } = await api.post("/api/profile/username", profile);
-  logger.debug("[API PROFILES] claimProfile response:", data);
+  logger.debug("[claimProfile] Response", { data });
+  
   return ClaimProfileResponseSchema.parse(data);
+};
+
+/**
+ * Saves a profile by either updating an existing one or creating a new one.
+ * 
+ * @param args - Object containing profile data and inbox ID
+ * @returns The updated or created profile data
+ */
+export const saveProfileAsync = async (args: {
+  profile: {
+    id?: string;
+    name?: string;
+    description?: string;
+    username?: string;
+    avatar?: string;
+    xmtpId?: string;
+  };
+  inboxId: string;
+}) => {
+  const { profile, inboxId } = args;
+  
+  try {
+    logger.debug("[saveProfileAsync]", { 
+      hasProfileId: !!profile.id,
+      hasXmtpId: !!profile.xmtpId,
+      inboxId
+    });
+    
+    // Update existing profile if we have an xmtpId
+    if (profile.xmtpId) {
+      // Pick only the fields that are present in the profile object
+      const updates = Object.fromEntries(
+        Object.entries(profile)
+          .filter(([key]) => ['name', 'username', 'description', 'avatar'].includes(key))
+          .filter(([_, value]) => value !== undefined)
+      );
+      
+      return updateProfile({
+        xmtpId: profile.xmtpId,
+        updates,
+      });
+    } 
+    
+    // Create new profile
+    return claimProfile({
+      profile: {
+        name: profile.name || '',
+        username: profile.username || '',
+        description: profile.description || '',
+        avatar: profile.avatar || '',
+      },
+    });
+  } catch (error) {
+    logger.error("[saveProfileAsync] Error", error);
+    throw error;
+  }
 };
