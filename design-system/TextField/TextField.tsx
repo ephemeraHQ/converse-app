@@ -16,7 +16,6 @@ import {
 } from "@/theme/use-app-theme";
 import { HStack } from "../HStack";
 import { Text } from "../Text/Text";
-import { textPresets } from "../Text/Text.presets";
 import { TouchableOpacity } from "../TouchableOpacity";
 import { VStack } from "../VStack";
 import { TextFieldProps } from "./TextField.props";
@@ -73,7 +72,6 @@ export const TextField = forwardRef(function TextField(
   ];
 
   const $inputStyles: ThemedStyleArray<TextStyle> = [
-    $inputStyle,
     disabled && { color: theme.colors.text.tertiary },
     TextInputProps.multiline && { height: "auto" },
     $inputStyleOverride,
@@ -173,7 +171,9 @@ const $containerStyle: ThemedStyle<ViewStyle> = ({
   //   ...debugBorder(),
 });
 
-const $labelStyle: ThemedStyle<TextStyle> = ({ spacing }) => ({});
+const $labelStyle: ThemedStyle<TextStyle> = ({ spacing }) => ({
+  marginBottom: spacing["4xs"],
+});
 
 const $inputWrapperStyle: ThemedStyle<ViewStyle> = ({
   colors,
@@ -189,8 +189,6 @@ const $inputWrapperStyle: ThemedStyle<ViewStyle> = ({
   paddingHorizontal: spacing.xs,
   paddingVertical: spacing.xxs,
 });
-
-const $inputStyle: ThemedStyle<TextStyle> = ({ colors }) => ({});
 
 const $helperStyle: ThemedStyle<TextStyle> = ({ spacing }) => ({
   marginTop: spacing.xxxs,

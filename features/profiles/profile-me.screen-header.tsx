@@ -1,5 +1,5 @@
 import { InboxId } from "@xmtp/react-native-sdk";
-import { memo, useCallback } from "react";
+import React, { memo, useCallback, useState } from "react";
 import { ViewStyle } from "react-native";
 import { Button } from "@/design-system/Button/Button";
 import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu";
@@ -18,6 +18,8 @@ import { useRouter } from "@/navigation/use-navigation";
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { Haptics } from "@/utils/haptics";
+import { useProfileQuery } from "@/features/profiles/profiles.query";
+import { useSaveProfile } from "@/features/profiles/hooks";
 
 export function useProfileMeScreenHeader(args: { inboxId: InboxId }) {
   const { inboxId } = args;
@@ -30,11 +32,24 @@ export function useProfileMeScreenHeader(args: { inboxId: InboxId }) {
 
   const profileMeStore = useProfileMeStore(inboxId);
 
+  const { data: profile } = useProfileQuery({ xmtpId: inboxId });
+
   const handleContextMenuAction = useCallback(
     async (actionId: string) => {
       Haptics.selectionAsync();
       switch (actionId) {
         case "edit":
+          // Initialize the store with current profile values before entering edit mode
+          if (profile) {
+            // Set the store values to match the current profile
+            profileMeStore.getState().actions.setNameTextValue(profile.name || '');
+            profileMeStore.getState().actions.setUsernameTextValue(profile.username || '');
+            profileMeStore.getState().actions.setDescriptionTextValue(profile.description || '');
+            if (profile.avatar) {
+              profileMeStore.getState().actions.setAvatarUri(profile.avatar);
+            }
+          }
+          // Enable edit mode to show editable fields
           profileMeStore.getState().actions.setEditMode(true);
           break;
         case "share":
@@ -42,21 +57,36 @@ export function useProfileMeScreenHeader(args: { inboxId: InboxId }) {
           break;
       }
     },
-    [profileMeStore, router],
+    [profileMeStore, router, profile],
   );
+
+  // Handle canceling edit mode
+  const handleCancelEdit = useCallback(() => {
+    // Reset the store and exit edit mode
+    profileMeStore.getState().actions.reset();
+    profileMeStore.getState().actions.setEditMode(false);
+  }, [profileMeStore]);
 
   useHeader(
     {
       backgroundColor: theme.colors.background.surface,
       safeAreaEdges: ["top"],
-      titleComponent: (
+      titleComponent: editMode ? undefined : (
         <Text preset="body">
           {router.canGoBack()
             ? router.getState().routes[router.getState().routes.length - 2].name
             : ""}
         </Text>
       ),
-      LeftActionComponent: (
+      LeftActionComponent: editMode ? (
+        // Show Cancel button when in edit mode
+        <Button
+          text={translate("Cancel")}
+          variant="text"
+          onPress={handleCancelEdit}
+        />
+      ) : (
+        // Show back button when not in edit mode
         <HeaderAction
           icon="chevron.left"
           onPress={() => {
@@ -82,12 +112,12 @@ export function useProfileMeScreenHeader(args: { inboxId: InboxId }) {
                 actions={[
                   {
                     id: "edit",
-                    title: translate("userProfile.edit"),
+                    title: translate("Edit"),
                     image: iconRegistry["pencil"],
                   },
                   {
                     id: "share",
-                    title: translate("share"),
+                    title: translate("Share"),
                     image: iconRegistry["square.and.arrow.up"],
                   },
                 ]}
@@ -99,35 +129,49 @@ export function useProfileMeScreenHeader(args: { inboxId: InboxId }) {
         </HStack>
       ),
     },
-    [router, theme, editMode, handleContextMenuAction, inboxId],
+    [router, theme, editMode, handleContextMenuAction, inboxId, handleCancelEdit],
   );
 }
 
 const DoneAction = memo(function DoneAction({ inboxId }: { inboxId: InboxId }) {
   const profileMeStore = useProfileMeStore(inboxId);
+  const { data: profile } = useProfileQuery({ xmtpId: inboxId });
+  const { saveProfile, isSaving, isSuccess } = useSaveProfile();
+
+  // Reset edit mode when save is successful
+  React.useEffect(() => {
+    if (isSuccess) {
+      profileMeStore.getState().actions.setEditMode(false);
+      profileMeStore.getState().actions.reset();
+    }
+  }, [isSuccess, profileMeStore]);
 
   const handleDoneEditProfile = useCallback(async () => {
-    try {
-      const newNameTextValue = profileMeStore.getState().nameTextValue;
-      const newAvatarUri = profileMeStore.getState().avatarUri;
+    // Get all the profile data from the store
+    const newNameTextValue = profileMeStore.getState().nameTextValue;
+    const newAvatarUri = profileMeStore.getState().avatarUri;
+    const newUsernameTextValue = profileMeStore.getState().usernameTextValue;
+    const newDescriptionTextValue = profileMeStore.getState().descriptionTextValue;
 
-      console.log("newNameTextValue", newNameTextValue);
-      console.log("newAvatarUri", newAvatarUri);
-
-      // TODO: Need to check to make sure we're aligned with what the new backend and the onboarding is doing
-      // await saveProfileAsync();
-
-      profileMeStore.getState().actions.reset();
-    } catch (error) {
-      captureErrorWithToast(error);
-    }
-  }, [profileMeStore]);
+    // Use the saveProfile function from the hook
+    await saveProfile({
+      profile: {
+        id: profile?.id,
+        name: newNameTextValue || profile?.name,
+        description: newDescriptionTextValue || profile?.description || '',
+        username: newUsernameTextValue || profile?.username || '',
+        avatar: newAvatarUri || profile?.avatar || '',
+      },
+      inboxId,
+    });
+  }, [profileMeStore, profile, inboxId, saveProfile]);
 
   return (
     <Button
-      text={translate("userProfile.done")}
+      text={translate("Done")}
       variant="text"
       onPress={handleDoneEditProfile}
+      loading={isSaving}
     />
   );
 });
