@@ -46,6 +46,16 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
         inboxId,
       });
     } catch (error) {
+      // Don't show toast for passkey cancellation
+      if (
+        error instanceof Error &&
+        error.message.includes(
+          "AuthenticationServices.AuthorizationError error 1001",
+        )
+      ) {
+        return;
+      }
+
       captureErrorWithToast(error, {
         message: "Error signing up with passkey",
       });
@@ -64,6 +74,16 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
         inboxId,
       });
     } catch (error) {
+      // Don't show toast for passkey cancellation
+      if (
+        error instanceof Error &&
+        error.message.includes(
+          "AuthenticationServices.AuthorizationError error 1001",
+        )
+      ) {
+        return;
+      }
+
       captureErrorWithToast(error, {
         message: "Error signing in with passkey",
       });

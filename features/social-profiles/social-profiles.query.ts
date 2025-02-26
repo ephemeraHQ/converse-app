@@ -54,7 +54,21 @@ export function useSocialProfilesForEthAddressQueries(args: {
 }
 
 export const ensureSocialProfilesQueryData = async (args: IStrictArgs) => {
-  return queryClient.ensureQueryData(
-    getSocialProfilesQueryOptions({ ...args }),
-  );
+  return queryClient.ensureQueryData(getSocialProfilesQueryOptions(args));
 };
+
+export function ensureSocialProfilesForEthAddress(args: IStrictArgs) {
+  return queryClient.ensureQueryData(getSocialProfilesQueryOptions(args));
+}
+
+export async function ensureSocialProfilesForEthAddresses(args: {
+  ethAddresses: IEthereumAddress[];
+}) {
+  return (
+    await Promise.all(
+      args.ethAddresses.map((ethAddress) =>
+        queryClient.fetchQuery(getSocialProfilesQueryOptions({ ethAddress })),
+      ),
+    )
+  ).flat();
+}

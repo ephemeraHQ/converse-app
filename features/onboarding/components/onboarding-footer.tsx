@@ -1,5 +1,10 @@
 import { ViewStyle } from "react-native";
-import { useAnimatedKeyboard, useAnimatedStyle } from "react-native-reanimated";
+import {
+  interpolate,
+  useAnimatedKeyboard,
+  useAnimatedStyle,
+} from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ActivityIndicator } from "@/design-system/activity-indicator";
 import { IIconName } from "@/design-system/Icon/Icon.types";
 import { AnimatedVStack } from "@/design-system/VStack";
@@ -33,18 +38,8 @@ export function OnboardingFooter({
   const { themed, theme } = useAppTheme();
   const { animation } = theme;
 
-  const keyboard = useAnimatedKeyboard();
-
-  const animatedStyle = useAnimatedStyle(() => {
-    // When using keyboard avoiding view it is putting this above the keyboard, so we will move it down when the keyboard animates
-    return {
-      transform: [{ translateY: keyboard.height.value }],
-    };
-  });
-
   return (
     <AnimatedVStack
-      style={animatedStyle}
       entering={animation
         .fadeInDownSpring()
         .delay(ONBOARDING_ENTERING_DELAY.THIRD)

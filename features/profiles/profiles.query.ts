@@ -30,21 +30,9 @@ export const useProfileQuery = ({ xmtpId }: { xmtpId: string | undefined }) => {
   return useQuery(getProfileQueryConfig({ xmtpId }));
 };
 
-export const prefetchProfileQuery = ({ xmtpId }: { xmtpId: string }) => {
-  return queryClient.prefetchQuery(getProfileQueryConfig({ xmtpId }));
-};
-
-export const fetchProfileQuery = ({ xmtpId }: { xmtpId: string }) => {
-  return queryClient.fetchQuery(getProfileQueryConfig({ xmtpId }));
-};
-
-export type IConvosProfileForInboxUpdate = Partial<
-  Omit<IConvosProfileForInbox, "updatedAt" | "createdAt">
->;
-
 export const setProfileQueryData = (args: {
   xmtpId: string;
-  data: IConvosProfileForInboxUpdate;
+  data: Partial<Omit<IConvosProfileForInbox, "updatedAt" | "createdAt">>;
   updatedAt?: number;
 }) => {
   const { xmtpId, data } = args;
@@ -57,22 +45,12 @@ export const setProfileQueryData = (args: {
   );
 };
 
-export const getProfileQueryData = ({ xmtpId }: { xmtpId: string }) => {
-  return queryClient.getQueryData(getProfileQueryConfig({ xmtpId }).queryKey);
-};
-
 export const ensureProfileQueryData = ({ xmtpId }: { xmtpId: string }) => {
   return queryClient.ensureQueryData(getProfileQueryConfig({ xmtpId }));
 };
 
 export const invalidateProfileQuery = ({ xmtpId }: { xmtpId: string }) => {
   queryClient.invalidateQueries({
-    queryKey: profileQueryKey({ xmtpId }),
-  });
-};
-
-export const removeProfileQueryData = ({ xmtpId }: { xmtpId: string }) => {
-  queryClient.removeQueries({
     queryKey: profileQueryKey({ xmtpId }),
   });
 };

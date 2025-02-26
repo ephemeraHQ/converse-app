@@ -1,6 +1,6 @@
 import { Text } from "@design-system/Text";
 import { InboxId } from "@xmtp/react-native-sdk";
-import { useProfileQuery } from "@/features/profiles/profiles.query";
+import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info";
 
 type IConversationMessageSenderProps = {
   inboxId: InboxId;
@@ -11,17 +11,17 @@ export function ConversationMessageSender(
 ) {
   const { inboxId } = args;
 
-  const { data: profile } = useProfileQuery({
-    xmtpId: inboxId,
+  const { displayName, isLoading } = usePreferredDisplayInfo({
+    inboxId,
   });
 
-  if (!profile) {
+  if (!isLoading) {
     return null;
   }
 
   return (
     <Text preset="smaller" color="secondary">
-      {profile.name}
+      {displayName}
     </Text>
   );
 }

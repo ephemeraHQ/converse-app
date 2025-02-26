@@ -7,10 +7,8 @@ import {
   isReplyMessage,
   isStaticAttachmentMessage,
 } from "@/features/conversation/conversation-message/conversation-message.utils";
-import {
-  useProfileQuery,
-  useProfilesQueries,
-} from "@/features/profiles/profiles.query";
+import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info";
+import { usePreferredDisplayInfoBatch } from "@/features/preferred-display-info/use-preferred-display-info-batch";
 import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types";
 import logger from "@/utils/logger";
 
@@ -48,8 +46,8 @@ export function useMessagePlainText(message: IXmtpDecodedMessage | undefined) {
       ? message.content().initiatedByInboxId
       : undefined;
 
-  const { data: initiatorProfile } = useProfileQuery({
-    xmtpId: initiatorInboxId,
+  const { displayName: initiatorDisplayName } = usePreferredDisplayInfo({
+    inboxId: initiatorInboxId,
   });
 
   // Get member profiles for group updates - split into added and removed
@@ -64,10 +62,11 @@ export function useMessagePlainText(message: IXmtpDecodedMessage | undefined) {
     };
   }, [message]);
 
-  const { data: addedMemberProfiles } = useProfilesQueries({
+  const addedMemberDisplayInfos = usePreferredDisplayInfoBatch({
     xmtpInboxIds: addedMemberInboxIds,
   });
-  const { data: removedMemberProfiles } = useProfilesQueries({
+
+  const removedMemberDisplayInfos = usePreferredDisplayInfoBatch({
     xmtpInboxIds: removedMemberInboxIds,
   });
 
@@ -92,7 +91,7 @@ export function useMessagePlainText(message: IXmtpDecodedMessage | undefined) {
       // Handle group update messages
       if (isGroupUpdatedMessage(message)) {
         const content = message.content();
-        const initiatorName = initiatorProfile?.name ?? "Someone";
+        const initiatorName = initiatorDisplayName ?? "Someone";
 
         // Handle metadata changes
         if (content.metadataFieldsChanged.length > 0) {
@@ -104,14 +103,16 @@ export function useMessagePlainText(message: IXmtpDecodedMessage | undefined) {
 
         // Handle member changes
         if (content.membersAdded.length > 0) {
-          const memberName = addedMemberProfiles?.[0]?.name ?? "someone";
+          const memberName =
+            addedMemberDisplayInfos?.[0]?.displayName ?? "someone";
           return content.membersAdded.length === 1
             ? `${initiatorName} added ${memberName}`
             : `${initiatorName} added ${content.membersAdded.length} members`;
         }
 
         if (content.membersRemoved.length > 0) {
-          const memberName = removedMemberProfiles?.[0]?.name ?? "someone";
+          const memberName =
+            removedMemberDisplayInfos?.[0]?.displayName ?? "someone";
           return content.membersRemoved.length === 1
             ? `${initiatorName} removed ${memberName}`
             : `${initiatorName} removed ${content.membersRemoved.length} members`;
@@ -132,8 +133,8 @@ export function useMessagePlainText(message: IXmtpDecodedMessage | undefined) {
   }, [
     message,
     account,
-    initiatorProfile,
-    addedMemberProfiles,
-    removedMemberProfiles,
+    initiatorDisplayName,
+    addedMemberDisplayInfos,
+    removedMemberDisplayInfos,
   ]);
 }

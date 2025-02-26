@@ -13,7 +13,7 @@ import { useDeleteDm } from "@/features/conversation-list/hooks/use-delete-dm";
 import { useMessagePlainText } from "@/features/conversation-list/hooks/use-message-plain-text";
 import { useRestoreConversation } from "@/features/conversation-list/hooks/use-restore-conversation";
 import { useToggleReadStatus } from "@/features/conversation-list/hooks/use-toggle-read-status";
-import { useProfileQuery } from "@/features/profiles/profiles.query";
+import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info";
 import { useFocusRerender } from "@/hooks/use-focus-rerender";
 import { navigate } from "@/navigation/navigation.utils";
 import { useConversationQuery } from "@/queries/conversation-query";
@@ -50,8 +50,9 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
     caller: "ConversationListItemDm",
   });
 
-  // Peer info hooks
-  const { data: profile } = useProfileQuery({ xmtpId: peerInboxId });
+  const { displayName, avatarUrl } = usePreferredDisplayInfo({
+    inboxId: peerInboxId,
+  });
 
   // Status hooks
   const { isUnread } = useConversationIsUnread({ topic: conversationTopic });
@@ -132,11 +133,11 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
         avatarComponent={
           <Avatar
             size={theme.avatarSize.lg}
-            uri={profile?.avatar}
-            name={profile?.name}
+            uri={avatarUrl}
+            name={displayName}
           />
         }
-        title={profile?.name}
+        title={displayName}
         subtitle={subtitle}
         isUnread={isUnread}
       />

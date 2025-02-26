@@ -29,7 +29,7 @@ import {
   isStaticAttachmentMessage,
 } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
-import { useProfileQuery } from "@/features/profiles/profiles.query";
+import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info";
 import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types";
 import { useAppTheme } from "@/theme/use-app-theme";
 import { useConversationMessageById } from "../conversation-message/use-conversation-message";
@@ -65,15 +65,15 @@ const Content = memo(function Content(props: {
     conversationTopic,
   });
 
-  const { data: profile } = useProfileQuery({
-    xmtpId: replyMessage?.senderInboxId!, // ! because we have enabled in the query
+  const { displayName } = usePreferredDisplayInfo({
+    inboxId: replyMessage?.senderInboxId,
   });
 
   const replyingTo = replyMessage
     ? messageIsFromCurrentAccountInboxId({ message: replyMessage })
       ? `Replying to you`
-      : profile?.name
-        ? `Replying to ${profile.name}`
+      : displayName
+        ? `Replying to ${displayName}`
         : "Replying"
     : "";
 

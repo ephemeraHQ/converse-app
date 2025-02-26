@@ -6,7 +6,6 @@ import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 const $defaultStyle: ThemedStyle<TextStyle> = ({ spacing }) => ({
   textAlign: "center",
   marginTop: spacing.xxs,
-  marginBottom: spacing.lg,
 });
 
 export const OnboardingFooterText = memo(function OnboardingFooterText(
