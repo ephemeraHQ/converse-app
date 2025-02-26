@@ -9,7 +9,7 @@ import {
   getConversationMetadataQueryData,
   updateConversationMetadataQueryData,
 } from "@/features/conversation/conversation-metadata/conversation-metadata.query";
-import { useProfileQuery } from "@/features/profiles/profiles.query";
+import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info";
 import { translate } from "@/i18n";
 import { getConversationQueryOptions } from "@/queries/conversation-query";
 import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query";
@@ -32,11 +32,11 @@ export const useDeleteDm = ({ topic }: { topic: ConversationTopic }) => {
     caller: "useDeleteDm",
   });
 
-  const { mutateAsync: denyDmConsentAsync } = useDenyDmMutation();
-
-  const { data: profile } = useProfileQuery({
-    xmtpId: peerInboxId!,
+  const { displayName } = usePreferredDisplayInfo({
+    inboxId: peerInboxId!,
   });
+
+  const { mutateAsync: denyDmConsentAsync } = useDenyDmMutation();
 
   const { mutateAsync: deleteDmAsync } = useMutation({
     mutationFn: () => deleteConversation({ account: currentAccount, topic }),
@@ -64,7 +64,7 @@ export const useDeleteDm = ({ topic }: { topic: ConversationTopic }) => {
   });
 
   return useCallback(() => {
-    const title = `${translate("delete_chat_with")} ${profile?.name}?`;
+    const title = `${translate("delete_chat_with")} ${displayName}?`;
 
     if (!conversationId) {
       throw new Error("Conversation not found in useDeleteDm");
@@ -120,7 +120,7 @@ export const useDeleteDm = ({ topic }: { topic: ConversationTopic }) => {
       },
     });
   }, [
-    profile,
+    displayName,
     deleteDmAsync,
     denyDmConsentAsync,
     peerInboxId,

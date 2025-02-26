@@ -12,8 +12,8 @@ export function getJwtQueryOptions() {
     enabled,
     queryKey: ["jwt"],
     queryFn: enabled
-      ? async () => {
-          const { token } = await fetchJwt();
+      ? async ({ signal }) => {
+          const { token } = await fetchJwt({ signal });
           return token;
         }
       : skipToken,
@@ -25,6 +25,12 @@ export async function ensureJwtQueryData() {
   return queryClient.ensureQueryData(getJwtQueryOptions());
 }
 
-export function refetchJwtQuery() {
-  return queryClient.refetchQueries(getJwtQueryOptions());
+export async function refreshAndGetNewJwtQuery() {
+  // Force invalidate the query to ensure we get fresh data
+  await queryClient.invalidateQueries(getJwtQueryOptions());
+
+  // Fetch the new token
+  const newToken = await queryClient.fetchQuery(getJwtQueryOptions());
+
+  return newToken;
 }

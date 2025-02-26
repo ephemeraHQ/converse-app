@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { api } from "@/utils/api/api";
 import { handleApiError } from "@/utils/api/api.error";
-import { AUTHENTICATION_ROUTES } from "./authentication.constants";
+import { AUTHENTICATE_ROUTE } from "./authentication.constants";
 
 const fetchJwtResponseSchema = z.object({
   token: z.string(),
@@ -9,11 +9,15 @@ const fetchJwtResponseSchema = z.object({
 
 type FetchJwtResponse = z.infer<typeof fetchJwtResponseSchema>;
 
-export async function fetchJwt(): Promise<FetchJwtResponse> {
+export async function fetchJwt({
+  signal,
+}: {
+  signal?: AbortSignal;
+}): Promise<FetchJwtResponse> {
   try {
-    const response = await api.post<FetchJwtResponse>(
-      AUTHENTICATION_ROUTES.AUTHENTICATE,
-    );
+    const response = await api.post<FetchJwtResponse>(AUTHENTICATE_ROUTE, {
+      signal,
+    });
     return fetchJwtResponseSchema.parse(response.data);
   } catch (error) {
     throw handleApiError(error, "fetchJwt");

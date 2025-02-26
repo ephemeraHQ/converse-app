@@ -25,6 +25,7 @@ import { translate } from "@/i18n";
 import { navigate } from "@/navigation/navigation.utils";
 import { $globalStyles } from "@/theme/styles";
 import { captureError } from "@/utils/capture-error";
+import { GenericError } from "@/utils/error";
 import { getEnv } from "@/utils/getEnv";
 import { showActionSheet } from "./action-sheet";
 
@@ -222,13 +223,13 @@ function useShowDebugMenu() {
             .join("\n"),
         );
       },
-      "Check for Updates": async () => {
+      "Check for OTA updates": async () => {
         try {
           const update = await Updates.checkForUpdateAsync();
           if (update.isAvailable) {
             Alert.alert(
               "Update Available",
-              "Would you like to download and install the update?",
+              "Would you like to download and install the OTA update?",
               [
                 {
                   text: "Cancel",
@@ -243,14 +244,22 @@ function useShowDebugMenu() {
                         await Updates.reloadAsync();
                       }
                     } catch (error) {
-                      Alert.alert("Error", JSON.stringify(error));
+                      captureError(
+                        new GenericError({
+                          error,
+                          additionalMessage: "Failed to fetch OTA update",
+                        }),
+                      );
                     }
                   },
                 },
               ],
             );
           } else {
-            Alert.alert("No Updates", "You are running the latest version");
+            Alert.alert(
+              "No OTA updates available",
+              "You are running the latest version",
+            );
           }
         } catch (error) {
           Alert.alert("Error", JSON.stringify(error));

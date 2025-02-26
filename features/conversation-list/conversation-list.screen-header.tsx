@@ -10,15 +10,15 @@ import { Icon, iconRegistry } from "@/design-system/Icon/Icon";
 import { Pressable } from "@/design-system/Pressable";
 import { Text } from "@/design-system/Text";
 import {
-  useCurrentProfiles,
   useMultiInboxStore,
   useSafeCurrentSender,
-  useSafeCurrentSenderProfile,
 } from "@/features/authentication/multi-inbox.store";
-import { useProfileQuery } from "@/features/profiles/profiles.query";
+import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info";
+import { usePreferredDisplayInfoBatch } from "@/features/preferred-display-info/use-preferred-display-info-batch";
 import { translate } from "@/i18n";
 import { useHeader } from "@/navigation/use-header";
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
+import { shortAddress } from "@/utils/strings/shortAddress";
 
 export function useConversationListScreenHeader() {
   const { theme } = useAppTheme();
@@ -65,8 +65,14 @@ function HeaderTitle() {
   const { theme, themed } = useAppTheme();
   const navigation = useNavigation();
   const currentAccountInboxId = useSafeCurrentSender().inboxId;
-  const { data: currentProfile } = useSafeCurrentSenderProfile();
-  const { currentProfiles } = useCurrentProfiles();
+  const { displayName } = usePreferredDisplayInfo({
+    inboxId: currentAccountInboxId,
+  });
+
+  const senders = useMultiInboxStore((state) => state.senders);
+  const preferredSendersDisplayInfos = usePreferredDisplayInfoBatch({
+    xmtpInboxIds: senders.map((sender) => sender.inboxId),
+  });
 
   const onDropdownPress = useCallback(
     (profileXmtpInboxId: string) => {
@@ -89,33 +95,33 @@ function HeaderTitle() {
   );
 
   return (
-    <HStack style={$titleContainer}>
+    <HStack style={themed($titleContainer)}>
       <ProfileAvatar />
       <DropdownMenu
         style={themed($dropDownMenu)}
         onPress={onDropdownPress}
         actions={[
-          ...currentProfiles?.map((profile) => ({
-            id: profile.id,
-            title: profile.name,
-            image: currentAccountInboxId === profile.xmtpId ? "checkmark" : "",
+          ...preferredSendersDisplayInfos?.filter(Boolean)?.map((profile) => ({
+            id: profile.inboxId,
+            title: profile.displayName || shortAddress(profile.inboxId),
+            image: currentAccountInboxId === profile.inboxId ? "checkmark" : "",
           })),
           {
             displayInline: true,
             id: "new-account",
-            title: translate("new_account"),
+            title: translate("new_account") || "New Account",
             image: iconRegistry["new-account-card"],
           },
           {
             displayInline: true,
             id: "app-settings",
-            title: translate("app_settings"),
+            title: translate("app_settings") || "App Settings",
             image: iconRegistry["settings"],
           },
         ]}
       >
         <HStack style={themed($rowContainer)}>
-          <Text>{currentProfile?.name}</Text>
+          <Text>{displayName}</Text>
           <Center style={themed($iconContainer)}>
             <Icon
               color={theme.colors.text.secondary}
@@ -132,10 +138,8 @@ function HeaderTitle() {
 function ProfileAvatar() {
   const { theme, themed } = useAppTheme();
   const navigation = useNavigation();
-
   const { inboxId } = useSafeCurrentSender();
-
-  const { data: profile } = useProfileQuery({ xmtpId: inboxId });
+  const { displayName, avatarUrl } = usePreferredDisplayInfo({ inboxId });
 
   return (
     <Pressable
@@ -147,11 +151,7 @@ function ProfileAvatar() {
       hitSlop={theme.spacing.sm}
     >
       <Center style={themed($avatarContainer)}>
-        <Avatar
-          uri={profile?.avatar}
-          name={profile?.name}
-          size={theme.avatarSize.sm}
-        />
+        <Avatar uri={avatarUrl} name={displayName} size={theme.avatarSize.sm} />
       </Center>
     </Pressable>
   );

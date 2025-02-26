@@ -2,7 +2,7 @@ import { MessageId } from "@xmtp/react-native-sdk";
 import { useMemo } from "react";
 import { isCurrentSender } from "@/features/authentication/multi-inbox.store";
 import { useConversationMessageReactions } from "@/features/conversation/conversation-message/conversation-message.utils";
-import { useProfilesQueries } from "@/features/profiles/profiles.query";
+import { usePreferredDisplayInfoBatch } from "@/features/preferred-display-info/use-preferred-display-info-batch";
 import {
   RolledUpReactions,
   SortedReaction,
@@ -24,7 +24,7 @@ export function useConversationMessageReactionsRolledUp(args: {
     ),
   );
 
-  const { data: profiles } = useProfilesQueries({
+  const preferredDisplayData = usePreferredDisplayInfoBatch({
     xmtpInboxIds: inboxIds,
   });
 
@@ -58,15 +58,16 @@ export function useConversationMessageReactionsRolledUp(args: {
         (previewCounts.get(reaction.content) || 0) + 1,
       );
 
-      const profile = profiles?.[inboxIds.indexOf(reaction.senderInboxId)];
+      const profile =
+        preferredDisplayData?.[inboxIds.indexOf(reaction.senderInboxId)];
 
       detailed.push({
         content: reaction.content,
         isOwnReaction,
         reactor: {
           address: reaction.senderInboxId,
-          username: profile?.name,
-          avatar: profile?.avatar,
+          username: profile?.displayName,
+          avatar: profile?.avatarUrl,
         },
       });
     });
@@ -87,5 +88,5 @@ export function useConversationMessageReactionsRolledUp(args: {
       preview,
       detailed,
     };
-  }, [reactionsBySender, profiles, messageId, inboxIds]);
+  }, [reactionsBySender, preferredDisplayData, messageId, inboxIds]);
 }

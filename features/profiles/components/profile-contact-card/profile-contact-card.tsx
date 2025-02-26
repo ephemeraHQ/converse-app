@@ -2,8 +2,8 @@ import React, { memo } from "react";
 import { Avatar } from "@/components/avatar";
 import { Text } from "@/design-system/Text";
 import { VStack } from "@/design-system/VStack";
+import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info";
 import { ProfileContactCardLayout } from "@/features/profiles/components/profile-contact-card/profile-contact-card-layout";
-import { useProfileQuery } from "@/features/profiles/profiles.query";
 import { useAppTheme } from "@/theme/use-app-theme";
 import { IProfileContactCardProps } from "../../profile.types";
 
@@ -13,8 +13,8 @@ import { IProfileContactCardProps } from "../../profile.types";
 export const ProfileContactCard = memo(function ProfileContactCard({
   inboxId,
 }: IProfileContactCardProps) {
-  const { data: profile } = useProfileQuery({
-    xmtpId: inboxId,
+  const { displayName, avatarUrl } = usePreferredDisplayInfo({
+    inboxId,
   });
 
   const { theme } = useAppTheme();
@@ -28,24 +28,16 @@ export const ProfileContactCard = memo(function ProfileContactCard({
           marginBottom: theme.spacing.xxxs,
         }}
       >
-        {profile?.name}
+        {displayName}
       </Text>
-      {profile?.username && (
-        <Text inverted color="secondary" preset="smaller">
-          @{profile?.username}
-        </Text>
-      )}
+      {/* Note: username handling might need to be adjusted since it's not part of usePreferredDisplayInfo */}
     </VStack>
   );
 
   return (
     <ProfileContactCardLayout
       avatar={
-        <Avatar
-          uri={profile?.avatar}
-          name={profile?.name}
-          size={theme.avatarSize.lg}
-        />
+        <Avatar uri={avatarUrl} name={displayName} size={theme.avatarSize.lg} />
       }
       name={content}
     />

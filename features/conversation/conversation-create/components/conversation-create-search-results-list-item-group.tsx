@@ -3,7 +3,7 @@ import { memo, useCallback } from "react";
 import { GroupAvatar } from "@/components/group-avatar";
 import { ConversationSearchResultsListItem } from "@/features/conversation/conversation-create/components/conversation-create-search-result-list-item";
 import { useConversationStore } from "@/features/conversation/conversation.store-context";
-import { useProfilesQueries } from "@/features/profiles/profiles.query";
+import { usePreferredDisplayInfoBatch } from "@/features/preferred-display-info/use-preferred-display-info-batch";
 import { useGroupMembers } from "@/hooks/useGroupMembers";
 import { useGroupName } from "@/hooks/useGroupName";
 
@@ -21,7 +21,7 @@ export const ConversationSearchResultsListItemGroup = memo(
 
     const conversationStore = useConversationStore();
 
-    const { data: profiles } = useProfilesQueries({
+    const preferredDisplayData = usePreferredDisplayInfoBatch({
       xmtpInboxIds: members?.ids?.slice(0, 3) ?? [],
     });
 
@@ -39,9 +39,9 @@ export const ConversationSearchResultsListItemGroup = memo(
         avatar={<GroupAvatar groupTopic={conversationTopic} />}
         title={groupName}
         subtitle={
-          profiles
+          preferredDisplayData
             ?.slice(0, 3)
-            .map((profile) => profile?.name)
+            .map((profile) => profile?.displayName)
             .join(", ") ?? ""
         }
         onPress={handlePress}

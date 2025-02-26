@@ -2,12 +2,18 @@ import { usePrivy } from "@privy-io/expo";
 import { isAxiosError } from "axios";
 import React, { memo, useCallback, useEffect, useState } from "react";
 import { Alert, TextStyle, ViewStyle } from "react-native";
+import {
+  interpolate,
+  useAnimatedKeyboard,
+  useAnimatedStyle,
+  useSharedValue,
+} from "react-native-reanimated";
 import { z } from "zod";
 import { create } from "zustand";
 import { Screen } from "@/components/screen/screen";
 import { showSnackbar } from "@/components/snackbar/snackbar.service";
-import { Center } from "@/design-system/Center";
-import { VStack } from "@/design-system/VStack";
+import { HStack } from "@/design-system/HStack";
+import { AnimatedVStack, VStack } from "@/design-system/VStack";
 import { useAuthStore } from "@/features/authentication/authentication.store";
 import { useMultiInboxStore } from "@/features/authentication/multi-inbox.store";
 import { useCreateUser } from "@/features/current-user/use-create-user";
@@ -21,9 +27,11 @@ import { ProfileContactCardLayout } from "@/features/profiles/components/profile
 import { profileValidationSchema } from "@/features/profiles/schemas/profile-validation.schema";
 import { validateProfileName } from "@/features/profiles/utils/validate-profile-name";
 import { useHeader } from "@/navigation/use-header";
+import { $globalStyles } from "@/theme/styles";
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { ValidationError } from "@/utils/api/api.error";
 import { captureErrorWithToast } from "@/utils/capture-error";
+import { debugBorder } from "@/utils/debug-style";
 import { useAddPfp } from "../../../hooks/use-add-pfp";
 
 // Request validation schema
@@ -72,6 +80,8 @@ export function OnboardingContactCardScreen() {
   const { mutateAsync: createUserAsync, isPending } = useCreateUser();
 
   const { user: privyUser } = usePrivy();
+
+  const keyboard = useAnimatedKeyboard();
 
   const handleRealContinue = useCallback(async () => {
     try {
@@ -174,22 +184,72 @@ export function OnboardingContactCardScreen() {
     };
   }, []);
 
+  const textContainerHeightAV = useSharedValue(0);
+  const contentContainerHeightAV = useSharedValue(0);
+  const cardContainerHeightAV = useSharedValue(0);
+  const footerContainerHeightAV = useSharedValue(0);
+
+  const contentAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        {
+          translateY: interpolate(
+            keyboard.height.value,
+            [0, 200],
+            [
+              0,
+              -contentContainerHeightAV.value / 2 +
+                cardContainerHeightAV.value / 2 +
+                footerContainerHeightAV.value -
+                textContainerHeightAV.value / 2,
+            ],
+            "clamp",
+          ),
+        },
+      ],
+      // opacity: interpolate(keyboard.height.value, [0, 200], [1, 0], "clamp"),
+    };
+  });
+
+  const textContainerAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: interpolate(keyboard.height.value, [0, 200], [1, 0], "clamp"),
+    };
+  });
+
   return (
     <>
       <Screen
-        preset="scroll"
         contentContainerStyle={$screenContainer}
         safeAreaEdges={["bottom"]}
       >
-        <Center style={$centerContainerStyle}>
-          <VStack style={$titleContainer}>
+        <AnimatedVStack
+          // {...debugBorder()}
+          style={[themed($contentContainer), contentAnimatedStyle]}
+          onLayout={(event) => {
+            contentContainerHeightAV.value = event.nativeEvent.layout.height;
+          }}
+        >
+          <AnimatedVStack
+            style={textContainerAnimatedStyle}
+            // {...debugBorder()}
+            onLayout={(event) => {
+              textContainerHeightAV.value = event.nativeEvent.layout.height;
+            }}
+          >
             <OnboardingTitle size={"xl"}>
               Complete your contact card
             </OnboardingTitle>
             <OnboardingSubtitle style={themed($subtitleStyle)}>
               Choose how you show up
             </OnboardingSubtitle>
+          </AnimatedVStack>
 
+          <VStack
+            onLayout={(event) => {
+              cardContainerHeightAV.value = event.nativeEvent.layout.height;
+            }}
+          >
             <ProfileContactCardLayout
               name={<ProfileContactCardNameInput />}
               avatar={<ProfileContactCardAvatar />}
@@ -197,13 +257,19 @@ export function OnboardingContactCardScreen() {
               // additionalOptions={<ProfileContactCardAdditionalOptions />}
             />
           </VStack>
-        </Center>
-        <OnboardingFooter
-          text={"Continue"}
-          iconName="chevron.right"
-          onPress={handleRealContinue}
-          isLoading={isPending}
-        />
+        </AnimatedVStack>
+        <VStack
+          onLayout={(event) => {
+            footerContainerHeightAV.value = event.nativeEvent.layout.height;
+          }}
+        >
+          <OnboardingFooter
+            text={"Continue"}
+            iconName="chevron.right"
+            onPress={handleRealContinue}
+            isLoading={isPending}
+          />
+        </VStack>
       </Screen>
 
       {/* <ConnectWalletBottomSheet
@@ -236,14 +302,11 @@ const $screenContainer: ViewStyle = {
   flex: 1,
 };
 
-const $titleContainer: ViewStyle = {
+const $contentContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flex: 1,
-};
-
-const $centerContainerStyle: ViewStyle = {
-  flex: 1,
-  paddingHorizontal: 24,
-};
+  paddingHorizontal: spacing.md,
+  justifyContent: "center",
+});
 
 const $subtitleStyle: ThemedStyle<TextStyle> = ({ spacing }) => ({
   marginTop: spacing.xs,

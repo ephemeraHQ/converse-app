@@ -8,7 +8,7 @@ import { getCurrentSenderEthAddress } from "@/features/authentication/multi-inbo
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm";
 import { ensureProfileQueryData } from "@/features/profiles/profiles.query";
 import { doesSocialProfilesMatchTextQuery } from "@/features/profiles/utils/does-social-profiles-match-text-query";
-import { ensureSocialProfilesQueryData } from "@/features/social-profiles/social-profiles.query";
+import { ensureSocialProfilesForAddressQueryData } from "@/features/social-profiles/social-profiles.query";
 import { getAllowedConsentConversationsQueryData } from "@/queries/conversations-allowed-consent-query";
 import { ensureDmPeerInboxIdQueryData } from "@/queries/use-dm-peer-inbox-id-query";
 import { ensureGroupMembersQueryData } from "@/queries/useGroupMembersQuery";
@@ -95,7 +95,7 @@ async function searchExistingDms(args: {
           ?.toLowerCase()
           .includes(normalizedSearchQuery);
 
-        const socialProfiles = await ensureSocialProfilesQueryData({
+        const socialProfiles = await ensureSocialProfilesForAddressQueryData({
           ethAddress: profile.privyAddress,
         });
 

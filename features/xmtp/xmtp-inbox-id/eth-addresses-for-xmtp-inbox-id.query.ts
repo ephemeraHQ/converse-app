@@ -4,12 +4,18 @@
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { InboxId } from "@xmtp/react-native-sdk";
 import { create, windowScheduler } from "@yornaath/batshit";
+import { queryClient } from "@/queries/queryClient";
 import { XMTPError } from "@/utils/error";
 import { IEthereumAddress } from "@/utils/evm/address";
 import { getEthAddressesFromInboxIds } from "./eth-addresses-from-xmtp-inbox-id";
 
 type IArgs = {
   clientEthAddress: string;
+  inboxId: InboxId | undefined;
+};
+
+type IStrictArgs = {
+  clientEthAddress: IEthereumAddress;
   inboxId: InboxId;
 };
 
@@ -22,7 +28,7 @@ export function getEthAddressesForXmtpInboxIdQueryOptions(args: IArgs) {
     queryFn: () => {
       return batchedGetEthAddressesForXmtpInboxId.fetch({
         clientEthAddress,
-        inboxId,
+        inboxId: inboxId!, // ! because we check enabled
       });
     },
   });
@@ -39,7 +45,17 @@ export function useEthAddressesForXmtpInboxId(args: IArgs) {
   );
 }
 
-type BatchArgs = IArgs;
+export function ensureEthAddressForXmtpInboxId(args: IStrictArgs) {
+  const { clientEthAddress, inboxId } = args;
+  return queryClient.ensureQueryData(
+    getEthAddressesForXmtpInboxIdQueryOptions({
+      clientEthAddress,
+      inboxId,
+    }),
+  );
+}
+
+type BatchArgs = IStrictArgs;
 
 // Batch multiple requests together
 const batchedGetEthAddressesForXmtpInboxId = create({

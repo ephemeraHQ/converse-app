@@ -12,7 +12,7 @@ import { memo } from "react";
 import { ViewStyle } from "react-native";
 import { Avatar } from "@/components/avatar";
 import { Center } from "@/design-system/Center";
-import { useProfileQuery } from "@/features/profiles/profiles.query";
+import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info";
 import { navigate } from "@/navigation/navigation.utils";
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 
@@ -77,7 +77,7 @@ type IChatGroupMemberLeftProps = {
 
 function ChatGroupMemberLeft({ inboxId }: IChatGroupMemberLeftProps) {
   const { themed, theme } = useAppTheme();
-  const { data: profile } = useProfileQuery({ xmtpId: inboxId });
+  const { displayName, avatarUrl } = usePreferredDisplayInfo({ inboxId });
 
   return (
     <HStack style={themed($memberContainer)}>
@@ -91,11 +91,11 @@ function ChatGroupMemberLeft({ inboxId }: IChatGroupMemberLeftProps) {
       >
         <Avatar
           size={theme.avatarSize.xs}
-          uri={profile?.avatar}
-          name={profile?.name}
+          uri={avatarUrl}
+          name={displayName ?? ""}
         />
         <ChatGroupUpdateText weight="bold">
-          {profile?.name || inboxId}{" "}
+          {displayName ?? ""}
         </ChatGroupUpdateText>
       </Pressable>
       <ChatGroupUpdateText>
@@ -111,7 +111,7 @@ type IChatGroupMemberJoinedProps = {
 
 function ChatGroupMemberJoined({ inboxId }: IChatGroupMemberJoinedProps) {
   const { themed, theme } = useAppTheme();
-  const { data: profile } = useProfileQuery({ xmtpId: inboxId });
+  const { displayName, avatarUrl } = usePreferredDisplayInfo({ inboxId });
 
   return (
     <HStack style={themed($memberContainer)}>
@@ -125,11 +125,11 @@ function ChatGroupMemberJoined({ inboxId }: IChatGroupMemberJoinedProps) {
       >
         <Avatar
           size={theme.avatarSize.xs}
-          uri={profile?.avatar}
-          name={profile?.name}
+          uri={avatarUrl}
+          name={displayName ?? ""}
         />
         <ChatGroupUpdateText weight="bold">
-          {profile?.name || inboxId}{" "}
+          {displayName ?? ""}
         </ChatGroupUpdateText>
       </Pressable>
       <ChatGroupUpdateText>
@@ -149,7 +149,9 @@ function ChatGroupMetadataUpdate({
   initiatorInboxId,
 }: IChatGroupMetadataUpdateProps) {
   const { themed, theme } = useAppTheme();
-  const { data: profile } = useProfileQuery({ xmtpId: initiatorInboxId });
+  const { displayName, avatarUrl } = usePreferredDisplayInfo({
+    inboxId: initiatorInboxId,
+  });
 
   let txKey: TxKeyPath;
   let txParams: Record<string, string> = {};
@@ -182,11 +184,11 @@ function ChatGroupMetadataUpdate({
       >
         <Avatar
           size={theme.avatarSize.xs}
-          uri={profile?.avatar}
-          name={profile?.name}
+          uri={avatarUrl}
+          name={displayName ?? ""}
         />
         <ChatGroupUpdateText weight="bold">
-          {profile?.name || initiatorInboxId}{" "}
+          {displayName ?? ""}
         </ChatGroupUpdateText>
       </Pressable>
       <ChatGroupUpdateText>{translate(txKey, txParams)}</ChatGroupUpdateText>
@@ -200,7 +202,7 @@ const ChatGroupUpdateText = memo(function ChatGroupUpdateText(
   const { style, ...rest } = props;
   return (
     <Text
-      style={[{ textAlign: "center" }, style]}
+      style={[{ textAlign: "center", flexWrap: "wrap" }, style]}
       color="secondary"
       preset="smaller"
       {...rest}
@@ -208,10 +210,11 @@ const ChatGroupUpdateText = memo(function ChatGroupUpdateText(
   );
 });
 
-const $memberContainer: ThemedStyle<ViewStyle> = () => ({
+const $memberContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   alignItems: "center",
   flexWrap: "wrap",
   justifyContent: "center",
+  columnGap: spacing.xxxs,
   width: "100%",
 });
 

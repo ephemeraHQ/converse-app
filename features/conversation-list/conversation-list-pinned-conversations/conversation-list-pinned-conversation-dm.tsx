@@ -5,7 +5,7 @@ import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbo
 import { useConversationListPinnedConversationsStyles } from "@/features/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversations.styles";
 import { useConversationIsUnread } from "@/features/conversation-list/hooks/use-conversation-is-unread";
 import { useDmConversationContextMenuViewProps } from "@/features/conversation-list/hooks/use-conversation-list-item-context-menu-props";
-import { useProfileQuery } from "@/features/profiles/profiles.query";
+import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info";
 import { IXmtpDmWithCodecs } from "@/features/xmtp/xmtp.types";
 import { navigate } from "@/navigation/navigation.utils";
 import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query";
@@ -21,9 +21,7 @@ export const ConversationListPinnedConversationDm = ({
   conversation,
 }: IConversationListPinnedConversationDmProps) => {
   const currentAccount = useCurrentSenderEthAddress()!;
-
   const conversationTopic = conversation.topic;
-
   const { avatarSize } = useConversationListPinnedConversationsStyles();
 
   const { data: peerInboxId } = useDmPeerInboxIdQuery({
@@ -32,7 +30,9 @@ export const ConversationListPinnedConversationDm = ({
     caller: "ConversationListPinnedConversationDm",
   });
 
-  const { data: profile } = useProfileQuery({ xmtpId: peerInboxId });
+  const { displayName, avatarUrl } = usePreferredDisplayInfo({
+    inboxId: peerInboxId,
+  });
 
   const { isUnread } = useConversationIsUnread({
     topic: conversationTopic,
@@ -41,9 +41,6 @@ export const ConversationListPinnedConversationDm = ({
   const onPress = useCallback(() => {
     navigate("Conversation", { topic: conversation.topic });
   }, [conversation.topic]);
-
-  const title = profile?.name ?? "";
-  const avatarUri = profile?.avatar;
 
   const displayMessagePreview =
     conversation.lastMessage &&
@@ -58,11 +55,11 @@ export const ConversationListPinnedConversationDm = ({
     <VStack>
       <ConversationListPinnedConversation
         avatarComponent={
-          <Avatar size={avatarSize} uri={avatarUri} name={title} />
+          <Avatar size={avatarSize} uri={avatarUrl} name={displayName ?? ""} />
         }
         onPress={onPress}
         showUnread={isUnread}
-        title={title}
+        title={displayName ?? ""}
         contextMenuProps={contextMenuProps}
       />
       {displayMessagePreview && (

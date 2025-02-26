@@ -6,10 +6,6 @@ import {
   persist,
   subscribeWithSelector,
 } from "zustand/middleware";
-import {
-  useProfileQuery,
-  useProfilesQueries,
-} from "@/features/profiles/profiles.query";
 import { captureError } from "@/utils/capture-error";
 import { enhanceError } from "@/utils/error";
 import { zustandMMKVStorage } from "@/utils/mmkv";
@@ -137,30 +133,6 @@ export const useMultiInboxStore = create<IMultiInboxStoreType>()(
     ),
   ),
 );
-
-export function useSafeCurrentSenderProfile() {
-  const { inboxId: currentInboxId } = useSafeCurrentSender();
-  const senders = useMultiInboxStore.getState().senders;
-  const sender = senders.find((sender) => sender.inboxId === currentInboxId);
-  const xmtpId = sender?.inboxId;
-  return useProfileQuery({ xmtpId });
-}
-
-export function useCurrentSenderProfile() {
-  const currentSender = useCurrentSender();
-  return useProfileQuery({ xmtpId: currentSender?.inboxId });
-}
-
-export function useCurrentProfiles() {
-  const senders = useMultiInboxStore((state) => state.senders);
-  const inboxIdsForCurrentInboxes = senders.map((sender) => sender.inboxId);
-  const { data: currentProfiles, isLoading: isLoadingProfiles } =
-    useProfilesQueries({
-      xmtpInboxIds: inboxIdsForCurrentInboxes,
-    });
-  const truthyProfiles = currentProfiles?.filter(Boolean);
-  return { currentProfiles: truthyProfiles, isLoadingProfiles };
-}
 
 export function useCurrentSenderEthAddress() {
   const currentSender = useCurrentSender();

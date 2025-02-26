@@ -31,6 +31,7 @@ export async function captureError(
     if (error instanceof FeedbackError) {
       return;
     }
+
     let truncatedLogs: string | null = null;
 
     // Maybe add XMTP logs

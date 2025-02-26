@@ -1,30 +1,33 @@
 import { getAllowedConsentConversationsQueryData } from "@/queries/conversations-allowed-consent-query";
-import { captureError } from "@/utils/capture-error";
+import { XMTPError } from "@/utils/error";
 import { xmtpLogger } from "@/utils/logger";
 import { getXmtpClientByEthAddress } from "../xmtp-client/xmtp-client.service";
 
 export const streamConsent = async (account: string) => {
+  const client = await getXmtpClientByEthAddress({
+    ethereumAddress: account,
+  });
+
+  xmtpLogger.debug(`Streaming consent for ${client.address}`);
+
   try {
-    xmtpLogger.info(`Streaming consent for ${account}`);
-    const client = await getXmtpClientByEthAddress({
-      ethereumAddress: account,
-    });
     await client.preferences.streamConsent(async () => {
-      xmtpLogger.info(`Consent has been updated`);
-      try {
-        const conversations = getAllowedConsentConversationsQueryData({
-          account,
-        });
-        // TODO: Consent Has Been Updated, resubscribe to notifications
-        if (!conversations) {
-          return;
-        }
-      } catch (e) {
-        captureError(e);
+      xmtpLogger.debug(`Consent has been updated for ${client.address}`);
+
+      const conversations = getAllowedConsentConversationsQueryData({
+        account,
+      });
+
+      // TODO: Consent Has Been Updated, resubscribe to notifications
+      if (!conversations) {
+        return;
       }
     });
-  } catch (e) {
-    captureError(e);
+  } catch (error) {
+    throw new XMTPError({
+      error,
+      additionalMessage: "Failed to stream consent",
+    });
   }
 };
 
@@ -32,25 +35,48 @@ export const stopStreamingConsent = async (account: string) => {
   const client = await getXmtpClientByEthAddress({
     ethereumAddress: account,
   });
-  xmtpLogger.info(`Stopping consent stream for ${account}`);
-  return client.preferences.cancelStreamConsent();
+
+  xmtpLogger.debug(`Stopping consent stream for ${client.address}`);
+
+  try {
+    const startTime = Date.now();
+    await client.preferences.cancelStreamConsent();
+    const duration = Date.now() - startTime;
+
+    if (duration > 3000) {
+      xmtpLogger.warn(`Canceling consent stream took longer than expected`, {
+        duration,
+        address: client.address,
+      });
+    }
+
+    xmtpLogger.debug(`Stopped consent stream for ${client.address}`);
+  } catch (error) {
+    throw new XMTPError({
+      error,
+      additionalMessage: "Failed to stop consent stream",
+    });
+  }
 };
 
-/**
- * Not implemented yet
- * @param account
- */
 export const streamPreferences = async (account: string) => {
+  const client = await getXmtpClientByEthAddress({
+    ethereumAddress: account,
+  });
+
+  xmtpLogger.debug(`Streaming preferences for ${client.address}`);
+
   try {
-    xmtpLogger.info(`Streaming preferences for ${account}`);
-    const client = await getXmtpClientByEthAddress({
-      ethereumAddress: account,
-    });
     await client.preferences.streamPreferenceUpdates(async (preference) => {
-      xmtpLogger.info(`Preference has been updated`);
+      xmtpLogger.debug(`Preference updated for ${client.address}`, {
+        preference,
+      });
     });
-  } catch (e) {
-    captureError(e);
+  } catch (error) {
+    throw new XMTPError({
+      error,
+      additionalMessage: "Failed to stream preferences",
+    });
   }
 };
 
@@ -58,5 +84,29 @@ export const stopStreamingPreferences = async (account: string) => {
   const client = await getXmtpClientByEthAddress({
     ethereumAddress: account,
   });
-  return client.preferences.cancelStreamPreferenceUpdates();
+
+  xmtpLogger.debug(`Stopping preferences stream for ${client.address}`);
+
+  try {
+    const startTime = Date.now();
+    await client.preferences.cancelStreamPreferenceUpdates();
+    const duration = Date.now() - startTime;
+
+    if (duration > 3000) {
+      xmtpLogger.warn(
+        `Canceling preferences stream took longer than expected`,
+        {
+          duration,
+          address: client.address,
+        },
+      );
+    }
+
+    xmtpLogger.debug(`Stopped preferences stream for ${client.address}`);
+  } catch (error) {
+    throw new XMTPError({
+      error,
+      additionalMessage: "Failed to stop preferences stream",
+    });
+  }
 };

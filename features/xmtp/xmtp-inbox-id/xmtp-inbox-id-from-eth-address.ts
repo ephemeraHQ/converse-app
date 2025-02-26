@@ -17,7 +17,6 @@ export async function getInboxIdFromEthAddress(args: {
     const lookupStartTime = Date.now();
     const inboxId = await client.findInboxIdFromAddress(targetEthAddress);
 
-    console.log("inboxId:", inboxId);
     const lookupDuration = Date.now() - lookupStartTime;
 
     if (lookupDuration > 3000) {

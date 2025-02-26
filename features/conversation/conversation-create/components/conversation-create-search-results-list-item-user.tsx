@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { Avatar } from "@/components/avatar";
 import { ConversationSearchResultsListItem } from "@/features/conversation/conversation-create/components/conversation-create-search-result-list-item";
 import { useConversationStore } from "@/features/conversation/conversation.store-context";
-import { useProfileQuery } from "@/features/profiles/profiles.query";
+import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info";
 import { useAppTheme } from "@/theme/use-app-theme";
 
 type UserSearchResultListItemProps = {
@@ -13,11 +13,7 @@ export function ConversationSearchResultsListItemUser({
   inboxId,
 }: UserSearchResultListItemProps) {
   const { theme } = useAppTheme();
-
-  const { data: profile } = useProfileQuery({
-    xmtpId: inboxId,
-  });
-
+  const { displayName, avatarUrl } = usePreferredDisplayInfo({ inboxId });
   const conversationStore = useConversationStore();
 
   const handlePress = useCallback(() => {
@@ -33,14 +29,10 @@ export function ConversationSearchResultsListItemUser({
   return (
     <ConversationSearchResultsListItem
       avatar={
-        <Avatar
-          name={profile?.name}
-          uri={profile?.avatar}
-          size={theme.avatarSize.md}
-        />
+        <Avatar name={displayName} uri={avatarUrl} size={theme.avatarSize.md} />
       }
-      title={profile?.name ?? " "}
-      subtitle={profile?.username ?? ""}
+      title={displayName ?? " "}
+      subtitle={""}
       onPress={handlePress}
     />
   );

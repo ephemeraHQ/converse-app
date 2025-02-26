@@ -5,12 +5,13 @@ import { Center } from "@/design-system/Center";
 import { Text } from "@/design-system/Text";
 import { VStack } from "@/design-system/VStack";
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store";
-import { useProfilesQueries } from "@/features/profiles/profiles.query";
+import { usePreferredDisplayInfoBatch } from "@/features/preferred-display-info/use-preferred-display-info-batch";
 import { useGroupMembersQuery } from "@/queries/useGroupMembersQuery";
 import { useGroupQuery } from "@/queries/useGroupQuery";
 import { $globalStyles } from "@/theme/styles";
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { Nullable } from "@/types/general";
+import { IEthereumAddress } from "@/utils/evm/address";
 import { Avatar } from "./avatar";
 
 /**
@@ -21,23 +22,23 @@ export const GroupAvatarInboxIds = memo(function GroupAvatarInboxIds(props: {
 }) {
   const { inboxIds } = props;
 
-  const { data: profiles } = useProfilesQueries({
+  const preferredDisplayData = usePreferredDisplayInfoBatch({
     xmtpInboxIds: inboxIds,
   });
 
   const members = useMemo(() => {
-    return profiles
-      ?.map((profile): IGroupAvatarMember | null =>
-        profile
+    return preferredDisplayData
+      ?.map((info) =>
+        info
           ? {
-              address: profile.xmtpId,
-              uri: profile.avatar,
-              name: profile.name,
+              address: info.ethAddress,
+              uri: info.avatarUrl,
+              name: info.displayName,
             }
           : null,
       )
       .filter(Boolean);
-  }, [profiles]);
+  }, [preferredDisplayData]);
 
   return <GroupAvatarUI members={members} />;
 });
@@ -67,7 +68,7 @@ export const GroupAvatar = memo(function GroupAvatar(props: {
     topic: groupTopic,
   });
 
-  const memberAddresses = useMemo(() => {
+  const memberInboxIds = useMemo(() => {
     if (!members?.ids) {
       return [];
     }
@@ -84,25 +85,25 @@ export const GroupAvatar = memo(function GroupAvatar(props: {
     }, []);
   }, [members, currentSender]);
 
-  const { data: profiles } = useProfilesQueries({
-    xmtpInboxIds: memberAddresses,
+  const preferredDisplayData = usePreferredDisplayInfoBatch({
+    xmtpInboxIds: memberInboxIds,
   });
 
   const memberData = useMemo<IGroupAvatarMember[]>(() => {
     return (
-      profiles
+      preferredDisplayData
         ?.map((profile): IGroupAvatarMember | null =>
           profile
             ? {
-                address: profile.xmtpId,
-                uri: profile.avatar,
-                name: profile.name,
+                address: profile.ethAddress,
+                uri: profile.avatarUrl,
+                name: profile.displayName,
               }
             : null,
         )
         .filter(Boolean) ?? []
     );
-  }, [profiles]);
+  }, [preferredDisplayData]);
 
   const sizeNumber = useMemo(() => {
     if (sizeNumberProp) {
@@ -133,7 +134,7 @@ const MAX_VISIBLE_MEMBERS = 4;
 type Position = { x: number; y: number; size: number };
 
 type IGroupAvatarMember = {
-  address: string;
+  address: Nullable<IEthereumAddress>;
   uri: Nullable<string>;
   name: Nullable<string>;
 };

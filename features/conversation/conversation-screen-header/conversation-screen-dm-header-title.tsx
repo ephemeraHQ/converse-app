@@ -3,11 +3,12 @@ import { useCallback } from "react";
 import { Avatar } from "@/components/avatar";
 import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
 import { ConversationHeaderTitle } from "@/features/conversation/conversation-screen-header/conversation-screen-header-title";
-import { useProfileQuery } from "@/features/profiles/profiles.query";
+import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info";
 import { useRouter } from "@/navigation/use-navigation";
 import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query";
 import { useAppTheme } from "@/theme/use-app-theme";
 import { copyToClipboard } from "@/utils/clipboard";
+import { shortAddress } from "@/utils/strings/shortAddress";
 
 type DmConversationTitleProps = {
   topic: ConversationTopic;
@@ -15,15 +16,17 @@ type DmConversationTitleProps = {
 
 export const DmConversationTitle = ({ topic }: DmConversationTitleProps) => {
   const account = useCurrentSenderEthAddress()!;
-
   const navigation = useRouter();
-
   const { theme } = useAppTheme();
 
   const { data: peerInboxId } = useDmPeerInboxIdQuery({
     account,
     topic,
     caller: "DmConversationTitle",
+  });
+
+  const { displayName, avatarUrl, isLoading } = usePreferredDisplayInfo({
+    inboxId: peerInboxId!,
   });
 
   const onPress = useCallback(() => {
@@ -36,25 +39,17 @@ export const DmConversationTitle = ({ topic }: DmConversationTitleProps) => {
     copyToClipboard(JSON.stringify(topic));
   }, [topic]);
 
-  const { data: profile, isLoading: isLoadingProfile } = useProfileQuery({
-    xmtpId: peerInboxId!,
-  });
-
-  if (isLoadingProfile) {
+  if (isLoading) {
     return null;
   }
 
   return (
     <ConversationHeaderTitle
-      title={profile?.name}
+      title={displayName}
       onLongPress={onLongPress}
       onPress={onPress}
       avatarComponent={
-        <Avatar
-          uri={profile?.avatar ?? undefined}
-          size={theme.avatarSize.md}
-          name={profile?.name}
-        />
+        <Avatar uri={avatarUrl} size={theme.avatarSize.md} name={displayName} />
       }
     />
   );

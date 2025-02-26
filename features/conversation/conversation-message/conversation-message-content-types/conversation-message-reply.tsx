@@ -23,7 +23,7 @@ import {
   useConversationStore,
   useCurrentConversationTopicSafe,
 } from "@/features/conversation/conversation.store-context";
-import { useProfileQuery } from "@/features/profiles/profiles.query";
+import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info";
 import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types";
 import { useSelect } from "@/stores/stores.utils";
 import { useAppTheme } from "@/theme/use-app-theme";
@@ -130,11 +130,9 @@ const MessageReplyReference = memo(function MessageReplyReference(props: {
     conversationTopic: topic,
   });
 
-  const { data: profile } = useProfileQuery({
-    xmtpId: referencedMessage?.senderInboxId,
+  const { displayName } = usePreferredDisplayInfo({
+    inboxId: referencedMessage?.senderInboxId,
   });
-
-  const inboxName = profile?.name;
 
   const tapGesture = Gesture.Tap()
     .onBegin(() => {
@@ -177,7 +175,7 @@ const MessageReplyReference = memo(function MessageReplyReference(props: {
             }
           />
           <Text preset="smaller" color="secondary" inverted={fromMe}>
-            {inboxName}
+            {displayName}
           </Text>
         </HStack>
         {!!referencedMessage && (

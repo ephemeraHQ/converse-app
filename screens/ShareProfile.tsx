@@ -10,7 +10,7 @@ import { Screen } from "@/components/screen/screen";
 import { config } from "@/config";
 import { Text } from "@/design-system/Text";
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store";
-import { useProfileQuery } from "@/features/profiles/profiles.query";
+import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info";
 import { translate } from "@/i18n";
 import { NavigationParamList } from "@/navigation/navigation.types";
 import { useHeader } from "@/navigation/use-header";
@@ -30,10 +30,12 @@ export function ShareProfileScreen({
   const headerHeight = useHeaderHeight();
   const [copiedLink, setCopiedLink] = useState(false);
 
-  const { data: profile } = useProfileQuery({ xmtpId: inboxId });
+  const { displayName, avatarUrl } = usePreferredDisplayInfo({
+    inboxId,
+  });
 
   const profileUrl = `https://${config.websiteDomain}/dm/${
-    profile?.name || shortAddress(inboxId)
+    displayName || shortAddress(inboxId)
   }`;
 
   const shareDict =
@@ -63,8 +65,8 @@ export function ShareProfileScreen({
       >
         <View style={{ alignItems: "center" }}>
           <Avatar
-            uri={profile?.avatar}
-            name={profile?.name}
+            uri={avatarUrl}
+            name={displayName}
             style={{ alignSelf: "center" }}
           />
           <Text
@@ -74,9 +76,9 @@ export function ShareProfileScreen({
               textAlign: "center",
             }}
           >
-            {profile?.name || shortAddress(inboxId)}
+            {displayName || shortAddress(inboxId)}
           </Text>
-          {profile?.name && (
+          {displayName && (
             <Text
               preset="formLabel"
               style={{
@@ -84,7 +86,7 @@ export function ShareProfileScreen({
                 textAlign: "center",
               }}
             >
-              {profile.name || shortAddress(inboxId)}
+              {displayName || shortAddress(inboxId)}
             </Text>
           )}
         </View>
