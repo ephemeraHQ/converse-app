@@ -2,7 +2,10 @@ import { InboxId } from "@xmtp/react-native-sdk";
 import { captureError } from "@/utils/capture-error";
 import { XMTPError } from "@/utils/error";
 import { XMTP_MAX_MS_UNTIL_LOG_ERROR } from "../utils/xmtp-logs";
-import { getXmtpClientByEthAddress } from "../xmtp-client/xmtp-client.service";
+import {
+  getXmtpClientByEthAddress,
+  getXmtpClientByInboxId,
+} from "../xmtp-client/xmtp-client.service";
 
 export async function getXmtpDmByInboxId(args: {
   ethAccountAddress: string;
@@ -71,4 +74,20 @@ export async function createXmtpDm(args: {
       additionalMessage: `Failed to create XMTP DM with inbox ID: ${peerInboxId}`,
     });
   }
+}
+
+export async function createXmtpDmWithEthAddress(args: {
+  senderInboxId: InboxId;
+  peerEthAddress: string;
+}) {
+  const { senderInboxId, peerEthAddress } = args;
+
+  const client = await getXmtpClientByInboxId({
+    inboxId: senderInboxId,
+  });
+
+  const conversation =
+    await client.conversations.findOrCreateDm(peerEthAddress);
+
+  return conversation;
 }

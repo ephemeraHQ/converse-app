@@ -64,9 +64,12 @@ export function usePreferredDisplayInfo(args: PreferredDisplayInfoArgs) {
     ethAddress,
   });
 
+  const preferredUsername = profile?.username;
+
   return {
     displayName,
     avatarUrl,
+    username: preferredUsername,
     ethAddress: preferredEthAddress,
     isLoading: isLoadingProfile || isLoadingSocialProfiles,
   };

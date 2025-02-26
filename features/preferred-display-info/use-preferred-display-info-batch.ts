@@ -57,11 +57,14 @@ export function usePreferredDisplayInfoBatch(args: {
       ethAddress: profileQuery.data?.privyAddress,
     });
 
+    const username = profileQuery?.data?.username;
+
     return {
       ethAddress,
       inboxId,
       displayName,
       avatarUrl,
+      username,
       isLoading: profileQuery?.isLoading || socialProfileQueries.isLoading,
     };
   });

@@ -1,3 +1,4 @@
+import { InboxId } from "@xmtp/react-native-sdk";
 import { useMultiInboxStore } from "@/features/authentication/multi-inbox.store";
 import { createXmtpClientInstance } from "@/features/xmtp/xmtp-client/xmtp-client";
 import { validateClientInstallation } from "@/features/xmtp/xmtp-installations/xmtp-installations";
@@ -62,4 +63,18 @@ export async function getXmtpClientByEthAddress(args: {
       `Failed to get or create XMTP client for address: ${ethereumAddress}`,
     );
   }
+}
+
+export async function getXmtpClientByInboxId(args: { inboxId: InboxId }) {
+  const { inboxId } = args;
+
+  const sender = useMultiInboxStore
+    .getState()
+    .senders.find((s) => s.inboxId === inboxId);
+
+  if (!sender) {
+    throw new Error(`No sender found for inboxId: ${inboxId}`);
+  }
+
+  return getXmtpClient({ ethAddress: sender.ethereumAddress });
 }

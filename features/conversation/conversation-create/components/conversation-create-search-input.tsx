@@ -129,6 +129,7 @@ export const ConversationCreateSearchInput = memo(
               onKeyPress={handleKeyPress}
               autoCapitalize="none"
               autoCorrect={false}
+              cursorColor={selectedChipInboxId ? "transparent" : undefined}
               caretHidden={Boolean(selectedChipInboxId)}
             />
           </HStack>

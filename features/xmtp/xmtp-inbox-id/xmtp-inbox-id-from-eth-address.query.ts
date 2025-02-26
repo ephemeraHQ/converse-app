@@ -14,8 +14,12 @@ export function getXmtpInboxIdFromEthAddressQueryOptions(args: {
       clientEthAddress,
       targetEthAddress,
     ],
-    queryFn: () =>
-      getInboxIdFromEthAddress({ clientEthAddress, targetEthAddress }),
+    queryFn: () => {
+      return getInboxIdFromEthAddress({
+        clientEthAddress,
+        targetEthAddress,
+      });
+    },
   });
 }
 

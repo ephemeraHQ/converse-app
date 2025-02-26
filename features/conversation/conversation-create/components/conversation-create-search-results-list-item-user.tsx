@@ -13,7 +13,9 @@ export function ConversationSearchResultsListItemUser({
   inboxId,
 }: UserSearchResultListItemProps) {
   const { theme } = useAppTheme();
-  const { displayName, avatarUrl } = usePreferredDisplayInfo({ inboxId });
+  const { displayName, avatarUrl, username } = usePreferredDisplayInfo({
+    inboxId,
+  });
   const conversationStore = useConversationStore();
 
   const handlePress = useCallback(() => {
@@ -32,7 +34,7 @@ export function ConversationSearchResultsListItemUser({
         <Avatar name={displayName} uri={avatarUrl} size={theme.avatarSize.md} />
       }
       title={displayName ?? " "}
-      subtitle={""}
+      subtitle={username ?? ""}
       onPress={handlePress}
     />
   );

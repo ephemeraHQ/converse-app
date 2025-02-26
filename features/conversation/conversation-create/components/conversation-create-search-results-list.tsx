@@ -23,6 +23,7 @@ import { useAppTheme } from "@/theme/use-app-theme";
 import { useSearchExistingDmsQuery } from "../queries/search-existing-dms.query";
 import { useSearchExistingGroupsByGroupMembersQuery } from "../queries/search-existing-groups-by-group-members.query";
 import { useSearchExistingGroupsByGroupNameQuery } from "../queries/search-existing-groups-by-group-name.query";
+import { ConversationSearchResultsListItemEthAddress } from "./conversation-create-search-results-list-item-eth-address";
 import { ConversationSearchResultsListItemGroup } from "./conversation-create-search-results-list-item-group";
 import { ConversationSearchResultsListItemNoConvosUser } from "./conversation-create-search-results-list-item-no-convos-user";
 import { ConversationSearchResultsListItemUser } from "./conversation-create-search-results-list-item-user";
@@ -30,6 +31,13 @@ import { ConversationSearchResultsListItemDm } from "./conversation-create-searc
 
 // Because we want a mix of DMs, groups, and profiles
 const MAX_INITIAL_RESULTS = 3;
+
+// Simple regex to check if a string might be an Ethereum address
+const ETH_ADDRESS_REGEX = /^(0x)?[0-9a-fA-F]{40}$/;
+
+function isEthereumAddress(value: string): boolean {
+  return ETH_ADDRESS_REGEX.test(value);
+}
 
 type ISearchResultItemDm = {
   type: "dm";
@@ -51,11 +59,17 @@ type ISearchResultItemSocialProfile = {
   profile: ISocialProfile;
 };
 
+type ISearchResultItemEthAddress = {
+  type: "ethAddress";
+  address: string;
+};
+
 type SearchResultItem =
   | ISearchResultItemDm
   | ISearchResultItemGroup
   | ISearchResultItemProfile
-  | ISearchResultItemSocialProfile;
+  | ISearchResultItemSocialProfile
+  | ISearchResultItemEthAddress;
 
 function searchResultIsDm(item: SearchResultItem): item is ISearchResultItemDm {
   return item.type === "dm";
@@ -77,6 +91,12 @@ function searchResultIsSocialProfile(
   item: SearchResultItem,
 ): item is ISearchResultItemSocialProfile {
   return item.type === "socialProfile";
+}
+
+function searchResultIsEthAddress(
+  item: SearchResultItem,
+): item is ISearchResultItemEthAddress {
+  return item.type === "ethAddress";
 }
 
 export function ConversationSearchResultsList() {
@@ -126,6 +146,10 @@ export function ConversationSearchResultsList() {
     searchQuery,
     searcherInboxId: currentUserInboxId,
   });
+
+  const isEthAddress = useMemo(() => {
+    return isEthereumAddress(searchQuery);
+  }, [searchQuery]);
 
   const listData = useMemo(() => {
     const items: SearchResultItem[] = [];
@@ -204,6 +228,21 @@ export function ConversationSearchResultsList() {
       );
     }
 
+    // 6. Add raw Ethereum address if:
+    // - The search query is an Ethereum address
+    // - We don't have any social profiles for it
+    // - We don't have any conversation users
+    if (
+      isEthAddress &&
+      socialProfilesForEthAddress.length === 0 &&
+      searchConvosUsersData?.length === 0
+    ) {
+      items.push({
+        type: "ethAddress",
+        address: searchQuery,
+      });
+    }
+
     return items;
   }, [
     existingDmTopics,
@@ -212,6 +251,8 @@ export function ConversationSearchResultsList() {
     searchConvosUsersData,
     selectedSearchUserInboxIds,
     socialProfilesForEthAddress,
+    searchQuery,
+    isEthAddress,
   ]);
 
   const isStillLoadingSearchResults =
@@ -273,6 +314,13 @@ export function ConversationSearchResultsList() {
               />
             );
           }
+          if (searchResultIsEthAddress(item)) {
+            return (
+              <ConversationSearchResultsListItemEthAddress
+                ethAddress={item.address}
+              />
+            );
+          }
           const _ensureNever: never = item;
           return null;
         }}
@@ -292,6 +340,9 @@ export function ConversationSearchResultsList() {
           }
           if (searchResultIsSocialProfile(item)) {
             return `social-profile-${item.profile.type}-${item.profile.address}`;
+          }
+          if (searchResultIsEthAddress(item)) {
+            return `eth-address-${item.address}`;
           }
           const _ensureNever: never = item;
           throw new Error("Invalid item type");
