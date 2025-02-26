@@ -18,6 +18,7 @@ import { useRouter } from "@/navigation/use-navigation";
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { Haptics } from "@/utils/haptics";
+import { logger } from "@/utils/logger";
 import { useProfileQuery } from "@/features/profiles/profiles.query";
 import { useSaveProfile } from "@/features/profiles/hooks";
 
@@ -136,7 +137,7 @@ export function useProfileMeScreenHeader(args: { inboxId: InboxId }) {
 const DoneAction = memo(function DoneAction({ inboxId }: { inboxId: InboxId }) {
   const profileMeStore = useProfileMeStore(inboxId);
   const { data: profile } = useProfileQuery({ xmtpId: inboxId });
-  const { saveProfile, isSaving, isSuccess } = useSaveProfile();
+  const { saveProfile, isSaving, isSuccess, error, isError } = useSaveProfile();
 
   // Reset edit mode when save is successful
   React.useEffect(() => {
@@ -146,24 +147,94 @@ const DoneAction = memo(function DoneAction({ inboxId }: { inboxId: InboxId }) {
     }
   }, [isSuccess, profileMeStore]);
 
-  const handleDoneEditProfile = useCallback(async () => {
-    // Get all the profile data from the store
-    const newNameTextValue = profileMeStore.getState().nameTextValue;
-    const newAvatarUri = profileMeStore.getState().avatarUri;
-    const newUsernameTextValue = profileMeStore.getState().usernameTextValue;
-    const newDescriptionTextValue = profileMeStore.getState().descriptionTextValue;
+  // Display toast when there's an error
+  React.useEffect(() => {
+    if (isError && error) {
+      // Extract error message from the API response
+      const apiError = error as any;
+      
+      try {
+        // Check if we have a response with error data
+        if (apiError.response?.data) {
+          const statusCode = apiError.response.status;
+          
+          // Handle validation errors (400 Bad Request or 409 Conflict)
+          if (statusCode === 400 || statusCode === 409) {
+            logger.debug("[DoneAction] Validation error response", { 
+              statusCode,
+              responseData: apiError.response?.data 
+            });
+            
+            // Generic approach to extract validation error messages
+            if (apiError.response?.data?.errors) {
+              const errors = apiError.response.data.errors;
+              
+              // Find the first error with a message
+              for (const field in errors) {
+                if (errors[field]?.message) {
+                  const errorMessage = errors[field].message;
+                  logger.debug("[DoneAction] Validation error", { field, errorMessage });
+                  captureErrorWithToast(error, { message: errorMessage });
+                  return;
+                }
+              }
+            }
+            
+            // Fallback to the general message if we couldn't extract specific error
+            const backendMessage = apiError.response?.data?.message || `Error ${statusCode}`;
+            captureErrorWithToast(error, { message: backendMessage });
+            return;
+          }
+        }
+        
+        // For other errors, use the default error handling
+        captureErrorWithToast(error);
+      } catch (handlingError) {
+        // If anything goes wrong in our error handling, still show a toast
+        logger.error("[DoneAction] Error while handling error", { handlingError });
+        captureErrorWithToast(error);
+      }
+    }
+  }, [isError, error]);
 
-    // Use the saveProfile function from the hook
-    await saveProfile({
-      profile: {
+  const handleDoneEditProfile = useCallback(async () => {
+    try {
+      // Get all the profile data from the store
+      const state = profileMeStore.getState();
+      
+      logger.debug("[DoneAction] Starting profile save", {
+        inboxId,
+        hasProfile: !!profile,
+        profileId: profile?.id,
+        xmtpId: profile?.xmtpId,
+        storeState: JSON.stringify(state)
+      });
+      
+      // CRITICAL FIX: Always include all fields from the store
+      // This ensures we're sending the actual values from the form
+      const profileUpdate = {
         id: profile?.id,
-        name: newNameTextValue || profile?.name,
-        description: newDescriptionTextValue || profile?.description || '',
-        username: newUsernameTextValue || profile?.username || '',
-        avatar: newAvatarUri || profile?.avatar || '',
-      },
-      inboxId,
-    });
+        xmtpId: inboxId,
+        name: state.nameTextValue,
+        username: state.usernameTextValue,
+        description: state.descriptionTextValue,
+        avatar: state.avatarUri,
+      };
+      
+      logger.debug("[DoneAction] Saving profile with update", {
+        profileUpdate: JSON.stringify(profileUpdate),
+        fields: Object.keys(profileUpdate)
+      });
+      
+      // Use the saveProfile function from the hook
+      await saveProfile({
+        profile: profileUpdate,
+        inboxId,
+      });
+    } catch (err) {
+      logger.error("[DoneAction] Error saving profile", { error: err });
+      // Error will be handled by the useMutation onError callback
+    }
   }, [profileMeStore, profile, inboxId, saveProfile]);
 
   return (
