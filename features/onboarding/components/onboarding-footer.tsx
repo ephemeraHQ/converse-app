@@ -1,10 +1,4 @@
 import { ViewStyle } from "react-native";
-import {
-  interpolate,
-  useAnimatedKeyboard,
-  useAnimatedStyle,
-} from "react-native-reanimated";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ActivityIndicator } from "@/design-system/activity-indicator";
 import { IIconName } from "@/design-system/Icon/Icon.types";
 import { AnimatedVStack } from "@/design-system/VStack";

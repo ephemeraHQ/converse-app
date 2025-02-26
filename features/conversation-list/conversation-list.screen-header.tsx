@@ -70,7 +70,7 @@ function HeaderTitle() {
   });
 
   const senders = useMultiInboxStore((state) => state.senders);
-  const preferredDisplayInfos = usePreferredDisplayInfoBatch({
+  const preferredSendersDisplayInfos = usePreferredDisplayInfoBatch({
     xmtpInboxIds: senders.map((sender) => sender.inboxId),
   });
 
@@ -101,7 +101,7 @@ function HeaderTitle() {
         style={themed($dropDownMenu)}
         onPress={onDropdownPress}
         actions={[
-          ...preferredDisplayInfos?.filter(Boolean).map((profile) => ({
+          ...preferredSendersDisplayInfos?.filter(Boolean)?.map((profile) => ({
             id: profile.inboxId,
             title: profile.displayName || shortAddress(profile.inboxId),
             image: currentAccountInboxId === profile.inboxId ? "checkmark" : "",

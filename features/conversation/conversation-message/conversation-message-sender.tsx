@@ -15,7 +15,7 @@ export function ConversationMessageSender(
     inboxId,
   });
 
-  if (!isLoading) {
+  if (isLoading) {
     return null;
   }
 

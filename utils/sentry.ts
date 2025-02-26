@@ -24,7 +24,7 @@ export function sentryInit() {
   Sentry.init({
     dsn: config.sentryDSN,
     debug: false,
-    enabled: !isDev,
+    enabled: !__DEV__,
     environment: getEnv(),
 
     // For now let's get all traces

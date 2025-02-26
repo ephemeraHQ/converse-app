@@ -4,7 +4,7 @@ import {
   useSafeCurrentSender,
 } from "@/features/authentication/multi-inbox.store";
 import {
-  ensureSocialProfilesForEthAddresses,
+  ensureSocialProfilesForAddressesQuery,
   useSocialProfilesForEthAddressQueries,
 } from "@/features/social-profiles/social-profiles.query";
 import {
@@ -50,7 +50,7 @@ export async function getSocialProfilesForInboxId(args: { inboxId: InboxId }) {
     return [];
   }
 
-  const socialProfiles = await ensureSocialProfilesForEthAddresses({
+  const socialProfiles = await ensureSocialProfilesForAddressesQuery({
     ethAddresses: ethAddresses,
   });
 

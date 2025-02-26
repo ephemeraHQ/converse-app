@@ -16,7 +16,7 @@ type IStrictArgs = {
   ethAddress: IEthereumAddress;
 };
 
-const getSocialProfilesQueryOptions = (args: IArgs) => {
+const getSocialProfilesForAddressQueryOptions = (args: IArgs) => {
   const { ethAddress } = args;
   return queryOptions({
     queryKey: ["social-profiles-for-eth-address", ethAddress ?? ""],
@@ -33,7 +33,7 @@ const getSocialProfilesQueryOptions = (args: IArgs) => {
 };
 
 export const useSocialProfilesForAddressQuery = (args: IArgs) => {
-  return useQuery(getSocialProfilesQueryOptions(args));
+  return useQuery(getSocialProfilesForAddressQueryOptions(args));
 };
 
 export function useSocialProfilesForEthAddressQueries(args: {
@@ -42,7 +42,7 @@ export function useSocialProfilesForEthAddressQueries(args: {
   const { ethAddresses } = args;
   return useQueries({
     queries: ethAddresses.map((ethAddress) =>
-      getSocialProfilesQueryOptions({ ethAddress }),
+      getSocialProfilesForAddressQueryOptions({ ethAddress }),
     ),
     combine: (results) => ({
       data: results.map((result) => result.data),
@@ -53,21 +53,23 @@ export function useSocialProfilesForEthAddressQueries(args: {
   });
 }
 
-export const ensureSocialProfilesQueryData = async (args: IStrictArgs) => {
-  return queryClient.ensureQueryData(getSocialProfilesQueryOptions(args));
+export const ensureSocialProfilesForAddressQueryData = async (
+  args: IStrictArgs,
+) => {
+  return queryClient.ensureQueryData(
+    getSocialProfilesForAddressQueryOptions(args),
+  );
 };
 
-export function ensureSocialProfilesForEthAddress(args: IStrictArgs) {
-  return queryClient.ensureQueryData(getSocialProfilesQueryOptions(args));
-}
-
-export async function ensureSocialProfilesForEthAddresses(args: {
+export async function ensureSocialProfilesForAddressesQuery(args: {
   ethAddresses: IEthereumAddress[];
 }) {
   return (
     await Promise.all(
       args.ethAddresses.map((ethAddress) =>
-        queryClient.fetchQuery(getSocialProfilesQueryOptions({ ethAddress })),
+        queryClient.fetchQuery(
+          getSocialProfilesForAddressQueryOptions({ ethAddress }),
+        ),
       ),
     )
   ).flat();
