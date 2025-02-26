@@ -1,4 +1,4 @@
-import { queryOptions, useQuery } from "@tanstack/react-query";
+import { queryOptions } from "@tanstack/react-query";
 import { queryClient } from "@/queries/queryClient";
 import { fetchCurrentUser, ICurrentUser } from "./current-user-api";
 
@@ -11,10 +11,6 @@ export function getCurrentUserQueryOptions() {
   });
 }
 
-export function useCurrentUserQuery() {
-  return useQuery(getCurrentUserQueryOptions());
-}
-
 export function setCurrentUserQueryData(args: { user: ICurrentUser }) {
   const { user } = args;
   return queryClient.setQueryData(getCurrentUserQueryOptions().queryKey, user);
@@ -22,12 +18,6 @@ export function setCurrentUserQueryData(args: { user: ICurrentUser }) {
 
 export function invalidateCurrentUserQuery() {
   return queryClient.invalidateQueries({
-    queryKey: getCurrentUserQueryOptions().queryKey,
-  });
-}
-
-export function cancelCurrentUserQuery() {
-  return queryClient.cancelQueries({
     queryKey: getCurrentUserQueryOptions().queryKey,
   });
 }

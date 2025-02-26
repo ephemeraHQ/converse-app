@@ -1,17 +1,16 @@
-import { logger } from "@utils/logger";
+import { logger, streamLogger } from "@utils/logger";
 import { useEffect } from "react";
 import { useMultiInboxStore } from "@/features/authentication/multi-inbox.store";
 import { stopStreamingConversations } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-stream";
 import { stopStreamingAllMessage } from "@/features/xmtp/xmtp-messages/xmtp-messages-stream";
 import { stopStreamingConsent } from "@/features/xmtp/xmtp-preferences/xmtp-preferences-stream";
 import { useAppStore } from "@/stores/app-store";
+import { useAppState } from "@/stores/use-app-state-store";
 import { captureError } from "@/utils/capture-error";
 import { startConversationStreaming } from "./stream-conversations";
 import { startMessageStreaming } from "./stream-messages";
 import { useStreamingStore } from "./stream-store";
 
-// todo move this to multi-inbox-client
-// when clients are added and removed; start and stop respective streams
 export function useSetupStreamingSubscriptions() {
   // Start/stop streaming when internet connectivity changes
   // TODO: Fix this, we need to combine with the accounts store subscription below
@@ -36,12 +35,35 @@ export function useSetupStreamingSubscriptions() {
   }, []);
 
   useEffect(() => {
-    const unsubscribe = useMultiInboxStore.subscribe(
+    // Handle app state changes
+    const unsubscribeAppState = useAppState.subscribe(
+      (state) => state.currentState,
+      (currentState, previousState) => {
+        const senders = useMultiInboxStore.getState().senders;
+        const ethAddresses = senders.map((sender) => sender.ethereumAddress);
+
+        if (currentState === "active" && previousState !== "active") {
+          streamLogger.debug("App became active, restarting streams");
+          // Stop existing streams first to ensure clean state
+          stopStreaming(ethAddresses).then(() => {
+            startStreaming(ethAddresses);
+          });
+        } else if (currentState !== "active" && previousState === "active") {
+          streamLogger.debug("App went to background, stopping streams");
+          stopStreaming(ethAddresses);
+        }
+      },
+    );
+
+    // Handle account changes
+    const unsubscribeAccounts = useMultiInboxStore.subscribe(
       (state) => [state.senders] as const,
       ([senders], [previousSenders]) => {
         const { isInternetReachable } = useAppStore.getState();
+        const { currentState } = useAppState.getState();
 
-        if (!isInternetReachable) {
+        // Only manage streams if app is active and has internet
+        if (!isInternetReachable || currentState !== "active") {
           return;
         }
 
@@ -76,7 +98,10 @@ export function useSetupStreamingSubscriptions() {
       },
     );
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribeAppState();
+      unsubscribeAccounts();
+    };
   }, []);
 }
 

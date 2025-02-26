@@ -40,7 +40,6 @@ const conversationMessagesQueryFn = async (args: {
     throw new Error("topic is required");
   }
 
-  // If we are getting the messages it means we have the conversation in the query cache for sure or it's a bug
   const conversation = await getOrFetchConversation({
     account,
     topic,

@@ -15,10 +15,7 @@ import {
   AxiosResponse,
 } from "axios";
 import { getConvosAuthenticatedHeaders } from "@/features/authentication/authentication.headers";
-import {
-  ensureJwtQueryData,
-  refetchJwtQuery,
-} from "@/features/authentication/jwt.query";
+import { refreshAndGetNewJwtQuery } from "@/features/authentication/jwt.query";
 import { captureError } from "@/utils/capture-error";
 import { ApiError, AuthenticationError } from "../../utils/error";
 
@@ -71,10 +68,9 @@ export const refreshJwtInterceptor = (
       originalRequest._retry = true;
 
       // 1. Attempt to get a fresh JWT token
-      await refetchJwtQuery();
-      const refreshedJwtResponse = await ensureJwtQueryData();
+      const jwtToken = await refreshAndGetNewJwtQuery();
 
-      if (!refreshedJwtResponse) {
+      if (!jwtToken) {
         throw new AuthenticationError({
           error: new Error("Failed to refresh token"),
         });

@@ -3,7 +3,10 @@ import type { ErrorEvent, EventHint } from "@sentry/types";
 import { QueryObserver } from "@tanstack/react-query";
 import * as Updates from "expo-updates";
 import { useEffect } from "react";
-import { useMultiInboxStore } from "@/features/authentication/multi-inbox.store";
+import {
+  useCurrentSender,
+  useMultiInboxStore,
+} from "@/features/authentication/multi-inbox.store";
 import { getCurrentUserQueryOptions } from "@/features/current-user/curent-user.query";
 import { getProfileQueryConfig } from "@/features/profiles/profiles.query";
 import { queryClient } from "@/queries/queryClient";
@@ -11,13 +14,10 @@ import { getEnv, isDev } from "@/utils/getEnv";
 import { config } from "../config";
 
 // Error patterns that should not be reported to Sentry
-type ErrorFilter = {
-  type: string;
-  value: string;
-};
 
-const errorsToFilterOut: ErrorFilter[] = [
-  { type: "AxiosError", value: "Network Error" },
+const errorsToFilterOut = [
+  "Request failed with status code 401",
+  "Request failed with status code 404",
 ];
 
 export function sentryInit() {
@@ -29,9 +29,6 @@ export function sentryInit() {
 
     // For now let's get all traces
     tracesSampleRate: 1.0,
-
-    // Enable view hierarchy for better debugging
-    attachViewHierarchy: true,
 
     // Add more context to your events
     attachStacktrace: true,
@@ -47,8 +44,8 @@ export function sentryInit() {
       // Filter out specific errors
       if (event.exception?.values?.length === 1) {
         const exception = event.exception.values[0];
-        const shouldFilter = errorsToFilterOut.some(
-          (e) => exception.type === e.type && exception.value === e.value,
+        const shouldFilter = errorsToFilterOut.some((errorStr) =>
+          exception.value?.includes(errorStr),
         );
 
         if (shouldFilter) {
@@ -105,7 +102,13 @@ export function sentryIdentifyUser(args: {
 }
 
 export function useUpdateSentry() {
+  const currentSender = useCurrentSender();
+
   useEffect(() => {
+    if (!currentSender) {
+      return;
+    }
+
     // Track user changes
     const userQueryObserver = new QueryObserver(
       queryClient,
@@ -157,6 +160,8 @@ export function useUpdateSentry() {
       unsubscribeFromProfileQueryObserver();
       unsubscribeFromStore();
     };
-  }, []);
-} // Sentry has ~8KB limit for string values
+  }, [currentSender]);
+}
+
+// Sentry has ~8KB limit for string values
 export const MAX_SENTRY_STRING_SIZE = 8000; // bytes

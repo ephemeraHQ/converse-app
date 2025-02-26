@@ -11,6 +11,18 @@ export const api = axios.create({
 // depending on the route in the request
 api.interceptors.request.use(headersInterceptor);
 
+// Debugging interceptors
+api.interceptors.request.use((config) => {
+  apiLogger.debug(
+    `Processing request for URL: ${config.url}, method: ${config.method}, body: ${JSON.stringify(
+      config.data ?? "",
+    )}, params: ${JSON.stringify(config.params ?? "")}`,
+  );
+
+  return config;
+});
+
+// Debugging interceptors
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -21,6 +33,7 @@ api.interceptors.response.use(
         status: error.response?.status,
         statusText: error.response?.statusText,
         data: error.response?.data,
+        params: error.config?.params,
       });
     }
     return Promise.reject(error);

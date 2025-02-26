@@ -3,18 +3,21 @@ import { useCallback } from "react";
 import { useAuthStore } from "@/features/authentication/authentication.store";
 import { resetAccountStore } from "@/features/authentication/multi-inbox.store";
 import { queryClient } from "@/queries/queryClient";
+import { captureError } from "@/utils/capture-error";
+import { GenericError } from "@/utils/error";
 import { reactQueryMMKV, secureQueryMMKV } from "@/utils/mmkv";
 import { logger } from "../../utils/logger";
 
 export const useLogout = () => {
-  const privy = usePrivy();
+  const { logout: privyLogout } = usePrivy();
 
   const logout = useCallback(async () => {
-    logger.debug("[useLogout] Logging out invoked");
+    logger.debug("Logging out...");
+
     try {
       useAuthStore.getState().actions.setStatus("signedOut");
 
-      await privy.logout();
+      await privyLogout();
 
       resetAccountStore();
 
@@ -25,13 +28,16 @@ export const useLogout = () => {
       reactQueryMMKV.clearAll();
       secureQueryMMKV.clearAll();
 
-      logger.debug(
-        `[useLogout] Privy, account store, query client, mmkv cleared successfully`,
-      );
+      logger.debug("Successfully logged out");
     } catch (error) {
-      logger.error("[useLogout] Error logging out", error);
+      captureError(
+        new GenericError({
+          error,
+          additionalMessage: "Error logging out",
+        }),
+      );
     }
-  }, [privy]);
+  }, [privyLogout]);
 
   return { logout };
 };
