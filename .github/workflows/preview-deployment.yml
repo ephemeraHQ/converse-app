@@ -151,9 +151,9 @@ jobs:
 
       - name: Resolve Sentry Issues
         env:
-          SENTRY_USER_AUTH_TOKEN: ${{ secrets.SENTRY_USER_AUTH_TOKEN }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_USER_AUTH_TOKEN }} # SENTRY_AUTH_TOKEN from expo can't have permissions to do this issues resolving
         run: |
-          sentry-cli issues resolve --all --project convos-mobile-app
+          sentry-cli issues resolve --all --project convos-mobile-app --org converse-app
 
   android-build:
     needs: [check-changes, bump-version]
@@ -204,9 +204,9 @@ jobs:
 
       - name: Resolve Sentry Issues
         env:
-          SENTRY_USER_AUTH_TOKEN: ${{ secrets.SENTRY_USER_AUTH_TOKEN }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_USER_AUTH_TOKEN }} # SENTRY_AUTH_TOKEN from expo can't have permissions to do this issues resolving
         run: |
-          sentry-cli issues resolve --all --project convos-mobile-app
+          sentry-cli issues resolve --all --project convos-mobile-app --org converse-app
 
   ota-update:
     needs: [check-changes]
@@ -255,6 +255,6 @@ jobs:
 
       - name: Resolve Sentry Issues
         env:
-          SENTRY_USER_AUTH_TOKEN: ${{ secrets.SENTRY_USER_AUTH_TOKEN }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_USER_AUTH_TOKEN }} # SENTRY_AUTH_TOKEN from expo can't have permissions to do this issues resolving
         run: |
-          sentry-cli issues resolve --all --project convos-mobile-app
+          sentry-cli issues resolve --all --project convos-mobile-app --org converse-app

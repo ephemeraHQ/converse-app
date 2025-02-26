@@ -34,3 +34,26 @@ export function normalizeString(str: string) {
 export function isSameTrimmedAndNormalizedString(str1: string, str2: string) {
   return normalizeString(str1) === normalizeString(str2);
 }
+
+// Helper to get the last N bytes of a string, making sure we don't cut in the middle of a line
+export function getLastBytes(str: string, maxBytes: number): string {
+  if (Buffer.byteLength(str, "utf8") <= maxBytes) {
+    return str;
+  }
+
+  // Get roughly the last maxBytes worth of characters
+  // We get more than needed to ensure we don't cut mid-line
+  const roughSlice = str.slice(-maxBytes * 2);
+
+  // Find the first newline to get a clean cut
+  const firstNewLine = roughSlice.indexOf("\n");
+  const cleanSlice =
+    firstNewLine !== -1 ? roughSlice.slice(firstNewLine + 1) : roughSlice;
+
+  // If still too big, get exact bytes from the end
+  if (Buffer.byteLength(cleanSlice, "utf8") > maxBytes) {
+    return `...(truncated)...\n${cleanSlice.slice(-maxBytes)}`;
+  }
+
+  return `...(truncated)...\n${cleanSlice}`;
+}

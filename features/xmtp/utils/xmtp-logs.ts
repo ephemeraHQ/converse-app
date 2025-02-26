@@ -5,81 +5,101 @@ import { v4 as uuidv4 } from "uuid";
 import { captureError } from "@/utils/capture-error";
 import logger from "@/utils/logger";
 
-let currentXmtpLoggingPath = "";
-let loggingInterval: ReturnType<typeof setInterval> | null = null;
+// Constants
+const LOG_FILE_EXTENSION = ".xmtp.log.txt";
+const LOGGING_INTERVAL_MS = 5000;
+const LOG_FILE_ENCODING = "utf8";
 
-export const isXmtpLoggingActive = () => {
-  return loggingInterval !== null;
+type LoggingState = {
+  currentLogPath: string;
+  interval: ReturnType<typeof setInterval> | null;
 };
 
-export const startXmtpLogging = async () => {
+// State management
+const state: LoggingState = {
+  currentLogPath: "",
+  interval: null,
+};
+
+export function isXmtpLoggingActive() {
+  return state.interval !== null;
+}
+
+export async function startXmtpLogging() {
   // Clear any existing interval
-  if (loggingInterval) {
-    clearInterval(loggingInterval);
+  if (state.interval) {
+    clearInterval(state.interval);
   }
 
   // Generate new log file path
   const tempDir = RNFS.TemporaryDirectoryPath;
-  currentXmtpLoggingPath = path.join(tempDir, `${uuidv4()}.xmtp.log.txt`);
+  state.currentLogPath = path.join(tempDir, `${uuidv4()}${LOG_FILE_EXTENSION}`);
 
   // Initialize log file with header
   const timestamp = new Date().toISOString();
   await RNFS.writeFile(
-    currentXmtpLoggingPath,
+    state.currentLogPath,
     `XMTP Logs Session - Started at ${timestamp}\n\n`,
-    "utf8",
+    LOG_FILE_ENCODING,
   );
 
   // Start periodic logging
-  loggingInterval = setInterval(async () => {
+  state.interval = setInterval(async () => {
     try {
       const logs = (await Client.exportNativeLogs()) as string;
-      await RNFS.writeFile(currentXmtpLoggingPath, logs, "utf8");
-      logger.debug("XMTP logs written to", currentXmtpLoggingPath);
+      await RNFS.writeFile(state.currentLogPath, logs, LOG_FILE_ENCODING);
+      logger.debug("XMTP logs written to", state.currentLogPath);
     } catch (error) {
       captureError(error);
     }
-  }, 5000);
-};
+  }, LOGGING_INTERVAL_MS);
+}
 
-export const stopXmtpLogging = () => {
-  if (loggingInterval) {
-    clearInterval(loggingInterval);
-    loggingInterval = null;
+export function stopXmtpLogging() {
+  if (state.interval) {
+    clearInterval(state.interval);
+    state.interval = null;
   }
-};
+}
 
-export const getXmtpLogFile = async () => {
+export async function getXmtpLogFile() {
   const logs = (await Client.exportNativeLogs()) as string;
   const logFilePath = path.join(RNFS.TemporaryDirectoryPath, "xmtp.logs.txt");
-  await RNFS.writeFile(logFilePath, logs, "utf8");
+  await RNFS.writeFile(logFilePath, logs, LOG_FILE_ENCODING);
   return logFilePath;
-};
+}
 
-export const getPreviousXmtpLogFile = async () => {
+export function getXmtpLogs() {
+  return Client.exportNativeLogs();
+}
+
+export async function getPreviousXmtpLogFile() {
   const tempDir = RNFS.TemporaryDirectoryPath;
   const files = await RNFS.readDir(tempDir);
   const logFiles = files
-    .filter((file) => file.name.endsWith(".xmtp.log.txt"))
+    .filter((file) => file.name.endsWith(LOG_FILE_EXTENSION))
     .sort((a, b) => (b.mtime?.getTime() ?? 0) - (a.mtime?.getTime() ?? 0));
+
   return logFiles[1]?.path ?? null;
-};
+}
 
 export const XMTP_MAX_MS_UNTIL_LOG_ERROR = 3000; // 3 seconds
 
-export const rotateXmtpLoggingFile = async () => {
+export async function rotateXmtpLoggingFile() {
   // Stop current logging if active
   stopXmtpLogging();
 
   // Clear current log file if it exists
-  if (currentXmtpLoggingPath && (await RNFS.exists(currentXmtpLoggingPath))) {
-    await RNFS.unlink(currentXmtpLoggingPath);
+  if (state.currentLogPath && (await RNFS.exists(state.currentLogPath))) {
+    await RNFS.unlink(state.currentLogPath);
   }
 
   // Clean up old log files
   const tempDir = RNFS.TemporaryDirectoryPath;
   const files = await RNFS.readDir(tempDir);
-  const logFiles = files.filter((file) => file.name.endsWith(".xmtp.log.txt"));
+  const logFiles = files.filter((file) =>
+    file.name.endsWith(LOG_FILE_EXTENSION),
+  );
 
   await Promise.all(
     logFiles.map((file) => RNFS.unlink(path.join(tempDir, file.name))),
@@ -87,4 +107,4 @@ export const rotateXmtpLoggingFile = async () => {
 
   // Restart logging
   await startXmtpLogging();
-};
+}

@@ -8,7 +8,6 @@ import { getCurrentUserQueryOptions } from "@/features/current-user/curent-user.
 import { getProfileQueryConfig } from "@/features/profiles/profiles.query";
 import { queryClient } from "@/queries/queryClient";
 import { getEnv, isDev } from "@/utils/getEnv";
-import { logger } from "@/utils/logger";
 import { config } from "../config";
 
 // Error patterns that should not be reported to Sentry
@@ -71,9 +70,7 @@ export function sentryInit() {
 
 type ISentryTrackErrorArgs = {
   error: Error;
-  // Filterable indexed values
   tags?: Record<string, string>;
-  // Additional error context
   extras?: Record<string, unknown>;
 };
 
@@ -82,7 +79,7 @@ export function sentryTrackError({
   extras,
   tags,
 }: ISentryTrackErrorArgs) {
-  Sentry.withScope((scope) => {
+  Sentry.withScope(async (scope) => {
     if (extras) {
       Object.entries(extras).forEach(([key, value]) => {
         scope.setExtra(key, value);
@@ -161,4 +158,5 @@ export function useUpdateSentry() {
       unsubscribeFromStore();
     };
   }, []);
-}
+} // Sentry has ~8KB limit for string values
+export const MAX_SENTRY_STRING_SIZE = 8000; // bytes

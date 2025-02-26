@@ -8,9 +8,12 @@ import {
 import { MessageId } from "@xmtp/react-native-sdk/build/lib/types";
 import { isReactionMessage } from "@/features/conversation/conversation-message/conversation-message.utils";
 import { contentTypesPrefixes } from "@/features/xmtp/xmtp-content-types/xmtp-content-types";
-import { isSupportedMessage } from "@/features/xmtp/xmtp-messages/xmtp-messages";
+import { syncConversation } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-sync";
+import {
+  getXmtpConversationMessages,
+  isSupportedMessage,
+} from "@/features/xmtp/xmtp-messages/xmtp-messages";
 import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types";
-import { captureError } from "@/utils/capture-error";
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
 import {
   getConversationQueryData,
@@ -48,23 +51,14 @@ const conversationMessagesQueryFn = async (args: {
     throw new Error("Conversation not found");
   }
 
-  const start = performance.now();
-
-  await conversation.sync();
-
-  const messages = await conversation.messages({
-    limit: 30, // Fetch limited messages for better performance until pagination is implemented
+  await syncConversation({
+    conversation,
   });
 
-  const timeDiff = performance.now() - start;
-
-  if (timeDiff > 3000) {
-    captureError(
-      new Error(
-        `[useConversationMessages] Fetched ${messages.length} messages in ${timeDiff}ms for conversation ${topic}`,
-      ),
-    );
-  }
+  const messages = await getXmtpConversationMessages({
+    conversation,
+    limit: 30, // Fetch limited messages for better performance until pagination is implemented
+  });
 
   const validMessages = messages.filter(isSupportedMessage);
 
