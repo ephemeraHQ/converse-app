@@ -55,13 +55,13 @@ export const OtaUpdatesList = memo(function OtaUpdatesList() {
   const otaSettings = useMemo((): ISettingsListRow[] => {
     return [
       {
-        label: "Check for Updates",
+        label: "Check for OTA updates",
         onPress: handleCheckUpdate,
         loading: isChecking || isDownloading,
         value: isChecking
-          ? "Checking for Updates..."
+          ? "Checking for OTA updates..."
           : isDownloading
-            ? "Downloading Update..."
+            ? "Downloading OTA update..."
             : "...",
       },
 
