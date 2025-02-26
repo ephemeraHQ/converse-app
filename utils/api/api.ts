@@ -2,7 +2,6 @@ import axios from "axios";
 import { apiLogger } from "@/utils/logger";
 import { config } from "../../config";
 import { headersInterceptor } from "../../features/authentication/interceptor.headers";
-import { logger } from "../logger";
 
 export const api = axios.create({
   baseURL: config.apiURI,
