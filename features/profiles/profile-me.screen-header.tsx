@@ -225,7 +225,7 @@ const DoneAction = memo(function DoneAction({ inboxId }: { inboxId: InboxId }) {
       text={translate("Done")}
       variant="text"
       onPress={handleDoneEditProfile}
-      disabled={isAvatarUploading}
+      loading={isAvatarUploading}
     />
   );
 });

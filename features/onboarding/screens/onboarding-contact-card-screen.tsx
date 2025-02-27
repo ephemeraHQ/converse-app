@@ -12,7 +12,6 @@ import { z } from "zod";
 import { create } from "zustand";
 import { Screen } from "@/components/screen/screen";
 import { showSnackbar } from "@/components/snackbar/snackbar.service";
-import { HStack } from "@/design-system/HStack";
 import { AnimatedVStack, VStack } from "@/design-system/VStack";
 import { useAuthStore } from "@/features/authentication/authentication.store";
 import { useMultiInboxStore } from "@/features/authentication/multi-inbox.store";
@@ -27,11 +26,9 @@ import { ProfileContactCardLayout } from "@/features/profiles/components/profile
 import { profileValidationSchema } from "@/features/profiles/schemas/profile-validation.schema";
 import { validateProfileName } from "@/features/profiles/utils/validate-profile-name";
 import { useHeader } from "@/navigation/use-header";
-import { $globalStyles } from "@/theme/styles";
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { ValidationError } from "@/utils/api/api.error";
 import { captureErrorWithToast } from "@/utils/capture-error";
-import { debugBorder } from "@/utils/debug-style";
 import { useAddPfp } from "@/hooks/use-add-pfp";
 
 // Request validation schema
