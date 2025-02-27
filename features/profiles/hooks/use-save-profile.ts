@@ -1,11 +1,11 @@
 import { useCallback } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { 
-  saveProfileAsync, 
-  IConvosProfileForInbox,
-  ProfileUpdates,
-  ProfileInput
-} from "@/features/profiles/profiles.api";
+import { saveProfileAsync } from "@/features/profiles/profiles.api";
+import {
+  type IConvosProfileForInbox,
+  type ProfileUpdates,
+  type ProfileInput
+} from "@/features/profiles/profile.types";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { setProfileQueryData } from "@/features/profiles/profiles.query";
 import { logger } from "@/utils/logger";
@@ -57,8 +57,8 @@ const getChangedFields = (
     description: { current: current.description, update: update.description, changed: update.description !== undefined && update.description !== current.description },
     avatar: { current: current.avatar, update: update.avatar, changed: update.avatar !== undefined && update.avatar !== current.avatar }
   });
+
   
-  // CRITICAL FIX: Always include name and username in updates
   // These are required fields and should always be sent
   if (update.name !== undefined) {
     updates.name = update.name;

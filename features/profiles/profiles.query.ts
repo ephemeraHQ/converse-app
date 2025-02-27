@@ -5,11 +5,9 @@ import {
   useQuery,
 } from "@tanstack/react-query";
 import { InboxId } from "@xmtp/react-native-sdk";
-import {
-  fetchProfile,
-  IConvosProfileForInbox,
-} from "@/features/profiles/profiles.api";
-import { queryClient } from "../../queries/queryClient";
+import { fetchProfile } from "@/features/profiles/profiles.api";
+import { type IConvosProfileForInbox } from "@/features/profiles/profile.types";
+import { queryClient } from "@/queries/queryClient";
 
 const profileQueryKey = ({ xmtpId }: { xmtpId: string }) =>
   ["profile", xmtpId] as const;

@@ -1,5 +1,5 @@
 import { InboxId } from "@xmtp/react-native-sdk";
-import React, { memo, useCallback, useState } from "react";
+import React, { memo, useCallback } from "react";
 import { ViewStyle } from "react-native";
 import { Button } from "@/design-system/Button/Button";
 import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu";
@@ -210,7 +210,6 @@ const DoneAction = memo(function DoneAction({ inboxId }: { inboxId: InboxId }) {
         storeState: JSON.stringify(state)
       });
       
-      // CRITICAL FIX: Always include all fields from the store
       // This ensures we're sending the actual values from the form
       const profileUpdate = {
         id: profile?.id,

@@ -1,6 +1,50 @@
 import { InboxId } from "@xmtp/react-native-sdk";
 import { ReactNode } from "react";
+import { z } from "zod";
 
+// API Schemas
+export const ConvosProfileForInboxSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  username: z.string(),
+  description: z.string().nullable(),
+  // TODO: Unsure if we need these
+  // deviceIdentityId: z.string(),
+  // createdAt: z.string(),
+  // updatedAt: z.string(),
+  xmtpId: z.string(),
+  avatar: z.string().nullable(),
+  privyAddress: z.string(),
+});
+
+export const ClaimProfileResponseSchema = z.object({
+  success: z.boolean(),
+  message: z.string(),
+});
+
+// API Types
+export type IConvosProfileForInbox = z.infer<typeof ConvosProfileForInboxSchema>;
+
+export type ProfileUpdates = {
+  name?: string;
+  username?: string;
+  description?: string | null;
+  avatar?: string | null;
+};
+
+export type ProfileInput = ProfileUpdates & {
+  id?: string;
+  xmtpId?: string;
+};
+
+export type ClaimProfileRequest = {
+  name: string;
+  username: string;
+  description?: string;
+  avatar?: string;
+};
+
+// UI Component Types
 export type ProfileContactCardHandle = {
   handleSave: () => Promise<{ success: boolean; error?: string }>;
   hasChanges: boolean;
