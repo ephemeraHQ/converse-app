@@ -13,7 +13,7 @@ import { IProfileContactCardProps } from "../../profile.types";
 export const ProfileContactCard = memo(function ProfileContactCard({
   inboxId,
 }: IProfileContactCardProps) {
-  const { displayName, avatarUrl } = usePreferredDisplayInfo({
+  const { displayName, avatarUrl, username } = usePreferredDisplayInfo({
     inboxId,
   });
 
@@ -30,7 +30,11 @@ export const ProfileContactCard = memo(function ProfileContactCard({
       >
         {displayName}
       </Text>
-      {/* Note: username handling might need to be adjusted since it's not part of usePreferredDisplayInfo */}
+      {username && (
+        <Text inverted color="secondary" preset="smaller">
+          @{username}
+        </Text>
+      )}
     </VStack>
   );
 
