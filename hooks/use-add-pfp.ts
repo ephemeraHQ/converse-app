@@ -1,15 +1,28 @@
 import { translate } from "@i18n";
+import { useMutation } from "@tanstack/react-query";
 import { executeAfterKeyboardClosed } from "@utils/keyboard";
-import { pickMediaFromLibrary, takePictureFromCamera, compressAndResizeImage } from "@utils/media";
-import { ImagePickerAsset } from "expo-image-picker";
+import {
+  compressAndResizeImage,
+  pickMediaFromLibrary,
+  takePictureFromCamera,
+} from "@utils/media";
+import { ImagePickerAsset, ImagePickerOptions } from "expo-image-picker";
 import { useCallback, useState } from "react";
 import { showActionSheet } from "@/components/action-sheet";
+import {
+  getPresignedUploadUrl,
+  uploadFileWithPresignedUrl,
+} from "@/features/uploads/upload.api";
 import { logger } from "@/utils/logger";
-import { getPresignedUploadUrl, uploadFileWithPresignedUrl } from "@/features/uploads/upload.api";
-import { useMutation } from "@tanstack/react-query";
 
+type ImageSource = "camera" | "library";
+
+/**
+ * Uploads an image asset to the server
+ * Handles compression, getting presigned URL, and uploading
+ */
 async function uploadImage(imageAsset: ImagePickerAsset): Promise<string> {
-  logger.debug("[useAddPfp] Starting image compression", { 
+  logger.debug("[useAddPfp] Starting image compression", {
     originalUri: imageAsset.uri,
     originalWidth: imageAsset.width,
     originalHeight: imageAsset.height,
@@ -17,28 +30,28 @@ async function uploadImage(imageAsset: ImagePickerAsset): Promise<string> {
 
   // Compress and resize the image
   const resizedImage = await compressAndResizeImage(imageAsset.uri, true);
-  
-  logger.debug("[useAddPfp] Image compressed successfully", { 
+
+  logger.debug("[useAddPfp] Image compressed successfully", {
     compressedUri: resizedImage.uri,
     width: resizedImage.width,
     height: resizedImage.height,
   });
-  
+
   // Get presigned URL for upload
   logger.debug("[useAddPfp] Getting presigned URL");
   const { url: presignedUrl } = await getPresignedUploadUrl("image/jpeg");
-  
+
   // Upload the image
   const publicUrl = await uploadFileWithPresignedUrl(
     presignedUrl,
     resizedImage.uri,
-    "image/jpeg"
+    "image/jpeg",
   );
-  
-  logger.debug("[useAddPfp] Profile picture upload complete", { 
+
+  logger.debug("[useAddPfp] Profile picture upload complete", {
     publicUrl,
     originalSize: { width: imageAsset.width, height: imageAsset.height },
-    finalSize: { width: resizedImage.width, height: resizedImage.height }
+    finalSize: { width: resizedImage.width, height: resizedImage.height },
   });
 
   return publicUrl;
@@ -47,80 +60,93 @@ async function uploadImage(imageAsset: ImagePickerAsset): Promise<string> {
 export function useAddPfp() {
   const [asset, setAsset] = useState<ImagePickerAsset>();
 
-  const { mutateAsync, isPending } = useMutation({
+  const {
+    mutateAsync: uploadImageAsync,
+    isPending: isUploading,
+    data: uploadedImageUrl,
+    error: errorUploadingImage,
+  } = useMutation({
     mutationFn: uploadImage,
-    onError: (error) => {
-      logger.error("[useAddPfp] Failed to upload image", { 
-        error,
-        errorMessage: error instanceof Error ? error.message : "Unknown error",
-      });
-    }
   });
 
-  const pickMedia = useCallback(async () => {
-    const pickedAsset = await pickMediaFromLibrary({
-      allowsEditing: true,
-      aspect: [1, 1],
-    });
-    if (!pickedAsset) return;
-    
-    setAsset(pickedAsset);
-    return mutateAsync(pickedAsset);
-  }, [mutateAsync]);
+  /**
+   * Shows an action sheet and lets the user pick a profile picture
+   * Returns a promise that resolves with the uploaded image URL
+   */
+  const addPFP = useCallback(() => {
+    return new Promise<string>((resolve, reject) => {
+      const showOptions = () => {
+        showActionSheet({
+          options: {
+            options: [
+              translate("userProfile.mediaOptions.takePhoto"),
+              translate("userProfile.mediaOptions.chooseFromLibrary"),
+              translate("userProfile.mediaOptions.cancel"),
+            ],
+            cancelButtonIndex: 2,
+          },
+          callback: async (selectedIndex?: number) => {
+            try {
+              let source: ImageSource | undefined;
 
-  const openCamera = useCallback(async () => {
-    const pickedAsset = await takePictureFromCamera({
-      allowsEditing: true,
-      aspect: [1, 1],
-    });
-    if (!pickedAsset) return;
-    
-    setAsset(pickedAsset);
-    return mutateAsync(pickedAsset);
-  }, [mutateAsync]);
+              switch (selectedIndex) {
+                case 0:
+                  source = "camera";
+                  break;
+                case 1:
+                  source = "library";
+                  break;
+                default:
+                  // User canceled
+                  reject(new Error("User canceled"));
+                  return;
+              }
 
-  const addPFP = useCallback((onAvatarChange: (url: string) => void) => {
-    const showOptions = () =>
-      showActionSheet({
-        options: {
-          options: [
-            translate("userProfile.mediaOptions.takePhoto"),
-            translate("userProfile.mediaOptions.chooseFromLibrary"),
-            translate("userProfile.mediaOptions.cancel"),
-          ],
-          cancelButtonIndex: 2,
-        },
-        callback: async (selectedIndex?: number) => {
-          try {
-            let uploadedUrl;
-            switch (selectedIndex) {
-              case 0: // Camera
-                uploadedUrl = await openCamera();
-                break;
-              case 1: // Media Library
-                uploadedUrl = await pickMedia();
-                break;
+              if (!source) {
+                return;
+              }
+
+              const options: ImagePickerOptions = {
+                allowsEditing: true,
+                aspect: [1, 1],
+              };
+
+              // Get image from selected source
+              const pickedAsset =
+                source === "camera"
+                  ? await takePictureFromCamera(options)
+                  : await pickMediaFromLibrary(options);
+
+              if (!pickedAsset) {
+                reject(new Error("No image selected"));
+                return;
+              }
+
+              // Update state and upload
+              setAsset(pickedAsset);
+              const uploadedUrl = await uploadImageAsync(pickedAsset);
+              resolve(uploadedUrl);
+            } catch (error) {
+              reject(error);
             }
-            if (uploadedUrl && onAvatarChange) {
-              onAvatarChange(uploadedUrl);
-            }
-          } catch (error) {
-            logger.error("[addPFP] Failed to upload image", { error });
-          }
-        },
-      });
+          },
+        });
+      };
 
-    executeAfterKeyboardClosed(showOptions);
-  }, [openCamera, pickMedia]);
+      executeAfterKeyboardClosed(showOptions);
+    });
+  }, [uploadImageAsync]);
 
-  const reset = useCallback(() => {
+  const reset = () => {
     setAsset(undefined);
-  }, []);
+  };
 
-  return { 
-    addPFP, 
+  return {
+    addPFP,
     asset,
-    isUploading: isPending,
+    isUploading,
     reset,
+    uploadedImageUrl,
+    errorUploadingImage,
   };
 }

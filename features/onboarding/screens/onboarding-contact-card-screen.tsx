@@ -25,11 +25,11 @@ import { ProfileContactCardEditableNameInput } from "@/features/profiles/compone
 import { ProfileContactCardLayout } from "@/features/profiles/components/profile-contact-card/profile-contact-card-layout";
 import { profileValidationSchema } from "@/features/profiles/schemas/profile-validation.schema";
 import { validateProfileName } from "@/features/profiles/utils/validate-profile-name";
+import { useAddPfp } from "@/hooks/use-add-pfp";
 import { useHeader } from "@/navigation/use-header";
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { ValidationError } from "@/utils/api/api.error";
 import { captureErrorWithToast } from "@/utils/capture-error";
-import { useAddPfp } from "@/hooks/use-add-pfp";
 
 // Request validation schema
 const createUserRequestSchema = z.object({
@@ -44,13 +44,13 @@ type IOnboardingContactCardStore = {
   username: string;
   nameValidationError: string;
   avatar: string;
-  isAvatarUploading: boolean;
+  // isAvatarUploading: boolean;
   actions: {
     setName: (name: string) => void;
     setUsername: (username: string) => void;
     setNameValidationError: (nameValidationError: string) => void;
     setAvatar: (avatar: string) => void;
-    setIsAvatarUploading: (isUploading: boolean) => void;
+    // setIsAvatarUploading: (isUploading: boolean) => void;
     reset: () => void;
   };
 };
@@ -61,22 +61,22 @@ const useOnboardingContactCardStore = create<IOnboardingContactCardStore>(
     username: "",
     nameValidationError: "",
     avatar: "",
-    isAvatarUploading: false,
+    // isAvatarUploading: false,
     actions: {
       setName: (name: string) => set({ name }),
       setUsername: (username: string) => set({ username }),
       setNameValidationError: (nameValidationError: string) =>
         set({ nameValidationError }),
       setAvatar: (avatar: string) => set({ avatar }),
-      setIsAvatarUploading: (isAvatarUploading: boolean) => 
-        set({ isAvatarUploading }),
+      // setIsAvatarUploading: (isAvatarUploading: boolean) =>
+      //   set({ isAvatarUploading }),
       reset: () =>
-        set({ 
-          name: "", 
-          username: "", 
-          nameValidationError: "", 
+        set({
+          name: "",
+          username: "",
+          nameValidationError: "",
           avatar: "",
-          isAvatarUploading: false 
+          // isAvatarUploading: false
         }),
     },
   }),
@@ -354,33 +354,27 @@ const ProfileContactCardNameInput = memo(
 );
 
 const ProfileContactCardAvatar = memo(function ProfileContactCardAvatar() {
-  const { addPFP, asset, isUploading } = useAddPfp();
-  const onboardingStore = useOnboardingContactCardStore();
-  const [displayUri, setDisplayUri] = useState<string | undefined>(onboardingStore.avatar);
+  const { addPFP, asset } = useAddPfp();
 
-  // Keep display URI in sync to prevent flashing
-  useEffect(() => {
-    if (asset?.uri) {
-      setDisplayUri(asset.uri);
-    } else {
-      setDisplayUri(onboardingStore.avatar);
+  const name = useOnboardingContactCardStore((state) => state.name);
+  const avatar = useOnboardingContactCardStore((state) => state.avatar);
+
+  const addAvatar = useCallback(async () => {
+    try {
+      const uploadedUrl = await addPFP();
+      useOnboardingContactCardStore.getState().actions.setAvatar(uploadedUrl);
+    } catch (error) {
+      captureErrorWithToast(error, {
+        message: "Failed to upload avatar. Please try again.",
+      });
     }
-  }, [asset?.uri, onboardingStore.avatar]);
-
-  // Update upload status
-  useEffect(() => {
-    onboardingStore.actions.setIsAvatarUploading(isUploading);
-  }, [isUploading, onboardingStore.actions]);
+  }, [addPFP]);
 
   return (
     <ProfileContactCardEditableAvatar
-      avatarUri={displayUri}
-      avatarName={onboardingStore.name}
-      onPress={() => {
-        addPFP((uploadedUrl) => {
-          onboardingStore.actions.setAvatar(uploadedUrl);
-        });
-      }}
+      avatarUri={asset?.uri ?? avatar}
+      avatarName={name}
+      onPress={addAvatar}
     />
   );
 });
