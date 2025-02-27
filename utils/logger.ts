@@ -128,3 +128,7 @@ export const xmtpLogger = createPrefixedLogger("XMTP");
  * @deprecated Use { logger } instead
  */
 export default logger;
+
+export function logJson(json: any) {
+  console.log(JSON.stringify(json, null, 2));
+}

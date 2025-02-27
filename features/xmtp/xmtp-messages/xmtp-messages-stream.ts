@@ -11,7 +11,7 @@ export const streamAllMessages = async (args: {
   const { account, onNewMessage } = args;
 
   const client = await getXmtpClientByEthAddress({
-    ethereumAddress: account,
+    ethAddress: account,
   });
 
   xmtpLogger.debug(`Streaming messages for ${client.address}`);
@@ -38,7 +38,7 @@ export const stopStreamingAllMessage = async (args: { ethAddress: string }) => {
   const { ethAddress } = args;
 
   const client = await getXmtpClientByEthAddress({
-    ethereumAddress: ethAddress,
+    ethAddress: ethAddress,
   });
 
   try {

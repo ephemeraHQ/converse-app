@@ -26,7 +26,7 @@ async function getUnknownConversations(args: { account: string }) {
   });
 
   const client = await getXmtpClientByEthAddress({
-    ethereumAddress: account,
+    ethAddress: account,
   });
 
   const conversations = await client.conversations.list(

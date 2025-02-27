@@ -21,6 +21,7 @@ import { Platform } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
+import { DevToolsBubble } from "react-native-react-query-devtools";
 import {
   configureReanimatedLogger,
   ReanimatedLogLevel,
@@ -73,15 +74,6 @@ export function App() {
 
   useCoinbaseWalletListener(true, coinbaseUrl);
 
-  // const onCopy = async (text: string) => {
-  //   try {
-  //     await Clipboard.setStringAsync(text);
-  //     return true;
-  //   } catch {
-  //     return false;
-  //   }
-  // };
-
   return (
     // <PersistQueryClientProvider
     //   client={queryClient}
@@ -107,7 +99,7 @@ export function App() {
                           {/* <AuthenticateWithPasskeyProvider> */}
                           <AppNavigator />
                           {/* </AuthenticateWithPasskeyProvider> */}
-                          {/* {__DEV__ && <DevToolsBubble onCopy={onCopy} />} */}
+                          {/* {__DEV__ && <DevToolsBubble />} */}
                           <ActionSheet />
                           <Snackbars />
                         </BottomSheetModalProvider>

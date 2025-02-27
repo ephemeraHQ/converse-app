@@ -40,27 +40,17 @@ export async function createXmtpClient(args: { inboxSigner: IXmtpSigner }) {
 }
 
 // Helper function while in lots of places we get the Xmtp client using the ethereum address
-export async function getXmtpClientByEthAddress(args: {
-  ethereumAddress: string;
-}) {
-  const { ethereumAddress } = args;
-
-  const sender = useMultiInboxStore
-    .getState()
-    .senders.find((s) => s.ethereumAddress === ethereumAddress);
-
-  if (!sender) {
-    throw new Error(`No sender found for address: ${ethereumAddress}`);
-  }
+export async function getXmtpClientByEthAddress(args: { ethAddress: string }) {
+  const { ethAddress } = args;
 
   try {
     return getXmtpClient({
-      ethAddress: sender.ethereumAddress,
+      ethAddress,
     });
   } catch (error) {
     throw enhanceError(
       error,
-      `Failed to get or create XMTP client for address: ${ethereumAddress}`,
+      `Failed to get or create XMTP client for address: ${ethAddress}`,
     );
   }
 }

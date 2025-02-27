@@ -14,7 +14,7 @@ export const updateInboxIdsConsentForAccount = async ({
   consent,
 }: UpdateInboxIdsConsentForAccountParams): Promise<void> => {
   const client = await getXmtpClientByEthAddress({
-    ethereumAddress: account,
+    ethAddress: account,
   });
 
   logger.debug(

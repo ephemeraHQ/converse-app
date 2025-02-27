@@ -16,7 +16,7 @@ export async function getXmtpDmByInboxId(args: {
 
   try {
     const client = await getXmtpClientByEthAddress({
-      ethereumAddress: ethAccountAddress,
+      ethAddress: ethAccountAddress,
     });
 
     const conversation = await client.conversations.findDmByInboxId(inboxId);
@@ -50,7 +50,7 @@ export async function createXmtpDm(args: {
 
   try {
     const client = await getXmtpClientByEthAddress({
-      ethereumAddress: senderEthAddress,
+      ethAddress: senderEthAddress,
     });
 
     const conversation =

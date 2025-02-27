@@ -6,10 +6,10 @@ export async function getEthAddressesFromInboxIds(args: {
   clientEthAddress: IEthereumAddress;
   inboxIds: InboxId[];
 }) {
-  const { clientEthAddress: clientEthAddress, inboxIds } = args;
+  const { clientEthAddress, inboxIds } = args;
 
   const client = await getXmtpClientByEthAddress({
-    ethereumAddress: clientEthAddress,
+    ethAddress: clientEthAddress,
   });
 
   const inboxStates = await client.inboxStates(true, inboxIds);

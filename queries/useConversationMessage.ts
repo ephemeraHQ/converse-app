@@ -26,7 +26,7 @@ async function getConversationMessage(args: IArgs) {
   );
 
   const xmtpClient = await getXmtpClientByEthAddress({
-    ethereumAddress: account,
+    ethAddress: account,
   });
 
   if (!xmtpClient) {

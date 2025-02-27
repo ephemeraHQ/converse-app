@@ -10,7 +10,7 @@ export const encryptRemoteAttachment = async (
   mimeType: string | undefined,
 ) => {
   const client = await getXmtpClientByEthAddress({
-    ethereumAddress: account,
+    ethAddress: account,
   });
   const encryptedAttachment = await client.encryptAttachment({
     fileUri,
@@ -36,7 +36,7 @@ export const fetchAndDecodeRemoteAttachment = async (args: {
   }).promise;
 
   const client = await getXmtpClientByEthAddress({
-    ethereumAddress: account,
+    ethAddress: account,
   });
 
   const decryptedContent = await client.decryptAttachment({

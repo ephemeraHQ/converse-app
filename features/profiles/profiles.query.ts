@@ -4,6 +4,7 @@ import {
   useQueries,
   useQuery,
 } from "@tanstack/react-query";
+import { InboxId } from "@xmtp/react-native-sdk";
 import {
   fetchProfile,
   IConvosProfileForInbox,
@@ -71,4 +72,8 @@ export const useProfilesQueries = ({
       error: results.find((result) => result.error)?.error,
     }),
   });
+};
+
+export const getProfileQueryData = ({ xmtpId }: { xmtpId: InboxId }) => {
+  return queryClient.getQueryData(getProfileQueryConfig({ xmtpId }).queryKey);
 };

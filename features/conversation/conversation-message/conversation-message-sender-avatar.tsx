@@ -1,9 +1,10 @@
 import { useCallback } from "react";
-import { TouchableOpacity } from "react-native";
 import { Avatar } from "@/components/avatar";
+import { Pressable } from "@/design-system/Pressable";
 import { useConversationMessageStyles } from "@/features/conversation/conversation-message/conversation-message.styles";
 import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info";
-import { navigate } from "@/navigation/navigation.utils";
+import { useRouter } from "@/navigation/use-navigation";
+import { useAppTheme } from "@/theme/use-app-theme";
 
 type IConversationSenderAvatarProps = {
   inboxId: string;
@@ -12,22 +13,23 @@ type IConversationSenderAvatarProps = {
 export function ConversationSenderAvatar({
   inboxId,
 }: IConversationSenderAvatarProps) {
+  const { theme } = useAppTheme();
   const { senderAvatarSize } = useConversationMessageStyles();
   const { displayName, avatarUrl } = usePreferredDisplayInfo({ inboxId });
 
+  const router = useRouter();
+
   const openProfile = useCallback(() => {
-    if (displayName) {
-      navigate("Profile", { inboxId });
-    }
-  }, [displayName, inboxId]);
+    router.push("Profile", { inboxId });
+  }, [inboxId, router]);
 
   return (
-    <TouchableOpacity onPress={openProfile}>
+    <Pressable onPress={openProfile} hitSlop={theme.spacing.xxxs}>
       <Avatar
         size={senderAvatarSize}
         uri={avatarUrl}
         name={displayName ?? ""}
       />
-    </TouchableOpacity>
+    </Pressable>
   );
 }

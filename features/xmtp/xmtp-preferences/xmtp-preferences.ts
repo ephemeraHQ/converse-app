@@ -3,7 +3,7 @@ import { getXmtpClientByEthAddress } from "../xmtp-client/xmtp-client.service";
 
 export const syncConsent = async (account: string) => {
   const client = await getXmtpClientByEthAddress({
-    ethereumAddress: account,
+    ethAddress: account,
   });
   try {
     await client.preferences.syncConsent();

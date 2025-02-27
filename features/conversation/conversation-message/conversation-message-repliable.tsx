@@ -16,19 +16,13 @@ import logger from "@/utils/logger";
 type IProps = {
   children: React.ReactNode;
   onReply: () => void;
-  messageIsFromCurrentUser: boolean;
 };
 
 export const ConversationMessageRepliable = memo(
-  function ConversationMessageRepliable({
-    children,
-    onReply,
-    messageIsFromCurrentUser,
-  }: IProps) {
+  function ConversationMessageRepliable({ children, onReply }: IProps) {
     const { theme } = useAppTheme();
 
-    const { messageContainerSidePadding, senderAvatarSize } =
-      useConversationMessageStyles();
+    const { messageContainerSidePadding } = useConversationMessageStyles();
 
     const handleLeftSwipe = useCallback(() => {
       logger.debug("[ConversationMessageRepliable] onLeftSwipe");
@@ -47,7 +41,9 @@ export const ConversationMessageRepliable = memo(
         overshootFriction={10} // 10 feels like the iMessage reply swipe so we like it!
         // Prevent swipe conflict with back gesture for other users' messages
         leftHitSlop={
-          -(messageContainerSidePadding + senderAvatarSize)
+          -messageContainerSidePadding
+          // Adding senderAvatarSize makes the sender avatar not pressable
+          //  - senderAvatarSize)
           // Allow swipe to trigger when starting a few pixels left of message. So don't add spaceBetweenSenderAvatarAndMessage
           // + spaceBetweenSenderAvatarAndMessage
         }

@@ -49,7 +49,7 @@ async function getConversation(args: IGetConversationArgs) {
   ]);
 
   const client = await getXmtpClientByEthAddress({
-    ethereumAddress: account,
+    ethAddress: account,
   });
 
   const conversation = (

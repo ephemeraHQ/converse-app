@@ -12,21 +12,39 @@ const IGNORED_LOGS = [
 
 // Workaround for console filtering in development
 if (__DEV__) {
-  const connectConsoleTextFromArgs = (arrayOfStrings: string[]): string =>
-    arrayOfStrings
-      .slice(1)
-      .reduce(
-        (baseString, currentString) => baseString.replace("%s", currentString),
-        arrayOfStrings[0],
-      );
+  const connectConsoleTextFromArgs = (args: any[]): string => {
+    // Handle case when args is empty
+    if (args.length === 0) {
+      return "";
+    }
+
+    // Handle case when first arg is not a string
+    if (typeof args[0] !== "string") {
+      return String(args[0]);
+    }
+
+    // Process string formatting when we have a string as first argument
+    return args.slice(1).reduce((baseString, currentArg) => {
+      // Convert current arg to string if it's not already
+      const currentString =
+        typeof currentArg === "string" ? currentArg : String(currentArg);
+
+      return baseString.replace("%s", currentString);
+    }, args[0]);
+  };
 
   const filterIgnoredMessages =
-    (consoleLog: typeof console.log) =>
+    (consoleMethod: typeof console.log) =>
     (...args: any[]) => {
-      const output = connectConsoleTextFromArgs(args);
+      try {
+        const output = connectConsoleTextFromArgs(args);
 
-      if (!IGNORED_LOGS.some((log) => output.includes(log))) {
-        consoleLog(...args);
+        if (!IGNORED_LOGS.some((log) => output.includes(log))) {
+          consoleMethod(...args);
+        }
+      } catch (error) {
+        // If any error occurs during filtering, fall back to original console method
+        consoleMethod(...args);
       }
     };
 

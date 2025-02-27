@@ -11,7 +11,7 @@ export const accountCanMessagePeer = async (
 ) => {
   const { peer, account } = args;
   const client = await getXmtpClientByEthAddress({
-    ethereumAddress: account,
+    ethAddress: account,
   });
 
   if (!client) {

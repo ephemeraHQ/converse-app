@@ -26,7 +26,7 @@ export function getConversationSyncAllQueryOptions(args: IArgs) {
           }
 
           const client = await getXmtpClientByEthAddress({
-            ethereumAddress: args.ethAddress,
+            ethAddress: args.ethAddress,
           });
 
           const beforeSync = new Date().getTime();

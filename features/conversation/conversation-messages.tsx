@@ -234,10 +234,7 @@ const ConversationMessagesListItem = memo(
           })}
         >
           <ConversationMessageTimestamp />
-          <ConversationMessageRepliable
-            onReply={handleReply}
-            messageIsFromCurrentUser={isFromCurrentUser}
-          >
+          <ConversationMessageRepliable onReply={handleReply}>
             <ConversationMessageLayout
               message={
                 <ConversationMessageHighlighted>

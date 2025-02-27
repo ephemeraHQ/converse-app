@@ -49,9 +49,10 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
       // Don't show toast for passkey cancellation
       if (
         error instanceof Error &&
-        error.message.includes(
+        (error.message.includes(
           "AuthenticationServices.AuthorizationError error 1001",
-        )
+        ) ||
+          error.message.includes("UserCancelled"))
       ) {
         return;
       }
@@ -77,9 +78,10 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
       // Don't show toast for passkey cancellation
       if (
         error instanceof Error &&
-        error.message.includes(
+        (error.message.includes(
           "AuthenticationServices.AuthorizationError error 1001",
-        )
+        ) ||
+          error.message.includes("UserCancelled"))
       ) {
         return;
       }

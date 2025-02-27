@@ -9,7 +9,7 @@ export async function syncAllConversations(
 ) {
   try {
     const client = await getXmtpClientByEthAddress({
-      ethereumAddress: ethAddress,
+      ethAddress: ethAddress,
     });
 
     const beforeSync = new Date().getTime();

@@ -11,7 +11,7 @@ export async function getInboxIdFromEthAddress(args: {
 
   try {
     const client = await getXmtpClientByEthAddress({
-      ethereumAddress: clientEthAddress,
+      ethAddress: clientEthAddress,
     });
 
     const lookupStartTime = Date.now();

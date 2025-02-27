@@ -11,7 +11,7 @@ export async function streamConversations(args: {
   const { ethAddress, onNewConversation } = args;
 
   const client = await getXmtpClientByEthAddress({
-    ethereumAddress: ethAddress,
+    ethAddress: ethAddress,
   });
 
   xmtpLogger.debug(`Started streaming conversations for ${ethAddress}`);
@@ -26,7 +26,7 @@ export async function stopStreamingConversations(args: { ethAddress: string }) {
   const { ethAddress } = args;
 
   const client = await getXmtpClientByEthAddress({
-    ethereumAddress: ethAddress,
+    ethAddress: ethAddress,
   });
 
   await client.conversations.cancelStream();

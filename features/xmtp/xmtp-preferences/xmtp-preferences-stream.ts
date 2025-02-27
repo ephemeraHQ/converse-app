@@ -5,7 +5,7 @@ import { getXmtpClientByEthAddress } from "../xmtp-client/xmtp-client.service";
 
 export const streamConsent = async (account: string) => {
   const client = await getXmtpClientByEthAddress({
-    ethereumAddress: account,
+    ethAddress: account,
   });
 
   xmtpLogger.debug(`Streaming consent for ${client.address}`);
@@ -33,7 +33,7 @@ export const streamConsent = async (account: string) => {
 
 export const stopStreamingConsent = async (account: string) => {
   const client = await getXmtpClientByEthAddress({
-    ethereumAddress: account,
+    ethAddress: account,
   });
 
   xmtpLogger.debug(`Stopping consent stream for ${client.address}`);
@@ -61,7 +61,7 @@ export const stopStreamingConsent = async (account: string) => {
 
 export const streamPreferences = async (account: string) => {
   const client = await getXmtpClientByEthAddress({
-    ethereumAddress: account,
+    ethAddress: account,
   });
 
   xmtpLogger.debug(`Streaming preferences for ${client.address}`);
@@ -82,7 +82,7 @@ export const streamPreferences = async (account: string) => {
 
 export const stopStreamingPreferences = async (account: string) => {
   const client = await getXmtpClientByEthAddress({
-    ethereumAddress: account,
+    ethAddress: account,
   });
 
   xmtpLogger.debug(`Stopping preferences stream for ${client.address}`);

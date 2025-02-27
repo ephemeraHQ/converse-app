@@ -37,7 +37,7 @@ export async function getConvosAuthenticationHeaders(): Promise<XmtpApiHeaders> 
   // }
 
   const inboxClient = await getXmtpClientByEthAddress({
-    ethereumAddress: currentEthereumAddress,
+    ethAddress: currentEthereumAddress,
   });
 
   if (!inboxClient) {

@@ -36,7 +36,7 @@ export async function createXmtpGroup(args: {
     const startTime = Date.now();
 
     const client = await getXmtpClientByEthAddress({
-      ethereumAddress: account,
+      ethAddress: account,
     });
 
     const group =

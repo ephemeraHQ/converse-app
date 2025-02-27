@@ -13,7 +13,7 @@ export const updateConsentForGroupsForAccount = async (
   const { account, groupIds, consent } = args;
 
   const client = await getXmtpClientByEthAddress({
-    ethereumAddress: account,
+    ethAddress: account,
   });
 
   if (!client) {

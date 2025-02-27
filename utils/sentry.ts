@@ -7,14 +7,22 @@ import {
   useCurrentSender,
   useMultiInboxStore,
 } from "@/features/authentication/multi-inbox.store";
-import { getCurrentUserQueryOptions } from "@/features/current-user/curent-user.query";
-import { getProfileQueryConfig } from "@/features/profiles/profiles.query";
+import {
+  getCurrentUserQueryData,
+  getCurrentUserQueryOptions,
+} from "@/features/current-user/curent-user.query";
+import {
+  getProfileQueryConfig,
+  getProfileQueryData,
+} from "@/features/profiles/profiles.query";
 import { queryClient } from "@/queries/queryClient";
 import { getEnv, isDev } from "@/utils/getEnv";
 import { config } from "../config";
 
-// Error patterns that should not be reported to Sentry
+// Sentry has ~8KB limit for string values
+export const MAX_SENTRY_STRING_SIZE = 8000; // bytes
 
+// Error patterns that should not be reported to Sentry
 const errorsToFilterOut = [
   "Request failed with status code 401",
   "Request failed with status code 404",
@@ -109,6 +117,16 @@ export function useUpdateSentry() {
       return;
     }
 
+    // Identify user on mount
+    const currentUser = getCurrentUserQueryData();
+    const currentProfile = getProfileQueryData({
+      xmtpId: currentSender.inboxId,
+    });
+    sentryIdentifyUser({
+      userId: currentUser?.id,
+      username: currentProfile?.username,
+    });
+
     // Track user changes
     const userQueryObserver = new QueryObserver(
       queryClient,
@@ -137,6 +155,7 @@ export function useUpdateSentry() {
       (result) => {
         if (result.data?.name) {
           sentryIdentifyUser({
+            userId: getCurrentUserQueryData()?.id,
             username: result.data.name,
           });
         }
@@ -162,6 +181,3 @@ export function useUpdateSentry() {
     };
   }, [currentSender]);
 }
-
-// Sentry has ~8KB limit for string values
-export const MAX_SENTRY_STRING_SIZE = 8000; // bytes
