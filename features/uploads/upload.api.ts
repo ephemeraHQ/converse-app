@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { api } from "@/utils/api/api";
 import { logger } from "@/utils/logger";
+import RNFetchBlob from "rn-fetch-blob";
 
 const PresignedUrlResponseSchema = z.object({
   objectKey: z.string(),
@@ -29,56 +30,45 @@ export const getPresignedUploadUrl = async (
 };
 
 /**
+ * Extracts the public URL from a presigned URL by removing query parameters
+ */
+const getPublicUrlFromPresignedUrl = (presignedUrl: string): string => {
+  const fileURL = new URL(presignedUrl);
+  return fileURL.origin + fileURL.pathname;
+};
+
+/**
  * Uploads a file using a presigned URL
  * @param presignedUrl - The presigned URL to upload to
- * @param file - The file to upload
+ * @param filePath - The local file path
  * @param contentType - The MIME type of the file
  * @returns The public URL of the uploaded file
  */
 export const uploadFileWithPresignedUrl = async (
   presignedUrl: string,
-  file: Blob | File,
+  filePath: string,
   contentType: string,
 ): Promise<string> => {
   logger.debug("[API ATTACHMENTS] Uploading file to presigned URL:", {
     presignedUrl,
+    filePath,
     contentType,
-    fileSize: file.size,
   });
-  await fetch(presignedUrl, {
-    method: "PUT",
-    body: file,
-    headers: {
+
+  // Remove file:// prefix for RNFetchBlob
+  const normalizedPath = filePath.replace("file://", "");
+
+  await RNFetchBlob.fetch(
+    "PUT",
+    presignedUrl,
+    {
       "Content-Type": contentType,
       "x-amz-acl": "public-read",
     },
-  });
+    RNFetchBlob.wrap(normalizedPath),
+  );
 
-  // Extract the public URL from the presigned URL
-  const fileURL = new URL(presignedUrl);
-  const publicUrl = fileURL.origin + fileURL.pathname;
+  const publicUrl = getPublicUrlFromPresignedUrl(presignedUrl);
   logger.debug("[API ATTACHMENTS] File uploaded successfully:", { publicUrl });
   return publicUrl;
-};
-
-/**
- * Helper function that combines getting a presigned URL and uploading a file
- * @param file - The file to upload
- * @returns The public URL and object key of the uploaded file
- */
-export const uploadFile = async (
-  file: File,
-): Promise<{ publicUrl: string; objectKey: string }> => {
-  logger.debug("[API ATTACHMENTS] Starting file upload:", {
-    fileName: file.name,
-    fileType: file.type,
-    fileSize: file.size,
-  });
-  const { url, objectKey } = await getPresignedUploadUrl(file.type);
-  const publicUrl = await uploadFileWithPresignedUrl(url, file, file.type);
-  logger.debug("[API ATTACHMENTS] File upload completed:", {
-    publicUrl,
-    objectKey,
-  });
-  return { publicUrl, objectKey };
 };

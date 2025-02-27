@@ -11,6 +11,14 @@ import {
   type IConvosProfileForInbox,
 } from "./profile.types";
 
+// Schema for profile update requests - only includes updatable fields
+const ProfileUpdateRequestSchema = z.object({
+  name: z.string().optional(),
+  username: z.string().optional(),
+  description: z.string().nullable().optional(),
+  avatar: z.string().nullable().optional(),
+});
+
 /**
  * Compares a profile update with the current profile and returns only changed fields.
  * Handles both new profiles and updates to existing ones.
@@ -91,13 +99,11 @@ export const updateProfile = async (args: { xmtpId: string; updates: ProfileUpda
   });
   
   try {
-    const { data } = await api.put(`/api/v1/profiles/${xmtpId}`, updates);
+    // Validate the update payload
+    const validatedUpdates = ProfileUpdateRequestSchema.parse(updates);
     
-    const result = ConvosProfileForInboxSchema.safeParse(data);
-    if (!result.success) {
-      captureError(result.error);
-    }
-    
+    // Make the API call
+    const { data } = await api.put(`/api/v1/profiles/${xmtpId}`, validatedUpdates);
     return data;
   } catch (error) {
     logger.error("[updateProfile]", { 

@@ -35,6 +35,7 @@ export type ProfileUpdates = {
 export type ProfileInput = ProfileUpdates & {
   id?: string;
   xmtpId?: string;
+  privyAddress?: string;
 };
 
 export type ClaimProfileRequest = {

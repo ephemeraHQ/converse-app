@@ -12,7 +12,8 @@ type IProfileMeStoreState = {
   nameTextValue: string;
   usernameTextValue: string;
   descriptionTextValue: string;
-  avatarUri: string;
+  avatarUri?: string;
+  isAvatarUploading: boolean;
 };
 
 type IProfileMeStoreActions = {
@@ -20,7 +21,8 @@ type IProfileMeStoreActions = {
   setNameTextValue: (nameTextValue: string) => void;
   setUsernameTextValue: (usernameTextValue: string) => void;
   setDescriptionTextValue: (descriptionTextValue: string) => void;
-  setAvatarUri: (avatarUri: string) => void;
+  setAvatarUri: (avatarUri?: string) => void;
+  setIsAvatarUploading: (isUploading: boolean) => void;
   reset: () => void;
 };
 
@@ -33,7 +35,8 @@ const DEFAULT_STATE: IProfileMeStoreState = {
   nameTextValue: "",
   usernameTextValue: "",
   descriptionTextValue: "",
-  avatarUri: "",
+  avatarUri: undefined,
+  isAvatarUploading: false,
 };
 
 function getProfileMeStorageKey(inboxId: InboxId) {
@@ -54,6 +57,7 @@ function createProfileMeStore(inboxId: InboxId) {
             setUsernameTextValue: (usernameTextValue) => set({ usernameTextValue }),
             setDescriptionTextValue: (descriptionTextValue) => set({ descriptionTextValue }),
             setAvatarUri: (avatarUri) => set({ avatarUri }),
+            setIsAvatarUploading: (isAvatarUploading) => set({ isAvatarUploading }),
             reset: () => {
               set(DEFAULT_STATE);
               // Clear persisted data
@@ -70,6 +74,7 @@ function createProfileMeStore(inboxId: InboxId) {
             usernameTextValue: state.usernameTextValue,
             descriptionTextValue: state.descriptionTextValue,
             avatarUri: state.avatarUri,
+            isAvatarUploading: state.isAvatarUploading,
           }),
         },
       ),

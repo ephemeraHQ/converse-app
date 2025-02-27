@@ -214,6 +214,7 @@ const DoneAction = memo(function DoneAction({ inboxId }: { inboxId: InboxId }) {
       const profileUpdate = {
         id: profile?.id,
         xmtpId: inboxId,
+        privyAddress: profile?.privyAddress,
         name: state.nameTextValue,
         username: state.usernameTextValue,
         description: state.descriptionTextValue,

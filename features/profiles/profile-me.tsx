@@ -253,23 +253,36 @@ const EditableDescriptionInput = memo(
 
 const EditableProfileContactCardAvatar = memo(
   function EditableProfileContactCardAvatar({ inboxId }: { inboxId: InboxId }) {
-    const { asset, addPFP } = useAddPfp();
-
+    const { addPFP, asset, isUploading } = useAddPfp();
     const profileMeStore = useProfileMeStore(inboxId);
-
     const { data: profile } = useProfileQuery({ xmtpId: inboxId });
+    const [displayUri, setDisplayUri] = useState<string | undefined>(
+      profileMeStore.getState().avatarUri ?? profile?.avatar ?? undefined
+    );
 
+    // Keep display URI in sync to prevent flashing
     useEffect(() => {
-      if (asset?.uri && asset.uri !== profileMeStore.getState().avatarUri) {
-        profileMeStore.getState().actions.setAvatarUri(asset.uri);
+      if (asset?.uri) {
+        setDisplayUri(asset.uri);
+      } else {
+        setDisplayUri(profileMeStore.getState().avatarUri ?? profile?.avatar ?? undefined);
       }
-    }, [asset?.uri, profileMeStore]);
+    }, [asset?.uri, profile?.avatar, profileMeStore]);
+
+    // Update upload status
+    useEffect(() => {
+      profileMeStore.getState().actions.setIsAvatarUploading(isUploading);
+    }, [isUploading, profileMeStore]);
 
     return (
       <ProfileContactCardEditableAvatar
-        avatarUri={asset?.uri ?? profile?.avatar}
+        avatarUri={displayUri}
         avatarName={profile?.name}
-        onPress={addPFP}
+        onPress={() => {
+          addPFP((uploadedUrl) => {
+            profileMeStore.getState().actions.setAvatarUri(uploadedUrl);
+          });
+        }}
       />
     );
   },

@@ -47,11 +47,13 @@ type IOnboardingContactCardStore = {
   username: string;
   nameValidationError: string;
   avatar: string;
+  isAvatarUploading: boolean;
   actions: {
     setName: (name: string) => void;
     setUsername: (username: string) => void;
     setNameValidationError: (nameValidationError: string) => void;
     setAvatar: (avatar: string) => void;
+    setIsAvatarUploading: (isUploading: boolean) => void;
     reset: () => void;
   };
 };
@@ -62,14 +64,23 @@ const useOnboardingContactCardStore = create<IOnboardingContactCardStore>(
     username: "",
     nameValidationError: "",
     avatar: "",
+    isAvatarUploading: false,
     actions: {
       setName: (name: string) => set({ name }),
       setUsername: (username: string) => set({ username }),
       setNameValidationError: (nameValidationError: string) =>
         set({ nameValidationError }),
       setAvatar: (avatar: string) => set({ avatar }),
+      setIsAvatarUploading: (isAvatarUploading: boolean) => 
+        set({ isAvatarUploading }),
       reset: () =>
-        set({ name: "", username: "", nameValidationError: "", avatar: "" }),
+        set({ 
+          name: "", 
+          username: "", 
+          nameValidationError: "", 
+          avatar: "",
+          isAvatarUploading: false 
+        }),
     },
   }),
 );
@@ -346,22 +357,32 @@ const ProfileContactCardNameInput = memo(
 );
 
 const ProfileContactCardAvatar = memo(function ProfileContactCardAvatar() {
-  const { asset, addPFP } = useAddPfp();
+  const { addPFP, asset, isUploading } = useAddPfp();
   const onboardingStore = useOnboardingContactCardStore();
+  const [displayUri, setDisplayUri] = useState<string | undefined>(onboardingStore.avatar);
 
+  // Keep display URI in sync to prevent flashing
   useEffect(() => {
-    if (asset?.uri && asset.uri !== onboardingStore.avatar) {
-      onboardingStore.actions.setAvatar(asset.uri);
+    if (asset?.uri) {
+      setDisplayUri(asset.uri);
+    } else {
+      setDisplayUri(onboardingStore.avatar);
     }
-  }, [asset?.uri, onboardingStore.actions, onboardingStore.avatar]);
+  }, [asset?.uri, onboardingStore.avatar]);
+
+  // Update upload status
+  useEffect(() => {
+    onboardingStore.actions.setIsAvatarUploading(isUploading);
+  }, [isUploading, onboardingStore.actions]);
 
   return (
     <ProfileContactCardEditableAvatar
-      avatarUri={asset?.uri ?? onboardingStore.avatar}
+      avatarUri={displayUri}
       avatarName={onboardingStore.name}
-      // onPress={addPFP}
       onPress={() => {
-        Alert.alert("Coming soon");
+        addPFP((uploadedUrl) => {
+          onboardingStore.actions.setAvatar(uploadedUrl);
+        });
       }}
     />
   );
