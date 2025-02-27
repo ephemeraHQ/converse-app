@@ -53,7 +53,7 @@ export function useSocialProfilesForEthAddressQueries(args: {
   });
 }
 
-export const ensureSocialProfilesForAddressQueryData = async (
+export const ensureSocialProfilesForAddressQuery = async (
   args: IStrictArgs,
 ) => {
   return queryClient.ensureQueryData(

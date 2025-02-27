@@ -28,6 +28,56 @@ if (isValid) {
 }
 ```
 
+## Code Organization
+
+- Place exported functions, components, and variables at the top of the file.
+- Place helper functions and non-exported components below the exported items.
+- Define types close to their implementation:
+  - Place type definitions directly above the function or component that uses them.
+  - Only place types at the top of the file if they're used in multiple places throughout the file.
+
+```typescript
+// ❌ Bad: Helper function above exported function
+function formatUserName(firstName: string, lastName: string) {
+  return `${firstName} ${lastName}`;
+}
+
+export function UserProfile(args: { userId: string }) {
+  // Implementation
+}
+
+// ✅ Good: Exported function at the top, helper below
+export function UserProfile(args: { userId: string }) {
+  // Implementation using formatUserName
+}
+
+function formatUserName(firstName: string, lastName: string) {
+  return `${firstName} ${lastName}`;
+}
+
+// ❌ Bad: Type definition far from implementation
+type IFormatOptions = {
+  uppercase: boolean;
+  includeMiddleName: boolean;
+};
+
+// Many lines of code...
+
+function formatName(args: { name: string; options: IFormatOptions }) {
+  // Implementation
+}
+
+// ✅ Good: Type definition close to implementation
+type IFormatOptions = {
+  uppercase: boolean;
+  includeMiddleName: boolean;
+};
+
+function formatName(args: { name: string; options: IFormatOptions }) {
+  // Implementation
+}
+```
+
 ## TypeScript
 
 - Use types over interfaces, prefixed with 'I'.
@@ -97,18 +147,79 @@ function sendMessage(args: { recipientId: string; content: string }) {
 
 - Use lower-kebab-case for directories and files.
 - Import paths should start with @/.
-- Use descriptive suffixes for files.
+- Place files as close as possible to where they are used.
+- Follow the feature-based organization pattern.
+- Use descriptive suffixes for files that indicate their purpose.
 
 ```
 // ❌ Bad: Unclear names
 utils.ts
 types.ts
 
-// ✅ Good: Clear names with suffixes
+// ✅ Good: Clear names with feature prefix and purpose suffix
 profile.screen.tsx
-messages.queries.ts
+messages.query.ts
 auth.client.ts
 ```
+
+### Feature-Based Organization
+
+Organize code by features rather than technical concerns. Each feature should be self-contained with its own components, screens, utilities, etc.
+
+Feature directories may contain:
+
+- `components/` - UI components specific to the feature
+- `screens/` - Screen components for the feature
+- `navigation/` - Navigation-related code
+- `hooks/` - Custom hooks
+- `utils/` - Utility functions
+- `data/` - Data management
+- `clients/` - API clients
+- `queries/` - React Query related code
+- `types/` - TypeScript types
+- `actors/` - XState actors
+
+### File Naming Convention
+
+Name files with the feature name as prefix and a descriptive suffix indicating the file's purpose:
+
+```
+[featureName].screen.tsx
+[featureName].nav.tsx
+[featureName].store.ts
+[featureName].query.ts
+[featureName].utils.ts
+[featureName].types.ts
+[featureName].test.ts
+```
+
+Example structure:
+
+```
+features/
+└── accounts/
+    ├── components/
+    │   ├── account-card.component.tsx
+    │   └── account-settings.component.tsx
+    ├── screens/
+    │   └── accounts.screen.tsx
+    ├── navigation/
+    │   └── accounts.nav.tsx
+    ├── hooks/
+    │   └── accounts.hooks.ts
+    ├── utils/
+    │   └── accounts.utils.ts
+    ├── data/
+    ├── accounts.query.ts
+    └── accounts.types.ts
+```
+
+This organization ensures that:
+
+1. Related code stays together
+2. Files are easy to find based on their name
+3. The purpose of each file is clear from its suffix
+4. Features are modular and self-contained
 
 ## React Query Best Practices
 
@@ -130,6 +241,75 @@ export const getMessagesQueryOptions = (args: { id: string }) => {
     enabled,
   });
 };
+```
+
+## Zustand Store Best Practices
+
+- Use Zustand stores to centralize state and actions, especially when passing many props between components.
+- Structure stores with a clear separation between state and actions:
+
+```typescript
+// ✅ Good: Clear separation of state and actions
+export const useCounterStore = create<ICounterStore>((set) => ({
+  // State
+  count: 0,
+  isLoading: false,
+
+  // Actions
+  actions: {
+    increment: () => set((state) => ({ count: state.count + 1 })),
+    decrement: () => set((state) => ({ count: state.count - 1 })),
+    reset: () => set({ count: 0 }),
+    fetchCount: async () => {
+      set({ isLoading: true });
+      try {
+        const count = await api.getCount();
+        set({ count, isLoading: false });
+      } catch (error) {
+        set({ isLoading: false });
+        throw new AppError({
+          error,
+          additionalMessage: "Failed to fetch count",
+        });
+      }
+    },
+  },
+}));
+```
+
+- Prefer using the store directly in components over prop drilling:
+
+```typescript
+// ❌ Bad: Prop drilling
+function ParentComponent() {
+  const count = useCounterStore((state) => state.count);
+  const increment = useCounterStore((state) => state.actions.increment);
+
+  return <ChildComponent count={count} increment={increment} />;
+}
+
+// ✅ Good: Direct store usage
+function ChildComponent() {
+  const count = useCounterStore((state) => state.count);
+  const { increment } = useCounterStore((state) => state.actions);
+
+  return (
+    <Button onPress={increment}>
+      Count: {count}
+    </Button>
+  );
+}
+```
+
+- Use selectors to minimize re-renders:
+
+```typescript
+// ❌ Bad: Getting the entire store
+const { count, actions } = useCounterStore();
+
+// ✅ Good: Using selectors for specific values
+const count = useCounterStore((state) => state.count);
+const { increment } = useCounterStore((state) => state.actions);
 ```
 
 ## Error Handling

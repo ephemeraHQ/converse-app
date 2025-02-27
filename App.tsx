@@ -21,7 +21,6 @@ import { Platform } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
-import { DevToolsBubble } from "react-native-react-query-devtools";
 import {
   configureReanimatedLogger,
   ReanimatedLogLevel,

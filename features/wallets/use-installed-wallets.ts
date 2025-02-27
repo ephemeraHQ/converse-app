@@ -25,6 +25,15 @@ export type ISupportedWallet = {
   };
 };
 
+export const useInstalledWallets = () => {
+  const { data: installedWallets, isLoading } = useQuery(
+    getInstalledWalletsQueryOptions(),
+  );
+
+  return { installedWallets, isLoading };
+};
+
+// List of wallets that the app supports
 const SupportedWallets: ISupportedWallet[] = [
   {
     name: "Coinbase Wallet",
@@ -36,7 +45,6 @@ const SupportedWallets: ISupportedWallet[] = [
       callbackURL: `https://${config.websiteDomain}/coinbase`,
     },
   },
-
   {
     name: "Rainbow",
     iconURL:
@@ -78,70 +86,66 @@ const SupportedWallets: ISupportedWallet[] = [
   // },
 ];
 
-async function getInstalledWallets(
-  supportedWallets: ISupportedWallet[],
-): Promise<ISupportedWallet[]> {
-  logger.debug(
-    `[getInstalledWallets] Checking ${supportedWallets.length} supported wallets`,
-  );
-  let installedWalletChecks: boolean[] = [];
-  try {
-    installedWalletChecks = await Promise.all(
-      supportedWallets.map(async (w) => {
-        try {
-          logger.debug(
-            `[getInstalledWallets] Checking if ${w.name} is installed at ${w.customScheme}wc`,
-          );
-          const canOpen = await Linking.canOpenURL(`${w.customScheme}wc`);
-          logger.debug(
-            `[getInstalledWallets] ${w.name} is installed: ${canOpen}`,
-          );
-
-          return canOpen;
-        } catch (e) {
-          logger.error(
-            `[getInstalledWallets] Error checking if ${w.name} is installed: ${e}`,
-          );
-          return false;
-        }
-      }),
-    );
-  } catch (e) {
-    logger.error(
-      `[getInstalledWallets] Error checking installed wallets: ${e}`,
-    );
-    installedWalletChecks = [];
-  }
-
-  const installedWallets = supportedWallets.filter(
-    (_, index) => installedWalletChecks[index],
-  ) as ISupportedWallet[];
-
-  logger.debug(
-    `[getInstalledWallets] Found ${
-      installedWallets.length
-    } installed wallets: ${installedWallets.map((w) => w.name).join(", ")}`,
-  );
-
-  return installedWallets;
-}
-
 function getInstalledWalletsQueryOptions() {
   return queryOptions({
     queryKey: ["installedWallets"],
     queryFn: async () => {
       logger.debug("getInstalledWalletsQueryOptions");
-      return await getInstalledWallets(SupportedWallets);
+      return getInstalledWallets({ supportedWallets: SupportedWallets });
     },
     staleTime: 0,
     refetchOnWindowFocus: true,
   });
 }
 
-export const useInstalledWallets = () => {
-  const { data: installedWallets, isLoading } = useQuery(
-    getInstalledWalletsQueryOptions(),
+async function getInstalledWallets(args: {
+  supportedWallets: ISupportedWallet[];
+}) {
+  const { supportedWallets } = args;
+
+  logger.debug(
+    `[getInstalledWallets] Checking ${supportedWallets.length} supported wallets`,
   );
 
-  return { installedWallets, isLoading };
-};
+  let installedWalletChecks: boolean[] = [];
+
+  try {
+    installedWalletChecks = await Promise.all(
+      supportedWallets.map(async (wallet) => {
+        try {
+          logger.debug(
+            `[getInstalledWallets] Checking if ${wallet.name} is installed at ${wallet.customScheme}wc`,
+          );
+
+          const canOpen = await Linking.canOpenURL(`${wallet.customScheme}wc`);
+
+          logger.debug(
+            `[getInstalledWallets] ${wallet.name} is installed: ${canOpen}`,
+          );
+
+          return canOpen;
+        } catch (error) {
+          logger.error(
+            `[getInstalledWallets] Error checking if ${wallet.name} is installed: ${error}`,
+          );
+          return false;
+        }
+      }),
+    );
+  } catch (error) {
+    logger.error(
+      `[getInstalledWallets] Error checking installed wallets: ${error}`,
+    );
+    installedWalletChecks = [];
+  }
+
+  const installedWallets = supportedWallets.filter(
+    (_, index) => installedWalletChecks[index],
+  );
+
+  logger.debug(
+    `[getInstalledWallets] Found ${installedWallets.length} installed wallets: ${installedWallets.map((w) => w.name).join(", ")}`,
+  );
+
+  return installedWallets;
+}

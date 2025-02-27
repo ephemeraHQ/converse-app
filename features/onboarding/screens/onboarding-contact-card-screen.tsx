@@ -1,7 +1,7 @@
 import { usePrivy } from "@privy-io/expo";
 import { isAxiosError } from "axios";
 import React, { memo, useCallback, useEffect, useState } from "react";
-import { Alert, TextStyle, ViewStyle } from "react-native";
+import { Alert, ViewStyle } from "react-native";
 import {
   interpolate,
   useAnimatedKeyboard,
@@ -12,7 +12,8 @@ import { z } from "zod";
 import { create } from "zustand";
 import { Screen } from "@/components/screen/screen";
 import { showSnackbar } from "@/components/snackbar/snackbar.service";
-import { HStack } from "@/design-system/HStack";
+import { Pressable } from "@/design-system/Pressable";
+import { Text } from "@/design-system/Text";
 import { AnimatedVStack, VStack } from "@/design-system/VStack";
 import { useAuthStore } from "@/features/authentication/authentication.store";
 import { useMultiInboxStore } from "@/features/authentication/multi-inbox.store";
@@ -24,14 +25,15 @@ import { formatRandomUserName } from "@/features/onboarding/utils/format-random-
 import { ProfileContactCardEditableAvatar } from "@/features/profiles/components/profile-contact-card/profile-contact-card-editable-avatar";
 import { ProfileContactCardEditableNameInput } from "@/features/profiles/components/profile-contact-card/profile-contact-card-editable-name-input";
 import { ProfileContactCardLayout } from "@/features/profiles/components/profile-contact-card/profile-contact-card-layout";
+import { useProfileContactCardStyles } from "@/features/profiles/components/profile-contact-card/use-profile-contact-card.styles";
 import { profileValidationSchema } from "@/features/profiles/schemas/profile-validation.schema";
 import { validateProfileName } from "@/features/profiles/utils/validate-profile-name";
+import { ConnectWalletBottomSheet } from "@/features/wallets/connect-wallet/connect-wallet-bottom-sheet";
+import { openConnectWalletBottomSheet } from "@/features/wallets/connect-wallet/connect-wallet.service";
 import { useHeader } from "@/navigation/use-header";
-import { $globalStyles } from "@/theme/styles";
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { ValidationError } from "@/utils/api/api.error";
 import { captureErrorWithToast } from "@/utils/capture-error";
-import { debugBorder } from "@/utils/debug-style";
 import { useAddPfp } from "../../../hooks/use-add-pfp";
 
 // Request validation schema
@@ -75,7 +77,7 @@ const useOnboardingContactCardStore = create<IOnboardingContactCardStore>(
 );
 
 export function OnboardingContactCardScreen() {
-  const { themed } = useAppTheme();
+  const { themed, theme } = useAppTheme();
 
   const { mutateAsync: createUserAsync, isPending } = useCreateUser();
 
@@ -217,6 +219,8 @@ export function OnboardingContactCardScreen() {
     };
   });
 
+  const { container } = useProfileContactCardStyles();
+
   return (
     <>
       <Screen
@@ -225,24 +229,34 @@ export function OnboardingContactCardScreen() {
       >
         <AnimatedVStack
           // {...debugBorder()}
-          style={[themed($contentContainer), contentAnimatedStyle]}
+          style={[
+            themed($contentContainer),
+            contentAnimatedStyle,
+            {
+              paddingHorizontal: theme.spacing.lg - container.margin,
+              rowGap: theme.spacing.lg - container.margin,
+            },
+          ]}
           onLayout={(event) => {
             contentContainerHeightAV.value = event.nativeEvent.layout.height;
           }}
         >
           <AnimatedVStack
-            style={textContainerAnimatedStyle}
+            style={[
+              textContainerAnimatedStyle,
+              {
+                rowGap: theme.spacing.sm,
+              },
+            ]}
             // {...debugBorder()}
             onLayout={(event) => {
               textContainerHeightAV.value = event.nativeEvent.layout.height;
             }}
           >
             <OnboardingTitle size={"xl"}>
-              Complete your contact card
+              Complete your{`\n`}contact card
             </OnboardingTitle>
-            <OnboardingSubtitle style={themed($subtitleStyle)}>
-              Choose how you show up
-            </OnboardingSubtitle>
+            <OnboardingSubtitle>Choose how you show up</OnboardingSubtitle>
           </AnimatedVStack>
 
           <VStack
@@ -253,10 +267,21 @@ export function OnboardingContactCardScreen() {
             <ProfileContactCardLayout
               name={<ProfileContactCardNameInput />}
               avatar={<ProfileContactCardAvatar />}
-              // TODO: Import wallets
-              // additionalOptions={<ProfileContactCardAdditionalOptions />}
+              additionalOptions={<ProfileContactCardAdditionalOptions />}
             />
           </VStack>
+
+          <Text
+            preset="small"
+            color="secondary"
+            style={{
+              textAlign: "center",
+              paddingHorizontal: theme.spacing.lg,
+            }}
+          >
+            Add and edit Contact Cards anytime,{`\n`}or go Rando for extra
+            privacy.
+          </Text>
         </AnimatedVStack>
         <VStack
           onLayout={(event) => {
@@ -272,28 +297,24 @@ export function OnboardingContactCardScreen() {
         </VStack>
       </Screen>
 
-      {/* <ConnectWalletBottomSheet
-        isVisible={isConnectWalletBottomSheetVisible}
-        onClose={() => setIsConnectWalletBottomSheetVisible(false)}
-        onWalletImported={(something) => {
-          logger.debug(
-            "[OnboardingContactCardScreen] Wallet connect:",
-            something
-          );
-        }}
-        // onWalletConnect={async (connectHandler) => {
-        //   try {
-        //     await connectHandler();
-        //     listBottomSheetRef.current?.dismiss();
-        //   } catch (error) {
-        //     logger.error(
-        //       "[OnboardingContactCardScreen] Wallet connect error:",
-        //       error
-        //     );
-        //     captureErrorWithToast(error as Error);
-        //   }
-        // }}
-      /> */}
+      <ConnectWalletBottomSheet
+      // onClose={() => setIsConnectWalletBottomSheetVisible(false)}
+      // onWalletImported={(something) => {
+      //   console.log("something:", something);
+      // }}
+      // onWalletConnect={async (connectHandler) => {
+      //   try {
+      //     await connectHandler();
+      //     listBottomSheetRef.current?.dismiss();
+      //   } catch (error) {
+      //     logger.error(
+      //       "[OnboardingContactCardScreen] Wallet connect error:",
+      //       error
+      //     );
+      //     captureErrorWithToast(error as Error);
+      //   }
+      // }}
+      />
     </>
   );
 }
@@ -304,13 +325,8 @@ const $screenContainer: ViewStyle = {
 
 const $contentContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flex: 1,
-  paddingHorizontal: spacing.md,
+  paddingHorizontal: spacing.lg,
   justifyContent: "center",
-});
-
-const $subtitleStyle: ThemedStyle<TextStyle> = ({ spacing }) => ({
-  marginTop: spacing.xs,
-  marginBottom: spacing.sm,
 });
 
 const ProfileContactCardNameInput = memo(
@@ -366,3 +382,24 @@ const ProfileContactCardAvatar = memo(function ProfileContactCardAvatar() {
     />
   );
 });
+
+const ProfileContactCardAdditionalOptions = memo(
+  function ProfileContactCardAdditionalOptions() {
+    const { theme } = useAppTheme();
+
+    return (
+      <Pressable
+        hitSlop={theme.spacing.md}
+        style={{
+          paddingHorizontal: theme.spacing.xs,
+          paddingVertical: theme.spacing.xxs,
+        }}
+        onPress={openConnectWalletBottomSheet}
+      >
+        <Text preset="small" color="secondary" inverted>
+          Import
+        </Text>
+      </Pressable>
+    );
+  },
+);
