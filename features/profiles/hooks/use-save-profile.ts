@@ -3,10 +3,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { saveProfileAsync } from "@/features/profiles/profiles.api";
 import {
   type IConvosProfileForInbox,
-  type ProfileUpdates,
   type ProfileInput
 } from "@/features/profiles/profile.types";
-import { captureErrorWithToast } from "@/utils/capture-error";
 import { setProfileQueryData } from "@/features/profiles/profiles.query";
 import { logger } from "@/utils/logger";
 
@@ -17,72 +15,6 @@ type SaveProfileArgs = {
 
 // Helper function to match the query key format in profiles.query.ts
 const profileQueryKey = (xmtpId: string) => ["profile", xmtpId] as const;
-
-/**
- * Compares a profile update with the current profile and returns only changed fields.
- * Treats null values as intentional clearing of fields.
- */
-const getChangedFields = (
-  update: ProfileInput, 
-  current?: IConvosProfileForInbox
-): ProfileUpdates => {
-  logger.debug("[getChangedFields] Starting comparison", {
-    update: JSON.stringify(update),
-    current: current ? JSON.stringify(current) : null
-  });
-
-  if (!current) {
-    // If we don't have current data, include all provided fields
-    const { name, username, description, avatar } = update;
-    const updates: ProfileUpdates = {};
-    
-    if (name !== undefined) updates.name = name;
-    if (username !== undefined) updates.username = username;
-    if (description !== undefined) updates.description = description;
-    if (avatar !== undefined) updates.avatar = avatar;
-    
-    logger.debug("[getChangedFields] No current profile, returning all fields", {
-      result: JSON.stringify(updates)
-    });
-    return updates;
-  }
-  
-  // Only include fields that have changed
-  const updates: ProfileUpdates = {};
-  
-  // Log each field comparison
-  logger.debug("[getChangedFields] Field comparison", {
-    name: { current: current.name, update: update.name, changed: update.name !== undefined && update.name !== current.name },
-    username: { current: current.username, update: update.username, changed: update.username !== undefined && update.username !== current.username },
-    description: { current: current.description, update: update.description, changed: update.description !== undefined && update.description !== current.description },
-    avatar: { current: current.avatar, update: update.avatar, changed: update.avatar !== undefined && update.avatar !== current.avatar }
-  });
-
-  
-  // These are required fields and should always be sent
-  if (update.name !== undefined) {
-    updates.name = update.name;
-  }
-  
-  if (update.username !== undefined) {
-    updates.username = update.username;
-  }
-  
-  // For nullable fields, include them if they're defined in the update
-  if (update.description !== undefined) {
-    updates.description = update.description;
-  }
-  
-  if (update.avatar !== undefined) {
-    updates.avatar = update.avatar;
-  }
-  
-  logger.debug("[getChangedFields] Final result", {
-    result: JSON.stringify(updates)
-  });
-  
-  return updates;
-};
 
 /**
  * Hook for saving profile data using React Query's useMutation
