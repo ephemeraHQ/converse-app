@@ -11,6 +11,76 @@ import {
   type IConvosProfileForInbox,
 } from "./profile.types";
 
+/**
+ * Compares a profile update with the current profile and returns only changed fields.
+ * Handles both new profiles and updates to existing ones.
+ */
+const getProfileChanges = (args: {
+  update: ProfileInput;
+  current?: IConvosProfileForInbox;
+}): ProfileUpdates => {
+  const { update, current } = args;
+  
+  logger.debug("[getProfileChanges]", {
+    update: JSON.stringify(update),
+    current: current ? JSON.stringify(current) : undefined
+  });
+
+  // For new profiles, include all provided fields
+  if (!current) {
+    const updates: ProfileUpdates = {
+      ...(update.name !== undefined && { name: update.name }),
+      ...(update.username !== undefined && { username: update.username }),
+      ...(update.description !== undefined && { description: update.description }),
+      ...(update.avatar !== undefined && { avatar: update.avatar }),
+    };
+    
+    logger.debug("[getProfileChanges] New profile", { updates: JSON.stringify(updates) });
+    return updates;
+  }
+
+  // For existing profiles, only include changed fields
+  const updates: ProfileUpdates = {};
+  
+  if (update.name !== undefined && update.name !== current.name) {
+    updates.name = update.name;
+  }
+  
+  if (update.username !== undefined && update.username !== current.username) {
+    updates.username = update.username;
+  }
+  
+  if (update.description !== undefined && update.description !== current.description) {
+    updates.description = update.description;
+  }
+  
+  if (update.avatar !== undefined && update.avatar !== current.avatar) {
+    updates.avatar = update.avatar;
+  }
+
+  logger.debug("[getProfileChanges] Changed fields", { 
+    updates: JSON.stringify(updates),
+    changedFields: Object.keys(updates)
+  });
+  
+  return updates;
+};
+
+/**
+ * Normalizes profile data for the claim profile endpoint.
+ * Converts null values to empty strings as required by the API.
+ */
+const normalizeProfileData = (profile: ProfileInput): ClaimProfileRequest => ({
+  name: profile.name || "",
+  username: profile.username || "",
+  ...(profile.description !== undefined && { 
+    description: profile.description === null ? "" : profile.description 
+  }),
+  ...(profile.avatar !== undefined && { 
+    avatar: profile.avatar === null ? "" : profile.avatar 
+  }),
+});
+
 export const updateProfile = async (args: { xmtpId: string; updates: ProfileUpdates }) => {
   const { xmtpId, updates } = args;
 
@@ -85,19 +155,12 @@ export const claimProfile = async (args: { profile: ClaimProfileRequest }) => {
   }
 };
 
-const normalizeProfileData = (profile: ProfileInput): ClaimProfileRequest => ({
-  name: profile.name || "",
-  username: profile.username || "",
-  ...(profile.description !== undefined && { 
-    description: profile.description === null ? "" : profile.description 
-  }),
-  ...(profile.avatar !== undefined && { 
-    avatar: profile.avatar === null ? "" : profile.avatar 
-  }),
-});
-
-export const saveProfileAsync = async (args: { profile: ProfileInput; inboxId: string }) => {
-  const { profile, inboxId } = args;
+export const saveProfileAsync = async (args: { 
+  profile: ProfileInput; 
+  inboxId: string;
+  currentProfile?: IConvosProfileForInbox;
+}) => {
+  const { profile, inboxId, currentProfile } = args;
   const xmtpId = profile.xmtpId || inboxId;
   
   logger.debug("[saveProfileAsync]", { 
@@ -109,16 +172,22 @@ export const saveProfileAsync = async (args: { profile: ProfileInput; inboxId: s
   
   try {
     if (xmtpId) {
-      const updates: ProfileUpdates = {
-        ...(profile.name !== undefined && { name: profile.name }),
-        ...(profile.username !== undefined && { username: profile.username }),
-        ...(profile.description !== undefined && { description: profile.description }),
-        ...(profile.avatar !== undefined && { avatar: profile.avatar }),
-      };
+      // Get only the changed fields
+      const updates = getProfileChanges({ 
+        update: profile,
+        current: currentProfile
+      });
       
-      return updateProfile({ xmtpId, updates });
+      // Only make the API call if there are actual changes
+      if (Object.keys(updates).length > 0) {
+        return updateProfile({ xmtpId, updates });
+      }
+      
+      // If no changes, return the current profile
+      return currentProfile;
     } 
     
+    // For new profiles, claim it
     return claimProfile({
       profile: normalizeProfileData(profile)
     });
