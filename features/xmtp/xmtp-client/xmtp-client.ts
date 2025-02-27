@@ -22,6 +22,7 @@ export async function createXmtpClientInstance(args: {
 
   try {
     const client = await XmtpClient.create<ISupportedXmtpCodecs>(inboxSigner, {
+      appVersion: `${config.appName}/${config.appVersion}`,
       env: config.xmtpEnv,
       dbEncryptionKey: await getDbEncryptionKey(),
       codecs: supportedXmtpCodecs,

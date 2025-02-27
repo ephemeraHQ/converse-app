@@ -7,6 +7,7 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import { IAnimatedVStackProps } from "@/design-system/VStack";
+import { useProfileContactCardStyles } from "@/features/profiles/components/profile-contact-card/use-profile-contact-card.styles";
 import { useAppTheme } from "@/theme/use-app-theme";
 
 /**
@@ -23,6 +24,7 @@ export const ProfileContactCardContainer = memo(
   }: IAnimatedVStackProps) {
     const { theme } = useAppTheme();
     const { width: screenWidth } = Dimensions.get("window");
+    const { container } = useProfileContactCardStyles();
 
     const rotateX = useSharedValue(0);
     const rotateY = useSharedValue(0);
@@ -33,8 +35,7 @@ export const ProfileContactCardContainer = memo(
       backgroundColor: theme.colors.fill.primary,
       borderRadius: theme.borderRadius.xxs,
       padding: theme.spacing.lg,
-      marginTop: theme.spacing.xs,
-      marginBottom: theme.spacing.lg,
+      margin: container.margin, // For shadow to show well
       shadowColor: theme.colors.fill.primary,
       shadowOpacity: 0.25,
       shadowRadius: 12,

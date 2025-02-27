@@ -28,6 +28,7 @@ function maybeReplaceLocalhost(uri: string) {
 
 // Base configuration shared across all environments
 export const shared = {
+  appName: Constants.expoConfig?.name || "Converse",
   appVersion: Constants.expoConfig?.version || "0.0.0",
   loggerColorScheme:
     (process.env.EXPO_PUBLIC_LOGGER_COLOR_SCHEME as ILoggerColorScheme) ||
