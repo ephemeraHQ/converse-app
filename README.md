@@ -1,25 +1,16 @@
 # Converse
 
-## Requirements
-
-- Node 20+
-- Ruby 3.2.5+
-- Xcode 15.2+
-- Android Studio 2023.1.1+
-
-#### Node
-
-We recommend using a Node version manager such as [nvm](https://github.com/nvm-sh/nvm) or [nodenv](https://github.com/nodenv/nodenv).
-
-#### Ruby
-
-We recommend using a Ruby version manager such as [rbenv](https://github.com/rbenv/rbenv).
-
 ## Setup
 
 ### Environment
 
-Run one of the following commands to set up your environment variables:
+First, create a `.env.local` file based on the provided `.env.example`:
+
+```sh
+cp .env.example .env.local
+```
+
+Then, run one of the following commands to set up your environment variables:
 
 ```sh
 # For development environment
@@ -32,7 +23,7 @@ yarn env:pull:preview
 yarn env:pull:prod
 ```
 
-This will create the appropriate `.env.local` file with environment variables configured in expo.dev.
+This will create the appropriate `.env.local` file with environment variables configured in expo.dev. Note that you'll need to have an Expo project set up since we use their EAS service to pull environment variables.
 
 ### Install JS/React Native dependencies
 
@@ -53,6 +44,8 @@ Android:
 ```sh
 yarn android
 ```
+
+After the initial build, you can simply use `yarn start` to launch the Expo server for subsequent runs.
 
 ## Manual start
 
@@ -81,7 +74,7 @@ If running the backend locally, run `yarn android:reverse`
 
 ### Running the app
 
-Once the app builds it will open the Expo App and ask what server and port you are targetting. If none are found, you probably need to start the expo server.
+Once the app builds it will open the Expo App and ask what server and port you are targeting. If none are found, you probably need to start the expo server.
 
 ### Start Expo server
 
@@ -91,43 +84,49 @@ yarn start
 
 ## Development
 
+### Code Style and Best Practices
+
+This project follows specific coding standards and best practices. Please refer to:
+
+- `.cursorrules` - Defines our coding standards and patterns
+- `eslint.config.mjs` - ESLint configuration
+- `.prettierrc.cjs` - Prettier formatting rules
+
+We use ESLint and Prettier to enforce code quality and consistency. Make sure to run linting before submitting PRs:
+
 ### Lint
 
 ```sh
 yarn lint
 ```
 
-### Test
-
-Before running the tests make sure that you have a `.env` file setup with the variables variable set
+### Typecheck
 
 ```sh
-yarn test
+yarn typecheck
 ```
 
-### Performance test
+### Environments
 
-Capture baselines for performance tests.
+The app supports three environments:
+
+1. **Development** - For local development
+2. **Preview** - For testing before production
+3. **Production** - Live app environment
+
+Each environment has its own configuration in `app.config.ts`.
+
+### Rebuilding after Native Changes
+
+If you add a new library with native dependencies or change configuration in `app.config.ts`, you'll need to rebuild:
 
 ```sh
-yarn test:perf:baseline
+# For iOS
+yarn ios:clean
+
+# For Android
+yarn android:clean
 ```
-
-Make changes to the code to see the performance impact. Run the performance tests again to see the changes.
-
-```sh
-yarn test:perf
-```
-
-## Release
-
-### Main branch
-
-Represents the current preview code.
-
-### Production branch
-
-Represents the current production code.
 
 ## Release Process
 
@@ -161,6 +160,8 @@ The production branch represents the current production code. When main is merge
    - Source maps are uploaded to Sentry
 
 Note: Production deployments are carefully managed to ensure version consistency. The system waits for any in-progress preview deployments to complete before proceeding with production deployment.
+
+For more details on the deployment process, see the GitHub Actions workflows in `.github/workflows/preview-deployment.yml` and `.github/workflows/production-deployment.yml`.
 
 ## Troubleshoot
 

@@ -1,18 +1,19 @@
 import { memo, useCallback, useEffect } from "react";
-import { Button, TextStyle } from "react-native";
+import { TextStyle } from "react-native";
 import { Screen } from "@/components/screen/screen";
 import { showSnackbar } from "@/components/snackbar/snackbar.service";
 import { Center } from "@/design-system/Center";
-import { Loader } from "@/design-system/loader";
 import { Pressable } from "@/design-system/Pressable";
 import { AnimatedText, Text } from "@/design-system/Text";
 import { VStack } from "@/design-system/VStack";
 import { useMultiInboxStore } from "@/features/authentication/multi-inbox.store";
 import { useLogout } from "@/features/authentication/use-logout";
+import { OnboardingFooter } from "@/features/onboarding/components/onboarding-footer";
 import { OnboardingSubtitle } from "@/features/onboarding/components/onboarding-subtitle";
 import { OnboardingTitle } from "@/features/onboarding/components/onboarding-title";
 import { useLoginWithPasskey } from "@/features/onboarding/hooks/use-login-with-passkey";
 import { useSignupWithPasskey } from "@/features/onboarding/hooks/use-signup-with-passkey";
+import { useHeader } from "@/navigation/use-header";
 import { $globalStyles } from "@/theme/styles";
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { captureErrorWithToast } from "@/utils/capture-error";
@@ -105,6 +106,12 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
     }
   }, [logout]);
 
+  useHeader({
+    safeAreaEdges: ["top"],
+    rightText: "Login",
+    onRightPress: handleLogin,
+  });
+
   return (
     <>
       <Screen
@@ -124,23 +131,13 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
           </VStack>
         </Center>
 
-        {/* The whole loading state and this UI/UX is temporary */}
-        <VStack
-          style={{
-            height: 100,
-          }}
-        >
-          {isSigningUp || isLoggingIn ? (
-            <Center style={$globalStyles.flex1}>
-              <Loader />
-            </Center>
-          ) : (
-            <>
-              <Button onPress={handleSignup} title="Signup with Passkey" />
-              <Button onPress={handleLogin} title="Sign in with Passkey" />
-            </>
-          )}
-        </VStack>
+        <OnboardingFooter
+          iconName="biometric"
+          text="Create a Contact Card"
+          onPress={handleSignup}
+          disabled={isSigningUp || isLoggingIn}
+          isLoading={isSigningUp}
+        />
 
         <Center
           style={{
@@ -162,14 +159,6 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
           </Pressable>
         </Center>
       </Screen>
-
-      {/* <ConnectWalletBottomSheet
-          isVisible={isVisible}
-          onClose={() => {
-            setIsVisible(false);
-          }}
-          onWalletImported={() => {}}
-        /> */}
     </>
   );
 });
