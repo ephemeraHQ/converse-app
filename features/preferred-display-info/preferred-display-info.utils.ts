@@ -1,5 +1,5 @@
 import { InboxId } from "@xmtp/react-native-sdk";
-import { IConvosProfileForInbox } from "@/features/profiles/profiles.api";
+import { IConvosProfileForInbox } from "@/features/profiles/profile.types";
 import { ISocialProfile } from "@/features/social-profiles/social-profiles.api";
 import { Nullable } from "@/types/general";
 import { IEthereumAddress } from "@/utils/evm/address";

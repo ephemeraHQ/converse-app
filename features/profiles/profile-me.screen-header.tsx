@@ -1,5 +1,5 @@
 import { InboxId } from "@xmtp/react-native-sdk";
-import { memo, useCallback } from "react";
+import React, { memo, useCallback } from "react";
 import { ViewStyle } from "react-native";
 import { Button } from "@/design-system/Button/Button";
 import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu";
@@ -18,6 +18,8 @@ import { useRouter } from "@/navigation/use-navigation";
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { Haptics } from "@/utils/haptics";
+import { getProfileQueryData } from "@/features/profiles/profiles.query";
+import { useSaveProfile } from "@/features/profiles/hooks/use-save-profile";
 
 export function useProfileMeScreenHeader(args: { inboxId: InboxId }) {
   const { inboxId } = args;
@@ -30,11 +32,22 @@ export function useProfileMeScreenHeader(args: { inboxId: InboxId }) {
 
   const profileMeStore = useProfileMeStore(inboxId);
 
+  const profile = getProfileQueryData({ xmtpId: inboxId });
+
   const handleContextMenuAction = useCallback(
     async (actionId: string) => {
       Haptics.selectionAsync();
       switch (actionId) {
         case "edit":
+          // Initialize the store with current profile values before entering edit mode
+          if (profile) {
+            // Set the store values to match the current profile
+            profileMeStore.getState().actions.setNameTextValue(profile.name || '');
+            profileMeStore.getState().actions.setUsernameTextValue(profile.username || '');
+            profileMeStore.getState().actions.setDescriptionTextValue(profile.description || '');
+            profileMeStore.getState().actions.setAvatarUri(profile.avatar || undefined);
+          }
+          // Enable edit mode to show editable fields
           profileMeStore.getState().actions.setEditMode(true);
           break;
         case "share":
@@ -42,21 +55,36 @@ export function useProfileMeScreenHeader(args: { inboxId: InboxId }) {
           break;
       }
     },
-    [profileMeStore, router],
+    [profileMeStore, router, profile],
   );
+
+  // Handle canceling edit mode
+  const handleCancelEdit = useCallback(() => {
+    // Reset the store and exit edit mode
+    profileMeStore.getState().actions.reset();
+    profileMeStore.getState().actions.setEditMode(false);
+  }, [profileMeStore]);
 
   useHeader(
     {
       backgroundColor: theme.colors.background.surface,
       safeAreaEdges: ["top"],
-      titleComponent: (
+      titleComponent: editMode ? undefined : (
         <Text preset="body">
           {router.canGoBack()
             ? router.getState().routes[router.getState().routes.length - 2].name
             : ""}
         </Text>
       ),
-      LeftActionComponent: (
+      LeftActionComponent: editMode ? (
+        // Show Cancel button when in edit mode
+        <Button
+          text={translate("Cancel")}
+          variant="text"
+          onPress={handleCancelEdit}
+        />
+      ) : (
+        // Show back button when not in edit mode
         <HeaderAction
           icon="chevron.left"
           onPress={() => {
@@ -82,12 +110,12 @@ export function useProfileMeScreenHeader(args: { inboxId: InboxId }) {
                 actions={[
                   {
                     id: "edit",
-                    title: translate("userProfile.edit"),
+                    title: translate("Edit"),
                     image: iconRegistry["pencil"],
                   },
                   {
                     id: "share",
-                    title: translate("share"),
+                    title: translate("Share"),
                     image: iconRegistry["square.and.arrow.up"],
                   },
                 ]}
@@ -99,35 +127,80 @@ export function useProfileMeScreenHeader(args: { inboxId: InboxId }) {
         </HStack>
       ),
     },
-    [router, theme, editMode, handleContextMenuAction, inboxId],
+    [router, theme, editMode, handleContextMenuAction, inboxId, handleCancelEdit],
   );
 }
 
 const DoneAction = memo(function DoneAction({ inboxId }: { inboxId: InboxId }) {
   const profileMeStore = useProfileMeStore(inboxId);
+  const profile = getProfileQueryData({ xmtpId: inboxId });
+  const { saveProfile } = useSaveProfile();
+  const isAvatarUploading = useProfileMeStoreValue(inboxId, (state) => state.isAvatarUploading);
 
   const handleDoneEditProfile = useCallback(async () => {
+    // Get all the profile data from the store
+    const state = profileMeStore.getState();
+
+    // This ensures we're sending the actual values from the form
+    const profileUpdate = {
+      id: profile?.id,
+      name: state.nameTextValue,
+      username: state.usernameTextValue,
+      description: state.descriptionTextValue,
+      avatar: state.avatarUri,
+    };
+    
     try {
-      const newNameTextValue = profileMeStore.getState().nameTextValue;
-      const newAvatarUri = profileMeStore.getState().avatarUri;
+      // Use the saveProfile function from the hook
+      await saveProfile({
+        profile: profileUpdate,
+        inboxId,
+      });
 
-      console.log("newNameTextValue", newNameTextValue);
-      console.log("newAvatarUri", newAvatarUri);
-
-      // TODO: Need to check to make sure we're aligned with what the new backend and the onboarding is doing
-      // await saveProfileAsync();
-
+      // Only close edit mode and reset store after successful save
+      profileMeStore.getState().actions.setEditMode(false);
       profileMeStore.getState().actions.reset();
-    } catch (error) {
+    } catch (err) {
+      const error = err as any;
+
+      // Extract error message from the API response
+      if (error.response?.data) {
+        const statusCode = error.response.status;
+        
+        // Handle validation errors (400 Bad Request or 409 Conflict)
+        if (statusCode === 400 || statusCode === 409) {
+          // Generic approach to extract validation error messages
+          if (error.response?.data?.errors) {
+            const errors = error.response.data.errors;
+            
+            // Find the first error with a message
+            for (const field in errors) {
+              if (errors[field]?.message) {
+                const errorMessage = errors[field].message;
+                captureErrorWithToast(error, { message: errorMessage });
+                return;
+              }
+            }
+          }
+          
+          // Fallback to the general message if we couldn't extract specific error
+          const backendMessage = error.response?.data?.message || `Error ${statusCode}`;
+          captureErrorWithToast(error, { message: backendMessage });
+          return;
+        }
+      }
+      
+      // For other errors, use the default error handling
       captureErrorWithToast(error);
     }
-  }, [profileMeStore]);
+  }, [profileMeStore, profile, inboxId, saveProfile]);
 
   return (
     <Button
-      text={translate("userProfile.done")}
+      text={translate("Done")}
       variant="text"
       onPress={handleDoneEditProfile}
+      loading={isAvatarUploading}
     />
   );
 });

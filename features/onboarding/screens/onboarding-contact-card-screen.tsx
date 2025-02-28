@@ -1,7 +1,7 @@
 import { usePrivy } from "@privy-io/expo";
 import { isAxiosError } from "axios";
 import React, { memo, useCallback, useEffect, useState } from "react";
-import { Alert, TextStyle, ViewStyle } from "react-native";
+import { TextStyle, ViewStyle } from "react-native";
 import {
   interpolate,
   useAnimatedKeyboard,
@@ -12,7 +12,6 @@ import { z } from "zod";
 import { create } from "zustand";
 import { Screen } from "@/components/screen/screen";
 import { showSnackbar } from "@/components/snackbar/snackbar.service";
-import { HStack } from "@/design-system/HStack";
 import { AnimatedVStack, VStack } from "@/design-system/VStack";
 import { useAuthStore } from "@/features/authentication/authentication.store";
 import { useMultiInboxStore } from "@/features/authentication/multi-inbox.store";
@@ -26,20 +25,18 @@ import { ProfileContactCardEditableNameInput } from "@/features/profiles/compone
 import { ProfileContactCardLayout } from "@/features/profiles/components/profile-contact-card/profile-contact-card-layout";
 import { profileValidationSchema } from "@/features/profiles/schemas/profile-validation.schema";
 import { validateProfileName } from "@/features/profiles/utils/validate-profile-name";
+import { useAddPfp } from "@/hooks/use-add-pfp";
 import { useHeader } from "@/navigation/use-header";
-import { $globalStyles } from "@/theme/styles";
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { ValidationError } from "@/utils/api/api.error";
 import { captureErrorWithToast } from "@/utils/capture-error";
-import { debugBorder } from "@/utils/debug-style";
-import { useAddPfp } from "../../../hooks/use-add-pfp";
 
 // Request validation schema
 const createUserRequestSchema = z.object({
   inboxId: z.string(),
   privyUserId: z.string(),
   smartContractWalletAddress: z.string(),
-  profile: profileValidationSchema.pick({ name: true, username: true }),
+  profile: profileValidationSchema.pick({ name: true, username: true, avatar: true }),
 });
 
 type IOnboardingContactCardStore = {
@@ -47,11 +44,13 @@ type IOnboardingContactCardStore = {
   username: string;
   nameValidationError: string;
   avatar: string;
+  isAvatarUploading: boolean;
   actions: {
     setName: (name: string) => void;
     setUsername: (username: string) => void;
     setNameValidationError: (nameValidationError: string) => void;
     setAvatar: (avatar: string) => void;
+    setIsAvatarUploading: (isUploading: boolean) => void;
     reset: () => void;
   };
 };
@@ -62,14 +61,23 @@ const useOnboardingContactCardStore = create<IOnboardingContactCardStore>(
     username: "",
     nameValidationError: "",
     avatar: "",
+    isAvatarUploading: false,
     actions: {
       setName: (name: string) => set({ name }),
       setUsername: (username: string) => set({ username }),
       setNameValidationError: (nameValidationError: string) =>
         set({ nameValidationError }),
       setAvatar: (avatar: string) => set({ avatar }),
+      setIsAvatarUploading: (isAvatarUploading: boolean) =>
+        set({ isAvatarUploading }),
       reset: () =>
-        set({ name: "", username: "", nameValidationError: "", avatar: "" }),
+        set({
+          name: "",
+          username: "",
+          nameValidationError: "",
+          avatar: "",
+          isAvatarUploading: false,
+        }),
     },
   }),
 );
@@ -92,6 +100,7 @@ export function OnboardingContactCardScreen() {
       const profileValidation = profileValidationSchema.safeParse({
         name: store.name,
         username: store.username,
+        ...(store.avatar && { avatar: store.avatar })
       });
 
       if (!profileValidation.success) {
@@ -116,6 +125,7 @@ export function OnboardingContactCardScreen() {
         profile: {
           name: store.name,
           username: store.username,
+          ...(store.avatar && { avatar: store.avatar })
         },
       };
 
@@ -217,6 +227,11 @@ export function OnboardingContactCardScreen() {
     };
   });
 
+  // Get isAvatarUploading from the store
+  const isAvatarUploading = useOnboardingContactCardStore(
+    (state) => state.isAvatarUploading
+  );
+
   return (
     <>
       <Screen
@@ -267,7 +282,7 @@ export function OnboardingContactCardScreen() {
             text={"Continue"}
             iconName="chevron.right"
             onPress={handleRealContinue}
-            isLoading={isPending}
+            isLoading={isPending || isAvatarUploading}
           />
         </VStack>
       </Screen>
@@ -346,23 +361,28 @@ const ProfileContactCardNameInput = memo(
 );
 
 const ProfileContactCardAvatar = memo(function ProfileContactCardAvatar() {
-  const { asset, addPFP } = useAddPfp();
-  const onboardingStore = useOnboardingContactCardStore();
+  const { addPFP, asset, isUploading } = useAddPfp();
 
+  const name = useOnboardingContactCardStore((state) => state.name);
+  const avatar = useOnboardingContactCardStore((state) => state.avatar);
+
+  // Update upload status in the store
   useEffect(() => {
-    if (asset?.uri && asset.uri !== onboardingStore.avatar) {
-      onboardingStore.actions.setAvatar(asset.uri);
+    useOnboardingContactCardStore.getState().actions.setIsAvatarUploading(isUploading);
+  }, [isUploading]);
+
+  const addAvatar = useCallback(async () => {
+    const url = await addPFP();
+    if (url) {
+      useOnboardingContactCardStore.getState().actions.setAvatar(url);
     }
-  }, [asset?.uri, onboardingStore.actions, onboardingStore.avatar]);
+  }, [addPFP]);
 
   return (
     <ProfileContactCardEditableAvatar
-      avatarUri={asset?.uri ?? onboardingStore.avatar}
-      avatarName={onboardingStore.name}
-      // onPress={addPFP}
-      onPress={() => {
-        Alert.alert("Coming soon");
-      }}
+      avatarUri={avatar || asset?.uri}
+      avatarName={name}
+      onPress={addAvatar}
     />
   );
 });

@@ -1,5 +1,5 @@
 import Big from "big.js";
-import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
+import { ImageManipulator, SaveFormat } from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
 import { Alert, Image, Linking } from "react-native";
 import { Nullable } from "../types/general";
@@ -358,15 +358,21 @@ export const compressAndResizeImage = async (
 ) => {
   const imageSize = await getImageSize(imageURI);
   const newSize = calculateImageOptiSize(imageSize, avatar);
+  
   logger.debug(
     `[ImageUtils] Resizing and compressing image to ${newSize.height}x${newSize.width} (was ${imageSize.height}x${imageSize.width})`,
   );
-  const manipResult = await manipulateAsync(imageURI, [{ resize: newSize }], {
+
+  const context = ImageManipulator.manipulate(imageURI);
+  context.resize(newSize);
+  const image = await context.renderAsync();
+  const result = await image.saveAsync({
     base64: false,
     compress: avatar ? 0.6 : 0.3,
     format: SaveFormat.JPEG,
   });
-  return manipResult;
+
+  return result;
 };
 
 export const pickMediaFromLibrary = async (

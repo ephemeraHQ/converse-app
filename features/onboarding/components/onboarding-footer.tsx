@@ -42,7 +42,7 @@ export function OnboardingFooter({
       <OnboardingIconButton
         action="primary"
         size="xl"
-        disabled={disabled}
+        disabled={disabled || isLoading}
         style={themed($iconButtonStyle)}
         onPress={onPress}
         {...(isLoading

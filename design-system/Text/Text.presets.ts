@@ -35,13 +35,13 @@ export const textPresets: Record<IPresets, ThemedStyleArray<TextStyle>> = {
 
   formHelper: [
     textBaseStyle,
-    textSizeStyles.xs,
+    textSizeStyles.xxs,
     ({ colors }) => ({ color: colors.fill.secondary }),
   ],
 
   formLabel: [
     textBaseStyle,
-    textSizeStyles.xs,
+    textSizeStyles.xxs,
     ({ colors }) => ({ color: colors.text.secondary }),
   ],
 
