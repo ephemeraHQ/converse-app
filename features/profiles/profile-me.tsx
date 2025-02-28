@@ -185,14 +185,8 @@ const EditableUsernameInput = memo(
     const profileMeStore = useProfileMeStore(inboxId);
     const { data: profile } = useProfileQuery({ xmtpId: inboxId });
     
-    const usernameDefaultTextValue = profileMeStore.getState().usernameTextValue || profile?.username || '';
+    const usernameDefaultTextValue = profile?.username || "";
     
-    useEffect(() => {
-      if (profile?.username && !profileMeStore.getState().usernameTextValue) {
-        profileMeStore.getState().actions.setUsernameTextValue(profile.username);
-      }
-    }, [profile?.username, profileMeStore]);
-
     const handleUsernameChange = useCallback(
       (text: string) => {
         profileMeStore.getState().actions.setUsernameTextValue(text);
@@ -223,14 +217,8 @@ const EditableDescriptionInput = memo(
     const profileMeStore = useProfileMeStore(inboxId);
     const { data: profile } = useProfileQuery({ xmtpId: inboxId });
     
-    const descriptionDefaultTextValue = profileMeStore.getState().descriptionTextValue || profile?.description || '';
+    const descriptionDefaultTextValue = profile?.description || "";
     
-    useEffect(() => {
-      if (profile?.description && !profileMeStore.getState().descriptionTextValue) {
-        profileMeStore.getState().actions.setDescriptionTextValue(profile.description);
-      }
-    }, [profile?.description, profileMeStore]);
-
     const handleDescriptionChange = useCallback(
       (text: string) => {
         profileMeStore.getState().actions.setDescriptionTextValue(text);
