@@ -25,12 +25,12 @@ export type IConnectWalletParams = {
   onSocialDataLoaded: (data: ISocialProfile[]) => void;
 };
 
-// Supported wallet type from the installed wallets hook
-export type ISupportedWallet = {
-  name: string;
-  thirdwebId: WalletId;
-  icon?: string;
-};
+// // Supported wallet type from the installed wallets hook
+// export type ISupportedWallet = {
+//   name: string;
+//   thirdwebId: WalletId;
+//   icon?: string;
+// };
 
 // Bottom sheet props
 export type IConnectWalletBottomSheetProps = {

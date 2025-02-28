@@ -68,3 +68,13 @@ export async function getXmtpClientByInboxId(args: { inboxId: InboxId }) {
 
   return getXmtpClient({ ethAddress: sender.ethereumAddress });
 }
+
+export async function getXmtpClientForCurrentSender() {
+  const currentSender = useMultiInboxStore.getState().currentSender;
+
+  if (!currentSender) {
+    throw new Error("No current sender found");
+  }
+
+  return getXmtpClient({ ethAddress: currentSender.ethereumAddress });
+}

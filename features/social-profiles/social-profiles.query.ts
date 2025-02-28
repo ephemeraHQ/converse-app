@@ -74,3 +74,11 @@ export async function ensureSocialProfilesForAddressesQuery(args: {
     )
   ).flat();
 }
+
+export function prefetchSocialProfilesForAddress(args: {
+  ethAddress: IEthereumAddress;
+}) {
+  return queryClient.prefetchQuery(
+    getSocialProfilesForAddressQueryOptions(args),
+  );
+}

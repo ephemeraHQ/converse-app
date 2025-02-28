@@ -8,16 +8,21 @@ import { useBottomSheet } from "./BottomSheet.utils";
 export const BottomSheetHeader = memo(function BottomSheetHeader(props: {
   title?: string;
   hasClose?: boolean;
+  onClose?: () => void;
 }) {
-  const { title, hasClose = true } = props;
+  const { title, hasClose = true, onClose } = props;
 
   const { close } = useBottomSheet();
 
   const { theme } = useAppTheme();
 
   const handleClose = useCallback(() => {
-    close();
-  }, [close]);
+    if (onClose) {
+      onClose();
+    } else {
+      close();
+    }
+  }, [close, onClose]);
 
   return (
     <HStack
