@@ -20,7 +20,7 @@ import { captureErrorWithToast } from "@/utils/capture-error";
 import { Haptics } from "@/utils/haptics";
 import { logger } from "@/utils/logger";
 import { useProfileQuery } from "@/features/profiles/profiles.query";
-import { useSaveProfile } from "@/features/profiles/hooks";
+import { useSaveProfile } from "@/features/profiles/hooks/use-save-profile";
 
 export function useProfileMeScreenHeader(args: { inboxId: InboxId }) {
   const { inboxId } = args;

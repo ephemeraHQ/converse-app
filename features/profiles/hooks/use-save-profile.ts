@@ -45,9 +45,6 @@ export function useSaveProfile() {
         xmtpId: args.inboxId,
       };
       
-      // CRITICAL FIX: Don't use getChangedFields here, as it's already handled in saveProfileAsync
-      // This prevents duplicate processing and duplicate requests
-      
       logger.debug("[useSaveProfile] Sending profile update", { 
         profile: JSON.stringify(profileWithXmtpId)
       });

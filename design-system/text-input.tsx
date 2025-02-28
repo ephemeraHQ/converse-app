@@ -26,7 +26,7 @@ export const TextInput = memo(
         hitSlop={theme.spacing.xs} // By default for better UX
         placeholderTextColor={theme.colors.text.tertiary}
         style={[
-          themed(textPresets["formInput"]),
+          themed(textPresets.body),
           { padding: 0 }, // We want fully control over our TextInput layout
           style,
         ]}
