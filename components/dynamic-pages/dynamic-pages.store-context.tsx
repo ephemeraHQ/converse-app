@@ -1,14 +1,23 @@
-import { createContext, useContext, useRef } from "react";
+import { createContext, useContext, useEffect, useRef } from "react";
 import { createStore, useStore } from "zustand";
 
-type IDynamicPagesStoreProps = {};
+type IPageChangeArgs = {
+  pageIndex: number;
+  pageHeight: number;
+};
+
+type IDynamicPagesStoreProps = {
+  onPageChange?: (args: IPageChangeArgs) => void;
+};
 
 type IDynamicPagesStoreState = IDynamicPagesStoreProps & {
   currentPageIndex: number;
+  pageHeights: Record<number, number>;
   actions: {
     goToNextPage: () => void;
     goToPreviousPage: () => void;
     reset: () => void;
+    updatePageHeight: (args: { pageIndex: number; height: number }) => void;
   };
 };
 
@@ -27,6 +36,13 @@ export function DynamicPagesStoreProvider({
     storeRef.current = createDynamicPagesStore(props);
   }
 
+  // Update onPageChange if it changes
+  useEffect(() => {
+    if (storeRef.current) {
+      storeRef.current.setState({ onPageChange: props.onPageChange });
+    }
+  }, [props.onPageChange]);
+
   return (
     <DynamicPagesStoreContext.Provider value={storeRef.current}>
       {children}
@@ -34,33 +50,100 @@ export function DynamicPagesStoreProvider({
   );
 }
 
-const createDynamicPagesStore = (
-  initProps: Partial<IDynamicPagesStoreProps>,
-) => {
-  const DEFAULT_PROPS: IDynamicPagesStoreProps = {};
+const createDynamicPagesStore = (initProps: IDynamicPagesStoreProps) => {
+  const DEFAULT_PROPS: IDynamicPagesStoreProps = {
+    onPageChange: undefined,
+  };
 
-  return createStore<IDynamicPagesStoreState>()((set) => ({
+  return createStore<IDynamicPagesStoreState>()((set, get) => ({
     ...DEFAULT_PROPS,
     ...initProps,
     currentPageIndex: 0,
+    pageHeights: {},
     actions: {
       goToNextPage: () => {
-        set((state) => ({
-          ...state,
-          currentPageIndex: state.currentPageIndex + 1,
-        }));
+        set((state) => {
+          const newIndex = state.currentPageIndex + 1;
+          const pageHeight = state.pageHeights[newIndex];
+
+          // Call onPageChange callback if provided
+          if (state.onPageChange) {
+            state.onPageChange({
+              pageIndex: newIndex,
+              pageHeight,
+            });
+          }
+
+          return {
+            ...state,
+            currentPageIndex: newIndex,
+          };
+        });
       },
       goToPreviousPage: () => {
-        set((state) => ({
-          ...state,
-          currentPageIndex: state.currentPageIndex - 1,
-        }));
+        set((state) => {
+          const newIndex = state.currentPageIndex - 1;
+          const pageHeight = state.pageHeights[newIndex];
+
+          // Call onPageChange callback if provided
+          if (state.onPageChange) {
+            state.onPageChange({
+              pageIndex: newIndex,
+              pageHeight,
+            });
+          }
+
+          return {
+            ...state,
+            currentPageIndex: newIndex,
+          };
+        });
       },
       reset: () => {
-        set((state) => ({
-          ...state,
-          currentPageIndex: 0,
-        }));
+        set((state) => {
+          // Only call onPageChange if we're not already at index 0
+          if (state.onPageChange && state.currentPageIndex !== 0) {
+            const pageHeight = state.pageHeights[0];
+
+            state.onPageChange({
+              pageIndex: 0,
+              pageHeight,
+            });
+          }
+
+          return {
+            ...state,
+            currentPageIndex: 0,
+          };
+        });
+      },
+      updatePageHeight: (args) => {
+        const { pageIndex, height } = args;
+
+        set((state) => {
+          // Only update if height actually changed
+          if (state.pageHeights[pageIndex] === height) {
+            return state;
+          }
+
+          const newPageHeights = {
+            ...state.pageHeights,
+            [pageIndex]: height,
+          };
+
+          // If this is the current page, notify about the height change
+          if (pageIndex === state.currentPageIndex && state.onPageChange) {
+            state.onPageChange({
+              pageIndex,
+              pageHeight: height,
+            });
+          }
+
+          return {
+            ...state,
+            pageHeights: newPageHeights,
+          };
+        });
       },
     },
   }));

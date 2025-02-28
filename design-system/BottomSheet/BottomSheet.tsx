@@ -1,10 +1,12 @@
-import BottomSheetBase, { BottomSheetProps } from "@gorhom/bottom-sheet";
+import GorhomBottomSheet, {
+  BottomSheetProps as GorhomBottomSheetProps,
+} from "@gorhom/bottom-sheet";
 import { BottomSheetMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
 import React, { forwardRef, memo, useMemo } from "react";
 import { useAppTheme } from "@/theme/use-app-theme";
 import { BottomSheetBackdropOpacity } from "./BottomSheetBackdropOpacity";
 
-export type IBottomSheetProps = BottomSheetProps & {
+export type IBottomSheetProps = GorhomBottomSheetProps & {
   children: React.ReactNode;
 };
 
@@ -55,7 +57,7 @@ export const BottomSheet = memo(
       );
 
       return (
-        <BottomSheetBase
+        <GorhomBottomSheet
           ref={ref}
           enableDynamicSizing={false}
           backdropComponent={backdropComponent}
@@ -65,7 +67,7 @@ export const BottomSheet = memo(
           {...rest}
         >
           {children}
-        </BottomSheetBase>
+        </GorhomBottomSheet>
       );
     },
   ),

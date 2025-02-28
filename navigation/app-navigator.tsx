@@ -5,7 +5,7 @@ import {
 import { LinkingOptions, NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as Linking from "expo-linking";
-import React, { useEffect } from "react";
+import React, { memo, useEffect } from "react";
 import { config } from "@/config";
 import { AppSettingsScreen } from "@/features/app-settings/app-settings.screen";
 import { useIsCurrentVersionEnough } from "@/features/app-settings/hooks/use-is-current-version-enough";
@@ -19,10 +19,11 @@ import {
   ProfileNav,
   ProfileScreenConfig,
 } from "@/features/profiles/profile.nav";
+import { ConnectWalletBottomSheetScreen } from "@/features/wallets/connect-wallet/connect-wallet-bottom-sheet.screen";
 import { NavigationParamList } from "@/navigation/navigation.types";
 import { navigationRef } from "@/navigation/navigation.utils";
 import { WebviewPreviewNav } from "@/screens/WebviewPreviewNav";
-import { useThemeProvider } from "@/theme/use-app-theme";
+import { useAppTheme, useThemeProvider } from "@/theme/use-app-theme";
 import { captureError } from "@/utils/capture-error";
 import { useUpdateSentry } from "@/utils/sentry";
 import { hideSplashScreen } from "@/utils/splash/splash";
@@ -83,7 +84,9 @@ export function AppNavigator() {
 
 export const AppNativeStack = createNativeStackNavigator<NavigationParamList>();
 
-function AppStacks() {
+const AppStacks = memo(function AppStacks() {
+  const { theme } = useAppTheme();
+
   const authStatus = useAuthStore((state) => state.status);
 
   useEffect(() => {
@@ -128,6 +131,17 @@ function AppStacks() {
             // Fade animation when transitioning to onboarding state
             options={{ animation: "fade" }}
           />
+          <AppNativeStack.Screen
+            name="OnboardingConnectWallet"
+            component={ConnectWalletBottomSheetScreen}
+            options={{
+              presentation: "formSheet",
+              contentStyle: {
+                backgroundColor: theme.colors.background.surface,
+              },
+            }}
+          />
+
           {/* <NativeStack.Screen
             name="OnboardingNotifications"
             component={OnboardingNotificationsScreen}
@@ -159,7 +173,7 @@ function AppStacks() {
       )}
     </AppNativeStack.Navigator>
   );
-}
+});
 
 // TODO: Maybe show animated splash screen or something
 function IdleScreen() {
