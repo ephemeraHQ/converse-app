@@ -38,6 +38,7 @@ const buildOptimisticUser = (args: ICreateUserArgs): CreateUserResponse => {
       name: args.profile.name,
       username: args.profile.username,
       description: args.profile.description ?? null,
+      avatar: args.profile.avatar ?? null,
     },
   };
 };
@@ -106,6 +107,7 @@ export function useCreateUser() {
           name: data.profile.name,
           username: data.profile.username,
           description: data.profile.description ?? null,
+          avatar: data.profile.avatar ?? null,
         },
       });
     },

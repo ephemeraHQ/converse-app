@@ -19,7 +19,7 @@ import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { Haptics } from "@/utils/haptics";
 import { logger } from "@/utils/logger";
-import { useProfileQuery } from "@/features/profiles/profiles.query";
+import { getProfileQueryData } from "@/features/profiles/profiles.query";
 import { useSaveProfile } from "@/features/profiles/hooks/use-save-profile";
 
 export function useProfileMeScreenHeader(args: { inboxId: InboxId }) {
@@ -33,7 +33,7 @@ export function useProfileMeScreenHeader(args: { inboxId: InboxId }) {
 
   const profileMeStore = useProfileMeStore(inboxId);
 
-  const { data: profile } = useProfileQuery({ xmtpId: inboxId });
+  const profile = getProfileQueryData({ xmtpId: inboxId });
 
   const handleContextMenuAction = useCallback(
     async (actionId: string) => {
@@ -46,9 +46,7 @@ export function useProfileMeScreenHeader(args: { inboxId: InboxId }) {
             profileMeStore.getState().actions.setNameTextValue(profile.name || '');
             profileMeStore.getState().actions.setUsernameTextValue(profile.username || '');
             profileMeStore.getState().actions.setDescriptionTextValue(profile.description || '');
-            if (profile.avatar) {
-              profileMeStore.getState().actions.setAvatarUri(profile.avatar);
-            }
+            profileMeStore.getState().actions.setAvatarUri(profile.avatar || undefined);
           }
           // Enable edit mode to show editable fields
           profileMeStore.getState().actions.setEditMode(true);
@@ -136,7 +134,7 @@ export function useProfileMeScreenHeader(args: { inboxId: InboxId }) {
 
 const DoneAction = memo(function DoneAction({ inboxId }: { inboxId: InboxId }) {
   const profileMeStore = useProfileMeStore(inboxId);
-  const { data: profile } = useProfileQuery({ xmtpId: inboxId });
+  const profile = getProfileQueryData({ xmtpId: inboxId });
   const { saveProfile } = useSaveProfile();
   const isAvatarUploading = useProfileMeStoreValue(inboxId, (state) => state.isAvatarUploading);
 
@@ -155,8 +153,6 @@ const DoneAction = memo(function DoneAction({ inboxId }: { inboxId: InboxId }) {
     // This ensures we're sending the actual values from the form
     const profileUpdate = {
       id: profile?.id,
-      xmtpId: inboxId,
-      privyAddress: profile?.privyAddress,
       name: state.nameTextValue,
       username: state.usernameTextValue,
       description: state.descriptionTextValue,

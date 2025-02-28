@@ -36,7 +36,7 @@ const createUserRequestSchema = z.object({
   inboxId: z.string(),
   privyUserId: z.string(),
   smartContractWalletAddress: z.string(),
-  profile: profileValidationSchema.pick({ name: true, username: true }),
+  profile: profileValidationSchema.pick({ name: true, username: true, avatar: true }),
 });
 
 type IOnboardingContactCardStore = {
@@ -100,6 +100,7 @@ export function OnboardingContactCardScreen() {
       const profileValidation = profileValidationSchema.safeParse({
         name: store.name,
         username: store.username,
+        avatar: store.avatar,
       });
 
       if (!profileValidation.success) {
@@ -371,15 +372,9 @@ const ProfileContactCardAvatar = memo(function ProfileContactCardAvatar() {
   }, [isUploading]);
 
   const addAvatar = useCallback(async () => {
-    try {
-      const uploadedUrl = await addPFP();
-      if (uploadedUrl) {
-        useOnboardingContactCardStore.getState().actions.setAvatar(uploadedUrl);
-      }
-    } catch (error) {
-      captureErrorWithToast(error, {
-        message: "Failed to upload avatar. Please try again.",
-      });
+    const url = await addPFP();
+    if (url) {
+      useOnboardingContactCardStore.getState().actions.setAvatar(url);
     }
   }, [addPFP]);
 

@@ -42,6 +42,7 @@ const createUserResponseSchema = z
       name: z.string(),
       username: z.string(),
       description: z.string().nullable(),
+      avatar: z.string().nullable(),
     }),
   })
   .strict();

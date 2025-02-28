@@ -268,15 +268,9 @@ const EditableProfileContactCardAvatar = memo(
     }, [isUploading, profileMeStore]);
 
     const addAvatar = useCallback(async () => {
-      try {
-        const uploadedUrl = await addPFP();
-        if (uploadedUrl) {
-          profileMeStore.getState().actions.setAvatarUri(uploadedUrl);
-        }
-      } catch (error) {
-        captureErrorWithToast(error, {
-          message: "Failed to upload avatar. Please try again.",
-        });
+      const url = await addPFP();
+      if (url) {
+        profileMeStore.getState().actions.setAvatarUri(url);
       }
     }, [addPFP, profileMeStore]);
 
