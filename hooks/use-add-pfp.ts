@@ -98,7 +98,6 @@ export function useAddPfp() {
                   break;
                 default:
                   // User canceled
-                  reject(new Error("User canceled"));
                   return;
               }
 

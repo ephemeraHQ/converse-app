@@ -41,7 +41,11 @@ export const ProfileContactCard = memo(function ProfileContactCard({
   return (
     <ProfileContactCardLayout
       avatar={
-        <Avatar uri={avatarUrl} name={displayName} size={theme.avatarSize.lg} />
+        <Avatar 
+          uri={avatarUrl ?? null}
+          name={displayName}
+          size={theme.avatarSize.lg} 
+        />
       }
       name={content}
     />

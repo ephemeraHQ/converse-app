@@ -25,6 +25,7 @@ import { useCurrentSender } from "../authentication/multi-inbox.store";
 import { TextField } from "@/design-system/TextField/TextField";
 import { VStack } from "@/design-system/VStack";
 import { Text } from "@/design-system/Text";
+import { captureErrorWithToast } from "@/utils/capture-error";
 
 export function ProfileMe(props: { inboxId: InboxId }) {
   const { inboxId } = props;
@@ -256,33 +257,46 @@ const EditableProfileContactCardAvatar = memo(
     const { addPFP, asset, isUploading } = useAddPfp();
     const profileMeStore = useProfileMeStore(inboxId);
     const { data: profile } = useProfileQuery({ xmtpId: inboxId });
-    const [displayUri, setDisplayUri] = useState<string | undefined>(
-      profileMeStore.getState().avatarUri ?? profile?.avatar ?? undefined
-    );
-
-    // Keep display URI in sync to prevent flashing
-    useEffect(() => {
-      if (asset?.uri) {
-        setDisplayUri(asset.uri);
-      } else {
-        setDisplayUri(profileMeStore.getState().avatarUri ?? profile?.avatar ?? undefined);
+    
+    // Determine which avatar to display with priority: store avatar > profile avatar
+    const storeAvatar = profileMeStore.getState().avatarUri;
+    const profileAvatar = profile?.avatar;
+    
+    // Create a display URI with a cache-busting parameter
+    const getDisplayUri = useCallback(() => {
+      // Priority: local asset (during upload) > store avatar > profile avatar
+      const sourceUri = asset?.uri || storeAvatar || profileAvatar;
+      
+      if (!sourceUri) {
+        return undefined;
       }
-    }, [asset?.uri, profile?.avatar, profileMeStore]);
+      
+      return sourceUri;
+    }, [asset?.uri, storeAvatar, profileAvatar]);
 
     // Update upload status
     useEffect(() => {
       profileMeStore.getState().actions.setIsAvatarUploading(isUploading);
     }, [isUploading, profileMeStore]);
 
+    const addAvatar = useCallback(async () => {
+      try {
+        const uploadedUrl = await addPFP();
+        if (uploadedUrl) {
+          profileMeStore.getState().actions.setAvatarUri(uploadedUrl);
+        }
+      } catch (error) {
+        captureErrorWithToast(error, {
+          message: "Failed to upload avatar. Please try again.",
+        });
+      }
+    }, [addPFP, profileMeStore]);
+
     return (
       <ProfileContactCardEditableAvatar
-        avatarUri={displayUri}
+        avatarUri={getDisplayUri()}
         avatarName={profile?.name}
-        onPress={() => {
-          addPFP((uploadedUrl) => {
-            profileMeStore.getState().actions.setAvatarUri(uploadedUrl);
-          });
-        }}
+        onPress={addAvatar}
       />
     );
   },

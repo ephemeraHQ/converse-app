@@ -1,7 +1,7 @@
 import { usePrivy } from "@privy-io/expo";
 import { isAxiosError } from "axios";
 import React, { memo, useCallback, useEffect, useState } from "react";
-import { Alert, TextStyle, ViewStyle } from "react-native";
+import { TextStyle, ViewStyle } from "react-native";
 import {
   interpolate,
   useAnimatedKeyboard,
@@ -44,13 +44,13 @@ type IOnboardingContactCardStore = {
   username: string;
   nameValidationError: string;
   avatar: string;
-  // isAvatarUploading: boolean;
+  isAvatarUploading: boolean;
   actions: {
     setName: (name: string) => void;
     setUsername: (username: string) => void;
     setNameValidationError: (nameValidationError: string) => void;
     setAvatar: (avatar: string) => void;
-    // setIsAvatarUploading: (isUploading: boolean) => void;
+    setIsAvatarUploading: (isUploading: boolean) => void;
     reset: () => void;
   };
 };
@@ -61,22 +61,22 @@ const useOnboardingContactCardStore = create<IOnboardingContactCardStore>(
     username: "",
     nameValidationError: "",
     avatar: "",
-    // isAvatarUploading: false,
+    isAvatarUploading: false,
     actions: {
       setName: (name: string) => set({ name }),
       setUsername: (username: string) => set({ username }),
       setNameValidationError: (nameValidationError: string) =>
         set({ nameValidationError }),
       setAvatar: (avatar: string) => set({ avatar }),
-      // setIsAvatarUploading: (isAvatarUploading: boolean) =>
-      //   set({ isAvatarUploading }),
+      setIsAvatarUploading: (isAvatarUploading: boolean) =>
+        set({ isAvatarUploading }),
       reset: () =>
         set({
           name: "",
           username: "",
           nameValidationError: "",
           avatar: "",
-          // isAvatarUploading: false
+          isAvatarUploading: false,
         }),
     },
   }),
@@ -124,6 +124,7 @@ export function OnboardingContactCardScreen() {
         profile: {
           name: store.name,
           username: store.username,
+          avatar: store.avatar,
         },
       };
 
@@ -225,6 +226,11 @@ export function OnboardingContactCardScreen() {
     };
   });
 
+  // Get isAvatarUploading from the store
+  const isAvatarUploading = useOnboardingContactCardStore(
+    (state) => state.isAvatarUploading
+  );
+
   return (
     <>
       <Screen
@@ -275,7 +281,7 @@ export function OnboardingContactCardScreen() {
             text={"Continue"}
             iconName="chevron.right"
             onPress={handleRealContinue}
-            isLoading={isPending}
+            isLoading={isPending || isAvatarUploading}
           />
         </VStack>
       </Screen>
@@ -354,15 +360,22 @@ const ProfileContactCardNameInput = memo(
 );
 
 const ProfileContactCardAvatar = memo(function ProfileContactCardAvatar() {
-  const { addPFP, asset } = useAddPfp();
+  const { addPFP, asset, isUploading } = useAddPfp();
 
   const name = useOnboardingContactCardStore((state) => state.name);
   const avatar = useOnboardingContactCardStore((state) => state.avatar);
 
+  // Update upload status in the store
+  useEffect(() => {
+    useOnboardingContactCardStore.getState().actions.setIsAvatarUploading(isUploading);
+  }, [isUploading]);
+
   const addAvatar = useCallback(async () => {
     try {
       const uploadedUrl = await addPFP();
-      useOnboardingContactCardStore.getState().actions.setAvatar(uploadedUrl);
+      if (uploadedUrl) {
+        useOnboardingContactCardStore.getState().actions.setAvatar(uploadedUrl);
+      }
     } catch (error) {
       captureErrorWithToast(error, {
         message: "Failed to upload avatar. Please try again.",
@@ -372,7 +385,7 @@ const ProfileContactCardAvatar = memo(function ProfileContactCardAvatar() {
 
   return (
     <ProfileContactCardEditableAvatar
-      avatarUri={asset?.uri ?? avatar}
+      avatarUri={avatar || asset?.uri}
       avatarName={name}
       onPress={addAvatar}
     />
