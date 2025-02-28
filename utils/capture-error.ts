@@ -1,24 +1,16 @@
 import { showSnackbar } from "@/components/snackbar/snackbar.service";
-import { getXmtpLogs } from "@/features/xmtp/utils/xmtp-logs";
-import {
-  ensureError,
-  FeedbackError,
-  GenericError,
-  XMTPError,
-} from "@/utils/error";
+import { ensureError, FeedbackError, GenericError } from "@/utils/error";
 import { logger } from "@/utils/logger";
-import { MAX_SENTRY_STRING_SIZE, sentryTrackError } from "@/utils/sentry";
-import { getLastBytes } from "./str";
+import { sentryTrackError } from "@/utils/sentry";
 
 export async function captureError(
   error: unknown,
   options: {
     extras?: Record<string, string>;
-    includeXmtpLogs?: boolean;
   } = {},
 ) {
   try {
-    const { extras, includeXmtpLogs } = options;
+    const { extras } = options;
 
     if (__DEV__) {
       if (extras) {
@@ -32,37 +24,10 @@ export async function captureError(
       return;
     }
 
-    let truncatedLogs: string | null = null;
-
-    // Maybe add XMTP logs
-    if (includeXmtpLogs || error instanceof XMTPError) {
-      try {
-        // Race between getting logs and 5 second timeout
-        const logs = await Promise.race([
-          getXmtpLogs(),
-          new Promise((_, reject) =>
-            setTimeout(() => reject(new Error("XMTP logs timeout")), 5000),
-          ),
-        ]);
-
-        if (logs && typeof logs === "string") {
-          truncatedLogs = getLastBytes(logs, MAX_SENTRY_STRING_SIZE);
-        }
-      } catch (e) {
-        sentryTrackError({
-          error: new GenericError({
-            error: ensureError(e),
-            additionalMessage: "Failed to capture XMTP logs",
-          }),
-        });
-      }
-    }
-
     sentryTrackError({
       error: ensureError(error),
       extras: {
         ...extras,
-        ...(truncatedLogs && { xmtp_logs: truncatedLogs }),
       },
     });
   } catch (error) {
