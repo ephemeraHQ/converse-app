@@ -23,31 +23,28 @@ const createUserRequestSchema = z
     }),
   })
   .strict();
-const createUserResponseSchema = z
-  .object({
-    id: z.string(),
-    privyUserId: z.string(),
-    device: z.object({
-      id: z.string(),
-      os: deviceOSEnum,
-      name: z.string().nullable(),
-    }),
-    identity: z.object({
-      id: z.string(),
-      privyAddress: z.string(),
-      xmtpId: z.string(),
-    }),
-    profile: z.object({
-      id: z.string(),
-      name: z.string(),
-      username: z.string(),
-      description: z.string().nullable(),
-      avatar: z.string().nullable(),
-    }),
-  })
-  .strict();
-
-export type CreateUserResponse = z.infer<typeof createUserResponseSchema>;
+  
+type CreateUserResponse = {
+  id: string;
+  privyUserId: string;
+  device: {
+    id: string;
+    os: "android" | "ios" | "web";
+    name: string | null;
+  };
+  identity: {
+    id: string;
+    privyAddress: string;
+    xmtpId: string;
+  };
+  profile: {
+    id: string;
+    name: string;
+    username: string;
+    description: string | null;
+    avatar: string | null;
+  };
+};
 
 export const createUser = async (args: {
   privyUserId: string;
