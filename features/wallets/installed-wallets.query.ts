@@ -1,36 +1,56 @@
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import * as Linking from "expo-linking";
+import { WalletId as ThirdwebWalletId } from "thirdweb/wallets";
 // TODO: move out of ConnectViaWallet
-import {
-  arbitrum,
-  avalanche,
-  base,
-  blast,
-  ethereum,
-  optimism,
-  polygon,
-  zora,
-} from "thirdweb/chains";
-import { WalletId } from "thirdweb/wallets";
 import { config } from "@/config";
 import logger from "@/utils/logger";
+
+// Define specific wallet ID constants tied to thirdweb's WalletId type
+export const WALLET_ID: Record<string, ThirdwebWalletId> = {
+  COINBASE: "com.coinbase.wallet",
+  RAINBOW: "me.rainbow",
+  METAMASK: "io.metamask",
+} as const;
+
+// Define custom schemes for each wallet
+export const WALLET_SCHEME = {
+  COINBASE: "cbwallet://" as const,
+  RAINBOW: "rainbow://" as const,
+  METAMASK: "metamask://" as const,
+} as const;
+
+// Create a union type of supported wallet IDs
+export type ISupportedWalletId = (typeof WALLET_ID)[keyof typeof WALLET_ID];
+
+// Create a union type of supported wallet schemes
+export type ISupportedWalletScheme =
+  (typeof WALLET_SCHEME)[keyof typeof WALLET_SCHEME];
+
+// Type guard functions for wallet identification
+export function isCoinbaseWallet(wallet: ISupportedWallet): boolean {
+  return wallet.thirdwebId === WALLET_ID.COINBASE;
+}
+
+export function isRainbowWallet(wallet: ISupportedWallet): boolean {
+  return wallet.thirdwebId === WALLET_ID.RAINBOW;
+}
+
+export function isMetaMaskWallet(wallet: ISupportedWallet): boolean {
+  return wallet.thirdwebId === WALLET_ID.METAMASK;
+}
 
 export type ISupportedWallet = {
   name: string;
   iconURL: string;
-  customScheme: string;
-  thirdwebId: WalletId;
+  customScheme: ISupportedWalletScheme;
+  thirdwebId: ISupportedWalletId;
   mobileConfig?: {
     callbackURL: string;
   };
 };
 
-export const useInstalledWallets = () => {
-  const { data: installedWallets, isLoading } = useQuery(
-    getInstalledWalletsQueryOptions(),
-  );
-
-  return { installedWallets, isLoading };
+export const useInstalledWalletsQuery = () => {
+  return useQuery(getInstalledWalletsQueryOptions());
 };
 
 // List of wallets that the app supports
@@ -39,8 +59,8 @@ const SupportedWallets: ISupportedWallet[] = [
     name: "Coinbase Wallet",
     iconURL:
       "https://explorer-api.walletconnect.com/v3/logo/sm/a5ebc364-8f91-4200-fcc6-be81310a0000?projectId=2f05ae7f1116030fde2d36508f472bfb",
-    customScheme: "cbwallet://",
-    thirdwebId: "com.coinbase.wallet",
+    customScheme: WALLET_SCHEME.COINBASE,
+    thirdwebId: WALLET_ID.COINBASE,
     mobileConfig: {
       callbackURL: `https://${config.websiteDomain}/coinbase`,
     },
@@ -51,8 +71,8 @@ const SupportedWallets: ISupportedWallet[] = [
       "https://explorer-api.walletconnect.com/v3/logo/sm/7a33d7f1-3d12-4b5c-f3ee-5cd83cb1b500?projectId=2f05ae7f1116030fde2d36508f472bfb",
     //  LOG  4:12:10 PM | DEBUG : [Navigation] Handling default link
     //  ERROR  Failed to open URI: rainbow://wc?uri=wc%3Adf81e00aa0a3ddce5a6f2cc98ea001e6dd05881ffee9298a988bb84c7575353f%402%3FexpiryTimestamp%3D1739222230%26relay-protocol%3Dirn%26symKey%3Dea9e0d2a494893eb8d85498370525cd1e67ee7d3fde6dad49a207a0599011ded - is the app installed?
-    customScheme: "rainbow://",
-    thirdwebId: "me.rainbow",
+    customScheme: WALLET_SCHEME.RAINBOW,
+    thirdwebId: WALLET_ID.RAINBOW,
     // Rainbow Mobile does not support tesnets (even Sepolia)
     // https://rainbow.me/en/support/app/testnets
     // supportedChains: [
@@ -73,8 +93,8 @@ const SupportedWallets: ISupportedWallet[] = [
     iconURL:
       "https://explorer-api.walletconnect.com/v3/logo/sm/018b2d52-10e9-4158-1fde-a5d5bac5aa00?projectId=2f05ae7f1116030fde2d36508f472bfb",
     //  Failed to open URI: metamask://wc?uri=wc%3A505bd431b1f198efb41ba50928ae64ed3c7d58c0eb25653a1018136ec8e8fb77%402%3FexpiryTimestamp%3D1739222248%26relay-protocol%3Dirn%26symKey%3D1c6b91862570d0b6b103285d1998eb6cbaeb8d6cebe201340481fbefa0f2d495 - is the app installed?
-    customScheme: "metamask://",
-    thirdwebId: "io.metamask",
+    customScheme: WALLET_SCHEME.METAMASK,
+    thirdwebId: WALLET_ID.METAMASK,
   },
   // {
   //   name: "Phantom",
@@ -90,11 +110,9 @@ function getInstalledWalletsQueryOptions() {
   return queryOptions({
     queryKey: ["installedWallets"],
     queryFn: async () => {
-      logger.debug("getInstalledWalletsQueryOptions");
       return getInstalledWallets({ supportedWallets: SupportedWallets });
     },
     staleTime: 0,
-    refetchOnWindowFocus: true,
   });
 }
 

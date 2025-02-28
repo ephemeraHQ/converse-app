@@ -29,7 +29,6 @@ import { useProfileContactCardStyles } from "@/features/profiles/components/prof
 import { profileValidationSchema } from "@/features/profiles/schemas/profile-validation.schema"
 import { validateProfileName } from "@/features/profiles/utils/validate-profile-name"
 import { ConnectWalletBottomSheet } from "@/features/wallets/connect-wallet/connect-wallet-bottom-sheet"
-import { openConnectWalletBottomSheet } from "@/features/wallets/connect-wallet/connect-wallet.service"
 import { useAddPfp } from "@/hooks/use-add-pfp"
 import { useHeader } from "@/navigation/use-header"
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme"
@@ -191,7 +190,7 @@ export function OnboardingContactCardScreen() {
 
   useHeader({
     safeAreaEdges: ["top"],
-    leftText: "Logout",
+    leftText: "Cancel",
     onLeftPress: () => {
       useAuthStore.getState().actions.setStatus("signedOut")
     },
