@@ -1,11 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { setCurrentUserQueryData } from "@/features/current-user/curent-user.query";
-import { setProfileQueryData } from "@/features/profiles/profiles.query";
-import { buildDeviceMetadata } from "@/utils/device-metadata";
-import {
-  createUser,
-  CreateUserResponse,
-} from "../authentication/create-user.api";
+import { setProfileQueryData, invalidateProfileQuery } from "@/features/profiles/profiles.query";
+import { createUser } from "../authentication/create-user.api";
 
 type ICreateUserArgs = {
   privyUserId: string;
@@ -16,30 +12,6 @@ type ICreateUserArgs = {
     username: string;
     avatar?: string;
     description?: string;
-  };
-};
-
-const buildOptimisticUser = (args: ICreateUserArgs): CreateUserResponse => {
-  const device = buildDeviceMetadata();
-  return {
-    id: "123",
-    privyUserId: args.privyUserId,
-    device: {
-      ...device,
-      id: "123",
-    },
-    identity: {
-      id: "123",
-      privyAddress: args.smartContractWalletAddress,
-      xmtpId: args.inboxId,
-    },
-    profile: {
-      id: "123",
-      name: args.profile.name,
-      username: args.profile.username,
-      description: args.profile.description ?? null,
-      avatar: args.profile.avatar ?? null,
-    },
   };
 };
 
@@ -59,6 +31,7 @@ export function useCreateUser() {
     mutationFn: async (args: ICreateUserArgs) => {
       return createUser(args);
     },
+
     // onMutate: async (args: ICreateUserArgs) => {
     //   await cancelCurrentUserQuery();
 
@@ -107,9 +80,13 @@ export function useCreateUser() {
           name: data.profile.name,
           username: data.profile.username,
           description: data.profile.description ?? null,
-          avatar: data.profile.avatar ?? null,
+          ...(data.profile.avatar && { avatar: data.profile.avatar })
         },
       });
+      
+      // Explicitly refetch the profile data to ensure
+      // we have the latest data including the newly uploaded avatar
+      invalidateProfileQuery({ xmtpId: data.identity.xmtpId });
     },
   });
 }

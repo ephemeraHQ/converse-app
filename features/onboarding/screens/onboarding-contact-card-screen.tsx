@@ -100,7 +100,7 @@ export function OnboardingContactCardScreen() {
       const profileValidation = profileValidationSchema.safeParse({
         name: store.name,
         username: store.username,
-        avatar: store.avatar,
+        ...(store.avatar && { avatar: store.avatar })
       });
 
       if (!profileValidation.success) {
@@ -125,7 +125,7 @@ export function OnboardingContactCardScreen() {
         profile: {
           name: store.name,
           username: store.username,
-          avatar: store.avatar,
+          ...(store.avatar && { avatar: store.avatar })
         },
       };
 

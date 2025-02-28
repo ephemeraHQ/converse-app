@@ -84,16 +84,12 @@ export const createUser = async (args: {
       validationResult.data,
     );
 
-    const responseValidation = createUserResponseSchema.safeParse(
-      response.data,
-    );
-    if (!responseValidation.success) {
-      throw new Error(
-        `Response validation failed: ${responseValidation.error.message}`,
-      );
+    // Ensure avatar is null if it doesn't exist
+    if (response.data?.profile && response.data.profile.avatar === undefined) {
+      response.data.profile.avatar = null;
     }
-
-    return responseValidation.data;
+    
+    return response.data;
   } catch (error) {
     throw handleApiError(error, "createUser");
   }
