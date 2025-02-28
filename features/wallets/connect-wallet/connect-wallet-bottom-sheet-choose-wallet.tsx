@@ -1,22 +1,33 @@
+import { useSmartWallets } from "@privy-io/expo/smart-wallets";
+import { Client } from "@xmtp/react-native-sdk";
 import React, { memo } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useConnect } from "thirdweb/react";
 import { createWallet as createWalletThirdweb } from "thirdweb/wallets";
 import { useDynamicPagesStoreContext } from "@/components/dynamic-pages/dynamic-pages.store-context";
 import { createConfirmationAlert } from "@/components/promise-alert";
-import { BottomSheetHeader } from "@/design-system/BottomSheet/BottomSheetHeader";
+import { config } from "@/config";
+import { BottomSheetHeaderBase } from "@/design-system/BottomSheet/BottomSheetHeader";
 import { Image } from "@/design-system/image";
 import { Loader } from "@/design-system/loader";
 import { Pressable } from "@/design-system/Pressable";
 import { Text } from "@/design-system/Text";
 import { VStack } from "@/design-system/VStack";
-import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store";
+import {
+  useMultiInboxStore,
+  useSafeCurrentSender,
+} from "@/features/authentication/multi-inbox.store";
+import { createXmtpSignerFromPrivySwc } from "@/features/onboarding/utils/create-xmtp-signer-from-privy-swc";
 import { prefetchSocialProfilesForAddress } from "@/features/social-profiles/social-profiles.query";
 import {
   ISupportedWallet,
   useInstalledWalletsQuery,
 } from "@/features/wallets/installed-wallets.query";
-import { inboxIdCanMessageEthAddress } from "@/features/xmtp/xmtp-consent/account-can-message-peer";
+import { getDbEncryptionKey } from "@/features/xmtp/xmtp-client/xmtp-client";
+import {
+  ISupportedXmtpCodecs,
+  supportedXmtpCodecs,
+} from "@/features/xmtp/xmtp-codecs/xmtp-codecs";
 import { addWalletToInboxId } from "@/features/xmtp/xmtp-inbox-id/add-wallet-to-inbox-id";
 import { useEthAddressesForXmtpInboxId } from "@/features/xmtp/xmtp-inbox-id/eth-addresses-for-xmtp-inbox-id.query";
 import { getInboxIdFromEthAddress } from "@/features/xmtp/xmtp-inbox-id/xmtp-inbox-id-from-eth-address";
@@ -37,10 +48,7 @@ export const ConnectWalletBottomSheetChooseWallet = memo(
 
     return (
       <>
-        <BottomSheetHeader
-          title="Choose an app"
-          onClose={actions.goToPreviousPage}
-        />
+        <BottomSheetHeaderBase title="Choose an app" />
 
         <VStack
           style={{
@@ -70,7 +78,9 @@ export const ConnectWalletBottomSheetChooseWallet = memo(
 function InstalledWalletsList() {
   const { theme } = useAppTheme();
   const currentSender = useSafeCurrentSender();
-  const { connect } = useConnect();
+  const { connect, error, isConnecting } = useConnect();
+  console.log("isConnecting:", isConnecting);
+  console.log("error:", error);
 
   // Get wallet connection state from the store
   const { thirdwebWalletIdThatIsConnecting, isWalletListDisabled } =
@@ -92,12 +102,14 @@ function InstalledWalletsList() {
   );
 
   // Get state from store
-  const { setConnectingWallet, setConnectingEthereumAddress } =
-    useConnectWalletStore();
+  // const { setConnectingWallet, setConnectingEthereumAddress } =
+  //   useConnectWalletStore();
+
+  const { client: smartWalletClient } = useSmartWallets();
 
   // Handle wallet connection
   const connectWallet = async (wallet: ISupportedWallet) => {
-    setConnectingWallet(wallet.thirdwebId);
+    // setConnectingWallet(wallet.thirdwebId);
 
     logger.debug(
       `[ConnectWalletBottomSheet] Handling connect wallet tapped for ${wallet.thirdwebId}`,
@@ -123,7 +135,7 @@ function InstalledWalletsList() {
           const addressToLink = walletAccount.address;
 
           // Update store with discovered address
-          setConnectingEthereumAddress(addressToLink);
+          // setConnectingEthereumAddress(addressToLink);
 
           logger.debug(
             `[ConnectWalletBottomSheet] Got wallet address: ${addressToLink}`,
@@ -147,47 +159,151 @@ function InstalledWalletsList() {
 
           // Get inbox client for current sender
 
-          const isOnXmtp = await inboxIdCanMessageEthAddress({
-            inboxId: currentSender.inboxId,
-            ethAddress: addressToLink,
-          });
+          // const isOnXmtp = await inboxIdCanMessageEthAddress({
+          //   inboxId: currentSender.inboxId,
+          //   ethAddress: addressToLink,
+          // });
 
-          console.log("isOnXmtp:", isOnXmtp);
-
+          // Tmp
           await new Promise((resolve) => setTimeout(resolve, 1000));
+
+          console.log("addressToLink:", addressToLink);
+          console.log("currentSender:", currentSender);
 
           const inboxId = await getInboxIdFromEthAddress({
             clientEthAddress: currentSender.ethereumAddress,
             targetEthAddress: addressToLink,
           });
 
-          console.log("inboxId:", inboxId);
+          console.log(`inboxId for ${addressToLink}:`, inboxId);
 
           console.log("currentSender:", currentSender);
+          const chain = thirdwebWallet.getChain();
 
-          if (isOnXmtp) {
-            logger.debug(
-              `[ConnectWalletBottomSheet] Address ${addressToLink} is already on XMTP`,
+          if (!chain) {
+            throw new Error("Chain not found");
+          }
+
+          if (inboxId) {
+            const isAlreadyLinkedToCurrentSender =
+              inboxId === currentSender.inboxId;
+
+            console.log(
+              "isAlreadyLinkedToCurrentSender:",
+              isAlreadyLinkedToCurrentSender,
             );
 
-            const res = await createConfirmationAlert({
+            if (isAlreadyLinkedToCurrentSender) {
+              logger.debug(
+                `[ConnectWalletBottomSheet] Address ${addressToLink} is already linked to current sender ${currentSender.inboxId}`,
+              );
+
+              alert(`Already linked to current inbox Id`);
+
+              return thirdwebWallet;
+            }
+
+            logger.debug(
+              `[ConnectWalletBottomSheet] Address ${addressToLink} is already linked to an inbox ID ${inboxId} on XMTP`,
+            );
+
+            const hasConfirmed = await createConfirmationAlert({
               title: `Linked on XMTP with address ${addressToLink}`,
               message: `Do you want to still connect with wallet to`,
             });
 
-            console.log("res:", res);
+            console.log("res:", hasConfirmed);
+
+            if (hasConfirmed) {
+              // useMultiInboxStore.getState().actions.setCurrentSender({
+              //   ethereumAddress: addressToLink,
+              //   inboxId: inboxId,
+              // });
+
+              // Create new client with new address
+              const newClient = await Client.create<ISupportedXmtpCodecs>(
+                getXmtpSigner({
+                  ethAddress: addressToLink,
+                  type: "EOA",
+                  chainId: chain.id,
+                  signMessage: async (message: string) => {
+                    logger.debug(
+                      `[ConnectWalletBottomSheet] Signing message for address ${addressToLink}`,
+                    );
+                    const signature = await walletAccount.signMessage({
+                      message,
+                    });
+                    return signature;
+                  },
+                }),
+                {
+                  appVersion: `${config.appName}/${config.appVersion}`,
+                  env: config.xmtpEnv,
+                  dbEncryptionKey: await getDbEncryptionKey(),
+                  codecs: supportedXmtpCodecs,
+                },
+              );
+              // await createXmtpClient({
+              //   inboxSigner: getXmtpSigner({
+              //     ethAddress: addressToLink,
+              //     type: "EOA",
+              //     chainId: chain.id,
+              //     signMessage: async (message: string) => {
+              //       logger.debug(
+              //         `[ConnectWalletBottomSheet] Signing message for address ${addressToLink}`,
+              //       );
+              //       const signature = await walletAccount.signMessage({
+              //         message,
+              //       });
+              //       return signature;
+              //     },
+              //   }),
+              // });
+
+              logger.debug(
+                `[ConnectWalletBottomSheet] New client inboxId: ${newClient.inboxId}`,
+              );
+
+              const inboxState = await newClient.inboxStates(true, [
+                newClient.inboxId,
+              ]);
+              console.log("new client inboxState:", inboxState);
+
+              // await addWalletToInboxId({
+              //   inboxId: inboxId,
+              //   wallet: createXmtpSignerFromPrivySwc(smartWalletClient!),
+              // });
+
+              console.log(
+                "smartWalletClient:",
+                smartWalletClient?.account.address,
+              );
+
+              // Add previously created smart wallet client to the existing inboxId
+              await newClient.addAccount(
+                createXmtpSignerFromPrivySwc(smartWalletClient!),
+                true,
+              );
+
+              useMultiInboxStore.getState().actions.setCurrentSender({
+                ethereumAddress: addressToLink,
+                inboxId: inboxId,
+              });
+
+              logger.debug(
+                `[ConnectWalletBottomSheet] Added wallet to new inbox ID`,
+              );
+            } else {
+              throw new Error("User did not confirm");
+              // thirdwebWallet.disconnect()
+              // return thirdwebWallet
+            }
 
             // onWalletImported(socialProfiles);
           } else {
             logger.debug(
-              `[ConnectWalletBottomSheet] Creating signer for address ${addressToLink}`,
+              `[ConnectWalletBottomSheet] Address ${addressToLink} is not linked to an inbox ID, link it to this one!`,
             );
-
-            const chain = thirdwebWallet.getChain();
-
-            if (!chain) {
-              throw new Error("Chain not found");
-            }
 
             // Create signer for the wallet
             const xmtpSigner = getXmtpSigner({
