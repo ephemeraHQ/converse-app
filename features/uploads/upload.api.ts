@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { api } from "@/utils/api/api";
-import { logger } from "@/utils/logger";
 import RNFetchBlob from "rn-fetch-blob";
 
 const PresignedUrlResponseSchema = z.object({
@@ -18,14 +17,9 @@ export type IPresignedUrlResponse = z.infer<typeof PresignedUrlResponseSchema>;
 export const getPresignedUploadUrl = async (
   contentType?: string,
 ): Promise<IPresignedUrlResponse> => {
-  logger.debug(
-    "[API ATTACHMENTS] Getting presigned URL for content type:",
-    contentType,
-  );
   const { data } = await api.get("/api/v1/attachments/presigned", {
     params: { contentType },
   });
-  logger.debug("[API ATTACHMENTS] getPresignedUploadUrl response:", data);
   return PresignedUrlResponseSchema.parse(data);
 };
 
@@ -49,12 +43,6 @@ export const uploadFileWithPresignedUrl = async (
   filePath: string,
   contentType: string,
 ): Promise<string> => {
-  logger.debug("[API ATTACHMENTS] Uploading file to presigned URL:", {
-    presignedUrl,
-    filePath,
-    contentType,
-  });
-
   // Remove file:// prefix for RNFetchBlob
   const normalizedPath = filePath.replace("file://", "");
 
@@ -68,7 +56,5 @@ export const uploadFileWithPresignedUrl = async (
     RNFetchBlob.wrap(normalizedPath),
   );
 
-  const publicUrl = getPublicUrlFromPresignedUrl(presignedUrl);
-  logger.debug("[API ATTACHMENTS] File uploaded successfully:", { publicUrl });
-  return publicUrl;
+  return getPublicUrlFromPresignedUrl(presignedUrl);
 };

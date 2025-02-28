@@ -25,7 +25,6 @@ import { useCurrentSender } from "../authentication/multi-inbox.store";
 import { TextField } from "@/design-system/TextField/TextField";
 import { VStack } from "@/design-system/VStack";
 import { Text } from "@/design-system/Text";
-import { captureErrorWithToast } from "@/utils/capture-error";
 
 export function ProfileMe(props: { inboxId: InboxId }) {
   const { inboxId } = props;

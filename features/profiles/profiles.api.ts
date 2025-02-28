@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { api } from "@/utils/api/api";
 import { captureError } from "@/utils/capture-error";
-import { logger } from "@/utils/logger";
 import {
   ConvosProfileForInboxSchema,
   ClaimProfileResponseSchema,
@@ -28,11 +27,6 @@ const getProfileChanges = (args: {
   current?: IConvosProfileForInbox;
 }): ProfileUpdates => {
   const { update, current } = args;
-  
-  logger.debug("[getProfileChanges]", {
-    update: JSON.stringify(update),
-    current: current ? JSON.stringify(current) : undefined
-  });
 
   // For new profiles, include all provided fields
   if (!current) {
@@ -42,8 +36,6 @@ const getProfileChanges = (args: {
       ...(update.description !== undefined && { description: update.description }),
       ...(update.avatar !== undefined && { avatar: update.avatar }),
     };
-    
-    logger.debug("[getProfileChanges] New profile", { updates: JSON.stringify(updates) });
     return updates;
   }
 
@@ -65,11 +57,6 @@ const getProfileChanges = (args: {
   if (update.avatar !== undefined && update.avatar !== current.avatar) {
     updates.avatar = update.avatar;
   }
-
-  logger.debug("[getProfileChanges] Changed fields", { 
-    updates: JSON.stringify(updates),
-    changedFields: Object.keys(updates)
-  });
   
   return updates;
 };
@@ -91,12 +78,6 @@ const normalizeProfileData = (profile: ProfileInput): ClaimProfileRequest => ({
 
 export const updateProfile = async (args: { xmtpId: string; updates: ProfileUpdates }) => {
   const { xmtpId, updates } = args;
-
-  logger.debug("[updateProfile]", { 
-    xmtpId, 
-    fieldsToUpdate: Object.keys(updates),
-    updates: JSON.stringify(updates)
-  });
   
   try {
     // Validate the update payload
@@ -106,18 +87,12 @@ export const updateProfile = async (args: { xmtpId: string; updates: ProfileUpda
     const { data } = await api.put(`/api/v1/profiles/${xmtpId}`, validatedUpdates);
     return data;
   } catch (error) {
-    logger.error("[updateProfile]", { 
-      error, 
-      requestPayload: updates,
-      endpoint: `/api/v1/profiles/${xmtpId}`
-    });
     throw error;
   }
 };
 
 export const fetchProfile = async (args: { xmtpId: string }): Promise<IConvosProfileForInbox> => {
   const { xmtpId } = args;
-  logger.debug("[fetchProfile]", { xmtpId });
   
   const { data } = await api.get(`/api/v1/profiles/${xmtpId}`);
   
@@ -131,7 +106,6 @@ export const fetchProfile = async (args: { xmtpId: string }): Promise<IConvosPro
 
 export const fetchAllProfilesForUser = async (args: { convosUserId: string }): Promise<IConvosProfileForInbox[]> => {
   const { convosUserId } = args;
-  logger.debug("[fetchAllProfilesForUser]", { convosUserId });
   
   const { data } = await api.get(`/api/v1/profiles/user/${convosUserId}`);
   
@@ -146,17 +120,10 @@ export const fetchAllProfilesForUser = async (args: { convosUserId: string }): P
 export const claimProfile = async (args: { profile: ClaimProfileRequest }) => {
   const { profile } = args;
   
-  logger.debug("[claimProfile]", { profile: JSON.stringify(profile) });
-  
   try {
     const { data } = await api.post("/api/profile/username", profile);
     return ClaimProfileResponseSchema.parse(data);
   } catch (error) {
-    logger.error("[claimProfile]", { 
-      error, 
-      requestPayload: profile,
-      endpoint: "/api/profile/username"
-    });
     throw error;
   }
 };
@@ -168,13 +135,6 @@ export const saveProfileAsync = async (args: {
 }) => {
   const { profile, inboxId, currentProfile } = args;
   const xmtpId = profile.xmtpId || inboxId;
-  
-  logger.debug("[saveProfileAsync]", { 
-    hasProfileId: !!profile.id,
-    hasXmtpId: !!profile.xmtpId,
-    inboxId,
-    profile: JSON.stringify(profile)
-  });
   
   try {
     if (xmtpId) {
@@ -198,11 +158,6 @@ export const saveProfileAsync = async (args: {
       profile: normalizeProfileData(profile)
     });
   } catch (error) {
-    logger.error("[saveProfileAsync]", {
-      error,
-      profile: JSON.stringify(profile),
-      inboxId
-    });
     throw error;
   }
 };

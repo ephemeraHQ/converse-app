@@ -18,7 +18,6 @@ import { useRouter } from "@/navigation/use-navigation";
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
 import { captureErrorWithToast } from "@/utils/capture-error";
 import { Haptics } from "@/utils/haptics";
-import { logger } from "@/utils/logger";
 import { getProfileQueryData } from "@/features/profiles/profiles.query";
 import { useSaveProfile } from "@/features/profiles/hooks/use-save-profile";
 
@@ -141,15 +140,7 @@ const DoneAction = memo(function DoneAction({ inboxId }: { inboxId: InboxId }) {
   const handleDoneEditProfile = useCallback(async () => {
     // Get all the profile data from the store
     const state = profileMeStore.getState();
-    
-    logger.debug("[DoneAction] Starting profile save", {
-      inboxId,
-      hasProfile: !!profile,
-      profileId: profile?.id,
-      xmtpId: profile?.xmtpId,
-      storeState: JSON.stringify(state)
-    });
-    
+
     // This ensures we're sending the actual values from the form
     const profileUpdate = {
       id: profile?.id,
@@ -158,11 +149,6 @@ const DoneAction = memo(function DoneAction({ inboxId }: { inboxId: InboxId }) {
       description: state.descriptionTextValue,
       avatar: state.avatarUri,
     };
-    
-    logger.debug("[DoneAction] Saving profile with update", {
-      profileUpdate: JSON.stringify(profileUpdate),
-      fields: Object.keys(profileUpdate)
-    });
     
     try {
       // Use the saveProfile function from the hook
@@ -176,7 +162,6 @@ const DoneAction = memo(function DoneAction({ inboxId }: { inboxId: InboxId }) {
       profileMeStore.getState().actions.reset();
     } catch (err) {
       const error = err as any;
-      logger.error("[DoneAction] Error saving profile", { error });
 
       // Extract error message from the API response
       if (error.response?.data) {
@@ -184,11 +169,6 @@ const DoneAction = memo(function DoneAction({ inboxId }: { inboxId: InboxId }) {
         
         // Handle validation errors (400 Bad Request or 409 Conflict)
         if (statusCode === 400 || statusCode === 409) {
-          logger.debug("[DoneAction] Validation error response", { 
-            statusCode,
-            responseData: error.response?.data 
-          });
-          
           // Generic approach to extract validation error messages
           if (error.response?.data?.errors) {
             const errors = error.response.data.errors;
@@ -197,7 +177,6 @@ const DoneAction = memo(function DoneAction({ inboxId }: { inboxId: InboxId }) {
             for (const field in errors) {
               if (errors[field]?.message) {
                 const errorMessage = errors[field].message;
-                logger.debug("[DoneAction] Validation error", { field, errorMessage });
                 captureErrorWithToast(error, { message: errorMessage });
                 return;
               }
