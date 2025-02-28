@@ -1,20 +1,20 @@
-import { useCallback } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { saveProfileAsync } from "@/features/profiles/profiles.api";
 import {
   type IConvosProfileForInbox,
   type ProfileInput
 } from "@/features/profiles/profile.types";
-import { setProfileQueryData } from "@/features/profiles/profiles.query";
+import { 
+  setProfileQueryData, 
+  getProfileQueryData,
+  invalidateProfileQuery
+} from "@/features/profiles/profiles.query";
 import { logger } from "@/utils/logger";
 
 type SaveProfileArgs = {
   profile: ProfileInput;
   inboxId: string;
 };
-
-// Helper function to match the query key format in profiles.query.ts
-const profileQueryKey = (xmtpId: string) => ["profile", xmtpId] as const;
 
 /**
  * Hook for saving profile data using React Query's useMutation
@@ -27,10 +27,9 @@ export function useSaveProfile() {
 
   const mutation = useMutation({
     mutationFn: (args: SaveProfileArgs) => {
-      // Get the current profile data to compare with
-      const currentProfile = queryClient.getQueryData(
-        profileQueryKey(args.inboxId)
-      ) as IConvosProfileForInbox | undefined;
+      const currentProfile = getProfileQueryData({ 
+        xmtpId: args.inboxId 
+      }) as IConvosProfileForInbox | undefined;
       
       logger.debug("[useSaveProfile] Starting mutation", {
         inboxId: args.inboxId,
@@ -56,9 +55,9 @@ export function useSaveProfile() {
     },
     onMutate: async (args) => {
       // Capture the previous profile data for rollback
-      const previousProfile = queryClient.getQueryData(
-        profileQueryKey(args.inboxId)
-      ) as IConvosProfileForInbox | undefined;
+      const previousProfile = getProfileQueryData({ 
+        xmtpId: args.inboxId 
+      }) as IConvosProfileForInbox | undefined;
 
       // Optimistically update the profile in the cache
       setProfileQueryData({
@@ -75,7 +74,7 @@ export function useSaveProfile() {
       // Rollback to the previous profile data on error
       if (context?.previousProfile) {
         queryClient.setQueryData(
-          profileQueryKey(variables.inboxId),
+          ["profile", variables.inboxId],
           context.previousProfile
         );
       }
@@ -86,22 +85,12 @@ export function useSaveProfile() {
     },
     onSettled: (_, __, variables) => {
       // Always invalidate the profile query to ensure fresh data
-      queryClient.invalidateQueries({
-        queryKey: profileQueryKey(variables.inboxId),
-      });
+      invalidateProfileQuery({ xmtpId: variables.inboxId });
     },
   });
 
-  // Extract mutateAsync to avoid the linter warning about dependencies
-  const { mutateAsync } = mutation;
-  
-  const saveProfile = useCallback(
-    (args: SaveProfileArgs) => mutateAsync(args),
-    [mutateAsync]
-  );
-
   return {
-    saveProfile,
+    saveProfile: mutation.mutateAsync,
     isSaving: mutation.isPending,
     isError: mutation.isError,
     isSuccess: mutation.isSuccess,
