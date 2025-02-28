@@ -30,6 +30,7 @@ import { config } from "./config";
 import { useMonitorNetworkConnectivity } from "./dependencies/NetworkMonitor/use-monitor-network-connectivity";
 import { AppNavigator } from "./navigation/app-navigator";
 import "./utils/ignore-logs";
+import { useCachedResources } from "@/utils/cache-resources";
 import { sentryInit } from "./utils/sentry";
 import { preventSplashScreenAutoHide } from "./utils/splash/splash";
 
@@ -62,6 +63,7 @@ export function App() {
   useHydrateAuth();
   useReactQueryDevTools(queryClient);
   useSetupStreamingSubscriptions();
+  useCachedResources();
 
   const { themeScheme, setThemeContextOverride, ThemeProvider } =
     useThemeProvider();

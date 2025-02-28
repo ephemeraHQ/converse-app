@@ -9,7 +9,7 @@ export const textSizeStyles = {
   xxl: { fontSize: 40, lineHeight: 44 } satisfies TextStyle,
   xl: { fontSize: 32, lineHeight: 36 } satisfies TextStyle, // Made up, need to confirm with Andrew once we have the design
   lg: { fontSize: 24, lineHeight: 28 } satisfies TextStyle, // Made up, need to confirm with Andrew once we have the design
-  md: { fontSize: 20, lineHeight: 20 } satisfies TextStyle,
+  md: { fontSize: 20, lineHeight: 24 } satisfies TextStyle,
   sm: { fontSize: 16, lineHeight: 20 } satisfies TextStyle,
   xs: { fontSize: 14, lineHeight: 18 } satisfies TextStyle,
   xxs: { fontSize: 12, lineHeight: 14 } satisfies TextStyle,

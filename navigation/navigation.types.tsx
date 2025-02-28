@@ -12,6 +12,7 @@ export type NavigationParamList = {
   // Auth / Onboarding
   OnboardingWelcome: undefined;
   OnboardingCreateContactCard: undefined;
+  OnboardingConnectWallet: undefined;
   OnboardingNotifications: undefined;
   OnboardingGetStarted: undefined;
 

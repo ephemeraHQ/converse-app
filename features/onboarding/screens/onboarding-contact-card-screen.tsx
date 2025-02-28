@@ -28,9 +28,9 @@ import { ProfileContactCardLayout } from "@/features/profiles/components/profile
 import { useProfileContactCardStyles } from "@/features/profiles/components/profile-contact-card/use-profile-contact-card.styles"
 import { profileValidationSchema } from "@/features/profiles/schemas/profile-validation.schema"
 import { validateProfileName } from "@/features/profiles/utils/validate-profile-name"
-import { ConnectWalletBottomSheet } from "@/features/wallets/connect-wallet/connect-wallet-bottom-sheet"
 import { useAddPfp } from "@/hooks/use-add-pfp"
 import { useHeader } from "@/navigation/use-header"
+import { useRouter } from "@/navigation/use-navigation"
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme"
 import { ValidationError } from "@/utils/api/api.error"
 import { captureErrorWithToast } from "@/utils/capture-error"
@@ -316,25 +316,6 @@ export function OnboardingContactCardScreen() {
           />
         </VStack>
       </Screen>
-
-      <ConnectWalletBottomSheet
-      // onClose={() => setIsConnectWalletBottomSheetVisible(false)}
-      // onWalletImported={(something) => {
-      //   console.log("something:", something);
-      // }}
-      // onWalletConnect={async (connectHandler) => {
-      //   try {
-      //     await connectHandler();
-      //     listBottomSheetRef.current?.dismiss();
-      //   } catch (error) {
-      //     logger.error(
-      //       "[OnboardingContactCardScreen] Wallet connect error:",
-      //       error
-      //     );
-      //     captureErrorWithToast(error as Error);
-      //   }
-      // }}
-      />
     </>
   )
 }
@@ -414,6 +395,8 @@ const ProfileContactCardAdditionalOptions = memo(
   function ProfileContactCardAdditionalOptions() {
     const { theme } = useAppTheme()
 
+    const router = useRouter()
+
     return (
       <Pressable
         hitSlop={theme.spacing.md}
@@ -421,7 +404,10 @@ const ProfileContactCardAdditionalOptions = memo(
           paddingHorizontal: theme.spacing.xs,
           paddingVertical: theme.spacing.xxs,
         }}
-        onPress={openConnectWalletBottomSheet}
+        // onPress={openConnectWalletBottomSheet}
+        onPress={() => {
+          router.navigate("OnboardingConnectWallet")
+        }}
       >
         <Text preset="small" color="secondary" inverted>
           Import

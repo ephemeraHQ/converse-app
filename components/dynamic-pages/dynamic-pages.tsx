@@ -1,12 +1,5 @@
-import {
-  Children,
-  memo,
-  useEffect,
-  useImperativeHandle,
-  useMemo,
-  useRef,
-} from "react";
-import { FadeIn, FadeOut } from "react-native-reanimated";
+import { memo, useEffect, useImperativeHandle, useMemo, useRef } from "react";
+import { FadeIn } from "react-native-reanimated";
 import { AnimatedVStack } from "@/design-system/VStack";
 import {
   DynamicPagesStoreProvider,
@@ -22,7 +15,7 @@ export type IDynamicPagesRef = {
 
 export type IDynamicPagesProps = {
   actionRef?: React.Ref<IDynamicPagesRef>;
-  children: React.ReactNode;
+  pages: React.ReactNode[];
 };
 
 export const DynamicPages = memo(function DynamicPages(
@@ -36,10 +29,7 @@ export const DynamicPages = memo(function DynamicPages(
 });
 
 const Main = memo(function Main(props: IDynamicPagesProps) {
-  const { children, actionRef } = props;
-
-  // Convert children to array for pagination
-  const pages = useMemo(() => Children.toArray(children), [children]);
+  const { pages, actionRef } = props;
 
   const store = useDynamicPagesStore();
 

@@ -5,8 +5,9 @@ import { Center } from "@/design-system/Center";
 import { Pressable } from "@/design-system/Pressable";
 import { ITextProps, Text } from "@/design-system/Text";
 import { useAppTheme } from "@/theme/use-app-theme";
+import { debugBorder } from "@/utils/debug-style";
 
-type IChipSize = "xs" | "sm" | "md";
+type IChipSize = "xs" | "sm" | "md" | "lg";
 
 const ChipContext = React.createContext<{
   size: IChipSize;
@@ -66,8 +67,18 @@ export function ChipText({ children, style }: IChipTextProps) {
 
   return (
     <Text
-      preset={size === "xs" ? "smaller" : size === "sm" ? "small" : "body"}
+      // {...debugBorder()}
+      preset={
+        size === "xs"
+          ? "smaller"
+          : size === "sm"
+            ? "small"
+            : size === "md"
+              ? "body"
+              : "big"
+      }
       style={[
+        { verticalAlign: "middle" },
         style,
         disabled && styles.$disabledText,
         isSelected && styles.$selectedText,
@@ -88,9 +99,16 @@ export function ChipIcon({ children }: IChipIconProps) {
 
 type IChipAvatarProps = IAvatarProps;
 
-export function ChipAvatar({ uri, name }: IChipAvatarProps) {
+export function ChipAvatar(props: IChipAvatarProps) {
   const { theme } = useAppTheme();
-  return <Avatar uri={uri} name={name} size={theme.avatarSize.xs} />;
+  const { size } = useChipContext();
+
+  return (
+    <Avatar
+      size={size === "lg" ? theme.avatarSize.sm : theme.avatarSize.xs}
+      {...props}
+    />
+  );
 }
 
 export function useChipStyles({
@@ -103,15 +121,30 @@ export function useChipStyles({
   const { theme } = useAppTheme();
 
   const verticalPadding =
-    size === "xs" ? theme.spacing.xxxs : theme.spacing.xxs;
+    size === "xs"
+      ? theme.spacing.xxxs
+      : size === "lg"
+        ? theme.spacing.xs
+        : theme.spacing.xxs;
 
   const horizontalPadding =
-    size === "xs" ? theme.spacing.xxs : theme.spacing.xs;
+    size === "xs"
+      ? theme.spacing.xxs
+      : size === "lg"
+        ? theme.spacing.sm
+        : theme.spacing.xs;
 
-  const contentHeight = size === "xs" ? theme.spacing.sm : theme.spacing.md;
+  const contentHeight =
+    size === "xs"
+      ? theme.spacing.sm
+      : size === "lg"
+        ? theme.spacing.lg
+        : theme.spacing.md;
+
+  const borderRadius = size === "lg" ? theme.spacing.lg : theme.spacing.xs;
 
   const $container = {
-    borderRadius: theme.spacing.xs,
+    borderRadius,
     borderWidth: variant === "outlined" ? theme.borderWidth.sm : 0,
     borderColor: theme.colors.border.subtle,
     backgroundColor:
@@ -123,8 +156,9 @@ export function useChipStyles({
   } satisfies StyleProp<ViewStyle>;
 
   const $content = {
-    columnGap: theme.spacing.xxxs,
+    columnGap: size === "lg" ? theme.spacing.xxs : theme.spacing.xxxs,
     height: contentHeight,
+    alignItems: "center",
   } satisfies StyleProp<ViewStyle>;
 
   return {

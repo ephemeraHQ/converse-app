@@ -9,6 +9,7 @@ type IConnectWalletState = {
   ethereumAddressThatIsConnecting: string | undefined;
   socialData: ISocialProfile[] | undefined;
   listShowing: IListShowing;
+  pagesHeight: Record<number, number>; // page index -> height
 };
 
 type IConnectWalletDerivedState = {
@@ -26,14 +27,16 @@ type IConnectWalletActions = {
 };
 
 type IConnectWalletStore = IConnectWalletState &
-  IConnectWalletDerivedState &
-  IConnectWalletActions;
+  IConnectWalletDerivedState & {
+    actions: IConnectWalletActions;
+  };
 
 const initialState: IConnectWalletState = {
   thirdwebWalletIdThatIsConnecting: undefined,
   ethereumAddressThatIsConnecting: undefined,
   socialData: undefined,
   listShowing: "wallets",
+  pagesHeight: {},
 };
 
 /**
@@ -58,24 +61,26 @@ export const useConnectWalletStore = create<IConnectWalletStore>(
       return get().listShowing === "socials" && get().socialData === undefined;
     },
 
-    // Actions
-    setConnectingWallet: (walletId: WalletId) =>
-      set({
-        thirdwebWalletIdThatIsConnecting: walletId,
-        ethereumAddressThatIsConnecting: undefined,
-        socialData: undefined,
-      }),
+    actions: {
+      // Actions
+      setConnectingWallet: (walletId: WalletId) =>
+        set({
+          thirdwebWalletIdThatIsConnecting: walletId,
+          ethereumAddressThatIsConnecting: undefined,
+          socialData: undefined,
+        }),
 
-    setConnectingEthereumAddress: (ethereumAddress: string) =>
-      set({ ethereumAddressThatIsConnecting: ethereumAddress }),
+      setConnectingEthereumAddress: (ethereumAddress: string) =>
+        set({ ethereumAddressThatIsConnecting: ethereumAddress }),
 
-    setSocialData: (data: ISocialProfile[]) =>
-      set({
-        socialData: data,
-        thirdwebWalletIdThatIsConnecting: undefined,
-        listShowing: "socials",
-      }),
+      setSocialData: (data: ISocialProfile[]) =>
+        set({
+          socialData: data,
+          thirdwebWalletIdThatIsConnecting: undefined,
+          listShowing: "socials",
+        }),
 
-    reset: () => set(initialState),
+      reset: () => set(initialState),
+    },
   }),
 );

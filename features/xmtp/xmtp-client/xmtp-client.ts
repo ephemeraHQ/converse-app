@@ -84,7 +84,7 @@ export async function buildXmtpClientInstance(args: {
   }
 }
 
-async function getDbEncryptionKey() {
+export async function getDbEncryptionKey() {
   const DB_ENCRYPTION_KEY = "LIBXMTP_DB_ENCRYPTION_KEY";
 
   xmtpLogger.debug(`Getting DB encryption key`);
