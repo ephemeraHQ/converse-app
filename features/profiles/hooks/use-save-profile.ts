@@ -9,7 +9,6 @@ import {
   getProfileQueryData,
   invalidateProfileQuery
 } from "@/features/profiles/profiles.query";
-import { logger } from "@/utils/logger";
 
 type SaveProfileArgs = {
   profile: ProfileInput;
@@ -26,28 +25,11 @@ export function useSaveProfile() {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: (args: SaveProfileArgs) => {
-      const currentProfile = getProfileQueryData({ 
-        xmtpId: args.inboxId 
-      }) as IConvosProfileForInbox | undefined;
-      
-      logger.debug("[useSaveProfile] Starting mutation", {
-        inboxId: args.inboxId,
-        hasCurrentProfile: !!currentProfile,
-        currentProfile: currentProfile ? JSON.stringify(currentProfile) : null,
-        newProfile: JSON.stringify(args.profile)
-      });
-      
-      // IMPORTANT: Make sure xmtpId is set correctly
+    mutationFn: (args: SaveProfileArgs) => {      
       const profileWithXmtpId = {
         ...args.profile,
         xmtpId: args.inboxId,
       };
-      
-      logger.debug("[useSaveProfile] Sending profile update", { 
-        profile: JSON.stringify(profileWithXmtpId)
-      });
-      
       return saveProfileAsync({
         profile: profileWithXmtpId,
         inboxId: args.inboxId,
