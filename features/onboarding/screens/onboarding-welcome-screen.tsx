@@ -1,50 +1,47 @@
-import { memo, useCallback, useEffect } from "react";
-import { Button, TextStyle } from "react-native";
-import { Screen } from "@/components/screen/screen";
-import { showSnackbar } from "@/components/snackbar/snackbar.service";
-import { Center } from "@/design-system/Center";
-import { Loader } from "@/design-system/loader";
-import { Pressable } from "@/design-system/Pressable";
-import { AnimatedText, Text } from "@/design-system/Text";
-import { VStack } from "@/design-system/VStack";
-import { useMultiInboxStore } from "@/features/authentication/multi-inbox.store";
-import { useLogout } from "@/features/authentication/use-logout";
-import { OnboardingSubtitle } from "@/features/onboarding/components/onboarding-subtitle";
-import { OnboardingTitle } from "@/features/onboarding/components/onboarding-title";
-import { useLoginWithPasskey } from "@/features/onboarding/hooks/use-login-with-passkey";
-import { useSignupWithPasskey } from "@/features/onboarding/hooks/use-signup-with-passkey";
-import { $globalStyles } from "@/theme/styles";
-import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
-import { captureErrorWithToast } from "@/utils/capture-error";
+import { memo, useCallback, useEffect } from "react"
+import { TextStyle } from "react-native"
+import { Screen } from "@/components/screen/screen"
+import { showSnackbar } from "@/components/snackbar/snackbar.service"
+import { Center } from "@/design-system/Center"
+import { Pressable } from "@/design-system/Pressable"
+import { AnimatedText, Text } from "@/design-system/Text"
+import { VStack } from "@/design-system/VStack"
+import { useMultiInboxStore } from "@/features/authentication/multi-inbox.store"
+import { useLogout } from "@/features/authentication/use-logout"
+import { OnboardingFooter } from "@/features/onboarding/components/onboarding-footer"
+import { OnboardingSubtitle } from "@/features/onboarding/components/onboarding-subtitle"
+import { OnboardingTitle } from "@/features/onboarding/components/onboarding-title"
+import { useLoginWithPasskey } from "@/features/onboarding/hooks/use-login-with-passkey"
+import { useSignupWithPasskey } from "@/features/onboarding/hooks/use-signup-with-passkey"
+import { useHeader } from "@/navigation/use-header"
+import { $globalStyles } from "@/theme/styles"
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme"
+import { captureErrorWithToast } from "@/utils/capture-error"
 
 export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
-  const { themed, theme } = useAppTheme();
+  const { themed, theme } = useAppTheme()
 
-  const { logout } = useLogout();
+  const { logout } = useLogout()
 
-  const { signup, isSigningUp } = useSignupWithPasskey();
-  const { login, isLoggingIn } = useLoginWithPasskey();
+  const { signup, isSigningUp } = useSignupWithPasskey()
+  const { login, isLoggingIn } = useLoginWithPasskey()
 
   // Safer to fully logout when we're here
   useEffect(() => {
-    logout();
+    logout()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [])
 
   const handleSignup = useCallback(async () => {
     try {
       // If the user decides to sign up again, make sure we're fully logged out
-      await logout();
+      await logout()
 
-      const { inboxId, ethereumAddress } = await signup();
-      useMultiInboxStore.getState().actions.addSender({
-        inboxId,
-        ethereumAddress,
-      });
+      const { inboxId, ethereumAddress } = await signup()
       useMultiInboxStore.getState().actions.setCurrentSender({
         ethereumAddress,
         inboxId,
-      });
+      })
     } catch (error) {
       // Don't show toast for passkey cancellation
       if (
@@ -54,26 +51,22 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
         ) ||
           error.message.includes("UserCancelled"))
       ) {
-        return;
+        return
       }
 
       captureErrorWithToast(error, {
         message: "Error signing up with passkey",
-      });
+      })
     }
-  }, [signup, logout]);
+  }, [signup, logout])
 
   const handleLogin = useCallback(async () => {
     try {
-      const { inboxId, ethereumAddress } = await login();
-      useMultiInboxStore.getState().actions.addSender({
-        inboxId,
-        ethereumAddress,
-      });
+      const { inboxId, ethereumAddress } = await login()
       useMultiInboxStore.getState().actions.setCurrentSender({
         ethereumAddress,
         inboxId,
-      });
+      })
     } catch (error) {
       // Don't show toast for passkey cancellation
       if (
@@ -83,27 +76,33 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
         ) ||
           error.message.includes("UserCancelled"))
       ) {
-        return;
+        return
       }
 
       captureErrorWithToast(error, {
         message: "Error signing in with passkey",
-      });
+      })
     }
-  }, [login]);
+  }, [login])
 
   const handleReset = useCallback(async () => {
     try {
-      await logout();
+      await logout()
       showSnackbar({
         message: "State reset. You can now sign in again",
-      });
+      })
     } catch (error) {
       captureErrorWithToast(error, {
         message: "Error resetting state. Please close the app and try again",
-      });
+      })
     }
-  }, [logout]);
+  }, [logout])
+
+  useHeader({
+    safeAreaEdges: ["top"],
+    rightText: "Login",
+    onRightPress: handleLogin,
+  })
 
   return (
     <>
@@ -116,7 +115,7 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
           <VStack>
             <OnboardingSubtitle>Welcome to Convos</OnboardingSubtitle>
             <OnboardingTitle style={themed($titleStyle)}>
-              Not another chat app
+              Not another{"\n"}chat app
             </OnboardingTitle>
             <AnimatedText style={$subtextStyle} color={"secondary"}>
               Super secure · Decentralized · Universal
@@ -124,23 +123,13 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
           </VStack>
         </Center>
 
-        {/* The whole loading state and this UI/UX is temporary */}
-        <VStack
-          style={{
-            height: 100,
-          }}
-        >
-          {isSigningUp || isLoggingIn ? (
-            <Center style={$globalStyles.flex1}>
-              <Loader />
-            </Center>
-          ) : (
-            <>
-              <Button onPress={handleSignup} title="Signup with Passkey" />
-              <Button onPress={handleLogin} title="Sign in with Passkey" />
-            </>
-          )}
-        </VStack>
+        <OnboardingFooter
+          iconName="biometric"
+          text="Create a Contact Card"
+          onPress={handleSignup}
+          disabled={isSigningUp || isLoggingIn}
+          isLoading={isSigningUp}
+        />
 
         <Center
           style={{
@@ -162,23 +151,15 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
           </Pressable>
         </Center>
       </Screen>
-
-      {/* <ConnectWalletBottomSheet
-          isVisible={isVisible}
-          onClose={() => {
-            setIsVisible(false);
-          }}
-          onWalletImported={() => {}}
-        /> */}
     </>
-  );
-});
+  )
+})
 
 const $subtextStyle: TextStyle = {
   textAlign: "center",
-};
+}
 
 const $titleStyle: ThemedStyle<TextStyle> = ({ spacing }) => ({
   marginTop: spacing.xs,
   marginBottom: spacing.sm,
-});
+})

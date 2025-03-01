@@ -21,7 +21,6 @@ import { Platform } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { Provider as PaperProvider } from "react-native-paper";
-import { DevToolsBubble } from "react-native-react-query-devtools";
 import {
   configureReanimatedLogger,
   ReanimatedLogLevel,
@@ -31,6 +30,7 @@ import { config } from "./config";
 import { useMonitorNetworkConnectivity } from "./dependencies/NetworkMonitor/use-monitor-network-connectivity";
 import { AppNavigator } from "./navigation/app-navigator";
 import "./utils/ignore-logs";
+import { useCachedResources } from "@/utils/cache-resources";
 import { sentryInit } from "./utils/sentry";
 import { preventSplashScreenAutoHide } from "./utils/splash/splash";
 
@@ -63,6 +63,7 @@ export function App() {
   useHydrateAuth();
   useReactQueryDevTools(queryClient);
   useSetupStreamingSubscriptions();
+  useCachedResources();
 
   const { themeScheme, setThemeContextOverride, ThemeProvider } =
     useThemeProvider();
