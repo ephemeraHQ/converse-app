@@ -1,25 +1,25 @@
-import { Image } from "expo-image";
-import React, { memo, useCallback, useState } from "react";
+import { Image } from "expo-image"
+import React, { memo, useCallback, useState } from "react"
 import {
   ImageSourcePropType,
   Platform,
   StyleProp,
   ViewStyle,
-} from "react-native";
-import { Center } from "@/design-system/Center";
-import { Icon } from "@/design-system/Icon/Icon";
-import { Text } from "@/design-system/Text";
-import { useAppTheme } from "@/theme/use-app-theme";
-import { Nullable } from "@/types/general";
-import { getCapitalizedLettersForAvatar } from "@/utils/get-capitalized-letters-for-avatar";
+} from "react-native"
+import { Center } from "@/design-system/Center"
+import { Icon } from "@/design-system/Icon/Icon"
+import { Text } from "@/design-system/Text"
+import { useAppTheme } from "@/theme/use-app-theme"
+import { Nullable } from "@/types/general"
+import { getCapitalizedLettersForAvatar } from "@/utils/get-capitalized-letters-for-avatar"
 
 export type IAvatarProps = {
-  source?: Nullable<string | ImageSourcePropType>;
-  uri?: Nullable<string>; // Kept for backward compatibility
-  name: Nullable<string>;
-  size?: number;
-  style?: StyleProp<ViewStyle>;
-};
+  name: Nullable<string>
+  source?: Nullable<string | ImageSourcePropType>
+  uri?: Nullable<string> // Kept for backward compatibility
+  size?: number
+  style?: StyleProp<ViewStyle>
+}
 
 export const Avatar = memo(function Avatar({
   source,
@@ -28,32 +28,32 @@ export const Avatar = memo(function Avatar({
   style,
   name,
 }: IAvatarProps) {
-  const { theme } = useAppTheme();
-  const avatarSize = size ?? theme.avatarSize.md;
-  const firstLetter = getCapitalizedLettersForAvatar(name ?? "");
-  const [didError, setDidError] = useState(false);
+  const { theme } = useAppTheme()
+  const avatarSize = size ?? theme.avatarSize.md
+  const firstLetter = getCapitalizedLettersForAvatar(name ?? "")
+  const [didError, setDidError] = useState(false)
 
   // Use source if provided, otherwise fall back to uri for backward compatibility
-  const imageSource = source ?? uri;
+  const imageSource = source ?? uri
 
   const handleImageError = useCallback(() => {
-    setDidError(true);
-  }, []);
+    setDidError(true)
+  }, [])
 
   const handleImageLoad = useCallback(() => {
-    setDidError(false);
-  }, []);
+    setDidError(false)
+  }, [])
 
   // Determine if we have a valid image source
-  const hasImageSource = !!imageSource && !didError;
+  const hasImageSource = !!imageSource && !didError
 
   // Prepare the source object for the Image component
   const getImageSource = () => {
     if (typeof imageSource === "string") {
-      return { uri: imageSource };
+      return { uri: imageSource }
     }
-    return imageSource;
-  };
+    return imageSource
+  }
 
   return (
     <Center
@@ -102,5 +102,5 @@ export const Avatar = memo(function Avatar({
         />
       )}
     </Center>
-  );
-});
+  )
+})

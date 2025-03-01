@@ -1,12 +1,13 @@
-import { queryOptions, useQuery } from "@tanstack/react-query";
-import { getInboxIdFromEthAddress } from "@/features/xmtp/xmtp-inbox-id/xmtp-inbox-id-from-eth-address";
-import { IEthereumAddress } from "@/utils/evm/address";
+import { queryOptions, useQuery } from "@tanstack/react-query"
+import { getInboxIdFromEthAddress } from "@/features/xmtp/xmtp-inbox-id/xmtp-inbox-id-from-eth-address"
+import { queryClient } from "@/queries/queryClient"
+import { IEthereumAddress } from "@/utils/evm/address"
 
 export function getXmtpInboxIdFromEthAddressQueryOptions(args: {
-  clientEthAddress: IEthereumAddress;
-  targetEthAddress: IEthereumAddress;
+  clientEthAddress: IEthereumAddress
+  targetEthAddress: IEthereumAddress
 }) {
-  const { clientEthAddress, targetEthAddress } = args;
+  const { clientEthAddress, targetEthAddress } = args
 
   return queryOptions({
     queryKey: [
@@ -18,14 +19,23 @@ export function getXmtpInboxIdFromEthAddressQueryOptions(args: {
       return getInboxIdFromEthAddress({
         clientEthAddress,
         targetEthAddress,
-      });
+      })
     },
-  });
+  })
 }
 
 export function useXmtpInboxIdFromEthAddressQuery(args: {
-  clientEthAddress: IEthereumAddress;
-  targetEthAddress: IEthereumAddress;
+  clientEthAddress: IEthereumAddress
+  targetEthAddress: IEthereumAddress
 }) {
-  return useQuery(getXmtpInboxIdFromEthAddressQueryOptions(args));
+  return useQuery(getXmtpInboxIdFromEthAddressQueryOptions(args))
+}
+
+export async function invalidateXmtpInboxIdFromEthAddressQuery(args: {
+  clientEthAddress: IEthereumAddress
+  targetEthAddress: IEthereumAddress
+}) {
+  await queryClient.invalidateQueries(
+    getXmtpInboxIdFromEthAddressQueryOptions(args),
+  )
 }

@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "zod"
 
 export const profileValidationSchema = z.object({
   name: z
@@ -20,6 +20,6 @@ export const profileValidationSchema = z.object({
     .max(500, { message: "Description cannot exceed 500 characters" })
     .optional(),
   avatar: z.string().url({ message: "Avatar must be a valid URL" }).optional(),
-});
+})
 
-export type IProfileValidation = z.infer<typeof profileValidationSchema>;
+export type IProfileValidation = z.infer<typeof profileValidationSchema>
