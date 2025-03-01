@@ -13,25 +13,14 @@ const imagesToCache = [
   // Icons
   require("@assets/icon.png"),
   require("@assets/icon-preview.png"),
-  require("@assets/icons/web3/base.png"),
-  require("@assets/icons/web3/ens.png"),
-  require("@assets/icons/web3/farcaster.png"),
-  require("@assets/icons/web3/coinbase-wallet.png"),
-  require("@assets/icons/web3/ens.png"),
-  require("@assets/icons/web3/rainbow.png"),
-  require("@assets/icons/web3/unstoppable-domains.png"),
-  require("@assets/icons/web3/rainbow.png"),
-  require("@assets/icons/web3/metamask.png"),
-
-  // Transaction related
-  require("@assets/transaction-close.svg"),
-  require("@assets/transaction-next.svg"),
-  require("@assets/transaction-send.png"),
-  require("@assets/transaction-to.png"),
-
-  // Currency
-  require("@assets/baseUSDCOnly-light.png"),
-  require("@assets/baseUSDCOnly-dark.png"),
+  require("@assets/images/web3/base.png"),
+  require("@assets/images/web3/ens.png"),
+  require("@assets/images/web3/farcaster.png"),
+  require("@assets/images/web3/coinbase-wallet.png"),
+  require("@assets/images/web3/lens.png"),
+  require("@assets/images/web3/rainbow.png"),
+  require("@assets/images/web3/unstoppable-domains.png"),
+  require("@assets/images/web3/metamask.png"),
 ];
 
 // Define fonts to preload

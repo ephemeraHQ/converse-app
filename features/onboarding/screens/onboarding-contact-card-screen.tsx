@@ -1,15 +1,3 @@
-import { usePrivy } from "@privy-io/expo"
-import { isAxiosError } from "axios"
-import React, { memo, useCallback, useEffect, useState } from "react"
-import { ViewStyle } from "react-native"
-import {
-  interpolate,
-  useAnimatedKeyboard,
-  useAnimatedStyle,
-  useSharedValue,
-} from "react-native-reanimated"
-import { z } from "zod"
-import { create } from "zustand"
 import { Screen } from "@/components/screen/screen"
 import { showSnackbar } from "@/components/snackbar/snackbar.service"
 import { Pressable } from "@/design-system/Pressable"
@@ -34,6 +22,26 @@ import { useRouter } from "@/navigation/use-navigation"
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme"
 import { ValidationError } from "@/utils/api/api.error"
 import { captureErrorWithToast } from "@/utils/capture-error"
+import { usePrivy } from "@privy-io/expo"
+import { useIsFocused } from "@react-navigation/native"
+import { isAxiosError } from "axios"
+import {
+  default as React,
+  default as React,
+  memo,
+  useCallback,
+  useEffect,
+  useState,
+} from "react"
+import { ViewStyle } from "react-native"
+import {
+  interpolate,
+  useAnimatedKeyboard,
+  useAnimatedStyle,
+  useSharedValue,
+} from "react-native-reanimated"
+import { z } from "zod"
+import { create } from "zustand"
 
 // Request validation schema
 const createUserRequestSchema = z.object({
@@ -63,8 +71,8 @@ type IOnboardingContactCardStore = {
   }
 }
 
-const useOnboardingContactCardStore = create<IOnboardingContactCardStore>(
-  (set) => ({
+export const useOnboardingContactCardStore =
+  create<IOnboardingContactCardStore>((set) => ({
     name: "",
     username: "",
     nameValidationError: "",
@@ -87,8 +95,7 @@ const useOnboardingContactCardStore = create<IOnboardingContactCardStore>(
           isAvatarUploading: false,
         }),
     },
-  }),
-)
+  }))
 
 export function OnboardingContactCardScreen() {
   const { themed, theme } = useAppTheme()
@@ -332,6 +339,9 @@ const $contentContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
 
 const ProfileContactCardNameInput = memo(
   function ProfileContactCardNameInput() {
+    // Need this so when we leave the import flow, if we selected a name (via the store), make sure it's updated here
+    useIsFocused()
+
     const [nameValidationError, setNameValidationError] = useState<string>()
 
     const handleDisplayNameChange = useCallback((text: string) => {
