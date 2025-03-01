@@ -1,86 +1,72 @@
-import { WalletId } from "thirdweb/wallets";
-import { create } from "zustand";
-import { ISocialProfile } from "@/features/social-profiles/social-profiles.api";
-import { IListShowing } from "./connect-wallet.types";
+import { WalletId } from "thirdweb/wallets"
+import { create } from "zustand"
+import { IWallet } from "./connect-wallet.types"
 
 type IConnectWalletState = {
-  // Base state
-  thirdwebWalletIdThatIsConnecting: WalletId | undefined;
-  ethereumAddressThatIsConnecting: string | undefined;
-  socialData: ISocialProfile[] | undefined;
-  listShowing: IListShowing;
-  pagesHeight: Record<number, number>; // page index -> height
-};
+  // Connection state
+  thirdwebWalletIdThatIsConnecting: WalletId | undefined
+  ethereumAddressThatIsConnecting: string | undefined
+  activeWallet: IWallet | undefined
+  isConnecting: boolean
+  error: Error | null
 
-type IConnectWalletDerivedState = {
-  isShowingWalletList: boolean;
-  isWalletListDisabled: boolean;
-  isShowingSocialIdentityList: boolean;
-  isShowingNoSocialsMessage: boolean;
-};
+  // UI state
+  pagesHeight: Record<number, number> // page index -> height
+}
 
 type IConnectWalletActions = {
-  setConnectingWallet: (walletId: WalletId) => void;
-  setConnectingEthereumAddress: (ethereumAddress: string) => void;
-  setSocialData: (data: ISocialProfile[]) => void;
-  reset: () => void;
-};
+  // Connection actions
+  setThirdwebWalletIdThatIsConnecting: (walletId: WalletId | undefined) => void
+  setEthereumAddressThatIsConnecting: (ethereumAddress: string) => void
+  setActiveWallet: (wallet: IWallet | undefined) => void
+  setIsConnecting: (isConnecting: boolean) => void
+  setError: (error: Error | null) => void
 
-type IConnectWalletStore = IConnectWalletState &
-  IConnectWalletDerivedState & {
-    actions: IConnectWalletActions;
-  };
+  // Reset action
+  reset: () => void
+}
+
+type IConnectWalletStore = IConnectWalletState & {
+  actions: IConnectWalletActions
+}
 
 const initialState: IConnectWalletState = {
   thirdwebWalletIdThatIsConnecting: undefined,
   ethereumAddressThatIsConnecting: undefined,
-  socialData: undefined,
-  listShowing: "wallets",
+  activeWallet: undefined,
+  isConnecting: false,
+  error: null,
   pagesHeight: {},
-};
+}
 
 /**
  * Store for managing wallet connection state
+ *
+ * This store centralizes all wallet connection state and actions,
+ * reducing the need for prop drilling and hooks in individual components.
  */
-export const useConnectWalletStore = create<IConnectWalletStore>(
-  (set, get) => ({
-    // Initial state
-    ...initialState,
+export const useConnectWalletStore = create<IConnectWalletStore>((set) => ({
+  // Initial state
+  ...initialState,
 
-    // Derived states as computed properties
-    get isShowingWalletList() {
-      return get().listShowing === "wallets";
-    },
-    get isWalletListDisabled() {
-      return get().thirdwebWalletIdThatIsConnecting !== undefined;
-    },
-    get isShowingSocialIdentityList() {
-      return get().listShowing === "socials" && get().socialData !== undefined;
-    },
-    get isShowingNoSocialsMessage() {
-      return get().listShowing === "socials" && get().socialData === undefined;
-    },
+  actions: {
+    // Connection actions
+    setThirdwebWalletIdThatIsConnecting: (walletId) =>
+      set({
+        thirdwebWalletIdThatIsConnecting: walletId,
+        ethereumAddressThatIsConnecting: undefined,
+      }),
 
-    actions: {
-      // Actions
-      setConnectingWallet: (walletId: WalletId) =>
-        set({
-          thirdwebWalletIdThatIsConnecting: walletId,
-          ethereumAddressThatIsConnecting: undefined,
-          socialData: undefined,
-        }),
+    setEthereumAddressThatIsConnecting: (ethereumAddress: string) =>
+      set({ ethereumAddressThatIsConnecting: ethereumAddress }),
 
-      setConnectingEthereumAddress: (ethereumAddress: string) =>
-        set({ ethereumAddressThatIsConnecting: ethereumAddress }),
+    setActiveWallet: (wallet) => set({ activeWallet: wallet }),
 
-      setSocialData: (data: ISocialProfile[]) =>
-        set({
-          socialData: data,
-          thirdwebWalletIdThatIsConnecting: undefined,
-          listShowing: "socials",
-        }),
+    setIsConnecting: (isConnecting) => set({ isConnecting }),
 
-      reset: () => set(initialState),
-    },
-  }),
-);
+    setError: (error) => set({ error }),
+
+    // Reset action
+    reset: () => set(initialState),
+  },
+}))
