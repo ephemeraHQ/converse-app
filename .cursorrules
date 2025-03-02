@@ -149,7 +149,7 @@ function sendMessage(args: { recipientId: string; content: string }) {
 - Avoid using render functions (renderHeader, renderContent, etc.) within components. Instead, create separate component functions for each logical UI section.
 - For styling components, use the style prop with an object instead of direct props:
 
-```typescript
+````typescript
 // ❌ Bad: Using style props directly
 <HStack alignItems="center" gap={theme.spacing.sm}>
 
@@ -160,6 +160,141 @@ function sendMessage(args: { recipientId: string; content: string }) {
     gap: theme.spacing.sm,
   }}
 >
+
+## Styling Patterns
+
+- Use the dollar sign ($) prefix for style objects defined outside of components.
+- Use ThemedStyle<ViewStyle> for theme-dependent styles that need access to theme variables.
+- Extract complex styles outside the component with the $ prefix.
+- Use $globalStyles for common styling patterns that are reused across components.
+- Use inline styles for simple, one-off styling needs.
+- Append "Override" to style props that override default component styles.
+
+```typescript
+// ❌ Bad: Inline complex styles
+<VStack
+  style={{
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 16,
+    backgroundColor: theme.colors.background,
+    borderRadius: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  }}
+/>
+
+// ✅ Good: Extract complex styles with $ prefix
+<VStack style={$container} />
+
+// Define outside the component
+const $container: ViewStyle = {
+  alignItems: "center",
+  justifyContent: "center",
+  paddingHorizontal: 16,
+  backgroundColor: theme.colors.background,
+  borderRadius: 8,
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.1,
+  shadowRadius: 4,
+};
+
+// ✅ Good: Use ThemedStyle for theme-dependent styles
+<VStack style={themed($container)} />
+
+const $container: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  alignItems: "center",
+  justifyContent: "center",
+  paddingHorizontal: spacing.md,
+  backgroundColor: colors.background,
+  borderRadius: 8,
+});
+
+// ✅ Good: Use $globalStyles for common patterns
+<VStack style={[$globalStyles.center, $globalStyles.flex1]} />
+
+// ✅ Good: Combine global styles with component-specific styles
+<VStack style={[$globalStyles.center, $container]} />
+````
+
+- When accepting style overrides in component props, use consistent naming:
+
+```typescript
+type ComponentProps = {
+  style?: StyleProp<ViewStyle>;
+  containerStyle?: StyleProp<ViewStyle>;
+  contentStyle?: StyleProp<ViewStyle>;
+  // etc.
+}
+
+// Then in the component:
+<View style={[$defaultStyle, style]} />
+<View style={[$defaultContainerStyle, containerStyle]} />
+```
+
+## Design System Components
+
+- Use design system components instead of native components whenever possible.
+- Prefer specialized layout components over generic View components:
+  - Use `VStack` instead of `View` with `flexDirection: "column"`.
+  - Use `HStack` instead of `View` with `flexDirection: "row"`.
+  - Use `Center` instead of manually setting alignment and justification.
+  - Use `AnimatedVStack`, `AnimatedHStack`, and `AnimatedCenter` for animated components.
+
+```typescript
+// ❌ Bad: Using native components with manual styling
+<View style={{ flexDirection: "column", gap: 8 }}>
+  <View style={{ flexDirection: "row", alignItems: "center" }}>
+    <Text>Label</Text>
+    <TextInput />
+  </View>
+  <View style={{ alignItems: "center", justifyContent: "center" }}>
+    <Button title="Submit" />
+  </View>
+</View>
+
+// ✅ Good: Using design system components
+<VStack style={{ gap: 8 }}>
+  <HStack style={{ alignItems: "center" }}>
+    <Text>Label</Text>
+    <TextInput />
+  </HStack>
+  <Center>
+    <Button title="Submit" />
+  </Center>
+</VStack>
+```
+
+## Text Component Usage
+
+- Use the Text component's built-in presets instead of manually specifying font size, line height, or weight.
+- Avoid inline text styling for font properties that are already handled by presets.
+- Use the color prop to set text color instead of style overrides.
+- Only use custom text styles for rare cases where the existing presets don't meet the requirements.
+
+```typescript
+// ❌ Bad: Manually styling text properties
+<Text style={{ fontSize: 16, lineHeight: 20, fontWeight: "bold", color: colors.text.primary }}>
+  Hello World
+</Text>
+
+// ❌ Bad: Using React Native's Text component directly
+<RNText style={{ fontSize: 16, lineHeight: 20 }}>Hello World</RNText>
+
+// ✅ Good: Using Text component with presets
+<Text preset="body">Hello World</Text>
+
+// ✅ Good: Using Text component with color prop
+<Text preset="body" color="secondary">Hello World</Text>
+
+// ✅ Good: Using Text component with weight prop
+<Text preset="body" weight="bold">Hello World</Text>
+
+// ✅ Good: Using Text component with size prop when needed
+<Text preset="body" size="lg">Hello World</Text>
 ```
 
 ```typescript

@@ -1,5 +1,5 @@
-import { Platform } from "react-native"
 import { ConversationNavParams } from "@/features/conversation/conversation.nav"
+import { GroupDetailsNavParams } from "@/features/group-details/group-details.nav"
 // import {
 //   InviteUsersToExistingGroupNav,
 //   InviteUsersToExistingGroupParams,
@@ -23,6 +23,7 @@ export type NavigationParamList = {
   ChatsRequests: undefined
   Conversation: ConversationNavParams
   CreateConversation: undefined
+  GroupDetails: GroupDetailsNavParams
 
   NewGroupSummary: undefined
   ConverseMatchMaker: undefined
