@@ -20,11 +20,11 @@
 
 ```typescript
 // ❌ Bad: Single-line if statement
-if (isValid) return;
+if (isValid) return
 
 // ✅ Good: Block-style if statement
 if (isValid) {
-  return;
+  return
 }
 ```
 
@@ -39,17 +39,17 @@ if (isValid) {
 ```typescript
 // ❌ Bad: Explicit Promise return types
 async function fetchUser(id: string): Promise<IUser> {
-  return api.getUser(id);
+  return api.getUser(id)
 }
 
 // ✅ Good: Let TypeScript infer the Promise return type
 async function fetchUser(id: string) {
-  return api.getUser(id);
+  return api.getUser(id)
 }
 
 // ✅ Good: Non-Promise return types are still fine to be explicit
 function calculateTotal(items: ICartItem[]): number {
-  return items.reduce((sum, item) => sum + item.price, 0);
+  return items.reduce((sum, item) => sum + item.price, 0)
 }
 ```
 
@@ -66,7 +66,7 @@ function sendMessage(recipientId: string, content: string) {
 
 // ✅ Good: Object parameters with destructuring
 function sendMessage(args: { recipientId: string; content: string }) {
-  const { recipientId, content } = args;
+  const { recipientId, content } = args
   // Function body
 }
 ```
@@ -80,7 +80,7 @@ function sendMessage(args: { recipientId: string; content: string }) {
 - Wrap components in memo() for performance.
 - For styling components, use the style prop with an object instead of direct props:
 
-```typescript
+````typescript
 // ❌ Bad: Using style props directly
 <HStack alignItems="center" gap={theme.spacing.sm}>
 
@@ -91,6 +91,141 @@ function sendMessage(args: { recipientId: string; content: string }) {
     gap: theme.spacing.sm,
   }}
 >
+
+## Styling Patterns
+
+- Use the dollar sign ($) prefix for style objects defined outside of components.
+- Use ThemedStyle<ViewStyle> for theme-dependent styles that need access to theme variables.
+- Extract complex styles outside the component with the $ prefix.
+- Use $globalStyles for common styling patterns that are reused across components.
+- Use inline styles for simple, one-off styling needs.
+- Append "Override" to style props that override default component styles.
+
+```typescript
+// ❌ Bad: Inline complex styles
+<VStack
+  style={{
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 16,
+    backgroundColor: theme.colors.background,
+    borderRadius: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  }}
+/>
+
+// ✅ Good: Extract complex styles with $ prefix
+<VStack style={$container} />
+
+// Define outside the component
+const $container: ViewStyle = {
+  alignItems: "center",
+  justifyContent: "center",
+  paddingHorizontal: 16,
+  backgroundColor: theme.colors.background,
+  borderRadius: 8,
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.1,
+  shadowRadius: 4,
+};
+
+// ✅ Good: Use ThemedStyle for theme-dependent styles
+<VStack style={themed($container)} />
+
+const $container: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  alignItems: "center",
+  justifyContent: "center",
+  paddingHorizontal: spacing.md,
+  backgroundColor: colors.background,
+  borderRadius: 8,
+});
+
+// ✅ Good: Use $globalStyles for common patterns
+<VStack style={[$globalStyles.center, $globalStyles.flex1]} />
+
+// ✅ Good: Combine global styles with component-specific styles
+<VStack style={[$globalStyles.center, $container]} />
+````
+
+- When accepting style overrides in component props, use consistent naming:
+
+```typescript
+type ComponentProps = {
+  style?: StyleProp<ViewStyle>;
+  containerStyle?: StyleProp<ViewStyle>;
+  contentStyle?: StyleProp<ViewStyle>;
+  // etc.
+}
+
+// Then in the component:
+<View style={[$defaultStyle, style]} />
+<View style={[$defaultContainerStyle, containerStyle]} />
+```
+
+## Design System Components
+
+- Use design system components instead of native components whenever possible.
+- Prefer specialized layout components over generic View components:
+  - Use `VStack` instead of `View` with `flexDirection: "column"`.
+  - Use `HStack` instead of `View` with `flexDirection: "row"`.
+  - Use `Center` instead of manually setting alignment and justification.
+  - Use `AnimatedVStack`, `AnimatedHStack`, and `AnimatedCenter` for animated components.
+
+```typescript
+// ❌ Bad: Using native components with manual styling
+<View style={{ flexDirection: "column", gap: 8 }}>
+  <View style={{ flexDirection: "row", alignItems: "center" }}>
+    <Text>Label</Text>
+    <TextInput />
+  </View>
+  <View style={{ alignItems: "center", justifyContent: "center" }}>
+    <Button title="Submit" />
+  </View>
+</View>
+
+// ✅ Good: Using design system components
+<VStack style={{ gap: 8 }}>
+  <HStack style={{ alignItems: "center" }}>
+    <Text>Label</Text>
+    <TextInput />
+  </HStack>
+  <Center>
+    <Button title="Submit" />
+  </Center>
+</VStack>
+```
+
+## Text Component Usage
+
+- Use the Text component's built-in presets instead of manually specifying font size, line height, or weight.
+- Avoid inline text styling for font properties that are already handled by presets.
+- Use the color prop to set text color instead of style overrides.
+- Only use custom text styles for rare cases where the existing presets don't meet the requirements.
+
+```typescript
+// ❌ Bad: Manually styling text properties
+<Text style={{ fontSize: 16, lineHeight: 20, fontWeight: "bold", color: colors.text.primary }}>
+  Hello World
+</Text>
+
+// ❌ Bad: Using React Native's Text component directly
+<RNText style={{ fontSize: 16, lineHeight: 20 }}>Hello World</RNText>
+
+// ✅ Good: Using Text component with presets
+<Text preset="body">Hello World</Text>
+
+// ✅ Good: Using Text component with color prop
+<Text preset="body" color="secondary">Hello World</Text>
+
+// ✅ Good: Using Text component with weight prop
+<Text preset="body" weight="bold">Hello World</Text>
+
+// ✅ Good: Using Text component with size prop when needed
+<Text preset="body" size="lg">Hello World</Text>
 ```
 
 ## File Structure
@@ -118,18 +253,18 @@ auth.client.ts
 
 ```typescript
 // ❌ Bad: Direct key usage
-const { data } = useQuery(["messages", id]);
+const { data } = useQuery(["messages", id])
 
 // ✅ Good: Using query options
 export const getMessagesQueryOptions = (args: { id: string }) => {
-  const enabled = !!args.id;
+  const enabled = !!args.id
 
   return queryOptions({
     queryKey: messagesQueryKey(args.id),
     queryFn: enabled ? () => fetchMessages(args) : skipToken,
     enabled,
-  });
-};
+  })
+}
 ```
 
 ## Error Handling
@@ -143,29 +278,29 @@ export const getMessagesQueryOptions = (args: { id: string }) => {
 ```typescript
 // ❌ Bad: Catching and capturing error when we should throw
 try {
-  await sendMessage(content);
+  await sendMessage(content)
 } catch (error) {
-  captureError(new XMTPError({ error }));
+  captureError(new XMTPError({ error }))
 }
 
 // ❌ Bad: Catching error too early
 async function sendMessage(args: { content: string }) {
   try {
-    await xmtpClient.send(args.content);
+    await xmtpClient.send(args.content)
   } catch (error) {
-    captureError(new XMTPError({ error }));
+    captureError(new XMTPError({ error }))
   }
 }
 
 // ✅ Good: Throwing error for parent to handle
 async function sendMessage(args: { content: string }) {
   try {
-    await xmtpClient.send(args.content);
+    await xmtpClient.send(args.content)
   } catch (error) {
     throw new XMTPError({
       error,
       additionalMessage: "Failed to send message",
-    });
+    })
   }
 }
 
@@ -173,11 +308,11 @@ async function sendMessage(args: { content: string }) {
 function MessageComponent() {
   const sendMessage = async () => {
     try {
-      await messagingService.sendMessage({ content });
+      await messagingService.sendMessage({ content })
     } catch (error) {
       // Here we actually handle the error for the user
-      captureErrorWithToast(error);
+      captureErrorWithToast(error)
     }
-  };
+  }
 }
 ```
