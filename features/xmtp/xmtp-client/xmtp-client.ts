@@ -22,6 +22,7 @@ export async function createXmtpClientInstance(args: {
 
   try {
     const client = await XmtpClient.create<ISupportedXmtpCodecs>(inboxSigner, {
+      appVersion: `${config.appName}/${config.appVersion}`,
       env: config.xmtpEnv,
       dbEncryptionKey: await getDbEncryptionKey(),
       codecs: supportedXmtpCodecs,
@@ -83,7 +84,7 @@ export async function buildXmtpClientInstance(args: {
   }
 }
 
-async function getDbEncryptionKey() {
+export async function getDbEncryptionKey() {
   const DB_ENCRYPTION_KEY = "LIBXMTP_DB_ENCRYPTION_KEY";
 
   xmtpLogger.debug(`Getting DB encryption key`);
