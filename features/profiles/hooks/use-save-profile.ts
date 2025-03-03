@@ -55,10 +55,10 @@ export function useSaveProfile() {
     onError: (error, variables, context) => {
       // Rollback to the previous profile data on error
       if (context?.previousProfile) {
-        queryClient.setQueryData(
-          ["profile", variables.inboxId],
-          context.previousProfile
-        );
+        setProfileQueryData({
+          xmtpId: variables.inboxId,
+          data: context.previousProfile
+        });
       }
       
       // All errors are handled by the component via the error state
