@@ -23,30 +23,30 @@ const createUserRequestSchema = z
     }),
   })
   .strict();
-const createUserResponseSchema = z
-  .object({
-    id: z.string(),
-    privyUserId: z.string(),
-    device: z.object({
-      id: z.string(),
-      os: deviceOSEnum,
-      name: z.string().nullable(),
-    }),
-    identity: z.object({
-      id: z.string(),
-      privyAddress: z.string(),
-      xmtpId: z.string(),
-    }),
-    profile: z.object({
-      id: z.string(),
-      name: z.string(),
-      username: z.string(),
-      description: z.string().nullable(),
-    }),
-  })
-  .strict();
 
-export type CreateUserResponse = z.infer<typeof createUserResponseSchema>;
+const createUserResponseSchema = z.object({
+  id: z.string(),
+  privyUserId: z.string(),
+  device: z.object({
+    id: z.string(),
+    os: deviceOSEnum,
+    name: z.string().nullable(),
+  }),
+  identity: z.object({
+    id: z.string(),
+    privyAddress: z.string(),
+    xmtpId: z.string(),
+  }),
+  profile: z.object({
+    id: z.string(),
+    name: z.string(),
+    username: z.string(),
+    description: z.string().nullable(),
+    avatar: z.string().nullable().optional(),
+  }),
+});
+
+type CreateUserResponse = z.infer<typeof createUserResponseSchema>;
 
 export const createUser = async (args: {
   privyUserId: string;
@@ -83,12 +83,11 @@ export const createUser = async (args: {
       validationResult.data,
     );
 
-    const responseValidation = createUserResponseSchema.safeParse(
-      response.data,
-    );
+    // Validate the response
+    const responseValidation = createUserResponseSchema.safeParse(response.data);
     if (!responseValidation.success) {
       throw new Error(
-        `Response validation failed: ${responseValidation.error.message}`,
+        `Invalid response data: ${responseValidation.error.message}`,
       );
     }
 

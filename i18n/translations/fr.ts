@@ -610,4 +610,15 @@ export const fr = {
     link_copied: "Lien copié",
     copy_link: "Copier le lien",
   },
+
+  // Profile strings
+  "Cancel": "Annuler",
+  "Edit": "Modifier",
+  "Share": "Partager",
+  "Done": "Terminer",
+  "Username": "Nom d'utilisateur",
+  "About": "À propos",
+  "Archive": "Archives",
+  "Keep messages": "Conserver les messages",
+  "Log out": "Se déconnecter",
 };

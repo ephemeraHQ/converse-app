@@ -10,13 +10,19 @@ import {
 type IProfileMeStoreState = {
   editMode: boolean;
   nameTextValue: string;
-  avatarUri: string;
+  usernameTextValue: string;
+  descriptionTextValue: string;
+  avatarUri?: string;
+  isAvatarUploading: boolean;
 };
 
 type IProfileMeStoreActions = {
   setEditMode: (editMode: boolean) => void;
   setNameTextValue: (nameTextValue: string) => void;
-  setAvatarUri: (avatarUri: string) => void;
+  setUsernameTextValue: (usernameTextValue: string) => void;
+  setDescriptionTextValue: (descriptionTextValue: string) => void;
+  setAvatarUri: (avatarUri?: string) => void;
+  setIsAvatarUploading: (isUploading: boolean) => void;
   reset: () => void;
 };
 
@@ -27,7 +33,10 @@ export type IProfileMeStore = IProfileMeStoreState & {
 const DEFAULT_STATE: IProfileMeStoreState = {
   editMode: false,
   nameTextValue: "",
-  avatarUri: "",
+  usernameTextValue: "",
+  descriptionTextValue: "",
+  avatarUri: undefined,
+  isAvatarUploading: false,
 };
 
 function getProfileMeStorageKey(inboxId: InboxId) {
@@ -45,7 +54,10 @@ function createProfileMeStore(inboxId: InboxId) {
           actions: {
             setEditMode: (editMode) => set({ editMode }),
             setNameTextValue: (nameTextValue) => set({ nameTextValue }),
+            setUsernameTextValue: (usernameTextValue) => set({ usernameTextValue }),
+            setDescriptionTextValue: (descriptionTextValue) => set({ descriptionTextValue }),
             setAvatarUri: (avatarUri) => set({ avatarUri }),
+            setIsAvatarUploading: (isAvatarUploading) => set({ isAvatarUploading }),
             reset: () => {
               set(DEFAULT_STATE);
               // Clear persisted data
@@ -59,7 +71,10 @@ function createProfileMeStore(inboxId: InboxId) {
           partialize: (state) => ({
             editMode: state.editMode,
             nameTextValue: state.nameTextValue,
+            usernameTextValue: state.usernameTextValue,
+            descriptionTextValue: state.descriptionTextValue,
             avatarUri: state.avatarUri,
+            isAvatarUploading: state.isAvatarUploading,
           }),
         },
       ),
