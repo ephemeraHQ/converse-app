@@ -1,22 +1,22 @@
-import { memo, useEffect, useImperativeHandle, useMemo, useRef } from "react";
-import { FadeIn } from "react-native-reanimated";
-import { AnimatedVStack } from "@/design-system/VStack";
+import { memo, useEffect, useImperativeHandle, useMemo, useRef } from "react"
+import { FadeIn } from "react-native-reanimated"
+import { AnimatedVStack } from "@/design-system/VStack"
 import {
   DynamicPagesStoreProvider,
   useDynamicPagesStore,
   useDynamicPagesStoreContext,
-} from "./dynamic-pages.store-context";
+} from "./dynamic-pages.store-context"
 
 export type IDynamicPagesRef = {
-  nextPage: () => void;
-  previousPage: () => void;
-  reset: () => void;
-};
+  nextPage: () => void
+  previousPage: () => void
+  reset: () => void
+}
 
 export type IDynamicPagesProps = {
-  actionRef?: React.Ref<IDynamicPagesRef>;
-  pages: React.ReactNode[];
-};
+  actionRef?: React.Ref<IDynamicPagesRef>
+  pages: React.ReactNode[]
+}
 
 export const DynamicPages = memo(function DynamicPages(
   props: IDynamicPagesProps,
@@ -25,78 +25,78 @@ export const DynamicPages = memo(function DynamicPages(
     <DynamicPagesStoreProvider>
       <Main {...props} />
     </DynamicPagesStoreProvider>
-  );
-});
+  )
+})
 
 const Main = memo(function Main(props: IDynamicPagesProps) {
-  const { pages, actionRef } = props;
+  const { pages, actionRef } = props
 
-  const store = useDynamicPagesStore();
+  const store = useDynamicPagesStore()
 
   useImperativeHandle(actionRef, () => ({
     nextPage() {
-      store.getState().actions.goToNextPage();
+      store.getState().actions.goToNextPage()
     },
     previousPage() {
-      store.getState().actions.goToPreviousPage();
+      store.getState().actions.goToPreviousPage()
     },
     reset() {
-      store.getState().actions.reset();
+      store.getState().actions.reset()
     },
-  }));
+  }))
 
   const currentPageIndex = useDynamicPagesStoreContext(
     (state) => state.currentPageIndex,
-  );
+  )
 
   const currentPage = useMemo(() => {
-    return pages[currentPageIndex];
-  }, [currentPageIndex, pages]);
+    return pages[currentPageIndex]
+  }, [currentPageIndex, pages])
 
   if (!currentPage) {
     throw new Error(
       "No page for dynamic pages component with index: " + currentPageIndex,
-    );
+    )
   }
 
-  return <PageAnimationContainer>{currentPage}</PageAnimationContainer>;
-});
+  return <PageAnimationContainer>{currentPage}</PageAnimationContainer>
+})
 
 const PageAnimationContainer = memo(function PageAnimationContainer(props: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
-  const { children } = props;
+  const { children } = props
 
   const currentPageIndex = useDynamicPagesStoreContext(
     (state) => state.currentPageIndex,
-  );
+  )
 
-  const previousPageIndexRef = useRef<number | null>(null);
+  const previousPageIndexRef = useRef<number | null>(null)
 
   useEffect(() => {
     if (currentPageIndex === null) {
-      previousPageIndexRef.current = null;
+      previousPageIndexRef.current = null
     }
-    previousPageIndexRef.current = currentPageIndex;
-  }, [currentPageIndex]);
+    previousPageIndexRef.current = currentPageIndex
+  }, [currentPageIndex])
 
   const direction = useMemo(() => {
     if (previousPageIndexRef.current === null) {
-      return "forward";
+      return "forward"
     }
     if (currentPageIndex > previousPageIndexRef.current) {
-      return "forward";
+      return "forward"
     } else {
-      return "backward";
+      return "backward"
     }
-  }, [currentPageIndex]);
+  }, [currentPageIndex])
 
   return (
     <ChangeSectionAnimation key={currentPageIndex} direction={direction}>
       {children}
     </ChangeSectionAnimation>
-  );
-});
+  )
+})
 
 //  const HandleComponent = memo(function HandleComponent(props: {
 //   currentPageIndex: number
@@ -111,10 +111,16 @@ const PageAnimationContainer = memo(function PageAnimationContainer(props: {
 // })
 
 const ChangeSectionAnimation = memo(function ChangeSectionAnimation(props: {
-  direction: "backward" | "forward";
-  children: React.ReactNode;
+  direction: "backward" | "forward"
+  children: React.ReactNode
 }) {
-  const { direction, children } = props;
+  const { direction, children } = props
 
-  return <AnimatedVStack entering={FadeIn}>{children}</AnimatedVStack>;
-});
+  return (
+    <AnimatedVStack
+    // entering={FadeIn}
+    >
+      {children}
+    </AnimatedVStack>
+  )
+})
