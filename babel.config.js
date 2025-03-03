@@ -11,7 +11,8 @@ module.exports = {
     "@babel/plugin-proposal-export-namespace-from",
     "@babel/plugin-transform-flow-strip-types", // For privy (phone country selector)
     ["@babel/plugin-transform-class-properties", { loose: true }], // For privy
-    ["@babel/plugin-transform-private-methods", { loose: true }], // For privy
+    ["react-native-boost/plugin"],
+    [("@babel/plugin-transform-private-methods", { loose: true })], // For privy
     [
       "module-resolver",
       {
@@ -49,4 +50,4 @@ module.exports = {
       plugins: ["transform-remove-console", "react-native-paper/babel"],
     },
   },
-};
+}
