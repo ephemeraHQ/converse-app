@@ -26,8 +26,8 @@ import { WalletConnected } from "./wallet-connected.component"
 export const ConnectWalletChooseApp = memo(function ConnectWalletChooseApp() {
   const router = useRouter()
 
-  // Get wallet data from queries and store
   const { data: installedWallets = [] } = useInstalledWalletsQuery()
+
   const activeWallet = useConnectWalletStore((state) => state.activeWallet)
 
   if (activeWallet) {

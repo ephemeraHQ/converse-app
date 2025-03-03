@@ -1,41 +1,41 @@
-import { memo } from "react";
-import { Alert } from "react-native";
-import { Avatar } from "@/components/avatar";
-import { Chip, ChipText } from "@/design-system/chip";
-import { HStack } from "@/design-system/HStack";
-import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store";
+import { memo } from "react"
+import { Alert } from "react-native"
+import { Avatar } from "@/components/avatar"
+import { Chip, ChipText } from "@/design-system/chip"
+import { HStack } from "@/design-system/HStack"
+import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import {
   ConversationSearchResultsListItem,
   ConversationSearchResultsListItemTitle,
-} from "@/features/conversation/conversation-create/components/conversation-create-search-result-list-item";
-import { useConversationStore } from "@/features/conversation/conversation.store-context";
-import { useXmtpInboxIdFromEthAddressQuery } from "@/features/xmtp/xmtp-inbox-id/xmtp-inbox-id-from-eth-address.query";
-import { useAppTheme } from "@/theme/use-app-theme";
-import { shortAddress } from "@/utils/strings/shortAddress";
+} from "@/features/conversation/conversation-create/components/conversation-create-search-result-list-item"
+import { useConversationStore } from "@/features/conversation/conversation.store-context"
+import { useXmtpInboxIdFromEthAddressQuery } from "@/features/xmtp/xmtp-inbox-id/xmtp-inbox-id-from-eth-address.query"
+import { useAppTheme } from "@/theme/use-app-theme"
+import { shortAddress } from "@/utils/strings/shortAddress"
 
 type Props = {
-  ethAddress: string;
-};
+  ethAddress: string
+}
 
 export const ConversationSearchResultsListItemEthAddress = memo(
   function ConversationSearchResultsListItemEthAddress(props: Props) {
-    const { ethAddress } = props;
-    const { theme } = useAppTheme();
+    const { ethAddress } = props
+    const { theme } = useAppTheme()
 
-    const conversationStore = useConversationStore();
+    const conversationStore = useConversationStore()
 
-    const currentSender = useSafeCurrentSender();
+    const currentSender = useSafeCurrentSender()
 
     const { data: inboxId, isLoading: isLoadingInboxId } =
       useXmtpInboxIdFromEthAddressQuery({
         clientEthAddress: currentSender.ethereumAddress,
         targetEthAddress: ethAddress,
-      });
+      })
 
     const handlePress = () => {
       if (!inboxId) {
-        Alert.alert("This user is not on XMTP yet!");
-        return;
+        Alert.alert("This user is not on XMTP yet!")
+        return
       }
 
       conversationStore.setState({
@@ -44,11 +44,11 @@ export const ConversationSearchResultsListItemEthAddress = memo(
           ...(conversationStore.getState().searchSelectedUserInboxIds ?? []),
           inboxId,
         ],
-      });
-    };
+      })
+    }
 
     if (isLoadingInboxId) {
-      return null;
+      return null
     }
 
     return (
@@ -56,7 +56,7 @@ export const ConversationSearchResultsListItemEthAddress = memo(
         avatar={
           <Avatar
             uri={undefined}
-            size={theme.avatarSize.md}
+            sizeNumber={theme.avatarSize.md}
             name={ethAddress}
           />
         }
@@ -88,6 +88,6 @@ export const ConversationSearchResultsListItemEthAddress = memo(
         }
         onPress={handlePress}
       />
-    );
+    )
   },
-);
+)

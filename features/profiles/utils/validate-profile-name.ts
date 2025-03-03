@@ -1,9 +1,9 @@
-import { translate } from "@/i18n";
+import { translate } from "@/i18n"
 
 export type ValidationResult = {
-  isValid: boolean;
-  error?: string;
-};
+  isValid: boolean
+  error?: string
+}
 
 /**
  * Rules for validating profile names
@@ -17,20 +17,22 @@ const validationRules: Array<(name: string) => ValidationResult> = [
       ? translate("userProfile.inputs.displayName.errors.noDots")
       : undefined,
   }),
-];
+]
 
 /**
  * Validates a profile name against a set of rules
  * @param name The profile name to validate
  * @returns ValidationResult indicating if the name is valid and any error message
  */
-export function validateProfileName(name: string): ValidationResult {
+export function validateCustomProfileDisplayName(
+  name: string,
+): ValidationResult {
   for (const rule of validationRules) {
-    const result = rule(name);
+    const result = rule(name)
     if (!result.isValid) {
-      return result;
+      return result
     }
   }
 
-  return { isValid: true };
+  return { isValid: true }
 }

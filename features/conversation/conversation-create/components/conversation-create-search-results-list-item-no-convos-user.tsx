@@ -1,37 +1,37 @@
-import { memo, useCallback } from "react";
-import { Alert } from "react-native";
-import { Avatar } from "@/components/avatar";
-import { Chip, ChipText } from "@/design-system/chip";
-import { HStack } from "@/design-system/HStack";
-import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store";
+import { memo, useCallback } from "react"
+import { Alert } from "react-native"
+import { Avatar } from "@/components/avatar"
+import { Chip, ChipText } from "@/design-system/chip"
+import { HStack } from "@/design-system/HStack"
+import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import {
   ConversationSearchResultsListItem,
   ConversationSearchResultsListItemTitle,
-} from "@/features/conversation/conversation-create/components/conversation-create-search-result-list-item";
-import { useConversationStore } from "@/features/conversation/conversation.store-context";
-import { ISocialProfile } from "@/features/social-profiles/social-profiles.api";
-import { useXmtpInboxIdFromEthAddressQuery } from "@/features/xmtp/xmtp-inbox-id/xmtp-inbox-id-from-eth-address.query";
-import { useAppTheme } from "@/theme/use-app-theme";
+} from "@/features/conversation/conversation-create/components/conversation-create-search-result-list-item"
+import { useConversationStore } from "@/features/conversation/conversation.store-context"
+import { ISocialProfile } from "@/features/social-profiles/social-profiles.api"
+import { useXmtpInboxIdFromEthAddressQuery } from "@/features/xmtp/xmtp-inbox-id/xmtp-inbox-id-from-eth-address.query"
+import { useAppTheme } from "@/theme/use-app-theme"
 
 type IConversationSearchResultsListItemNoConvosUserProps = {
-  socialProfile: ISocialProfile;
-};
+  socialProfile: ISocialProfile
+}
 
 export const ConversationSearchResultsListItemNoConvosUser = memo(
   function ConversationSearchResultsListItemNoConvosUser({
     socialProfile: socialProfile,
   }: IConversationSearchResultsListItemNoConvosUserProps) {
-    const { theme } = useAppTheme();
+    const { theme } = useAppTheme()
 
-    const conversationStore = useConversationStore();
+    const conversationStore = useConversationStore()
 
-    const currentSender = useSafeCurrentSender();
+    const currentSender = useSafeCurrentSender()
 
     const { data: inboxId, isLoading: isLoadingInboxId } =
       useXmtpInboxIdFromEthAddressQuery({
         clientEthAddress: currentSender.ethereumAddress,
         targetEthAddress: socialProfile.address,
-      });
+      })
 
     const handlePress = useCallback(() => {
       if (inboxId) {
@@ -41,21 +41,21 @@ export const ConversationSearchResultsListItemNoConvosUser = memo(
             ...(conversationStore.getState().searchSelectedUserInboxIds ?? []),
             inboxId,
           ],
-        });
+        })
       } else {
-        Alert.alert("This user is not on XMTP yet!");
+        Alert.alert("This user is not on XMTP yet!")
       }
-    }, [inboxId, conversationStore]);
+    }, [inboxId, conversationStore])
 
     if (isLoadingInboxId) {
-      return null;
+      return null
     }
 
     return (
       <ConversationSearchResultsListItem
         avatar={
           <Avatar
-            size={theme.avatarSize.md}
+            sizeNumber={theme.avatarSize.md}
             uri={socialProfile.avatar}
             name={socialProfile.name}
           />
@@ -83,6 +83,6 @@ export const ConversationSearchResultsListItemNoConvosUser = memo(
         subtitle={socialProfile.address}
         onPress={handlePress}
       />
-    );
+    )
   },
-);
+)

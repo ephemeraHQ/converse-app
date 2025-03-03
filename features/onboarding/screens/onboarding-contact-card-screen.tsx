@@ -1,3 +1,16 @@
+import { usePrivy } from "@privy-io/expo"
+import { useIsFocused } from "@react-navigation/native"
+import { isAxiosError } from "axios"
+import React, { memo, useCallback, useEffect, useState } from "react"
+import { ViewStyle } from "react-native"
+import {
+  interpolate,
+  useAnimatedKeyboard,
+  useAnimatedStyle,
+  useSharedValue,
+} from "react-native-reanimated"
+import { z } from "zod"
+import { create } from "zustand"
 import { Screen } from "@/components/screen/screen"
 import { showSnackbar } from "@/components/snackbar/snackbar.service"
 import { Pressable } from "@/design-system/Pressable"
@@ -9,39 +22,19 @@ import { useCreateUser } from "@/features/current-user/use-create-user"
 import { OnboardingFooter } from "@/features/onboarding/components/onboarding-footer"
 import { OnboardingSubtitle } from "@/features/onboarding/components/onboarding-subtitle"
 import { OnboardingTitle } from "@/features/onboarding/components/onboarding-title"
-import { formatRandomUserName } from "@/features/onboarding/utils/format-random-user-name"
+import { formatRandomUsername } from "@/features/onboarding/utils/format-random-user-name"
 import { ProfileContactCardEditableAvatar } from "@/features/profiles/components/profile-contact-card/profile-contact-card-editable-avatar"
 import { ProfileContactCardEditableNameInput } from "@/features/profiles/components/profile-contact-card/profile-contact-card-editable-name-input"
 import { ProfileContactCardLayout } from "@/features/profiles/components/profile-contact-card/profile-contact-card-layout"
 import { useProfileContactCardStyles } from "@/features/profiles/components/profile-contact-card/use-profile-contact-card.styles"
 import { profileValidationSchema } from "@/features/profiles/schemas/profile-validation.schema"
-import { validateProfileName } from "@/features/profiles/utils/validate-profile-name"
+import { validateCustomProfileDisplayName } from "@/features/profiles/utils/validate-profile-name"
 import { useAddPfp } from "@/hooks/use-add-pfp"
 import { useHeader } from "@/navigation/use-header"
 import { useRouter } from "@/navigation/use-navigation"
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme"
 import { ValidationError } from "@/utils/api/api.error"
 import { captureErrorWithToast } from "@/utils/capture-error"
-import { usePrivy } from "@privy-io/expo"
-import { useIsFocused } from "@react-navigation/native"
-import { isAxiosError } from "axios"
-import {
-  default as React,
-  default as React,
-  memo,
-  useCallback,
-  useEffect,
-  useState,
-} from "react"
-import { ViewStyle } from "react-native"
-import {
-  interpolate,
-  useAnimatedKeyboard,
-  useAnimatedStyle,
-  useSharedValue,
-} from "react-native-reanimated"
-import { z } from "zod"
-import { create } from "zustand"
 
 // Request validation schema
 const createUserRequestSchema = z.object({
@@ -79,7 +72,12 @@ export const useOnboardingContactCardStore =
     avatar: "",
     isAvatarUploading: false,
     actions: {
-      setName: (name: string) => set({ name }),
+      setName: (name: string) =>
+        set((state) => ({
+          name,
+          // For now, we're generating the username from the name
+          username: formatRandomUsername({ displayName: name }),
+        })),
       setUsername: (username: string) => set({ username }),
       setNameValidationError: (nameValidationError: string) =>
         set({ nameValidationError }),
@@ -339,26 +337,21 @@ const $contentContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
 
 const ProfileContactCardNameInput = memo(
   function ProfileContactCardNameInput() {
-    // Need this so when we leave the import flow, if we selected a name (via the store), make sure it's updated here
     useIsFocused()
 
     const [nameValidationError, setNameValidationError] = useState<string>()
 
     const handleDisplayNameChange = useCallback((text: string) => {
-      const { isValid, error } = validateProfileName(text)
+      const { isValid, error } = validateCustomProfileDisplayName(text)
 
       if (!isValid) {
         setNameValidationError(error)
-        useOnboardingContactCardStore.getState().actions.setUsername("")
+        useOnboardingContactCardStore.getState().actions.setName("")
         return
       }
 
       setNameValidationError(undefined)
-      const username = formatRandomUserName({ displayName: text })
-
-      const store = useOnboardingContactCardStore.getState()
-      store.actions.setName(text)
-      store.actions.setUsername(username)
+      useOnboardingContactCardStore.getState().actions.setName(text)
     }, [])
 
     return (

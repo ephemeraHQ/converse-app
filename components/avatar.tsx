@@ -17,21 +17,31 @@ export type IAvatarProps = {
   name: Nullable<string>
   source?: Nullable<string | ImageSourcePropType>
   uri?: Nullable<string> // Kept for backward compatibility
-  size?: number
+  size?: "sm" | "md" | "lg" | "xl"
+  sizeNumber?: number
   style?: StyleProp<ViewStyle>
 }
 
 export const Avatar = memo(function Avatar({
   source,
   uri,
-  size,
+  sizeNumber,
+  size = "md",
   style,
   name,
 }: IAvatarProps) {
   const { theme } = useAppTheme()
-  const avatarSize = size ?? theme.avatarSize.md
   const firstLetter = getCapitalizedLettersForAvatar(name ?? "")
   const [didError, setDidError] = useState(false)
+
+  const avatarSize =
+    sizeNumber ??
+    {
+      sm: theme.avatarSize.sm,
+      md: theme.avatarSize.md,
+      lg: theme.avatarSize.lg,
+      xl: theme.avatarSize.xl,
+    }[size]
 
   // Use source if provided, otherwise fall back to uri for backward compatibility
   const imageSource = source ?? uri

@@ -1,30 +1,29 @@
-import path from "path";
-import Constants from "expo-constants";
-import { Platform } from "react-native";
-import * as RNFS from "react-native-fs";
+import Constants from "expo-constants"
+import { Platform } from "react-native"
+import * as RNFS from "react-native-fs"
 import {
   consoleTransport,
   logger as RNLogger,
   transportFunctionType,
-} from "react-native-logs";
-import { v4 as uuidv4 } from "uuid";
+} from "react-native-logs"
+import { v4 as uuidv4 } from "uuid"
 
 // Types
-type LogMethod = (...args: any[]) => void;
+type LogMethod = (...args: any[]) => void
 
 type ILogger = {
-  debug: LogMethod;
-  info: LogMethod;
-  warn: LogMethod;
-  error: LogMethod;
-};
+  debug: LogMethod
+  info: LogMethod
+  warn: LogMethod
+  error: LogMethod
+}
 
 const LOG_LEVELS = {
   debug: 0,
   info: 1,
   warn: 2,
   error: 3,
-} as const;
+} as const
 
 const COLOR_SCHEMES = {
   dark: {
@@ -39,62 +38,63 @@ const COLOR_SCHEMES = {
     warn: "yellow",
     error: "red",
   },
-} as const;
+} as const
 
 // Simple file logging
-export let loggingFilePath = "";
+export let loggingFilePath = ""
 
 async function initLogFile() {
-  const tempDir = RNFS.TemporaryDirectoryPath;
-  loggingFilePath = path.join(tempDir, `${uuidv4()}.converse.log.txt`);
+  const tempDir = RNFS.TemporaryDirectoryPath
+  const separator = Platform.OS === "windows" ? "\\" : "/"
+  loggingFilePath = `${tempDir}${tempDir.endsWith(separator) ? "" : separator}${uuidv4()}.converse.log.txt`
 
-  const appVersion = Constants.expoConfig?.version;
+  const appVersion = Constants.expoConfig?.version
   const buildNumber =
     Platform.OS === "ios"
       ? Constants.expoConfig?.ios?.buildNumber
-      : Constants.expoConfig?.android?.versionCode;
+      : Constants.expoConfig?.android?.versionCode
 
   await RNFS.writeFile(
     loggingFilePath,
     `Converse ${Platform.OS} logs - v${appVersion} (${buildNumber})\n\n`,
-  );
+  )
 }
 
 export async function rotateLoggingFile() {
   if (loggingFilePath && (await RNFS.exists(loggingFilePath))) {
-    await RNFS.unlink(loggingFilePath);
+    await RNFS.unlink(loggingFilePath)
   }
-  await initLogFile();
+  await initLogFile()
 }
 
 export async function getPreviousSessionLoggingFile() {
-  const tempDir = RNFS.TemporaryDirectoryPath;
-  const files = await RNFS.readDir(tempDir);
+  const tempDir = RNFS.TemporaryDirectoryPath
+  const files = await RNFS.readDir(tempDir)
   const logFiles = files
     .filter((file) => file.name.endsWith(".converse.log.txt"))
-    .sort((a, b) => (b.mtime?.getTime() ?? 0) - (a.mtime?.getTime() ?? 0));
+    .sort((a, b) => (b.mtime?.getTime() ?? 0) - (a.mtime?.getTime() ?? 0))
 
-  return logFiles[1]?.path ?? null;
+  return logFiles[1]?.path ?? null
 }
 
 const converseTransport: transportFunctionType = async (props) => {
-  let logMessage = props.msg;
+  let logMessage = props.msg
 
   // Console logging in dev
   if (__DEV__) {
-    consoleTransport(props);
+    consoleTransport(props)
   }
 
   // File logging with enhanced message
   if (loggingFilePath) {
-    await RNFS.appendFile(loggingFilePath, `${logMessage}\n`, "utf8");
+    await RNFS.appendFile(loggingFilePath, `${logMessage}\n`, "utf8")
   }
-};
+}
 
 const activeColorScheme =
   process.env.EXPO_PUBLIC_LOGGER_COLOR_SCHEME === "dark"
     ? COLOR_SCHEMES.dark
-    : COLOR_SCHEMES.light;
+    : COLOR_SCHEMES.light
 
 const baseLogger = RNLogger.createLogger({
   severity: "debug",
@@ -103,7 +103,7 @@ const baseLogger = RNLogger.createLogger({
     colors: activeColorScheme,
   },
   levels: LOG_LEVELS,
-}) as ILogger;
+}) as ILogger
 
 function createPrefixedLogger(prefix: string): ILogger {
   return {
@@ -111,24 +111,24 @@ function createPrefixedLogger(prefix: string): ILogger {
     info: (...args) => baseLogger.info(`[${prefix}]`, ...args),
     warn: (...args) => baseLogger.warn(`[${prefix}]`, ...args),
     error: (...args) => baseLogger.error(`[${prefix}]`, ...args),
-  };
+  }
 }
 
 // Initialize log file
-initLogFile().catch(console.error);
+initLogFile().catch(console.error)
 
 // Logger exports
-export const logger = baseLogger;
-export const authLogger = createPrefixedLogger("AUTH");
-export const streamLogger = createPrefixedLogger("STREAM");
-export const apiLogger = createPrefixedLogger("API");
-export const xmtpLogger = createPrefixedLogger("XMTP");
+export const logger = baseLogger
+export const authLogger = createPrefixedLogger("AUTH")
+export const streamLogger = createPrefixedLogger("STREAM")
+export const apiLogger = createPrefixedLogger("API")
+export const xmtpLogger = createPrefixedLogger("XMTP")
 
 /**
  * @deprecated Use { logger } instead
  */
-export default logger;
+export default logger
 
 export function logJson(json: any) {
-  console.log(JSON.stringify(json, null, 2));
+  console.log(JSON.stringify(json, null, 2))
 }

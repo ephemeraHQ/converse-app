@@ -138,13 +138,13 @@ export const ConnectWalletButtonsContainer = memo(
 /**
  * Cancel button for connect wallet flows
  */
-export const ConnectWalletLinkButton = memo(
-  function ConnectWalletCancelLinkButton(props: IButtonProps) {
-    const { text = "Cancel", onPress, ...rest } = props
+export const ConnectWalletLinkButton = memo(function ConnectWalletLinkButton(
+  props: IButtonProps,
+) {
+  const { text = "Cancel", onPress, ...rest } = props
 
-    return <Button variant="link" text={text} onPress={onPress} {...rest} />
-  },
-)
+  return <Button variant="link" text={text} onPress={onPress} {...rest} />
+})
 
 export const ConnectWalletOutlineButton = memo(
   function ConnectWalletCancelOutlineButton(props: IButtonProps) {

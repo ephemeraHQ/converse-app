@@ -20,7 +20,6 @@ import React, { useEffect } from "react"
 import { Platform } from "react-native"
 import { GestureHandlerRootView } from "react-native-gesture-handler"
 import { KeyboardProvider } from "react-native-keyboard-controller"
-import { Provider as PaperProvider } from "react-native-paper"
 import {
   configureReanimatedLogger,
   ReanimatedLogLevel,
@@ -96,20 +95,18 @@ export function App() {
             <AppKeyboardProvider>
               <ActionSheetProvider>
                 <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
-                  <PaperProvider>
-                    <GestureHandlerRootView style={$globalStyles.flex1}>
-                      <DebugProvider>
-                        <BottomSheetModalProvider>
-                          {/* <AuthenticateWithPasskeyProvider> */}
-                          <AppNavigator />
-                          {/* </AuthenticateWithPasskeyProvider> */}
-                          {/* {__DEV__ && <DevToolsBubble />} */}
-                          <Snackbars />
-                          <ActionSheet />
-                        </BottomSheetModalProvider>
-                      </DebugProvider>
-                    </GestureHandlerRootView>
-                  </PaperProvider>
+                  <GestureHandlerRootView style={$globalStyles.flex1}>
+                    <DebugProvider>
+                      <BottomSheetModalProvider>
+                        {/* <AuthenticateWithPasskeyProvider> */}
+                        <AppNavigator />
+                        {/* </AuthenticateWithPasskeyProvider> */}
+                        {/* {__DEV__ && <DevToolsBubble />} */}
+                        <Snackbars />
+                        <ActionSheet />
+                      </BottomSheetModalProvider>
+                    </DebugProvider>
+                  </GestureHandlerRootView>
                 </ThemeProvider>
               </ActionSheetProvider>
             </AppKeyboardProvider>

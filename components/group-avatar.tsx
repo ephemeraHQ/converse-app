@@ -1,194 +1,198 @@
-import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
-import React, { memo, useMemo } from "react";
-import { StyleProp, TextStyle, ViewStyle } from "react-native";
-import { Center } from "@/design-system/Center";
-import { Text } from "@/design-system/Text";
-import { VStack } from "@/design-system/VStack";
-import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store";
-import { usePreferredDisplayInfoBatch } from "@/features/preferred-display-info/use-preferred-display-info-batch";
-import { useGroupMembersQuery } from "@/queries/useGroupMembersQuery";
-import { useGroupQuery } from "@/queries/useGroupQuery";
-import { $globalStyles } from "@/theme/styles";
-import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
-import { Nullable } from "@/types/general";
-import { IEthereumAddress } from "@/utils/evm/address";
-import { Avatar } from "./avatar";
+import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk"
+import React, { memo, useMemo } from "react"
+import { StyleProp, TextStyle, ViewStyle } from "react-native"
+import { Center } from "@/design-system/Center"
+import { Text } from "@/design-system/Text"
+import { VStack } from "@/design-system/VStack"
+import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
+import { usePreferredDisplayInfoBatch } from "@/features/preferred-display-info/use-preferred-display-info-batch"
+import { useGroupMembersQuery } from "@/queries/useGroupMembersQuery"
+import { useGroupQuery } from "@/queries/useGroupQuery"
+import { $globalStyles } from "@/theme/styles"
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme"
+import { Nullable } from "@/types/general"
+import { IEthereumAddress } from "@/utils/evm/address"
+import { Avatar } from "./avatar"
 
 // Constants
-const MAIN_CIRCLE_RADIUS = 50;
-const MAX_VISIBLE_MEMBERS = 4;
+const MAIN_CIRCLE_RADIUS = 50
+const MAX_VISIBLE_MEMBERS = 4
 
 // Types
 type Position = {
-  x: number;
-  y: number;
-  size: number;
-};
+  x: number
+  y: number
+  size: number
+}
 
 type GroupAvatarMember = {
-  address: Nullable<IEthereumAddress>;
-  uri: Nullable<string>;
-  name: Nullable<string>;
-};
+  address: Nullable<IEthereumAddress>
+  uri: Nullable<string>
+  name: Nullable<string>
+}
 
 type GroupAvatarUIProps = {
-  size?: number;
-  style?: StyleProp<ViewStyle>;
-  members?: GroupAvatarMember[];
-};
+  size?: number
+  style?: StyleProp<ViewStyle>
+  members?: GroupAvatarMember[]
+}
 
-type AvatarSize = "sm" | "md" | "lg";
+type AvatarSize = "sm" | "md" | "lg"
 
 type ExtraMembersIndicatorProps = {
-  pos: Position;
-  extraMembersCount: number;
-  size: number;
-};
+  pos: Position
+  extraMembersCount: number
+  size: number
+}
 
 /**
  * Component to render a group avatar from a list of inbox IDs
  */
 export const GroupAvatarInboxIds = memo(function GroupAvatarInboxIds(props: {
-  inboxIds: InboxId[];
+  inboxIds: InboxId[]
 }) {
-  const { inboxIds } = props;
+  const { inboxIds } = props
 
   const preferredDisplayData = usePreferredDisplayInfoBatch({
     xmtpInboxIds: inboxIds,
-  });
+  })
 
   const members = useMemo(() => {
     return preferredDisplayData
       ?.map((info) => {
         if (!info) {
-          return null;
+          return null
         }
 
         return {
           address: info.ethAddress,
           uri: info.avatarUrl,
           name: info.displayName,
-        };
+        }
       })
-      .filter(Boolean);
-  }, [preferredDisplayData]);
+      .filter(Boolean)
+  }, [preferredDisplayData])
 
-  return <GroupAvatarUI members={members} />;
-});
+  return <GroupAvatarUI members={members} />
+})
 
 /**
  * Component to render a group avatar from a group topic
  * Will render the group image if available, otherwise shows member avatars
  */
 export const GroupAvatar = memo(function GroupAvatar(props: {
-  groupTopic: ConversationTopic;
-  size?: AvatarSize;
-  sizeNumber?: number;
+  groupTopic: ConversationTopic
+  size?: AvatarSize
+  sizeNumber?: number
 }) {
-  const { groupTopic, size = "md", sizeNumber: sizeNumberProp } = props;
-  const { theme } = useAppTheme();
-  const currentSender = useSafeCurrentSender();
+  const { groupTopic, size = "md", sizeNumber: sizeNumberProp } = props
+  const { theme } = useAppTheme()
+  const currentSender = useSafeCurrentSender()
 
   // Fetch group data
   const { data: group } = useGroupQuery({
     account: currentSender.ethereumAddress,
     topic: groupTopic,
-  });
+  })
 
   // Fetch group members
   const { data: members } = useGroupMembersQuery({
     caller: "GroupAvatar",
     account: currentSender.ethereumAddress,
     topic: groupTopic,
-  });
+  })
 
   // Extract member inbox IDs excluding current sender
   const memberInboxIds = useMemo(() => {
     if (!members?.ids) {
-      return [];
+      return []
     }
 
     return members.ids.reduce<InboxId[]>((inboxIds, memberId) => {
-      const memberInboxId = members.byId[memberId].inboxId;
+      const memberInboxId = members.byId[memberId].inboxId
       const isCurrentSender =
-        memberInboxId?.toLowerCase() === currentSender?.inboxId?.toLowerCase();
+        memberInboxId?.toLowerCase() === currentSender?.inboxId?.toLowerCase()
 
       if (memberInboxId && !isCurrentSender) {
-        inboxIds.push(memberInboxId);
+        inboxIds.push(memberInboxId)
       }
 
-      return inboxIds;
-    }, []);
-  }, [members, currentSender]);
+      return inboxIds
+    }, [])
+  }, [members, currentSender])
 
   // Get display info for all members
   const preferredDisplayData = usePreferredDisplayInfoBatch({
     xmtpInboxIds: memberInboxIds,
-  });
+  })
 
   // Transform display data into member format
   const memberData = useMemo<GroupAvatarMember[]>(() => {
     if (!preferredDisplayData) {
-      return [];
+      return []
     }
 
     return preferredDisplayData
       .map((profile): GroupAvatarMember | null => {
         if (!profile) {
-          return null;
+          return null
         }
 
         return {
           address: profile.ethAddress,
           uri: profile.avatarUrl,
           name: profile.displayName,
-        };
+        }
       })
-      .filter(Boolean);
-  }, [preferredDisplayData]);
+      .filter(Boolean)
+  }, [preferredDisplayData])
 
   // Calculate size based on theme or prop
   const sizeNumber = useMemo(() => {
     if (sizeNumberProp) {
-      return sizeNumberProp;
+      return sizeNumberProp
     }
 
     switch (size) {
       case "sm":
-        return theme.avatarSize.sm;
+        return theme.avatarSize.sm
       case "md":
-        return theme.avatarSize.md;
+        return theme.avatarSize.md
       case "lg":
-        return theme.avatarSize.lg;
+        return theme.avatarSize.lg
       default:
-        return theme.avatarSize.md;
+        return theme.avatarSize.md
     }
-  }, [size, theme, sizeNumberProp]);
+  }, [size, theme, sizeNumberProp])
 
   // If group has an image, use it instead of member avatars
   if (group?.imageUrlSquare) {
     return (
-      <Avatar uri={group.imageUrlSquare} size={sizeNumber} name={group.name} />
-    );
+      <Avatar
+        uri={group.imageUrlSquare}
+        sizeNumber={sizeNumber}
+        name={group.name}
+      />
+    )
   }
 
-  return <GroupAvatarUI members={memberData} size={sizeNumber} />;
-});
+  return <GroupAvatarUI members={memberData} size={sizeNumber} />
+})
 
 /**
  * Core UI component for group avatars
  * Handles positioning of member avatars in a circular layout
  */
 const GroupAvatarUI = memo(function GroupAvatarUI(props: GroupAvatarUIProps) {
-  const { themed, theme } = useAppTheme();
-  const { size = theme.avatarSize.md, style, members = [] } = props;
-  const memberCount = members.length;
+  const { themed, theme } = useAppTheme()
+  const { size = theme.avatarSize.md, style, members = [] } = props
+  const memberCount = members.length
 
   // Calculate positions for avatars based on member count
   const positions = useMemo(
     () => calculatePositions(memberCount, MAIN_CIRCLE_RADIUS),
     [memberCount],
-  );
+  )
 
   return (
     <Center style={[{ width: size, height: size }, $container, style]}>
@@ -203,14 +207,14 @@ const GroupAvatarUI = memo(function GroupAvatarUI(props: GroupAvatarUIProps) {
                   key={`avatar-${index}`}
                   uri={members[index].uri}
                   name={members[index].name}
-                  size={(pos.size / 100) * size}
+                  sizeNumber={(pos.size / 100) * size}
                   style={{
                     left: (pos.x / 100) * size,
                     top: (pos.y / 100) * size,
                     position: "absolute",
                   }}
                 />
-              );
+              )
             }
 
             // Render "+N" indicator if there are more members than can be shown
@@ -225,16 +229,16 @@ const GroupAvatarUI = memo(function GroupAvatarUI(props: GroupAvatarUIProps) {
                   extraMembersCount={memberCount - MAX_VISIBLE_MEMBERS}
                   size={size}
                 />
-              );
+              )
             }
 
-            return null;
+            return null
           })}
         </Center>
       </Center>
     </Center>
-  );
-});
+  )
+})
 
 /**
  * Calculate positions for avatars in the group avatar
@@ -262,7 +266,7 @@ const calculatePositions = (
       { x: mainCircleRadius * 1.1, y: mainCircleRadius * 0.9, size: 35 },
       { x: mainCircleRadius * 0.5, y: mainCircleRadius * 1.2, size: 30 },
     ],
-  };
+  }
 
   // Default layout for 5+ members
   return (
@@ -273,8 +277,8 @@ const calculatePositions = (
       { x: mainCircleRadius * 0.5, y: mainCircleRadius * 1.2, size: 30 },
       { x: mainCircleRadius * 1.1, y: mainCircleRadius * 0.9, size: 35 },
     ]
-  );
-};
+  )
+}
 
 /**
  * Component to show "+N" indicator when there are more members than can be displayed
@@ -282,12 +286,12 @@ const calculatePositions = (
 const ExtraMembersIndicator = memo(function ExtraMembersIndicator(
   props: ExtraMembersIndicatorProps,
 ) {
-  const { pos, extraMembersCount, size } = props;
-  const { theme, themed } = useAppTheme();
+  const { pos, extraMembersCount, size } = props
+  const { theme, themed } = useAppTheme()
 
-  const avatarSize = (pos.size / 100) * size;
-  const borderRadius = avatarSize / 2;
-  const fontSize = avatarSize / 2;
+  const avatarSize = (pos.size / 100) * size
+  const borderRadius = avatarSize / 2
+  const fontSize = avatarSize / 2
 
   return (
     <Center
@@ -314,14 +318,14 @@ const ExtraMembersIndicator = memo(function ExtraMembersIndicator(
         +{extraMembersCount}
       </Text>
     </Center>
-  );
-});
+  )
+})
 
 // Styles
 const $container: ViewStyle = {
   position: "relative",
   borderRadius: 999,
-};
+}
 
 const $content: ViewStyle = {
   position: "absolute",
@@ -329,20 +333,20 @@ const $content: ViewStyle = {
   left: 0,
   right: 0,
   bottom: 0,
-};
+}
 
 const $background: ThemedStyle<ViewStyle> = ({ colors }) => ({
   ...$globalStyles.absoluteFill,
   backgroundColor: colors.fill.minimal,
   borderRadius: 999,
-});
+})
 
 const $extraMembersContainer: ThemedStyle<ViewStyle> = ({ colors }) => ({
   position: "absolute",
   backgroundColor: colors.fill.tertiary,
-});
+})
 
 const $extraMembersText: ThemedStyle<TextStyle> = ({ colors }) => ({
   fontWeight: "bold",
   color: colors.text.primary,
-});
+})

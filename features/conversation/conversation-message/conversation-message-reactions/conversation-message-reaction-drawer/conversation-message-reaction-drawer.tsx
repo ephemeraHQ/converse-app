@@ -1,41 +1,41 @@
-import { BottomSheet } from "@design-system/BottomSheet/BottomSheet";
-import { BottomSheetContentContainer } from "@design-system/BottomSheet/BottomSheetContentContainer";
-import { BottomSheetHeader } from "@design-system/BottomSheet/BottomSheetHeader";
-import { HStack } from "@design-system/HStack";
-import { Text } from "@design-system/Text";
-import { TouchableHighlight } from "@design-system/touchable-highlight";
-import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
-import { BottomSheetMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
-import { FlashList } from "@shopify/flash-list";
-import { memo, useCallback, useRef, useState } from "react";
-import { Modal, Platform, TextStyle, ViewStyle } from "react-native";
-import { ScrollView } from "react-native-gesture-handler";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Avatar } from "@/components/avatar";
-import { useMessageReactionsStore } from "@/features/conversation/conversation-message/conversation-message-reactions/conversation-message-reaction-drawer/conversation-message-reaction-drawer.store";
-import { useConversationMessageReactionsRolledUp } from "@/features/conversation/conversation-message/conversation-message-reactions/use-conversation-message-reactions-rolled-up";
-import { useCurrentConversationTopicSafe } from "@/features/conversation/conversation.store-context";
-import { useRemoveReactionOnMessage } from "@/features/conversation/hooks/use-remove-reaction-on-message";
-import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
+import { BottomSheet } from "@design-system/BottomSheet/BottomSheet"
+import { BottomSheetContentContainer } from "@design-system/BottomSheet/BottomSheetContentContainer"
+import { BottomSheetHeader } from "@design-system/BottomSheet/BottomSheetHeader"
+import { HStack } from "@design-system/HStack"
+import { Text } from "@design-system/Text"
+import { TouchableHighlight } from "@design-system/touchable-highlight"
+import { BottomSheetScrollView } from "@gorhom/bottom-sheet"
+import { BottomSheetMethods } from "@gorhom/bottom-sheet/lib/typescript/types"
+import { FlashList } from "@shopify/flash-list"
+import { memo, useCallback, useRef, useState } from "react"
+import { Modal, Platform, TextStyle, ViewStyle } from "react-native"
+import { ScrollView } from "react-native-gesture-handler"
+import { useSafeAreaInsets } from "react-native-safe-area-context"
+import { Avatar } from "@/components/avatar"
+import { useMessageReactionsStore } from "@/features/conversation/conversation-message/conversation-message-reactions/conversation-message-reaction-drawer/conversation-message-reaction-drawer.store"
+import { useConversationMessageReactionsRolledUp } from "@/features/conversation/conversation-message/conversation-message-reactions/use-conversation-message-reactions-rolled-up"
+import { useCurrentConversationTopicSafe } from "@/features/conversation/conversation.store-context"
+import { useRemoveReactionOnMessage } from "@/features/conversation/hooks/use-remove-reaction-on-message"
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme"
 import {
   closeMessageReactionsDrawer,
   conversationMessageDrawerBottomSheetRef,
-} from "./conversation-message-reaction-drawer.service";
+} from "./conversation-message-reaction-drawer.service"
 
 export const MessageReactionsDrawer = memo(function MessageReactionsDrawer() {
-  const insets = useSafeAreaInsets();
+  const insets = useSafeAreaInsets()
 
-  const messageId = useMessageReactionsStore((state) => state.messageId);
+  const messageId = useMessageReactionsStore((state) => state.messageId)
 
   // Centralized dismiss handler that:
   // 1. Closes the bottom sheet UI component
   // 2. Resets the global drawer state
   // This ensures consistent cleanup and prevents UI state mismatches
   const handleDismiss = useCallback(() => {
-    closeMessageReactionsDrawer();
-  }, []);
+    closeMessageReactionsDrawer()
+  }, [])
 
-  const isVisible = !!messageId;
+  const isVisible = !!messageId
 
   return (
     <Modal
@@ -53,7 +53,7 @@ export const MessageReactionsDrawer = memo(function MessageReactionsDrawer() {
         enableDynamicSizing={false}
         onChange={(index) => {
           if (index === -1) {
-            handleDismiss();
+            handleDismiss()
           }
         }}
         topInset={insets.top}
@@ -61,33 +61,33 @@ export const MessageReactionsDrawer = memo(function MessageReactionsDrawer() {
         <BottomSheetContent />
       </BottomSheet>
     </Modal>
-  );
-});
+  )
+})
 
 const BottomSheetContent = memo(function BottomSheetContent() {
-  const { theme, themed } = useAppTheme();
+  const { theme, themed } = useAppTheme()
 
-  const topic = useCurrentConversationTopicSafe();
-  const messageId = useMessageReactionsStore((state) => state.messageId)!; // Using ! because we know when using this function we MUST have messageId;
+  const topic = useCurrentConversationTopicSafe()
+  const messageId = useMessageReactionsStore((state) => state.messageId)! // Using ! because we know when using this function we MUST have messageId;
 
   const rolledUpReactions = useConversationMessageReactionsRolledUp({
     messageId,
-  });
+  })
 
-  const [filterReactions, setFilterReactions] = useState<string | null>(null);
+  const [filterReactions, setFilterReactions] = useState<string | null>(null)
 
-  const removeReactionOnMessage = useRemoveReactionOnMessage({ topic });
+  const removeReactionOnMessage = useRemoveReactionOnMessage({ topic })
 
   const handleRemoveReaction = useCallback(
     ({ content }: { content: string }) => {
       removeReactionOnMessage({
         messageId,
         emoji: content,
-      });
-      closeMessageReactionsDrawer();
+      })
+      closeMessageReactionsDrawer()
     },
     [messageId, removeReactionOnMessage],
-  );
+  )
 
   return (
     <>
@@ -165,10 +165,10 @@ const BottomSheetContent = memo(function BottomSheetContent() {
             (item) => !filterReactions || item.content === filterReactions,
           )}
           renderItem={({ item, index }) => {
-            const isOwnReaction = item.isOwnReaction;
+            const isOwnReaction = item.isOwnReaction
             const ReactionContainer = isOwnReaction
               ? TouchableHighlight
-              : HStack;
+              : HStack
             const containerProps = isOwnReaction
               ? {
                   onPress: () =>
@@ -178,13 +178,13 @@ const BottomSheetContent = memo(function BottomSheetContent() {
                   underlayColor: "transparent",
                   activeOpacity: 0.75,
                 }
-              : {};
+              : {}
 
             return (
               <ReactionContainer {...containerProps} style={themed($reaction)}>
                 <HStack style={themed($reactionInner)}>
                   <Avatar
-                    size={theme.avatarSize.md}
+                    sizeNumber={theme.avatarSize.md}
                     uri={item.reactor.avatar}
                     name={item.reactor.username}
                   />
@@ -192,7 +192,7 @@ const BottomSheetContent = memo(function BottomSheetContent() {
                   <Text style={themed($reactionContent)}>{item.content}</Text>
                 </HStack>
               </ReactionContainer>
-            );
+            )
           }}
           keyExtractor={(item, index) =>
             `${item.content}-${item.reactor.address}-${index}`
@@ -200,8 +200,8 @@ const BottomSheetContent = memo(function BottomSheetContent() {
         />
       </BottomSheetScrollView>
     </>
-  );
-});
+  )
+})
 
 const $chip: ThemedStyle<ViewStyle> = ({
   spacing,
@@ -216,23 +216,23 @@ const $chip: ThemedStyle<ViewStyle> = ({
   borderRadius: borderRadius.sm,
   borderWidth: borderWidth.sm,
   borderColor: colors.border.subtle,
-});
+})
 
 const $chipActive: ThemedStyle<ViewStyle> = ({ colors }) => ({
   backgroundColor: colors.border.subtle,
-});
+})
 
 const $reaction: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   display: "flex",
   paddingVertical: spacing.xs,
   paddingHorizontal: spacing.lg,
-});
+})
 
 const $reactionInner: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   alignItems: "center",
   gap: spacing.xs,
   flex: 1,
-});
+})
 
 const $username: ThemedStyle<TextStyle> = ({ spacing, colors }) => ({
   flex: 1,
@@ -241,16 +241,16 @@ const $username: ThemedStyle<TextStyle> = ({ spacing, colors }) => ({
   gap: spacing.xxxs,
   overflow: "hidden",
   color: colors.text.primary,
-});
+})
 
 const $reactionContent: ThemedStyle<TextStyle> = ({ spacing }) => ({
   padding: spacing.xxxs,
-});
+})
 
 const $chipText: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.text.secondary,
-});
+})
 
 const $chipTextActive: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.text.primary,
-});
+})

@@ -1,15 +1,12 @@
 import { memo, useCallback } from "react"
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
-import { useSocialProfilesForAddressQuery } from "@/features/social-profiles/social-profiles.query"
 import { IWallet } from "@/features/wallets/connect-wallet/connect-wallet.types"
 import { supportedWallets } from "@/features/wallets/supported-wallets"
-import { createXmtpClient } from "@/features/xmtp/xmtp-client/xmtp-client.service"
 import { addWalletToInboxId } from "@/features/xmtp/xmtp-inbox-id/add-wallet-to-inbox-id"
 import { getXmtpSigner } from "@/features/xmtp/xmtp-signer/get-xmtp-signer"
 import { useRouter } from "@/navigation/use-navigation"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { captureErrorWithToast } from "@/utils/capture-error"
-import { GenericError } from "@/utils/error"
 import { shortAddress } from "@/utils/strings/shortAddress"
 import {
   ConnectWalletErrorContent,
