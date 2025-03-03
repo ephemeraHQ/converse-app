@@ -6,9 +6,9 @@ import { VStack } from "@/design-system/VStack"
 import { useRouter } from "@/navigation/use-navigation"
 import { useAppTheme } from "@/theme/use-app-theme"
 import {
-  ConnectWalletCancelLinkButton,
   ConnectWalletHeader,
   ConnectWalletLayout,
+  ConnectWalletLinkButton,
   ConnectWalletPrimaryButton,
   ConnectWalletTextSection,
 } from "./connect-wallet.ui"
@@ -80,7 +80,7 @@ export const ConnectWalletBottomSheetOnboarding = memo(
           text="Connect Wallet"
           onPress={actions.goToNextPage}
         />
-        <ConnectWalletCancelLinkButton onPress={router.goBack} />
+        <ConnectWalletLinkButton onPress={router.goBack} />
       </>
     )
 

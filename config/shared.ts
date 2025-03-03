@@ -1,29 +1,29 @@
 // @ts-nocheck note(lustig) env types aren't working for me OOTB
 
-import Constants from "expo-constants";
-import { IConfig, ILoggerColorScheme } from "@/config/config.types";
+import Constants from "expo-constants"
+import { IConfig, ILoggerColorScheme } from "@/config/config.types"
 
 function maybeReplaceLocalhost(uri: string) {
   try {
     if (uri?.includes("localhost")) {
-      console.info("Replacing localhost with device-accessible IP");
+      console.info("Replacing localhost with device-accessible IP")
       // Try Expo host info first
-      const hostIp = Constants.expoConfig?.hostUri?.split(":")[0];
-      console.info("Host IP", { hostIp });
+      const hostIp = Constants.expoConfig?.hostUri?.split(":")[0]
+      console.info("Host IP", { hostIp })
 
       if (hostIp) {
         console.info("Replacing localhost with device-accessible IP", {
           uri,
           hostIp,
-        });
-        return uri.replace("localhost", hostIp);
+        })
+        return uri.replace("localhost", hostIp)
       }
     }
   } catch (error) {
-    console.error("Error replacing localhost with device-accessible IP", error);
+    console.error("Error replacing localhost with device-accessible IP", error)
   }
 
-  return uri;
+  return uri
 }
 
 // Base configuration shared across all environments
@@ -42,17 +42,6 @@ export const shared = {
   lensSuffix: ".lens",
   sentryDSN: process.env.EXPO_PUBLIC_SENTRY_DSN,
   framesAllowedSchemes: ["http", "https", "ethereum"],
-  walletConnectConfig: {
-    projectId: process.env.EXPO_PUBLIC_WALLETCONNECT_PROJECT_ID,
-    appMetadata: {
-      name: "Converse",
-      description:
-        "Converse lets you communicate and transact freely and safely.",
-      url: "https://converse.xyz",
-      logoUrl: "https://converse.xyz/icon.png",
-      icons: [],
-    },
-  },
   privy: {
     appId: process.env.EXPO_PUBLIC_PRIVY_APP_ID,
     clientId: process.env.EXPO_PUBLIC_PRIVY_CLIENT_ID,
@@ -64,4 +53,4 @@ export const shared = {
     Platform.OS === "android"
       ? process.env.EXPO_PUBLIC_FIREBASE_APP_CHECK_DEBUG_TOKEN_ANDROID
       : process.env.EXPO_PUBLIC_FIREBASE_APP_CHECK_DEBUG_TOKEN_IOS,
-} as const satisfies Partial<IConfig>;
+} as const satisfies Partial<IConfig>

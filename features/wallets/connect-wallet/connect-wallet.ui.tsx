@@ -11,7 +11,7 @@ import { IVStackProps, VStack } from "@/design-system/VStack"
 import { useAppTheme } from "@/theme/use-app-theme"
 
 /**
- * Header component for connect wallet bottom sheets
+ * Header component for connect wallet
  */
 type IConnectWalletHeaderProps = {
   title: string
@@ -63,6 +63,9 @@ export const ConnectWalletItem = memo(function ConnectWalletItem(
         alignItems: "center",
         columnGap: theme.spacing.xs,
         paddingVertical: theme.spacing.xs,
+        ...(isDisabled && {
+          opacity: 0.3,
+        }),
       }}
       onPress={onPress}
     >
@@ -135,7 +138,7 @@ export const ConnectWalletButtonsContainer = memo(
 /**
  * Cancel button for connect wallet flows
  */
-export const ConnectWalletCancelLinkButton = memo(
+export const ConnectWalletLinkButton = memo(
   function ConnectWalletCancelLinkButton(props: IButtonProps) {
     const { text = "Cancel", onPress, ...rest } = props
 
@@ -143,7 +146,7 @@ export const ConnectWalletCancelLinkButton = memo(
   },
 )
 
-export const ConnectWalletCancelOutlineButton = memo(
+export const ConnectWalletOutlineButton = memo(
   function ConnectWalletCancelOutlineButton(props: IButtonProps) {
     const { text = "Cancel", onPress, ...rest } = props
 
@@ -176,7 +179,7 @@ export const ConnectWalletButtonContainer = memo(
 )
 
 /**
- * Content container for connect wallet bottom sheets
+ * Content container for connect wallet
  */
 type IConnectWalletContentContainerProps = {
   children: ReactNode
@@ -203,7 +206,7 @@ export const ConnectWalletContentContainer = memo(
 )
 
 /**
- * Text section for connect wallet bottom sheets
+ * Text section for connect wallet
  */
 type IConnectWalletTextSectionProps = {
   text?: string
@@ -245,6 +248,9 @@ export const ConnectWalletLoadingContent = memo(
   },
 )
 
+/**
+ * Error content for connect wallet
+ */
 export const ConnectWalletErrorContent = memo(
   function ConnectWalletErrorContent(props: { onPressCancel: () => void }) {
     const { onPressCancel } = props
@@ -257,13 +263,16 @@ export const ConnectWalletErrorContent = memo(
             text="Please try again"
             secondaryText="If the problem persists, please contact support."
           />
-          <ConnectWalletCancelOutlineButton onPress={onPressCancel} />
+          <ConnectWalletOutlineButton onPress={onPressCancel} />
         </ConnectWalletContentContainer>
       </>
     )
   },
 )
 
+/**
+ * Layout component for connect wallet
+ */
 export const ConnectWalletLayout = memo(function ConnectWalletLayout(props: {
   header: ReactNode
   text: ReactNode
@@ -288,7 +297,8 @@ export const ConnectWalletLayout = memo(function ConnectWalletLayout(props: {
       </ConnectWalletContentContainer>
       <ConnectWalletButtonContainer
         style={{
-          marginTop: theme.spacing.md,
+          paddingTop: theme.spacing.md,
+          paddingHorizontal: theme.spacing.lg,
         }}
       >
         {buttons}

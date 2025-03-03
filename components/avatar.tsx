@@ -96,7 +96,7 @@ export const Avatar = memo(function Avatar({
         </Text>
       ) : (
         <Icon
-          picto="photo"
+          icon="photo"
           size={Platform.OS === "ios" ? avatarSize / 3 : avatarSize / 2}
           color="white"
         />
