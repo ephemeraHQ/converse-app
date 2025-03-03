@@ -23,28 +23,30 @@ const createUserRequestSchema = z
     }),
   })
   .strict();
-  
-type CreateUserResponse = {
-  id: string;
-  privyUserId: string;
-  device: {
-    id: string;
-    os: "android" | "ios" | "web";
-    name: string | null;
-  };
-  identity: {
-    id: string;
-    privyAddress: string;
-    xmtpId: string;
-  };
-  profile: {
-    id: string;
-    name: string;
-    username: string;
-    description: string | null;
-    avatar: string | null;
-  };
-};
+
+const createUserResponseSchema = z.object({
+  id: z.string(),
+  privyUserId: z.string(),
+  device: z.object({
+    id: z.string(),
+    os: deviceOSEnum,
+    name: z.string().nullable(),
+  }),
+  identity: z.object({
+    id: z.string(),
+    privyAddress: z.string(),
+    xmtpId: z.string(),
+  }),
+  profile: z.object({
+    id: z.string(),
+    name: z.string(),
+    username: z.string(),
+    description: z.string().nullable(),
+    avatar: z.string().nullable().optional(),
+  }),
+});
+
+type CreateUserResponse = z.infer<typeof createUserResponseSchema>;
 
 export const createUser = async (args: {
   privyUserId: string;
@@ -81,12 +83,15 @@ export const createUser = async (args: {
       validationResult.data,
     );
 
-    // Ensure avatar is null if it doesn't exist
-    if (response.data?.profile && response.data.profile.avatar === undefined) {
-      response.data.profile.avatar = null;
+    // Validate the response
+    const responseValidation = createUserResponseSchema.safeParse(response.data);
+    if (!responseValidation.success) {
+      throw new Error(
+        `Invalid response data: ${responseValidation.error.message}`,
+      );
     }
-    
-    return response.data;
+
+    return responseValidation.data;
   } catch (error) {
     throw handleApiError(error, "createUser");
   }
