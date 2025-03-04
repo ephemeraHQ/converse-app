@@ -9,7 +9,7 @@ import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.stor
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
 import { ensureProfileQueryData } from "@/features/profiles/profiles.query";
 import { doesSocialProfilesMatchTextQuery } from "@/features/profiles/utils/does-social-profiles-match-text-query";
-import { ensureSocialProfilesForAddressQueryData } from "@/features/social-profiles/social-profiles.query";
+import { ensureSocialProfilesForAddressQuery } from "@/features/social-profiles/social-profiles.query";
 import { getAllowedConsentConversationsQueryData } from "@/queries/conversations-allowed-consent-query";
 import { ensureGroupMembersQueryData } from "@/queries/useGroupMembersQuery";
 import { captureError } from "@/utils/capture-error";
@@ -60,10 +60,9 @@ export async function searchExistingGroupsByGroupMembers(args: {
               return true;
             }
 
-            const socialProfiles =
-              await ensureSocialProfilesForAddressQueryData({
-                ethAddress: profile.privyAddress,
-              });
+            const socialProfiles = await ensureSocialProfilesForAddressQuery({
+              ethAddress: profile.privyAddress,
+            });
 
             if (!socialProfiles) {
               return false;

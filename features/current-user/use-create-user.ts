@@ -1,35 +1,34 @@
-import { useMutation } from "@tanstack/react-query";
-import { setCurrentUserQueryData } from "@/features/current-user/curent-user.query";
-import { setProfileQueryData, invalidateProfileQuery } from "@/features/profiles/profiles.query";
-import { createUser } from "../authentication/create-user.api";
+import { useMutation } from "@tanstack/react-query"
+import { useCallback } from "react"
+import { z } from "zod"
+import { setCurrentUserQueryData } from "@/features/current-user/curent-user.query"
+import {
+  invalidateProfileQuery,
+  setProfileQueryData,
+} from "@/features/profiles/profiles.query"
+import { profileValidationSchema } from "@/features/profiles/schemas/profile-validation.schema"
+import { createUser } from "../authentication/create-user.api"
 
-type ICreateUserArgs = {
-  privyUserId: string;
-  smartContractWalletAddress: string;
-  inboxId: string;
-  profile: {
-    name: string;
-    username: string;
-    avatar?: string;
-    description?: string;
-  };
-};
+const createUserRequestSchema = z.object({
+  inboxId: z.string(),
+  privyUserId: z.string(),
+  smartContractWalletAddress: z.string(),
+  profile: profileValidationSchema.pick({
+    name: true,
+    username: true,
+    avatar: true,
+    description: true,
+  }),
+})
 
-/**
- * Hook to create a new user and handle related state updates
- *
- * This mutation:
- * 1. Creates a user via the API with provided profile info
- * 2. Optimistically updates the users query cache
- * 3. Fetches a new JWT token after user creation
- * 4. Follows React Query best practices for mutations
- */
+type ICreateUserArgs = z.infer<typeof createUserRequestSchema>
+
 export function useCreateUser() {
   // const { logout } = useLogout();
 
-  return useMutation({
+  const { mutateAsync, isPending: isCreatingUser } = useMutation({
     mutationFn: async (args: ICreateUserArgs) => {
-      return createUser(args);
+      return createUser(args)
     },
 
     // onMutate: async (args: ICreateUserArgs) => {
@@ -72,7 +71,7 @@ export function useCreateUser() {
           id: data.id,
           identities: [data.identity],
         },
-      });
+      })
       setProfileQueryData({
         xmtpId: data.identity.xmtpId,
         data: {
@@ -80,13 +79,27 @@ export function useCreateUser() {
           name: data.profile.name,
           username: data.profile.username,
           description: data.profile.description ?? null,
-          ...(data.profile.avatar && { avatar: data.profile.avatar })
+          ...(data.profile.avatar && { avatar: data.profile.avatar }),
         },
-      });
-      
+      })
+
       // Explicitly refetch the profile data to ensure
       // we have the latest data including the newly uploaded avatar
-      invalidateProfileQuery({ xmtpId: data.identity.xmtpId });
+      invalidateProfileQuery({ xmtpId: data.identity.xmtpId })
     },
-  });
+  })
+
+  const handleCreateUser = useCallback(
+    async (args: ICreateUserArgs) => {
+      // Validate the payload against our schema
+      const validationResult = createUserRequestSchema.parse(args)
+      await mutateAsync(validationResult)
+    },
+    [mutateAsync],
+  )
+
+  return {
+    createUserAsync: handleCreateUser,
+    isCreatingUser,
+  }
 }

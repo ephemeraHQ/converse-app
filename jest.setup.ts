@@ -3,14 +3,14 @@
 // require("dotenv").config();
 
 jest.mock("react-native-webview", () => {
-  const MockWebView = () => null;
-  MockWebView.defaultProps = {};
+  const MockWebView = () => null
+  MockWebView.defaultProps = {}
   return {
     WebView: MockWebView,
     default: MockWebView,
-  };
-});
-jest.mock("react-native/Libraries/EventEmitter/NativeEventEmitter");
+  }
+})
+jest.mock("react-native/Libraries/EventEmitter/NativeEventEmitter")
 jest.mock("react-native-fs", () => {
   return {
     mkdir: jest.fn(),
@@ -54,34 +54,30 @@ jest.mock("react-native-fs", () => {
     TemporaryDirectoryPath: "",
     LibraryDirectoryPath: jest.fn(),
     PicturesDirectoryPath: jest.fn(),
-  };
-});
+  }
+})
 
 jest.mock("rn-fetch-blob", () => {
   return {
     DocumentDir: () => {},
     polyfill: () => {},
-  };
-});
+  }
+})
 
 jest.mock("@sentry/react-native", () => ({
   init: jest.fn(),
   addBreadcrumb: jest.fn(),
-}));
-jest.mock("expo-constants", () => ({}));
+}))
+jest.mock("expo-constants", () => ({}))
 
 jest.mock("uuid", () => ({
   v4: jest.fn(() => "uuidv4"),
-}));
-
-jest.mock("path", () => ({
-  join: jest.fn(() => ""),
-}));
+}))
 
 jest.mock("expo-localization", () => ({
   // TODO: Update later to begin returning more locales and mock within individual tests
   getLocales: jest.fn(() => [{ languageTag: "en-US" }]),
-}));
+}))
 
 // Mock config module
 jest.mock("@/config", () => ({
@@ -102,7 +98,7 @@ jest.mock("@/config", () => ({
     deprecatedApiURI: "https://test.api",
     // Add other config values as needed by tests
   },
-}));
+}))
 
 jest.mock("@react-native-firebase/app-check", () => {
   return {
@@ -118,8 +114,8 @@ jest.mock("@react-native-firebase/app-check", () => {
         initializeAppCheck: jest.fn(),
       }),
     },
-  };
-});
+  }
+})
 
 jest.mock("@xmtp/react-native-sdk", () => ({
   Client: {
@@ -165,15 +161,7 @@ jest.mock("@xmtp/react-native-sdk", () => ({
     encode: jest.fn(),
     decode: jest.fn(),
   })),
-}));
-
-jest.mock("@xmtp/content-type-transaction-reference", () => ({
-  TransactionReferenceCodec: jest.fn().mockImplementation(() => ({
-    contentType: "transaction-reference",
-    encode: jest.fn(),
-    decode: jest.fn(),
-  })),
-}));
+}))
 
 jest.mock("@privy-io/expo", () => ({
   usePrivy: jest.fn().mockReturnValue({
@@ -183,4 +171,4 @@ jest.mock("@privy-io/expo", () => ({
     ready: true,
     user: null,
   }),
-}));
+}))

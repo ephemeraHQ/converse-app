@@ -1,13 +1,13 @@
-import { Button } from "@design-system/Button/Button";
-import { Center } from "@design-system/Center";
-import { AnimatedHStack, HStack } from "@design-system/HStack";
-import { IconButton } from "@design-system/IconButton/IconButton";
-import { Text } from "@design-system/Text";
-import { AnimatedVStack } from "@design-system/VStack";
-import { SICK_SPRING_CONFIG } from "@theme/animations";
-import { memo, useCallback, useEffect } from "react";
-import { useWindowDimensions } from "react-native";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { Button } from "@design-system/Button/Button"
+import { Center } from "@design-system/Center"
+import { AnimatedHStack, HStack } from "@design-system/HStack"
+import { IconButton } from "@design-system/IconButton/IconButton"
+import { Text } from "@design-system/Text"
+import { AnimatedVStack } from "@design-system/VStack"
+import { SICK_SPRING_CONFIG } from "@theme/animations"
+import { memo, useCallback, useEffect } from "react"
+import { useWindowDimensions } from "react-native"
+import { Gesture, GestureDetector } from "react-native-gesture-handler"
 import {
   interpolate,
   runOnJS,
@@ -15,62 +15,62 @@ import {
   useSharedValue,
   withSpring,
   withTiming,
-} from "react-native-reanimated";
+} from "react-native-reanimated"
 import {
   SNACKBAR_BOTTOM_OFFSET,
   SNACKBAR_HEIGHT,
   SNACKBAR_LARGE_TEXT_HEIGHT,
   SNACKBAR_SPACE_BETWEEN_SNACKBARS,
   SNACKBARS_MAX_VISIBLE,
-} from "@/components/snackbar/snackbar.constants";
+} from "@/components/snackbar/snackbar.constants"
 import {
   getNumberOfSnackbars,
   onSnackbarsChange,
-} from "@/components/snackbar/snackbar.service";
-import { ISnackbar } from "@/components/snackbar/snackbar.types";
-import { useAppTheme } from "@/theme/use-app-theme";
+} from "@/components/snackbar/snackbar.service"
+import { ISnackbar } from "@/components/snackbar/snackbar.types"
+import { useAppTheme } from "@/theme/use-app-theme"
 
 type SnackbarProps = {
-  snackbar: ISnackbar;
-  onDismiss: () => void;
-};
+  snackbar: ISnackbar
+  onDismiss: () => void
+}
 
 export const Snackbar = memo(
   function Snackbar(props: SnackbarProps) {
-    const { snackbar, onDismiss } = props;
-    const { theme } = useAppTheme();
-    const { width: windowWidth } = useWindowDimensions();
+    const { snackbar, onDismiss } = props
+    const { theme } = useAppTheme()
+    const { width: windowWidth } = useWindowDimensions()
 
-    const isFirstSnack = getNumberOfSnackbars() === 1;
+    const isFirstSnack = getNumberOfSnackbars() === 1
     const initialBottomPosition = isFirstSnack
       ? -SNACKBAR_HEIGHT / 2
-      : SNACKBAR_BOTTOM_OFFSET;
+      : SNACKBAR_BOTTOM_OFFSET
 
-    const snackbarIndexAV = useSharedValue(0);
-    const bottomAV = useSharedValue(initialBottomPosition);
-    const translateXAV = useSharedValue(0);
-    const isSwipingAV = useSharedValue(false);
+    const snackbarIndexAV = useSharedValue(0)
+    const bottomAV = useSharedValue(initialBottomPosition)
+    const translateXAV = useSharedValue(0)
+    const isSwipingAV = useSharedValue(false)
     const firstSnackbarRenderProgressAV = useSharedValue(
       // We only want the first snackbar to animate in with a special animation
       isFirstSnack ? 0 : 1,
-    );
+    )
 
     useEffect(() => {
-      bottomAV.value = withSpring(SNACKBAR_BOTTOM_OFFSET, SICK_SPRING_CONFIG);
-      firstSnackbarRenderProgressAV.value = withSpring(1, SICK_SPRING_CONFIG);
-    }, [bottomAV, firstSnackbarRenderProgressAV]);
+      bottomAV.value = withSpring(SNACKBAR_BOTTOM_OFFSET, SICK_SPRING_CONFIG)
+      firstSnackbarRenderProgressAV.value = withSpring(1, SICK_SPRING_CONFIG)
+    }, [bottomAV, firstSnackbarRenderProgressAV])
 
     useEffect(() => {
       const unsubscribe = onSnackbarsChange((snackbars) => {
         const snackbarIndex = snackbars.findIndex(
           (item) => item.key === snackbar.key,
-        );
+        )
 
         // Set the new new index of the current snackbar
-        snackbarIndexAV.value = withSpring(snackbarIndex, SICK_SPRING_CONFIG);
+        snackbarIndexAV.value = withSpring(snackbarIndex, SICK_SPRING_CONFIG)
 
         if (snackbarIndex === -1) {
-          return;
+          return
         }
 
         const totalHeightBeforeThisSnackbar = snackbars
@@ -78,51 +78,51 @@ export const Snackbar = memo(
           .reduce((acc, item) => {
             const snackbarHeight = item.isMultiLine
               ? SNACKBAR_LARGE_TEXT_HEIGHT
-              : SNACKBAR_HEIGHT;
-            return acc + snackbarHeight + SNACKBAR_SPACE_BETWEEN_SNACKBARS;
-          }, 0);
+              : SNACKBAR_HEIGHT
+            return acc + snackbarHeight + SNACKBAR_SPACE_BETWEEN_SNACKBARS
+          }, 0)
 
         bottomAV.value = withSpring(
           SNACKBAR_BOTTOM_OFFSET + totalHeightBeforeThisSnackbar,
           SICK_SPRING_CONFIG,
-        );
-      });
+        )
+      })
 
-      return unsubscribe;
-    }, [snackbar.key, bottomAV, snackbarIndexAV]);
+      return unsubscribe
+    }, [snackbar.key, bottomAV, snackbarIndexAV])
 
     const dismissItem = useCallback(() => {
-      "worklet";
+      "worklet"
       translateXAV.value = withTiming(
         -windowWidth,
         { duration: 250 },
         (isFinished) => {
           if (isFinished) {
-            runOnJS(onDismiss)();
+            runOnJS(onDismiss)()
           }
         },
-      );
-    }, [onDismiss, translateXAV, windowWidth]);
+      )
+    }, [onDismiss, translateXAV, windowWidth])
 
     const gesture = Gesture.Pan()
       .onBegin(() => {
-        isSwipingAV.value = true;
+        isSwipingAV.value = true
       })
       .onUpdate((event) => {
         if (event.translationX <= 0) {
-          translateXAV.value = event.translationX;
+          translateXAV.value = event.translationX
         }
       })
       .onEnd((event) => {
         if (event.translationX < -50) {
-          dismissItem();
+          dismissItem()
         } else {
-          translateXAV.value = withSpring(0);
+          translateXAV.value = withSpring(0)
         }
       })
       .onFinalize(() => {
-        isSwipingAV.value = false;
-      });
+        isSwipingAV.value = false
+      })
 
     const containerAS = useAnimatedStyle(
       () => ({
@@ -161,14 +161,14 @@ export const Snackbar = memo(
         ],
       }),
       [],
-    );
+    )
 
     const SnackContainer = snackbar.isMultiLine
       ? AnimatedVStack
-      : AnimatedHStack;
+      : AnimatedHStack
     const snackbarHeight = snackbar.isMultiLine
       ? SNACKBAR_LARGE_TEXT_HEIGHT
-      : SNACKBAR_HEIGHT;
+      : SNACKBAR_HEIGHT
 
     return (
       <GestureDetector gesture={gesture}>
@@ -210,7 +210,7 @@ export const Snackbar = memo(
               >
                 <Text
                   preset="small"
-                  numberOfLines={snackbar.isMultiLine ? 2 : 1}
+                  numberOfLines={2}
                   {...(snackbar.type === "error" && { color: "caution" })}
                 >
                   {snackbar.message}
@@ -264,8 +264,8 @@ export const Snackbar = memo(
           </AnimatedVStack>
         </AnimatedVStack>
       </GestureDetector>
-    );
+    )
   },
   // We don't need to rerender a snackbar
   () => true,
-);
+)

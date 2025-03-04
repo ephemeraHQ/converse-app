@@ -1,37 +1,39 @@
 import {
   ConversationNav,
   ConversationScreenConfig,
-} from "@features/conversation/conversation.nav";
-import { LinkingOptions, NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import * as Linking from "expo-linking";
-import React, { useEffect } from "react";
-import { config } from "@/config";
-import { AppSettingsScreen } from "@/features/app-settings/app-settings.screen";
-import { useIsCurrentVersionEnough } from "@/features/app-settings/hooks/use-is-current-version-enough";
-import { useAuthStore } from "@/features/authentication/authentication.store";
-import { BlockedConversationsScreen } from "@/features/blocked-conversations/blocked-conversations.screen";
-import { ConversationListScreen } from "@/features/conversation-list/conversation-list.screen";
-import { ConversationRequestsListNav } from "@/features/conversation-requests-list/conversation-requests-list.nav";
-import { OnboardingContactCardScreen } from "@/features/onboarding/screens/onboarding-contact-card-screen";
-import { OnboardingWelcomeScreen } from "@/features/onboarding/screens/onboarding-welcome-screen";
+} from "@features/conversation/conversation.nav"
+import { LinkingOptions, NavigationContainer } from "@react-navigation/native"
+import { createNativeStackNavigator } from "@react-navigation/native-stack"
+import * as Linking from "expo-linking"
+import React, { memo, useEffect } from "react"
+import { config } from "@/config"
+import { AppSettingsScreen } from "@/features/app-settings/app-settings.screen"
+import { useIsCurrentVersionEnough } from "@/features/app-settings/hooks/use-is-current-version-enough"
+import { useAuthStore } from "@/features/authentication/authentication.store"
+import { BlockedConversationsScreen } from "@/features/blocked-conversations/blocked-conversations.screen"
+import { ConversationListScreen } from "@/features/conversation-list/conversation-list.screen"
+import { ConversationRequestsListNav } from "@/features/conversation-requests-list/conversation-requests-list.nav"
+import { OnboardingContactCardImportNameScreen } from "@/features/onboarding/screens/onboarding-contact-card-import-name.screen"
+import { OnboardingContactCardScreen } from "@/features/onboarding/screens/onboarding-contact-card.screen"
+import { OnboardingWelcomeScreen } from "@/features/onboarding/screens/onboarding-welcome.screen"
+import { ProfileImportNameScreen } from "@/features/profiles/profile-import-name.screen"
 import {
   ProfileNav,
   ProfileScreenConfig,
-} from "@/features/profiles/profile.nav";
-import { NavigationParamList } from "@/navigation/navigation.types";
-import { navigationRef } from "@/navigation/navigation.utils";
-import { WebviewPreviewNav } from "@/screens/WebviewPreviewNav";
-import { useThemeProvider } from "@/theme/use-app-theme";
-import { captureError } from "@/utils/capture-error";
-import { useUpdateSentry } from "@/utils/sentry";
-import { hideSplashScreen } from "@/utils/splash/splash";
+} from "@/features/profiles/profile.nav"
+import { NavigationParamList } from "@/navigation/navigation.types"
+import { navigationRef } from "@/navigation/navigation.utils"
+import { WebviewPreviewNav } from "@/screens/WebviewPreviewNav"
+import { useAppTheme, useThemeProvider } from "@/theme/use-app-theme"
+import { captureError } from "@/utils/capture-error"
+import { useUpdateSentry } from "@/utils/sentry"
+import { hideSplashScreen } from "@/utils/splash/splash"
 import {
   ShareProfileNav,
   ShareProfileScreenConfig,
-} from "../screens/ShareProfileNav";
+} from "../screens/ShareProfileNav"
 
-const prefix = Linking.createURL("/");
+const prefix = Linking.createURL("/")
 
 const linking: LinkingOptions<NavigationParamList> = {
   prefixes: [prefix, ...config.universalLinks],
@@ -48,7 +50,7 @@ const linking: LinkingOptions<NavigationParamList> = {
   // getStateFromPath: getConverseStateFromPath("fullStackNavigation"),
   // TODO: Fix this
   // getInitialURL: () => null,
-};
+}
 
 export function AppNavigator() {
   const {
@@ -56,10 +58,10 @@ export function AppNavigator() {
     navigationTheme,
     setThemeContextOverride,
     ThemeProvider,
-  } = useThemeProvider();
+  } = useThemeProvider()
 
-  useUpdateSentry();
-  useIsCurrentVersionEnough();
+  useUpdateSentry()
+  useIsCurrentVersionEnough()
 
   return (
     <>
@@ -78,23 +80,25 @@ export function AppNavigator() {
         </NavigationContainer>
       </ThemeProvider>
     </>
-  );
+  )
 }
 
-export const AppNativeStack = createNativeStackNavigator<NavigationParamList>();
+export const AppNativeStack = createNativeStackNavigator<NavigationParamList>()
 
-function AppStacks() {
-  const authStatus = useAuthStore((state) => state.status);
+const AppStacks = memo(function AppStacks() {
+  const { theme } = useAppTheme()
+
+  const authStatus = useAuthStore((state) => state.status)
 
   useEffect(() => {
     if (authStatus !== "undetermined") {
-      hideSplashScreen().catch(captureError);
+      hideSplashScreen().catch(captureError)
     }
-  }, [authStatus]);
+  }, [authStatus])
 
-  const isUndetermined = authStatus === "undetermined";
-  const isOnboarding = authStatus === "onboarding";
-  const isSignedOut = authStatus === "signedOut";
+  const isUndetermined = authStatus === "undetermined"
+  const isOnboarding = authStatus === "onboarding"
+  const isSignedOut = authStatus === "signedOut"
 
   return (
     <AppNativeStack.Navigator
@@ -128,6 +132,19 @@ function AppStacks() {
             // Fade animation when transitioning to onboarding state
             options={{ animation: "fade" }}
           />
+          <AppNativeStack.Screen
+            name="OnboardingCreateContactCardImportName"
+            component={OnboardingContactCardImportNameScreen}
+            options={{
+              presentation: "formSheet",
+              sheetAllowedDetents: [0.5],
+              // sheetCornerRadius: theme.borderRadius.sm, // Not sure why but adding this breaks the animation between different height transitions
+              contentStyle: {
+                backgroundColor: theme.colors.background.surface,
+              },
+            }}
+          />
+
           {/* <NativeStack.Screen
             name="OnboardingNotifications"
             component={OnboardingNotificationsScreen}
@@ -152,16 +169,28 @@ function AppStacks() {
           {WebviewPreviewNav()}
           {ProfileNav()}
           <AppNativeStack.Screen
+            name="ProfileImportName"
+            component={ProfileImportNameScreen}
+            options={{
+              presentation: "formSheet",
+              sheetAllowedDetents: [0.5],
+              // sheetCornerRadius: theme.borderRadius.sm, // Not sure why but adding this breaks the animation between different height transitions
+              contentStyle: {
+                backgroundColor: theme.colors.background.surface,
+              },
+            }}
+          />
+          <AppNativeStack.Screen
             name="AppSettings"
             component={AppSettingsScreen}
           />
         </AppNativeStack.Group>
       )}
     </AppNativeStack.Navigator>
-  );
-}
+  )
+})
 
 // TODO: Maybe show animated splash screen or something
 function IdleScreen() {
-  return null;
+  return null
 }

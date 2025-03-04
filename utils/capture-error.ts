@@ -1,27 +1,27 @@
-import { showSnackbar } from "@/components/snackbar/snackbar.service";
-import { ensureError, FeedbackError, GenericError } from "@/utils/error";
-import { logger } from "@/utils/logger";
-import { sentryTrackError } from "@/utils/sentry";
+import { showSnackbar } from "@/components/snackbar/snackbar.service"
+import { ensureError, FeedbackError, GenericError } from "@/utils/error"
+import { logger } from "@/utils/logger"
+import { sentryTrackError } from "@/utils/sentry"
 
 export async function captureError(
   error: unknown,
   options: {
-    extras?: Record<string, string>;
+    extras?: Record<string, string>
   } = {},
 ) {
   try {
-    const { extras } = options;
+    const { extras } = options
 
     if (__DEV__) {
       if (extras) {
-        logger.error(error, extras);
+        logger.error(error, extras)
       } else {
-        logger.error(error);
+        logger.error(error)
       }
     }
 
     if (error instanceof FeedbackError) {
-      return;
+      return
     }
 
     sentryTrackError({
@@ -29,38 +29,38 @@ export async function captureError(
       extras: {
         ...extras,
       },
-    });
+    })
   } catch (error) {
     sentryTrackError({
       error: new GenericError({
         error,
         additionalMessage: "Failed to capture error",
       }),
-    });
+    })
   }
 }
 
 export function captureErrorWithToast(
   error: unknown,
   options?: {
-    message?: string;
+    message?: string
   },
 ) {
-  const { message } = options || {};
+  const { message } = options || {}
 
-  captureError(error);
+  captureError(error)
 
   const snackMessage =
-    message || (error as Error)?.message || "Something went wrong";
+    message || (error as Error)?.message || "Something went wrong"
 
   showSnackbar({
     message: snackMessage,
     type: "error",
-  });
+  })
 }
 
 export function captureErrorWithFriendlyToast(error: unknown) {
   captureErrorWithToast(error, {
     message: "Something went wrong",
-  });
+  })
 }

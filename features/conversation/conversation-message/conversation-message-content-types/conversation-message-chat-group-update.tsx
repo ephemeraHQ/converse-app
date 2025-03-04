@@ -1,35 +1,35 @@
-import { HStack } from "@design-system/HStack";
-import { Pressable } from "@design-system/Pressable";
-import { ITextProps, Text } from "@design-system/Text";
-import { translate, TxKeyPath } from "@i18n";
+import { HStack } from "@design-system/HStack"
+import { Pressable } from "@design-system/Pressable"
+import { ITextProps, Text } from "@design-system/Text"
+import { translate, TxKeyPath } from "@i18n"
 import {
   DecodedMessage,
   GroupUpdatedCodec,
   GroupUpdatedMetadatEntry,
   InboxId,
-} from "@xmtp/react-native-sdk";
-import { memo } from "react";
-import { ViewStyle } from "react-native";
-import { Avatar } from "@/components/avatar";
-import { Center } from "@/design-system/Center";
-import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info";
-import { navigate } from "@/navigation/navigation.utils";
-import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
+} from "@xmtp/react-native-sdk"
+import { memo } from "react"
+import { ViewStyle } from "react-native"
+import { Avatar } from "@/components/avatar"
+import { Center } from "@/design-system/Center"
+import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
+import { navigate } from "@/navigation/navigation.utils"
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme"
 
 type IMessageChatGroupUpdateProps = {
-  message: DecodedMessage<GroupUpdatedCodec>;
-};
+  message: DecodedMessage<GroupUpdatedCodec>
+}
 
 export function MessageChatGroupUpdate({
   message,
 }: IMessageChatGroupUpdateProps) {
-  const { theme } = useAppTheme();
+  const { theme } = useAppTheme()
 
-  const content = message.content();
+  const content = message.content()
 
   if (typeof content === "string") {
     // TODO
-    return null;
+    return null
   }
 
   return (
@@ -68,16 +68,16 @@ export function MessageChatGroupUpdate({
         />
       ))}
     </Center>
-  );
+  )
 }
 
 type IChatGroupMemberLeftProps = {
-  inboxId: InboxId;
-};
+  inboxId: InboxId
+}
 
 function ChatGroupMemberLeft({ inboxId }: IChatGroupMemberLeftProps) {
-  const { themed, theme } = useAppTheme();
-  const { displayName, avatarUrl } = usePreferredDisplayInfo({ inboxId });
+  const { themed, theme } = useAppTheme()
+  const { displayName, avatarUrl } = usePreferredDisplayInfo({ inboxId })
 
   return (
     <HStack style={themed($memberContainer)}>
@@ -86,11 +86,11 @@ function ChatGroupMemberLeft({ inboxId }: IChatGroupMemberLeftProps) {
         onPress={() => {
           navigate("Profile", {
             inboxId,
-          });
+          })
         }}
       >
         <Avatar
-          size={theme.avatarSize.xs}
+          sizeNumber={theme.avatarSize.xs}
           uri={avatarUrl}
           name={displayName ?? ""}
         />
@@ -102,16 +102,16 @@ function ChatGroupMemberLeft({ inboxId }: IChatGroupMemberLeftProps) {
         {translate("group_member_left")}
       </ChatGroupUpdateText>
     </HStack>
-  );
+  )
 }
 
 type IChatGroupMemberJoinedProps = {
-  inboxId: InboxId;
-};
+  inboxId: InboxId
+}
 
 function ChatGroupMemberJoined({ inboxId }: IChatGroupMemberJoinedProps) {
-  const { themed, theme } = useAppTheme();
-  const { displayName, avatarUrl } = usePreferredDisplayInfo({ inboxId });
+  const { themed, theme } = useAppTheme()
+  const { displayName, avatarUrl } = usePreferredDisplayInfo({ inboxId })
 
   return (
     <HStack style={themed($memberContainer)}>
@@ -119,12 +119,12 @@ function ChatGroupMemberJoined({ inboxId }: IChatGroupMemberJoinedProps) {
         onPress={() => {
           navigate("Profile", {
             inboxId,
-          });
+          })
         }}
         style={themed($pressableContent)}
       >
         <Avatar
-          size={theme.avatarSize.xs}
+          sizeNumber={theme.avatarSize.xs}
           uri={avatarUrl}
           name={displayName ?? ""}
         />
@@ -136,40 +136,40 @@ function ChatGroupMemberJoined({ inboxId }: IChatGroupMemberJoinedProps) {
         {translate("group_member_joined")}
       </ChatGroupUpdateText>
     </HStack>
-  );
+  )
 }
 
 type IChatGroupMetadataUpdateProps = {
-  metadataEntry: GroupUpdatedMetadatEntry;
-  initiatorInboxId: InboxId;
-};
+  metadataEntry: GroupUpdatedMetadatEntry
+  initiatorInboxId: InboxId
+}
 
 function ChatGroupMetadataUpdate({
   metadataEntry,
   initiatorInboxId,
 }: IChatGroupMetadataUpdateProps) {
-  const { themed, theme } = useAppTheme();
+  const { themed, theme } = useAppTheme()
   const { displayName, avatarUrl } = usePreferredDisplayInfo({
     inboxId: initiatorInboxId,
-  });
+  })
 
-  let txKey: TxKeyPath;
-  let txParams: Record<string, string> = {};
+  let txKey: TxKeyPath
+  let txParams: Record<string, string> = {}
 
   switch (metadataEntry.fieldName) {
     case "group_name":
-      txKey = "group_name_changed_to";
-      txParams = { newValue: metadataEntry.newValue };
-      break;
+      txKey = "group_name_changed_to"
+      txParams = { newValue: metadataEntry.newValue }
+      break
     case "group_image_url_square":
-      txKey = "group_photo_changed";
-      break;
+      txKey = "group_photo_changed"
+      break
     case "description":
-      txKey = "group_description_changed";
-      txParams = { newValue: metadataEntry.newValue };
-      break;
+      txKey = "group_description_changed"
+      txParams = { newValue: metadataEntry.newValue }
+      break
     default:
-      return null;
+      return null
   }
 
   return (
@@ -178,12 +178,12 @@ function ChatGroupMetadataUpdate({
         onPress={() => {
           navigate("Profile", {
             inboxId: initiatorInboxId,
-          });
+          })
         }}
         style={themed($pressableContent)}
       >
         <Avatar
-          size={theme.avatarSize.xs}
+          sizeNumber={theme.avatarSize.xs}
           uri={avatarUrl}
           name={displayName ?? ""}
         />
@@ -193,13 +193,13 @@ function ChatGroupMetadataUpdate({
       </Pressable>
       <ChatGroupUpdateText>{translate(txKey, txParams)}</ChatGroupUpdateText>
     </HStack>
-  );
+  )
 }
 
 const ChatGroupUpdateText = memo(function ChatGroupUpdateText(
   props: ITextProps,
 ) {
-  const { style, ...rest } = props;
+  const { style, ...rest } = props
   return (
     <Text
       style={[{ textAlign: "center", flexWrap: "wrap" }, style]}
@@ -207,8 +207,8 @@ const ChatGroupUpdateText = memo(function ChatGroupUpdateText(
       preset="smaller"
       {...rest}
     />
-  );
-});
+  )
+})
 
 const $memberContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   alignItems: "center",
@@ -216,10 +216,10 @@ const $memberContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   justifyContent: "center",
   columnGap: spacing.xxxs,
   width: "100%",
-});
+})
 
 const $pressableContent: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   columnGap: spacing.xxxs,
   alignItems: "center",
   flexDirection: "row",
-});
+})

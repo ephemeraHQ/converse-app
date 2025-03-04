@@ -1,38 +1,69 @@
-import { Image } from "expo-image";
-import React, { memo, useCallback, useState } from "react";
-import { Platform, StyleProp, ViewStyle } from "react-native";
-import { Center } from "@/design-system/Center";
-import { Icon } from "@/design-system/Icon/Icon";
-import { Text } from "@/design-system/Text";
-import { useAppTheme } from "@/theme/use-app-theme";
-import { Nullable } from "@/types/general";
-import { getCapitalizedLettersForAvatar } from "@/utils/get-capitalized-letters-for-avatar";
+import { Image } from "expo-image"
+import React, { memo, useCallback, useState } from "react"
+import {
+  ImageSourcePropType,
+  Platform,
+  StyleProp,
+  ViewStyle,
+} from "react-native"
+import { Center } from "@/design-system/Center"
+import { Icon } from "@/design-system/Icon/Icon"
+import { Text } from "@/design-system/Text"
+import { useAppTheme } from "@/theme/use-app-theme"
+import { Nullable } from "@/types/general"
+import { getCapitalizedLettersForAvatar } from "@/utils/get-capitalized-letters-for-avatar"
 
 export type IAvatarProps = {
-  uri: Nullable<string>;
-  name: Nullable<string>;
-  size?: number;
-  style?: StyleProp<ViewStyle>;
-};
+  name: Nullable<string>
+  source?: Nullable<string | ImageSourcePropType>
+  uri?: Nullable<string> // Kept for backward compatibility
+  size?: "sm" | "md" | "lg" | "xl"
+  sizeNumber?: number
+  style?: StyleProp<ViewStyle>
+}
 
 export const Avatar = memo(function Avatar({
+  source,
   uri,
-  size,
+  sizeNumber,
+  size = "md",
   style,
   name,
 }: IAvatarProps) {
-  const { theme } = useAppTheme();
-  const avatarSize = size ?? theme.avatarSize.md;
-  const firstLetter = getCapitalizedLettersForAvatar(name ?? "");
-  const [didError, setDidError] = useState(false);
+  const { theme } = useAppTheme()
+  const firstLetter = getCapitalizedLettersForAvatar(name ?? "")
+  const [didError, setDidError] = useState(false)
+
+  const avatarSize =
+    sizeNumber ??
+    {
+      sm: theme.avatarSize.sm,
+      md: theme.avatarSize.md,
+      lg: theme.avatarSize.lg,
+      xl: theme.avatarSize.xl,
+    }[size]
+
+  // Use source if provided, otherwise fall back to uri for backward compatibility
+  const imageSource = source ?? uri
 
   const handleImageError = useCallback(() => {
-    setDidError(true);
-  }, []);
+    setDidError(true)
+  }, [])
 
   const handleImageLoad = useCallback(() => {
-    setDidError(false);
-  }, []);
+    setDidError(false)
+  }, [])
+
+  // Determine if we have a valid image source
+  const hasImageSource = !!imageSource && !didError
+
+  // Prepare the source object for the Image component
+  const getImageSource = () => {
+    if (typeof imageSource === "string") {
+      return { uri: imageSource }
+    }
+    return imageSource
+  }
 
   return (
     <Center
@@ -47,11 +78,11 @@ export const Avatar = memo(function Avatar({
       ]}
       testID="avatar-placeholder"
     >
-      {uri && !didError ? (
+      {hasImageSource ? (
         <Image
           onLoad={handleImageLoad}
           onError={handleImageError}
-          source={{ uri }}
+          source={getImageSource()}
           style={{
             position: "absolute",
             borderRadius: avatarSize / 2,
@@ -75,11 +106,11 @@ export const Avatar = memo(function Avatar({
         </Text>
       ) : (
         <Icon
-          picto="photo"
+          icon="photo"
           size={Platform.OS === "ios" ? avatarSize / 3 : avatarSize / 2}
           color="white"
         />
       )}
     </Center>
-  );
-});
+  )
+})

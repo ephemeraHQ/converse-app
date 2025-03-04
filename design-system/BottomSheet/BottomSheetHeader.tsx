@@ -5,19 +5,17 @@ import { IconButton } from "../IconButton/IconButton";
 import { Text } from "../Text";
 import { useBottomSheet } from "./BottomSheet.utils";
 
-export const BottomSheetHeader = memo(function BottomSheetHeader(props: {
+type IBottomSheetHeaderProps = {
   title?: string;
-  hasClose?: boolean;
-}) {
-  const { title, hasClose = true } = props;
+  onClose?: () => void;
+};
 
-  const { close } = useBottomSheet();
-
+// Dumb component that doesn't use useBottomSheet
+export const BottomSheetHeaderBase = memo(function BottomSheetHeaderBase(
+  props: IBottomSheetHeaderProps,
+) {
+  const { title, onClose } = props;
   const { theme } = useAppTheme();
-
-  const handleClose = useCallback(() => {
-    close();
-  }, [close]);
 
   return (
     <HStack
@@ -29,13 +27,13 @@ export const BottomSheetHeader = memo(function BottomSheetHeader(props: {
       }}
     >
       {!!title && <Text preset="bigBold">{title}</Text>}
-      {hasClose && (
+      {onClose && (
         <IconButton
           action="primary"
           variant="subtle"
           size="md"
           iconName="xmark"
-          onPress={handleClose}
+          onPress={onClose}
           style={{
             borderRadius: theme.borderRadius.md,
           }}
@@ -43,4 +41,25 @@ export const BottomSheetHeader = memo(function BottomSheetHeader(props: {
       )}
     </HStack>
   );
+});
+
+// Smart component that uses useBottomSheet
+export const BottomSheetHeader = memo(function BottomSheetHeader(
+  props: IBottomSheetHeaderProps & { hasClose?: boolean },
+) {
+  const { onClose, hasClose = true } = props;
+  const { close } = useBottomSheet();
+
+  const handleClose = useCallback(() => {
+    if (!hasClose) {
+      return undefined;
+    }
+    if (onClose) {
+      onClose();
+    } else {
+      close();
+    }
+  }, [close, hasClose, onClose]);
+
+  return <BottomSheetHeaderBase {...props} onClose={handleClose} />;
 });

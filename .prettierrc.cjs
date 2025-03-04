@@ -9,7 +9,7 @@ module.exports = {
   printWidth: 80,
   proseWrap: "preserve",
   quoteProps: "as-needed",
-  semi: true,
+  semi: false,
   singleAttributePerLine: false,
   singleQuote: false,
   tabWidth: 2,

@@ -1,6 +1,6 @@
-import { Platform } from "react-native";
-import { IConfig } from "@/config/config.types";
-import { shared } from "./shared";
+import { Platform } from "react-native"
+import { IConfig } from "@/config/config.types"
+import { shared } from "./shared"
 
 export const previewConfig: IConfig = {
   ...shared,
@@ -26,4 +26,4 @@ export const previewConfig: IConfig = {
       decimals: 6,
     },
   },
-} as const;
+} as const
