@@ -1,16 +1,16 @@
-import { memo } from "react";
-import { TextField } from "@/design-system/TextField/TextField";
-import { TextFieldProps } from "@/design-system/TextField/TextField.props";
-import { translate } from "@/i18n";
-import { useAppTheme } from "@/theme/use-app-theme";
+import { memo } from "react"
+import { TextField } from "@/design-system/TextField/TextField"
+import { TextFieldProps } from "@/design-system/TextField/TextField.props"
+import { translate } from "@/i18n"
+import { useAppTheme } from "@/theme/use-app-theme"
 
-type IProfileContactCardEditableNameInputProps = TextFieldProps;
+type IProfileContactCardEditableNameInputProps = TextFieldProps
 
 export const ProfileContactCardEditableNameInput = memo(
   function ProfileContactCardEditableNameInput(
     props: IProfileContactCardEditableNameInputProps,
   ) {
-    const { theme } = useAppTheme();
+    const { theme } = useAppTheme()
 
     return (
       <TextField
@@ -28,8 +28,9 @@ export const ProfileContactCardEditableNameInput = memo(
           paddingVertical: theme.spacing.xs,
         }}
         maxLength={32}
+        autoCorrect={false}
         {...props}
       />
-    );
+    )
   },
-);
+)

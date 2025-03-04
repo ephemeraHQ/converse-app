@@ -10,6 +10,7 @@ import { useLogout } from "@/features/authentication/use-logout"
 import { ProfileContactCard } from "@/features/profiles/components/profile-contact-card/profile-contact-card"
 import { ProfileContactCardEditableAvatar } from "@/features/profiles/components/profile-contact-card/profile-contact-card-editable-avatar"
 import { ProfileContactCardEditableNameInput } from "@/features/profiles/components/profile-contact-card/profile-contact-card-editable-name-input"
+import { ProfileContactCardImportName } from "@/features/profiles/components/profile-contact-card/profile-contact-card-import-name"
 import { ProfileContactCardLayout } from "@/features/profiles/components/profile-contact-card/profile-contact-card-layout"
 import { ProfileSection } from "@/features/profiles/components/profile-section"
 import { ProfileSocialsNames } from "@/features/profiles/components/profile-social-names"
@@ -59,12 +60,20 @@ export function ProfileMe(props: { inboxId: InboxId }) {
       keyboardOffset={insets.bottom}
       keyboardShouldPersistTaps="handled"
     >
-      <ProfileSection>
+      <ProfileSection
+        style={{
+          paddingHorizontal: 0, // Since the ProfileContactCardLayout already has margin for the shadow
+          paddingVertical: 0, // Since the ProfileContactCardLayout already has margin for the shadow
+        }}
+      >
         {/* Show editable avatar and name when in edit mode */}
         {editMode ? (
           <ProfileContactCardLayout
             avatar={<EditableProfileContactCardAvatar inboxId={inboxId} />}
             name={<EditableProfileContactCardNameInput inboxId={inboxId} />}
+            additionalOptions={
+              <EditableProfileContactCardImportName inboxId={inboxId} />
+            }
           />
         ) : (
           <ProfileContactCard inboxId={inboxId} />
@@ -207,6 +216,16 @@ const EditableUsernameInput = memo(function EditableUsernameInput({
     </VStack>
   )
 })
+
+const EditableProfileContactCardImportName = memo(
+  function EditableProfileContactCardImportName({
+    inboxId,
+  }: {
+    inboxId: InboxId
+  }) {
+    return <ProfileContactCardImportName onPress={() => {}} />
+  },
+)
 
 const EditableDescriptionInput = memo(function EditableDescriptionInput({
   inboxId,

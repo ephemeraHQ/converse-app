@@ -17,6 +17,7 @@ import { useHeader } from "@/navigation/use-header"
 import { $globalStyles } from "@/theme/styles"
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme"
 import { captureErrorWithToast } from "@/utils/capture-error"
+import { ensureError } from "@/utils/error"
 
 export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
   const { themed, theme } = useAppTheme()
@@ -43,20 +44,24 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
         inboxId,
       })
     } catch (error) {
+      const typedError = ensureError(error)
       // Don't show toast for passkey cancellation
       if (
-        error instanceof Error &&
-        (error.message.includes(
+        typedError.message.includes(
           "AuthenticationServices.AuthorizationError error 1001",
         ) ||
-          error.message.includes("UserCancelled"))
+        typedError.message.includes("UserCancelled")
       ) {
         return
+      } else if (typedError.message.includes("Biometrics must be enabled")) {
+        captureErrorWithToast(error, {
+          message: "Biometrics must be enabled",
+        })
+      } else {
+        captureErrorWithToast(error, {
+          message: typedError.message || "Error signing up with passkey",
+        })
       }
-
-      captureErrorWithToast(error, {
-        message: "Error signing up with passkey",
-      })
     }
   }, [signup, logout])
 
@@ -68,20 +73,20 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
         inboxId,
       })
     } catch (error) {
+      const typedError = ensureError(error)
       // Don't show toast for passkey cancellation
       if (
-        error instanceof Error &&
-        (error.message.includes(
+        typedError.message.includes(
           "AuthenticationServices.AuthorizationError error 1001",
         ) ||
-          error.message.includes("UserCancelled"))
+        typedError.message.includes("UserCancelled")
       ) {
         return
+      } else {
+        captureErrorWithToast(error, {
+          message: typedError.message || "Error signing in with passkey",
+        })
       }
-
-      captureErrorWithToast(error, {
-        message: "Error signing in with passkey",
-      })
     }
   }, [login])
 

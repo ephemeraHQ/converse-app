@@ -1,57 +1,64 @@
-import { InboxId, Client as XmtpClient } from "@xmtp/react-native-sdk";
-import { getRandomBytesAsync } from "expo-crypto";
-import { config } from "@/config";
-import { XMTP_MAX_MS_UNTIL_LOG_ERROR } from "@/features/xmtp/utils/xmtp-logs";
-import { captureError } from "@/utils/capture-error";
-import { XMTPError } from "@/utils/error";
-import { getSecureItemAsync, setSecureItemAsync } from "@/utils/keychain";
-import { xmtpLogger } from "@/utils/logger";
+import { InboxId, Client as XmtpClient } from "@xmtp/react-native-sdk"
+import { getRandomBytesAsync } from "expo-crypto"
+import { config } from "@/config"
+import { XMTP_MAX_MS_UNTIL_LOG_ERROR } from "@/features/xmtp/utils/xmtp-logs"
+import { captureError } from "@/utils/capture-error"
+import { XMTPError } from "@/utils/error"
+import { getSecureItemAsync, setSecureItemAsync } from "@/utils/keychain"
+import { xmtpLogger } from "@/utils/logger"
 import {
   ISupportedXmtpCodecs,
   supportedXmtpCodecs,
-} from "../xmtp-codecs/xmtp-codecs";
-import { IXmtpClient, IXmtpSigner } from "../xmtp.types";
+} from "../xmtp-codecs/xmtp-codecs"
+import { IXmtpClient, IXmtpSigner } from "../xmtp.types"
 
 export async function createXmtpClientInstance(args: {
-  inboxSigner: IXmtpSigner;
+  inboxSigner: IXmtpSigner
 }): Promise<IXmtpClient> {
-  const { inboxSigner } = args;
-  const startTime = Date.now();
+  const { inboxSigner } = args
+  const startTime = Date.now()
 
-  xmtpLogger.debug(`Creating new XMTP client`);
+  xmtpLogger.debug(`Creating new XMTP client`)
 
   try {
+    const appNameNormalized = config.appName.replace(/\s+/g, "_")
+    const appVersionNormalized = config.appVersion.replace(/\s+/g, "_")
+    const appVersion = `${appNameNormalized}/${appVersionNormalized}`
+
     const client = await XmtpClient.create<ISupportedXmtpCodecs>(inboxSigner, {
-      appVersion: `${config.appName}/${config.appVersion}`,
+      appVersion: appVersion,
       env: config.xmtpEnv,
       dbEncryptionKey: await getDbEncryptionKey(),
       codecs: supportedXmtpCodecs,
-    });
+    })
 
-    const duration = Date.now() - startTime;
+    const duration = Date.now() - startTime
     if (duration > XMTP_MAX_MS_UNTIL_LOG_ERROR) {
       captureError(
         new XMTPError({
           error: new Error(`Creating XMTP client took ${duration}ms`),
         }),
-      );
+      )
     }
 
-    return client;
+    return client
   } catch (error) {
     throw new XMTPError({
       error,
       additionalMessage: "Failed to create XMTP client instance",
-    });
+    })
   }
 }
 
 export async function buildXmtpClientInstance(args: {
-  ethereumAddress: string;
-  inboxId?: InboxId;
+  ethereumAddress: string
+  inboxId?: InboxId
 }): Promise<IXmtpClient> {
-  const { ethereumAddress, inboxId } = args;
-  const startTime = Date.now();
+  const { ethereumAddress, inboxId } = args
+
+  xmtpLogger.debug(`Building XMTP client for address: ${ethereumAddress}`)
+
+  const startTime = Date.now()
 
   try {
     const client = await XmtpClient.build<ISupportedXmtpCodecs>(
@@ -62,9 +69,9 @@ export async function buildXmtpClientInstance(args: {
         dbEncryptionKey: await getDbEncryptionKey(),
       },
       inboxId,
-    );
+    )
 
-    const duration = Date.now() - startTime;
+    const duration = Date.now() - startTime
     if (duration > XMTP_MAX_MS_UNTIL_LOG_ERROR) {
       captureError(
         new XMTPError({
@@ -72,40 +79,40 @@ export async function buildXmtpClientInstance(args: {
             `Building XMTP client took ${duration}ms for address: ${ethereumAddress}`,
           ),
         }),
-      );
+      )
     }
 
-    return client;
+    return client
   } catch (error) {
     throw new XMTPError({
       error,
       additionalMessage: `Failed to build XMTP client for address: ${ethereumAddress}`,
-    });
+    })
   }
 }
 
 export async function getDbEncryptionKey() {
-  const DB_ENCRYPTION_KEY = "LIBXMTP_DB_ENCRYPTION_KEY";
+  const DB_ENCRYPTION_KEY = "LIBXMTP_DB_ENCRYPTION_KEY"
 
-  xmtpLogger.debug(`Getting DB encryption key`);
+  xmtpLogger.debug(`Getting DB encryption key`)
 
   try {
-    const existingKey = await getSecureItemAsync(DB_ENCRYPTION_KEY);
+    const existingKey = await getSecureItemAsync(DB_ENCRYPTION_KEY)
 
     if (existingKey) {
-      xmtpLogger.debug(`Found existing DB encryption key`);
-      return new Uint8Array(Buffer.from(existingKey, "base64"));
+      xmtpLogger.debug(`Found existing DB encryption key`)
+      return new Uint8Array(Buffer.from(existingKey, "base64"))
     }
 
-    xmtpLogger.debug(`Creating new DB encryption key`);
-    const newKey = Buffer.from(await getRandomBytesAsync(32));
-    await setSecureItemAsync(DB_ENCRYPTION_KEY, newKey.toString("base64"));
+    xmtpLogger.debug(`Creating new DB encryption key`)
+    const newKey = Buffer.from(await getRandomBytesAsync(32))
+    await setSecureItemAsync(DB_ENCRYPTION_KEY, newKey.toString("base64"))
 
-    return new Uint8Array(newKey);
+    return new Uint8Array(newKey)
   } catch (error) {
     throw new XMTPError({
       error,
       additionalMessage: "Failed to get or create DB encryption key",
-    });
+    })
   }
 }

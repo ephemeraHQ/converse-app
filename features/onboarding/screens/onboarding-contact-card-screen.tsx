@@ -13,7 +13,6 @@ import { z } from "zod"
 import { create } from "zustand"
 import { Screen } from "@/components/screen/screen"
 import { showSnackbar } from "@/components/snackbar/snackbar.service"
-import { Pressable } from "@/design-system/Pressable"
 import { Text } from "@/design-system/Text"
 import { AnimatedVStack, VStack } from "@/design-system/VStack"
 import { useAuthStore } from "@/features/authentication/authentication.store"
@@ -25,10 +24,10 @@ import { OnboardingTitle } from "@/features/onboarding/components/onboarding-tit
 import { formatRandomUsername } from "@/features/onboarding/utils/format-random-user-name"
 import { ProfileContactCardEditableAvatar } from "@/features/profiles/components/profile-contact-card/profile-contact-card-editable-avatar"
 import { ProfileContactCardEditableNameInput } from "@/features/profiles/components/profile-contact-card/profile-contact-card-editable-name-input"
+import { ProfileContactCardImportName } from "@/features/profiles/components/profile-contact-card/profile-contact-card-import-name"
 import { ProfileContactCardLayout } from "@/features/profiles/components/profile-contact-card/profile-contact-card-layout"
 import { useProfileContactCardStyles } from "@/features/profiles/components/profile-contact-card/use-profile-contact-card.styles"
 import { profileValidationSchema } from "@/features/profiles/schemas/profile-validation.schema"
-import { validateCustomProfileDisplayName } from "@/features/profiles/utils/validate-profile-name"
 import { useAddPfp } from "@/hooks/use-add-pfp"
 import { useHeader } from "@/navigation/use-header"
 import { useRouter } from "@/navigation/use-navigation"
@@ -342,13 +341,13 @@ const ProfileContactCardNameInput = memo(
     const [nameValidationError, setNameValidationError] = useState<string>()
 
     const handleDisplayNameChange = useCallback((text: string) => {
-      const { isValid, error } = validateCustomProfileDisplayName(text)
+      // const { isValid, error } = validateCustomProfileDisplayName(text)
 
-      if (!isValid) {
-        setNameValidationError(error)
-        useOnboardingContactCardStore.getState().actions.setName("")
-        return
-      }
+      // if (!isValid) {
+      //   setNameValidationError(error)
+      //   useOnboardingContactCardStore.getState().actions.setName("")
+      //   return
+      // }
 
       setNameValidationError(undefined)
       useOnboardingContactCardStore.getState().actions.setName(text)
@@ -396,26 +395,14 @@ const ProfileContactCardAvatar = memo(function ProfileContactCardAvatar() {
 
 const ProfileContactCardAdditionalOptions = memo(
   function ProfileContactCardAdditionalOptions() {
-    const { theme } = useAppTheme()
-
     const router = useRouter()
 
     return (
-      <Pressable
-        hitSlop={theme.spacing.md}
-        style={{
-          paddingHorizontal: theme.spacing.xs,
-          paddingVertical: theme.spacing.xxs,
-        }}
-        // onPress={openConnectWalletBottomSheet}
+      <ProfileContactCardImportName
         onPress={() => {
           router.navigate("OnboardingConnectWallet")
         }}
-      >
-        <Text preset="small" color="secondary" inverted>
-          Import
-        </Text>
-      </Pressable>
+      />
     )
   },
 )
