@@ -400,7 +400,7 @@ const ProfileContactCardAdditionalOptions = memo(
     return (
       <ProfileContactCardImportName
         onPress={() => {
-          router.navigate("OnboardingConnectWallet")
+          router.navigate("OnboardingCreateContactCardImportName")
         }}
       />
     )
