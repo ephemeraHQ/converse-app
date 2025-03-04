@@ -1,11 +1,11 @@
 import { memo } from "react"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
-import { WalletChooseName } from "@/features/wallets/connect-wallet/components/wallet-choose-name.component"
+import { ConnectWalletChooseName } from "@/features/wallets/connect-wallet/components/connect-wallet-choose-name"
 import { IWallet } from "@/features/wallets/connect-wallet/connect-wallet.types"
 import { useXmtpInboxIdFromEthAddressQuery } from "@/features/xmtp/xmtp-inbox-id/xmtp-inbox-id-from-eth-address.query"
 import { ConnectWalletLoadingContent } from "../connect-wallet.ui"
-import { WalletLinkInbox } from "./wallet-link-inbox.component"
-import { WalletRotateInbox } from "./wallet-rotate-inbox.component"
+import { ConnectWalletLinkToInbox } from "./connect-wallet-link-to-inbox"
+import { ConnectWalletRotateInbox } from "./connect-wallet-rotate-inbox"
 
 type IWalletConnectedProps = {
   activeWallet: IWallet
@@ -36,14 +36,14 @@ export const WalletConnected = memo(function WalletConnected(
 
   // If the wallet is not linked to an inbox, link it to the current inbox
   if (!activeWalletInboxId) {
-    return <WalletLinkInbox activeWallet={activeWallet} />
+    return <ConnectWalletLinkToInbox activeWallet={activeWallet} />
   }
 
   // If the wallet is already linked to the current inbox, show names
   if (activeWalletInboxId === currentSenderInboxId) {
-    return <WalletChooseName ethAddress={walletAddress} />
+    return <ConnectWalletChooseName ethAddress={walletAddress} />
   }
 
   // If the wallet is already linked to an inbox, rotate it to the current inbox
-  return <WalletRotateInbox activeWallet={activeWallet} />
+  return <ConnectWalletRotateInbox activeWallet={activeWallet} />
 })

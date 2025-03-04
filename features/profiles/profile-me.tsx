@@ -223,7 +223,15 @@ const EditableProfileContactCardImportName = memo(
   }: {
     inboxId: InboxId
   }) {
-    return <ProfileContactCardImportName onPress={() => {}} />
+    const router = useRouter()
+
+    return (
+      <ProfileContactCardImportName
+        onPress={() => {
+          router.navigate("ProfileImportName")
+        }}
+      />
+    )
   },
 )
 

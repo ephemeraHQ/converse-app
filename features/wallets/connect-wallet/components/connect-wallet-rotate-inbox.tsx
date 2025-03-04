@@ -1,10 +1,7 @@
 import { useSmartWallets } from "@privy-io/expo/smart-wallets"
 import { memo, useCallback } from "react"
 import { Text } from "@/design-system/Text"
-import {
-  getSafeCurrentSender,
-  useMultiInboxStore,
-} from "@/features/authentication/multi-inbox.store"
+import { useMultiInboxStore } from "@/features/authentication/multi-inbox.store"
 import { createXmtpSignerFromPrivySwc } from "@/features/onboarding/utils/create-xmtp-signer-from-privy-swc"
 import { IWallet } from "@/features/wallets/connect-wallet/connect-wallet.types"
 import { createXmtpClient } from "@/features/xmtp/xmtp-client/xmtp-client.service"
@@ -23,12 +20,12 @@ import {
   ConnectWalletTextSection,
 } from "../connect-wallet.ui"
 
-type IWalletRotateInboxProps = {
+type IConnectWalletRotateInboxProps = {
   activeWallet: IWallet
 }
 
-export const WalletRotateInbox = memo(function WalletRotateInbox(
-  props: IWalletRotateInboxProps,
+export const ConnectWalletRotateInbox = memo(function ConnectWalletRotateInbox(
+  props: IConnectWalletRotateInboxProps,
 ) {
   const { activeWallet } = props
 

@@ -7,18 +7,22 @@ import { Screen } from "@/components/screen/screen"
 import { Snackbars } from "@/components/snackbar/snackbars"
 import { VStack } from "@/design-system/VStack"
 import { ConnectWalletChooseApp } from "@/features/wallets/connect-wallet/components/connect-wallet-choose-app"
+import { ConnectWalletContextProvider } from "@/features/wallets/connect-wallet/connect-wallet.context"
 import { useRouter } from "@/navigation/use-navigation"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { captureError } from "@/utils/capture-error"
+import { debugBorder } from "@/utils/debug-style"
 import { GenericError } from "@/utils/error"
-import { ConnectWalletBottomSheetOnboarding } from "./connect-wallet-onboarding"
+import { ConnectWalletOnboarding } from "./components/connect-wallet-onboarding"
 import {
   disconnectActiveWallet,
   resetConnectWalletStore,
 } from "./connect-wallet.service"
 import { useConnectWalletStore } from "./connect-wallet.store"
 
-export function ConnectWalletBottomSheetScreen() {
+export function ConnectWallet(props: { onSelectName: (name: string) => void }) {
+  const { onSelectName } = props
+
   const { theme } = useAppTheme()
   const insets = useSafeAreaInsets()
   const router = useRouter()
@@ -30,7 +34,7 @@ export function ConnectWalletBottomSheetScreen() {
   // Set up the pages for the dynamic pages component
   const pages = useMemo(
     () => [
-      <ConnectWalletBottomSheetOnboarding key="onboarding" />,
+      <ConnectWalletOnboarding key="onboarding" />,
       <ConnectWalletChooseApp key="choose-wallet" />,
     ],
     [],
@@ -69,7 +73,7 @@ export function ConnectWalletBottomSheetScreen() {
   }, [])
 
   return (
-    <>
+    <ConnectWalletContextProvider onSelectName={onSelectName}>
       <Screen backgroundColor={theme.colors.background.raised}>
         <VStack onLayout={handleLayout}>
           <DynamicPages pages={pages} />
@@ -77,7 +81,7 @@ export function ConnectWalletBottomSheetScreen() {
       </Screen>
       {/* Not sure why but if not here, they appear behind the screen? (formSheet problem?) */}
       <Snackbars />
-    </>
+    </ConnectWalletContextProvider>
   )
 }
 

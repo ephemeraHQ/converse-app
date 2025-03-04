@@ -1,11 +1,10 @@
 import { memo } from "react"
 import { Avatar } from "@/components/avatar"
-import { useOnboardingContactCardStore } from "@/features/onboarding/screens/onboarding-contact-card-screen"
 import { useSocialProfilesForAddressQuery } from "@/features/social-profiles/social-profiles.query"
 import { supportedSocialProfiles } from "@/features/social-profiles/supported-social-profiles"
+import { useConnectWalletContext } from "@/features/wallets/connect-wallet/connect-wallet.context"
 import { disconnectActiveWallet } from "@/features/wallets/connect-wallet/connect-wallet.service"
 import { useRouter } from "@/navigation/use-navigation"
-import { useAppTheme } from "@/theme/use-app-theme"
 import { captureError } from "@/utils/capture-error"
 import { shortAddress } from "@/utils/strings/shortAddress"
 import {
@@ -20,16 +19,18 @@ import {
   ConnectWalletTextSection,
 } from "../connect-wallet.ui"
 
-type IWalletChooseNameProps = {
+type IConnectWalletChooseNameProps = {
   ethAddress: string
 }
 
-export const WalletChooseName = memo(function WalletChooseName(
-  props: IWalletChooseNameProps,
+export const ConnectWalletChooseName = memo(function ConnectWalletChooseName(
+  props: IConnectWalletChooseNameProps,
 ) {
-  const router = useRouter()
-  const { theme } = useAppTheme()
   const { ethAddress } = props
+
+  const router = useRouter()
+
+  const { onSelectName } = useConnectWalletContext()
 
   const { data: socialProfiles, isLoading: isLoadingSocialProfiles } =
     useSocialProfilesForAddressQuery({
@@ -100,9 +101,7 @@ export const WalletChooseName = memo(function WalletChooseName(
             <Avatar uri={socialProfile.avatar} name={socialProfile.name} />
           }
           onPress={() => {
-            useOnboardingContactCardStore
-              .getState()
-              .actions.setName(socialProfile.name)
+            onSelectName(socialProfile.name)
             router.goBack()
           }}
         />

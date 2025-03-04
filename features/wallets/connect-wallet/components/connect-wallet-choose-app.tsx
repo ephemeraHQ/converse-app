@@ -21,7 +21,7 @@ import {
   ConnectWalletPrimaryButton,
   ConnectWalletTextSection,
 } from "../connect-wallet.ui"
-import { WalletConnected } from "./wallet-connected.component"
+import { WalletConnected } from "./connect-wallet-connected"
 
 export const ConnectWalletChooseApp = memo(function ConnectWalletChooseApp() {
   const router = useRouter()

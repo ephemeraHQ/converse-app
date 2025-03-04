@@ -18,12 +18,12 @@ import {
   ConnectWalletTextSection,
 } from "../connect-wallet.ui"
 
-type IWalletLinkInboxProps = {
+type IConnectWalletLinkToInboxProps = {
   activeWallet: IWallet
 }
 
-export const WalletLinkInbox = memo(function WalletLinkInbox(
-  props: IWalletLinkInboxProps,
+export const ConnectWalletLinkToInbox = memo(function ConnectWalletLinkToInbox(
+  props: IConnectWalletLinkToInboxProps,
 ) {
   const { activeWallet } = props
   const { theme } = useAppTheme()

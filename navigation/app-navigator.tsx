@@ -13,13 +13,14 @@ import { useAuthStore } from "@/features/authentication/authentication.store"
 import { BlockedConversationsScreen } from "@/features/blocked-conversations/blocked-conversations.screen"
 import { ConversationListScreen } from "@/features/conversation-list/conversation-list.screen"
 import { ConversationRequestsListNav } from "@/features/conversation-requests-list/conversation-requests-list.nav"
+import { OnboardingContactCardImportNameScreen } from "@/features/onboarding/screens/onboarding-contact-card-import-name.screen"
 import { OnboardingContactCardScreen } from "@/features/onboarding/screens/onboarding-contact-card-screen"
 import { OnboardingWelcomeScreen } from "@/features/onboarding/screens/onboarding-welcome-screen"
+import { ProfileImportNameScreen } from "@/features/profiles/profile-import-name.screen"
 import {
   ProfileNav,
   ProfileScreenConfig,
 } from "@/features/profiles/profile.nav"
-import { ConnectWalletBottomSheetScreen } from "@/features/wallets/connect-wallet/connect-wallet.screen"
 import { NavigationParamList } from "@/navigation/navigation.types"
 import { navigationRef } from "@/navigation/navigation.utils"
 import { WebviewPreviewNav } from "@/screens/WebviewPreviewNav"
@@ -132,10 +133,11 @@ const AppStacks = memo(function AppStacks() {
             options={{ animation: "fade" }}
           />
           <AppNativeStack.Screen
-            name="OnboardingConnectWallet"
-            component={ConnectWalletBottomSheetScreen}
+            name="OnboardingCreateContactCardImportName"
+            component={OnboardingContactCardImportNameScreen}
             options={{
               presentation: "formSheet",
+              sheetAllowedDetents: [0.5],
               // sheetCornerRadius: theme.borderRadius.sm, // Not sure why but adding this breaks the animation between different height transitions
               contentStyle: {
                 backgroundColor: theme.colors.background.surface,
@@ -166,6 +168,18 @@ const AppStacks = memo(function AppStacks() {
           {ShareProfileNav()}
           {WebviewPreviewNav()}
           {ProfileNav()}
+          <AppNativeStack.Screen
+            name="ProfileImportName"
+            component={ProfileImportNameScreen}
+            options={{
+              presentation: "formSheet",
+              sheetAllowedDetents: [0.5],
+              // sheetCornerRadius: theme.borderRadius.sm, // Not sure why but adding this breaks the animation between different height transitions
+              contentStyle: {
+                backgroundColor: theme.colors.background.surface,
+              },
+            }}
+          />
           <AppNativeStack.Screen
             name="AppSettings"
             component={AppSettingsScreen}
