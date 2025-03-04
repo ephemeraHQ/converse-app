@@ -210,7 +210,7 @@ export const Snackbar = memo(
               >
                 <Text
                   preset="small"
-                  numberOfLines={snackbar.isMultiLine ? 2 : 1}
+                  numberOfLines={2}
                   {...(snackbar.type === "error" && { color: "caution" })}
                 >
                   {snackbar.message}

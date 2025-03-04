@@ -1,21 +1,23 @@
-import { translate } from "@i18n";
-import { useMutation } from "@tanstack/react-query";
-import { executeAfterKeyboardClosed } from "@utils/keyboard";
+import { translate } from "@i18n"
+import { useMutation } from "@tanstack/react-query"
+import { executeAfterKeyboardClosed } from "@utils/keyboard"
 import {
   compressAndResizeImage,
   pickMediaFromLibrary,
   takePictureFromCamera,
-} from "@utils/media";
-import { ImagePickerAsset, ImagePickerOptions } from "expo-image-picker";
-import { useCallback, useState } from "react";
-import { showActionSheet } from "@/components/action-sheet";
+} from "@utils/media"
+import { ImagePickerAsset, ImagePickerOptions } from "expo-image-picker"
+import { useCallback, useState } from "react"
+import { showActionSheet } from "@/components/action-sheet"
 import {
   getPresignedUploadUrl,
   uploadFileWithPresignedUrl,
-} from "@/features/uploads/upload.api";
-import { logger } from "@/utils/logger";
+} from "@/features/uploads/upload.api"
+import { captureError } from "@/utils/capture-error"
+import { prefetchImageUrl } from "@/utils/image"
+import { logger } from "@/utils/logger"
 
-type ImageSource = "camera" | "library";
+type ImageSource = "camera" | "library"
 
 /**
  * Uploads an image asset to the server
@@ -26,39 +28,41 @@ async function uploadImage(imageAsset: ImagePickerAsset): Promise<string> {
     originalUri: imageAsset.uri,
     originalWidth: imageAsset.width,
     originalHeight: imageAsset.height,
-  });
+  })
 
   // Compress and resize the image
-  const resizedImage = await compressAndResizeImage(imageAsset.uri, true);
+  const resizedImage = await compressAndResizeImage(imageAsset.uri, true)
 
   logger.debug("[useAddPfp] Image compressed successfully", {
     compressedUri: resizedImage.uri,
     width: resizedImage.width,
     height: resizedImage.height,
-  });
+  })
 
   // Get presigned URL for upload
-  logger.debug("[useAddPfp] Getting presigned URL");
-  const { url: presignedUrl } = await getPresignedUploadUrl("image/jpeg");
+  logger.debug("[useAddPfp] Getting presigned URL")
+  const { url: presignedUrl } = await getPresignedUploadUrl("image/jpeg")
 
   // Upload the image
   const publicUrl = await uploadFileWithPresignedUrl(
     presignedUrl,
     resizedImage.uri,
     "image/jpeg",
-  );
+  )
+
+  prefetchImageUrl(publicUrl).catch(captureError)
 
   logger.debug("[useAddPfp] Profile picture upload complete", {
     publicUrl,
     originalSize: { width: imageAsset.width, height: imageAsset.height },
     finalSize: { width: resizedImage.width, height: resizedImage.height },
-  });
+  })
 
-  return publicUrl;
+  return publicUrl
 }
 
 export function useAddPfp() {
-  const [asset, setAsset] = useState<ImagePickerAsset>();
+  const [asset, setAsset] = useState<ImagePickerAsset>()
 
   const {
     mutateAsync: uploadImageAsync,
@@ -67,7 +71,7 @@ export function useAddPfp() {
     error: errorUploadingImage,
   } = useMutation({
     mutationFn: uploadImage,
-  });
+  })
 
   /**
    * Shows an action sheet and lets the user pick a profile picture
@@ -87,58 +91,58 @@ export function useAddPfp() {
           },
           callback: async (selectedIndex?: number) => {
             try {
-              let source: ImageSource | undefined;
+              let source: ImageSource | undefined
 
               switch (selectedIndex) {
                 case 0:
-                  source = "camera";
-                  break;
+                  source = "camera"
+                  break
                 case 1:
-                  source = "library";
-                  break;
+                  source = "library"
+                  break
                 default:
                   // User canceled
-                  return;
+                  return
               }
 
               if (!source) {
-                return;
+                return
               }
 
               const options: ImagePickerOptions = {
                 allowsEditing: true,
                 aspect: [1, 1],
-              };
+              }
 
               // Get image from selected source
               const pickedAsset =
                 source === "camera"
                   ? await takePictureFromCamera(options)
-                  : await pickMediaFromLibrary(options);
+                  : await pickMediaFromLibrary(options)
 
               if (!pickedAsset) {
-                reject(new Error("No image selected"));
-                return;
+                reject(new Error("No image selected"))
+                return
               }
 
               // Update state and upload
-              setAsset(pickedAsset);
-              const uploadedUrl = await uploadImageAsync(pickedAsset);
-              resolve(uploadedUrl);
+              setAsset(pickedAsset)
+              const uploadedUrl = await uploadImageAsync(pickedAsset)
+              resolve(uploadedUrl)
             } catch (error) {
-              reject(error);
+              reject(error)
             }
           },
-        });
-      };
+        })
+      }
 
-      executeAfterKeyboardClosed(showOptions);
-    });
-  }, [uploadImageAsync]);
+      executeAfterKeyboardClosed(showOptions)
+    })
+  }, [uploadImageAsync])
 
   const reset = () => {
-    setAsset(undefined);
-  };
+    setAsset(undefined)
+  }
 
   return {
     addPFP,
@@ -147,5 +151,5 @@ export function useAddPfp() {
     reset,
     uploadedImageUrl,
     errorUploadingImage,
-  };
+  }
 }

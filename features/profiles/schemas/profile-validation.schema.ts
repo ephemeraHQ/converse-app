@@ -4,11 +4,10 @@ export const profileValidationSchema = z.object({
   name: z
     .string()
     .min(3, { message: "Name must be at least 3 characters long" })
-    .max(50, { message: "Name cannot exceed 50 characters" }),
-  // Don't put here because we need to allow people to import their onchain names
-  // .regex(/^[a-zA-Z0-9\s]+$/, {
-  //   message: "Name can only contain letters, numbers and spaces",
-  // }),
+    .max(50, { message: "Name cannot exceed 50 characters" })
+    .regex(/^[a-zA-Z0-9\s.]+$/, {
+      message: "Name can only contain letters, numbers, spaces", // "and dots". Don't put in error because it's only for import names we just put in regex so it doesn't give errors
+    }),
   username: z
     .string()
     .min(3, { message: "Username must be at least 3 characters long" })

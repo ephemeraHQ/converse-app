@@ -9,8 +9,6 @@ import {
   useAnimatedStyle,
   useSharedValue,
 } from "react-native-reanimated"
-import { z } from "zod"
-import { create } from "zustand"
 import { Screen } from "@/components/screen/screen"
 import { showSnackbar } from "@/components/snackbar/snackbar.service"
 import { Text } from "@/design-system/Text"
@@ -21,83 +19,24 @@ import { useCreateUser } from "@/features/current-user/use-create-user"
 import { OnboardingFooter } from "@/features/onboarding/components/onboarding-footer"
 import { OnboardingSubtitle } from "@/features/onboarding/components/onboarding-subtitle"
 import { OnboardingTitle } from "@/features/onboarding/components/onboarding-title"
-import { formatRandomUsername } from "@/features/onboarding/utils/format-random-user-name"
 import { ProfileContactCardEditableAvatar } from "@/features/profiles/components/profile-contact-card/profile-contact-card-editable-avatar"
 import { ProfileContactCardEditableNameInput } from "@/features/profiles/components/profile-contact-card/profile-contact-card-editable-name-input"
 import { ProfileContactCardImportName } from "@/features/profiles/components/profile-contact-card/profile-contact-card-import-name"
 import { ProfileContactCardLayout } from "@/features/profiles/components/profile-contact-card/profile-contact-card-layout"
 import { useProfileContactCardStyles } from "@/features/profiles/components/profile-contact-card/use-profile-contact-card.styles"
-import { profileValidationSchema } from "@/features/profiles/schemas/profile-validation.schema"
 import { useAddPfp } from "@/hooks/use-add-pfp"
 import { useHeader } from "@/navigation/use-header"
 import { useRouter } from "@/navigation/use-navigation"
+import { $globalStyles } from "@/theme/styles"
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme"
-import { ValidationError } from "@/utils/api/api.error"
 import { captureErrorWithToast } from "@/utils/capture-error"
-
-// Request validation schema
-const createUserRequestSchema = z.object({
-  inboxId: z.string(),
-  privyUserId: z.string(),
-  smartContractWalletAddress: z.string(),
-  profile: profileValidationSchema.pick({
-    name: true,
-    username: true,
-    avatar: true,
-  }),
-})
-
-type IOnboardingContactCardStore = {
-  name: string
-  username: string
-  nameValidationError: string
-  avatar: string
-  isAvatarUploading: boolean
-  actions: {
-    setName: (name: string) => void
-    setUsername: (username: string) => void
-    setNameValidationError: (nameValidationError: string) => void
-    setAvatar: (avatar: string) => void
-    setIsAvatarUploading: (isUploading: boolean) => void
-    reset: () => void
-  }
-}
-
-export const useOnboardingContactCardStore =
-  create<IOnboardingContactCardStore>((set) => ({
-    name: "",
-    username: "",
-    nameValidationError: "",
-    avatar: "",
-    isAvatarUploading: false,
-    actions: {
-      setName: (name: string) =>
-        set((state) => ({
-          name,
-          // For now, we're generating the username from the name
-          username: formatRandomUsername({ displayName: name }),
-        })),
-      setUsername: (username: string) => set({ username }),
-      setNameValidationError: (nameValidationError: string) =>
-        set({ nameValidationError }),
-      setAvatar: (avatar: string) => set({ avatar }),
-      setIsAvatarUploading: (isAvatarUploading: boolean) =>
-        set({ isAvatarUploading }),
-      reset: () =>
-        set({
-          name: "",
-          username: "",
-          nameValidationError: "",
-          avatar: "",
-          isAvatarUploading: false,
-        }),
-    },
-  }))
+import { getFirstZodValidationError, isZodValidationError } from "@/utils/zod"
+import { useOnboardingContactCardStore } from "./onboarding-contact-card.store"
 
 export function OnboardingContactCardScreen() {
   const { themed, theme } = useAppTheme()
 
-  const { mutateAsync: createUserAsync, isPending } = useCreateUser()
+  const { createUserAsync, isCreatingUser } = useCreateUser()
 
   const { user: privyUser } = usePrivy()
 
@@ -108,19 +47,6 @@ export function OnboardingContactCardScreen() {
       const currentSender = useMultiInboxStore.getState().currentSender
       const store = useOnboardingContactCardStore.getState()
 
-      // Validate profile data first using profileValidationSchema
-      const profileValidation = profileValidationSchema.safeParse({
-        name: store.name,
-        username: store.username,
-        ...(store.avatar && { avatar: store.avatar }),
-      })
-
-      if (!profileValidation.success) {
-        const errorMessage =
-          profileValidation.error.errors[0]?.message || "Invalid profile data"
-        throw new ValidationError({ message: errorMessage })
-      }
-
       if (!currentSender) {
         throw new Error("No current sender found, please logout")
       }
@@ -129,8 +55,7 @@ export function OnboardingContactCardScreen() {
         throw new Error("No Privy user found, please logout")
       }
 
-      // Create and validate the request payload
-      const payload = {
+      await createUserAsync({
         inboxId: currentSender.inboxId,
         privyUserId: privyUser.id,
         smartContractWalletAddress: currentSender.ethereumAddress,
@@ -139,16 +64,8 @@ export function OnboardingContactCardScreen() {
           username: store.username,
           ...(store.avatar && { avatar: store.avatar }),
         },
-      }
+      })
 
-      // Validate the payload against our schema
-      const validationResult = createUserRequestSchema.safeParse(payload)
-
-      if (!validationResult.success) {
-        throw new Error("Invalid request data. Please check your input.")
-      }
-
-      await createUserAsync(validationResult.data)
       useAuthStore.getState().actions.setStatus("signedIn")
 
       // TODO: Notification permissions screen
@@ -160,9 +77,9 @@ export function OnboardingContactCardScreen() {
       //   }
       // }
     } catch (error) {
-      if (error instanceof ValidationError) {
+      if (isZodValidationError(error)) {
         showSnackbar({
-          message: error.message,
+          message: getFirstZodValidationError(error),
           type: "error",
         })
       } else if (isAxiosError(error)) {
@@ -248,7 +165,7 @@ export function OnboardingContactCardScreen() {
   return (
     <>
       <Screen
-        contentContainerStyle={$screenContainer}
+        contentContainerStyle={$globalStyles.flex1}
         safeAreaEdges={["bottom"]}
       >
         <AnimatedVStack
@@ -316,16 +233,12 @@ export function OnboardingContactCardScreen() {
             text={"Continue"}
             iconName="chevron.right"
             onPress={handleRealContinue}
-            isLoading={isPending || isAvatarUploading}
+            isLoading={isCreatingUser || isAvatarUploading}
           />
         </VStack>
       </Screen>
     </>
   )
-}
-
-const $screenContainer: ViewStyle = {
-  flex: 1,
 }
 
 const $contentContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
@@ -340,18 +253,22 @@ const ProfileContactCardNameInput = memo(
 
     const [nameValidationError, setNameValidationError] = useState<string>()
 
-    const handleDisplayNameChange = useCallback((text: string) => {
-      // const { isValid, error } = validateCustomProfileDisplayName(text)
+    const handleDisplayNameChange = useCallback(
+      (args: { text: string; error?: string }) => {
+        const { text, error } = args
+        const { actions } = useOnboardingContactCardStore.getState()
 
-      // if (!isValid) {
-      //   setNameValidationError(error)
-      //   useOnboardingContactCardStore.getState().actions.setName("")
-      //   return
-      // }
+        if (error) {
+          setNameValidationError(error)
+          actions.setName("")
+          return
+        }
 
-      setNameValidationError(undefined)
-      useOnboardingContactCardStore.getState().actions.setName(text)
-    }, [])
+        setNameValidationError(undefined)
+        actions.setName(text)
+      },
+      [],
+    )
 
     return (
       <ProfileContactCardEditableNameInput

@@ -20,7 +20,6 @@ import {
   useProfileMeStoreValue,
 } from "@/features/profiles/profile-me.store"
 import { useProfileQuery } from "@/features/profiles/profiles.query"
-import { validateCustomProfileDisplayName } from "@/features/profiles/utils/validate-profile-name"
 import { useSocialProfilesForAddressQuery } from "@/features/social-profiles/social-profiles.query"
 import { useAddPfp } from "@/hooks/use-add-pfp"
 import { translate } from "@/i18n"
@@ -162,16 +161,13 @@ const EditableProfileContactCardNameInput = memo(
     const [nameValidationError, setNameValidationError] = useState<string>()
 
     const handleDisplayNameChange = useCallback(
-      (text: string) => {
-        const { isValid, error } = validateCustomProfileDisplayName(text)
-
-        if (!isValid) {
-          setNameValidationError(error)
+      (args: { text: string; error?: string }) => {
+        if (args.error) {
+          setNameValidationError(args.error)
         } else {
           setNameValidationError(undefined)
         }
-
-        profileMeStore.getState().actions.setNameTextValue(text)
+        profileMeStore.getState().actions.setNameTextValue(args.text)
       },
       [profileMeStore],
     )

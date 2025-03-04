@@ -1,16 +1,35 @@
-import { memo } from "react"
+import { memo, useCallback } from "react"
 import { TextField } from "@/design-system/TextField/TextField"
 import { TextFieldProps } from "@/design-system/TextField/TextField.props"
 import { translate } from "@/i18n"
 import { useAppTheme } from "@/theme/use-app-theme"
 
-type IProfileContactCardEditableNameInputProps = TextFieldProps
+type IProfileContactCardEditableNameInputProps = Omit<
+  TextFieldProps,
+  "onChangeText"
+> & {
+  onChangeText: (args: { text: string; error: string | undefined }) => void
+}
 
 export const ProfileContactCardEditableNameInput = memo(
   function ProfileContactCardEditableNameInput(
     props: IProfileContactCardEditableNameInputProps,
   ) {
+    const { onChangeText, ...rest } = props
+
     const { theme } = useAppTheme()
+
+    const handleChangeText = useCallback(
+      (text: string) => {
+        // const result = profileValidationSchema.shape.name.safeParse(text)
+        onChangeText?.({
+          text,
+          error: undefined,
+          // error: result.success ? undefined : result.error.message,
+        })
+      },
+      [onChangeText],
+    )
 
     return (
       <TextField
@@ -29,7 +48,8 @@ export const ProfileContactCardEditableNameInput = memo(
         }}
         maxLength={32}
         autoCorrect={false}
-        {...props}
+        onChangeText={handleChangeText}
+        {...rest}
       />
     )
   },

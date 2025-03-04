@@ -14,8 +14,8 @@ import { BlockedConversationsScreen } from "@/features/blocked-conversations/blo
 import { ConversationListScreen } from "@/features/conversation-list/conversation-list.screen"
 import { ConversationRequestsListNav } from "@/features/conversation-requests-list/conversation-requests-list.nav"
 import { OnboardingContactCardImportNameScreen } from "@/features/onboarding/screens/onboarding-contact-card-import-name.screen"
-import { OnboardingContactCardScreen } from "@/features/onboarding/screens/onboarding-contact-card-screen"
-import { OnboardingWelcomeScreen } from "@/features/onboarding/screens/onboarding-welcome-screen"
+import { OnboardingContactCardScreen } from "@/features/onboarding/screens/onboarding-contact-card.screen"
+import { OnboardingWelcomeScreen } from "@/features/onboarding/screens/onboarding-welcome.screen"
 import { ProfileImportNameScreen } from "@/features/profiles/profile-import-name.screen"
 import {
   ProfileNav,

@@ -4,14 +4,12 @@ import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { useActiveWallet } from "thirdweb/react"
 import { DynamicPages } from "@/components/dynamic-pages/dynamic-pages"
 import { Screen } from "@/components/screen/screen"
-import { Snackbars } from "@/components/snackbar/snackbars"
 import { VStack } from "@/design-system/VStack"
 import { ConnectWalletChooseApp } from "@/features/wallets/connect-wallet/components/connect-wallet-choose-app"
 import { ConnectWalletContextProvider } from "@/features/wallets/connect-wallet/connect-wallet.context"
 import { useRouter } from "@/navigation/use-navigation"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { captureError } from "@/utils/capture-error"
-import { debugBorder } from "@/utils/debug-style"
 import { GenericError } from "@/utils/error"
 import { ConnectWalletOnboarding } from "./components/connect-wallet-onboarding"
 import {
@@ -79,8 +77,6 @@ export function ConnectWallet(props: { onSelectName: (name: string) => void }) {
           <DynamicPages pages={pages} />
         </VStack>
       </Screen>
-      {/* Not sure why but if not here, they appear behind the screen? (formSheet problem?) */}
-      <Snackbars />
     </ConnectWalletContextProvider>
   )
 }
