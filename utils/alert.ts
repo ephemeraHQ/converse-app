@@ -1,5 +1,5 @@
-import { Alert, AlertButton } from "react-native";
-import { waitUntilAppActive } from "./appState/wait-until-app-is-active";
+import { Alert, AlertButton } from "react-native"
+import { waitUntilAppActive } from "./appState/wait-until-app-is-active"
 
 export const awaitableAlert = (
   title: string,
@@ -8,23 +8,23 @@ export const awaitableAlert = (
   cancelButton?: string,
 ): Promise<boolean> =>
   new Promise(async (resolve) => {
-    await waitUntilAppActive(500);
+    await waitUntilAppActive(500)
     const buttons: AlertButton[] = [
       {
         text: okButton || "Ok",
         onPress: () => {
-          resolve(true);
+          resolve(true)
         },
         isPreferred: true,
       },
-    ];
+    ]
     if (cancelButton) {
       buttons.unshift({
         text: cancelButton,
         onPress: () => {
-          resolve(false);
+          resolve(false)
         },
-      });
+      })
     }
-    Alert.alert(title, message, buttons, { cancelable: false });
-  });
+    Alert.alert(title, message, buttons, { cancelable: false })
+  })

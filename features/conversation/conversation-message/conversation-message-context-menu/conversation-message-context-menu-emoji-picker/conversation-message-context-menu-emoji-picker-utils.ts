@@ -1,12 +1,11 @@
-import { createBottomSheetModalRef } from "@/design-system/BottomSheet/BottomSheet.utils";
+import { createBottomSheetModalRef } from "@/design-system/BottomSheet/BottomSheet.utils"
 
-export const messageContextMenuEmojiPickerBottomSheetRef =
-  createBottomSheetModalRef();
+export const messageContextMenuEmojiPickerBottomSheetRef = createBottomSheetModalRef()
 
 export function openMessageContextMenuEmojiPicker() {
-  messageContextMenuEmojiPickerBottomSheetRef.current?.present();
+  messageContextMenuEmojiPickerBottomSheetRef.current?.present()
 }
 
 export function closeMessageContextMenuEmojiPicker() {
-  messageContextMenuEmojiPickerBottomSheetRef.current?.dismiss();
+  messageContextMenuEmojiPickerBottomSheetRef.current?.dismiss()
 }

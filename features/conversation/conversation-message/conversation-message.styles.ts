@@ -1,9 +1,9 @@
-import { useAppTheme } from "@/theme/use-app-theme";
+import { useAppTheme } from "@/theme/use-app-theme"
 
 export function useConversationMessageStyles() {
-  const { theme } = useAppTheme();
+  const { theme } = useAppTheme()
 
-  const spaceBetweenMessagesInSeries = theme.spacing["4xs"];
+  const spaceBetweenMessagesInSeries = theme.spacing["4xs"]
 
   return {
     spaceBetweenMessagesInSeries,
@@ -13,7 +13,6 @@ export function useConversationMessageStyles() {
     spaceBetweenMessageFromDifferentUserOrType: theme.spacing.sm,
     spaceBetweenMessageAndSender: theme.spacing.xxxs,
     senderNameLeftMargin: theme.spacing.xs,
-    spaceBetweenSeriesWithReactions:
-      theme.spacing["3xs"] + spaceBetweenMessagesInSeries,
-  };
+    spaceBetweenSeriesWithReactions: theme.spacing["3xs"] + spaceBetweenMessagesInSeries,
+  }
 }

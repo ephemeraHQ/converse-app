@@ -1,8 +1,8 @@
-const init = jest.fn();
-const captureException = jest.fn();
-const captureMessage = jest.fn();
-const addBreadcrumb = jest.fn();
-const withScope = jest.fn();
+const init = jest.fn()
+const captureException = jest.fn()
+const captureMessage = jest.fn()
+const addBreadcrumb = jest.fn()
+const withScope = jest.fn()
 
 const MockedSentry = {
   init,
@@ -10,8 +10,8 @@ const MockedSentry = {
   captureMessage,
   addBreadcrumb,
   withScope,
-};
+}
 
-export { init, captureException, captureMessage, addBreadcrumb, withScope };
+export { init, captureException, captureMessage, addBreadcrumb, withScope }
 
-export default MockedSentry;
+export default MockedSentry

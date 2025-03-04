@@ -1,8 +1,8 @@
-import { InboxId } from "@xmtp/react-native-sdk";
-import { PermissionPolicySet } from "@xmtp/react-native-sdk/build/lib/types/PermissionPolicySet";
-import { XMTPError } from "@/utils/error";
-import { xmtpLogger } from "@/utils/logger";
-import { getXmtpClientByEthAddress } from "../xmtp-client/xmtp-client.service";
+import { InboxId } from "@xmtp/react-native-sdk"
+import { PermissionPolicySet } from "@xmtp/react-native-sdk/build/lib/types/PermissionPolicySet"
+import { XMTPError } from "@/utils/error"
+import { xmtpLogger } from "@/utils/logger"
+import { getXmtpClientByEthAddress } from "../xmtp-client/xmtp-client.service"
 
 const defaultPermissionPolicySet: PermissionPolicySet = {
   addMemberPolicy: "allow",
@@ -13,15 +13,15 @@ const defaultPermissionPolicySet: PermissionPolicySet = {
   updateGroupDescriptionPolicy: "allow",
   updateGroupImagePolicy: "allow",
   updateMessageDisappearingPolicy: "allow",
-};
+}
 
 export async function createXmtpGroup(args: {
-  account: string;
-  inboxIds: InboxId[];
-  permissionPolicySet?: PermissionPolicySet;
-  groupName?: string;
-  groupPhoto?: string;
-  groupDescription?: string;
+  account: string
+  inboxIds: InboxId[]
+  permissionPolicySet?: PermissionPolicySet
+  groupName?: string
+  groupPhoto?: string
+  groupDescription?: string
 }) {
   try {
     const {
@@ -31,36 +31,35 @@ export async function createXmtpGroup(args: {
       groupName,
       groupPhoto,
       groupDescription,
-    } = args;
+    } = args
 
-    const startTime = Date.now();
+    const startTime = Date.now()
 
     const client = await getXmtpClientByEthAddress({
       ethAddress: account,
-    });
+    })
 
-    const group =
-      await client.conversations.newGroupCustomPermissionsWithInboxIds(
-        inboxIds,
-        permissionPolicySet,
-        {
-          name: groupName,
-          imageUrlSquare: groupPhoto,
-          description: groupDescription,
-        },
-      );
+    const group = await client.conversations.newGroupCustomPermissionsWithInboxIds(
+      inboxIds,
+      permissionPolicySet,
+      {
+        name: groupName,
+        imageUrlSquare: groupPhoto,
+        description: groupDescription,
+      },
+    )
 
-    const duration = Date.now() - startTime;
+    const duration = Date.now() - startTime
 
     if (duration > 3000) {
-      xmtpLogger.warn(`Creating group took ${duration}ms`);
+      xmtpLogger.warn(`Creating group took ${duration}ms`)
     }
 
-    return group;
+    return group
   } catch (error) {
     throw new XMTPError({
       error,
       additionalMessage: "failed to create XMTP group",
-    });
+    })
   }
 }

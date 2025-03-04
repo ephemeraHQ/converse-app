@@ -1,22 +1,22 @@
-import { PropsWithChildren } from "react";
-import { ViewStyle } from "react-native";
-import { useAppTheme } from "@/theme/use-app-theme";
-import { EntryOrExitLayoutType } from "@/utils/react-native-reanimated";
-import { AnimatedVStack } from "./VStack";
+import { PropsWithChildren } from "react"
+import { ViewStyle } from "react-native"
+import { useAppTheme } from "@/theme/use-app-theme"
+import { EntryOrExitLayoutType } from "@/utils/react-native-reanimated"
+import { AnimatedVStack } from "./VStack"
 
 type IStaggeredAnimationProps = PropsWithChildren<{
-  index: number;
-  totalItems: number;
-  delayBetweenItems?: number;
-  baseDelay?: number;
-  isReverse?: boolean;
-  getEnteringAnimation?: (args: { delay: number }) => EntryOrExitLayoutType;
-  getExitingAnimation?: (args: { delay: number }) => EntryOrExitLayoutType;
-  style?: ViewStyle;
-}>;
+  index: number
+  totalItems: number
+  delayBetweenItems?: number
+  baseDelay?: number
+  isReverse?: boolean
+  getEnteringAnimation?: (args: { delay: number }) => EntryOrExitLayoutType
+  getExitingAnimation?: (args: { delay: number }) => EntryOrExitLayoutType
+  style?: ViewStyle
+}>
 
 export function StaggeredAnimation(args: IStaggeredAnimationProps) {
-  const { theme } = useAppTheme();
+  const { theme } = useAppTheme()
 
   const {
     children,
@@ -26,11 +26,11 @@ export function StaggeredAnimation(args: IStaggeredAnimationProps) {
     baseDelay = 100,
     style,
     isReverse = false,
-  } = args;
+  } = args
 
   const delay = isReverse
     ? (totalItems - index) * delayBetweenItems + baseDelay
-    : index * delayBetweenItems + baseDelay;
+    : index * delayBetweenItems + baseDelay
 
   const {
     getEnteringAnimation = (args: { delay: number }) =>
@@ -38,7 +38,7 @@ export function StaggeredAnimation(args: IStaggeredAnimationProps) {
         delay,
       }),
     getExitingAnimation,
-  } = args;
+  } = args
 
   return (
     <AnimatedVStack
@@ -48,5 +48,5 @@ export function StaggeredAnimation(args: IStaggeredAnimationProps) {
     >
       {children}
     </AnimatedVStack>
-  );
+  )
 }

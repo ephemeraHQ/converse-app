@@ -27,9 +27,7 @@ export async function connectWallet(wallet: ISupportedWallet) {
       client: thirdwebClient,
     })
 
-    logger.debug(
-      `[connectWallet] Successfully connected wallet: ${wallet.thirdwebId}`,
-    )
+    logger.debug(`[connectWallet] Successfully connected wallet: ${wallet.thirdwebId}`)
 
     return thirdwebWallet
   } catch (error) {

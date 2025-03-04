@@ -1,4 +1,4 @@
-import { ViewStyle } from "react-native";
+import { ViewStyle } from "react-native"
 
 /* Use this file to define styles that are used in multiple places in your app. */
 export const $globalStyles = {
@@ -19,4 +19,4 @@ export const $globalStyles = {
     right: 0,
     bottom: 0,
   } as ViewStyle,
-};
+}

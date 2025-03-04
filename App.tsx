@@ -20,10 +20,7 @@ import React, { useEffect } from "react"
 import { Platform } from "react-native"
 import { GestureHandlerRootView } from "react-native-gesture-handler"
 import { KeyboardProvider } from "react-native-keyboard-controller"
-import {
-  configureReanimatedLogger,
-  ReanimatedLogLevel,
-} from "react-native-reanimated"
+import { configureReanimatedLogger, ReanimatedLogLevel } from "react-native-reanimated"
 import { ThirdwebProvider } from "thirdweb/react"
 import { config } from "./config"
 import { useMonitorNetworkConnectivity } from "./dependencies/NetworkMonitor/use-monitor-network-connectivity"
@@ -64,8 +61,7 @@ export function App() {
   useSetupStreamingSubscriptions()
   useCachedResources()
 
-  const { themeScheme, setThemeContextOverride, ThemeProvider } =
-    useThemeProvider()
+  const { themeScheme, setThemeContextOverride, ThemeProvider } = useThemeProvider()
 
   useEffect(() => {
     // Disabled for now until we go live and it works with bun
@@ -86,10 +82,7 @@ export function App() {
     //   }}
     // >
     <QueryClientProvider client={queryClient}>
-      <PrivyProvider
-        appId={config.privy.appId}
-        clientId={config.privy.clientId}
-      >
+      <PrivyProvider appId={config.privy.appId} clientId={config.privy.clientId}>
         <SmartWalletsProvider>
           <ThirdwebProvider>
             <AppKeyboardProvider>
@@ -119,5 +112,4 @@ export function App() {
 }
 
 // On Android we use the default keyboard "animation"
-const AppKeyboardProvider =
-  Platform.OS === "ios" ? KeyboardProvider : React.Fragment
+const AppKeyboardProvider = Platform.OS === "ios" ? KeyboardProvider : React.Fragment

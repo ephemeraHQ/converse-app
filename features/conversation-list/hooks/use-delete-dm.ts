@@ -1,22 +1,22 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { ConversationTopic } from "@xmtp/react-native-sdk";
-import { useCallback } from "react";
-import { showActionSheet } from "@/components/action-sheet";
-import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
-import { useDenyDmMutation } from "@/features/consent/use-deny-dm.mutation";
-import { deleteConversation } from "@/features/conversation/conversation-metadata/conversation-metadata.api";
+import { useMutation, useQuery } from "@tanstack/react-query"
+import { ConversationTopic } from "@xmtp/react-native-sdk"
+import { useCallback } from "react"
+import { showActionSheet } from "@/components/action-sheet"
+import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
+import { useDenyDmMutation } from "@/features/consent/use-deny-dm.mutation"
+import { deleteConversation } from "@/features/conversation/conversation-metadata/conversation-metadata.api"
 import {
   getConversationMetadataQueryData,
   updateConversationMetadataQueryData,
-} from "@/features/conversation/conversation-metadata/conversation-metadata.query";
-import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info";
-import { translate } from "@/i18n";
-import { getConversationQueryOptions } from "@/queries/conversation-query";
-import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query";
-import { captureErrorWithToast } from "@/utils/capture-error";
+} from "@/features/conversation/conversation-metadata/conversation-metadata.query"
+import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
+import { translate } from "@/i18n"
+import { getConversationQueryOptions } from "@/queries/conversation-query"
+import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query"
+import { captureErrorWithToast } from "@/utils/capture-error"
 
 export const useDeleteDm = ({ topic }: { topic: ConversationTopic }) => {
-  const currentAccount = useCurrentSenderEthAddress()!;
+  const currentAccount = useCurrentSenderEthAddress()!
 
   const { data: conversationId } = useQuery({
     ...getConversationQueryOptions({
@@ -24,19 +24,19 @@ export const useDeleteDm = ({ topic }: { topic: ConversationTopic }) => {
       topic,
     }),
     select: (conversation) => conversation?.id,
-  });
+  })
 
   const { data: peerInboxId } = useDmPeerInboxIdQuery({
     account: currentAccount,
     topic,
     caller: "useDeleteDm",
-  });
+  })
 
   const { displayName } = usePreferredDisplayInfo({
     inboxId: peerInboxId!,
-  });
+  })
 
-  const { mutateAsync: denyDmConsentAsync } = useDenyDmMutation();
+  const { mutateAsync: denyDmConsentAsync } = useDenyDmMutation()
 
   const { mutateAsync: deleteDmAsync } = useMutation({
     mutationFn: () => deleteConversation({ account: currentAccount, topic }),
@@ -44,34 +44,34 @@ export const useDeleteDm = ({ topic }: { topic: ConversationTopic }) => {
       const previousDeleted = getConversationMetadataQueryData({
         account: currentAccount,
         topic,
-      })?.deleted;
+      })?.deleted
 
       updateConversationMetadataQueryData({
         account: currentAccount,
         topic,
         updateData: { deleted: true },
-      });
+      })
 
-      return { previousDeleted };
+      return { previousDeleted }
     },
     onError: (error, _, context) => {
       updateConversationMetadataQueryData({
         account: currentAccount,
         topic,
         updateData: { deleted: context?.previousDeleted },
-      });
+      })
     },
-  });
+  })
 
   return useCallback(() => {
-    const title = `${translate("delete_chat_with")} ${displayName}?`;
+    const title = `${translate("delete_chat_with")} ${displayName}?`
 
     if (!conversationId) {
-      throw new Error("Conversation not found in useDeleteDm");
+      throw new Error("Conversation not found in useDeleteDm")
     }
 
     if (!peerInboxId) {
-      throw new Error("Peer inbox id not found in useDeleteDm");
+      throw new Error("Peer inbox id not found in useDeleteDm")
     }
 
     const actions = [
@@ -79,9 +79,9 @@ export const useDeleteDm = ({ topic }: { topic: ConversationTopic }) => {
         label: translate("delete"),
         action: async () => {
           try {
-            await deleteDmAsync();
+            await deleteDmAsync()
           } catch (error) {
-            captureErrorWithToast(error);
+            captureErrorWithToast(error)
           }
         },
       },
@@ -89,14 +89,14 @@ export const useDeleteDm = ({ topic }: { topic: ConversationTopic }) => {
         label: translate("delete_and_block"),
         action: async () => {
           try {
-            await deleteDmAsync();
+            await deleteDmAsync()
             await denyDmConsentAsync({
               peerInboxId: peerInboxId,
               conversationId,
               topic,
-            });
+            })
           } catch (error) {
-            captureErrorWithToast(error);
+            captureErrorWithToast(error)
           }
         },
       },
@@ -104,7 +104,7 @@ export const useDeleteDm = ({ topic }: { topic: ConversationTopic }) => {
         label: translate("Cancel"),
         action: () => {},
       },
-    ];
+    ]
 
     showActionSheet({
       options: {
@@ -115,16 +115,9 @@ export const useDeleteDm = ({ topic }: { topic: ConversationTopic }) => {
       },
       callback: async (selectedIndex?: number) => {
         if (selectedIndex !== undefined) {
-          await actions[selectedIndex].action();
+          await actions[selectedIndex].action()
         }
       },
-    });
-  }, [
-    displayName,
-    deleteDmAsync,
-    denyDmConsentAsync,
-    peerInboxId,
-    conversationId,
-    topic,
-  ]);
-};
+    })
+  }, [displayName, deleteDmAsync, denyDmConsentAsync, peerInboxId, conversationId, topic])
+}

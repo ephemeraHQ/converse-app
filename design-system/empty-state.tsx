@@ -3,22 +3,22 @@
  * Feel free to extend it and add more props.
  */
 
-import { memo } from "react";
-import { View } from "react-native";
-import { Icon } from "@/design-system/Icon/Icon";
-import { IIconName } from "@/design-system/Icon/Icon.types";
-import { Text } from "@/design-system/Text";
-import { IVStackProps, VStack } from "@/design-system/VStack";
-import { useAppTheme } from "@/theme/use-app-theme";
+import { memo } from "react"
+import { View } from "react-native"
+import { Icon } from "@/design-system/Icon/Icon"
+import { IIconName } from "@/design-system/Icon/Icon.types"
+import { Text } from "@/design-system/Text"
+import { IVStackProps, VStack } from "@/design-system/VStack"
+import { useAppTheme } from "@/theme/use-app-theme"
 
 type IEmptyStateProps = {
-  title?: string;
-  description?: string;
-  iconName?: IIconName;
-  icon?: React.ReactNode;
-  containerStyle?: IVStackProps["style"];
-  style?: IVStackProps["style"];
-};
+  title?: string
+  description?: string
+  iconName?: IIconName
+  icon?: React.ReactNode
+  containerStyle?: IVStackProps["style"]
+  style?: IVStackProps["style"]
+}
 
 export const EmptyState = memo(function EmptyState({
   title,
@@ -28,7 +28,7 @@ export const EmptyState = memo(function EmptyState({
   containerStyle,
   style,
 }: IEmptyStateProps) {
-  const { theme } = useAppTheme();
+  const { theme } = useAppTheme()
 
   return (
     <VStack
@@ -45,8 +45,7 @@ export const EmptyState = memo(function EmptyState({
     >
       {(icon || iconName) && (
         <View style={{ marginBottom: theme.spacing.md }}>
-          {icon ||
-            (iconName && <Icon icon={iconName} size={theme.iconSize.lg} />)}
+          {icon || (iconName && <Icon icon={iconName} size={theme.iconSize.lg} />)}
         </View>
       )}
 
@@ -73,5 +72,5 @@ export const EmptyState = memo(function EmptyState({
         </Text>
       )}
     </VStack>
-  );
-});
+  )
+})

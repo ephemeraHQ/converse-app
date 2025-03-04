@@ -14,29 +14,25 @@ import {
   Signer as XmtpSigner,
   StaticAttachmentCodec as XmtpStaticAttachmentCodec,
   TextCodec as XmtpTextCodec,
-} from "@xmtp/react-native-sdk";
-import { ISupportedXmtpCodecs } from "./xmtp-codecs/xmtp-codecs";
+} from "@xmtp/react-native-sdk"
+import { ISupportedXmtpCodecs } from "./xmtp-codecs/xmtp-codecs"
 
-export type IXmtpConversationWithCodecs =
-  XmtpConversation<ISupportedXmtpCodecs>;
+export type IXmtpConversationWithCodecs = XmtpConversation<ISupportedXmtpCodecs>
 
-export type IXmtpDmWithCodecs = XmtpDm<ISupportedXmtpCodecs>;
+export type IXmtpDmWithCodecs = XmtpDm<ISupportedXmtpCodecs>
 
-export type IXmtpGroupWithCodecs = XmtpGroup<ISupportedXmtpCodecs>;
+export type IXmtpGroupWithCodecs = XmtpGroup<ISupportedXmtpCodecs>
 
-export type IXmtpDecodedTextMessage = XmtpDecodedMessage<XmtpTextCodec>;
-export type IXmtpDecodedReactionMessage = XmtpDecodedMessage<XmtpReactionCodec>;
-export type IXmtpDecodedGroupUpdatedMessage =
-  XmtpDecodedMessage<XmtpGroupUpdatedCodec>;
-export type IXmtpDecodedReplyMessage = XmtpDecodedMessage<XmtpReplyCodec>;
+export type IXmtpDecodedTextMessage = XmtpDecodedMessage<XmtpTextCodec>
+export type IXmtpDecodedReactionMessage = XmtpDecodedMessage<XmtpReactionCodec>
+export type IXmtpDecodedGroupUpdatedMessage = XmtpDecodedMessage<XmtpGroupUpdatedCodec>
+export type IXmtpDecodedReplyMessage = XmtpDecodedMessage<XmtpReplyCodec>
 // export type IXmtpDecodedReadReceiptMessage =
 //   XmtpDecodedMessage<XmtpReadReceiptCodec>;
-export type IXmtpDecodedRemoteAttachmentMessage =
-  XmtpDecodedMessage<XmtpRemoteAttachmentCodec>;
-export type IXmtpDecodedStaticAttachmentMessage =
-  XmtpDecodedMessage<XmtpStaticAttachmentCodec>;
+export type IXmtpDecodedRemoteAttachmentMessage = XmtpDecodedMessage<XmtpRemoteAttachmentCodec>
+export type IXmtpDecodedStaticAttachmentMessage = XmtpDecodedMessage<XmtpStaticAttachmentCodec>
 
-export type IXmtpInboxId = InboxId;
+export type IXmtpInboxId = InboxId
 
 // export type IXmtpDecodedMessageWrong = XmtpDecodedMessage<
 //   ISupportedXmtpCodecs[number]
@@ -49,17 +45,17 @@ export type IXmtpDecodedMessage =
   | IXmtpDecodedReplyMessage
   // | IXmtpDecodedReadReceiptMessage
   | IXmtpDecodedRemoteAttachmentMessage
-  | IXmtpDecodedStaticAttachmentMessage;
+  | IXmtpDecodedStaticAttachmentMessage
 
 export type IXmtpDecodedActualMessage =
   | IXmtpDecodedTextMessage
   | IXmtpDecodedReactionMessage
   | IXmtpDecodedReplyMessage
   | IXmtpDecodedRemoteAttachmentMessage
-  | IXmtpDecodedStaticAttachmentMessage;
+  | IXmtpDecodedStaticAttachmentMessage
 
-export type IXmtpSigner = XmtpSigner;
+export type IXmtpSigner = XmtpSigner
 
-export type IXmtpEnv = "dev" | "production" | "local";
+export type IXmtpEnv = "dev" | "production" | "local"
 
-export type IXmtpClient = XmtpClient<ISupportedXmtpCodecs>;
+export type IXmtpClient = XmtpClient<ISupportedXmtpCodecs>

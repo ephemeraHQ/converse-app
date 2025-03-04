@@ -1,34 +1,34 @@
-import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import { getXmtpClientByEthAddress } from "@/features/xmtp/xmtp-client/xmtp-client.service";
-import { ensureConversationSyncAllQuery } from "@/queries/conversation-sync-all-query";
-import { Optional } from "@/types/general";
-import { captureError } from "@/utils/capture-error";
-import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
-import { queryClient } from "./queryClient";
-import { conversationQueryKey } from "./QueryKeys";
+import { queryOptions, skipToken, useQuery } from "@tanstack/react-query"
+import type { ConversationTopic } from "@xmtp/react-native-sdk"
+import { getXmtpClientByEthAddress } from "@/features/xmtp/xmtp-client/xmtp-client.service"
+import { ensureConversationSyncAllQuery } from "@/queries/conversation-sync-all-query"
+import { Optional } from "@/types/general"
+import { captureError } from "@/utils/capture-error"
+import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
+import { queryClient } from "./queryClient"
+import { conversationQueryKey } from "./QueryKeys"
 
-export type ConversationQueryData = Awaited<ReturnType<typeof getConversation>>;
+export type ConversationQueryData = Awaited<ReturnType<typeof getConversation>>
 
 type IGetConversationArgs = {
-  account: string;
-  topic: ConversationTopic;
-};
+  account: string
+  topic: ConversationTopic
+}
 
-type IGetConversationArgsWithCaller = IGetConversationArgs & { caller: string };
+type IGetConversationArgsWithCaller = IGetConversationArgs & { caller: string }
 
 async function getConversation(args: IGetConversationArgs) {
-  const { account, topic } = args;
+  const { account, topic } = args
 
   if (!topic) {
-    throw new Error("Topic is required");
+    throw new Error("Topic is required")
   }
 
   if (!account) {
-    throw new Error("Account is required");
+    throw new Error("Account is required")
   }
 
-  const totalStart = new Date().getTime();
+  const totalStart = new Date().getTime()
 
   /**
    * (START) TMP until we can fetch a single conversation and get ALL the properties for it (lastMessage, etc)
@@ -46,11 +46,11 @@ async function getConversation(args: IGetConversationArgs) {
       ethAddress: account,
       consentStates: ["denied"],
     }),
-  ]);
+  ])
 
   const client = await getXmtpClientByEthAddress({
     ethAddress: account,
-  });
+  })
 
   const conversation = (
     await client.conversations.list({
@@ -62,10 +62,10 @@ async function getConversation(args: IGetConversationArgs) {
       lastMessage: true,
       description: true,
     })
-  ).find((c) => c.topic === topic);
+  ).find((c) => c.topic === topic)
 
   if (!conversation) {
-    throw new Error(`Conversation ${topic} not found`);
+    throw new Error(`Conversation ${topic} not found`)
   }
   /**
    * (END) TMP until we can fetch a single conversation and get ALL the properties for it (lastMessage, etc)
@@ -91,29 +91,27 @@ async function getConversation(args: IGetConversationArgs) {
 
   // await conversation.sync();
 
-  const totalEnd = new Date().getTime();
-  const totalTimeDiff = totalEnd - totalStart;
+  const totalEnd = new Date().getTime()
+  const totalTimeDiff = totalEnd - totalStart
 
   if (totalTimeDiff > 3000) {
     captureError(
-      new Error(
-        `[useConversationQuery] Fetched conversation for ${topic} in ${totalTimeDiff}ms`,
-      ),
-    );
+      new Error(`[useConversationQuery] Fetched conversation for ${topic} in ${totalTimeDiff}ms`),
+    )
   }
 
-  return conversation;
+  return conversation
 }
 
 export const useConversationQuery = (args: IGetConversationArgsWithCaller) => {
-  return useQuery(getConversationQueryOptions(args));
-};
+  return useQuery(getConversationQueryOptions(args))
+}
 
 export function getConversationQueryOptions(
   args: Optional<IGetConversationArgsWithCaller, "caller">,
 ) {
-  const { account, topic, caller } = args;
-  const enabled = !!topic && !!account;
+  const { account, topic, caller } = args
+  const enabled = !!topic && !!account
   return queryOptions({
     meta: {
       caller,
@@ -121,45 +119,42 @@ export function getConversationQueryOptions(
     queryKey: conversationQueryKey(account, topic),
     queryFn: enabled ? () => getConversation({ account, topic }) : skipToken,
     enabled,
-  });
+  })
 }
 
 export const setConversationQueryData = (
   args: IGetConversationArgs & {
-    conversation: ConversationQueryData;
+    conversation: ConversationQueryData
   },
 ) => {
-  const { account, topic, conversation } = args;
+  const { account, topic, conversation } = args
   queryClient.setQueryData(
     getConversationQueryOptions({
       account,
       topic,
     }).queryKey,
     conversation,
-  );
-};
+  )
+}
 
 export function updateConversationQueryData(
   args: IGetConversationArgs & {
-    conversationUpdate: Partial<ConversationQueryData>;
+    conversationUpdate: Partial<ConversationQueryData>
   },
 ) {
-  const { conversationUpdate } = args;
-  queryClient.setQueryData(
-    getConversationQueryOptions(args).queryKey,
-    (previousConversation) => {
-      if (!previousConversation) {
-        return undefined;
-      }
-      return updateObjectAndMethods(previousConversation, conversationUpdate);
-    },
-  );
+  const { conversationUpdate } = args
+  queryClient.setQueryData(getConversationQueryOptions(args).queryKey, (previousConversation) => {
+    if (!previousConversation) {
+      return undefined
+    }
+    return updateObjectAndMethods(previousConversation, conversationUpdate)
+  })
 }
 
 export const getConversationQueryData = (args: IGetConversationArgs) => {
-  return queryClient.getQueryData(getConversationQueryOptions(args).queryKey);
-};
+  return queryClient.getQueryData(getConversationQueryOptions(args).queryKey)
+}
 
 export function getOrFetchConversation(args: IGetConversationArgsWithCaller) {
-  return queryClient.ensureQueryData(getConversationQueryOptions(args));
+  return queryClient.ensureQueryData(getConversationQueryOptions(args))
 }

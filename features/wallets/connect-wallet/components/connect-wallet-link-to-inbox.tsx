@@ -41,8 +41,7 @@ export const ConnectWalletLinkToInbox = memo(function ConnectWalletLinkToInbox(
         ethAddress: walletAccount.address,
         type: "EOA",
         chainId: activeWallet.getChain()?.id!,
-        signMessage: (message: string) =>
-          walletAccount.signMessage({ message }),
+        signMessage: (message: string) => walletAccount.signMessage({ message }),
       })
 
       // Get the current sender
@@ -60,9 +59,7 @@ export const ConnectWalletLinkToInbox = memo(function ConnectWalletLinkToInbox(
     }
   }, [activeWallet])
 
-  const supportedWallet = supportedWallets.find(
-    (wallet) => wallet.thirdwebId === activeWallet.id,
-  )
+  const supportedWallet = supportedWallets.find((wallet) => wallet.thirdwebId === activeWallet.id)
 
   if (!walletEthAddress) {
     return <ConnectWalletErrorContent onPressCancel={router.goBack} />

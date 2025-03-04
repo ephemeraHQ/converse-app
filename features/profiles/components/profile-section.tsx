@@ -12,12 +12,7 @@ export const ProfileSection = memo(function ProfileSection(
 
   const { themed } = useAppTheme()
 
-  return (
-    <VStack
-      style={[themed($section), withTopBorder && themed($borderTop)]}
-      {...rest}
-    />
-  )
+  return <VStack style={[themed($section), withTopBorder && themed($borderTop)]} {...rest} />
 })
 
 const $section: ThemedStyle<ViewStyle> = ({ spacing, colors }) => ({

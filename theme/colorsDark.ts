@@ -1,5 +1,5 @@
-import { IColors } from "./colorsLight";
-import { darkPalette, lightPalette } from "./palette";
+import { IColors } from "./colorsLight"
+import { darkPalette, lightPalette } from "./palette"
 
 export const colorsDark: IColors = {
   bubbles: {
@@ -75,4 +75,4 @@ export const colorsDark: IColors = {
       primaryAlpha60: lightPalette.alpha60,
     },
   },
-};
+}

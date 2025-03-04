@@ -1,49 +1,38 @@
-import { queryOptions, skipToken } from "@tanstack/react-query";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import { getConversationMetadata } from "@/features/conversation/conversation-metadata/conversation-metadata.api";
-import { conversationMetadataQueryKey } from "@/queries/QueryKeys";
-import { queryClient } from "../../../queries/queryClient";
+import { queryOptions, skipToken } from "@tanstack/react-query"
+import type { ConversationTopic } from "@xmtp/react-native-sdk"
+import { getConversationMetadata } from "@/features/conversation/conversation-metadata/conversation-metadata.api"
+import { conversationMetadataQueryKey } from "@/queries/QueryKeys"
+import { queryClient } from "../../../queries/queryClient"
 
-export type IConversationMetadataQueryData = Awaited<
-  ReturnType<typeof getConversationMetadata>
->;
+export type IConversationMetadataQueryData = Awaited<ReturnType<typeof getConversationMetadata>>
 
 type IArgs = {
-  account: string;
-  topic: ConversationTopic;
-};
-
-export function getConversationMetadataQueryOptions({ account, topic }: IArgs) {
-  const enabled = !!topic && !!account;
-  return queryOptions({
-    queryKey: conversationMetadataQueryKey(account, topic),
-    queryFn: enabled
-      ? () => getConversationMetadata({ account, topic })
-      : skipToken,
-    enabled,
-  });
+  account: string
+  topic: ConversationTopic
 }
 
-export function prefetchConversationMetadataQuery(
-  account: string,
-  topic: ConversationTopic,
-) {
-  return queryClient.prefetchQuery(
-    getConversationMetadataQueryOptions({ account, topic }),
-  );
+export function getConversationMetadataQueryOptions({ account, topic }: IArgs) {
+  const enabled = !!topic && !!account
+  return queryOptions({
+    queryKey: conversationMetadataQueryKey(account, topic),
+    queryFn: enabled ? () => getConversationMetadata({ account, topic }) : skipToken,
+    enabled,
+  })
+}
+
+export function prefetchConversationMetadataQuery(account: string, topic: ConversationTopic) {
+  return queryClient.prefetchQuery(getConversationMetadataQueryOptions({ account, topic }))
 }
 
 export const getConversationMetadataQueryData = (args: IArgs) => {
-  const { account, topic } = args;
-  return queryClient.getQueryData(
-    getConversationMetadataQueryOptions({ account, topic }).queryKey,
-  );
-};
+  const { account, topic } = args
+  return queryClient.getQueryData(getConversationMetadataQueryOptions({ account, topic }).queryKey)
+}
 
 export function updateConversationMetadataQueryData(
   args: IArgs & { updateData: Partial<IConversationMetadataQueryData> },
 ) {
-  const { updateData, account, topic } = args;
+  const { updateData, account, topic } = args
   queryClient.setQueryData(
     getConversationMetadataQueryOptions({ account, topic }).queryKey,
     (previousData) => ({
@@ -56,7 +45,7 @@ export function updateConversationMetadataQueryData(
       ...(previousData ?? {}),
       ...updateData,
     }),
-  );
+  )
 }
 
 // TODO: Add back later when we're back at optimizing queries

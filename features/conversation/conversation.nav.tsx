@@ -1,14 +1,14 @@
-import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
-import { ConversationScreen } from "@/features/conversation/conversation.screen";
-import { translate } from "@/i18n";
-import { AppNativeStack } from "@/navigation/app-navigator";
+import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk"
+import { ConversationScreen } from "@/features/conversation/conversation.screen"
+import { translate } from "@/i18n"
+import { AppNativeStack } from "@/navigation/app-navigator"
 
 export type ConversationNavParams = {
-  topic?: ConversationTopic;
-  composerTextPrefill?: string;
-  searchSelectedUserInboxIds?: InboxId[];
-  isNew?: boolean;
-};
+  topic?: ConversationTopic
+  composerTextPrefill?: string
+  searchSelectedUserInboxIds?: InboxId[]
+  isNew?: boolean
+}
 
 export const ConversationScreenConfig = {
   path: "/conversation",
@@ -18,7 +18,7 @@ export const ConversationScreenConfig = {
   stringify: {
     topic: encodeURIComponent,
   },
-};
+}
 
 export function ConversationNav() {
   return (
@@ -30,5 +30,5 @@ export function ConversationNav() {
       name="Conversation"
       component={ConversationScreen}
     />
-  );
+  )
 }

@@ -1,11 +1,7 @@
 import Constants from "expo-constants"
 import { Platform } from "react-native"
 import * as RNFS from "react-native-fs"
-import {
-  consoleTransport,
-  logger as RNLogger,
-  transportFunctionType,
-} from "react-native-logs"
+import { consoleTransport, logger as RNLogger, transportFunctionType } from "react-native-logs"
 import { v4 as uuidv4 } from "uuid"
 
 // Types
@@ -92,9 +88,7 @@ const converseTransport: transportFunctionType = async (props) => {
 }
 
 const activeColorScheme =
-  process.env.EXPO_PUBLIC_LOGGER_COLOR_SCHEME === "dark"
-    ? COLOR_SCHEMES.dark
-    : COLOR_SCHEMES.light
+  process.env.EXPO_PUBLIC_LOGGER_COLOR_SCHEME === "dark" ? COLOR_SCHEMES.dark : COLOR_SCHEMES.light
 
 const baseLogger = RNLogger.createLogger({
   severity: "debug",

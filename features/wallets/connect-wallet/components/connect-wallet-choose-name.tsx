@@ -63,10 +63,7 @@ export const ConnectWalletChooseName = memo(function ConnectWalletChooseName(
         ))}
         buttons={
           <ConnectWalletButtonContainer>
-            <ConnectWalletPrimaryButton
-              text={`Close`}
-              onPress={router.goBack}
-            />
+            <ConnectWalletPrimaryButton text={`Close`} onPress={router.goBack} />
             <ConnectWalletLinkButton
               text={`Disconnect wallet ${shortAddress(ethAddress)}`}
               onPress={async () => {
@@ -97,9 +94,7 @@ export const ConnectWalletChooseName = memo(function ConnectWalletChooseName(
         <ConnectWalletItem
           key={socialProfile.name}
           name={socialProfile.name}
-          image={
-            <Avatar uri={socialProfile.avatar} name={socialProfile.name} />
-          }
+          image={<Avatar uri={socialProfile.avatar} name={socialProfile.name} />}
           onPress={() => {
             onSelectName(socialProfile.name)
             router.goBack()

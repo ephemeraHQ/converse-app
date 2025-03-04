@@ -1,5 +1,5 @@
-import Clipboard from "@react-native-clipboard/clipboard";
+import Clipboard from "@react-native-clipboard/clipboard"
 
 export function copyToClipboard(text: string) {
-  Clipboard.setString(text);
+  Clipboard.setString(text)
 }

@@ -20,9 +20,7 @@ type IMessageChatGroupUpdateProps = {
   message: DecodedMessage<GroupUpdatedCodec>
 }
 
-export function MessageChatGroupUpdate({
-  message,
-}: IMessageChatGroupUpdateProps) {
+export function MessageChatGroupUpdate({ message }: IMessageChatGroupUpdateProps) {
   const { theme } = useAppTheme()
 
   const content = message.content()
@@ -53,10 +51,7 @@ export function MessageChatGroupUpdate({
 
       {/* Member removals */}
       {content.membersRemoved.map((member) => (
-        <ChatGroupMemberLeft
-          key={`left-${member.inboxId}`}
-          inboxId={member.inboxId as InboxId}
-        />
+        <ChatGroupMemberLeft key={`left-${member.inboxId}`} inboxId={member.inboxId as InboxId} />
       ))}
 
       {/* Metadata changes */}
@@ -89,18 +84,10 @@ function ChatGroupMemberLeft({ inboxId }: IChatGroupMemberLeftProps) {
           })
         }}
       >
-        <Avatar
-          sizeNumber={theme.avatarSize.xs}
-          uri={avatarUrl}
-          name={displayName ?? ""}
-        />
-        <ChatGroupUpdateText weight="bold">
-          {displayName ?? ""}
-        </ChatGroupUpdateText>
+        <Avatar sizeNumber={theme.avatarSize.xs} uri={avatarUrl} name={displayName ?? ""} />
+        <ChatGroupUpdateText weight="bold">{displayName ?? ""}</ChatGroupUpdateText>
       </Pressable>
-      <ChatGroupUpdateText>
-        {translate("group_member_left")}
-      </ChatGroupUpdateText>
+      <ChatGroupUpdateText>{translate("group_member_left")}</ChatGroupUpdateText>
     </HStack>
   )
 }
@@ -123,18 +110,10 @@ function ChatGroupMemberJoined({ inboxId }: IChatGroupMemberJoinedProps) {
         }}
         style={themed($pressableContent)}
       >
-        <Avatar
-          sizeNumber={theme.avatarSize.xs}
-          uri={avatarUrl}
-          name={displayName ?? ""}
-        />
-        <ChatGroupUpdateText weight="bold">
-          {displayName ?? ""}
-        </ChatGroupUpdateText>
+        <Avatar sizeNumber={theme.avatarSize.xs} uri={avatarUrl} name={displayName ?? ""} />
+        <ChatGroupUpdateText weight="bold">{displayName ?? ""}</ChatGroupUpdateText>
       </Pressable>
-      <ChatGroupUpdateText>
-        {translate("group_member_joined")}
-      </ChatGroupUpdateText>
+      <ChatGroupUpdateText>{translate("group_member_joined")}</ChatGroupUpdateText>
     </HStack>
   )
 }
@@ -182,23 +161,15 @@ function ChatGroupMetadataUpdate({
         }}
         style={themed($pressableContent)}
       >
-        <Avatar
-          sizeNumber={theme.avatarSize.xs}
-          uri={avatarUrl}
-          name={displayName ?? ""}
-        />
-        <ChatGroupUpdateText weight="bold">
-          {displayName ?? ""}
-        </ChatGroupUpdateText>
+        <Avatar sizeNumber={theme.avatarSize.xs} uri={avatarUrl} name={displayName ?? ""} />
+        <ChatGroupUpdateText weight="bold">{displayName ?? ""}</ChatGroupUpdateText>
       </Pressable>
       <ChatGroupUpdateText>{translate(txKey, txParams)}</ChatGroupUpdateText>
     </HStack>
   )
 }
 
-const ChatGroupUpdateText = memo(function ChatGroupUpdateText(
-  props: ITextProps,
-) {
+const ChatGroupUpdateText = memo(function ChatGroupUpdateText(props: ITextProps) {
   const { style, ...rest } = props
   return (
     <Text

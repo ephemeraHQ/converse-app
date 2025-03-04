@@ -3,13 +3,7 @@ import { api } from "@/utils/api/api"
 import { captureError } from "@/utils/capture-error"
 
 // Define the profile type enum to match backend
-const ProfileType = z.enum([
-  "ens",
-  "farcaster",
-  "basename",
-  "lens",
-  "unstoppable-domains",
-])
+const ProfileType = z.enum(["ens", "farcaster", "basename", "lens", "unstoppable-domains"])
 
 export type ISocialProfileType = z.infer<typeof ProfileType>
 
@@ -54,9 +48,7 @@ export const BasenameProfileSchema = BaseSocialProfileSchema.extend({
 export type IEnsProfile = z.infer<typeof EnsProfileSchema>
 export type IFarcasterProfile = z.infer<typeof FarcasterProfileSchema>
 export type ILensProfile = z.infer<typeof LensProfileSchema>
-export type IUnstoppableDomainsProfile = z.infer<
-  typeof UnstoppableDomainsProfileSchema
->
+export type IUnstoppableDomainsProfile = z.infer<typeof UnstoppableDomainsProfileSchema>
 export type IBasenameProfile = z.infer<typeof BasenameProfileSchema>
 export type ISocialProfile = z.infer<typeof SocialProfileSchema>
 
@@ -64,27 +56,17 @@ const SocialProfilesResponseSchema = z.object({
   socialProfiles: z.array(SocialProfileSchema),
 })
 
-export type ISocialProfilesResponse = z.infer<
-  typeof SocialProfilesResponseSchema
->
+export type ISocialProfilesResponse = z.infer<typeof SocialProfilesResponseSchema>
 
-export async function fetchSocialProfilesForAddress(args: {
-  ethAddress: string
-}) {
+export async function fetchSocialProfilesForAddress(args: { ethAddress: string }) {
   const { ethAddress } = args
 
-  const { data } = await api.get<ISocialProfilesResponse>(
-    `/api/v1/lookup/address/${ethAddress}`,
-  )
+  const { data } = await api.get<ISocialProfilesResponse>(`/api/v1/lookup/address/${ethAddress}`)
 
   const response = SocialProfilesResponseSchema.safeParse(data)
 
   if (!response.success) {
-    captureError(
-      new Error(
-        `Invalid social profiles response: ${JSON.stringify(response.error)}`,
-      ),
-    )
+    captureError(new Error(`Invalid social profiles response: ${JSON.stringify(response.error)}`))
   }
 
   return data.socialProfiles as ISocialProfile[]

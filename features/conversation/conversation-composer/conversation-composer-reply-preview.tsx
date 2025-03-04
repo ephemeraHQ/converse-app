@@ -1,25 +1,21 @@
-import { HStack } from "@design-system/HStack";
-import { Icon } from "@design-system/Icon/Icon";
-import { IconButton } from "@design-system/IconButton/IconButton";
-import { Text } from "@design-system/Text";
-import { AnimatedVStack, VStack } from "@design-system/VStack";
-import { SICK_DAMPING, SICK_STIFFNESS } from "@theme/animations";
-import { Haptics } from "@utils/haptics";
+import { HStack } from "@design-system/HStack"
+import { Icon } from "@design-system/Icon/Icon"
+import { IconButton } from "@design-system/IconButton/IconButton"
+import { Text } from "@design-system/Text"
+import { AnimatedVStack, VStack } from "@design-system/VStack"
+import { SICK_DAMPING, SICK_STIFFNESS } from "@theme/animations"
+import { Haptics } from "@utils/haptics"
 import {
   ConversationTopic,
   DecodedMessage,
   RemoteAttachmentCodec,
   ReplyCodec,
   StaticAttachmentCodec,
-} from "@xmtp/react-native-sdk";
-import { memo, useCallback, useEffect } from "react";
-import {
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from "react-native-reanimated";
-import { useMessagePlainText } from "@/features/conversation-list/hooks/use-message-plain-text";
-import { AttachmentRemoteImage } from "@/features/conversation/conversation-attachment/conversation-attachment-remote-image";
+} from "@xmtp/react-native-sdk"
+import { memo, useCallback, useEffect } from "react"
+import { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated"
+import { useMessagePlainText } from "@/features/conversation-list/hooks/use-message-plain-text"
+import { AttachmentRemoteImage } from "@/features/conversation/conversation-attachment/conversation-attachment-remote-image"
 import {
   isGroupUpdatedMessage,
   isReactionMessage,
@@ -27,47 +23,45 @@ import {
   isRemoteAttachmentMessage,
   isReplyMessage,
   isStaticAttachmentMessage,
-} from "@/features/conversation/conversation-message/conversation-message.utils";
-import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
-import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info";
-import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types";
-import { useAppTheme } from "@/theme/use-app-theme";
-import { useConversationMessageById } from "../conversation-message/use-conversation-message";
-import { useCurrentConversationTopic } from "../conversation.store-context";
+} from "@/features/conversation/conversation-message/conversation-message.utils"
+import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user"
+import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
+import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types"
+import { useAppTheme } from "@/theme/use-app-theme"
+import { useConversationMessageById } from "../conversation-message/use-conversation-message"
+import { useCurrentConversationTopic } from "../conversation.store-context"
 import {
   useConversationComposerStore,
   useConversationComposerStoreContext,
-} from "./conversation-composer.store-context";
+} from "./conversation-composer.store-context"
 
 export const ReplyPreview = memo(function ReplyPreview() {
-  const topic = useCurrentConversationTopic();
+  const topic = useCurrentConversationTopic()
 
-  if (!topic) return null;
+  if (!topic) return null
 
-  return <Content conversationTopic={topic} />;
-});
+  return <Content conversationTopic={topic} />
+})
 
-const Content = memo(function Content(props: {
-  conversationTopic: ConversationTopic;
-}) {
-  const { conversationTopic } = props;
+const Content = memo(function Content(props: { conversationTopic: ConversationTopic }) {
+  const { conversationTopic } = props
 
   const replyingToMessageId = useConversationComposerStoreContext(
     (state) => state.replyingToMessageId,
-  );
+  )
 
-  const { theme } = useAppTheme();
+  const { theme } = useAppTheme()
 
-  const composerStore = useConversationComposerStore();
+  const composerStore = useConversationComposerStore()
 
   const { message: replyMessage } = useConversationMessageById({
     messageId: replyingToMessageId!, // ! because we have enabled in the query
     conversationTopic,
-  });
+  })
 
   const { displayName } = usePreferredDisplayInfo({
     inboxId: replyMessage?.senderInboxId,
-  });
+  })
 
   const replyingTo = replyMessage
     ? messageIsFromCurrentAccountInboxId({ message: replyMessage })
@@ -75,30 +69,28 @@ const Content = memo(function Content(props: {
       : displayName
         ? `Replying to ${displayName}`
         : "Replying"
-    : "";
+    : ""
 
-  const contentHeightAV = useSharedValue(0);
+  const contentHeightAV = useSharedValue(0)
 
   const containerAS = useAnimatedStyle(() => {
     return {
       height: withSpring(
-        replyingToMessageId && contentHeightAV.value !== 0
-          ? contentHeightAV.value
-          : 0,
+        replyingToMessageId && contentHeightAV.value !== 0 ? contentHeightAV.value : 0,
         { damping: SICK_DAMPING, stiffness: SICK_STIFFNESS },
       ),
-    };
-  }, [replyingToMessageId]);
+    }
+  }, [replyingToMessageId])
 
   useEffect(() => {
     if (replyingToMessageId) {
-      Haptics.softImpactAsync();
+      Haptics.softImpactAsync()
     }
-  }, [replyingToMessageId]);
+  }, [replyingToMessageId])
 
   const handleDismiss = useCallback(() => {
-    composerStore.getState().setReplyToMessageId(null);
-  }, [composerStore]);
+    composerStore.getState().setReplyToMessageId(null)
+  }, [composerStore])
 
   return (
     <AnimatedVStack
@@ -115,7 +107,7 @@ const Content = memo(function Content(props: {
           entering={theme.animation.reanimatedFadeInSpring}
           exiting={theme.animation.reanimatedFadeOutSpring}
           onLayout={(event) => {
-            contentHeightAV.value = event.nativeEvent.layout.height;
+            contentHeightAV.value = event.nativeEvent.layout.height
           }}
           style={{
             borderTopWidth: theme.borderWidth.xs,
@@ -158,38 +150,31 @@ const Content = memo(function Content(props: {
                   {replyingTo}
                 </Text>
               </HStack>
-              {!!replyMessage && (
-                <ReplyPreviewMessageContent replyMessage={replyMessage} />
-              )}
+              {!!replyMessage && <ReplyPreviewMessageContent replyMessage={replyMessage} />}
             </VStack>
             <ReplyPreviewEndContent replyMessage={replyMessage} />
-            <IconButton
-              iconName="xmark"
-              onPress={handleDismiss}
-              hitSlop={8}
-              size="sm"
-            />
+            <IconButton iconName="xmark" onPress={handleDismiss} hitSlop={8} size="sm" />
           </HStack>
         </AnimatedVStack>
       )}
     </AnimatedVStack>
-  );
-});
+  )
+})
 
 const ReplyPreviewEndContent = memo(function ReplyPreviewEndContent(props: {
-  replyMessage: IXmtpDecodedMessage;
+  replyMessage: IXmtpDecodedMessage
 }) {
-  const { replyMessage } = props;
+  const { replyMessage } = props
 
-  const { theme } = useAppTheme();
+  const { theme } = useAppTheme()
 
   if (isReplyMessage(replyMessage)) {
-    const replyTyped = replyMessage as DecodedMessage<ReplyCodec>;
+    const replyTyped = replyMessage as DecodedMessage<ReplyCodec>
 
-    const content = replyTyped.content();
+    const content = replyTyped.content()
 
     if (typeof content === "string") {
-      return null;
+      return null
     }
 
     if (content.content.remoteAttachment) {
@@ -205,17 +190,17 @@ const ReplyPreviewEndContent = memo(function ReplyPreviewEndContent(props: {
             },
           }}
         />
-      );
+      )
     }
   }
 
   if (isRemoteAttachmentMessage(replyMessage)) {
-    const messageTyped = replyMessage as DecodedMessage<RemoteAttachmentCodec>;
+    const messageTyped = replyMessage as DecodedMessage<RemoteAttachmentCodec>
 
-    const content = messageTyped.content();
+    const content = messageTyped.content()
 
     if (typeof content === "string") {
-      return null;
+      return null
     }
 
     return (
@@ -230,76 +215,73 @@ const ReplyPreviewEndContent = memo(function ReplyPreviewEndContent(props: {
           },
         }}
       />
-    );
+    )
   }
 
-  return null;
-});
+  return null
+})
 
-const ReplyPreviewMessageContent = memo(
-  function ReplyPreviewMessageContent(props: {
-    replyMessage: IXmtpDecodedMessage;
-  }) {
-    const { replyMessage } = props;
+const ReplyPreviewMessageContent = memo(function ReplyPreviewMessageContent(props: {
+  replyMessage: IXmtpDecodedMessage
+}) {
+  const { replyMessage } = props
 
-    const { theme } = useAppTheme();
+  const { theme } = useAppTheme()
 
-    const messageText = useMessagePlainText(replyMessage);
-    const clearedMessage = messageText?.replace(/(\n)/gm, " ");
+  const messageText = useMessagePlainText(replyMessage)
+  const clearedMessage = messageText?.replace(/(\n)/gm, " ")
 
-    if (isStaticAttachmentMessage(replyMessage)) {
-      const messageTyped =
-        replyMessage as DecodedMessage<StaticAttachmentCodec>;
+  if (isStaticAttachmentMessage(replyMessage)) {
+    const messageTyped = replyMessage as DecodedMessage<StaticAttachmentCodec>
 
-      const content = messageTyped.content();
+    const content = messageTyped.content()
 
-      if (typeof content === "string") {
-        return <Text>{content}</Text>;
-      }
-
-      // TODO
-      return <Text>Static attachment</Text>;
+    if (typeof content === "string") {
+      return <Text>{content}</Text>
     }
 
-    if (isReactionMessage(replyMessage)) {
-      return <Text>Reaction</Text>;
+    // TODO
+    return <Text>Static attachment</Text>
+  }
+
+  if (isReactionMessage(replyMessage)) {
+    return <Text>Reaction</Text>
+  }
+
+  if (isReadReceiptMessage(replyMessage)) {
+    return <Text>Read Receipt</Text>
+  }
+
+  if (isGroupUpdatedMessage(replyMessage)) {
+    return <Text>Group updates</Text>
+  }
+
+  if (isRemoteAttachmentMessage(replyMessage)) {
+    return <Text>Remote Attachment</Text>
+  }
+
+  if (isReplyMessage(replyMessage)) {
+    const messageTyped = replyMessage as DecodedMessage<ReplyCodec>
+    const content = messageTyped.content()
+
+    if (typeof content === "string") {
+      return <Text>{content}</Text>
     }
 
-    if (isReadReceiptMessage(replyMessage)) {
-      return <Text>Read Receipt</Text>;
+    if (content.content.attachment) {
+      return <Text>Reply with attachment</Text>
     }
 
-    if (isGroupUpdatedMessage(replyMessage)) {
-      return <Text>Group updates</Text>;
+    if (content.content.text) {
+      return <Text>{content.content.text}</Text>
     }
 
-    if (isRemoteAttachmentMessage(replyMessage)) {
-      return <Text>Remote Attachment</Text>;
+    if (content.content.remoteAttachment) {
+      return <Text>Image</Text>
     }
 
-    if (isReplyMessage(replyMessage)) {
-      const messageTyped = replyMessage as DecodedMessage<ReplyCodec>;
-      const content = messageTyped.content();
+    return <Text>Reply</Text>
+  }
 
-      if (typeof content === "string") {
-        return <Text>{content}</Text>;
-      }
-
-      if (content.content.attachment) {
-        return <Text>Reply with attachment</Text>;
-      }
-
-      if (content.content.text) {
-        return <Text>{content.content.text}</Text>;
-      }
-
-      if (content.content.remoteAttachment) {
-        return <Text>Image</Text>;
-      }
-
-      return <Text>Reply</Text>;
-    }
-
-    return <Text numberOfLines={1}>{clearedMessage}</Text>;
-  },
-);
+  return <Text numberOfLines={1}>{clearedMessage}</Text>
+})

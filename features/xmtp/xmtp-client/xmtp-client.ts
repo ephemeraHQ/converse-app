@@ -6,10 +6,7 @@ import { captureError } from "@/utils/capture-error"
 import { XMTPError } from "@/utils/error"
 import { getSecureItemAsync, setSecureItemAsync } from "@/utils/keychain"
 import { xmtpLogger } from "@/utils/logger"
-import {
-  ISupportedXmtpCodecs,
-  supportedXmtpCodecs,
-} from "../xmtp-codecs/xmtp-codecs"
+import { ISupportedXmtpCodecs, supportedXmtpCodecs } from "../xmtp-codecs/xmtp-codecs"
 import { IXmtpClient, IXmtpSigner } from "../xmtp.types"
 
 export async function createXmtpClientInstance(args: {

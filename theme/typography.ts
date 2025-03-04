@@ -1,6 +1,6 @@
-import { Platform, TextStyle } from "react-native";
+import { Platform, TextStyle } from "react-native"
 
-export const customFontsToLoad = {};
+export const customFontsToLoad = {}
 
 const fonts = {
   roboto: {
@@ -35,7 +35,7 @@ const fonts = {
     // Android only font.
     normal: "monospace",
   },
-};
+}
 
 export const typography = {
   /**
@@ -46,7 +46,7 @@ export const typography = {
     android: fonts.roboto,
     default: fonts.sfPro,
   }),
-};
+}
 
 /**
  *  
@@ -62,4 +62,4 @@ font-family: 'SF Pro';
 }
  */
 
-export type ITypography = typeof typography;
+export type ITypography = typeof typography

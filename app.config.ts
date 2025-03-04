@@ -1,32 +1,32 @@
-import { ExpoConfig } from "expo/config";
-import { version } from "./package.json";
+import { ExpoConfig } from "expo/config"
+import { version } from "./package.json"
 
-type Environment = "development" | "preview" | "production";
+type Environment = "development" | "preview" | "production"
 
 type EnvironmentConfig = {
-  scheme: string;
-  androidPackage: string;
-  appDomainConverse: string;
-  appDomainGetConverse: string;
-  appName: string;
-  icon: string;
+  scheme: string
+  androidPackage: string
+  appDomainConverse: string
+  appDomainGetConverse: string
+  appName: string
+  icon: string
   ios: {
-    bundleIdentifier: string;
-    associatedDomains: string[];
-    googleServicesFile: string;
-  };
+    bundleIdentifier: string
+    associatedDomains: string[]
+    googleServicesFile: string
+  }
   android: {
-    package: string;
-    googleServicesFile: string;
-  };
-  alchemyApiKey: string;
-};
+    package: string
+    googleServicesFile: string
+  }
+  alchemyApiKey: string
+}
 
 // Type assertion for process.env to include our Expo public variables
 const env = process.env as {
-  EXPO_PUBLIC_ALCHEMY_API_KEY?: string;
-  EXPO_ENV?: string;
-};
+  EXPO_PUBLIC_ALCHEMY_API_KEY?: string
+  EXPO_ENV?: string
+}
 
 const settings: Record<Environment, EnvironmentConfig> = {
   development: {
@@ -95,11 +95,11 @@ const settings: Record<Environment, EnvironmentConfig> = {
     icon: "./assets/icon.png",
     alchemyApiKey: env.EXPO_PUBLIC_ALCHEMY_API_KEY || "",
   },
-};
+}
 
 export default (): ExpoConfig => {
-  const expoEnv = (process.env.EXPO_ENV || "development") as Environment;
-  const config = settings[expoEnv];
+  const expoEnv = (process.env.EXPO_ENV || "development") as Environment
+  const config = settings[expoEnv]
 
   return {
     name: config.appName,
@@ -227,8 +227,7 @@ export default (): ExpoConfig => {
       [
         "expo-local-authentication",
         {
-          faceIDPermission:
-            "We need this to use biometrics to secure your data.",
+          faceIDPermission: "We need this to use biometrics to secure your data.",
         },
       ],
       [
@@ -325,10 +324,8 @@ export default (): ExpoConfig => {
       [
         "expo-image-picker",
         {
-          photosPermission:
-            "We need this so that you can share photos from your library.",
-          cameraPermission:
-            "We need this so that you can take photos to share.",
+          photosPermission: "We need this so that you can share photos from your library.",
+          cameraPermission: "We need this so that you can take photos to share.",
         },
       ],
       [
@@ -354,5 +351,5 @@ export default (): ExpoConfig => {
       ["@react-native-firebase/app-check"],
       "./scripts/android/build/android-deps-expo-plugin.js",
     ],
-  };
-};
+  }
+}

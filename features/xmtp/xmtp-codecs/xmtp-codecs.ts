@@ -6,7 +6,7 @@ import {
   ReplyCodec,
   StaticAttachmentCodec,
   TextCodec,
-} from "@xmtp/react-native-sdk";
+} from "@xmtp/react-native-sdk"
 
 export const supportedXmtpCodecs = [
   new TextCodec(),
@@ -16,6 +16,6 @@ export const supportedXmtpCodecs = [
   // new ReadReceiptCodec(),
   new RemoteAttachmentCodec(),
   new StaticAttachmentCodec(),
-];
+]
 
-export type ISupportedXmtpCodecs = typeof supportedXmtpCodecs;
+export type ISupportedXmtpCodecs = typeof supportedXmtpCodecs

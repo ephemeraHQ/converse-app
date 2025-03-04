@@ -1,11 +1,7 @@
 import { logger } from "@utils/logger"
 import { InboxId } from "@xmtp/react-native-sdk"
 import { create } from "zustand"
-import {
-  createJSONStorage,
-  persist,
-  subscribeWithSelector,
-} from "zustand/middleware"
+import { createJSONStorage, persist, subscribeWithSelector } from "zustand/middleware"
 import { captureError } from "@/utils/capture-error"
 import { enhanceError } from "@/utils/error"
 import { zustandMMKVStorage } from "@/utils/mmkv"
@@ -24,14 +20,9 @@ type IMultiInboxStoreActions = {
   reset: () => void
   setCurrentSender: (
     sender: // We let users pass in a partial CurrentSender object and we will find the full object in the store using "senders"
-    | CurrentSender
-      | { ethereumAddress: string }
-      | { inboxId: InboxId }
-      | undefined,
+    CurrentSender | { ethereumAddress: string } | { inboxId: InboxId } | undefined,
   ) => void
-  removeSender: (
-    senderIdentifier: { ethereumAddress: string } | { inboxId: string },
-  ) => void
+  removeSender: (senderIdentifier: { ethereumAddress: string } | { inboxId: string }) => void
 }
 
 // Combine State and Actions for the store type
@@ -76,9 +67,7 @@ export const useMultiInboxStore = create<IMultiInboxStoreType>()(
               const fullSender = sender as CurrentSender
 
               // Check if this sender already exists in our list
-              const existingIndex = senders.findIndex((s) =>
-                isSameSender(s, fullSender),
-              )
+              const existingIndex = senders.findIndex((s) => isSameSender(s, fullSender))
 
               if (existingIndex === -1) {
                 // If not in list, add it and set as current
@@ -98,9 +87,7 @@ export const useMultiInboxStore = create<IMultiInboxStoreType>()(
             let foundSender: CurrentSender | undefined
 
             if ("ethereumAddress" in sender) {
-              foundSender = senders.find(
-                (s) => s.ethereumAddress === sender.ethereumAddress,
-              )
+              foundSender = senders.find((s) => s.ethereumAddress === sender.ethereumAddress)
             } else if ("inboxId" in sender) {
               foundSender = senders.find((s) => s.inboxId === sender.inboxId)
             }
@@ -124,9 +111,7 @@ export const useMultiInboxStore = create<IMultiInboxStoreType>()(
                   (s) => s.ethereumAddress === senderIdentifier.ethereumAddress,
                 )
               } else if ("inboxId" in senderIdentifier) {
-                senderToRemove = state.senders.find(
-                  (s) => s.inboxId === senderIdentifier.inboxId,
-                )
+                senderToRemove = state.senders.find((s) => s.inboxId === senderIdentifier.inboxId)
               }
 
               if (!senderToRemove) {
@@ -141,10 +126,7 @@ export const useMultiInboxStore = create<IMultiInboxStoreType>()(
               // Update current sender if needed
               const isRemovingCurrentSender =
                 state.currentSender &&
-                isSameSender(
-                  state.currentSender,
-                  senderToRemove as CurrentSender,
-                )
+                isSameSender(state.currentSender, senderToRemove as CurrentSender)
 
               const newCurrentSender = isRemovingCurrentSender
                 ? newSenders.length > 0
@@ -169,9 +151,7 @@ export const useMultiInboxStore = create<IMultiInboxStoreType>()(
         },
         onRehydrateStorage: () => (state, error) => {
           if (error) {
-            captureError(
-              enhanceError(error, "Error during multi-inbox store hydration"),
-            )
+            captureError(enhanceError(error, "Error during multi-inbox store hydration"))
             return
           }
           logger.debug(
@@ -231,9 +211,7 @@ export function isCurrentSender(sender: Partial<CurrentSender>) {
 }
 
 export function useAllInboxIds() {
-  return useMultiInboxStore((state) =>
-    state.senders.map((sender) => sender.inboxId),
-  )
+  return useMultiInboxStore((state) => state.senders.map((sender) => sender.inboxId))
 }
 
 export function resetAccountStore() {
@@ -241,7 +219,5 @@ export function resetAccountStore() {
 }
 
 export function getSenderWithInboxId(inboxId: InboxId) {
-  return useMultiInboxStore
-    .getState()
-    .senders.find((sender) => sender.inboxId === inboxId)
+  return useMultiInboxStore.getState().senders.find((sender) => sender.inboxId === inboxId)
 }

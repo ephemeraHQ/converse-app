@@ -18,9 +18,7 @@ export type IDynamicPagesProps = {
   pages: React.ReactNode[]
 }
 
-export const DynamicPages = memo(function DynamicPages(
-  props: IDynamicPagesProps,
-) {
+export const DynamicPages = memo(function DynamicPages(props: IDynamicPagesProps) {
   return (
     <DynamicPagesStoreProvider>
       <Main {...props} />
@@ -45,18 +43,14 @@ const Main = memo(function Main(props: IDynamicPagesProps) {
     },
   }))
 
-  const currentPageIndex = useDynamicPagesStoreContext(
-    (state) => state.currentPageIndex,
-  )
+  const currentPageIndex = useDynamicPagesStoreContext((state) => state.currentPageIndex)
 
   const currentPage = useMemo(() => {
     return pages[currentPageIndex]
   }, [currentPageIndex, pages])
 
   if (!currentPage) {
-    throw new Error(
-      "No page for dynamic pages component with index: " + currentPageIndex,
-    )
+    throw new Error("No page for dynamic pages component with index: " + currentPageIndex)
   }
 
   return <PageAnimationContainer>{currentPage}</PageAnimationContainer>
@@ -67,9 +61,7 @@ const PageAnimationContainer = memo(function PageAnimationContainer(props: {
 }) {
   const { children } = props
 
-  const currentPageIndex = useDynamicPagesStoreContext(
-    (state) => state.currentPageIndex,
-  )
+  const currentPageIndex = useDynamicPagesStoreContext((state) => state.currentPageIndex)
 
   const previousPageIndexRef = useRef<number | null>(null)
 

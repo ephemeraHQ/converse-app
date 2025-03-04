@@ -1,9 +1,9 @@
-import { useAppTheme } from "@/theme/use-app-theme";
+import { useAppTheme } from "@/theme/use-app-theme"
 
 export function useConversationListPinnedConversationsStyles() {
-  const { theme } = useAppTheme();
+  const { theme } = useAppTheme()
 
   return {
     avatarSize: theme.avatarSize["xxl"],
-  } as const;
+  } as const
 }

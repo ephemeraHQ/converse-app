@@ -1,24 +1,14 @@
-import { translate } from "@i18n";
-import { $globalStyles } from "@theme/styles";
-import React, {
-  forwardRef,
-  Ref,
-  useCallback,
-  useImperativeHandle,
-  useRef,
-} from "react";
-import { TextInput as RNTextInput, TextStyle, ViewStyle } from "react-native";
-import { TextInput } from "@/design-system/text-input";
-import {
-  ThemedStyle,
-  ThemedStyleArray,
-  useAppTheme,
-} from "@/theme/use-app-theme";
-import { HStack } from "../HStack";
-import { Text } from "../Text/Text";
-import { TouchableOpacity } from "../TouchableOpacity";
-import { VStack } from "../VStack";
-import { TextFieldProps } from "./TextField.props";
+import { translate } from "@i18n"
+import { $globalStyles } from "@theme/styles"
+import React, { forwardRef, Ref, useCallback, useImperativeHandle, useRef } from "react"
+import { TextInput as RNTextInput, TextStyle, ViewStyle } from "react-native"
+import { TextInput } from "@/design-system/text-input"
+import { ThemedStyle, ThemedStyleArray, useAppTheme } from "@/theme/use-app-theme"
+import { HStack } from "../HStack"
+import { Text } from "../Text/Text"
+import { TouchableOpacity } from "../TouchableOpacity"
+import { VStack } from "../VStack"
+import { TextFieldProps } from "./TextField.props"
 
 export const TextField = forwardRef(function TextField(
   props: TextFieldProps,
@@ -43,24 +33,24 @@ export const TextField = forwardRef(function TextField(
     containerStyle: $containerStyleOverride,
     inputWrapperStyle: $inputWrapperStyleOverride,
     ...TextInputProps
-  } = props;
-  const input = useRef<RNTextInput>(null);
+  } = props
+  const input = useRef<RNTextInput>(null)
 
-  const { themed, theme } = useAppTheme();
+  const { themed, theme } = useAppTheme()
 
-  const disabled = TextInputProps.editable === false || status === "disabled";
+  const disabled = TextInputProps.editable === false || status === "disabled"
 
   const placeholderContent = placeholderTx
     ? translate(placeholderTx, placeholderTxOptions)
-    : placeholder;
+    : placeholder
 
-  const $containerStyles = [$containerStyle, $containerStyleOverride];
+  const $containerStyles = [$containerStyle, $containerStyleOverride]
 
   const $labelStyles = [
     $labelStyle,
     disabled && { color: theme.colors.text.tertiary },
     LabelTextProps?.style,
-  ];
+  ]
 
   const $inputWrapperStyles = [
     $inputWrapperStyle,
@@ -69,31 +59,31 @@ export const TextField = forwardRef(function TextField(
     LeftAccessory && { paddingStart: 0 },
     RightAccessory && { paddingEnd: 0 },
     $inputWrapperStyleOverride,
-  ];
+  ]
 
   const $inputStyles: ThemedStyleArray<TextStyle> = [
     disabled && { color: theme.colors.text.tertiary },
     TextInputProps.multiline && { height: "auto" },
     $inputStyleOverride,
-  ];
+  ]
 
   const $helperStyles = [
     $helperStyle,
     status === "error" && { color: theme.colors.global.caution },
     HelperTextProps?.style,
-  ];
+  ]
 
   const $labelAndInputContainerStyles = [
     $globalStyles.flex1,
     !(label || labelTx) && $globalStyles.justifyCenter,
-  ];
+  ]
 
   const onFocus = useCallback(() => {
-    if (disabled) return;
-    input.current?.focus();
-  }, [disabled]);
+    if (disabled) return
+    input.current?.focus()
+  }, [disabled])
 
-  useImperativeHandle(ref, () => input.current as RNTextInput);
+  useImperativeHandle(ref, () => input.current as RNTextInput)
 
   return (
     <TouchableOpacity
@@ -161,19 +151,16 @@ export const TextField = forwardRef(function TextField(
         />
       )}
     </TouchableOpacity>
-  );
-});
+  )
+})
 
-const $containerStyle: ThemedStyle<ViewStyle> = ({
-  spacing,
-  borderRadius,
-}) => ({
+const $containerStyle: ThemedStyle<ViewStyle> = ({ spacing, borderRadius }) => ({
   //   ...debugBorder(),
-});
+})
 
 const $labelStyle: ThemedStyle<TextStyle> = ({ spacing }) => ({
   marginBottom: spacing["4xs"],
-});
+})
 
 const $inputWrapperStyle: ThemedStyle<ViewStyle> = ({
   colors,
@@ -188,19 +175,19 @@ const $inputWrapperStyle: ThemedStyle<ViewStyle> = ({
   overflow: "hidden",
   paddingHorizontal: spacing.xs,
   paddingVertical: spacing.xxs,
-});
+})
 
 const $helperStyle: ThemedStyle<TextStyle> = ({ spacing }) => ({
   marginTop: spacing.xxxs,
   paddingHorizontal: spacing.xs,
-});
+})
 
 const $rightAccessoryStyle: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   marginEnd: spacing.xxs,
   flexShrink: 0,
   justifyContent: "center",
   alignItems: "center",
-});
+})
 
 const $leftAccessoryStyle: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   marginStart: spacing.xxs,
@@ -208,4 +195,4 @@ const $leftAccessoryStyle: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexShrink: 0,
   justifyContent: "center",
   alignItems: "center",
-});
+})

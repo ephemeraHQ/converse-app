@@ -1,4 +1,4 @@
-import { PermissionOption } from "@xmtp/react-native-sdk/build/lib/types/PermissionPolicySet";
+import { PermissionOption } from "@xmtp/react-native-sdk/build/lib/types/PermissionPolicySet"
 
 export const memberCanUpdateGroup = (
   fieldPermission: PermissionOption | undefined,
@@ -6,22 +6,22 @@ export const memberCanUpdateGroup = (
   isSuperAdmin: boolean,
 ) => {
   if (fieldPermission === "deny") {
-    return false;
+    return false
   }
   if (fieldPermission === "allow") {
-    return true;
+    return true
   }
 
   if (fieldPermission === "admin") {
-    return isAdmin || isSuperAdmin;
+    return isAdmin || isSuperAdmin
   }
 
   if (fieldPermission === "superAdmin") {
-    return isSuperAdmin;
+    return isSuperAdmin
   }
   if (!fieldPermission) {
-    return false;
+    return false
   }
   // unknown
-  return isAdmin || isSuperAdmin;
-};
+  return isAdmin || isSuperAdmin
+}

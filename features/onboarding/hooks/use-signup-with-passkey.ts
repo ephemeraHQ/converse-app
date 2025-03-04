@@ -10,8 +10,7 @@ import { RELYING_PARTY } from "../onboarding.constants"
 export function useSignupWithPasskey() {
   const { create: createEmbeddedWallet } = useEmbeddedEthereumWallet()
   const { client: smartWalletClient } = useSmartWallets()
-  const { signupWithPasskey: privySignupWithPasskey } =
-    usePrivySignupWithPasskey()
+  const { signupWithPasskey: privySignupWithPasskey } = usePrivySignupWithPasskey()
   const [isSigningUp, setIsSigningUp] = useState(false)
   const clientRef = useRef(smartWalletClient)
 

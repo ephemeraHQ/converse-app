@@ -1,19 +1,19 @@
-import { Pressable } from "react-native";
-import { HStack } from "@/design-system/HStack";
-import { Icon } from "@/design-system/Icon/Icon";
-import { IIconName } from "@/design-system/Icon/Icon.types";
-import { Text } from "@/design-system/Text";
-import { VStack } from "@/design-system/VStack";
-import { useAppTheme } from "@/theme/use-app-theme";
+import { Pressable } from "react-native"
+import { HStack } from "@/design-system/HStack"
+import { Icon } from "@/design-system/Icon/Icon"
+import { IIconName } from "@/design-system/Icon/Icon.types"
+import { Text } from "@/design-system/Text"
+import { VStack } from "@/design-system/VStack"
+import { useAppTheme } from "@/theme/use-app-theme"
 
 type IMenuListContainerProps = {
-  children: React.ReactNode;
-};
+  children: React.ReactNode
+}
 
 export function DropdownMenuContainer({ children }: IMenuListContainerProps) {
-  const { theme } = useAppTheme();
+  const { theme } = useAppTheme()
 
-  const { containerWidth } = useDropdownMenuCustomStyles();
+  const { containerWidth } = useDropdownMenuCustomStyles()
 
   return (
     <VStack
@@ -34,23 +34,19 @@ export function DropdownMenuContainer({ children }: IMenuListContainerProps) {
     >
       {children}
     </VStack>
-  );
+  )
 }
 
 export type IDropdownMenuCustomItemProps = {
-  label: string;
-  iconName?: IIconName;
-  onPress?: () => void;
-};
+  label: string
+  iconName?: IIconName
+  onPress?: () => void
+}
 
-export function DropdownMenuCustomItem({
-  label,
-  iconName,
-  onPress,
-}: IDropdownMenuCustomItemProps) {
-  const { theme } = useAppTheme();
+export function DropdownMenuCustomItem({ label, iconName, onPress }: IDropdownMenuCustomItemProps) {
+  const { theme } = useAppTheme()
 
-  const { itemHeight } = useDropdownMenuCustomStyles();
+  const { itemHeight } = useDropdownMenuCustomStyles()
 
   return (
     <Pressable
@@ -71,12 +67,12 @@ export function DropdownMenuCustomItem({
         </VStack>
       )}
     </Pressable>
-  );
+  )
 }
 
 export function useDropdownMenuCustomStyles() {
   return {
     containerWidth: 181, // From Figma
     itemHeight: 44, // From Figma
-  };
+  }
 }

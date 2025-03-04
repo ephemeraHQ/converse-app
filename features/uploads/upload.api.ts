@@ -1,13 +1,13 @@
-import { z } from "zod";
-import { api } from "@/utils/api/api";
-import RNFetchBlob from "rn-fetch-blob";
+import RNFetchBlob from "rn-fetch-blob"
+import { z } from "zod"
+import { api } from "@/utils/api/api"
 
 const PresignedUrlResponseSchema = z.object({
   objectKey: z.string(),
   url: z.string().url(),
-});
+})
 
-export type IPresignedUrlResponse = z.infer<typeof PresignedUrlResponseSchema>;
+export type IPresignedUrlResponse = z.infer<typeof PresignedUrlResponseSchema>
 
 /**
  * Gets a presigned URL for uploading a file to S3
@@ -19,17 +19,17 @@ export const getPresignedUploadUrl = async (
 ): Promise<IPresignedUrlResponse> => {
   const { data } = await api.get("/api/v1/attachments/presigned", {
     params: { contentType },
-  });
-  return PresignedUrlResponseSchema.parse(data);
-};
+  })
+  return PresignedUrlResponseSchema.parse(data)
+}
 
 /**
  * Extracts the public URL from a presigned URL by removing query parameters
  */
 const getPublicUrlFromPresignedUrl = (presignedUrl: string): string => {
-  const fileURL = new URL(presignedUrl);
-  return fileURL.origin + fileURL.pathname;
-};
+  const fileURL = new URL(presignedUrl)
+  return fileURL.origin + fileURL.pathname
+}
 
 /**
  * Uploads a file using a presigned URL
@@ -44,7 +44,7 @@ export const uploadFileWithPresignedUrl = async (
   contentType: string,
 ): Promise<string> => {
   // Remove file:// prefix for RNFetchBlob
-  const normalizedPath = filePath.replace("file://", "");
+  const normalizedPath = filePath.replace("file://", "")
 
   await RNFetchBlob.fetch(
     "PUT",
@@ -54,7 +54,7 @@ export const uploadFileWithPresignedUrl = async (
       "x-amz-acl": "public-read",
     },
     RNFetchBlob.wrap(normalizedPath),
-  );
+  )
 
-  return getPublicUrlFromPresignedUrl(presignedUrl);
-};
+  return getPublicUrlFromPresignedUrl(presignedUrl)
+}

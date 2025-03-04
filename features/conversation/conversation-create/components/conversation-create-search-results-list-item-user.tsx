@@ -9,9 +9,7 @@ type UserSearchResultListItemProps = {
   inboxId: string
 }
 
-export function ConversationSearchResultsListItemUser({
-  inboxId,
-}: UserSearchResultListItemProps) {
+export function ConversationSearchResultsListItemUser({ inboxId }: UserSearchResultListItemProps) {
   const { theme } = useAppTheme()
   const { displayName, avatarUrl, username } = usePreferredDisplayInfo({
     inboxId,
@@ -30,13 +28,7 @@ export function ConversationSearchResultsListItemUser({
 
   return (
     <ConversationSearchResultsListItem
-      avatar={
-        <Avatar
-          name={displayName}
-          uri={avatarUrl}
-          sizeNumber={theme.avatarSize.md}
-        />
-      }
+      avatar={<Avatar name={displayName} uri={avatarUrl} sizeNumber={theme.avatarSize.md} />}
       title={displayName ?? " "}
       subtitle={username ?? ""}
       onPress={handlePress}

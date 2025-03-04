@@ -71,25 +71,17 @@ export const createUser = async (args: {
       profile,
     }
 
-    const validationResult =
-      createUserApiRequestBodySchema.safeParse(requestPayload)
+    const validationResult = createUserApiRequestBodySchema.safeParse(requestPayload)
     if (!validationResult.success) {
       throw new Error(`Invalid request body: ${validationResult.error.message}`)
     }
 
-    const response = await api.post<CreateUserResponse>(
-      "/api/v1/users",
-      validationResult.data,
-    )
+    const response = await api.post<CreateUserResponse>("/api/v1/users", validationResult.data)
 
     // Validate the response
-    const responseValidation = createUserApiResponseSchema.safeParse(
-      response.data,
-    )
+    const responseValidation = createUserApiResponseSchema.safeParse(response.data)
     if (!responseValidation.success) {
-      throw new Error(
-        `Invalid response data: ${responseValidation.error.message}`,
-      )
+      throw new Error(`Invalid response data: ${responseValidation.error.message}`)
     }
 
     return responseValidation.data

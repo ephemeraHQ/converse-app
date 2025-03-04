@@ -13,9 +13,7 @@ type IProfileSocialsNamesProps = {
   socialProfiles: ISocialProfile[]
 }
 
-export function ProfileSocialsNames({
-  socialProfiles,
-}: IProfileSocialsNamesProps) {
+export function ProfileSocialsNames({ socialProfiles }: IProfileSocialsNamesProps) {
   const { theme, themed } = useAppTheme()
 
   // Group valid social profiles by name

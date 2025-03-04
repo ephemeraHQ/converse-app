@@ -1,5 +1,5 @@
-import logger from "./logger";
-import { wait } from "./wait";
+import logger from "./logger"
+import { wait } from "./wait"
 
 export const retryWithBackoff = async <T>({
   fn, // The function to retry
@@ -10,40 +10,36 @@ export const retryWithBackoff = async <T>({
   context, // Context to log in error message
   onError, // Function to call on error
 }: {
-  fn: () => Promise<T>;
-  retries?: number;
-  delay?: number;
-  factor?: number;
-  maxDelay?: number;
-  context?: string;
-  onError?: (error: unknown) => Promise<void>;
+  fn: () => Promise<T>
+  retries?: number
+  delay?: number
+  factor?: number
+  maxDelay?: number
+  context?: string
+  onError?: (error: unknown) => Promise<void>
 }): Promise<T> => {
-  let attempt = 0;
-  let currentDelay = delay;
+  let attempt = 0
+  let currentDelay = delay
 
   while (attempt < retries) {
     try {
-      return await fn();
+      return await fn()
     } catch (error) {
-      attempt++;
+      attempt++
       if (attempt >= retries) {
-        throw error; // Exceeded max retries, propagate the error
+        throw error // Exceeded max retries, propagate the error
       }
       logger.warn(
-        `Retry attempt ${attempt} failed. Retrying in ${currentDelay}ms...${
-          context ?? ""
-        }`,
-      );
+        `Retry attempt ${attempt} failed. Retrying in ${currentDelay}ms...${context ?? ""}`,
+      )
       if (onError) {
-        await onError(error);
+        await onError(error)
       }
-      await wait(currentDelay);
-      currentDelay = Math.min(currentDelay * factor, maxDelay);
+      await wait(currentDelay)
+      currentDelay = Math.min(currentDelay * factor, maxDelay)
     }
   }
   throw new Error(
-    context
-      ? `Failed to execute: ${context}`
-      : "Failed to execute function after max retries",
-  );
-};
+    context ? `Failed to execute: ${context}` : "Failed to execute function after max retries",
+  )
+}

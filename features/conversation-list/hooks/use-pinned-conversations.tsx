@@ -1,17 +1,17 @@
-import { useQueries } from "@tanstack/react-query";
-import { useMemo } from "react";
-import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
-import { getConversationMetadataQueryOptions } from "@/features/conversation/conversation-metadata/conversation-metadata.query";
-import { useAllowedConsentConversationsQuery } from "@/queries/conversations-allowed-consent-query";
+import { useQueries } from "@tanstack/react-query"
+import { useMemo } from "react"
+import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
+import { getConversationMetadataQueryOptions } from "@/features/conversation/conversation-metadata/conversation-metadata.query"
+import { useAllowedConsentConversationsQuery } from "@/queries/conversations-allowed-consent-query"
 
 export function usePinnedConversations() {
-  const currentAccount = useCurrentSenderEthAddress();
+  const currentAccount = useCurrentSenderEthAddress()
 
   const { isLoading: isLoadingConversations, data: conversations } =
     useAllowedConsentConversationsQuery({
       account: currentAccount!,
       caller: "usePinnedConversations",
-    });
+    })
 
   const conversationsDataQueries = useQueries({
     queries: (conversations ?? []).map((conversation) =>
@@ -20,19 +20,17 @@ export function usePinnedConversations() {
         topic: conversation.topic,
       }),
     ),
-  });
+  })
 
   const pinnedConversations = useMemo(() => {
     return conversations?.filter((conversation, index) => {
-      const query = conversationsDataQueries[index];
-      return query?.data?.pinned;
-    });
-  }, [conversations, conversationsDataQueries]);
+      const query = conversationsDataQueries[index]
+      return query?.data?.pinned
+    })
+  }, [conversations, conversationsDataQueries])
 
   return {
     pinnedConversations,
-    isLoading:
-      isLoadingConversations ||
-      conversationsDataQueries.some((q) => q.isLoading),
-  };
+    isLoading: isLoadingConversations || conversationsDataQueries.some((q) => q.isLoading),
+  }
 }

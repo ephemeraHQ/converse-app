@@ -13,9 +13,11 @@ export const previewConfig: IConfig = {
   scheme: "converse-preview",
   websiteDomain: "preview.converse.xyz",
   usernameSuffix: ".conversedev.eth",
-  universalLinks: ["preview.converse.xyz/", "preview.getconverse.app/"].flatMap(
-    (domain) => [`https://${domain}`, `http://${domain}`, domain],
-  ),
+  universalLinks: ["preview.converse.xyz/", "preview.getconverse.app/"].flatMap((domain) => [
+    `https://${domain}`,
+    `http://${domain}`,
+    domain,
+  ]),
   evm: {
     rpcEndpoint: process.env.EXPO_PUBLIC_EVM_RPC_ENDPOINT,
     transactionChainId: "0x14a34", // Base Sepolia

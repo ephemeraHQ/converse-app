@@ -59,16 +59,12 @@ export const ConnectWalletRotateInbox = memo(function ConnectWalletRotateInbox(
           ethAddress: activeWalletEthAddress,
           type: "EOA",
           chainId: activeWallet.getChain()?.id!,
-          signMessage: (message: string) =>
-            activeWalletAccount.signMessage({ message }),
+          signMessage: (message: string) => activeWalletAccount.signMessage({ message }),
         }),
       })
 
       // Add the privy SWC to the new client inbox
-      await newXmtpClient.addAccount(
-        createXmtpSignerFromPrivySwc(smartWalletClient),
-        true,
-      )
+      await newXmtpClient.addAccount(createXmtpSignerFromPrivySwc(smartWalletClient), true)
 
       // Set the new inbox ID as the current sender
       useMultiInboxStore.getState().actions.setCurrentSender({
@@ -103,9 +99,7 @@ export const ConnectWalletRotateInbox = memo(function ConnectWalletRotateInbox(
             {shortAddress(activeWallet.getAccount()?.address ?? "")}
           </Text>
         }
-        buttons={
-          <ConnectWalletOutlineButton text="Cancel" onPress={router.goBack} />
-        }
+        buttons={<ConnectWalletOutlineButton text="Cancel" onPress={router.goBack} />}
       />
     )
   }
@@ -123,10 +117,7 @@ export const ConnectWalletRotateInbox = memo(function ConnectWalletRotateInbox(
       }
       buttons={
         <>
-          <ConnectWalletPrimaryButton
-            text="Use this address"
-            onPress={handleCreateNewInboxId}
-          />
+          <ConnectWalletPrimaryButton text="Use this address" onPress={handleCreateNewInboxId} />
           <ConnectWalletLinkButton text="Cancel" onPress={router.goBack} />
         </>
       }

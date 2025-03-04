@@ -15,10 +15,7 @@ import { ProfileContactCardLayout } from "@/features/profiles/components/profile
 import { ProfileSection } from "@/features/profiles/components/profile-section"
 import { ProfileSocialsNames } from "@/features/profiles/components/profile-social-names"
 import { useProfileMeScreenHeader } from "@/features/profiles/profile-me.screen-header"
-import {
-  useProfileMeStore,
-  useProfileMeStoreValue,
-} from "@/features/profiles/profile-me.store"
+import { useProfileMeStore, useProfileMeStoreValue } from "@/features/profiles/profile-me.store"
 import { useProfileQuery } from "@/features/profiles/profiles.query"
 import { useSocialProfilesForAddressQuery } from "@/features/social-profiles/social-profiles.query"
 import { useAddPfp } from "@/hooks/use-add-pfp"
@@ -70,9 +67,7 @@ export function ProfileMe(props: { inboxId: InboxId }) {
           <ProfileContactCardLayout
             avatar={<EditableProfileContactCardAvatar inboxId={inboxId} />}
             name={<EditableProfileContactCardNameInput inboxId={inboxId} />}
-            additionalOptions={
-              <EditableProfileContactCardImportName inboxId={inboxId} />
-            }
+            additionalOptions={<EditableProfileContactCardImportName inboxId={inboxId} />}
           />
         ) : (
           <ProfileContactCard inboxId={inboxId} />
@@ -111,9 +106,7 @@ export function ProfileMe(props: { inboxId: InboxId }) {
             </ProfileSection>
           ) : null}
 
-          {socialProfiles && (
-            <ProfileSocialsNames socialProfiles={socialProfiles} />
-          )}
+          {socialProfiles && <ProfileSocialsNames socialProfiles={socialProfiles} />}
 
           {/* Only show settings when viewing your own profile and not in edit mode */}
           {isMyProfile && !editMode && (
@@ -148,40 +141,38 @@ export function ProfileMe(props: { inboxId: InboxId }) {
   )
 }
 
-const EditableProfileContactCardNameInput = memo(
-  function EditableProfileContactCardNameInput({
-    inboxId,
-  }: {
-    inboxId: InboxId
-  }) {
-    const profileMeStore = useProfileMeStore(inboxId)
+const EditableProfileContactCardNameInput = memo(function EditableProfileContactCardNameInput({
+  inboxId,
+}: {
+  inboxId: InboxId
+}) {
+  const profileMeStore = useProfileMeStore(inboxId)
 
-    const nameDefaultTextValue = profileMeStore.getState().nameTextValue
+  const nameDefaultTextValue = profileMeStore.getState().nameTextValue
 
-    const [nameValidationError, setNameValidationError] = useState<string>()
+  const [nameValidationError, setNameValidationError] = useState<string>()
 
-    const handleDisplayNameChange = useCallback(
-      (args: { text: string; error?: string }) => {
-        if (args.error) {
-          setNameValidationError(args.error)
-        } else {
-          setNameValidationError(undefined)
-        }
-        profileMeStore.getState().actions.setNameTextValue(args.text)
-      },
-      [profileMeStore],
-    )
+  const handleDisplayNameChange = useCallback(
+    (args: { text: string; error?: string }) => {
+      if (args.error) {
+        setNameValidationError(args.error)
+      } else {
+        setNameValidationError(undefined)
+      }
+      profileMeStore.getState().actions.setNameTextValue(args.text)
+    },
+    [profileMeStore],
+  )
 
-    return (
-      <ProfileContactCardEditableNameInput
-        defaultValue={nameDefaultTextValue}
-        onChangeText={handleDisplayNameChange}
-        status={nameValidationError ? "error" : undefined}
-        helper={nameValidationError}
-      />
-    )
-  },
-)
+  return (
+    <ProfileContactCardEditableNameInput
+      defaultValue={nameDefaultTextValue}
+      onChangeText={handleDisplayNameChange}
+      status={nameValidationError ? "error" : undefined}
+      helper={nameValidationError}
+    />
+  )
+})
 
 const EditableUsernameInput = memo(function EditableUsernameInput({
   inboxId,
@@ -213,23 +204,21 @@ const EditableUsernameInput = memo(function EditableUsernameInput({
   )
 })
 
-const EditableProfileContactCardImportName = memo(
-  function EditableProfileContactCardImportName({
-    inboxId,
-  }: {
-    inboxId: InboxId
-  }) {
-    const router = useRouter()
+const EditableProfileContactCardImportName = memo(function EditableProfileContactCardImportName({
+  inboxId,
+}: {
+  inboxId: InboxId
+}) {
+  const router = useRouter()
 
-    return (
-      <ProfileContactCardImportName
-        onPress={() => {
-          router.navigate("ProfileImportName")
-        }}
-      />
-    )
-  },
-)
+  return (
+    <ProfileContactCardImportName
+      onPress={() => {
+        router.navigate("ProfileImportName")
+      }}
+    />
+  )
+})
 
 const EditableDescriptionInput = memo(function EditableDescriptionInput({
   inboxId,
@@ -262,46 +251,48 @@ const EditableDescriptionInput = memo(function EditableDescriptionInput({
   )
 })
 
-const EditableProfileContactCardAvatar = memo(
-  function EditableProfileContactCardAvatar({ inboxId }: { inboxId: InboxId }) {
-    const { addPFP, asset, isUploading } = useAddPfp()
-    const profileMeStore = useProfileMeStore(inboxId)
-    const { data: profile } = useProfileQuery({ xmtpId: inboxId })
+const EditableProfileContactCardAvatar = memo(function EditableProfileContactCardAvatar({
+  inboxId,
+}: {
+  inboxId: InboxId
+}) {
+  const { addPFP, asset, isUploading } = useAddPfp()
+  const profileMeStore = useProfileMeStore(inboxId)
+  const { data: profile } = useProfileQuery({ xmtpId: inboxId })
 
-    // Determine which avatar to display with priority: store avatar > profile avatar
-    const storeAvatar = profileMeStore.getState().avatarUri
-    const profileAvatar = profile?.avatar
+  // Determine which avatar to display with priority: store avatar > profile avatar
+  const storeAvatar = profileMeStore.getState().avatarUri
+  const profileAvatar = profile?.avatar
 
-    // Create a display URI with a cache-busting parameter
-    const getDisplayUri = useCallback(() => {
-      // Priority: local asset (during upload) > store avatar > profile avatar
-      const sourceUri = asset?.uri || storeAvatar || profileAvatar
+  // Create a display URI with a cache-busting parameter
+  const getDisplayUri = useCallback(() => {
+    // Priority: local asset (during upload) > store avatar > profile avatar
+    const sourceUri = asset?.uri || storeAvatar || profileAvatar
 
-      if (!sourceUri) {
-        return undefined
-      }
+    if (!sourceUri) {
+      return undefined
+    }
 
-      return sourceUri
-    }, [asset?.uri, storeAvatar, profileAvatar])
+    return sourceUri
+  }, [asset?.uri, storeAvatar, profileAvatar])
 
-    // Update upload status
-    useEffect(() => {
-      profileMeStore.getState().actions.setIsAvatarUploading(isUploading)
-    }, [isUploading, profileMeStore])
+  // Update upload status
+  useEffect(() => {
+    profileMeStore.getState().actions.setIsAvatarUploading(isUploading)
+  }, [isUploading, profileMeStore])
 
-    const addAvatar = useCallback(async () => {
-      const url = await addPFP()
-      if (url) {
-        profileMeStore.getState().actions.setAvatarUri(url)
-      }
-    }, [addPFP, profileMeStore])
+  const addAvatar = useCallback(async () => {
+    const url = await addPFP()
+    if (url) {
+      profileMeStore.getState().actions.setAvatarUri(url)
+    }
+  }, [addPFP, profileMeStore])
 
-    return (
-      <ProfileContactCardEditableAvatar
-        avatarUri={getDisplayUri()}
-        avatarName={profile?.name}
-        onPress={addAvatar}
-      />
-    )
-  },
-)
+  return (
+    <ProfileContactCardEditableAvatar
+      avatarUri={getDisplayUri()}
+      avatarName={profile?.name}
+      onPress={addAvatar}
+    />
+  )
+})

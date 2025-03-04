@@ -1,29 +1,29 @@
-import { HStack } from "@design-system/HStack";
-import { VStack } from "@design-system/VStack";
-import React, { memo, useCallback } from "react";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ReplyPreview } from "@/features/conversation/conversation-composer/conversation-composer-reply-preview";
-import { useAppTheme } from "@/theme/use-app-theme";
-import { captureErrorWithToast } from "@/utils/capture-error";
-import { AddAttachmentButton } from "./conversation-composer-add-attachment-button";
-import { ConversationComposerAttachmentPreview } from "./conversation-composer-attachment-preview";
-import { SendButton } from "./conversation-composer-send-button";
-import { ConversationComposerTextInput } from "./conversation-composer-text-input";
-import { useSend } from "./conversation-composer-use-send";
+import { HStack } from "@design-system/HStack"
+import { VStack } from "@design-system/VStack"
+import React, { memo, useCallback } from "react"
+import { useSafeAreaInsets } from "react-native-safe-area-context"
+import { ReplyPreview } from "@/features/conversation/conversation-composer/conversation-composer-reply-preview"
+import { useAppTheme } from "@/theme/use-app-theme"
+import { captureErrorWithToast } from "@/utils/capture-error"
+import { AddAttachmentButton } from "./conversation-composer-add-attachment-button"
+import { ConversationComposerAttachmentPreview } from "./conversation-composer-attachment-preview"
+import { SendButton } from "./conversation-composer-send-button"
+import { ConversationComposerTextInput } from "./conversation-composer-text-input"
+import { useSend } from "./conversation-composer-use-send"
 
 export const ConversationComposer = memo(function ConversationComposer() {
-  const { theme } = useAppTheme();
-  const insets = useSafeAreaInsets();
+  const { theme } = useAppTheme()
+  const insets = useSafeAreaInsets()
 
-  const { send } = useSend();
+  const { send } = useSend()
 
   const handleSend = useCallback(async () => {
     try {
-      await send();
+      await send()
     } catch (error) {
-      captureErrorWithToast(error, { message: "Failed to send message" });
+      captureErrorWithToast(error, { message: "Failed to send message" })
     }
-  }, [send]);
+  }, [send])
 
   return (
     <VStack
@@ -75,5 +75,5 @@ export const ConversationComposer = memo(function ConversationComposer() {
         </HStack>
       </VStack>
     </VStack>
-  );
-});
+  )
+})

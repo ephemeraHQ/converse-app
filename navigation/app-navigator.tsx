@@ -1,7 +1,4 @@
-import {
-  ConversationNav,
-  ConversationScreenConfig,
-} from "@features/conversation/conversation.nav"
+import { ConversationNav, ConversationScreenConfig } from "@features/conversation/conversation.nav"
 import { LinkingOptions, NavigationContainer } from "@react-navigation/native"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import * as Linking from "expo-linking"
@@ -17,10 +14,7 @@ import { OnboardingContactCardImportNameScreen } from "@/features/onboarding/scr
 import { OnboardingContactCardScreen } from "@/features/onboarding/screens/onboarding-contact-card.screen"
 import { OnboardingWelcomeScreen } from "@/features/onboarding/screens/onboarding-welcome.screen"
 import { ProfileImportNameScreen } from "@/features/profiles/profile-import-name.screen"
-import {
-  ProfileNav,
-  ProfileScreenConfig,
-} from "@/features/profiles/profile.nav"
+import { ProfileNav, ProfileScreenConfig } from "@/features/profiles/profile.nav"
 import { NavigationParamList } from "@/navigation/navigation.types"
 import { navigationRef } from "@/navigation/navigation.utils"
 import { WebviewPreviewNav } from "@/screens/WebviewPreviewNav"
@@ -28,10 +22,7 @@ import { useAppTheme, useThemeProvider } from "@/theme/use-app-theme"
 import { captureError } from "@/utils/capture-error"
 import { useUpdateSentry } from "@/utils/sentry"
 import { hideSplashScreen } from "@/utils/splash/splash"
-import {
-  ShareProfileNav,
-  ShareProfileScreenConfig,
-} from "../screens/ShareProfileNav"
+import { ShareProfileNav, ShareProfileScreenConfig } from "../screens/ShareProfileNav"
 
 const prefix = Linking.createURL("/")
 
@@ -53,12 +44,8 @@ const linking: LinkingOptions<NavigationParamList> = {
 }
 
 export function AppNavigator() {
-  const {
-    themeScheme,
-    navigationTheme,
-    setThemeContextOverride,
-    ThemeProvider,
-  } = useThemeProvider()
+  const { themeScheme, navigationTheme, setThemeContextOverride, ThemeProvider } =
+    useThemeProvider()
 
   useUpdateSentry()
   useIsCurrentVersionEnough()
@@ -159,10 +146,7 @@ const AppStacks = memo(function AppStacks() {
             // Fade animation when transitioning to authenticated state
             options={{ animation: "fade" }}
           />
-          <AppNativeStack.Screen
-            name="Blocked"
-            component={BlockedConversationsScreen}
-          />
+          <AppNativeStack.Screen name="Blocked" component={BlockedConversationsScreen} />
           {ConversationRequestsListNav()}
           {ConversationNav()}
           {ShareProfileNav()}
@@ -180,10 +164,7 @@ const AppStacks = memo(function AppStacks() {
               },
             }}
           />
-          <AppNativeStack.Screen
-            name="AppSettings"
-            component={AppSettingsScreen}
-          />
+          <AppNativeStack.Screen name="AppSettings" component={AppSettingsScreen} />
         </AppNativeStack.Group>
       )}
     </AppNativeStack.Navigator>

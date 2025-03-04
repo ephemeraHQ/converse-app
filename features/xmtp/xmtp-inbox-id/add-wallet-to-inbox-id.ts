@@ -26,9 +26,7 @@ export async function addWalletToInboxId(args: {
     if (timeDiffMs > 3000) {
       captureError(
         new XMTPError({
-          error: new Error(
-            `Adding wallet to inbox ID took ${timeDiffMs}ms for inboxId ${inboxId}`,
-          ),
+          error: new Error(`Adding wallet to inbox ID took ${timeDiffMs}ms for inboxId ${inboxId}`),
         }),
       )
     }

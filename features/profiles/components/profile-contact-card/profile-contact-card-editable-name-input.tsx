@@ -4,17 +4,12 @@ import { TextFieldProps } from "@/design-system/TextField/TextField.props"
 import { translate } from "@/i18n"
 import { useAppTheme } from "@/theme/use-app-theme"
 
-type IProfileContactCardEditableNameInputProps = Omit<
-  TextFieldProps,
-  "onChangeText"
-> & {
+type IProfileContactCardEditableNameInputProps = Omit<TextFieldProps, "onChangeText"> & {
   onChangeText: (args: { text: string; error: string | undefined }) => void
 }
 
 export const ProfileContactCardEditableNameInput = memo(
-  function ProfileContactCardEditableNameInput(
-    props: IProfileContactCardEditableNameInputProps,
-  ) {
+  function ProfileContactCardEditableNameInput(props: IProfileContactCardEditableNameInputProps) {
     const { onChangeText, ...rest } = props
 
     const { theme } = useAppTheme()

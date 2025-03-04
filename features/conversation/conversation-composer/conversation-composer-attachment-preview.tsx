@@ -1,36 +1,34 @@
-import { HStack } from "@design-system/HStack";
-import { AnimatedVStack } from "@design-system/VStack";
-import { SICK_DAMPING, SICK_STIFFNESS } from "@theme/animations";
-import React, { memo, useCallback } from "react";
-import { useAnimatedStyle, withSpring } from "react-native-reanimated";
-import { SendAttachmentPreview } from "@/features/conversation/conversation-composer/conversation-composer-send-attachment-preview";
-import { useAppTheme } from "@/theme/use-app-theme";
+import { HStack } from "@design-system/HStack"
+import { AnimatedVStack } from "@design-system/VStack"
+import { SICK_DAMPING, SICK_STIFFNESS } from "@theme/animations"
+import React, { memo, useCallback } from "react"
+import { useAnimatedStyle, withSpring } from "react-native-reanimated"
+import { SendAttachmentPreview } from "@/features/conversation/conversation-composer/conversation-composer-send-attachment-preview"
+import { useAppTheme } from "@/theme/use-app-theme"
 import {
   useConversationComposerStore,
   useConversationComposerStoreContext,
-} from "./conversation-composer.store-context";
+} from "./conversation-composer.store-context"
 
 export const ConversationComposerAttachmentPreview = memo(
   function ConversationComposerAttachmentPreview() {
-    const { theme } = useAppTheme();
+    const { theme } = useAppTheme()
 
-    const mediaPreview = useConversationComposerStoreContext(
-      (state) => state.composerMediaPreview,
-    );
+    const mediaPreview = useConversationComposerStoreContext((state) => state.composerMediaPreview)
 
-    const store = useConversationComposerStore();
+    const store = useConversationComposerStore()
 
     const handleAttachmentClosed = useCallback(() => {
-      store.getState().setComposerMediaPreview(null);
-    }, [store]);
+      store.getState().setComposerMediaPreview(null)
+    }, [store])
 
     const isLandscape = !!(
       mediaPreview?.dimensions?.height &&
       mediaPreview?.dimensions?.width &&
       mediaPreview.dimensions.width > mediaPreview.dimensions.height
-    );
+    )
 
-    const maxHeight = isLandscape ? 90 : 120;
+    const maxHeight = isLandscape ? 90 : 120
 
     const containerAS = useAnimatedStyle(() => {
       return {
@@ -38,8 +36,8 @@ export const ConversationComposerAttachmentPreview = memo(
           damping: SICK_DAMPING,
           stiffness: SICK_STIFFNESS,
         }),
-      };
-    }, [mediaPreview?.mediaURI, maxHeight]);
+      }
+    }, [mediaPreview?.mediaURI, maxHeight])
 
     return (
       <AnimatedVStack style={containerAS}>
@@ -68,6 +66,6 @@ export const ConversationComposerAttachmentPreview = memo(
           </HStack>
         )}
       </AnimatedVStack>
-    );
+    )
   },
-);
+)

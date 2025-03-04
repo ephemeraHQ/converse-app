@@ -104,11 +104,7 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
   // Swipe action renderers
   const renderLeftActions = useCallback(
     (args: ISwipeableRenderActionsArgs) =>
-      isDeleted ? (
-        <RestoreSwipeableAction {...args} />
-      ) : (
-        <DeleteSwipeableAction {...args} />
-      ),
+      isDeleted ? <RestoreSwipeableAction {...args} /> : <DeleteSwipeableAction {...args} />,
     [isDeleted],
   )
 
@@ -131,11 +127,7 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
         onPress={onPress}
         showError={false}
         avatarComponent={
-          <Avatar
-            sizeNumber={theme.avatarSize.lg}
-            uri={avatarUrl}
-            name={displayName}
-          />
+          <Avatar sizeNumber={theme.avatarSize.lg} uri={avatarUrl} name={displayName} />
         }
         title={displayName}
         subtitle={subtitle}

@@ -50,8 +50,7 @@ export function captureErrorWithToast(
 
   captureError(error)
 
-  const snackMessage =
-    message || (error as Error)?.message || "Something went wrong"
+  const snackMessage = message || (error as Error)?.message || "Something went wrong"
 
   showSnackbar({
     message: snackMessage,

@@ -1,37 +1,36 @@
-import { Icon } from "@design-system/Icon/Icon";
-import { PressableScale } from "@design-system/pressable-scale";
-import { Text } from "@design-system/Text";
-import { IVStackProps, VStack } from "@design-system/VStack";
-import { translate } from "@i18n";
-import { useQuery } from "@tanstack/react-query";
-import { getLocalAttachmentForMessageId } from "@utils/attachment/getLocalAttachment";
-import { handleDecryptedLocalAttachment } from "@utils/attachment/handleDecryptedLocalAttachment";
-import { RemoteAttachmentContent } from "@xmtp/react-native-sdk";
-import { Image } from "expo-image";
-import prettyBytes from "pretty-bytes";
-import { memo } from "react";
-import { getCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
-import { AttachmentLoading } from "@/features/conversation/conversation-attachment/conversation-attachment-loading";
+import { Icon } from "@design-system/Icon/Icon"
+import { PressableScale } from "@design-system/pressable-scale"
+import { Text } from "@design-system/Text"
+import { IVStackProps, VStack } from "@design-system/VStack"
+import { translate } from "@i18n"
+import { useQuery } from "@tanstack/react-query"
+import { getLocalAttachmentForMessageId } from "@utils/attachment/getLocalAttachment"
+import { handleDecryptedLocalAttachment } from "@utils/attachment/handleDecryptedLocalAttachment"
+import { RemoteAttachmentContent } from "@xmtp/react-native-sdk"
+import { Image } from "expo-image"
+import prettyBytes from "pretty-bytes"
+import { memo } from "react"
+import { getCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
+import { AttachmentLoading } from "@/features/conversation/conversation-attachment/conversation-attachment-loading"
 import {
   fetchAndDecodeRemoteAttachment,
   MAX_AUTOMATIC_DOWNLOAD_ATTACHMENT_SIZE,
-} from "@/features/xmtp/xmtp-codecs/xmtp-codecs-attachments";
-import { useAppTheme } from "@/theme/use-app-theme";
+} from "@/features/xmtp/xmtp-codecs/xmtp-codecs-attachments"
+import { useAppTheme } from "@/theme/use-app-theme"
 
 type IAttachmentRemoteImageProps = {
-  messageId: string;
-  remoteMessageContent: RemoteAttachmentContent;
-  fitAspectRatio?: boolean;
-  containerProps?: IVStackProps;
-};
+  messageId: string
+  remoteMessageContent: RemoteAttachmentContent
+  fitAspectRatio?: boolean
+  containerProps?: IVStackProps
+}
 
 export const AttachmentRemoteImage = memo(function AttachmentRemoteImage(
   props: IAttachmentRemoteImageProps,
 ) {
-  const { messageId, remoteMessageContent, fitAspectRatio, containerProps } =
-    props;
+  const { messageId, remoteMessageContent, fitAspectRatio, containerProps } = props
 
-  const { theme } = useAppTheme();
+  const { theme } = useAppTheme()
 
   const {
     data: attachment,
@@ -41,14 +40,14 @@ export const AttachmentRemoteImage = memo(function AttachmentRemoteImage(
   } = useQuery({
     queryKey: ["attachment", messageId],
     queryFn: () => fetchAttachment(messageId, remoteMessageContent),
-  });
+  })
 
   if (!attachment && attachmentLoading) {
     return (
       <AttachmentPreviewContainer {...containerProps}>
         <AttachmentLoading />
       </AttachmentPreviewContainer>
-    );
+    )
   }
 
   if (attachmentError || !attachment) {
@@ -56,7 +55,7 @@ export const AttachmentRemoteImage = memo(function AttachmentRemoteImage(
       <AttachmentPreviewContainer {...containerProps}>
         <Text>{translate("attachment_message_error_download")}</Text>
       </AttachmentPreviewContainer>
-    );
+    )
   }
 
   if (!attachment.mediaURL) {
@@ -69,7 +68,7 @@ export const AttachmentRemoteImage = memo(function AttachmentRemoteImage(
           </Text>
         </AttachmentPreviewContainer>
       </PressableScale>
-    );
+    )
   }
 
   if (attachment.mediaType === "UNSUPPORTED") {
@@ -89,15 +88,15 @@ export const AttachmentRemoteImage = memo(function AttachmentRemoteImage(
           </Text>
         </AttachmentPreviewContainer>
       </PressableScale>
-    );
+    )
   }
 
   const aspectRatio =
     fitAspectRatio && attachment.imageSize
       ? attachment.imageSize.width / attachment.imageSize.height
-      : undefined;
+      : undefined
 
-  const { style, ...rest } = containerProps || {};
+  const { style, ...rest } = containerProps || {}
 
   return (
     <AttachmentPreviewContainer style={[{ aspectRatio }, style]} {...rest}>
@@ -110,15 +109,13 @@ export const AttachmentRemoteImage = memo(function AttachmentRemoteImage(
         }}
       />
     </AttachmentPreviewContainer>
-  );
-});
+  )
+})
 
-const AttachmentPreviewContainer = memo(function AttachmentPreviewContainer(
-  props: IVStackProps,
-) {
-  const { style, ...rest } = props;
+const AttachmentPreviewContainer = memo(function AttachmentPreviewContainer(props: IVStackProps) {
+  const { style, ...rest } = props
 
-  const { theme } = useAppTheme();
+  const { theme } = useAppTheme()
 
   return (
     <VStack
@@ -137,17 +134,14 @@ const AttachmentPreviewContainer = memo(function AttachmentPreviewContainer(
       ]}
       {...rest}
     />
-  );
-});
+  )
+})
 
-async function fetchAttachment(
-  messageId: string,
-  content: RemoteAttachmentContent,
-) {
-  const localAttachment = await getLocalAttachmentForMessageId(messageId);
+async function fetchAttachment(messageId: string, content: RemoteAttachmentContent) {
+  const localAttachment = await getLocalAttachmentForMessageId(messageId)
 
   if (localAttachment) {
-    return localAttachment;
+    return localAttachment
   }
 
   if (
@@ -158,15 +152,15 @@ async function fetchAttachment(
       account: getCurrentSenderEthAddress()!,
       messageId: messageId,
       remoteAttachmentContent: content,
-    });
+    })
 
     const result = await handleDecryptedLocalAttachment({
       messageId: messageId,
       decryptedLocalAttachment: decryptedLocalAttachment,
-    });
+    })
 
-    return result;
+    return result
   }
 
-  return null;
+  return null
 }

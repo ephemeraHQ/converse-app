@@ -41,15 +41,12 @@ export async function getConvosAuthenticationHeaders(): Promise<XmtpApiHeaders> 
 
   if (!inboxClient) {
     throw new AuthenticationError({
-      error: new Error(
-        "[getConvosAuthenticationHeaders] No inbox client found for account",
-      ),
+      error: new Error("[getConvosAuthenticationHeaders] No inbox client found for account"),
       additionalMessage: "failed to generate headers",
     })
   }
 
-  const rawAppCheckTokenSignature =
-    await inboxClient.signWithInstallationKey(appCheckToken)
+  const rawAppCheckTokenSignature = await inboxClient.signWithInstallationKey(appCheckToken)
   const appCheckTokenSignatureHexString = toHex(rawAppCheckTokenSignature)
 
   return {

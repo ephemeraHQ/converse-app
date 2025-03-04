@@ -1,33 +1,31 @@
-import { memo, useCallback } from "react";
+import { memo, useCallback } from "react"
 import {
   GestureResponderEvent,
   TouchableOpacity as RNTouchableOpacity,
   TouchableOpacityProps,
-} from "react-native";
-import { Haptics } from "../utils/haptics";
+} from "react-native"
+import { Haptics } from "../utils/haptics"
 
 export type ITouchableOpacityProps = TouchableOpacityProps & {
-  withHaptics?: boolean;
-};
+  withHaptics?: boolean
+}
 
-export const TOUCHABLE_OPACITY_ACTIVE_OPACITY = 0.7;
+export const TOUCHABLE_OPACITY_ACTIVE_OPACITY = 0.7
 
-export const TouchableOpacity = memo(function TouchableOpacity(
-  props: ITouchableOpacityProps,
-) {
-  const { withHaptics, onPress: onPressProps, ...rest } = props;
+export const TouchableOpacity = memo(function TouchableOpacity(props: ITouchableOpacityProps) {
+  const { withHaptics, onPress: onPressProps, ...rest } = props
 
   const onPress = useCallback(
     (e: GestureResponderEvent) => {
       if (onPressProps) {
         if (withHaptics) {
-          Haptics.lightImpactAsync();
+          Haptics.lightImpactAsync()
         }
-        onPressProps(e);
+        onPressProps(e)
       }
     },
     [onPressProps, withHaptics],
-  );
+  )
 
   return (
     <RNTouchableOpacity
@@ -35,5 +33,5 @@ export const TouchableOpacity = memo(function TouchableOpacity(
       activeOpacity={TOUCHABLE_OPACITY_ACTIVE_OPACITY}
       {...rest}
     />
-  );
-});
+  )
+})

@@ -67,9 +67,7 @@ export function useSetupStreamingSubscriptions() {
           return
         }
 
-        const previousAddresses = previousSenders.map(
-          (sender) => sender.ethereumAddress,
-        )
+        const previousAddresses = previousSenders.map((sender) => sender.ethereumAddress)
 
         const currentAddresses = senders.map((sender) => sender.ethereumAddress)
 

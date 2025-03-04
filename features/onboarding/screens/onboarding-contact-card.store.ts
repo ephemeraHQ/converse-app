@@ -17,33 +17,30 @@ type IOnboardingContactCardStore = {
   }
 }
 
-export const useOnboardingContactCardStore =
-  create<IOnboardingContactCardStore>((set) => ({
-    name: "",
-    username: "",
-    nameValidationError: "",
-    avatar: "",
-    isAvatarUploading: false,
-    actions: {
-      setName: (name: string) =>
-        set((state) => ({
-          name,
-          // For now, we're generating the username from the name
-          username: formatRandomUsername({ displayName: name }),
-        })),
-      setUsername: (username: string) => set({ username }),
-      setNameValidationError: (nameValidationError: string) =>
-        set({ nameValidationError }),
-      setAvatar: (avatar: string) => set({ avatar }),
-      setIsAvatarUploading: (isAvatarUploading: boolean) =>
-        set({ isAvatarUploading }),
-      reset: () =>
-        set({
-          name: "",
-          username: "",
-          nameValidationError: "",
-          avatar: "",
-          isAvatarUploading: false,
-        }),
-    },
-  }))
+export const useOnboardingContactCardStore = create<IOnboardingContactCardStore>((set) => ({
+  name: "",
+  username: "",
+  nameValidationError: "",
+  avatar: "",
+  isAvatarUploading: false,
+  actions: {
+    setName: (name: string) =>
+      set((state) => ({
+        name,
+        // For now, we're generating the username from the name
+        username: formatRandomUsername({ displayName: name }),
+      })),
+    setUsername: (username: string) => set({ username }),
+    setNameValidationError: (nameValidationError: string) => set({ nameValidationError }),
+    setAvatar: (avatar: string) => set({ avatar }),
+    setIsAvatarUploading: (isAvatarUploading: boolean) => set({ isAvatarUploading }),
+    reset: () =>
+      set({
+        name: "",
+        username: "",
+        nameValidationError: "",
+        avatar: "",
+        isAvatarUploading: false,
+      }),
+  },
+}))

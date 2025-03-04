@@ -1,17 +1,17 @@
-import { IconButton } from "@design-system/IconButton/IconButton";
-import { AnimatedVStack, VStack } from "@design-system/VStack";
-import { Image } from "expo-image";
-import { StyleSheet } from "react-native";
-import { ActivityIndicator } from "@/design-system/activity-indicator";
-import { useAppTheme } from "@/theme/use-app-theme";
+import { IconButton } from "@design-system/IconButton/IconButton"
+import { AnimatedVStack, VStack } from "@design-system/VStack"
+import { Image } from "expo-image"
+import { StyleSheet } from "react-native"
+import { ActivityIndicator } from "@/design-system/activity-indicator"
+import { useAppTheme } from "@/theme/use-app-theme"
 
 type SendAttachmentPreviewProps = {
-  uri: string;
-  onClose: () => void;
-  isLoading: boolean;
-  error: boolean;
-  isLandscape: boolean;
-};
+  uri: string
+  onClose: () => void
+  isLoading: boolean
+  error: boolean
+  isLandscape: boolean
+}
 
 export function SendAttachmentPreview({
   uri,
@@ -20,7 +20,7 @@ export function SendAttachmentPreview({
   error,
   isLandscape,
 }: SendAttachmentPreviewProps) {
-  const { theme } = useAppTheme();
+  const { theme } = useAppTheme()
 
   return (
     <AnimatedVStack
@@ -87,5 +87,5 @@ export function SendAttachmentPreview({
         <IconButton size="sm" iconName="xmark" onPress={onClose} />
       </AnimatedVStack>
     </AnimatedVStack>
-  );
+  )
 }

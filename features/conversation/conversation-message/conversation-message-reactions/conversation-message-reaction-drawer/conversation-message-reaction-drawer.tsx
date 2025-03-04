@@ -107,17 +107,10 @@ const BottomSheetContent = memo(function BottomSheetContent() {
           {/* "All" button to clear the filter */}
           <TouchableHighlight
             onPress={() => setFilterReactions(null)}
-            style={[
-              themed($chip),
-              filterReactions === null && themed($chipActive),
-            ]}
+            style={[themed($chip), filterReactions === null && themed($chipActive)]}
           >
             <HStack style={{ alignItems: "center" }}>
-              <Text
-                style={themed(
-                  filterReactions === null ? $chipTextActive : $chipText,
-                )}
-              >
+              <Text style={themed(filterReactions === null ? $chipTextActive : $chipText)}>
                 All {rolledUpReactions.totalCount}
               </Text>
             </HStack>
@@ -128,23 +121,12 @@ const BottomSheetContent = memo(function BottomSheetContent() {
             <TouchableHighlight
               key={index}
               onPress={() =>
-                setFilterReactions(
-                  reaction.content === filterReactions
-                    ? null
-                    : reaction.content,
-                )
+                setFilterReactions(reaction.content === filterReactions ? null : reaction.content)
               }
-              style={[
-                themed($chip),
-                filterReactions === reaction.content && themed($chipActive),
-              ]}
+              style={[themed($chip), filterReactions === reaction.content && themed($chipActive)]}
             >
               <Text
-                style={themed(
-                  filterReactions === reaction.content
-                    ? $chipTextActive
-                    : $chipText,
-                )}
+                style={themed(filterReactions === reaction.content ? $chipTextActive : $chipText)}
               >
                 {reaction.content} {reaction.count}
               </Text>
@@ -155,10 +137,7 @@ const BottomSheetContent = memo(function BottomSheetContent() {
       </BottomSheetContentContainer>
 
       {/* Detailed list of each reaction, sorted and filtered with all own reactions on top */}
-      <BottomSheetScrollView
-        style={{ flex: 1 }}
-        showsVerticalScrollIndicator={false}
-      >
+      <BottomSheetScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
         <FlashList
           estimatedItemSize={rolledUpReactions.totalCount}
           data={rolledUpReactions.detailed.filter(
@@ -166,9 +145,7 @@ const BottomSheetContent = memo(function BottomSheetContent() {
           )}
           renderItem={({ item, index }) => {
             const isOwnReaction = item.isOwnReaction
-            const ReactionContainer = isOwnReaction
-              ? TouchableHighlight
-              : HStack
+            const ReactionContainer = isOwnReaction ? TouchableHighlight : HStack
             const containerProps = isOwnReaction
               ? {
                   onPress: () =>
@@ -194,21 +171,14 @@ const BottomSheetContent = memo(function BottomSheetContent() {
               </ReactionContainer>
             )
           }}
-          keyExtractor={(item, index) =>
-            `${item.content}-${item.reactor.address}-${index}`
-          }
+          keyExtractor={(item, index) => `${item.content}-${item.reactor.address}-${index}`}
         />
       </BottomSheetScrollView>
     </>
   )
 })
 
-const $chip: ThemedStyle<ViewStyle> = ({
-  spacing,
-  borderRadius,
-  borderWidth,
-  colors,
-}) => ({
+const $chip: ThemedStyle<ViewStyle> = ({ spacing, borderRadius, borderWidth, colors }) => ({
   marginRight: spacing.xxs,
   marginBottom: spacing.xs,
   paddingVertical: spacing.xxs,

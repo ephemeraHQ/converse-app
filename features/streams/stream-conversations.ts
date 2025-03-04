@@ -18,9 +18,7 @@ export async function startConversationStreaming(ethAddress: string) {
     await streamConversations({
       ethAddress: ethAddress,
       onNewConversation: (conversation) =>
-        handleNewConversation({ account: ethAddress, conversation }).catch(
-          captureError,
-        ),
+        handleNewConversation({ account: ethAddress, conversation }).catch(captureError),
     })
   } catch (error) {
     throw new StreamError({
@@ -36,9 +34,7 @@ async function handleNewConversation(args: {
 }) {
   const { account, conversation } = args
 
-  streamLogger.debug(
-    `[Stream] Received new conversation for ${account}: ${conversation.topic}`,
-  )
+  streamLogger.debug(`[Stream] Received new conversation for ${account}: ${conversation.topic}`)
 
   // For some reason, when receiving a new conversation, the group members are not available?
   ensureGroupMembersQueryData({

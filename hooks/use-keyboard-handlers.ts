@@ -3,24 +3,24 @@ import {
   runOnJS,
   useAnimatedKeyboard,
   useAnimatedReaction,
-} from "react-native-reanimated";
+} from "react-native-reanimated"
 
 type IKeyboardHandlersArgs = {
-  onKeyboardOpen: () => void;
-  onKeyboardClose: () => void;
-};
+  onKeyboardOpen: () => void
+  onKeyboardClose: () => void
+}
 
 export function useKeyboardHandlers(args: IKeyboardHandlersArgs) {
-  const { state } = useAnimatedKeyboard();
+  const { state } = useAnimatedKeyboard()
 
   useAnimatedReaction(
     () => state.value,
     (state) => {
       if (state === KeyboardState.OPEN) {
-        runOnJS(args.onKeyboardOpen)();
+        runOnJS(args.onKeyboardOpen)()
       } else if (state === KeyboardState.CLOSED) {
-        runOnJS(args.onKeyboardClose)();
+        runOnJS(args.onKeyboardClose)()
       }
     },
-  );
+  )
 }

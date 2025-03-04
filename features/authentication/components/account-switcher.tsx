@@ -43,9 +43,7 @@ export function AccountSwitcher(props: { noAvatar?: boolean }) {
       if (profileXmtpInboxId === "all-chats") {
         Alert.alert("Coming soon")
       } else if (profileXmtpInboxId === "new-account") {
-        alert(
-          "Under Construction - waiting on Privy for multiple embedded passkey support",
-        )
+        alert("Under Construction - waiting on Privy for multiple embedded passkey support")
       } else if (profileXmtpInboxId === "app-settings") {
         navigation.navigate("AppSettings")
       } else {

@@ -1,26 +1,19 @@
-import { Haptics } from "@utils/haptics";
-import React, { useCallback } from "react";
+import { Haptics } from "@utils/haptics"
+import React, { useCallback } from "react"
 import {
   GestureResponderEvent,
   PressableStateCallbackType,
   StyleProp,
   TextStyle,
   ViewStyle,
-} from "react-native";
-import { useAppTheme } from "../../theme/use-app-theme";
-import { Icon } from "../Icon/Icon";
-import { Pressable } from "../Pressable";
-import { IIconButtonProps } from "./IconButton.props";
-import {
-  getIconButtonViewStyle,
-  getIconProps,
-  getIconStyle,
-} from "./IconButton.styles";
+} from "react-native"
+import { useAppTheme } from "../../theme/use-app-theme"
+import { Icon } from "../Icon/Icon"
+import { Pressable } from "../Pressable"
+import { IIconButtonProps } from "./IconButton.props"
+import { getIconButtonViewStyle, getIconProps, getIconStyle } from "./IconButton.styles"
 
-export const IconButton = React.forwardRef(function IconButton(
-  props: IIconButtonProps,
-  ref,
-) {
+export const IconButton = React.forwardRef(function IconButton(props: IIconButtonProps, ref) {
   const {
     icon,
     iconName,
@@ -35,9 +28,9 @@ export const IconButton = React.forwardRef(function IconButton(
     withHaptics = true,
     onPress,
     ...rest
-  } = props;
+  } = props
 
-  const { theme, themed } = useAppTheme();
+  const { theme, themed } = useAppTheme()
 
   const viewStyle = useCallback(
     ({ pressed }: PressableStateCallbackType): StyleProp<ViewStyle> => [
@@ -64,7 +57,7 @@ export const IconButton = React.forwardRef(function IconButton(
       pressedStyleOverride,
       disabledStyleOverride,
     ],
-  );
+  )
 
   const iconStyle = useCallback(
     ({ pressed }: PressableStateCallbackType): StyleProp<TextStyle> =>
@@ -78,7 +71,7 @@ export const IconButton = React.forwardRef(function IconButton(
         }),
       ),
     [themed, variant, size, action, disabled],
-  );
+  )
 
   // For now until we fix Icon
 
@@ -94,21 +87,21 @@ export const IconButton = React.forwardRef(function IconButton(
         }),
       ),
     [themed, variant, size, action, disabled],
-  );
+  )
 
   const handlePress = useCallback(
     (e: GestureResponderEvent) => {
       if (disabled) {
-        return;
+        return
       }
 
       if (withHaptics) {
-        Haptics.softImpactAsync();
+        Haptics.softImpactAsync()
       }
-      onPress?.(e);
+      onPress?.(e)
     },
     [withHaptics, onPress, disabled],
-  );
+  )
 
   return (
     <Pressable
@@ -130,11 +123,11 @@ export const IconButton = React.forwardRef(function IconButton(
               weight={iconWeight}
               {...iconProps({ pressed, hovered })}
             />
-          );
+          )
         }
 
-        return icon;
+        return icon
       }}
     </Pressable>
-  );
-});
+  )
+})

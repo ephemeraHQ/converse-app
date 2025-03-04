@@ -1,5 +1,5 @@
-import { MenuAction as RNMenuAction } from "@react-native-menu/menu";
-import { Platform } from "react-native";
+import { MenuAction as RNMenuAction } from "@react-native-menu/menu"
+import { Platform } from "react-native"
 
 /**
  * Android will always make a sub menu item, so instead this will just return the item
@@ -13,7 +13,7 @@ export const getInlinedItem = (item: RNMenuAction): RNMenuAction => {
       title: "",
       displayInline: true,
       subactions: [item],
-    };
+    }
   }
-  return item;
-};
+  return item
+}

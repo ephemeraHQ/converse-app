@@ -26,11 +26,10 @@ export const ConversationSearchResultsListItemEthAddress = memo(
 
     const currentSender = useSafeCurrentSender()
 
-    const { data: inboxId, isLoading: isLoadingInboxId } =
-      useXmtpInboxIdFromEthAddressQuery({
-        clientEthAddress: currentSender.ethereumAddress,
-        targetEthAddress: ethAddress,
-      })
+    const { data: inboxId, isLoading: isLoadingInboxId } = useXmtpInboxIdFromEthAddressQuery({
+      clientEthAddress: currentSender.ethereumAddress,
+      targetEthAddress: ethAddress,
+    })
 
     const handlePress = () => {
       if (!inboxId) {
@@ -53,13 +52,7 @@ export const ConversationSearchResultsListItemEthAddress = memo(
 
     return (
       <ConversationSearchResultsListItem
-        avatar={
-          <Avatar
-            uri={undefined}
-            sizeNumber={theme.avatarSize.md}
-            name={ethAddress}
-          />
-        }
+        avatar={<Avatar uri={undefined} sizeNumber={theme.avatarSize.md} name={ethAddress} />}
         title={
           <HStack
             style={{

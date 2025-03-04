@@ -1,4 +1,4 @@
-import { darkPalette } from "@theme/palette";
+import { darkPalette } from "@theme/palette"
 
 export const shadow = {
   big: {
@@ -8,8 +8,8 @@ export const shadow = {
     shadowRadius: 16,
     elevation: 16,
   },
-};
+}
 
-export type IShadow = typeof shadow;
+export type IShadow = typeof shadow
 
-export type IShadowKey = keyof typeof shadow;
+export type IShadowKey = keyof typeof shadow

@@ -1,74 +1,71 @@
-import { useMutation } from "@tanstack/react-query";
-import { logger } from "@utils/logger";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
-import { captureError } from "@/utils/capture-error";
-import { promoteSuperAdminMutationKey } from "./MutationKeys";
+import { useMutation } from "@tanstack/react-query"
+import { logger } from "@utils/logger"
+import type { ConversationTopic } from "@xmtp/react-native-sdk"
+import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client"
+import { captureError } from "@/utils/capture-error"
+import { promoteSuperAdminMutationKey } from "./MutationKeys"
 import {
   cancelGroupMembersQuery,
   getGroupMembersQueryData,
   setGroupMembersQueryData,
-} from "./useGroupMembersQuery";
-import { useGroupQuery } from "./useGroupQuery";
+} from "./useGroupMembersQuery"
+import { useGroupQuery } from "./useGroupQuery"
 
-export const usePromoteToSuperAdminMutation = (
-  account: string,
-  topic: ConversationTopic,
-) => {
-  const { data: group } = useGroupQuery({ account, topic });
+export const usePromoteToSuperAdminMutation = (account: string, topic: ConversationTopic) => {
+  const { data: group } = useGroupQuery({ account, topic })
 
   return useMutation({
     mutationKey: promoteSuperAdminMutationKey(account, topic!),
     mutationFn: async (inboxId: InboxId) => {
       if (!group || !account || !topic) {
-        return;
+        return
       }
-      await group.addSuperAdmin(inboxId);
-      return inboxId;
+      await group.addSuperAdmin(inboxId)
+      return inboxId
     },
     onMutate: async (inboxId: InboxId) => {
       if (!topic) {
-        throw new Error("Topic is required");
+        throw new Error("Topic is required")
       }
-      await cancelGroupMembersQuery({ account, topic });
+      await cancelGroupMembersQuery({ account, topic })
 
       const previousGroupMembers = getGroupMembersQueryData({
         account,
         topic,
-      });
+      })
       if (!previousGroupMembers) {
-        return;
+        return
       }
-      const newMembers = { ...previousGroupMembers };
+      const newMembers = { ...previousGroupMembers }
       if (!newMembers.byId[inboxId]) {
-        return;
+        return
       }
-      newMembers.byId[inboxId].permissionLevel = "super_admin";
+      newMembers.byId[inboxId].permissionLevel = "super_admin"
       setGroupMembersQueryData({
         account,
         topic,
         members: newMembers,
-      });
+      })
 
-      return { previousGroupMembers };
+      return { previousGroupMembers }
     },
     onError: (error, _variables, context) => {
-      captureError(error);
+      captureError(error)
       if (context?.previousGroupMembers === undefined) {
-        return;
+        return
       }
       if (!topic) {
-        return;
+        return
       }
       setGroupMembersQueryData({
         account,
         topic,
         members: context.previousGroupMembers,
-      });
+      })
     },
     onSuccess: (data, variables, context) => {
-      logger.debug("onSuccess usePromoteToSuperAdminMutation");
+      logger.debug("onSuccess usePromoteToSuperAdminMutation")
       // refreshGroup(account, topic);
     },
-  });
-};
+  })
+}

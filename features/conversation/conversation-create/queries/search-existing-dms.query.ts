@@ -1,26 +1,19 @@
-import {
-  keepPreviousData,
-  queryOptions,
-  useQuery,
-} from "@tanstack/react-query";
-import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
-import { getCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
-import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm";
-import { ensureProfileQueryData } from "@/features/profiles/profiles.query";
-import { doesSocialProfilesMatchTextQuery } from "@/features/profiles/utils/does-social-profiles-match-text-query";
-import { ensureSocialProfilesForAddressQuery } from "@/features/social-profiles/social-profiles.query";
-import { getAllowedConsentConversationsQueryData } from "@/queries/conversations-allowed-consent-query";
-import { ensureDmPeerInboxIdQueryData } from "@/queries/use-dm-peer-inbox-id-query";
-import { ensureGroupMembersQueryData } from "@/queries/useGroupMembersQuery";
-import { captureError } from "@/utils/capture-error";
-import { normalizeString } from "@/utils/str";
+import { keepPreviousData, queryOptions, useQuery } from "@tanstack/react-query"
+import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk"
+import { getCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
+import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm"
+import { ensureProfileQueryData } from "@/features/profiles/profiles.query"
+import { doesSocialProfilesMatchTextQuery } from "@/features/profiles/utils/does-social-profiles-match-text-query"
+import { ensureSocialProfilesForAddressQuery } from "@/features/social-profiles/social-profiles.query"
+import { getAllowedConsentConversationsQueryData } from "@/queries/conversations-allowed-consent-query"
+import { ensureDmPeerInboxIdQueryData } from "@/queries/use-dm-peer-inbox-id-query"
+import { ensureGroupMembersQueryData } from "@/queries/useGroupMembersQuery"
+import { captureError } from "@/utils/capture-error"
+import { normalizeString } from "@/utils/str"
 
-export function getSearchExistingDmsQueryOptions(args: {
-  searchQuery: string;
-  inboxId: InboxId;
-}) {
-  const { searchQuery, inboxId } = args;
-  const normalizedSearchQuery = normalizeString(searchQuery);
+export function getSearchExistingDmsQueryOptions(args: { searchQuery: string; inboxId: InboxId }) {
+  const { searchQuery, inboxId } = args
+  const normalizedSearchQuery = normalizeString(searchQuery)
   return queryOptions({
     queryKey: ["conversations-search", "dms", normalizedSearchQuery, inboxId],
     queryFn: () =>
@@ -33,31 +26,28 @@ export function getSearchExistingDmsQueryOptions(args: {
     // Keep showing previous search results while new results load
     // to prevent UI flicker during search
     placeholderData: keepPreviousData,
-  });
+  })
 }
 
-async function searchExistingDms(args: {
-  searchQuery: string;
-  inboxId: InboxId;
-}) {
-  const { searchQuery, inboxId } = args;
-  const currentAccount = getCurrentSenderEthAddress()!;
+async function searchExistingDms(args: { searchQuery: string; inboxId: InboxId }) {
+  const { searchQuery, inboxId } = args
+  const currentAccount = getCurrentSenderEthAddress()!
   const conversations = getAllowedConsentConversationsQueryData({
     account: currentAccount,
-  });
-  const normalizedSearchQuery = searchQuery.toLowerCase().trim();
+  })
+  const normalizedSearchQuery = searchQuery.toLowerCase().trim()
 
   if (!conversations) {
-    return [];
+    return []
   }
 
   // Return early if search query is empty
   if (!normalizedSearchQuery) {
-    return [];
+    return []
   }
 
-  const matchingTopics: ConversationTopic[] = [];
-  const dmConversations = conversations.filter(isConversationDm);
+  const matchingTopics: ConversationTopic[] = []
+  const dmConversations = conversations.filter(isConversationDm)
 
   const results = await Promise.all(
     dmConversations.map(async (conversation) => {
@@ -69,8 +59,8 @@ async function searchExistingDms(args: {
             account: currentAccount,
             topic: conversation.topic,
           }).then((members) => {
-            const otherId = members.ids.find((id) => id !== inboxId);
-            return [otherId, members] as const;
+            const otherId = members.ids.find((id) => id !== inboxId)
+            return [otherId, members] as const
           }),
 
           ensureDmPeerInboxIdQueryData({
@@ -78,51 +68,43 @@ async function searchExistingDms(args: {
             topic: conversation.topic,
             caller: "searchExistingDms",
           }).then((peerId) => [peerId, null] as const),
-        ]);
+        ])
 
-        const otherMemberInboxId =
-          peerInboxId || members?.ids.find((id) => id !== inboxId);
+        const otherMemberInboxId = peerInboxId || members?.ids.find((id) => id !== inboxId)
 
         if (!otherMemberInboxId) {
-          throw new Error("No other member inbox Id found for conversation DM");
+          throw new Error("No other member inbox Id found for conversation DM")
         }
 
         const profile = await ensureProfileQueryData({
           xmtpId: otherMemberInboxId,
-        });
+        })
 
-        const hasProfileMatch = profile?.name
-          ?.toLowerCase()
-          .includes(normalizedSearchQuery);
+        const hasProfileMatch = profile?.name?.toLowerCase().includes(normalizedSearchQuery)
 
         const socialProfiles = await ensureSocialProfilesForAddressQuery({
           ethAddress: profile.privyAddress,
-        });
+        })
 
         const hasSocialProfileMatch = doesSocialProfilesMatchTextQuery({
           socialProfiles,
           normalizedQuery: normalizedSearchQuery,
-        });
+        })
 
-        return hasProfileMatch || hasSocialProfileMatch
-          ? conversation.topic
-          : null;
+        return hasProfileMatch || hasSocialProfileMatch ? conversation.topic : null
       } catch (e) {
-        captureError(e);
-        return null;
+        captureError(e)
+        return null
       }
     }),
-  );
+  )
 
   // Filter out nulls and add matching topics to results
-  matchingTopics.push(...results.filter(Boolean));
+  matchingTopics.push(...results.filter(Boolean))
 
-  return matchingTopics;
+  return matchingTopics
 }
 
-export function useSearchExistingDmsQuery(args: {
-  searchQuery: string;
-  inboxId: InboxId;
-}) {
-  return useQuery(getSearchExistingDmsQueryOptions(args));
+export function useSearchExistingDmsQuery(args: { searchQuery: string; inboxId: InboxId }) {
+  return useQuery(getSearchExistingDmsQueryOptions(args))
 }

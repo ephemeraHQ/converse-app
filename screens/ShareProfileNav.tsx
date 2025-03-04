@@ -1,9 +1,9 @@
-import { AppNativeStack } from "@/navigation/app-navigator";
-import { ShareProfileScreen } from "./ShareProfile";
+import { AppNativeStack } from "@/navigation/app-navigator"
+import { ShareProfileScreen } from "./ShareProfile"
 
 export const ShareProfileScreenConfig = {
   path: "/shareProfile",
-};
+}
 
 export function ShareProfileNav() {
   return (
@@ -12,5 +12,5 @@ export function ShareProfileNav() {
       name="ShareProfile"
       component={ShareProfileScreen}
     />
-  );
+  )
 }

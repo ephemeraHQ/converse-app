@@ -22,13 +22,11 @@ export const en = {
     },
     notifications: {
       title: "Good vibrations only",
-      subtitle:
-        "Most things aren't urgent. Protect your attention by minimizing notifications.",
+      subtitle: "Most things aren't urgent. Protect your attention by minimizing notifications.",
       essentials: "Essentials",
       essentialsDescription: "Notify me when approved contacts send messages",
       mentionsOnly: "Mentions only",
-      mentionsOnlyDescription:
-        "In large groupchats, don't notify me unless I'm mentioned",
+      mentionsOnlyDescription: "In large groupchats, don't notify me unless I'm mentioned",
       cash: "Cash",
       cashDescription: "Notify me immediately when I receive cash",
       comingSoon: "Coming soon",
@@ -77,8 +75,7 @@ export const en = {
     errors: {
       displayNameLength:
         "Display names must be between 2 and 32 characters and can't include domain name extensions",
-      usernameAlphanumeric:
-        "Your username can only contain letters and numbers",
+      usernameAlphanumeric: "Your username can only contain letters and numbers",
       usernameLength: "Your user name must be between 3 and 30 characters long",
     },
     converseProfiles:
@@ -115,8 +112,7 @@ export const en = {
   },
   walletSelector: {
     title: "Your messages.\nYour privacy.",
-    subtitle:
-      "Decentralized messaging,\nend-to-end encrypted and owned by you.",
+    subtitle: "Decentralized messaging,\nend-to-end encrypted and owned by you.",
     converseAccount: {
       title: "CONVERSE ACCOUNTS",
       connectViaPhone: "Connect via Phone",
@@ -201,13 +197,11 @@ export const en = {
       },
       ownCommunications: {
         title: "Own your communications — forever",
-        subtitle:
-          "Your messages are yours. You own and control them completely, not the app.",
+        subtitle: "Your messages are yours. You own and control them completely, not the app.",
       },
       chatSecurely: {
         title: "Invite your friends",
-        subtitle:
-          "Find people you know onchain or share your private QR code with your friends.",
+        subtitle: "Find people you know onchain or share your private QR code with your friends.",
       },
     },
     cancel: "Cancel",
@@ -243,8 +237,7 @@ export const en = {
   connecting: "Connecting…",
   syncing: "Syncing…",
   search_chats: "Search chats",
-  no_results:
-    "We could not find any result in your existing conversations. You might want to",
+  no_results: "We could not find any result in your existing conversations. You might want to",
   no_results_start_convo: "start a new conversation",
   new_account: "New account",
   app_settings: "App settings",
@@ -278,15 +271,13 @@ export const en = {
   if_you_block_contact:
     "If you block this contact, you will not receive messages from them anymore",
   opening_conversation: "Opening your conversation",
-  conversation_not_found:
-    "We couldn't find this conversation. Please try again",
+  conversation_not_found: "We couldn't find this conversation. Please try again",
   group_not_found:
     "We couldn't find this group. Please try again or ask someone to invite you to this group",
   say_hi: "Say hi",
   join_this_group: "Join this group",
   identity_not_found_title: "Identity not found",
-  identity_not_found:
-    "Identity {{identity}} not found or invalid. Please check it and try again",
+  identity_not_found: "Identity {{identity}} not found or invalid. Please check it and try again",
   identity_not_found_timeout:
     "Identity {{identity}} took too long to resolve. Please check your connection and try again",
   identity_not_yet_xmtp_title: "Not yet using XMTP",
@@ -448,10 +439,8 @@ export const en = {
   // Chat null state
   connectWithYourNetwork: "Find your frens",
   shareYourQRCode: "Share your QR code",
-  moveOrConnect:
-    "Move a conversation to Converse,\nor connect with someone new.",
-  findContacts:
-    "Here are some recommended contacts based on\nyour onchain activity",
+  moveOrConnect: "Move a conversation to Converse,\nor connect with someone new.",
+  findContacts: "Here are some recommended contacts based on\nyour onchain activity",
   copyShareLink: "Copy Share Link",
   alphaTestTitle: "Help shape the future of Converse!",
   alphaTestDescription:
@@ -460,8 +449,7 @@ export const en = {
   linkCopied: "Link copied",
 
   // Transactional frames
-  transactionalFrameConnectWallet:
-    "Connect to a wallet app to trigger a transaction",
+  transactionalFrameConnectWallet: "Connect to a wallet app to trigger a transaction",
   transaction_failure: "Transaction failed",
   transaction_pending: "Confirm in {{wallet}}",
   transaction_triggering: "Opening {{wallet}}...",
@@ -480,12 +468,10 @@ export const en = {
   transaction_asset_change_type_approve: "Approve",
   transaction_asset_change_type_transfer: "Transfer",
   transaction_asset_change_to: "To",
-  external_wallet_chain_not_supported:
-    "This chain is not supported by your wallet",
+  external_wallet_chain_not_supported: "This chain is not supported by your wallet",
 
   // New Conversation
-  cannot_be_added_to_group_yet:
-    "{{name}} needs to update Converse to be added to a group",
+  cannot_be_added_to_group_yet: "{{name}} needs to update Converse to be added to a group",
   add: "Add",
   add_loading: "Adding...",
   chat: "Chat",
@@ -515,15 +501,13 @@ export const en = {
     "This is the beginning of your conversation with {{name}}",
 
   group_placeholder: {
-    placeholder_text:
-      "This is the beginning of your conversation in {{groupName}}",
+    placeholder_text: "This is the beginning of your conversation in {{groupName}}",
   },
 
   removed_chats: {
     removed_chats: "Removed Chats",
     eyes: "👀",
-    no_removed_chats:
-      "We could not find any removed group chat in your existing conversations.",
+    no_removed_chats: "We could not find any removed group chat in your existing conversations.",
   },
 
   group_screen_member_actions: {
@@ -546,13 +530,11 @@ export const en = {
 
   initial_load: {
     title: "Welcome to Converse!",
-    subtitle:
-      "We're checking if you already own conversations on the XMTP network.",
+    subtitle: "We're checking if you already own conversations on the XMTP network.",
   },
 
   recommendations: {
-    title:
-      "Find people who have interests in common with you. Start talking to them.",
+    title: "Find people who have interests in common with you. Start talking to them.",
     section_title: "RECOMMENDED PROFILES",
     loading: "Loading your recommendations",
     no_recommendations:
@@ -560,8 +542,7 @@ export const en = {
     signal_list: "find the current list here",
     please_feel_free_to: ", please feel free to ",
     contact_pol: "contact our co-founder Pol",
-    if_you_want_us_to_add_anything:
-      "if you want us to add anything. \n\nThank you!",
+    if_you_want_us_to_add_anything: "if you want us to add anything. \n\nThank you!",
   },
 
   top_up: {
@@ -580,8 +561,7 @@ export const en = {
     updated_the_group: "{{username}} updated the group",
     group_updated: "Group updated",
     name_changed: "{{username}} changed the group name to {{newValue}}",
-    description_changed:
-      "{{username}} changed the group description to {{newValue}}",
+    description_changed: "{{username}} changed the group description to {{newValue}}",
     image_changed: "{{username}} changed the group image",
     member_added: "{{username}} added {{memberName}} to the group",
     member_added_unknown: "{{username}} added a new member to the group",
@@ -597,6 +577,6 @@ export const en = {
     link_copied: "Link copied",
     copy_link: "Copy link",
   },
-};
+}
 
-export type Translations = typeof en;
+export type Translations = typeof en

@@ -1,12 +1,12 @@
-import { memo } from "react";
-import { useAppTheme } from "../../theme/use-app-theme";
-import { HStack } from "../HStack";
-import { Text } from "../Text/Text";
-import { VStack } from "../VStack";
-import { IconButton } from "./IconButton";
+import { memo } from "react"
+import { useAppTheme } from "../../theme/use-app-theme"
+import { HStack } from "../HStack"
+import { Text } from "../Text/Text"
+import { VStack } from "../VStack"
+import { IconButton } from "./IconButton"
 
 export const IconButtonExample = memo(function IconButtonExample() {
-  const { theme } = useAppTheme();
+  const { theme } = useAppTheme()
 
   return (
     <VStack
@@ -66,5 +66,5 @@ export const IconButtonExample = memo(function IconButtonExample() {
         </HStack>
       </VStack>
     </VStack>
-  );
-});
+  )
+})

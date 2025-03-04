@@ -1,17 +1,17 @@
-import { useLayoutEffect, useState } from "react";
-import { ImageURISource, Platform, Image as RNImage } from "react-native";
-import { IImageProps, Image } from "@/design-system/image";
+import { useLayoutEffect, useState } from "react"
+import { ImageURISource, Platform, Image as RNImage } from "react-native"
+import { IImageProps, Image } from "@/design-system/image"
 
 export type IAutoSizedImageProps = IImageProps & {
   /**
    * How wide should the image be?
    */
-  maxWidth?: number;
+  maxWidth?: number
   /**
    * How tall should the image be?
    */
-  maxHeight?: number;
-};
+  maxHeight?: number
+}
 
 /**
  * An Image component that automatically sizes a remote or data-uri image.
@@ -20,8 +20,8 @@ export type IAutoSizedImageProps = IImageProps & {
  * @returns {JSX.Element} The rendered `AutoImage` component.
  */
 export function AutoSizedImage(props: IAutoSizedImageProps) {
-  const { maxWidth, maxHeight, ...ImageProps } = props;
-  const source = props.source as ImageURISource;
+  const { maxWidth, maxHeight, ...ImageProps } = props
+  const source = props.source as ImageURISource
 
   const [width, height] = useAutoSizeImage(
     Platform.select({
@@ -29,9 +29,9 @@ export function AutoSizedImage(props: IAutoSizedImageProps) {
       default: source?.uri as string,
     }),
     [maxWidth, maxHeight],
-  );
+  )
 
-  return <Image {...ImageProps} style={[{ width, height }, props.style]} />;
+  return <Image {...ImageProps} style={[{ width, height }, props.style]} />
 }
 
 /**
@@ -50,31 +50,26 @@ export function useAutoSizeImage(
   remoteUri: string,
   dimensions?: [maxWidth?: number, maxHeight?: number],
 ): [width: number, height: number] {
-  const [[remoteWidth, remoteHeight], setRemoteImageDimensions] = useState([
-    0, 0,
-  ]);
-  const remoteAspectRatio = remoteWidth / remoteHeight;
-  const [maxWidth, maxHeight] = dimensions ?? [];
+  const [[remoteWidth, remoteHeight], setRemoteImageDimensions] = useState([0, 0])
+  const remoteAspectRatio = remoteWidth / remoteHeight
+  const [maxWidth, maxHeight] = dimensions ?? []
 
   useLayoutEffect(() => {
-    if (!remoteUri) return;
+    if (!remoteUri) return
 
-    RNImage.getSize(remoteUri, (w, h) => setRemoteImageDimensions([w, h]));
-  }, [remoteUri]);
+    RNImage.getSize(remoteUri, (w, h) => setRemoteImageDimensions([w, h]))
+  }, [remoteUri])
 
-  if (Number.isNaN(remoteAspectRatio)) return [0, 0];
+  if (Number.isNaN(remoteAspectRatio)) return [0, 0]
 
   if (maxWidth && maxHeight) {
-    const aspectRatio = Math.min(
-      maxWidth / remoteWidth,
-      maxHeight / remoteHeight,
-    );
-    return [remoteWidth * aspectRatio, remoteHeight * aspectRatio];
+    const aspectRatio = Math.min(maxWidth / remoteWidth, maxHeight / remoteHeight)
+    return [remoteWidth * aspectRatio, remoteHeight * aspectRatio]
   } else if (maxWidth) {
-    return [maxWidth, maxWidth / remoteAspectRatio];
+    return [maxWidth, maxWidth / remoteAspectRatio]
   } else if (maxHeight) {
-    return [maxHeight * remoteAspectRatio, maxHeight];
+    return [maxHeight * remoteAspectRatio, maxHeight]
   } else {
-    return [remoteWidth, remoteHeight];
+    return [remoteWidth, remoteHeight]
   }
 }

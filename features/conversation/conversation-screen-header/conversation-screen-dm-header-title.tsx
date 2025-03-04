@@ -49,11 +49,7 @@ export const DmConversationTitle = ({ topic }: DmConversationTitleProps) => {
       onLongPress={onLongPress}
       onPress={onPress}
       avatarComponent={
-        <Avatar
-          uri={avatarUrl}
-          sizeNumber={theme.avatarSize.md}
-          name={displayName}
-        />
+        <Avatar uri={avatarUrl} sizeNumber={theme.avatarSize.md} name={displayName} />
       }
     />
   )

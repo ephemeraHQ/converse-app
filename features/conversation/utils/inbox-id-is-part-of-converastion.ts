@@ -1,46 +1,43 @@
-import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
+import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk"
 import {
   getCurrentSenderEthAddress,
   getSafeCurrentSender,
-} from "@/features/authentication/multi-inbox.store";
+} from "@/features/authentication/multi-inbox.store"
 import {
   ensureDmPeerInboxIdQueryData,
   getDmPeerInboxIdQueryData,
-} from "@/queries/use-dm-peer-inbox-id-query";
+} from "@/queries/use-dm-peer-inbox-id-query"
 import {
   ensureGroupMembersQueryData,
   getGroupMembersQueryData,
-} from "@/queries/useGroupMembersQuery";
+} from "@/queries/useGroupMembersQuery"
 
 export function inboxIdIsPartOfConversationUsingCacheData(args: {
-  inboxId: InboxId;
-  conversationTopic: ConversationTopic;
+  inboxId: InboxId
+  conversationTopic: ConversationTopic
 }) {
-  const { inboxId, conversationTopic } = args;
+  const { inboxId, conversationTopic } = args
 
   const members = getGroupMembersQueryData({
     account: getSafeCurrentSender().ethereumAddress,
     topic: conversationTopic,
-  });
+  })
 
   const peerInboxId = getDmPeerInboxIdQueryData({
     account: getSafeCurrentSender().ethereumAddress,
     topic: conversationTopic,
-  });
+  })
 
-  return (
-    peerInboxId === inboxId ||
-    members?.ids.some((_inboxId) => _inboxId === inboxId)
-  );
+  return peerInboxId === inboxId || members?.ids.some((_inboxId) => _inboxId === inboxId)
 }
 
 export async function inboxIdIsPartOfConversationUsingEnsure(args: {
-  inboxId: InboxId;
-  conversationTopic: ConversationTopic;
+  inboxId: InboxId
+  conversationTopic: ConversationTopic
 }) {
-  const { inboxId, conversationTopic } = args;
+  const { inboxId, conversationTopic } = args
 
-  const account = getSafeCurrentSender().ethereumAddress;
+  const account = getSafeCurrentSender().ethereumAddress
 
   const [members, peerInboxId] = await Promise.all([
     ensureGroupMembersQueryData({
@@ -53,10 +50,7 @@ export async function inboxIdIsPartOfConversationUsingEnsure(args: {
       account: account,
       topic: conversationTopic,
     }),
-  ]);
+  ])
 
-  return (
-    peerInboxId === inboxId ||
-    members?.ids.some((_inboxId) => _inboxId === inboxId)
-  );
+  return peerInboxId === inboxId || members?.ids.some((_inboxId) => _inboxId === inboxId)
 }

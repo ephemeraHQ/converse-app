@@ -1,14 +1,11 @@
-import { ConversationId, ConversationTopic } from "@xmtp/react-native-sdk";
+import { ConversationId, ConversationTopic } from "@xmtp/react-native-sdk"
 
-const V3_TOPIC_PREFIX = "/xmtp/mls/1/g-";
-export const prefixStringWithV3TopicPrefix = (str: string) =>
-  `${V3_TOPIC_PREFIX}${str}`;
+const V3_TOPIC_PREFIX = "/xmtp/mls/1/g-"
+export const prefixStringWithV3TopicPrefix = (str: string) => `${V3_TOPIC_PREFIX}${str}`
 
 export const getV3IdFromTopic = (topic: ConversationTopic): ConversationId => {
-  return topic
-    .replace(V3_TOPIC_PREFIX, "")
-    .replace("/proto", "") as ConversationId;
-};
+  return topic.replace(V3_TOPIC_PREFIX, "").replace("/proto", "") as ConversationId
+}
 
 /**
  * Checks if a topic string is a valid V3 conversation topic
@@ -29,16 +26,14 @@ export const getV3IdFromTopic = (topic: ConversationTopic): ConversationId => {
  */
 export const isV3Topic = (topic: string): topic is ConversationTopic => {
   if (!topic || typeof topic !== "string") {
-    return false;
+    return false
   }
-  return topic.startsWith(V3_TOPIC_PREFIX);
-};
+  return topic.startsWith(V3_TOPIC_PREFIX)
+}
 
-export const getTopicFromV3Id = (
-  conversationId: ConversationId,
-): ConversationTopic => {
+export const getTopicFromV3Id = (conversationId: ConversationId): ConversationTopic => {
   if (!isV3Topic(conversationId)) {
-    throw new Error("Invalid V3 topic");
+    throw new Error("Invalid V3 topic")
   }
-  return `${V3_TOPIC_PREFIX}${conversationId}/proto` as ConversationTopic;
-};
+  return `${V3_TOPIC_PREFIX}${conversationId}/proto` as ConversationTopic
+}

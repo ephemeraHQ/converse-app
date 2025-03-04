@@ -13,9 +13,7 @@ const ConnectWalletContext = createContext<IConnectWalletContextType>(
   {} as IConnectWalletContextType,
 )
 
-export const ConnectWalletContextProvider = (
-  props: IConnectWalletContextProps,
-) => {
+export const ConnectWalletContextProvider = (props: IConnectWalletContextProps) => {
   const { children, onSelectName: onSelectNameProp } = props
 
   const onSelectName = useCallback(
@@ -27,11 +25,7 @@ export const ConnectWalletContextProvider = (
 
   const value = useMemo(() => ({ onSelectName }), [onSelectName])
 
-  return (
-    <ConnectWalletContext.Provider value={value}>
-      {children}
-    </ConnectWalletContext.Provider>
-  )
+  return <ConnectWalletContext.Provider value={value}>{children}</ConnectWalletContext.Provider>
 }
 
 export function useConnectWalletContext(): IConnectWalletContextType {

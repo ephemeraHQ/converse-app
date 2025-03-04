@@ -1,31 +1,31 @@
-import { logger } from "@utils/logger";
-import RNFS from "react-native-fs";
-import { isImageMimetype } from "../media";
+import { logger } from "@utils/logger"
+import RNFS from "react-native-fs"
+import { isImageMimetype } from "../media"
 import {
   getLocalAttachmentMetaData,
   getMessageAttachmentLocalMetadataPath,
   getMessageAttachmentLocalPath,
-} from "./attachment.utils";
+} from "./attachment.utils"
 
 export const getLocalAttachmentForMessageId = async (messageId: string) => {
-  const attachmentJsonPath = getMessageAttachmentLocalMetadataPath(messageId);
+  const attachmentJsonPath = getMessageAttachmentLocalMetadataPath(messageId)
 
-  const attachmentExists = await RNFS.exists(attachmentJsonPath);
+  const attachmentExists = await RNFS.exists(attachmentJsonPath)
 
   if (attachmentExists) {
     try {
-      const attachmentMetaData = await getLocalAttachmentMetaData(messageId);
+      const attachmentMetaData = await getLocalAttachmentMetaData(messageId)
 
       // Check if attachment is an image
-      const supportedMediaType = isImageMimetype(attachmentMetaData.mimeType);
+      const supportedMediaType = isImageMimetype(attachmentMetaData.mimeType)
 
       // Get path to actual attachment file
       const attachmentLocalPath = getMessageAttachmentLocalPath(
         messageId,
         attachmentMetaData.filename,
-      );
+      )
 
-      const fileExists = await RNFS.exists(attachmentLocalPath);
+      const fileExists = await RNFS.exists(attachmentLocalPath)
 
       if (fileExists) {
         // Return attachment metadata and local file path if file exists
@@ -39,14 +39,14 @@ export const getLocalAttachmentForMessageId = async (messageId: string) => {
           mediaURL: `file://${attachmentLocalPath}`,
           contentLength: 0,
           filename: attachmentMetaData.filename,
-        };
+        }
       } else {
-        logger.debug(`Attachment file does not exist: ${attachmentLocalPath}`);
+        logger.debug(`Attachment file does not exist: ${attachmentLocalPath}`)
       }
     } catch (e) {
-      logger.warn(e);
+      logger.warn(e)
     }
   } else {
-    logger.debug(`No attachment metadata found for messageId: ${messageId}`);
+    logger.debug(`No attachment metadata found for messageId: ${messageId}`)
   }
-};
+}

@@ -1,9 +1,9 @@
-import { AppNativeStack } from "@/navigation/app-navigator";
-import { WebviewPreview } from "@/screens/WebviewPreview";
+import { AppNativeStack } from "@/navigation/app-navigator"
+import { WebviewPreview } from "@/screens/WebviewPreview"
 
 export type WebviewPreviewNavParams = {
-  uri: string;
-};
+  uri: string
+}
 
 export const WebviewPreviewScreenConfig = {
   path: "/webviewPreview",
@@ -13,7 +13,7 @@ export const WebviewPreviewScreenConfig = {
   stringify: {
     uri: encodeURIComponent,
   },
-};
+}
 
 export function WebviewPreviewNav() {
   return (
@@ -24,5 +24,5 @@ export function WebviewPreviewNav() {
         presentation: "modal",
       }}
     />
-  );
+  )
 }

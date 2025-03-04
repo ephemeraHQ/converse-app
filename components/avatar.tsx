@@ -1,11 +1,6 @@
 import { Image } from "expo-image"
 import React, { memo, useCallback, useState } from "react"
-import {
-  ImageSourcePropType,
-  Platform,
-  StyleProp,
-  ViewStyle,
-} from "react-native"
+import { ImageSourcePropType, Platform, StyleProp, ViewStyle } from "react-native"
 import { Center } from "@/design-system/Center"
 import { Icon } from "@/design-system/Icon/Icon"
 import { Text } from "@/design-system/Text"

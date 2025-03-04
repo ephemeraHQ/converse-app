@@ -1,20 +1,20 @@
-import { ITextProps, Text } from "@design-system/Text";
-import React, { forwardRef, ReactNode } from "react";
-import { Text as RNText } from "react-native";
-import { ICustomParseShape } from "./parsed-text.types";
-import { isDefaultPattern, parseText, PATTERNS } from "./parsed-text.utils";
+import { ITextProps, Text } from "@design-system/Text"
+import React, { forwardRef, ReactNode } from "react"
+import { Text as RNText } from "react-native"
+import { ICustomParseShape } from "./parsed-text.types"
+import { isDefaultPattern, parseText, PATTERNS } from "./parsed-text.utils"
 
 export type ParsedTextProps = {
   /** The text or components to render */
-  children: ReactNode;
+  children: ReactNode
   /** Array of patterns to parse the text */
-  parse: ICustomParseShape[];
+  parse: ICustomParseShape[]
   /** Props to be passed to each child Text component */
-  childrenProps?: ITextProps;
-} & ITextProps;
+  childrenProps?: ITextProps
+} & ITextProps
 
 export const ParsedText = forwardRef<RNText, ParsedTextProps>((props, ref) => {
-  const { parse, childrenProps = {}, ...rest } = props;
+  const { parse, childrenProps = {}, ...rest } = props
 
   /**
    * Converts parse patterns to include the actual regex patterns.
@@ -24,27 +24,27 @@ export const ParsedText = forwardRef<RNText, ParsedTextProps>((props, ref) => {
     return (
       parse.map((option) => {
         if (isDefaultPattern(option)) {
-          const { type, ...patternOption } = option;
+          const { type, ...patternOption } = option
           if (!PATTERNS[type]) {
-            throw new Error(`${type} is not a supported type`);
+            throw new Error(`${type} is not a supported type`)
           }
           return {
             ...patternOption,
             pattern: PATTERNS[type],
-          } as ICustomParseShape;
+          } as ICustomParseShape
         }
 
-        return option;
+        return option
       }) || []
-    );
-  };
+    )
+  }
 
   /**
    * Parses the text and generates Text components with the matched patterns.
    */
   const getParsedText = (): ReactNode => {
     if (!parse) {
-      return props.children;
+      return props.children
     }
 
     // From the patch in case we need it
@@ -64,11 +64,11 @@ export const ParsedText = forwardRef<RNText, ParsedTextProps>((props, ref) => {
     // +    }
 
     if (typeof props.children !== "string") {
-      return props.children;
+      return props.children
     }
 
-    const patterns = getPatterns();
-    const parsedParts = parseText({ text: props.children, patterns });
+    const patterns = getPatterns()
+    const parsedParts = parseText({ text: props.children, patterns })
 
     // From the patch in case we need it
     //     return [prefix, ...textExtraction.parse().map((props, index) => {
@@ -83,8 +83,8 @@ export const ParsedText = forwardRef<RNText, ParsedTextProps>((props, ref) => {
     // +    }), suffix];
 
     return parsedParts.map((parsedProps, index) => {
-      const { style: parentStyle } = props;
-      const { style, children, _matched, ...remainderParsed } = parsedProps;
+      const { style: parentStyle } = props
+      const { style, children, _matched, ...remainderParsed } = parsedProps
 
       return (
         <Text
@@ -95,13 +95,13 @@ export const ParsedText = forwardRef<RNText, ParsedTextProps>((props, ref) => {
         >
           {children}
         </Text>
-      );
-    });
-  };
+      )
+    })
+  }
 
   return (
     <Text ref={ref} {...rest}>
       {getParsedText()}
     </Text>
-  );
-});
+  )
+})

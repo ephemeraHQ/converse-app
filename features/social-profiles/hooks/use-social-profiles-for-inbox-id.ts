@@ -1,58 +1,55 @@
-import { InboxId } from "@xmtp/react-native-sdk";
+import { InboxId } from "@xmtp/react-native-sdk"
 import {
   getSafeCurrentSender,
   useSafeCurrentSender,
-} from "@/features/authentication/multi-inbox.store";
+} from "@/features/authentication/multi-inbox.store"
 import {
   ensureSocialProfilesForAddressesQuery,
   useSocialProfilesForEthAddressQueries,
-} from "@/features/social-profiles/social-profiles.query";
+} from "@/features/social-profiles/social-profiles.query"
 import {
   ensureEthAddressForXmtpInboxId,
   useEthAddressesForXmtpInboxId,
-} from "@/features/xmtp/xmtp-inbox-id/eth-addresses-for-xmtp-inbox-id.query";
+} from "@/features/xmtp/xmtp-inbox-id/eth-addresses-for-xmtp-inbox-id.query"
 
-export function useSocialProfilesForInboxId(args: {
-  inboxId: InboxId | undefined;
-}) {
-  const { inboxId } = args;
+export function useSocialProfilesForInboxId(args: { inboxId: InboxId | undefined }) {
+  const { inboxId } = args
 
-  const currentSender = useSafeCurrentSender();
+  const currentSender = useSafeCurrentSender()
 
-  const { data: ethAddresses, isLoading: isLoadingEthAddresses } =
-    useEthAddressesForXmtpInboxId({
-      inboxId,
-      clientEthAddress: currentSender.ethereumAddress,
-    });
+  const { data: ethAddresses, isLoading: isLoadingEthAddresses } = useEthAddressesForXmtpInboxId({
+    inboxId,
+    clientEthAddress: currentSender.ethereumAddress,
+  })
 
   const { data: socialProfiles, isLoading: isLoadingSocialProfiles } =
     useSocialProfilesForEthAddressQueries({
       ethAddresses: ethAddresses ?? [],
-    });
+    })
 
   return {
     data: socialProfiles.filter(Boolean).flat(),
     isLoading: isLoadingEthAddresses || isLoadingSocialProfiles,
-  };
+  }
 }
 
 export async function getSocialProfilesForInboxId(args: { inboxId: InboxId }) {
-  const { inboxId } = args;
+  const { inboxId } = args
 
-  const currentSender = getSafeCurrentSender();
+  const currentSender = getSafeCurrentSender()
 
   const ethAddresses = await ensureEthAddressForXmtpInboxId({
     inboxId,
     clientEthAddress: currentSender.ethereumAddress,
-  });
+  })
 
   if (!ethAddresses) {
-    return [];
+    return []
   }
 
   const socialProfiles = await ensureSocialProfilesForAddressesQuery({
     ethAddresses: ethAddresses,
-  });
+  })
 
-  return socialProfiles;
+  return socialProfiles
 }

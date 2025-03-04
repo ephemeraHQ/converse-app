@@ -47,9 +47,7 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
       const typedError = ensureError(error)
       // Don't show toast for passkey cancellation
       if (
-        typedError.message.includes(
-          "AuthenticationServices.AuthorizationError error 1001",
-        ) ||
+        typedError.message.includes("AuthenticationServices.AuthorizationError error 1001") ||
         typedError.message.includes("UserCancelled")
       ) {
         return
@@ -76,9 +74,7 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
       const typedError = ensureError(error)
       // Don't show toast for passkey cancellation
       if (
-        typedError.message.includes(
-          "AuthenticationServices.AuthorizationError error 1001",
-        ) ||
+        typedError.message.includes("AuthenticationServices.AuthorizationError error 1001") ||
         typedError.message.includes("UserCancelled")
       ) {
         return
@@ -119,9 +115,7 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
         <Center style={$globalStyles.flex1}>
           <VStack>
             <OnboardingSubtitle>Welcome to Convos</OnboardingSubtitle>
-            <OnboardingTitle style={themed($titleStyle)}>
-              Not another{"\n"}chat app
-            </OnboardingTitle>
+            <OnboardingTitle style={themed($titleStyle)}>Not another{"\n"}chat app</OnboardingTitle>
             <AnimatedText style={$subtextStyle} color={"secondary"}>
               Super secure · Decentralized · Universal
             </AnimatedText>
@@ -150,8 +144,7 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
                 textAlign: "center",
               }}
             >
-              Press me to clear stuff and restart{"\n"}(use this if you get in a
-              funky state)
+              Press me to clear stuff and restart{"\n"}(use this if you get in a funky state)
             </Text>
           </Pressable>
         </Center>

@@ -1,26 +1,26 @@
-import { InboxId } from "@xmtp/react-native-sdk";
-import { memo } from "react";
-import { Screen } from "@/components/screen/screen";
-import { ProfileContactCard } from "@/features/profiles/components/profile-contact-card/profile-contact-card";
-import { ProfileSection } from "@/features/profiles/components/profile-section";
-import { ProfileSocialsNames } from "@/features/profiles/components/profile-social-names";
-import { useProfileOtherScreenHeader } from "@/features/profiles/profile-other.screen-header";
-import { useProfileQuery } from "@/features/profiles/profiles.query";
-import { useSocialProfilesForAddressQuery } from "@/features/social-profiles/social-profiles.query";
-import { useAppTheme } from "@/theme/use-app-theme";
+import { InboxId } from "@xmtp/react-native-sdk"
+import { memo } from "react"
+import { Screen } from "@/components/screen/screen"
+import { ProfileContactCard } from "@/features/profiles/components/profile-contact-card/profile-contact-card"
+import { ProfileSection } from "@/features/profiles/components/profile-section"
+import { ProfileSocialsNames } from "@/features/profiles/components/profile-social-names"
+import { useProfileOtherScreenHeader } from "@/features/profiles/profile-other.screen-header"
+import { useProfileQuery } from "@/features/profiles/profiles.query"
+import { useSocialProfilesForAddressQuery } from "@/features/social-profiles/social-profiles.query"
+import { useAppTheme } from "@/theme/use-app-theme"
 
 export const ProfileOther = memo(function (props: { inboxId: InboxId }) {
-  const { inboxId } = props;
+  const { inboxId } = props
 
-  const { theme } = useAppTheme();
+  const { theme } = useAppTheme()
 
-  useProfileOtherScreenHeader({ inboxId });
+  useProfileOtherScreenHeader({ inboxId })
 
-  const { data: profile } = useProfileQuery({ xmtpId: inboxId });
+  const { data: profile } = useProfileQuery({ xmtpId: inboxId })
 
   const { data: socialProfiles } = useSocialProfilesForAddressQuery({
     ethAddress: profile?.privyAddress,
-  });
+  })
 
   return (
     <Screen preset="fixed" backgroundColor={theme.colors.background.surface}>
@@ -28,9 +28,7 @@ export const ProfileOther = memo(function (props: { inboxId: InboxId }) {
         <ProfileContactCard inboxId={inboxId} />
       </ProfileSection>
 
-      {socialProfiles && (
-        <ProfileSocialsNames socialProfiles={socialProfiles} />
-      )}
+      {socialProfiles && <ProfileSocialsNames socialProfiles={socialProfiles} />}
     </Screen>
-  );
-});
+  )
+})

@@ -1,6 +1,6 @@
-import { Icon } from "@design-system/Icon/Icon";
-import { IIconSizeKey } from "@theme/icon";
-import { useCallback, useMemo } from "react";
+import { Icon } from "@design-system/Icon/Icon"
+import { IIconSizeKey } from "@theme/icon"
+import { useCallback, useMemo } from "react"
 import {
   ActivityIndicator,
   GestureResponderEvent,
@@ -9,17 +9,17 @@ import {
   StyleProp,
   TextStyle,
   ViewStyle,
-} from "react-native";
-import { useAppTheme } from "@/theme/use-app-theme";
-import { Haptics } from "../../utils/haptics";
-import { Text } from "../Text";
-import { IButtonProps, IButtonVariant } from "./Button.props";
+} from "react-native"
+import { useAppTheme } from "@/theme/use-app-theme"
+import { Haptics } from "../../utils/haptics"
+import { Text } from "../Text"
+import { IButtonProps, IButtonVariant } from "./Button.props"
 import {
   $buttonLeftAccessoryStyle,
   $buttonRightAccessoryStyle,
   getButtonTextStyle,
   getButtonViewStyle,
-} from "./Button.styles";
+} from "./Button.styles"
 
 export function Button(props: IButtonProps) {
   const {
@@ -45,22 +45,20 @@ export function Button(props: IButtonProps) {
     title,
     picto,
     ...rest
-  } = props;
+  } = props
 
-  const { themed, theme } = useAppTheme();
+  const { themed, theme } = useAppTheme()
 
-  const variant: IButtonVariant = props.variant ?? "fill";
+  const variant: IButtonVariant = props.variant ?? "fill"
 
   const $viewStyle = useCallback(
     ({ pressed }: PressableStateCallbackType): StyleProp<ViewStyle> => {
       return [
-        themed(
-          getButtonViewStyle({ variant, size, action: "primary", pressed }),
-        ),
+        themed(getButtonViewStyle({ variant, size, action: "primary", pressed })),
         $viewStyleOverride,
         pressed && $pressedViewStyleOverride,
         disabled && $disabledViewStyleOverride,
-      ];
+      ]
     },
     [
       themed,
@@ -71,18 +69,16 @@ export function Button(props: IButtonProps) {
       $disabledViewStyleOverride,
       disabled,
     ],
-  );
+  )
 
   const $textStyle = useCallback(
     ({ pressed }: PressableStateCallbackType): StyleProp<TextStyle> => {
       return [
-        themed(
-          getButtonTextStyle({ variant, size, action: "primary", pressed }),
-        ),
+        themed(getButtonTextStyle({ variant, size, action: "primary", pressed })),
         $textStyleOverride,
         pressed && $pressedTextStyleOverride,
         disabled && $disabledTextStyleOverride,
-      ];
+      ]
     },
     [
       themed,
@@ -93,26 +89,26 @@ export function Button(props: IButtonProps) {
       $disabledTextStyleOverride,
       disabled,
     ],
-  );
+  )
 
   const handlePress = useCallback(
     (e: GestureResponderEvent) => {
       if (withHapticFeedback) {
-        Haptics.softImpactAsync();
+        Haptics.softImpactAsync()
       }
-      onPress?.(e);
+      onPress?.(e)
     },
     [withHapticFeedback, onPress],
-  );
+  )
 
-  const _icon = icon ?? picto;
+  const _icon = icon ?? picto
 
   const iconSize = useMemo((): IIconSizeKey => {
     if (size === "lg") {
-      return "sm";
+      return "sm"
     }
-    return "xs";
-  }, [size]);
+    return "xs"
+  }, [size])
 
   return (
     <Pressable
@@ -125,7 +121,7 @@ export function Button(props: IButtonProps) {
     >
       {(state) => {
         if (loading) {
-          return <ActivityIndicator />;
+          return <ActivityIndicator />
         }
 
         return (
@@ -152,12 +148,7 @@ export function Button(props: IButtonProps) {
               />
             )}
 
-            <Text
-              tx={tx}
-              text={title ?? text}
-              txOptions={txOptions}
-              style={$textStyle(state)}
-            >
+            <Text tx={tx} text={title ?? text} txOptions={txOptions} style={$textStyle(state)}>
               {children}
             </Text>
 
@@ -169,8 +160,8 @@ export function Button(props: IButtonProps) {
               />
             )}
           </>
-        );
+        )
       }}
     </Pressable>
-  );
+  )
 }

@@ -1,8 +1,8 @@
-import Clipboard from "@react-native-clipboard/clipboard";
-import * as Linking from "expo-linking";
-import { useCallback } from "react";
-import { StyleProp, StyleSheet, TextStyle } from "react-native";
-import { ParsedText } from "@/components/parsed-text/parsed-text";
+import Clipboard from "@react-native-clipboard/clipboard"
+import * as Linking from "expo-linking"
+import { useCallback } from "react"
+import { StyleProp, StyleSheet, TextStyle } from "react-native"
+import { ParsedText } from "@/components/parsed-text/parsed-text"
 import {
   ADDRESS_REGEX,
   CB_ID_REGEX,
@@ -12,42 +12,42 @@ import {
   LENS_REGEX,
   UNS_REGEX,
   URL_REGEX,
-} from "../utils/regex";
-import { showActionSheet } from "./action-sheet";
+} from "../utils/regex"
+import { showActionSheet } from "./action-sheet"
 
 type Props = {
-  children: React.ReactNode;
-  style?: StyleProp<TextStyle>;
-};
+  children: React.ReactNode
+  style?: StyleProp<TextStyle>
+}
 
 export function ClickableText({ children, style }: Props) {
-  const styles = useStyles();
+  const styles = useStyles()
 
   const handleEmailPress = useCallback((email: string) => {
     try {
-      Linking.openURL(`mailto:${email}`);
+      Linking.openURL(`mailto:${email}`)
     } catch {}
-  }, []);
+  }, [])
 
   const handleUrlPress = useCallback((url: string) => {
-    const uri = url.toLowerCase().startsWith("http") ? url : `https://${url}`;
-    Linking.openURL(uri);
-  }, []);
+    const uri = url.toLowerCase().startsWith("http") ? url : `https://${url}`
+    Linking.openURL(uri)
+  }, [])
 
   const handleNewConversationPress = useCallback((peer: string) => {
     // TODO
-  }, []);
+  }, [])
 
   const showCopyActionSheet = useCallback(
     (cta: string) => (content: string) => {
       const methods = {
         [cta]: () => {
-          Clipboard.setString(content);
+          Clipboard.setString(content)
         },
         Cancel: () => {},
-      };
+      }
 
-      const options = Object.keys(methods);
+      const options = Object.keys(methods)
 
       showActionSheet({
         options: {
@@ -56,16 +56,16 @@ export function ClickableText({ children, style }: Props) {
           cancelButtonIndex: options.indexOf("Cancel"),
         },
         callback: (selectedIndex?: number) => {
-          if (selectedIndex === undefined) return;
-          const method = (methods as any)[options[selectedIndex]];
+          if (selectedIndex === undefined) return
+          const method = (methods as any)[options[selectedIndex]]
           if (method) {
-            method();
+            method()
           }
         },
-      });
+      })
     },
     [],
-  );
+  )
 
   return (
     <ParsedText
@@ -124,11 +124,11 @@ export function ClickableText({ children, style }: Props) {
     >
       {children}
     </ParsedText>
-  );
+  )
 }
 
 const useStyles = () => {
   return StyleSheet.create({
     clickableText: { textDecorationLine: "underline" },
-  });
-};
+  })
+}

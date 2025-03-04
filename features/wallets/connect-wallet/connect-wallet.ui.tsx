@@ -39,18 +39,8 @@ type IConnectWalletItemProps = {
   onPress?: () => void
 }
 
-export const ConnectWalletItem = memo(function ConnectWalletItem(
-  props: IConnectWalletItemProps,
-) {
-  const {
-    name,
-    imageSource,
-    image,
-    isDisabled,
-    onPress,
-    helperText,
-    endElement,
-  } = props
+export const ConnectWalletItem = memo(function ConnectWalletItem(props: IConnectWalletItemProps) {
+  const { name, imageSource, image, isDisabled, onPress, helperText, endElement } = props
   const { theme } = useAppTheme()
 
   return (
@@ -107,76 +97,67 @@ type IConnectWalletPrimaryButtonProps = {
   disabled?: boolean
 }
 
-export const ConnectWalletPrimaryButton = memo(
-  function ConnectWalletPrimaryButton(props: IConnectWalletPrimaryButtonProps) {
-    const { text, onPress, loading, disabled } = props
+export const ConnectWalletPrimaryButton = memo(function ConnectWalletPrimaryButton(
+  props: IConnectWalletPrimaryButtonProps,
+) {
+  const { text, onPress, loading, disabled } = props
 
-    return (
-      <Button
-        text={text}
-        onPress={onPress}
-        loading={loading}
-        disabled={disabled}
-      />
-    )
-  },
-)
+  return <Button text={text} onPress={onPress} loading={loading} disabled={disabled} />
+})
 
-export const ConnectWalletButtonsContainer = memo(
-  function ConnectWalletButtonsContainer(props: IVStackProps) {
-    const { children, ...rest } = props
-    const { theme } = useAppTheme()
+export const ConnectWalletButtonsContainer = memo(function ConnectWalletButtonsContainer(
+  props: IVStackProps,
+) {
+  const { children, ...rest } = props
+  const { theme } = useAppTheme()
 
-    return (
-      <VStack style={{ rowGap: theme.spacing.xxs }} {...rest}>
-        {children}
-      </VStack>
-    )
-  },
-)
+  return (
+    <VStack style={{ rowGap: theme.spacing.xxs }} {...rest}>
+      {children}
+    </VStack>
+  )
+})
 
 /**
  * Cancel button for connect wallet flows
  */
-export const ConnectWalletLinkButton = memo(function ConnectWalletLinkButton(
-  props: IButtonProps,
-) {
+export const ConnectWalletLinkButton = memo(function ConnectWalletLinkButton(props: IButtonProps) {
   const { text = "Cancel", onPress, ...rest } = props
 
   return <Button variant="link" text={text} onPress={onPress} {...rest} />
 })
 
-export const ConnectWalletOutlineButton = memo(
-  function ConnectWalletCancelOutlineButton(props: IButtonProps) {
-    const { text = "Cancel", onPress, ...rest } = props
+export const ConnectWalletOutlineButton = memo(function ConnectWalletCancelOutlineButton(
+  props: IButtonProps,
+) {
+  const { text = "Cancel", onPress, ...rest } = props
 
-    return <Button variant="outline" text={text} onPress={onPress} {...rest} />
-  },
-)
+  return <Button variant="outline" text={text} onPress={onPress} {...rest} />
+})
 
 /**
  * Button container for connect wallet flows
  */
-export const ConnectWalletButtonContainer = memo(
-  function ConnectWalletButtonContainer(props: IVStackProps) {
-    const { children, style, ...rest } = props
-    const { theme } = useAppTheme()
+export const ConnectWalletButtonContainer = memo(function ConnectWalletButtonContainer(
+  props: IVStackProps,
+) {
+  const { children, style, ...rest } = props
+  const { theme } = useAppTheme()
 
-    return (
-      <VStack
-        style={[
-          {
-            rowGap: theme.spacing.xxs,
-          },
-          style,
-        ]}
-        {...rest}
-      >
-        {children}
-      </VStack>
-    )
-  },
-)
+  return (
+    <VStack
+      style={[
+        {
+          rowGap: theme.spacing.xxs,
+        },
+        style,
+      ]}
+      {...rest}
+    >
+      {children}
+    </VStack>
+  )
+})
 
 /**
  * Content container for connect wallet
@@ -185,25 +166,23 @@ type IConnectWalletContentContainerProps = {
   children: ReactNode
 }
 
-export const ConnectWalletContentContainer = memo(
-  function ConnectWalletContentContainer(
-    props: IConnectWalletContentContainerProps,
-  ) {
-    const { children } = props
-    const { theme } = useAppTheme()
+export const ConnectWalletContentContainer = memo(function ConnectWalletContentContainer(
+  props: IConnectWalletContentContainerProps,
+) {
+  const { children } = props
+  const { theme } = useAppTheme()
 
-    return (
-      <VStack
-        style={{
-          paddingHorizontal: theme.spacing.lg,
-          // rowGap: theme.spacing.xs,
-        }}
-      >
-        {children}
-      </VStack>
-    )
-  },
-)
+  return (
+    <VStack
+      style={{
+        paddingHorizontal: theme.spacing.lg,
+        // rowGap: theme.spacing.xs,
+      }}
+    >
+      {children}
+    </VStack>
+  )
+})
 
 /**
  * Text section for connect wallet
@@ -235,40 +214,38 @@ export const ConnectWalletTextSection = memo(function ConnectWalletTextSection(
   )
 })
 
-export const ConnectWalletLoadingContent = memo(
-  function ConnectWalletLoadingContent() {
-    return (
-      <>
-        <ConnectWalletHeader title="Loading..." />
-        <ConnectWalletContentContainer>
-          <Loader />
-        </ConnectWalletContentContainer>
-      </>
-    )
-  },
-)
+export const ConnectWalletLoadingContent = memo(function ConnectWalletLoadingContent() {
+  return (
+    <>
+      <ConnectWalletHeader title="Loading..." />
+      <ConnectWalletContentContainer>
+        <Loader />
+      </ConnectWalletContentContainer>
+    </>
+  )
+})
 
 /**
  * Error content for connect wallet
  */
-export const ConnectWalletErrorContent = memo(
-  function ConnectWalletErrorContent(props: { onPressCancel: () => void }) {
-    const { onPressCancel } = props
+export const ConnectWalletErrorContent = memo(function ConnectWalletErrorContent(props: {
+  onPressCancel: () => void
+}) {
+  const { onPressCancel } = props
 
-    return (
-      <>
-        <ConnectWalletHeader title="Something went wrong" />
-        <ConnectWalletContentContainer>
-          <ConnectWalletTextSection
-            text="Please try again"
-            secondaryText="If the problem persists, please contact support."
-          />
-          <ConnectWalletOutlineButton onPress={onPressCancel} />
-        </ConnectWalletContentContainer>
-      </>
-    )
-  },
-)
+  return (
+    <>
+      <ConnectWalletHeader title="Something went wrong" />
+      <ConnectWalletContentContainer>
+        <ConnectWalletTextSection
+          text="Please try again"
+          secondaryText="If the problem persists, please contact support."
+        />
+        <ConnectWalletOutlineButton onPress={onPressCancel} />
+      </ConnectWalletContentContainer>
+    </>
+  )
+})
 
 /**
  * Layout component for connect wallet

@@ -1,40 +1,34 @@
-import { useMutation } from "@tanstack/react-query";
-import {
-  ConversationTopic,
-  MessageId,
-  RemoteAttachmentContent,
-} from "@xmtp/react-native-sdk";
-import { useCallback } from "react";
-import { getCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
-import { getOrFetchConversation } from "@/queries/conversation-query";
-import { captureErrorWithToast } from "@/utils/capture-error";
+import { useMutation } from "@tanstack/react-query"
+import { ConversationTopic, MessageId, RemoteAttachmentContent } from "@xmtp/react-native-sdk"
+import { useCallback } from "react"
+import { getCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
+import { getOrFetchConversation } from "@/queries/conversation-query"
+import { captureErrorWithToast } from "@/utils/capture-error"
 
 export type ISendMessageParams = {
-  topic: ConversationTopic;
-  referencedMessageId?: MessageId;
+  topic: ConversationTopic
+  referencedMessageId?: MessageId
   content:
     | { text: string; remoteAttachment?: RemoteAttachmentContent }
-    | { text?: string; remoteAttachment: RemoteAttachmentContent };
-};
+    | { text?: string; remoteAttachment: RemoteAttachmentContent }
+}
 
 export async function sendMessage(args: ISendMessageParams) {
-  const { referencedMessageId, content, topic } = args;
+  const { referencedMessageId, content, topic } = args
 
   // Need at least a text or remoteAttachment
   if (!content.remoteAttachment && !content.text) {
-    throw new Error(
-      "Invalid content: Either text or remoteAttachment must be provided",
-    );
+    throw new Error("Invalid content: Either text or remoteAttachment must be provided")
   }
 
   const conversation = await getOrFetchConversation({
     topic,
     account: getCurrentSenderEthAddress()!,
     caller: "use-send-message#sendMessage",
-  });
+  })
 
   if (!conversation) {
-    throw new Error("Conversation not found when sending message");
+    throw new Error("Conversation not found when sending message")
   }
 
   if (referencedMessageId) {
@@ -45,20 +39,20 @@ export async function sendMessage(args: ISendMessageParams) {
           ? { remoteAttachment: content.remoteAttachment }
           : { text: content.text },
       },
-    });
+    })
   }
 
   return conversation.send(
     content.remoteAttachment
       ? { remoteAttachment: content.remoteAttachment }
       : { text: content.text! },
-  );
+  )
 }
 
 export function useSendMessage() {
   const { mutateAsync, error, isError } = useMutation({
     mutationFn: (variables: ISendMessageParams) => {
-      return sendMessage(variables);
+      return sendMessage(variables)
     },
     // onMutate: (variables) => {
     //   const currentAccount = getCurrentAccount()!;
@@ -128,22 +122,22 @@ export function useSendMessage() {
     //     caller: "useSendMessage#onError",
     //   }).catch(captureErrorWithToast);
     // },
-  });
+  })
 
   const sendMessageMutation = useCallback(
     async (args: ISendMessageParams) => {
       try {
-        await mutateAsync(args);
+        await mutateAsync(args)
       } catch (error) {
-        captureErrorWithToast(error);
+        captureErrorWithToast(error)
       }
     },
     [mutateAsync],
-  );
+  )
 
   return {
     sendMessage: sendMessageMutation,
     error,
     isError,
-  };
+  }
 }

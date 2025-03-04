@@ -1,29 +1,16 @@
-import { Button } from "@design-system/Button/Button";
-import React from "react";
-import { IButtonProps } from "@/design-system/Button/Button.props";
-import { ITextProps, Text } from "@/design-system/Text";
-import { IVStackProps, VStack } from "@/design-system/VStack";
-import { useAppTheme } from "@/theme/use-app-theme";
+import { Button } from "@design-system/Button/Button"
+import React from "react"
+import { IButtonProps } from "@/design-system/Button/Button.props"
+import { ITextProps, Text } from "@/design-system/Text"
+import { IVStackProps, VStack } from "@/design-system/VStack"
+import { useAppTheme } from "@/theme/use-app-theme"
 
-export function ConversationConsentPopupButton({
-  style,
-  ...rest
-}: IButtonProps) {
-  return (
-    <Button
-      size="lg"
-      style={[{ width: "100%" }, style]}
-      withHapticFeedback={true}
-      {...rest}
-    />
-  );
+export function ConversationConsentPopupButton({ style, ...rest }: IButtonProps) {
+  return <Button size="lg" style={[{ width: "100%" }, style]} withHapticFeedback={true} {...rest} />
 }
 
-export function ConversationConsentPopupHelperText({
-  style,
-  ...rest
-}: ITextProps) {
-  const { theme } = useAppTheme();
+export function ConversationConsentPopupHelperText({ style, ...rest }: ITextProps) {
+  const { theme } = useAppTheme()
 
   return (
     <Text
@@ -31,15 +18,11 @@ export function ConversationConsentPopupHelperText({
       style={[{ paddingTop: theme.spacing.xxs, textAlign: "center" }, style]}
       {...rest}
     />
-  );
+  )
 }
 
-export function ConsentPopupButtonsContainer({
-  children,
-  style,
-  ...rest
-}: IVStackProps) {
-  const { theme } = useAppTheme();
+export function ConsentPopupButtonsContainer({ children, style, ...rest }: IVStackProps) {
+  const { theme } = useAppTheme()
 
   return (
     <VStack
@@ -57,15 +40,11 @@ export function ConsentPopupButtonsContainer({
     >
       {children}
     </VStack>
-  );
+  )
 }
 
-export function ConversationConsentPopupContainer({
-  children,
-  style,
-  ...rest
-}: IVStackProps) {
-  const { theme } = useAppTheme();
+export function ConversationConsentPopupContainer({ children, style, ...rest }: IVStackProps) {
+  const { theme } = useAppTheme()
 
   return (
     <VStack
@@ -86,5 +65,5 @@ export function ConversationConsentPopupContainer({
     >
       {children}
     </VStack>
-  );
+  )
 }

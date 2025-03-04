@@ -68,15 +68,7 @@ export function ChipText({ children, style }: IChipTextProps) {
   return (
     <Text
       // {...debugBorder()}
-      preset={
-        size === "xs"
-          ? "smaller"
-          : size === "sm"
-            ? "small"
-            : size === "md"
-              ? "body"
-              : "big"
-      }
+      preset={size === "xs" ? "smaller" : size === "sm" ? "small" : size === "md" ? "body" : "big"}
       style={[
         { verticalAlign: "middle" },
         style,
@@ -104,10 +96,7 @@ export function ChipAvatar(props: IChipAvatarProps) {
   const { size } = useChipContext()
 
   return (
-    <Avatar
-      sizeNumber={size === "lg" ? theme.avatarSize.sm : theme.avatarSize.xs}
-      {...props}
-    />
+    <Avatar sizeNumber={size === "lg" ? theme.avatarSize.sm : theme.avatarSize.xs} {...props} />
   )
 }
 
@@ -121,25 +110,13 @@ export function useChipStyles({
   const { theme } = useAppTheme()
 
   const verticalPadding =
-    size === "xs"
-      ? theme.spacing.xxxs
-      : size === "lg"
-        ? theme.spacing.xs
-        : theme.spacing.xxs
+    size === "xs" ? theme.spacing.xxxs : size === "lg" ? theme.spacing.xs : theme.spacing.xxs
 
   const horizontalPadding =
-    size === "xs"
-      ? theme.spacing.xxs
-      : size === "lg"
-        ? theme.spacing.sm
-        : theme.spacing.xs
+    size === "xs" ? theme.spacing.xxs : size === "lg" ? theme.spacing.sm : theme.spacing.xs
 
   const contentHeight =
-    size === "xs"
-      ? theme.spacing.sm
-      : size === "lg"
-        ? theme.spacing.lg
-        : theme.spacing.md
+    size === "xs" ? theme.spacing.sm : size === "lg" ? theme.spacing.lg : theme.spacing.md
 
   const borderRadius = size === "lg" ? theme.spacing.lg : theme.spacing.xs
 
@@ -148,9 +125,7 @@ export function useChipStyles({
     borderWidth: variant === "outlined" ? theme.borderWidth.sm : 0,
     borderColor: theme.colors.border.subtle,
     backgroundColor:
-      variant === "outlined"
-        ? theme.colors.background.surface
-        : theme.colors.fill.minimal,
+      variant === "outlined" ? theme.colors.background.surface : theme.colors.fill.minimal,
     paddingVertical: verticalPadding - theme.borderWidth.sm * 2,
     paddingHorizontal: horizontalPadding - theme.borderWidth.sm * 2,
   } satisfies StyleProp<ViewStyle>
@@ -170,8 +145,7 @@ export function useChipStyles({
     $container,
     $selectedContainer: {
       backgroundColor: theme.colors.fill.minimal,
-      borderColor:
-        variant === "outlined" ? theme.colors.fill.minimal : "transparent",
+      borderColor: variant === "outlined" ? theme.colors.fill.minimal : "transparent",
     },
     $content,
     $disabledContainer: {

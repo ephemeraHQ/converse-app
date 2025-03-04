@@ -10,11 +10,7 @@ export function getXmtpInboxIdFromEthAddressQueryOptions(args: {
   const { clientEthAddress, targetEthAddress } = args
 
   return queryOptions({
-    queryKey: [
-      "xmtp-inbox-id-from-eth-address",
-      clientEthAddress,
-      targetEthAddress,
-    ],
+    queryKey: ["xmtp-inbox-id-from-eth-address", clientEthAddress, targetEthAddress],
     queryFn: () => {
       return getInboxIdFromEthAddress({
         clientEthAddress,
@@ -35,7 +31,5 @@ export async function invalidateXmtpInboxIdFromEthAddressQuery(args: {
   clientEthAddress: IEthereumAddress
   targetEthAddress: IEthereumAddress
 }) {
-  await queryClient.invalidateQueries(
-    getXmtpInboxIdFromEthAddressQueryOptions(args),
-  )
+  await queryClient.invalidateQueries(getXmtpInboxIdFromEthAddressQueryOptions(args))
 }

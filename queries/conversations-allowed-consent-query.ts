@@ -1,125 +1,107 @@
-import { allowedConsentConversationsQueryKey } from "@queries/QueryKeys";
-import {
-  QueryObserver,
-  queryOptions,
-  skipToken,
-  useQuery,
-} from "@tanstack/react-query";
-import { ConversationTopic } from "@xmtp/react-native-sdk";
-import { useMultiInboxStore } from "@/features/authentication/multi-inbox.store";
-import { getXmtpClientByEthAddress } from "@/features/xmtp/xmtp-client/xmtp-client.service";
-import { IXmtpConversationWithCodecs } from "@/features/xmtp/xmtp.types";
-import {
-  getConversationQueryData,
-  setConversationQueryData,
-} from "@/queries/conversation-query";
-import { ensureConversationSyncAllQuery } from "@/queries/conversation-sync-all-query";
-import { Optional } from "@/types/general";
-import { captureError } from "@/utils/capture-error";
-import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
-import { queryClient } from "./queryClient";
-import { ensureGroupMembersQueryData } from "./useGroupMembersQuery";
+import { allowedConsentConversationsQueryKey } from "@queries/QueryKeys"
+import { QueryObserver, queryOptions, skipToken, useQuery } from "@tanstack/react-query"
+import { ConversationTopic } from "@xmtp/react-native-sdk"
+import { useMultiInboxStore } from "@/features/authentication/multi-inbox.store"
+import { getXmtpClientByEthAddress } from "@/features/xmtp/xmtp-client/xmtp-client.service"
+import { IXmtpConversationWithCodecs } from "@/features/xmtp/xmtp.types"
+import { getConversationQueryData, setConversationQueryData } from "@/queries/conversation-query"
+import { ensureConversationSyncAllQuery } from "@/queries/conversation-sync-all-query"
+import { Optional } from "@/types/general"
+import { captureError } from "@/utils/capture-error"
+import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
+import { queryClient } from "./queryClient"
+import { ensureGroupMembersQueryData } from "./useGroupMembersQuery"
 
 export type IAllowedConsentConversationsQuery = Awaited<
   ReturnType<typeof getAllowedConsentConversations>
->;
+>
 
 type IArgs = {
-  account: string;
-};
+  account: string
+}
 
-type IArgsWithCaller = IArgs & { caller: string };
+type IArgsWithCaller = IArgs & { caller: string }
 
 export const createAllowedConsentConversationsQueryObserver = (
   args: IArgs & { caller: string },
 ) => {
-  return new QueryObserver(
-    queryClient,
-    getAllowedConsentConversationsQueryOptions(args),
-  );
-};
+  return new QueryObserver(queryClient, getAllowedConsentConversationsQueryOptions(args))
+}
 
-export const useAllowedConsentConversationsQuery = (
-  args: IArgs & { caller: string },
-) => {
-  return useQuery(getAllowedConsentConversationsQueryOptions(args));
-};
+export const useAllowedConsentConversationsQuery = (args: IArgs & { caller: string }) => {
+  return useQuery(getAllowedConsentConversationsQueryOptions(args))
+}
 
 export function addConversationToAllowedConsentConversationsQuery(
   args: IArgs & {
-    conversation: IXmtpConversationWithCodecs;
+    conversation: IXmtpConversationWithCodecs
   },
 ) {
-  const { account, conversation } = args;
+  const { account, conversation } = args
 
   const previousConversationsData = getAllowedConsentConversationsQueryData({
     account,
-  });
+  })
 
   if (!previousConversationsData) {
-    queryClient.setQueryData(
-      getAllowedConsentConversationsQueryOptions({ account }).queryKey,
-      [conversation],
-    );
-    return;
+    queryClient.setQueryData(getAllowedConsentConversationsQueryOptions({ account }).queryKey, [
+      conversation,
+    ])
+    return
   }
 
-  const conversationExists = previousConversationsData.some(
-    (c) => c.topic === conversation.topic,
-  );
+  const conversationExists = previousConversationsData.some((c) => c.topic === conversation.topic)
 
   if (conversationExists) {
     return updateConversationInAllowedConsentConversationsQueryData({
       account,
       topic: conversation.topic,
       conversationUpdate: conversation,
-    });
+    })
   }
 
   queryClient.setQueryData<IAllowedConsentConversationsQuery>(
     getAllowedConsentConversationsQueryOptions({ account }).queryKey,
     [conversation, ...previousConversationsData],
-  );
+  )
 }
 
 export const removeConversationFromAllowedConsentConversationsQuery = (
   args: IArgs & {
-    topic: ConversationTopic;
+    topic: ConversationTopic
   },
 ) => {
-  const { account, topic } = args;
+  const { account, topic } = args
 
   const previousConversationsData = getAllowedConsentConversationsQueryData({
     account,
-  });
+  })
 
   if (!previousConversationsData) {
-    return;
+    return
   }
 
   queryClient.setQueryData(
     getAllowedConsentConversationsQueryOptions({ account }).queryKey,
     previousConversationsData.filter((c) => c.topic !== topic),
-  );
-};
+  )
+}
 
 export const getAllowedConsentConversationsQueryData = (args: IArgs) => {
-  return queryClient.getQueryData(
-    getAllowedConsentConversationsQueryOptions(args).queryKey,
-  );
-};
+  return queryClient.getQueryData(getAllowedConsentConversationsQueryOptions(args).queryKey)
+}
 
 const getAllowedConsentConversations = async (args: IArgs) => {
-  const { account } = args;
+  const { account } = args
 
   await ensureConversationSyncAllQuery({
     ethAddress: account,
     consentStates: ["allowed"],
-  });
+  })
 
   const client = await getXmtpClientByEthAddress({
     ethAddress: account,
-  });
+  })
 
   const conversations = await client.conversations.list(
     {
@@ -133,7 +115,7 @@ const getAllowedConsentConversations = async (args: IArgs) => {
     },
     9999, // All of them
     ["allowed"],
-  );
+  )
 
   for (const conversation of conversations) {
     // Only set if the conversation is not already in the query cache
@@ -143,7 +125,7 @@ const getAllowedConsentConversations = async (args: IArgs) => {
         account,
         topic: conversation.topic,
         conversation,
-      });
+      })
     }
 
     // We are often using conversation members info
@@ -152,40 +134,38 @@ const getAllowedConsentConversations = async (args: IArgs) => {
       caller: "getAllowedConsentConversations",
       account,
       topic: conversation.topic,
-    }).catch(captureError);
+    }).catch(captureError)
   }
 
-  return conversations;
-};
+  return conversations
+}
 
 export const getAllowedConsentConversationsQueryOptions = (
   args: Optional<IArgsWithCaller, "caller">,
 ) => {
-  const { account, caller } = args;
-  const enabled = !!account;
+  const { account, caller } = args
+  const enabled = !!account
   return queryOptions({
     meta: {
       caller,
     },
     queryKey: allowedConsentConversationsQueryKey(account),
-    queryFn: enabled
-      ? () => getAllowedConsentConversations({ account })
-      : skipToken,
+    queryFn: enabled ? () => getAllowedConsentConversations({ account }) : skipToken,
     enabled,
-  });
-};
+  })
+}
 
 export const updateConversationInAllowedConsentConversationsQueryData = (
   args: IArgs & {
-    topic: ConversationTopic;
-    conversationUpdate: Partial<IXmtpConversationWithCodecs>;
+    topic: ConversationTopic
+    conversationUpdate: Partial<IXmtpConversationWithCodecs>
   },
 ) => {
-  const { account, topic, conversationUpdate } = args;
+  const { account, topic, conversationUpdate } = args
 
   const previousConversationsData = getAllowedConsentConversationsQueryData({
     account,
-  });
+  })
 
   if (!previousConversationsData) {
     captureError(
@@ -194,27 +174,25 @@ export const updateConversationInAllowedConsentConversationsQueryData = (
           conversationUpdate,
         )}`,
       ),
-    );
-    return;
+    )
+    return
   }
 
   const newConversations = previousConversationsData.map((c) => {
     if (c.topic === topic) {
-      return updateObjectAndMethods(c, conversationUpdate);
+      return updateObjectAndMethods(c, conversationUpdate)
     }
-    return c;
-  });
+    return c
+  })
 
   queryClient.setQueryData<IAllowedConsentConversationsQuery>(
     getAllowedConsentConversationsQueryOptions({
       account,
     }).queryKey,
     newConversations,
-  );
-};
+  )
+}
 
 export function fetchAllowedConsentConversationsQuery(args: IArgsWithCaller) {
-  return queryClient.fetchQuery(
-    getAllowedConsentConversationsQueryOptions(args),
-  );
+  return queryClient.fetchQuery(getAllowedConsentConversationsQueryOptions(args))
 }

@@ -1,13 +1,8 @@
-import {
-  Mutation,
-  MutationCache,
-  QueryCache,
-  QueryClient,
-} from "@tanstack/react-query";
-import { captureError } from "@/utils/capture-error";
-import { ReactQueryError } from "@/utils/error";
-import { logger } from "@/utils/logger";
-import { DEFAULT_GC_TIME, DEFAULT_STALE_TIME } from "./queryClient.constants";
+import { Mutation, MutationCache, QueryCache, QueryClient } from "@tanstack/react-query"
+import { captureError } from "@/utils/capture-error"
+import { ReactQueryError } from "@/utils/error"
+import { logger } from "@/utils/logger"
+import { DEFAULT_GC_TIME, DEFAULT_STALE_TIME } from "./queryClient.constants"
 
 export const queryClient = new QueryClient({
   mutationCache: new MutationCache({
@@ -22,23 +17,23 @@ export const queryClient = new QueryClient({
         mutationKey: mutation.options.mutationKey
           ? JSON.stringify(mutation.options.mutationKey)
           : "",
-      };
+      }
 
       if (mutation.meta?.caller) {
-        extras.caller = mutation.meta.caller as string;
+        extras.caller = mutation.meta.caller as string
       }
 
       if (variables) {
-        extras.variables = JSON.stringify(variables);
+        extras.variables = JSON.stringify(variables)
       }
 
       // Wrap the error in ReactQueryError
       const wrappedError = new ReactQueryError({
         error,
         additionalMessage: `Mutation failed: ${mutation.options.mutationKey ?? "unknown"}`,
-      });
+      })
 
-      captureError(wrappedError, { extras });
+      captureError(wrappedError, { extras })
     },
   }),
   queryCache: new QueryCache({
@@ -49,25 +44,25 @@ export const queryClient = new QueryClient({
         `[Query] success fetching ${JSON.stringify(query.queryKey)}${
           query.meta?.caller ? ` (caller: ${query.meta.caller})` : ""
         }`,
-      );
+      )
     },
     onError: (error: Error, query) => {
       const extras: Record<string, string> = {
         type: "query",
         queryKey: JSON.stringify(query.queryKey),
-      };
+      }
 
       if (query.meta?.caller) {
-        extras.caller = query.meta.caller as string;
+        extras.caller = query.meta.caller as string
       }
 
       // Wrap the error in ReactQueryError
       const wrappedError = new ReactQueryError({
         error,
         additionalMessage: `Query failed: ${JSON.stringify(query.queryKey)}`,
-      });
+      })
 
-      captureError(wrappedError, { extras });
+      captureError(wrappedError, { extras })
     },
   }),
 
@@ -92,4 +87,4 @@ export const queryClient = new QueryClient({
       structuralSharing: false,
     },
   },
-});
+})

@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useRef } from "react";
+import React, { memo, useEffect, useRef } from "react"
 import {
   cancelAnimation,
   interpolate,
@@ -7,41 +7,41 @@ import {
   useSharedValue,
   withSequence,
   withTiming,
-} from "react-native-reanimated";
-import { AnimatedCenter } from "@/design-system/Center";
-import { AnimatableText } from "@/design-system/Text/AnimatedText";
-import { ITextProps } from "@/design-system/Text/Text.props";
+} from "react-native-reanimated"
+import { AnimatedCenter } from "@/design-system/Center"
+import { AnimatableText } from "@/design-system/Text/AnimatedText"
+import { ITextProps } from "@/design-system/Text/Text.props"
 
 type IAnimatedTextCarouselProps = {
-  texts: string[];
-  textStyle?: ITextProps["style"];
-  msDelayBetweenTextChange?: number;
-};
+  texts: string[]
+  textStyle?: ITextProps["style"]
+  msDelayBetweenTextChange?: number
+}
 
 export const AnimatedTextCarousel = memo(function AnimatedTextCarousel({
   texts,
   msDelayBetweenTextChange = 2000,
   textStyle,
 }: IAnimatedTextCarouselProps) {
-  const indexAV = useSharedValue(1);
-  const indexRef = useRef(0);
+  const indexAV = useSharedValue(1)
+  const indexRef = useRef(0)
 
   const textAV = useDerivedValue(() => {
-    return texts[Math.round(indexAV.value - 1) % texts.length];
-  });
+    return texts[Math.round(indexAV.value - 1) % texts.length]
+  })
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
-    cancelAnimation(indexAV);
-    indexAV.value = 1;
+    let interval: NodeJS.Timeout
+    cancelAnimation(indexAV)
+    indexAV.value = 1
 
     const startInterval = () => {
-      if (interval) clearInterval(interval);
+      if (interval) clearInterval(interval)
 
       interval = setInterval(() => {
-        const currentIndex = indexRef.current;
-        const newIndex = (currentIndex + 1) % texts.length;
-        indexRef.current = newIndex;
+        const currentIndex = indexRef.current
+        const newIndex = (currentIndex + 1) % texts.length
+        indexRef.current = newIndex
 
         // When transitioning from last to first item, animate through an intermediate value
         // to create a smooth fade transition
@@ -55,45 +55,37 @@ export const AnimatedTextCarousel = memo(function AnimatedTextCarousel({
             withTiming(1, {
               duration: msDelayBetweenTextChange / 2,
             }),
-          );
+          )
         } else {
           // Normal case: animate to the next index + 1 for the fade effect
           indexAV.value = withTiming(newIndex + 1, {
             duration: msDelayBetweenTextChange,
-          });
+          })
         }
-      }, msDelayBetweenTextChange);
-    };
+      }, msDelayBetweenTextChange)
+    }
 
-    startInterval();
+    startInterval()
 
     return () => {
       if (interval) {
-        clearInterval(interval);
+        clearInterval(interval)
       }
-    };
-  }, [texts, msDelayBetweenTextChange, indexAV]);
+    }
+  }, [texts, msDelayBetweenTextChange, indexAV])
 
   const textAS = useAnimatedStyle(() => {
-    const progress = indexAV.value % 1;
-    const opacity = interpolate(
-      progress,
-      [0, 0.4, 0.6, 1],
-      [1, 0, 0, 1],
-      "clamp",
-    );
+    const progress = indexAV.value % 1
+    const opacity = interpolate(progress, [0, 0.4, 0.6, 1], [1, 0, 0, 1], "clamp")
 
     return {
       opacity,
-    };
-  });
+    }
+  })
 
   return (
     <AnimatedCenter>
-      <AnimatableText
-        text={textAV}
-        style={[textStyle, textAS, { textAlign: "center" }]}
-      />
+      <AnimatableText text={textAV} style={[textStyle, textAS, { textAlign: "center" }]} />
     </AnimatedCenter>
-  );
-});
+  )
+})

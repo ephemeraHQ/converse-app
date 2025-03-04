@@ -1,36 +1,34 @@
-import { AnimatedPressable, IPressableProps } from "@design-system/Pressable";
-import { memo, useCallback } from "react";
-import { GestureResponderEvent } from "react-native";
+import { AnimatedPressable, IPressableProps } from "@design-system/Pressable"
+import { memo, useCallback } from "react"
+import { GestureResponderEvent } from "react-native"
 import {
   useAnimatedReaction,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
-} from "react-native-reanimated";
-import { Haptics } from "../utils/haptics";
+} from "react-native-reanimated"
+import { Haptics } from "../utils/haptics"
 
-export type IPressableScaleProps = IPressableProps;
+export type IPressableScaleProps = IPressableProps
 
-export const PressableScale = memo(function PressableScale(
-  props: IPressableScaleProps,
-) {
-  const { withHaptics, onPress: onPressProps, style, ...rest } = props;
+export const PressableScale = memo(function PressableScale(props: IPressableScaleProps) {
+  const { withHaptics, onPress: onPressProps, style, ...rest } = props
 
   const { handlePressIn, handlePressOut, animatedStyle } = usePressInDepth({
     withHapticFeedback: withHaptics,
-  });
+  })
 
   const onPress = useCallback(
     (e: GestureResponderEvent) => {
       if (withHaptics) {
-        Haptics.lightImpactAsync();
+        Haptics.lightImpactAsync()
       }
       if (onPressProps) {
-        onPressProps(e);
+        onPressProps(e)
       }
     },
     [onPressProps, withHaptics],
-  );
+  )
 
   return (
     <AnimatedPressable
@@ -42,15 +40,15 @@ export const PressableScale = memo(function PressableScale(
     >
       {props.children}
     </AnimatedPressable>
-  );
-});
+  )
+})
 
 function usePressInDepth(options?: { withHapticFeedback?: boolean }) {
-  const { withHapticFeedback = true } = options || {};
+  const { withHapticFeedback = true } = options || {}
 
-  const pressedInAV = useSharedValue(0);
+  const pressedInAV = useSharedValue(0)
 
-  const hasTriggeredHapticAV = useSharedValue(false);
+  const hasTriggeredHapticAV = useSharedValue(false)
 
   // Only if we press long enough
   // otherwise we don't want to trigger the haptic
@@ -65,24 +63,24 @@ function usePressInDepth(options?: { withHapticFeedback?: boolean }) {
       }
     },
     [withHapticFeedback],
-  );
+  )
 
   useAnimatedReaction(
     () => pressedInAV.value === 0,
     (v) => {
       if (v) {
-        hasTriggeredHapticAV.value = false;
+        hasTriggeredHapticAV.value = false
       }
     },
-  );
+  )
 
   const handlePressIn = useCallback(() => {
-    pressedInAV.value = withTiming(1);
-  }, [pressedInAV]);
+    pressedInAV.value = withTiming(1)
+  }, [pressedInAV])
 
   const handlePressOut = useCallback(() => {
-    pressedInAV.value = withTiming(0);
-  }, [pressedInAV]);
+    pressedInAV.value = withTiming(0)
+  }, [pressedInAV])
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
@@ -91,13 +89,13 @@ function usePressInDepth(options?: { withHapticFeedback?: boolean }) {
           scale: 1 - pressedInAV.value * 0.05,
         },
       ],
-    };
-  }, []);
+    }
+  }, [])
 
   return {
     pressedInAV,
     handlePressIn,
     handlePressOut,
     animatedStyle,
-  };
+  }
 }

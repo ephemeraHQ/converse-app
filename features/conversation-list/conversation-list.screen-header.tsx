@@ -69,11 +69,7 @@ export function ProfileAvatar() {
       hitSlop={theme.spacing.sm}
     >
       <Center style={themed($avatarContainer)}>
-        <Avatar
-          uri={avatarUrl}
-          name={displayName}
-          sizeNumber={theme.avatarSize.sm}
-        />
+        <Avatar uri={avatarUrl} name={displayName} sizeNumber={theme.avatarSize.sm} />
       </Center>
     </Pressable>
   )

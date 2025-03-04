@@ -7,7 +7,7 @@ function mockedClient() {
     },
     exportKeyBundle: jest.fn(() => "keybundle"),
     canMessage: jest.fn(() => true),
-  };
+  }
 }
 
 module.exports = {
@@ -16,18 +16,18 @@ module.exports = {
     createRandom: jest.fn().mockImplementation(mockedClient),
   },
   StaticAttachmentCodec: jest.fn().mockImplementation(() => {
-    return {};
+    return {}
   }),
   RemoteAttachmentCodec: jest.fn().mockImplementation(() => {
-    return {};
+    return {}
   }),
   JSContentCodec: jest.fn().mockImplementation(() => {
-    return {};
+    return {}
   }),
   GroupUpdatedCodec: jest.fn().mockImplementation(() => {
-    return {};
+    return {}
   }),
   ReplyCodec: jest.fn().mockImplementation(() => ({})),
   ReactionCodec: jest.fn().mockImplementation(() => ({})),
   emitter: { removeAllListeners: jest.fn(() => {}) },
-};
+}

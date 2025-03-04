@@ -1,13 +1,11 @@
-import { IVStackProps, VStack } from "@design-system/VStack";
-import { memo } from "react";
-import { useAppTheme } from "@/theme/use-app-theme";
+import { IVStackProps, VStack } from "@design-system/VStack"
+import { memo } from "react"
+import { useAppTheme } from "@/theme/use-app-theme"
 
-export const AttachmentContainer = memo(function AttachmentContainer(
-  props: IVStackProps,
-) {
-  const { style, ...rest } = props;
+export const AttachmentContainer = memo(function AttachmentContainer(props: IVStackProps) {
+  const { style, ...rest } = props
 
-  const { theme } = useAppTheme();
+  const { theme } = useAppTheme()
 
   return (
     <VStack
@@ -25,5 +23,5 @@ export const AttachmentContainer = memo(function AttachmentContainer(
       ]}
       {...rest}
     />
-  );
-});
+  )
+})

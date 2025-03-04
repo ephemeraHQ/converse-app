@@ -1,77 +1,74 @@
-import { useGroupQuery } from "@queries/useGroupQuery";
-import { useMutation } from "@tanstack/react-query";
-import { logger } from "@utils/logger";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
+import { useGroupQuery } from "@queries/useGroupQuery"
+import { useMutation } from "@tanstack/react-query"
+import { logger } from "@utils/logger"
+import type { ConversationTopic } from "@xmtp/react-native-sdk"
+import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client"
 // import { refreshGroup } from "../utils/xmtpRN/conversations";
-import { captureError } from "@/utils/capture-error";
-import { promoteAdminMutationKey } from "./MutationKeys";
+import { captureError } from "@/utils/capture-error"
+import { promoteAdminMutationKey } from "./MutationKeys"
 import {
   cancelGroupMembersQuery,
   getGroupMembersQueryData,
   setGroupMembersQueryData,
-} from "./useGroupMembersQuery";
+} from "./useGroupMembersQuery"
 
-export const usePromoteToAdminMutation = (
-  account: string,
-  topic: ConversationTopic,
-) => {
-  const { data: group } = useGroupQuery({ account, topic });
+export const usePromoteToAdminMutation = (account: string, topic: ConversationTopic) => {
+  const { data: group } = useGroupQuery({ account, topic })
 
   return useMutation({
     mutationKey: promoteAdminMutationKey(account, topic!),
     // The actual function that will be called to promote a member to admin
     mutationFn: async (inboxId: InboxId) => {
       if (!group || !account || !topic) {
-        return;
+        return
       }
-      await group.addAdmin(inboxId);
-      return inboxId;
+      await group.addAdmin(inboxId)
+      return inboxId
     },
     // Nice to have functionality, but not necessary for the task
     // onMutation will happen before the mutation is executed
     // So this is where we can optimistically update the cache
     onMutate: async (inboxId: InboxId) => {
       if (!topic) {
-        return;
+        return
       }
-      await cancelGroupMembersQuery({ account, topic });
+      await cancelGroupMembersQuery({ account, topic })
 
       const previousGroupMembers = getGroupMembersQueryData({
         account,
         topic,
-      });
+      })
       if (!previousGroupMembers) {
-        return;
+        return
       }
-      const newMembers = { ...previousGroupMembers };
+      const newMembers = { ...previousGroupMembers }
       if (!newMembers.byId[inboxId]) {
-        return;
+        return
       }
-      newMembers.byId[inboxId].permissionLevel = "admin";
-      setGroupMembersQueryData({ account, topic, members: newMembers });
+      newMembers.byId[inboxId].permissionLevel = "admin"
+      setGroupMembersQueryData({ account, topic, members: newMembers })
 
-      return { previousGroupMembers };
+      return { previousGroupMembers }
     },
     // Use onError to revert the cache if the mutation fails
     onError: (error, _variables, context) => {
-      captureError(error);
+      captureError(error)
       if (context?.previousGroupMembers === undefined) {
-        return;
+        return
       }
       if (!topic) {
-        return;
+        return
       }
       setGroupMembersQueryData({
         account,
         topic,
         members: context.previousGroupMembers,
-      });
+      })
     },
     // For now we need to make sure the group is updated for handling on the conversation screen
     onSuccess: () => {
-      logger.debug("onSuccess usePromoteToAdminMutation");
+      logger.debug("onSuccess usePromoteToAdminMutation")
       // refreshGroup(account, topic);
     },
-  });
-};
+  })
+}

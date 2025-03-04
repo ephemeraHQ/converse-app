@@ -1,14 +1,14 @@
-import { translate } from "@i18n";
-import { ConsentState } from "@xmtp/react-native-sdk";
-import { ColorSchemeName } from "react-native";
-import { showActionSheet } from "@/components/action-sheet";
+import { translate } from "@i18n"
+import { ConsentState } from "@xmtp/react-native-sdk"
+import { ColorSchemeName } from "react-native"
+import { showActionSheet } from "@/components/action-sheet"
 
 type GroupAction = {
-  includeAddedBy: boolean;
-  includeCreator: boolean;
-};
+  includeAddedBy: boolean
+  includeCreator: boolean
+}
 
-type GroupActionHandler = (options: GroupAction) => void;
+type GroupActionHandler = (options: GroupAction) => void
 
 export const groupRemoveRestoreHandler = (
   consent: ConsentState | undefined,
@@ -18,11 +18,7 @@ export const groupRemoveRestoreHandler = (
   blockGroup: GroupActionHandler,
 ) => {
   return (callback: (success: boolean) => void) => {
-    const showOptions = (
-      options: string[],
-      title: string,
-      actions: (() => void)[],
-    ) => {
+    const showOptions = (options: string[], title: string, actions: (() => void)[]) => {
       showActionSheet({
         options: {
           options,
@@ -32,41 +28,33 @@ export const groupRemoveRestoreHandler = (
         },
         callback: (selectedIndex?: number) => {
           if (selectedIndex !== undefined && selectedIndex < actions.length) {
-            actions[selectedIndex]();
-            callback(true);
+            actions[selectedIndex]()
+            callback(true)
           } else {
-            callback(false);
+            callback(false)
           }
         },
-      });
-    };
+      })
+    }
 
     if (consent === "denied") {
       showOptions(
-        [
-          translate("restore"),
-          translate("restore_and_unblock_inviter"),
-          translate("Cancel"),
-        ],
+        [translate("restore"), translate("restore_and_unblock_inviter"), translate("Cancel")],
         `${translate("restore")} ${groupName}?`,
         [
           () => allowGroup({ includeAddedBy: false, includeCreator: false }),
           () => allowGroup({ includeAddedBy: true, includeCreator: false }),
         ],
-      );
+      )
     } else {
       showOptions(
-        [
-          translate("remove"),
-          translate("remove_and_block_inviter"),
-          translate("Cancel"),
-        ],
+        [translate("remove"), translate("remove_and_block_inviter"), translate("Cancel")],
         `${translate("remove")} ${groupName}?`,
         [
           () => blockGroup({ includeAddedBy: false, includeCreator: false }),
           () => blockGroup({ includeAddedBy: true, includeCreator: false }),
         ],
-      );
+      )
     }
-  };
-};
+  }
+}

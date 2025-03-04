@@ -2,10 +2,7 @@ import { useMutation } from "@tanstack/react-query"
 import { useCallback } from "react"
 import { z } from "zod"
 import { setCurrentUserQueryData } from "@/features/current-user/curent-user.query"
-import {
-  invalidateProfileQuery,
-  setProfileQueryData,
-} from "@/features/profiles/profiles.query"
+import { invalidateProfileQuery, setProfileQueryData } from "@/features/profiles/profiles.query"
 import { profileValidationSchema } from "@/features/profiles/schemas/profile-validation.schema"
 import { createUser } from "../authentication/create-user.api"
 

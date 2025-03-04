@@ -1,33 +1,33 @@
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import React, { memo } from "react";
-import { Screen } from "@/components/screen/screen";
-import { ActivityIndicator } from "@/design-system/activity-indicator";
-import { Center } from "@/design-system/Center";
-import { VStack } from "@/design-system/VStack";
-import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
-import { ConversationComposer } from "@/features/conversation/conversation-composer/conversation-composer";
-import { ConversationComposerStoreProvider } from "@/features/conversation/conversation-composer/conversation-composer.store-context";
-import { ConversationCreateSearchInput } from "@/features/conversation/conversation-create/components/conversation-create-search-input";
-import { ConversationSearchResultsList } from "@/features/conversation/conversation-create/components/conversation-create-search-results-list";
-import { ConversationKeyboardFiller } from "@/features/conversation/conversation-keyboard-filler";
-import { ConversationMessageContextMenu } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu";
-import { ConversationMessageContextMenuStoreProvider } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu.store-context";
-import { MessageReactionsDrawer } from "@/features/conversation/conversation-message/conversation-message-reactions/conversation-message-reaction-drawer/conversation-message-reaction-drawer";
-import { DmConversationTitle } from "@/features/conversation/conversation-screen-header/conversation-screen-dm-header-title";
-import { GroupConversationTitle } from "@/features/conversation/conversation-screen-header/conversation-screen-group-header-title";
-import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm";
-import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
-import { NavigationParamList } from "@/navigation/navigation.types";
-import { useHeader } from "@/navigation/use-header";
-import { useRouter } from "@/navigation/use-navigation";
-import { useConversationQuery } from "@/queries/conversation-query";
-import { $globalStyles } from "@/theme/styles";
-import { useAppTheme } from "@/theme/use-app-theme";
-import { ConversationMessages } from "./conversation-messages";
+import { NativeStackScreenProps } from "@react-navigation/native-stack"
+import React, { memo } from "react"
+import { Screen } from "@/components/screen/screen"
+import { ActivityIndicator } from "@/design-system/activity-indicator"
+import { Center } from "@/design-system/Center"
+import { VStack } from "@/design-system/VStack"
+import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
+import { ConversationComposer } from "@/features/conversation/conversation-composer/conversation-composer"
+import { ConversationComposerStoreProvider } from "@/features/conversation/conversation-composer/conversation-composer.store-context"
+import { ConversationCreateSearchInput } from "@/features/conversation/conversation-create/components/conversation-create-search-input"
+import { ConversationSearchResultsList } from "@/features/conversation/conversation-create/components/conversation-create-search-results-list"
+import { ConversationKeyboardFiller } from "@/features/conversation/conversation-keyboard-filler"
+import { ConversationMessageContextMenu } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu"
+import { ConversationMessageContextMenuStoreProvider } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu.store-context"
+import { MessageReactionsDrawer } from "@/features/conversation/conversation-message/conversation-message-reactions/conversation-message-reaction-drawer/conversation-message-reaction-drawer"
+import { DmConversationTitle } from "@/features/conversation/conversation-screen-header/conversation-screen-dm-header-title"
+import { GroupConversationTitle } from "@/features/conversation/conversation-screen-header/conversation-screen-group-header-title"
+import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm"
+import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group"
+import { NavigationParamList } from "@/navigation/navigation.types"
+import { useHeader } from "@/navigation/use-header"
+import { useRouter } from "@/navigation/use-navigation"
+import { useConversationQuery } from "@/queries/conversation-query"
+import { $globalStyles } from "@/theme/styles"
+import { useAppTheme } from "@/theme/use-app-theme"
+import { ConversationMessages } from "./conversation-messages"
 import {
   ConversationStoreProvider,
   useConversationStoreContext,
-} from "./conversation.store-context";
+} from "./conversation.store-context"
 
 export const ConversationScreen = memo(function ConversationScreen(
   props: NativeStackScreenProps<NavigationParamList, "Conversation">,
@@ -37,7 +37,7 @@ export const ConversationScreen = memo(function ConversationScreen(
     composerTextPrefill = "",
     searchSelectedUserInboxIds = [],
     isNew = false,
-  } = props.route.params;
+  } = props.route.params
 
   return (
     <Screen contentContainerStyle={$globalStyles.flex1}>
@@ -53,25 +53,24 @@ export const ConversationScreen = memo(function ConversationScreen(
         </ConversationMessageContextMenuStoreProvider>
       </ConversationStoreProvider>
     </Screen>
-  );
-});
+  )
+})
 
 const Content = memo(function Content() {
-  const { theme } = useAppTheme();
+  const { theme } = useAppTheme()
 
-  const currentAccount = useCurrentSenderEthAddress()!;
-  const navigation = useRouter();
-  const topic = useConversationStoreContext((state) => state.topic);
+  const currentAccount = useCurrentSenderEthAddress()!
+  const navigation = useRouter()
+  const topic = useConversationStoreContext((state) => state.topic)
   const isCreatingNewConversation = useConversationStoreContext(
     (state) => state.isCreatingNewConversation,
-  );
+  )
 
-  const { data: conversation, isLoading: isLoadingConversation } =
-    useConversationQuery({
-      account: currentAccount,
-      topic: topic!, // ! is okay because we have enabled in useQuery
-      caller: "Conversation screen",
-    });
+  const { data: conversation, isLoading: isLoadingConversation } = useConversationQuery({
+    account: currentAccount,
+    topic: topic!, // ! is okay because we have enabled in useQuery
+    caller: "Conversation screen",
+  })
 
   useHeader(
     {
@@ -87,9 +86,7 @@ const Content = memo(function Content() {
       ...(!isCreatingNewConversation &&
         conversation &&
         isConversationGroup(conversation) && {
-          titleComponent: (
-            <GroupConversationTitle conversationTopic={conversation.topic} />
-          ),
+          titleComponent: <GroupConversationTitle conversationTopic={conversation.topic} />,
         }),
       // New conversation params
       ...(isCreatingNewConversation && {
@@ -101,14 +98,14 @@ const Content = memo(function Content() {
       }),
     },
     [conversation, isCreatingNewConversation],
-  );
+  )
 
   if (isLoadingConversation) {
     return (
       <Center style={$globalStyles.flex1}>
         <ActivityIndicator />
       </Center>
-    );
+    )
   }
 
   return (
@@ -130,15 +127,15 @@ const Content = memo(function Content() {
       <ConversationMessageContextMenu />
       <MessageReactionsDrawer />
     </>
-  );
-});
+  )
+})
 
 export const DmConversationEmpty = memo(function DmConversationEmpty() {
   // Will never really be empty anyway because to create the DM conversation the user has to send a first message
-  return null;
-});
+  return null
+})
 
 export const GroupConversationEmpty = memo(() => {
   // Will never really be empty anyway becaue we have group updates
-  return null;
-});
+  return null
+})

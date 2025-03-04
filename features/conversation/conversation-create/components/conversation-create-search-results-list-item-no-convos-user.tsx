@@ -27,11 +27,10 @@ export const ConversationSearchResultsListItemNoConvosUser = memo(
 
     const currentSender = useSafeCurrentSender()
 
-    const { data: inboxId, isLoading: isLoadingInboxId } =
-      useXmtpInboxIdFromEthAddressQuery({
-        clientEthAddress: currentSender.ethereumAddress,
-        targetEthAddress: socialProfile.address,
-      })
+    const { data: inboxId, isLoading: isLoadingInboxId } = useXmtpInboxIdFromEthAddressQuery({
+      clientEthAddress: currentSender.ethereumAddress,
+      targetEthAddress: socialProfile.address,
+    })
 
     const handlePress = useCallback(() => {
       if (inboxId) {

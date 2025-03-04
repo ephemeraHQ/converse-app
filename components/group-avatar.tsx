@@ -110,8 +110,7 @@ export const GroupAvatar = memo(function GroupAvatar(props: {
 
     return members.ids.reduce<InboxId[]>((inboxIds, memberId) => {
       const memberInboxId = members.byId[memberId].inboxId
-      const isCurrentSender =
-        memberInboxId?.toLowerCase() === currentSender?.inboxId?.toLowerCase()
+      const isCurrentSender = memberInboxId?.toLowerCase() === currentSender?.inboxId?.toLowerCase()
 
       if (memberInboxId && !isCurrentSender) {
         inboxIds.push(memberInboxId)
@@ -167,13 +166,7 @@ export const GroupAvatar = memo(function GroupAvatar(props: {
 
   // If group has an image, use it instead of member avatars
   if (group?.imageUrlSquare) {
-    return (
-      <Avatar
-        uri={group.imageUrlSquare}
-        sizeNumber={sizeNumber}
-        name={group.name}
-      />
-    )
+    return <Avatar uri={group.imageUrlSquare} sizeNumber={sizeNumber} name={group.name} />
   }
 
   return <GroupAvatarUI members={memberData} size={sizeNumber} />
@@ -218,10 +211,7 @@ const GroupAvatarUI = memo(function GroupAvatarUI(props: GroupAvatarUIProps) {
             }
 
             // Render "+N" indicator if there are more members than can be shown
-            if (
-              index === MAX_VISIBLE_MEMBERS &&
-              memberCount > MAX_VISIBLE_MEMBERS
-            ) {
+            if (index === MAX_VISIBLE_MEMBERS && memberCount > MAX_VISIBLE_MEMBERS) {
               return (
                 <ExtraMembersIndicator
                   key={`extra-${index}`}
@@ -244,10 +234,7 @@ const GroupAvatarUI = memo(function GroupAvatarUI(props: GroupAvatarUIProps) {
  * Calculate positions for avatars in the group avatar
  * Returns different layouts based on the number of members
  */
-const calculatePositions = (
-  memberCount: number,
-  mainCircleRadius: number,
-): Position[] => {
+const calculatePositions = (memberCount: number, mainCircleRadius: number): Position[] => {
   const positionMaps: Record<number, Position[]> = {
     0: [],
     1: [{ x: mainCircleRadius - 50, y: mainCircleRadius - 50, size: 100 }],

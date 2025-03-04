@@ -1,12 +1,12 @@
-import { create } from "zustand";
-import { subscribeWithSelector } from "zustand/middleware";
-import { ISnackbar } from "@/components/snackbar/snackbar.types";
+import { create } from "zustand"
+import { subscribeWithSelector } from "zustand/middleware"
+import { ISnackbar } from "@/components/snackbar/snackbar.types"
 
 export type ISnackBarStore = {
-  snackbars: ISnackbar[];
-  showSnackbar: (snackbar: ISnackbar) => void;
-  clearAllSnackbars: () => void;
-};
+  snackbars: ISnackbar[]
+  showSnackbar: (snackbar: ISnackbar) => void
+  clearAllSnackbars: () => void
+}
 
 export const useSnackBarStore = create<ISnackBarStore>()(
   subscribeWithSelector((set) => ({
@@ -14,13 +14,13 @@ export const useSnackBarStore = create<ISnackBarStore>()(
     showSnackbar: (snackbar) => {
       set((state) => ({
         snackbars: [...state.snackbars, snackbar],
-      }));
+      }))
     },
     clearAllSnackbars: () => {
-      set({ snackbars: [] });
+      set({ snackbars: [] })
     },
   })),
-);
+)
 
 // Initialize store
-useSnackBarStore.getState();
+useSnackBarStore.getState()

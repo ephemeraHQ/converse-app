@@ -12,14 +12,12 @@ export const fr = {
       subtitle:
         "La plupart des choses ne sont pas urgentes. Protégez votre attention en limitant vos notifications.",
       essentials: "Essentiels",
-      essentialsDescription:
-        "Me notifier lorsque mes contacts approuvés m'envoient des messages",
+      essentialsDescription: "Me notifier lorsque mes contacts approuvés m'envoient des messages",
       mentionsOnly: "Mentions uniquement",
       mentionsOnlyDescription:
         "Dans les grands groupes, ne me notifier que si je suis mentionné(e)",
       cash: "Argent",
-      cashDescription:
-        "Me notifier immédiatement lorsque je reçois de l'argent",
+      cashDescription: "Me notifier immédiatement lorsque je reçois de l'argent",
       comingSoon: "Bientôt disponible",
       enableNotifications: "Activer les notifications",
       later: "Plus tard",
@@ -32,8 +30,7 @@ export const fr = {
     body: "Ajoutez et modifiez vos cartes de contact à tout moment,",
     bodyPressable: "ou optez pour le mode Rando pour plus de confidentialité.",
     randoTitle: "Mode Rando",
-    randoSubtitle:
-      "Discutez en utilisant des informations de contact aléatoires",
+    randoSubtitle: "Discutez en utilisant des informations de contact aléatoires",
     randoBody: "Pour des conversations quotidiennes,",
     randoPressable: "utilisez votre carte de contact personnelle.",
     import: "Importer",
@@ -69,8 +66,7 @@ export const fr = {
         "Les noms d'affichage doivent comprendre entre 2 et 32 caractères et ne pas inclure d'extensions de nom de domaine",
       usernameAlphanumeric:
         "Votre nom d'utilisateur ne peut contenir que des lettres et des chiffres",
-      usernameLength:
-        "Votre nom d'utilisateur doit comporter entre 3 et 30 caractères",
+      usernameLength: "Votre nom d'utilisateur doit comporter entre 3 et 30 caractères",
     },
     converseProfiles:
       "Réclamez votre identité dans l'espace de noms ENS de Converse. Ce nom sera publiquement consultable.",
@@ -111,8 +107,7 @@ export const fr = {
   },
   walletSelector: {
     title: "Vos messages.\nVotre confidentialité.",
-    subtitle:
-      "Messagerie décentralisée,\nchiffrée de bout en bout et détenue par vous.",
+    subtitle: "Messagerie décentralisée,\nchiffrée de bout en bout et détenue par vous.",
     converseAccount: {
       title: "COMPTES CONVERSE",
       connectViaPhone: "Se connecter via téléphone",
@@ -156,8 +151,7 @@ export const fr = {
     },
     errors: {
       invalidPhoneNumber: "Veuillez entrer un numéro de téléphone valide",
-      invalidCode:
-        "Le code que vous avez entré n'est pas valide, veuillez réessayer",
+      invalidCode: "Le code que vous avez entré n'est pas valide, veuillez réessayer",
     },
     resendCodeIn: "Renvoyer le code dans {{seconds}} secondes…",
   },
@@ -214,8 +208,7 @@ export const fr = {
       message: "Ce compte est déjà connecté à Converse.",
     },
   },
-  onboarding_error:
-    "Une erreur s'est produite lors de votre connexion. Veuillez réessayer.",
+  onboarding_error: "Une erreur s'est produite lors de votre connexion. Veuillez réessayer.",
   termsText: "En vous connectant, vous acceptez nos",
   termsLink: "conditions générales.",
 
@@ -236,8 +229,7 @@ export const fr = {
   connecting: "Connexion…",
   syncing: "Synchronisation…",
   search_chats: "Rechercher des conversations",
-  no_results:
-    "Aucun résultat trouvé dans vos conversations existantes. Vous pouvez",
+  no_results: "Aucun résultat trouvé dans vos conversations existantes. Vous pouvez",
   no_results_start_convo: "commencer une nouvelle conversation",
   new_account: "Nouveau compte",
   add_an_account: "Ajouter un compte",
@@ -271,11 +263,9 @@ export const fr = {
   unblock: "Débloquer",
   if_you_unblock_contact:
     "Si vous débloquez ce contact, il pourra à nouveau vous envoyer des messages.",
-  if_you_block_contact:
-    "Si vous bloquez ce contact, vous ne recevrez plus de messages de sa part.",
+  if_you_block_contact: "Si vous bloquez ce contact, vous ne recevrez plus de messages de sa part.",
   opening_conversation: "Ouverture de votre conversation",
-  conversation_not_found:
-    "Nous n'avons pas pu trouver cette conversation. Veuillez réessayer",
+  conversation_not_found: "Nous n'avons pas pu trouver cette conversation. Veuillez réessayer",
   group_not_found:
     "Nous n'avons pas pu trouver ce groupe. Veuillez réessayer ou demander à quelqu'un de vous inviter à ce groupe",
   say_hi: "Dites bonjour",
@@ -299,8 +289,7 @@ export const fr = {
   // NewGroupSummary
   group_name: "NOM DU GROUPE",
   group_description: "DESCRIPTION DU GROUPE",
-  upload_group_photo_error:
-    "Erreur lors du téléchargement de la photo du groupe",
+  upload_group_photo_error: "Erreur lors du téléchargement de la photo du groupe",
   promote_to_admin_to_manage_group:
     "Après avoir créé le groupe, vous pouvez promouvoir quelqu'un au rang d'administrateur pour gérer les membres et les infos du groupe.",
 
@@ -309,8 +298,7 @@ export const fr = {
   are_you_sure: "Êtes-vous sûr ?",
   promote_to_admin: "Promouvoir au rang d'administrateur",
   send_a_message: "Envoyer un message",
-  client_error:
-    "Un problème est survenu, veuillez essayer de vous reconnecter.",
+  client_error: "Un problème est survenu, veuillez essayer de vous reconnecter.",
   actions: "ACTIONS",
   common_activity: "ACTIVITÉ COMMUNE",
   social: "RÉSEAUX SOCIAUX",
@@ -329,15 +317,13 @@ export const fr = {
   top_up_your_account: "Approvisionner votre compte",
   you_parentheses: " (vous)",
   log_out: "Se déconnecter",
-  disconnect_delete_local_data:
-    "Se déconnecter et supprimer les données locales",
+  disconnect_delete_local_data: "Se déconnecter et supprimer les données locales",
   disconnect_this_account: "Se déconnecter de ce compte",
   disconnect_account_description:
     "Vos discussions de groupe seront chiffrées et sauvegardées sur votre appareil jusqu'à ce que vous supprimiez Converse. Vos messages privés seront sauvegardés par le réseau XMTP.",
   your_profile_page: "Votre page de profil",
   copy_wallet_address: "Copier l'adresse du portefeuille",
-  attachment_message_error_download:
-    "Impossible de télécharger la pièce jointe",
+  attachment_message_error_download: "Impossible de télécharger la pièce jointe",
 
   // Context Menu
   reply: "Répondre",
@@ -437,8 +423,7 @@ export const fr = {
   current_installation_revoked_description:
     "Vous avez été déconnecté de votre compte. Vos discussions de groupe seront supprimées de cet appareil.",
   other_installations_count: "Vous avez {{count}} connexions actives",
-  revoke_description:
-    "Souhaitez-vous vous déconnecter de toutes les autres sessions ?",
+  revoke_description: "Souhaitez-vous vous déconnecter de toutes les autres sessions ?",
   revoke_done_title: "Terminé",
   revoke_done_description: "{{count}} sessions déconnectées",
   revoke_empty: "Vous n'avez aucune autre session active",
@@ -457,8 +442,7 @@ export const fr = {
   shareYourQRCode: "Partagez votre code QR",
   moveOrConnect:
     "Déplacez une conversation vers Converse,\nou connectez-vous avec quelqu'un de nouveau.",
-  findContacts:
-    "Voici quelques contacts recommandés en fonction\nde votre activité on-chain",
+  findContacts: "Voici quelques contacts recommandés en fonction\nde votre activité on-chain",
   copyShareLink: "Copier le lien de partage",
   alphaTestTitle: "Aidez à façonner l'avenir de Converse !",
   alphaTestDescription:
@@ -474,8 +458,7 @@ export const fr = {
   transaction_triggering: "Ouverture de {{wallet}}...",
   transaction_triggered: "Votre transaction est en cours d'exécution...",
   transaction_success: "Terminé !",
-  transaction_switch_chain:
-    "Changez de chaîne pour {{chainName}} dans {{wallet}}",
+  transaction_switch_chain: "Changez de chaîne pour {{chainName}} dans {{wallet}}",
   transaction_wallet: "Portefeuille",
 
   // Transaction Simulation
@@ -492,8 +475,7 @@ export const fr = {
     "Cette chaîne n'est pas prise en charge par votre portefeuille",
 
   // New Conversation
-  cannot_be_added_to_group_yet:
-    "{{name}} doit mettre à jour Converse pour être ajouté à un groupe",
+  cannot_be_added_to_group_yet: "{{name}} doit mettre à jour Converse pour être ajouté à un groupe",
   add: "Ajouter",
   add_loading: "Ajout en cours...",
   chat: "Discuter",
@@ -507,8 +489,7 @@ export const fr = {
   group_member_joined: "a rejoint la conversation",
   group_member_left: "a quitté la conversation",
   group_photo_changed: "a changé la photo du groupe.",
-  group_description_changed:
-    'a changé la description du groupe en "{{newValue}}".',
+  group_description_changed: 'a changé la description du groupe en "{{newValue}}".',
   group_name_changed_to: 'a changé le nom du groupe en "{{newValue}}".',
 
   message_status: {
@@ -521,8 +502,7 @@ export const fr = {
   },
 
   group_placeholder: {
-    placeholder_text:
-      "Ceci est le début de votre conversation dans {{groupName}}",
+    placeholder_text: "Ceci est le début de votre conversation dans {{groupName}}",
   },
 
   removed_chats: {
@@ -552,13 +532,11 @@ export const fr = {
 
   initial_load: {
     title: "Bienvenue sur Converse !",
-    subtitle:
-      "Nous vérifions si vous possédez déjà des conversations sur le réseau XMTP.",
+    subtitle: "Nous vérifions si vous possédez déjà des conversations sur le réseau XMTP.",
   },
 
   recommendations: {
-    title:
-      "Trouvez des personnes qui partagent vos intérêts. Commencez à leur parler.",
+    title: "Trouvez des personnes qui partagent vos intérêts. Commencez à leur parler.",
     section_title: "PROFILS RECOMMANDÉS",
     loading: "Chargement de vos recommandations",
     no_recommendations:
@@ -577,8 +555,7 @@ export const fr = {
     usdc: "USDC",
     base: " sur Base",
     native: " (natifs, pas USDbC)",
-    to_your_address:
-      " sur la blockchain à votre adresse (voir adresse ci-dessous).",
+    to_your_address: " sur la blockchain à votre adresse (voir adresse ci-dessous).",
   },
 
   conversation_list: {
@@ -587,8 +564,7 @@ export const fr = {
     updated_the_group: "{{username}} a mis à jour le groupe",
     group_updated: "Groupe mis à jour",
     name_changed: "{{username}} a changé le nom du groupe en {{newValue}}",
-    description_changed:
-      "{{username}} a changé la description du groupe en {{newValue}}",
+    description_changed: "{{username}} a changé la description du groupe en {{newValue}}",
     image_changed: "{{username}} a changé l'image du groupe",
     member_added: "{{username}} a ajouté {{memberName}} au groupe",
     member_added_unknown: "{{username}} a ajouté un nouveau membre au groupe",
@@ -612,13 +588,13 @@ export const fr = {
   },
 
   // Profile strings
-  "Cancel": "Annuler",
-  "Edit": "Modifier",
-  "Share": "Partager",
-  "Done": "Terminer",
-  "Username": "Nom d'utilisateur",
-  "About": "À propos",
-  "Archive": "Archives",
+  Cancel: "Annuler",
+  Edit: "Modifier",
+  Share: "Partager",
+  Done: "Terminer",
+  Username: "Nom d'utilisateur",
+  About: "À propos",
+  Archive: "Archives",
   "Keep messages": "Conserver les messages",
   "Log out": "Se déconnecter",
-};
+}

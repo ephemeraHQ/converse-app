@@ -4,10 +4,7 @@ import { Loader } from "@/design-system/loader"
 import { VStack } from "@/design-system/VStack"
 import { useConnectWalletStore } from "@/features/wallets/connect-wallet/connect-wallet.store"
 import { useInstalledWalletsQuery } from "@/features/wallets/installed-wallets.query"
-import {
-  ISupportedWallet,
-  supportedWallets,
-} from "@/features/wallets/supported-wallets"
+import { ISupportedWallet, supportedWallets } from "@/features/wallets/supported-wallets"
 import { useRouter } from "@/navigation/use-navigation"
 import { captureErrorWithToast } from "@/utils/capture-error"
 import { openLink } from "@/utils/linking"

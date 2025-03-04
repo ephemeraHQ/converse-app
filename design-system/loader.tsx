@@ -1,12 +1,6 @@
-import {
-  Canvas,
-  Path,
-  Skia,
-  SweepGradient,
-  vec,
-} from "@shopify/react-native-skia";
-import { memo, useEffect, useMemo } from "react";
-import { StyleProp, ViewStyle } from "react-native";
+import { Canvas, Path, Skia, SweepGradient, vec } from "@shopify/react-native-skia"
+import { memo, useEffect, useMemo } from "react"
+import { StyleProp, ViewStyle } from "react-native"
 import {
   Easing,
   FadeIn,
@@ -16,34 +10,31 @@ import {
   useSharedValue,
   withRepeat,
   withTiming,
-} from "react-native-reanimated";
-import { AnimatedVStack } from "@/design-system/VStack";
-import { ILoaderSize } from "@/theme/loader";
-import { useAppTheme } from "@/theme/use-app-theme";
+} from "react-native-reanimated"
+import { AnimatedVStack } from "@/design-system/VStack"
+import { ILoaderSize } from "@/theme/loader"
+import { useAppTheme } from "@/theme/use-app-theme"
 
 type ILoaderProps = {
-  size?: keyof ILoaderSize;
-  style?: StyleProp<ViewStyle>;
-};
+  size?: keyof ILoaderSize
+  style?: StyleProp<ViewStyle>
+}
 
-export const Loader = memo(function Loader({
-  size = "md",
-  style,
-}: ILoaderProps) {
-  const { theme } = useAppTheme();
-  const sizeValue = theme.loaderSize[size];
-  const strokeWidth = Math.max(sizeValue * 0.1, 2);
-  const radius = (sizeValue - strokeWidth) / 2;
-  const canvasPadding = sizeValue * 0.15;
-  const canvasSize = sizeValue + canvasPadding;
+export const Loader = memo(function Loader({ size = "md", style }: ILoaderProps) {
+  const { theme } = useAppTheme()
+  const sizeValue = theme.loaderSize[size]
+  const strokeWidth = Math.max(sizeValue * 0.1, 2)
+  const radius = (sizeValue - strokeWidth) / 2
+  const canvasPadding = sizeValue * 0.15
+  const canvasSize = sizeValue + canvasPadding
 
   const circle = useMemo(() => {
-    const path = Skia.Path.Make();
-    path.addCircle(canvasSize / 2, canvasSize / 2, radius);
-    return path;
-  }, [canvasSize, radius]);
+    const path = Skia.Path.Make()
+    path.addCircle(canvasSize / 2, canvasSize / 2, radius)
+    return path
+  }, [canvasSize, radius])
 
-  const progress = useSharedValue(0);
+  const progress = useSharedValue(0)
 
   useEffect(() => {
     progress.value = withRepeat(
@@ -53,17 +44,17 @@ export const Loader = memo(function Loader({
       }),
       -1,
       false,
-    );
-  }, [progress]);
+    )
+  }, [progress])
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ rotate: `${2 * Math.PI * progress.value}rad` }],
-  }));
+  }))
 
   const startPath = useDerivedValue(
     () => interpolate(progress.value, [0, 0.5, 1], [0.6, 0.3, 0.6]),
     [],
-  );
+  )
 
   return (
     <AnimatedVStack
@@ -98,5 +89,5 @@ export const Loader = memo(function Loader({
         </Path>
       </Canvas>
     </AnimatedVStack>
-  );
-});
+  )
+})

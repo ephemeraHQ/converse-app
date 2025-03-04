@@ -1,14 +1,14 @@
-import { z } from "zod";
-import { api } from "@/utils/api/api";
-import { captureError } from "@/utils/capture-error";
+import { z } from "zod"
+import { api } from "@/utils/api/api"
+import { captureError } from "@/utils/capture-error"
 import {
-  ConvosProfileForInboxSchema,
   ClaimProfileResponseSchema,
-  type ProfileUpdates,
-  type ProfileInput,
+  ConvosProfileForInboxSchema,
   type ClaimProfileRequest,
   type IConvosProfileForInbox,
-} from "./profile.types";
+  type ProfileInput,
+  type ProfileUpdates,
+} from "./profile.types"
 
 // Schema for profile update requests - only includes updatable fields
 const ProfileUpdateRequestSchema = z.object({
@@ -16,50 +16,52 @@ const ProfileUpdateRequestSchema = z.object({
   username: z.string().optional(),
   description: z.string().nullable().optional(),
   avatar: z.string().nullable().optional(),
-});
+})
 
 /**
  * Compares a profile update with the current profile and returns only changed fields.
  * Handles both new profiles and updates to existing ones.
  */
 const getProfileChanges = (args: {
-  update: ProfileInput;
-  current?: IConvosProfileForInbox;
+  update: ProfileInput
+  current?: IConvosProfileForInbox
 }): ProfileUpdates => {
-  const { update, current } = args;
+  const { update, current } = args
 
   // For new profiles, include all provided fields
   if (!current) {
     const updates: ProfileUpdates = {
       ...(update.name !== undefined && { name: update.name }),
       ...(update.username !== undefined && { username: update.username }),
-      ...(update.description !== undefined && { description: update.description }),
+      ...(update.description !== undefined && {
+        description: update.description,
+      }),
       ...(update.avatar !== undefined && { avatar: update.avatar }),
-    };
-    return updates;
+    }
+    return updates
   }
 
   // For existing profiles, only include changed fields
-  const updates: ProfileUpdates = {};
-  
+  const updates: ProfileUpdates = {}
+
   if (update.name !== undefined && update.name !== current.name) {
-    updates.name = update.name;
+    updates.name = update.name
   }
-  
+
   if (update.username !== undefined && update.username !== current.username) {
-    updates.username = update.username;
+    updates.username = update.username
   }
-  
+
   if (update.description !== undefined && update.description !== current.description) {
-    updates.description = update.description;
+    updates.description = update.description
   }
-  
+
   if (update.avatar !== undefined && update.avatar !== current.avatar) {
-    updates.avatar = update.avatar;
+    updates.avatar = update.avatar
   }
-  
-  return updates;
-};
+
+  return updates
+}
 
 /**
  * Normalizes profile data for the claim profile endpoint.
@@ -68,96 +70,98 @@ const getProfileChanges = (args: {
 const normalizeProfileData = (profile: ProfileInput): ClaimProfileRequest => ({
   name: profile.name || "",
   username: profile.username || "",
-  ...(profile.description !== undefined && { 
-    description: profile.description === null ? "" : profile.description 
+  ...(profile.description !== undefined && {
+    description: profile.description === null ? "" : profile.description,
   }),
-  ...(profile.avatar !== undefined && { 
-    avatar: profile.avatar === null ? "" : profile.avatar 
+  ...(profile.avatar !== undefined && {
+    avatar: profile.avatar === null ? "" : profile.avatar,
   }),
-});
+})
 
 export const updateProfile = async (args: { xmtpId: string; updates: ProfileUpdates }) => {
-  const { xmtpId, updates } = args;
-  
+  const { xmtpId, updates } = args
+
   try {
     // Validate the update payload
-    const validatedUpdates = ProfileUpdateRequestSchema.parse(updates);
-    
+    const validatedUpdates = ProfileUpdateRequestSchema.parse(updates)
+
     // Make the API call
-    const { data } = await api.put(`/api/v1/profiles/${xmtpId}`, validatedUpdates);
-    return data;
+    const { data } = await api.put(`/api/v1/profiles/${xmtpId}`, validatedUpdates)
+    return data
   } catch (error) {
-    throw error;
+    throw error
   }
-};
+}
 
 export const fetchProfile = async (args: { xmtpId: string }): Promise<IConvosProfileForInbox> => {
-  const { xmtpId } = args;
-  
-  const { data } = await api.get(`/api/v1/profiles/${xmtpId}`);
-  
-  const result = ConvosProfileForInboxSchema.safeParse(data);
-  if (!result.success) {
-    captureError(result.error);
-  }
-  
-  return data;
-};
+  const { xmtpId } = args
 
-export const fetchAllProfilesForUser = async (args: { convosUserId: string }): Promise<IConvosProfileForInbox[]> => {
-  const { convosUserId } = args;
-  
-  const { data } = await api.get(`/api/v1/profiles/user/${convosUserId}`);
-  
-  const result = z.array(ConvosProfileForInboxSchema).safeParse(data);
+  const { data } = await api.get(`/api/v1/profiles/${xmtpId}`)
+
+  const result = ConvosProfileForInboxSchema.safeParse(data)
   if (!result.success) {
-    captureError(result.error);
+    captureError(result.error)
   }
-  
-  return data;
-};
+
+  return data
+}
+
+export const fetchAllProfilesForUser = async (args: {
+  convosUserId: string
+}): Promise<IConvosProfileForInbox[]> => {
+  const { convosUserId } = args
+
+  const { data } = await api.get(`/api/v1/profiles/user/${convosUserId}`)
+
+  const result = z.array(ConvosProfileForInboxSchema).safeParse(data)
+  if (!result.success) {
+    captureError(result.error)
+  }
+
+  return data
+}
 
 export const claimProfile = async (args: { profile: ClaimProfileRequest }) => {
-  const { profile } = args;
-  
-  try {
-    const { data } = await api.post("/api/profile/username", profile);
-    return ClaimProfileResponseSchema.parse(data);
-  } catch (error) {
-    throw error;
-  }
-};
+  const { profile } = args
 
-export const saveProfileAsync = async (args: { 
-  profile: ProfileInput; 
-  inboxId: string;
-  currentProfile?: IConvosProfileForInbox;
+  try {
+    const { data } = await api.post("/api/profile/username", profile)
+    return ClaimProfileResponseSchema.parse(data)
+  } catch (error) {
+    throw error
+  }
+}
+
+export const saveProfileAsync = async (args: {
+  profile: ProfileInput
+  inboxId: string
+  currentProfile?: IConvosProfileForInbox
 }) => {
-  const { profile, inboxId, currentProfile } = args;
-  const xmtpId = profile.xmtpId || inboxId;
-  
+  const { profile, inboxId, currentProfile } = args
+  const xmtpId = profile.xmtpId || inboxId
+
   try {
     if (xmtpId) {
       // Get only the changed fields
-      const updates = getProfileChanges({ 
+      const updates = getProfileChanges({
         update: profile,
-        current: currentProfile
-      });
-      
+        current: currentProfile,
+      })
+
       // Only make the API call if there are actual changes
       if (Object.keys(updates).length > 0) {
-        return updateProfile({ xmtpId, updates });
+        return updateProfile({ xmtpId, updates })
       }
-      
+
       // If no changes, return the current profile
-      return currentProfile;
-    } 
-    
+      return currentProfile
+    }
+
     // For new profiles, claim it
     return claimProfile({
-      profile: normalizeProfileData(profile)
-    });
+      profile: normalizeProfileData(profile),
+    })
   } catch (error) {
-    throw error;
+    throw error
   }
-};
+}

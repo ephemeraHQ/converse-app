@@ -1,15 +1,15 @@
-import { memo } from "react";
-import { ViewStyle } from "react-native";
-import { useAppTheme } from "@/theme/use-app-theme";
-import { Center } from "../Center";
-import { IconButton } from "../IconButton/IconButton";
-import { Text } from "../Text/Text";
-import { VStack } from "../VStack";
-import { TextField } from "./TextField";
-import { TextFieldSimple } from "./TextFieldSimple";
+import { memo } from "react"
+import { ViewStyle } from "react-native"
+import { useAppTheme } from "@/theme/use-app-theme"
+import { Center } from "../Center"
+import { IconButton } from "../IconButton/IconButton"
+import { Text } from "../Text/Text"
+import { VStack } from "../VStack"
+import { TextField } from "./TextField"
+import { TextFieldSimple } from "./TextFieldSimple"
 
 export const TextFieldExample = memo(function TextFieldExample() {
-  const { theme } = useAppTheme();
+  const { theme } = useAppTheme()
 
   return (
     <VStack
@@ -27,7 +27,7 @@ export const TextFieldExample = memo(function TextFieldExample() {
             <Center style={style as ViewStyle}>
               <IconButton variant="ghost" iconName="phone" />
             </Center>
-          );
+          )
         }}
       />
       <TextField
@@ -52,12 +52,7 @@ export const TextFieldExample = memo(function TextFieldExample() {
           </Center>
         )}
       />
-      <TextField
-        label="Bio"
-        placeholder="Tell us about yourself"
-        multiline
-        numberOfLines={4}
-      />
+      <TextField label="Bio" placeholder="Tell us about yourself" multiline numberOfLines={4} />
       <TextField
         label="Disabled example"
         placeholder="Hello there"
@@ -67,15 +62,11 @@ export const TextFieldExample = memo(function TextFieldExample() {
             <Center style={style as ViewStyle}>
               <IconButton disabled variant="ghost" iconName="xmark" />
             </Center>
-          );
+          )
         }}
       />
       <TextFieldSimple placeholder="Enter your phone number" />
-      <TextFieldSimple
-        value="This is a test"
-        size="lg"
-        placeholder="Enter your phone number"
-      />
+      <TextFieldSimple value="This is a test" size="lg" placeholder="Enter your phone number" />
       <TextFieldSimple
         placeholder="Search..."
         LeftAccessory={({ style }) => (
@@ -93,11 +84,7 @@ export const TextFieldExample = memo(function TextFieldExample() {
           </Center>
         )}
       />
-      <TextFieldSimple
-        value="Read-only field"
-        editable={false}
-        selectTextOnFocus={false}
-      />
+      <TextFieldSimple value="Read-only field" editable={false} selectTextOnFocus={false} />
     </VStack>
-  );
-});
+  )
+})

@@ -1,13 +1,12 @@
-import { BlurViewProps, BlurView as RNBlurView } from "expo-blur";
-import { memo } from "react";
-import Animated, { AnimatedProps } from "react-native-reanimated";
-import { useAppTheme } from "@/theme/use-app-theme";
-import { IVStackProps } from "./VStack";
+import { BlurViewProps, BlurView as RNBlurView } from "expo-blur"
+import { memo } from "react"
+import Animated, { AnimatedProps } from "react-native-reanimated"
+import { useAppTheme } from "@/theme/use-app-theme"
+import { IVStackProps } from "./VStack"
 
-const AnimatedBlurView = Animated.createAnimatedComponent(RNBlurView);
+const AnimatedBlurView = Animated.createAnimatedComponent(RNBlurView)
 
-export type IBlurViewProps = IVStackProps &
-  AnimatedProps<BlurViewProps> & { isAbsolute?: boolean };
+export type IBlurViewProps = IVStackProps & AnimatedProps<BlurViewProps> & { isAbsolute?: boolean }
 
 export const BlurView = memo(function BlurView({
   children,
@@ -16,7 +15,7 @@ export const BlurView = memo(function BlurView({
   tint,
   ...rest
 }: IBlurViewProps) {
-  const { theme } = useAppTheme();
+  const { theme } = useAppTheme()
 
   return (
     <AnimatedBlurView
@@ -41,5 +40,5 @@ export const BlurView = memo(function BlurView({
     >
       {children}
     </AnimatedBlurView>
-  );
-});
+  )
+})

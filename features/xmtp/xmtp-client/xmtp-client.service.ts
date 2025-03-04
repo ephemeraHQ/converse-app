@@ -5,10 +5,7 @@ import { validateClientInstallation } from "@/features/xmtp/xmtp-installations/x
 import { IXmtpSigner } from "@/features/xmtp/xmtp.types"
 import { queryClient } from "@/queries/queryClient"
 import { enhanceError } from "@/utils/error"
-import {
-  getXmtpClientQueryOptions,
-  setXmtpClientQueryData,
-} from "./xmtp-client.query"
+import { getXmtpClientQueryOptions, setXmtpClientQueryData } from "./xmtp-client.query"
 
 export async function getXmtpClient(args: { ethAddress: string }) {
   return queryClient.ensureQueryData(getXmtpClientQueryOptions(args))
@@ -48,19 +45,14 @@ export async function getXmtpClientByEthAddress(args: { ethAddress: string }) {
       ethAddress,
     })
   } catch (error) {
-    throw enhanceError(
-      error,
-      `Failed to get or create XMTP client for address: ${ethAddress}`,
-    )
+    throw enhanceError(error, `Failed to get or create XMTP client for address: ${ethAddress}`)
   }
 }
 
 export async function getXmtpClientByInboxId(args: { inboxId: InboxId }) {
   const { inboxId } = args
   console.log("inboxId:", inboxId)
-  const sender = useMultiInboxStore
-    .getState()
-    .senders.find((s) => s.inboxId === inboxId)
+  const sender = useMultiInboxStore.getState().senders.find((s) => s.inboxId === inboxId)
 
   const senders = useMultiInboxStore.getState().senders
 

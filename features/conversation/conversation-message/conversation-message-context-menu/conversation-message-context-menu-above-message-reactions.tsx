@@ -1,24 +1,19 @@
-import { Text } from "@design-system/Text";
-import { favoritedEmojis } from "@utils/emojis/favoritedEmojis";
-import {
-  ConversationTopic,
-  InboxId,
-  MessageId,
-  ReactionContent,
-} from "@xmtp/react-native-sdk";
-import React, { memo, useCallback, useMemo } from "react";
-import { EntryAnimationsValues, withSpring } from "react-native-reanimated";
-import { HStack } from "@/design-system/HStack";
-import { Icon } from "@/design-system/Icon/Icon";
-import { StaggeredAnimation } from "@/design-system/staggered-animation";
-import { TouchableOpacity } from "@/design-system/TouchableOpacity";
-import { AnimatedVStack, VStack } from "@/design-system/VStack";
-import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store";
-import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user";
-import { getReactionContent } from "@/features/xmtp/xmtp-codecs/xmtp-codecs-reaction";
-import { useAppTheme } from "@/theme/use-app-theme";
-import { useConversationMessageById } from "../use-conversation-message";
-import { MESSAGE_CONTEXT_MENU_ABOVE_MESSAGE_REACTIONS_HEIGHT } from "./conversation-message-context-menu.constants";
+import { Text } from "@design-system/Text"
+import { favoritedEmojis } from "@utils/emojis/favoritedEmojis"
+import { ConversationTopic, InboxId, MessageId, ReactionContent } from "@xmtp/react-native-sdk"
+import React, { memo, useCallback, useMemo } from "react"
+import { EntryAnimationsValues, withSpring } from "react-native-reanimated"
+import { HStack } from "@/design-system/HStack"
+import { Icon } from "@/design-system/Icon/Icon"
+import { StaggeredAnimation } from "@/design-system/staggered-animation"
+import { TouchableOpacity } from "@/design-system/TouchableOpacity"
+import { AnimatedVStack, VStack } from "@/design-system/VStack"
+import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
+import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user"
+import { getReactionContent } from "@/features/xmtp/xmtp-codecs/xmtp-codecs-reaction"
+import { useAppTheme } from "@/theme/use-app-theme"
+import { useConversationMessageById } from "../use-conversation-message"
+import { MESSAGE_CONTEXT_MENU_ABOVE_MESSAGE_REACTIONS_HEIGHT } from "./conversation-message-context-menu.constants"
 
 export const MessageContextMenuAboveMessageReactions = memo(
   function MessageContextMenuAboveMessageReactions({
@@ -30,66 +25,55 @@ export const MessageContextMenuAboveMessageReactions = memo(
     originY,
     reactors,
   }: {
-    topic: ConversationTopic;
-    messageId: MessageId;
-    onChooseMoreEmojis: () => void;
-    onSelectReaction: (emoji: string) => void;
-    originX: number;
-    originY: number;
+    topic: ConversationTopic
+    messageId: MessageId
+    onChooseMoreEmojis: () => void
+    onSelectReaction: (emoji: string) => void
+    originX: number
+    originY: number
     reactors: {
-      [reactor: InboxId]: ReactionContent[];
-    };
+      [reactor: InboxId]: ReactionContent[]
+    }
   }) {
-    const { theme } = useAppTheme();
+    const { theme } = useAppTheme()
 
-    const currentUserInboxId = useSafeCurrentSender().inboxId;
+    const currentUserInboxId = useSafeCurrentSender().inboxId
 
     const { message } = useConversationMessageById({
       messageId,
       conversationTopic: topic,
-    });
+    })
 
     const messageFromMe =
       message &&
       messageIsFromCurrentAccountInboxId({
         message,
-      });
+      })
 
     const currentUserEmojiSelectedMap = useMemo(() => {
       if (!currentUserInboxId || !reactors?.[currentUserInboxId]) {
-        return new Map<string, boolean>();
+        return new Map<string, boolean>()
       }
 
       return new Map(
-        reactors[currentUserInboxId].map((reaction) => [
-          getReactionContent(reaction),
-          true,
-        ]),
-      );
-    }, [reactors, currentUserInboxId]);
+        reactors[currentUserInboxId].map((reaction) => [getReactionContent(reaction), true]),
+      )
+    }, [reactors, currentUserInboxId])
 
     const handlePlusPress = useCallback(() => {
-      onChooseMoreEmojis();
-    }, [onChooseMoreEmojis]);
+      onChooseMoreEmojis()
+    }, [onChooseMoreEmojis])
 
     const customEnteringAnimation = useCallback(
       (targetValues: EntryAnimationsValues) => {
-        "worklet";
+        "worklet"
 
         const animations = {
-          originX: withSpring(
-            targetValues.targetOriginX,
-            theme.animation.contextMenuSpring,
-          ),
-          originY: withSpring(
-            targetValues.targetOriginY,
-            theme.animation.contextMenuSpring,
-          ),
+          originX: withSpring(targetValues.targetOriginX, theme.animation.contextMenuSpring),
+          originY: withSpring(targetValues.targetOriginY, theme.animation.contextMenuSpring),
           opacity: withSpring(1, theme.animation.contextMenuSpring),
-          transform: [
-            { scale: withSpring(1, theme.animation.contextMenuSpring) },
-          ],
-        };
+          transform: [{ scale: withSpring(1, theme.animation.contextMenuSpring) }],
+        }
 
         const initialValues = {
           originX:
@@ -99,20 +83,15 @@ export const MessageContextMenuAboveMessageReactions = memo(
           originY,
           opacity: 0,
           transform: [{ scale: 0 }],
-        };
+        }
 
         return {
           initialValues,
           animations,
-        };
+        }
       },
-      [
-        theme.animation.contextMenuSpring,
-        originX,
-        originY,
-        theme.layout.screen.width,
-      ],
-    );
+      [theme.animation.contextMenuSpring, originX, originY, theme.layout.screen.width],
+    )
 
     return (
       <AnimatedVStack
@@ -131,9 +110,7 @@ export const MessageContextMenuAboveMessageReactions = memo(
               paddingHorizontal: theme.spacing.xs,
               backgroundColor: theme.colors.background.raised,
             },
-            messageFromMe
-              ? { alignSelf: "flex-end" }
-              : { alignSelf: "flex-start" },
+            messageFromMe ? { alignSelf: "flex-end" } : { alignSelf: "flex-start" },
           ]}
         >
           {favoritedEmojis.getEmojis().map((emoji, index) => (
@@ -151,10 +128,7 @@ export const MessageContextMenuAboveMessageReactions = memo(
               />
             </StaggeredAnimation>
           ))}
-          <TouchableOpacity
-            hitSlop={theme.spacing.xs}
-            onPress={handlePlusPress}
-          >
+          <TouchableOpacity hitSlop={theme.spacing.xs} onPress={handlePlusPress}>
             <VStack
               style={{
                 height: theme.spacing.xxl,
@@ -164,18 +138,14 @@ export const MessageContextMenuAboveMessageReactions = memo(
                 alignItems: "center",
               }}
             >
-              <Icon
-                icon="plus"
-                size={theme.iconSize.md}
-                color={theme.colors.text.secondary}
-              />
+              <Icon icon="plus" size={theme.iconSize.md} color={theme.colors.text.secondary} />
             </VStack>
           </TouchableOpacity>
         </HStack>
       </AnimatedVStack>
-    );
+    )
   },
-);
+)
 
 const Emoji = memo(
   ({
@@ -183,15 +153,15 @@ const Emoji = memo(
     alreadySelected,
     onSelectReaction,
   }: {
-    content: string;
-    alreadySelected: boolean;
-    onSelectReaction: (emoji: string) => void;
+    content: string
+    alreadySelected: boolean
+    onSelectReaction: (emoji: string) => void
   }) => {
-    const { theme } = useAppTheme();
+    const { theme } = useAppTheme()
 
     const handlePress = useCallback(() => {
-      onSelectReaction(content);
-    }, [onSelectReaction, content]);
+      onSelectReaction(content)
+    }, [onSelectReaction, content])
 
     return (
       <TouchableOpacity
@@ -221,6 +191,6 @@ const Emoji = memo(
           <Text preset="emojiSymbol">{content}</Text>
         </VStack>
       </TouchableOpacity>
-    );
+    )
   },
-);
+)

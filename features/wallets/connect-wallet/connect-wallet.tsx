@@ -12,10 +12,7 @@ import { useAppTheme } from "@/theme/use-app-theme"
 import { captureError } from "@/utils/capture-error"
 import { GenericError } from "@/utils/error"
 import { ConnectWalletOnboarding } from "./components/connect-wallet-onboarding"
-import {
-  disconnectActiveWallet,
-  resetConnectWalletStore,
-} from "./connect-wallet.service"
+import { disconnectActiveWallet, resetConnectWalletStore } from "./connect-wallet.service"
 import { useConnectWalletStore } from "./connect-wallet.store"
 
 export function ConnectWallet(props: { onSelectName: (name: string) => void }) {

@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query"
 import {
   ConversationId,
   ConversationTopic,
@@ -8,14 +8,11 @@ import {
   MessageDeliveryStatus,
   MessageId,
   RemoteAttachmentContent,
-} from "@xmtp/react-native-sdk";
-import {
-  InboxId,
-  InstallationId,
-} from "@xmtp/react-native-sdk/build/lib/Client";
-import { DmParams } from "@xmtp/react-native-sdk/build/lib/Dm";
-import { GroupParams } from "@xmtp/react-native-sdk/build/lib/Group";
-import { getCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
+} from "@xmtp/react-native-sdk"
+import { InboxId, InstallationId } from "@xmtp/react-native-sdk/build/lib/Client"
+import { DmParams } from "@xmtp/react-native-sdk/build/lib/Dm"
+import { GroupParams } from "@xmtp/react-native-sdk/build/lib/Group"
+import { getCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
 import {
   addConversationMessageQuery,
   getConversationMessagesQueryData,
@@ -23,48 +20,45 @@ import {
   IMessageAccumulator,
   replaceOptimisticMessageWithReal,
   setConversationMessagesQueryData,
-} from "@/features/conversation/conversation-messages.query";
-import { useConversationStore } from "@/features/conversation/conversation.store-context";
-import { ISupportedXmtpCodecs } from "@/features/xmtp/xmtp-codecs/xmtp-codecs";
-import { contentTypesPrefixes } from "@/features/xmtp/xmtp-content-types/xmtp-content-types";
-import { createXmtpDm } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-dm";
-import { createXmtpGroup } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-group";
+} from "@/features/conversation/conversation-messages.query"
+import { useConversationStore } from "@/features/conversation/conversation.store-context"
+import { ISupportedXmtpCodecs } from "@/features/xmtp/xmtp-codecs/xmtp-codecs"
+import { contentTypesPrefixes } from "@/features/xmtp/xmtp-content-types/xmtp-content-types"
+import { createXmtpDm } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-dm"
+import { createXmtpGroup } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-group"
 import {
   IXmtpConversationWithCodecs,
   IXmtpDmWithCodecs,
   IXmtpGroupWithCodecs,
-} from "@/features/xmtp/xmtp.types";
-import {
-  getConversationQueryData,
-  updateConversationQueryData,
-} from "@/queries/conversation-query";
+} from "@/features/xmtp/xmtp.types"
+import { getConversationQueryData, updateConversationQueryData } from "@/queries/conversation-query"
 import {
   addConversationToAllowedConsentConversationsQuery,
   removeConversationFromAllowedConsentConversationsQuery,
-} from "@/queries/conversations-allowed-consent-query";
-import { queryClient } from "@/queries/queryClient";
+} from "@/queries/conversations-allowed-consent-query"
+import { queryClient } from "@/queries/queryClient"
 import {
   allowedConsentConversationsQueryKey,
   conversationMessagesQueryKey,
-} from "@/queries/QueryKeys";
-import { setDmQueryData } from "@/queries/useDmQuery";
-import { setGroupQueryData } from "@/queries/useGroupQuery";
-import { captureErrorWithToast } from "@/utils/capture-error";
-import { getTodayNs } from "@/utils/date";
-import { getRandomId } from "@/utils/general";
-import logger from "@/utils/logger";
-import { sentryTrackError } from "@/utils/sentry";
-import { sendMessage } from "../../hooks/use-send-message";
+} from "@/queries/QueryKeys"
+import { setDmQueryData } from "@/queries/useDmQuery"
+import { setGroupQueryData } from "@/queries/useGroupQuery"
+import { captureErrorWithToast } from "@/utils/capture-error"
+import { getTodayNs } from "@/utils/date"
+import { getRandomId } from "@/utils/general"
+import logger from "@/utils/logger"
+import { sentryTrackError } from "@/utils/sentry"
+import { sendMessage } from "../../hooks/use-send-message"
 
 export type ISendMessageParams = {
-  topic: ConversationTopic;
-  referencedMessageId?: MessageId;
+  topic: ConversationTopic
+  referencedMessageId?: MessageId
   content:
     | { text: string; remoteAttachment?: RemoteAttachmentContent }
-    | { text?: string; remoteAttachment: RemoteAttachmentContent };
-};
+    | { text?: string; remoteAttachment: RemoteAttachmentContent }
+}
 
-export type ISendFirstMessageParams = Omit<ISendMessageParams, "topic">;
+export type ISendFirstMessageParams = Omit<ISendMessageParams, "topic">
 
 // export async function sendMessage(
 //   args: ISendMessageParams
@@ -104,56 +98,53 @@ export type ISendFirstMessageParams = Omit<ISendMessageParams, "topic">;
 //   return messageId;
 // }
 
-export const TEMP_CONVERSATION_PREFIX = "tmp-";
+export const TEMP_CONVERSATION_PREFIX = "tmp-"
 
 function getConversationTempTopic(args: { inboxIds: InboxId[] }) {
-  const { inboxIds } = args;
+  const { inboxIds } = args
   return `${TEMP_CONVERSATION_PREFIX}${generateGroupHashFromMemberIds(
     inboxIds,
-  )}` as ConversationTopic;
+  )}` as ConversationTopic
 }
 
 export function useCreateConversationAndSendFirstMessage() {
-  const conversationStore = useConversationStore();
+  const conversationStore = useConversationStore()
 
   return useMutation({
-    mutationFn: async (args: {
-      inboxIds: InboxId[];
-      content: { text: string };
-    }) => {
-      const { inboxIds, content } = args;
+    mutationFn: async (args: { inboxIds: InboxId[]; content: { text: string } }) => {
+      const { inboxIds, content } = args
 
       if (!inboxIds.length) {
-        throw new Error("No inboxIds provided");
+        throw new Error("No inboxIds provided")
       }
 
-      const currentAccount = getCurrentSenderEthAddress()!;
+      const currentAccount = getCurrentSenderEthAddress()!
 
       if (!currentAccount) {
-        throw new Error("No current account");
+        throw new Error("No current account")
       }
 
       // Create conversation
-      let conversation: IXmtpGroupWithCodecs | IXmtpDmWithCodecs;
+      let conversation: IXmtpGroupWithCodecs | IXmtpDmWithCodecs
       if (inboxIds.length > 1) {
         conversation = await createXmtpGroup({
           account: currentAccount,
           inboxIds,
-        });
+        })
       } else {
         conversation = await createXmtpDm({
           senderEthAddress: currentAccount,
           peerInboxId: inboxIds[0],
-        });
+        })
       }
 
       // Send message
       const messageId = await sendMessage({
         topic: conversation.topic,
         content,
-      });
+      })
 
-      return { conversation, messageId };
+      return { conversation, messageId }
     },
     // onMutate: ({ inboxIds, content }) => {
     //   const currentAccountInboxId = getSafeCurrentSender().inboxId;
@@ -337,51 +328,47 @@ export function useCreateConversationAndSendFirstMessage() {
     //   }
     //   sentryTrackError(error);
     // },
-  });
+  })
 }
 
 export function maybeReplaceOptimisticConversationWithReal(args: {
-  ethAccountAddress: string;
-  memberInboxIds: InboxId[];
-  realTopic: ConversationTopic;
+  ethAccountAddress: string
+  memberInboxIds: InboxId[]
+  realTopic: ConversationTopic
 }) {
-  const {
-    ethAccountAddress: ethAccountAddress,
-    memberInboxIds,
-    realTopic,
-  } = args;
+  const { ethAccountAddress: ethAccountAddress, memberInboxIds, realTopic } = args
 
   const tempTopic = getConversationTempTopic({
     inboxIds: memberInboxIds,
-  });
+  })
 
   const realConversation = getConversationQueryData({
     account: ethAccountAddress,
     topic: realTopic,
-  });
+  })
 
   if (!realConversation) {
-    throw new Error("Real conversation not found");
+    throw new Error("Real conversation not found")
   }
 
   updateConversationQueryData({
     account: ethAccountAddress,
     topic: tempTopic,
     conversationUpdate: realConversation,
-  });
+  })
 
   // Now move the messages from the temp conversation to the real conversation
   const messages = getConversationMessagesQueryData({
     account: ethAccountAddress,
     topic: tempTopic,
-  });
+  })
 
   if (messages) {
     setConversationMessagesQueryData({
       account: ethAccountAddress,
       topic: realTopic,
       data: messages,
-    });
+    })
   }
 
   // Get messages for the temporary conversation
@@ -430,42 +417,42 @@ export function maybeReplaceOptimisticConversationWithReal(args: {
  */
 function generateGroupHashFromMemberIds(members: InboxId[]) {
   if (!members.length) {
-    return undefined;
+    return undefined
   }
 
   // 1) Sort members (case-insensitive) and deduplicate
   const sorted = [...new Set(members)].sort((a, b) =>
     a.localeCompare(b, undefined, { sensitivity: "base" }),
-  );
+  )
   // 2) Lowercase them
-  const lowercased = sorted.map((m) => m.toLowerCase());
+  const lowercased = sorted.map((m) => m.toLowerCase())
   // 3) Convert to a JSON string
-  const input = JSON.stringify(lowercased);
+  const input = JSON.stringify(lowercased)
 
   // ----------------------------
   // FNV-1a–style "forward" pass
   // ----------------------------
-  let hash1 = 2166136261 >>> 0;
+  let hash1 = 2166136261 >>> 0
   for (let i = 0; i < input.length; i++) {
-    hash1 ^= input.charCodeAt(i);
+    hash1 ^= input.charCodeAt(i)
     // 16777619 is the FNV magic prime
-    hash1 = Math.imul(hash1, 16777619);
+    hash1 = Math.imul(hash1, 16777619)
   }
 
   // ------------------------------------
   // FNV-1a–style "reverse" pass (optional)
   // ------------------------------------
-  let hash2 = 2166136261 >>> 0;
+  let hash2 = 2166136261 >>> 0
   for (let i = input.length - 1; i >= 0; i--) {
-    hash2 ^= input.charCodeAt(i);
-    hash2 = Math.imul(hash2, 16777619);
+    hash2 ^= input.charCodeAt(i)
+    hash2 = Math.imul(hash2, 16777619)
   }
 
   // Combine both 32-bit results into one 64-bit hex string (16 hex chars).
-  const part1 = (hash1 >>> 0).toString(16).padStart(8, "0");
-  const part2 = (hash2 >>> 0).toString(16).padStart(8, "0");
+  const part1 = (hash1 >>> 0).toString(16).padStart(8, "0")
+  const part2 = (hash2 >>> 0).toString(16).padStart(8, "0")
 
-  return part1 + part2;
+  return part1 + part2
 }
 
 // async function ensureConversationInCache(args: {

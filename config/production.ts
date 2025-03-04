@@ -1,6 +1,6 @@
-import { Platform } from "react-native";
-import { IConfig } from "@/config/config.types";
-import { shared } from "./shared";
+import { Platform } from "react-native"
+import { IConfig } from "@/config/config.types"
+import { shared } from "./shared"
 
 export const productionConfig: IConfig = {
   ...shared,
@@ -8,8 +8,7 @@ export const productionConfig: IConfig = {
     default: "TODO",
     android: "TODO",
   }),
-  bundleId:
-    Platform.OS === "android" ? "com.converse.prod" : "com.converse.native",
+  bundleId: Platform.OS === "android" ? "com.converse.prod" : "com.converse.native",
   scheme: "converse",
   websiteDomain: "converse.xyz",
   usernameSuffix: ".converse.xyz",
@@ -29,4 +28,4 @@ export const productionConfig: IConfig = {
       decimals: 6,
     },
   },
-} as const;
+} as const

@@ -1,29 +1,28 @@
-import { Text } from "@design-system/Text";
-import { textSizeStyles } from "@design-system/Text/Text.styles";
-import { VStack } from "@design-system/VStack";
-import { DecodedMessage, TextCodec } from "@xmtp/react-native-sdk";
-import { memo } from "react";
+import { Text } from "@design-system/Text"
+import { textSizeStyles } from "@design-system/Text/Text.styles"
+import { VStack } from "@design-system/VStack"
+import { DecodedMessage, TextCodec } from "@xmtp/react-native-sdk"
+import { memo } from "react"
 import {
   BubbleContainer,
   BubbleContentContainer,
-} from "@/features/conversation/conversation-message/conversation-message-bubble";
-import { ConversationMessageGestures } from "@/features/conversation/conversation-message/conversation-message-gestures";
-import { MessageText } from "@/features/conversation/conversation-message/conversation-message-text";
-import { useConversationMessageContextStoreContext } from "@/features/conversation/conversation-message/conversation-message.store-context";
-import { shouldRenderBigEmoji } from "@/features/conversation/conversation-message/conversation-message.utils";
-import { useSelect } from "@/stores/stores.utils";
+} from "@/features/conversation/conversation-message/conversation-message-bubble"
+import { ConversationMessageGestures } from "@/features/conversation/conversation-message/conversation-message-gestures"
+import { MessageText } from "@/features/conversation/conversation-message/conversation-message-text"
+import { useConversationMessageContextStoreContext } from "@/features/conversation/conversation-message/conversation-message.store-context"
+import { shouldRenderBigEmoji } from "@/features/conversation/conversation-message/conversation-message.utils"
+import { useSelect } from "@/stores/stores.utils"
 
 export const MessageSimpleText = memo(function MessageSimpleText(props: {
-  message: DecodedMessage<TextCodec>;
+  message: DecodedMessage<TextCodec>
 }) {
-  const { message } = props;
+  const { message } = props
 
-  const textContent = message.content();
+  const textContent = message.content()
 
-  const { hasNextMessageInSeries, fromMe } =
-    useConversationMessageContextStoreContext(
-      useSelect(["hasNextMessageInSeries", "fromMe"]),
-    );
+  const { hasNextMessageInSeries, fromMe } = useConversationMessageContextStoreContext(
+    useSelect(["hasNextMessageInSeries", "fromMe"]),
+  )
 
   if (shouldRenderBigEmoji(textContent)) {
     return (
@@ -34,19 +33,16 @@ export const MessageSimpleText = memo(function MessageSimpleText(props: {
       >
         <Text style={textSizeStyles["5xl"]}>{textContent}</Text>
       </VStack>
-    );
+    )
   }
 
   return (
     <BubbleContainer fromMe={fromMe}>
       <ConversationMessageGestures>
-        <BubbleContentContainer
-          fromMe={fromMe}
-          hasNextMessageInSeries={hasNextMessageInSeries}
-        >
+        <BubbleContentContainer fromMe={fromMe} hasNextMessageInSeries={hasNextMessageInSeries}>
           <MessageText inverted={fromMe}>{textContent}</MessageText>
         </BubbleContentContainer>
       </ConversationMessageGestures>
     </BubbleContainer>
-  );
-});
+  )
+})

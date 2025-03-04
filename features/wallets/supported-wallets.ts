@@ -20,8 +20,7 @@ export const WALLET_SCHEME = {
 export type ISupportedWalletId = (typeof WALLET_ID)[keyof typeof WALLET_ID]
 
 // Create a union type of supported wallet schemes
-export type ISupportedWalletScheme =
-  (typeof WALLET_SCHEME)[keyof typeof WALLET_SCHEME]
+export type ISupportedWalletScheme = (typeof WALLET_SCHEME)[keyof typeof WALLET_SCHEME]
 
 export type ISupportedWallet = {
   name: string

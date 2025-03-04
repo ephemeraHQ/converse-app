@@ -19,11 +19,7 @@ export const ProfileContactCardEditableAvatar = memo(function (props: {
   return (
     <Pressable onPress={onPress}>
       <VStack>
-        <Avatar
-          uri={avatarUri}
-          name={avatarName}
-          sizeNumber={theme.avatarSize.xxl}
-        />
+        <Avatar uri={avatarUri} name={avatarName} sizeNumber={theme.avatarSize.xxl} />
         <Center
           style={{
             position: "absolute",
@@ -37,11 +33,7 @@ export const ProfileContactCardEditableAvatar = memo(function (props: {
             backgroundColor: theme.colors.fill.primary,
           }}
         >
-          <Icon
-            icon="camera"
-            size={theme.iconSize.sm}
-            color={theme.colors.fill.inverted.primary}
-          />
+          <Icon icon="camera" size={theme.iconSize.sm} color={theme.colors.fill.inverted.primary} />
         </Center>
       </VStack>
     </Pressable>

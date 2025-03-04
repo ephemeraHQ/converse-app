@@ -1,53 +1,50 @@
-import { ConversationTopic } from "@xmtp/react-native-sdk";
-import { memo } from "react";
-import { useWindowDimensions, ViewStyle } from "react-native";
-import { AnimatedCenter } from "@/design-system/Center";
-import { AnimatedHStack } from "@/design-system/HStack";
-import { AnimatedVStack } from "@/design-system/VStack";
-import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
-import { ConversationListPinnedConversationDm } from "@/features/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversation-dm";
-import { ConversationListPinnedConversationGroup } from "@/features/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversation-group";
-import { useConversationListPinnedConversationsStyles } from "@/features/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversations.styles";
-import { useConversationListStyles } from "@/features/conversation-list/conversation-list.styles";
-import { useAllowedConversationsCount } from "@/features/conversation-list/hooks/use-conversations-count";
-import { usePinnedConversations } from "@/features/conversation-list/hooks/use-pinned-conversations";
-import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
-import { useConversationQuery } from "@/queries/conversation-query";
-import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
-import { captureError } from "@/utils/capture-error";
-import { chunk } from "@/utils/general";
+import { ConversationTopic } from "@xmtp/react-native-sdk"
+import { memo } from "react"
+import { useWindowDimensions, ViewStyle } from "react-native"
+import { AnimatedCenter } from "@/design-system/Center"
+import { AnimatedHStack } from "@/design-system/HStack"
+import { AnimatedVStack } from "@/design-system/VStack"
+import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
+import { ConversationListPinnedConversationDm } from "@/features/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversation-dm"
+import { ConversationListPinnedConversationGroup } from "@/features/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversation-group"
+import { useConversationListPinnedConversationsStyles } from "@/features/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversations.styles"
+import { useConversationListStyles } from "@/features/conversation-list/conversation-list.styles"
+import { useAllowedConversationsCount } from "@/features/conversation-list/hooks/use-conversations-count"
+import { usePinnedConversations } from "@/features/conversation-list/hooks/use-pinned-conversations"
+import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group"
+import { useConversationQuery } from "@/queries/conversation-query"
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme"
+import { captureError } from "@/utils/capture-error"
+import { chunk } from "@/utils/general"
 
 export const ConversationListPinnedConversations = memo(
   function ConversationListPinnedConversations() {
-    const { themed, theme } = useAppTheme();
+    const { themed, theme } = useAppTheme()
 
     const { pinnedConversations, isLoading: isLoadingPinnedConversations } =
-      usePinnedConversations();
+      usePinnedConversations()
 
-    const { avatarSize } = useConversationListPinnedConversationsStyles();
+    const { avatarSize } = useConversationListPinnedConversationsStyles()
 
-    const {
-      count: allowedConversationsCount,
-      isLoading: allowedConversationsCountIsLoading,
-    } = useAllowedConversationsCount();
+    const { count: allowedConversationsCount, isLoading: allowedConversationsCountIsLoading } =
+      useAllowedConversationsCount()
 
-    const { screenHorizontalPadding } = useConversationListStyles();
+    const { screenHorizontalPadding } = useConversationListStyles()
 
-    const { width } = useWindowDimensions();
+    const { width } = useWindowDimensions()
 
     if (isLoadingPinnedConversations || allowedConversationsCountIsLoading) {
-      return null;
+      return null
     }
 
     if (allowedConversationsCount === 0) {
-      return null;
+      return null
     }
 
-    const hasPinnedConversations =
-      pinnedConversations && pinnedConversations?.length > 0;
+    const hasPinnedConversations = pinnedConversations && pinnedConversations?.length > 0
 
     if (!hasPinnedConversations) {
-      return null;
+      return null
     }
 
     return (
@@ -62,8 +59,7 @@ export const ConversationListPinnedConversations = memo(
             style={[
               themed($pinnedRow),
               {
-                columnGap:
-                  (width - screenHorizontalPadding * 2 - avatarSize * 3) / 2,
+                columnGap: (width - screenHorizontalPadding * 2 - avatarSize * 3) / 2,
               },
             ]}
             layout={theme.animation.reanimatedLayoutSpringTransition}
@@ -80,47 +76,43 @@ export const ConversationListPinnedConversations = memo(
           </AnimatedHStack>
         ))}
       </AnimatedVStack>
-    );
+    )
   },
-);
+)
 
-const PinnedConversationWrapper = memo(
-  function PinnedConversationWrapper(props: { topic: ConversationTopic }) {
-    const { topic } = props;
+const PinnedConversationWrapper = memo(function PinnedConversationWrapper(props: {
+  topic: ConversationTopic
+}) {
+  const { topic } = props
 
-    const currentAccount = useCurrentSenderEthAddress();
+  const currentAccount = useCurrentSenderEthAddress()
 
-    const { data: conversation } = useConversationQuery({
-      topic,
-      account: currentAccount!,
-      caller: "Conversation List Pinned Conversations",
-    });
+  const { data: conversation } = useConversationQuery({
+    topic,
+    account: currentAccount!,
+    caller: "Conversation List Pinned Conversations",
+  })
 
-    if (!conversation) {
-      captureError(
-        new Error(
-          `Couldn't find conversation ${topic} in PinnedConversationWrapper`,
-        ),
-      );
-      return null;
-    }
+  if (!conversation) {
+    captureError(new Error(`Couldn't find conversation ${topic} in PinnedConversationWrapper`))
+    return null
+  }
 
-    if (isConversationGroup(conversation)) {
-      return <ConversationListPinnedConversationGroup group={conversation} />;
-    }
+  if (isConversationGroup(conversation)) {
+    return <ConversationListPinnedConversationGroup group={conversation} />
+  }
 
-    return <ConversationListPinnedConversationDm conversation={conversation} />;
-  },
-);
+  return <ConversationListPinnedConversationDm conversation={conversation} />
+})
 const $container: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingVertical: spacing.xs,
   paddingHorizontal: spacing.lg,
   rowGap: spacing.lg,
   justifyContent: "space-between",
-});
+})
 
 const $pinnedRow: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   justifyContent: "center",
   flexWrap: "wrap",
   rowGap: spacing.lg,
-});
+})

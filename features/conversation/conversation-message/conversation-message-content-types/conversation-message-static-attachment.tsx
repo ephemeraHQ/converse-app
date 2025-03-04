@@ -1,44 +1,44 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query"
 import {
   getMessageAttachmentLocalPath,
   getMessagesAttachmentsLocalFolderPath,
-} from "@utils/attachment/attachment.utils";
+} from "@utils/attachment/attachment.utils"
 import {
   DecodedMessage,
   StaticAttachmentCodec,
   StaticAttachmentContent,
-} from "@xmtp/react-native-sdk";
-import { Image } from "expo-image";
-import { memo } from "react";
-import RNFS from "react-native-fs";
-import { Text } from "@/design-system/Text";
-import { AttachmentContainer } from "@/features/conversation/conversation-attachment/conversation-attachment-container";
-import { AttachmentLoading } from "@/features/conversation/conversation-attachment/conversation-attachment-loading";
-import { translate } from "@/i18n";
-import { getLocalAttachment } from "@/utils/attachment/handleAttachment";
+} from "@xmtp/react-native-sdk"
+import { Image } from "expo-image"
+import { memo } from "react"
+import RNFS from "react-native-fs"
+import { Text } from "@/design-system/Text"
+import { AttachmentContainer } from "@/features/conversation/conversation-attachment/conversation-attachment-container"
+import { AttachmentLoading } from "@/features/conversation/conversation-attachment/conversation-attachment-loading"
+import { translate } from "@/i18n"
+import { getLocalAttachment } from "@/utils/attachment/handleAttachment"
 
 type IMessageStaticAttachmentProps = {
-  message: DecodedMessage<StaticAttachmentCodec>;
-};
+  message: DecodedMessage<StaticAttachmentCodec>
+}
 
 export const MessageStaticAttachment = memo(function MessageStaticAttachment({
   message,
 }: IMessageStaticAttachmentProps) {
-  const content = message.content();
+  const content = message.content()
 
   if (typeof content === "string") {
     // TODO
-    return null;
+    return null
   }
 
-  return <Content messageId={message.id} staticAttachment={content} />;
-});
+  return <Content messageId={message.id} staticAttachment={content} />
+})
 
 const Content = memo(function Content(props: {
-  messageId: string;
-  staticAttachment: StaticAttachmentContent;
+  messageId: string
+  staticAttachment: StaticAttachmentContent
 }) {
-  const { messageId, staticAttachment } = props;
+  const { messageId, staticAttachment } = props
 
   const {
     data: attachment,
@@ -47,34 +47,27 @@ const Content = memo(function Content(props: {
   } = useQuery({
     queryKey: ["attachment", messageId],
     queryFn: async () => {
-      const messageFolder = getMessagesAttachmentsLocalFolderPath(messageId);
+      const messageFolder = getMessagesAttachmentsLocalFolderPath(messageId)
 
       // Create folder
       await RNFS.mkdir(messageFolder, {
         NSURLIsExcludedFromBackupKey: true,
-      });
+      })
 
-      const attachmentPath = getMessageAttachmentLocalPath(
-        messageId,
-        staticAttachment.filename,
-      );
+      const attachmentPath = getMessageAttachmentLocalPath(messageId, staticAttachment.filename)
 
-      await RNFS.writeFile(attachmentPath, staticAttachment.data, "base64");
+      await RNFS.writeFile(attachmentPath, staticAttachment.data, "base64")
 
-      return getLocalAttachment(
-        messageId,
-        staticAttachment.filename,
-        staticAttachment.mimeType,
-      );
+      return getLocalAttachment(messageId, staticAttachment.filename, staticAttachment.mimeType)
     },
-  });
+  })
 
   if (!attachment && attachmentLoading) {
     return (
       <AttachmentContainer>
         <AttachmentLoading />
       </AttachmentContainer>
-    );
+    )
   }
 
   if (attachmentError || !attachment) {
@@ -82,12 +75,12 @@ const Content = memo(function Content(props: {
       <AttachmentContainer>
         <Text>{translate("attachment_not_found")}</Text>
       </AttachmentContainer>
-    );
+    )
   }
 
   const aspectRatio = attachment.imageSize
     ? attachment.imageSize.width / attachment.imageSize.height
-    : undefined;
+    : undefined
 
   return (
     <AttachmentContainer style={{ aspectRatio }}>
@@ -100,5 +93,5 @@ const Content = memo(function Content(props: {
         }}
       />
     </AttachmentContainer>
-  );
-});
+  )
+})

@@ -1,47 +1,45 @@
-import type { ConversationTopic, DecodedMessage } from "@xmtp/react-native-sdk";
-import React, { memo } from "react";
-import { FlatList } from "react-native";
-import { ActivityIndicator } from "@/design-system/activity-indicator";
-import { Center } from "@/design-system/Center";
-import { EmptyState } from "@/design-system/empty-state";
-import { Text } from "@/design-system/Text";
-import { VStack } from "@/design-system/VStack";
-import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
-import { ConversationMessage } from "@/features/conversation/conversation-message/conversation-message";
-import { ConversationMessageContextMenuStoreProvider } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu.store-context";
-import { ConversationMessageLayout } from "@/features/conversation/conversation-message/conversation-message-layout";
-import { ConversationMessageReactions } from "@/features/conversation/conversation-message/conversation-message-reactions/conversation-message-reactions";
-import { ConversationMessageTimestamp } from "@/features/conversation/conversation-message/conversation-message-timestamp";
-import { ConversationMessageContextStoreProvider } from "@/features/conversation/conversation-message/conversation-message.store-context";
-import { useMessageHasReactions } from "@/features/conversation/conversation-message/conversation-message.utils";
-import { conversationListDefaultProps } from "@/features/conversation/conversation-messages-list";
-import { useConversationMessagesQuery } from "@/features/conversation/conversation-messages.query";
-import { ConversationStoreProvider } from "@/features/conversation/conversation.store-context";
-import { useConversationQuery } from "@/queries/conversation-query";
-import { $globalStyles } from "@/theme/styles";
+import type { ConversationTopic, DecodedMessage } from "@xmtp/react-native-sdk"
+import React, { memo } from "react"
+import { FlatList } from "react-native"
+import { ActivityIndicator } from "@/design-system/activity-indicator"
+import { Center } from "@/design-system/Center"
+import { EmptyState } from "@/design-system/empty-state"
+import { Text } from "@/design-system/Text"
+import { VStack } from "@/design-system/VStack"
+import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
+import { ConversationMessage } from "@/features/conversation/conversation-message/conversation-message"
+import { ConversationMessageContextMenuStoreProvider } from "@/features/conversation/conversation-message/conversation-message-context-menu/conversation-message-context-menu.store-context"
+import { ConversationMessageLayout } from "@/features/conversation/conversation-message/conversation-message-layout"
+import { ConversationMessageReactions } from "@/features/conversation/conversation-message/conversation-message-reactions/conversation-message-reactions"
+import { ConversationMessageTimestamp } from "@/features/conversation/conversation-message/conversation-message-timestamp"
+import { ConversationMessageContextStoreProvider } from "@/features/conversation/conversation-message/conversation-message.store-context"
+import { useMessageHasReactions } from "@/features/conversation/conversation-message/conversation-message.utils"
+import { conversationListDefaultProps } from "@/features/conversation/conversation-messages-list"
+import { useConversationMessagesQuery } from "@/features/conversation/conversation-messages.query"
+import { ConversationStoreProvider } from "@/features/conversation/conversation.store-context"
+import { useConversationQuery } from "@/queries/conversation-query"
+import { $globalStyles } from "@/theme/styles"
 
 type ConversationPreviewProps = {
-  topic: ConversationTopic;
-};
+  topic: ConversationTopic
+}
 
 export const ConversationPreview = ({ topic }: ConversationPreviewProps) => {
-  const currentAccount = useCurrentSenderEthAddress()!;
+  const currentAccount = useCurrentSenderEthAddress()!
 
-  const { data: messages, isLoading: isLoadingMessages } =
-    useConversationMessagesQuery({
-      account: currentAccount,
-      topic,
-      caller: "Conversation Preview",
-    });
+  const { data: messages, isLoading: isLoadingMessages } = useConversationMessagesQuery({
+    account: currentAccount,
+    topic,
+    caller: "Conversation Preview",
+  })
 
-  const { data: conversation, isLoading: isLoadingConversation } =
-    useConversationQuery({
-      account: currentAccount,
-      topic,
-      caller: "Conversation Preview",
-    });
+  const { data: conversation, isLoading: isLoadingConversation } = useConversationQuery({
+    account: currentAccount,
+    topic,
+    caller: "Conversation Preview",
+  })
 
-  const isLoading = isLoadingMessages || isLoadingConversation;
+  const isLoading = isLoadingMessages || isLoadingConversation
 
   return (
     <VStack style={$globalStyles.flex1}>
@@ -55,10 +53,7 @@ export const ConversationPreview = ({ topic }: ConversationPreviewProps) => {
         </Center>
       ) : messages?.ids.length === 0 ? (
         <Center style={$globalStyles.flex1}>
-          <EmptyState
-            title="Empty conversation"
-            description="This conversation has no messages"
-          />
+          <EmptyState title="Empty conversation" description="This conversation has no messages" />
         </Center>
       ) : (
         // Shouldn't need this provider here but for now we need it because we use ConversationMessageGestures inside ConversationMessage
@@ -70,10 +65,9 @@ export const ConversationPreview = ({ topic }: ConversationPreviewProps) => {
               // 15 is enough
               data={Object.values(messages?.byId ?? {}).slice(0, 15)}
               renderItem={({ item, index }) => {
-                const message = item;
-                const previousMessage =
-                  messages?.byId[messages?.ids[index + 1]];
-                const nextMessage = messages?.byId[messages?.ids[index - 1]];
+                const message = item
+                const previousMessage = messages?.byId[messages?.ids[index + 1]]
+                const nextMessage = messages?.byId[messages?.ids[index - 1]]
 
                 return (
                   <MessageWrapper
@@ -81,28 +75,28 @@ export const ConversationPreview = ({ topic }: ConversationPreviewProps) => {
                     previousMessage={previousMessage}
                     nextMessage={nextMessage}
                   />
-                );
+                )
               }}
             />
           </ConversationStoreProvider>
         </ConversationMessageContextMenuStoreProvider>
       )}
     </VStack>
-  );
-};
+  )
+}
 
 const MessageWrapper = memo(function MessageWrapper({
   message,
   previousMessage,
   nextMessage,
 }: {
-  message: DecodedMessage;
-  previousMessage: DecodedMessage | undefined;
-  nextMessage: DecodedMessage | undefined;
+  message: DecodedMessage
+  previousMessage: DecodedMessage | undefined
+  nextMessage: DecodedMessage | undefined
 }) {
   const hasReactions = useMessageHasReactions({
     messageId: message.id,
-  });
+  })
 
   return (
     <ConversationMessageContextStoreProvider
@@ -118,5 +112,5 @@ const MessageWrapper = memo(function MessageWrapper({
         />
       </VStack>
     </ConversationMessageContextStoreProvider>
-  );
-});
+  )
+})

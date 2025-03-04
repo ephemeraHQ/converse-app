@@ -30,14 +30,11 @@ function maybeReplaceLocalhost(uri: string) {
 export const shared = {
   appName: Constants.expoConfig?.name || "Converse",
   appVersion: Constants.expoConfig?.version || "0.0.0",
-  loggerColorScheme:
-    (process.env.EXPO_PUBLIC_LOGGER_COLOR_SCHEME as ILoggerColorScheme) ||
-    "light",
+  loggerColorScheme: (process.env.EXPO_PUBLIC_LOGGER_COLOR_SCHEME as ILoggerColorScheme) || "light",
   debugMenu: false,
   xmtpEnv: (process.env.EXPO_PUBLIC_XMTP_ENV || "dev") as IConfig["xmtpEnv"],
   apiURI: maybeReplaceLocalhost(process.env.EXPO_PUBLIC_CONVOS_API_URI),
-  debugAddresses:
-    process.env.EXPO_PUBLIC_DEBUG_ADDRESSES?.toLowerCase().split(",") || [],
+  debugAddresses: process.env.EXPO_PUBLIC_DEBUG_ADDRESSES?.toLowerCase().split(",") || [],
   lensApiDomain: "api.lens.dev",
   lensSuffix: ".lens",
   sentryDSN: process.env.EXPO_PUBLIC_SENTRY_DSN,
@@ -47,8 +44,7 @@ export const shared = {
     clientId: process.env.EXPO_PUBLIC_PRIVY_CLIENT_ID,
   },
   thirdwebClientId: process.env.EXPO_PUBLIC_THIRDWEB_CLIENT_ID,
-  reactQueryEncryptionKey:
-    process.env.EXPO_PUBLIC_SECURE_REACT_QUERY_ENCRYPTION_KEY,
+  reactQueryEncryptionKey: process.env.EXPO_PUBLIC_SECURE_REACT_QUERY_ENCRYPTION_KEY,
   appCheckDebugToken:
     Platform.OS === "android"
       ? process.env.EXPO_PUBLIC_FIREBASE_APP_CHECK_DEBUG_TOKEN_ANDROID

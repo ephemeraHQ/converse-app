@@ -23,10 +23,7 @@ import {
   SNACKBAR_SPACE_BETWEEN_SNACKBARS,
   SNACKBARS_MAX_VISIBLE,
 } from "@/components/snackbar/snackbar.constants"
-import {
-  getNumberOfSnackbars,
-  onSnackbarsChange,
-} from "@/components/snackbar/snackbar.service"
+import { getNumberOfSnackbars, onSnackbarsChange } from "@/components/snackbar/snackbar.service"
 import { ISnackbar } from "@/components/snackbar/snackbar.types"
 import { useAppTheme } from "@/theme/use-app-theme"
 
@@ -42,9 +39,7 @@ export const Snackbar = memo(
     const { width: windowWidth } = useWindowDimensions()
 
     const isFirstSnack = getNumberOfSnackbars() === 1
-    const initialBottomPosition = isFirstSnack
-      ? -SNACKBAR_HEIGHT / 2
-      : SNACKBAR_BOTTOM_OFFSET
+    const initialBottomPosition = isFirstSnack ? -SNACKBAR_HEIGHT / 2 : SNACKBAR_BOTTOM_OFFSET
 
     const snackbarIndexAV = useSharedValue(0)
     const bottomAV = useSharedValue(initialBottomPosition)
@@ -62,9 +57,7 @@ export const Snackbar = memo(
 
     useEffect(() => {
       const unsubscribe = onSnackbarsChange((snackbars) => {
-        const snackbarIndex = snackbars.findIndex(
-          (item) => item.key === snackbar.key,
-        )
+        const snackbarIndex = snackbars.findIndex((item) => item.key === snackbar.key)
 
         // Set the new new index of the current snackbar
         snackbarIndexAV.value = withSpring(snackbarIndex, SICK_SPRING_CONFIG)
@@ -76,9 +69,7 @@ export const Snackbar = memo(
         const totalHeightBeforeThisSnackbar = snackbars
           .slice(0, Math.min(snackbarIndex, SNACKBARS_MAX_VISIBLE))
           .reduce((acc, item) => {
-            const snackbarHeight = item.isMultiLine
-              ? SNACKBAR_LARGE_TEXT_HEIGHT
-              : SNACKBAR_HEIGHT
+            const snackbarHeight = item.isMultiLine ? SNACKBAR_LARGE_TEXT_HEIGHT : SNACKBAR_HEIGHT
             return acc + snackbarHeight + SNACKBAR_SPACE_BETWEEN_SNACKBARS
           }, 0)
 
@@ -93,15 +84,11 @@ export const Snackbar = memo(
 
     const dismissItem = useCallback(() => {
       "worklet"
-      translateXAV.value = withTiming(
-        -windowWidth,
-        { duration: 250 },
-        (isFinished) => {
-          if (isFinished) {
-            runOnJS(onDismiss)()
-          }
-        },
-      )
+      translateXAV.value = withTiming(-windowWidth, { duration: 250 }, (isFinished) => {
+        if (isFinished) {
+          runOnJS(onDismiss)()
+        }
+      })
     }, [onDismiss, translateXAV, windowWidth])
 
     const gesture = Gesture.Pan()
@@ -136,11 +123,7 @@ export const Snackbar = memo(
         // - First 3 snackbars have opacity of 1
         // - After 3rd snackbar, opacity decreases linearly by 0.05
         // - This creates a nice fading effect for stacked snackbars
-        shadowOpacity: interpolate(
-          snackbarIndexAV.value,
-          [0, 3, 10],
-          [1, 1, 0],
-        ),
+        shadowOpacity: interpolate(snackbarIndexAV.value, [0, 3, 10], [1, 1, 0]),
         // The content of the first two StackedToasts is visible
         // The content of the other StackedToasts is hidden
         opacity: interpolate(
@@ -152,23 +135,15 @@ export const Snackbar = memo(
           // For the dragging animation
           { translateX: translateXAV.value },
           {
-            scale: interpolate(
-              firstSnackbarRenderProgressAV.value,
-              [0, 1],
-              [0.9, 1],
-            ),
+            scale: interpolate(firstSnackbarRenderProgressAV.value, [0, 1], [0.9, 1]),
           },
         ],
       }),
       [],
     )
 
-    const SnackContainer = snackbar.isMultiLine
-      ? AnimatedVStack
-      : AnimatedHStack
-    const snackbarHeight = snackbar.isMultiLine
-      ? SNACKBAR_LARGE_TEXT_HEIGHT
-      : SNACKBAR_HEIGHT
+    const SnackContainer = snackbar.isMultiLine ? AnimatedVStack : AnimatedHStack
+    const snackbarHeight = snackbar.isMultiLine ? SNACKBAR_LARGE_TEXT_HEIGHT : SNACKBAR_HEIGHT
 
     return (
       <GestureDetector gesture={gesture}>

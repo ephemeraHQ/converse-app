@@ -1,11 +1,6 @@
-import NetInfo from "@react-native-community/netinfo";
-import {
-  BehaviorSubject,
-  Observable,
-  PartialObserver,
-  Subscription,
-} from "rxjs";
-import { distinctUntilChanged, shareReplay, switchMap } from "rxjs/operators";
+import NetInfo from "@react-native-community/netinfo"
+import { BehaviorSubject, Observable, PartialObserver, Subscription } from "rxjs"
+import { distinctUntilChanged, shareReplay, switchMap } from "rxjs/operators"
 
 /*
  * NetworkMonitorClient provides a flexible API to monitor
@@ -36,8 +31,8 @@ import { distinctUntilChanged, shareReplay, switchMap } from "rxjs/operators";
  * - 'unknown': Network state is unknown.
  */
 export type NetworkAvailability = {
-  status: "satisfied" | "unsatisfied" | "unknown";
-};
+  status: "satisfied" | "unsatisfied" | "unknown"
+}
 
 /*
  * NetworkMonitorClient provides an interface to monitor
@@ -65,21 +60,19 @@ export class NetworkMonitorClient {
    * Ensures that only one instance exists throughout
    * the application.
    */
-  private static instance: NetworkMonitorClient;
+  private static instance: NetworkMonitorClient
 
   /*
    * Subject that holds the current Observable<NetworkAvailability>.
    * Allows dynamic switching of the network observable at runtime.
    */
-  private networkObservableSubject: BehaviorSubject<
-    Observable<NetworkAvailability>
-  >;
+  private networkObservableSubject: BehaviorSubject<Observable<NetworkAvailability>>
 
   /*
    * Observable that emits the network availability status.
    * Subscribers can subscribe to this Observable to get updates.
    */
-  private networkObservable: Observable<NetworkAvailability>;
+  private networkObservable: Observable<NetworkAvailability>
 
   /*
    * Private constructor to enforce singleton pattern.
@@ -89,7 +82,7 @@ export class NetworkMonitorClient {
    * @param initialObservable - Initial Observable<NetworkAvailability>
    */
   private constructor(initialObservable: Observable<NetworkAvailability>) {
-    this.networkObservableSubject = new BehaviorSubject(initialObservable);
+    this.networkObservableSubject = new BehaviorSubject(initialObservable)
 
     /*
      * The networkObservable is built by piping the
@@ -116,7 +109,7 @@ export class NetworkMonitorClient {
       switchMap((observable) => observable),
       distinctUntilChanged((a, b) => a.status === b.status),
       shareReplay(1),
-    );
+    )
   }
 
   /*
@@ -135,9 +128,9 @@ export class NetworkMonitorClient {
       // Default to unimplemented to catch any unintended usage
       NetworkMonitorClient.instance = new NetworkMonitorClient(
         NetworkMonitorClient.unimplementedObservable(),
-      );
+      )
     }
-    return NetworkMonitorClient.instance;
+    return NetworkMonitorClient.instance
   }
 
   /*
@@ -169,17 +162,15 @@ export class NetworkMonitorClient {
    *   console.log(networkAvailability.status);
    * });
    */
-  subscribe(observer: PartialObserver<NetworkAvailability>): Subscription;
-  subscribe(next: (value: NetworkAvailability) => void): Subscription;
+  subscribe(observer: PartialObserver<NetworkAvailability>): Subscription
+  subscribe(next: (value: NetworkAvailability) => void): Subscription
   subscribe(
-    observerOrNext:
-      | PartialObserver<NetworkAvailability>
-      | ((value: NetworkAvailability) => void),
+    observerOrNext: PartialObserver<NetworkAvailability> | ((value: NetworkAvailability) => void),
   ): Subscription {
     if (typeof observerOrNext === "function") {
-      return this.networkObservable.subscribe(observerOrNext);
+      return this.networkObservable.subscribe(observerOrNext)
     }
-    return this.networkObservable.subscribe(observerOrNext);
+    return this.networkObservable.subscribe(observerOrNext)
   }
 
   /*
@@ -189,7 +180,7 @@ export class NetworkMonitorClient {
    * @param observable - The new Observable<NetworkAvailability> to switch to.
    */
   private setNetworkObservable(observable: Observable<NetworkAvailability>) {
-    this.networkObservableSubject.next(observable);
+    this.networkObservableSubject.next(observable)
   }
 
   /*
@@ -216,30 +207,30 @@ export class NetworkMonitorClient {
         NetInfo.fetch().then((state) => {
           const networkState: NetworkAvailability = {
             status: state.isConnected ? "satisfied" : "unsatisfied",
-          };
-          subscriber.next(networkState);
-        });
-      };
+          }
+          subscriber.next(networkState)
+        })
+      }
 
-      fetchAndUpdateNetworkState();
+      fetchAndUpdateNetworkState()
 
       const unsubscribeNetInfo = NetInfo.addEventListener((state) => {
         const networkState: NetworkAvailability = {
           status: state.isConnected ? "satisfied" : "unsatisfied",
-        };
-        subscriber.next(networkState);
-      });
+        }
+        subscriber.next(networkState)
+      })
 
       return () => {
-        unsubscribeNetInfo();
-      };
+        unsubscribeNetInfo()
+      }
     }).pipe(
       distinctUntilChanged((a, b) => a.status === b.status),
       shareReplay(1),
-    );
+    )
 
-    NetworkMonitorClient.getInstance().setNetworkObservable(liveObservable);
-    return NetworkMonitorClient.getInstance();
+    NetworkMonitorClient.getInstance().setNetworkObservable(liveObservable)
+    return NetworkMonitorClient.getInstance()
   }
 
   /*
@@ -260,12 +251,10 @@ export class NetworkMonitorClient {
   static satisfied(): NetworkMonitorClient {
     const satisfiedObservable = new BehaviorSubject<NetworkAvailability>({
       status: "satisfied",
-    });
+    })
 
-    NetworkMonitorClient.getInstance().setNetworkObservable(
-      satisfiedObservable,
-    );
-    return NetworkMonitorClient.getInstance();
+    NetworkMonitorClient.getInstance().setNetworkObservable(satisfiedObservable)
+    return NetworkMonitorClient.getInstance()
   }
 
   /*
@@ -286,12 +275,10 @@ export class NetworkMonitorClient {
   static unsatisfied(): NetworkMonitorClient {
     const unsatisfiedObservable = new BehaviorSubject<NetworkAvailability>({
       status: "unsatisfied",
-    });
+    })
 
-    NetworkMonitorClient.getInstance().setNetworkObservable(
-      unsatisfiedObservable,
-    );
-    return NetworkMonitorClient.getInstance();
+    NetworkMonitorClient.getInstance().setNetworkObservable(unsatisfiedObservable)
+    return NetworkMonitorClient.getInstance()
   }
 
   /*
@@ -311,16 +298,16 @@ export class NetworkMonitorClient {
   static flakey(): NetworkMonitorClient {
     const subject = new BehaviorSubject<NetworkAvailability>({
       status: "satisfied",
-    });
-    let isSatisfied = true;
+    })
+    let isSatisfied = true
 
     setInterval(() => {
-      isSatisfied = !isSatisfied;
-      subject.next({ status: isSatisfied ? "satisfied" : "unsatisfied" });
-    }, 2000);
+      isSatisfied = !isSatisfied
+      subject.next({ status: isSatisfied ? "satisfied" : "unsatisfied" })
+    }, 2000)
 
-    NetworkMonitorClient.getInstance().setNetworkObservable(subject);
-    return NetworkMonitorClient.getInstance();
+    NetworkMonitorClient.getInstance().setNetworkObservable(subject)
+    return NetworkMonitorClient.getInstance()
   }
 
   /*
@@ -337,11 +324,9 @@ export class NetworkMonitorClient {
    *
    * const networkMonitor = NetworkMonitorClient.custom(customObservable);
    */
-  static custom(
-    observable: Observable<NetworkAvailability>,
-  ): NetworkMonitorClient {
-    NetworkMonitorClient.getInstance().setNetworkObservable(observable);
-    return NetworkMonitorClient.getInstance();
+  static custom(observable: Observable<NetworkAvailability>): NetworkMonitorClient {
+    NetworkMonitorClient.getInstance().setNetworkObservable(observable)
+    return NetworkMonitorClient.getInstance()
   }
 
   /*
@@ -354,12 +339,9 @@ export class NetworkMonitorClient {
    * const networkMonitor = NetworkMonitorClient.unimplemented();
    */
   static unimplemented(): NetworkMonitorClient {
-    const unimplementedObservable =
-      NetworkMonitorClient.unimplementedObservable();
-    NetworkMonitorClient.getInstance().setNetworkObservable(
-      unimplementedObservable,
-    );
-    return NetworkMonitorClient.getInstance();
+    const unimplementedObservable = NetworkMonitorClient.unimplementedObservable()
+    NetworkMonitorClient.getInstance().setNetworkObservable(unimplementedObservable)
+    return NetworkMonitorClient.getInstance()
   }
 
   /*
@@ -375,7 +357,7 @@ export class NetworkMonitorClient {
             "ensure you don't invoke code you don't intend to, ensuring your tests are truly " +
             "testing what they are expected to",
         ),
-      );
-    }).pipe(shareReplay(1));
+      )
+    }).pipe(shareReplay(1))
   }
 }

@@ -1,78 +1,73 @@
-import { useGroupQuery } from "@queries/useGroupQuery";
-import { useMutation } from "@tanstack/react-query";
-import { logger } from "@utils/logger";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
+import { useGroupQuery } from "@queries/useGroupQuery"
+import { useMutation } from "@tanstack/react-query"
+import { logger } from "@utils/logger"
+import type { ConversationTopic } from "@xmtp/react-native-sdk"
+import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client"
 // import { refreshGroup } from "../utils/xmtpRN/conversations";
-import { captureError } from "@/utils/capture-error";
-import { removeMemberMutationKey } from "./MutationKeys";
+import { captureError } from "@/utils/capture-error"
+import { removeMemberMutationKey } from "./MutationKeys"
 import {
   cancelGroupMembersQuery,
   getGroupMembersQueryData,
   setGroupMembersQueryData,
-} from "./useGroupMembersQuery";
+} from "./useGroupMembersQuery"
 
-export const useRemoveFromGroupMutation = (
-  account: string,
-  topic: ConversationTopic,
-) => {
-  const { data: group } = useGroupQuery({ account, topic });
+export const useRemoveFromGroupMutation = (account: string, topic: ConversationTopic) => {
+  const { data: group } = useGroupQuery({ account, topic })
 
   return useMutation({
     mutationKey: removeMemberMutationKey(account, topic!),
     mutationFn: async (inboxIds: InboxId[]) => {
       if (!group || !account || !topic) {
-        return;
+        return
       }
-      await group.removeMembersByInboxId(inboxIds);
-      return inboxIds;
+      await group.removeMembersByInboxId(inboxIds)
+      return inboxIds
     },
     onMutate: async (inboxIds: InboxId[]) => {
       if (!topic) {
-        return;
+        return
       }
-      await cancelGroupMembersQuery({ account, topic });
-      const removeSet = new Set(inboxIds);
+      await cancelGroupMembersQuery({ account, topic })
+      const removeSet = new Set(inboxIds)
 
       const previousGroupMembers = getGroupMembersQueryData({
         account,
         topic,
-      });
+      })
       if (!previousGroupMembers) {
-        return;
+        return
       }
 
       const newGroupMembers = {
         ...previousGroupMembers,
-        ids: previousGroupMembers.ids.filter(
-          (member) => !removeSet.has(member),
-        ),
-      };
+        ids: previousGroupMembers.ids.filter((member) => !removeSet.has(member)),
+      }
       setGroupMembersQueryData({
         account,
         topic,
         members: newGroupMembers,
-      });
+      })
 
-      return { previousGroupMembers };
+      return { previousGroupMembers }
     },
     onError: (error, _variables, context) => {
-      captureError(error);
+      captureError(error)
       if (context?.previousGroupMembers === undefined) {
-        return;
+        return
       }
       if (!topic) {
-        return;
+        return
       }
       setGroupMembersQueryData({
         account,
         topic,
         members: context.previousGroupMembers,
-      });
+      })
     },
     onSuccess: (data, variables, context) => {
-      logger.debug("onSuccess useRemoveFromGroupMutation");
+      logger.debug("onSuccess useRemoveFromGroupMutation")
       // refreshGroup(account, topic);
     },
-  });
-};
+  })
+}

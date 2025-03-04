@@ -10,9 +10,7 @@ type IConversationSenderAvatarProps = {
   inboxId: string
 }
 
-export function ConversationSenderAvatar({
-  inboxId,
-}: IConversationSenderAvatarProps) {
+export function ConversationSenderAvatar({ inboxId }: IConversationSenderAvatarProps) {
   const { theme } = useAppTheme()
   const { senderAvatarSize } = useConversationMessageStyles()
   const { displayName, avatarUrl } = usePreferredDisplayInfo({ inboxId })
@@ -25,11 +23,7 @@ export function ConversationSenderAvatar({
 
   return (
     <Pressable onPress={openProfile} hitSlop={theme.spacing.xxxs}>
-      <Avatar
-        sizeNumber={senderAvatarSize}
-        uri={avatarUrl}
-        name={displayName ?? ""}
-      />
+      <Avatar sizeNumber={senderAvatarSize} uri={avatarUrl} name={displayName ?? ""} />
     </Pressable>
   )
 }

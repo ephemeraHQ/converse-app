@@ -1,13 +1,10 @@
-import { MaterialIcons } from "@expo/vector-icons";
-import { logger } from "@utils/logger";
-import { StyleProp, TextStyle } from "react-native";
-import { useAppTheme } from "@/theme/use-app-theme";
-import { IIconName, IIconProps } from "./Icon.types";
+import { MaterialIcons } from "@expo/vector-icons"
+import { logger } from "@utils/logger"
+import { StyleProp, TextStyle } from "react-native"
+import { useAppTheme } from "@/theme/use-app-theme"
+import { IIconName, IIconProps } from "./Icon.types"
 
-export const iconRegistry: Record<
-  IIconName,
-  keyof typeof MaterialIcons.glyphMap
-> = {
+export const iconRegistry: Record<IIconName, keyof typeof MaterialIcons.glyphMap> = {
   xmark: "close",
   "xmark.circle.fill": "cancel",
   plus: "add",
@@ -75,10 +72,10 @@ export const iconRegistry: Record<
   restore: "restore",
   biometric: "fingerprint",
   camera: "camera",
-};
+}
 
 export function Icon(props: IIconProps) {
-  const { theme } = useAppTheme();
+  const { theme } = useAppTheme()
 
   const {
     picto,
@@ -86,21 +83,17 @@ export function Icon(props: IIconProps) {
     size = theme.iconSize.lg,
     color = theme.colors.fill.primary,
     ...rest
-  } = props;
+  } = props
 
   if (!icon && !picto) {
-    throw new Error("Either 'icon' or 'picto' must be provided");
+    throw new Error("Either 'icon' or 'picto' must be provided")
   }
 
-  const iconName = icon
-    ? iconRegistry[icon]
-    : picto
-      ? iconRegistry[picto]
-      : null;
+  const iconName = icon ? iconRegistry[icon] : picto ? iconRegistry[picto] : null
 
   if (!iconName) {
-    logger.warn(`Invalid icon name ${icon || picto}`);
-    return null;
+    logger.warn(`Invalid icon name ${icon || picto}`)
+    return null
   }
 
   return (
@@ -111,5 +104,5 @@ export function Icon(props: IIconProps) {
       size={size}
       color={color}
     />
-  );
+  )
 }

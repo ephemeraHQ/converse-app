@@ -104,9 +104,7 @@ jest.mock("@react-native-firebase/app-check", () => {
   return {
     firebase: {
       appCheck: () => ({
-        getLimitedUseToken: jest
-          .fn()
-          .mockResolvedValue({ token: "mock-token" }),
+        getLimitedUseToken: jest.fn().mockResolvedValue({ token: "mock-token" }),
         getToken: jest.fn().mockResolvedValue({ token: "mock-token" }),
         newReactNativeFirebaseAppCheckProvider: jest.fn().mockReturnValue({
           configure: jest.fn(),

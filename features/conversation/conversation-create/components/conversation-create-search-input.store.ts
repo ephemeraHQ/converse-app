@@ -1,18 +1,18 @@
-import { InboxId } from "@xmtp/react-native-sdk";
-import { create } from "zustand";
+import { InboxId } from "@xmtp/react-native-sdk"
+import { create } from "zustand"
 
 type IConversationCreateSearchInputStore = {
-  selectedChipInboxId: InboxId | null;
+  selectedChipInboxId: InboxId | null
   actions: {
-    setSelectedChipInboxId: (inboxId: InboxId | null) => void;
-  };
-};
+    setSelectedChipInboxId: (inboxId: InboxId | null) => void
+  }
+}
 
-export const useConversationCreateSearchInputStore =
-  create<IConversationCreateSearchInputStore>((set, get) => ({
+export const useConversationCreateSearchInputStore = create<IConversationCreateSearchInputStore>(
+  (set, get) => ({
     selectedChipInboxId: null,
     actions: {
-      setSelectedChipInboxId: (inboxId) =>
-        set({ selectedChipInboxId: inboxId }),
+      setSelectedChipInboxId: (inboxId) => set({ selectedChipInboxId: inboxId }),
     },
-  }));
+  }),
+)

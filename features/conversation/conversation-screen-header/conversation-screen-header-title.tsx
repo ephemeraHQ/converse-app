@@ -1,16 +1,16 @@
-import { HStack } from "@/design-system/HStack";
-import { Pressable } from "@/design-system/Pressable";
-import { Text } from "@/design-system/Text";
-import { VStack } from "@/design-system/VStack";
-import { useAppTheme } from "@/theme/use-app-theme";
+import { HStack } from "@/design-system/HStack"
+import { Pressable } from "@/design-system/Pressable"
+import { Text } from "@/design-system/Text"
+import { VStack } from "@/design-system/VStack"
+import { useAppTheme } from "@/theme/use-app-theme"
 
 type ConversationTitleDumbProps = {
-  title?: string;
-  subtitle?: React.ReactNode;
-  avatarComponent?: React.ReactNode;
-  onLongPress?: () => void;
-  onPress?: () => void;
-};
+  title?: string
+  subtitle?: React.ReactNode
+  avatarComponent?: React.ReactNode
+  onLongPress?: () => void
+  onPress?: () => void
+}
 
 export function ConversationHeaderTitle({
   avatarComponent,
@@ -19,7 +19,7 @@ export function ConversationHeaderTitle({
   onLongPress,
   onPress,
 }: ConversationTitleDumbProps) {
-  const { theme } = useAppTheme();
+  const { theme } = useAppTheme()
 
   return (
     <HStack
@@ -55,5 +55,5 @@ export function ConversationHeaderTitle({
         </VStack>
       </Pressable>
     </HStack>
-  );
+  )
 }

@@ -1,6 +1,6 @@
-import { logger } from "@utils/logger";
-import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types";
-import { ObjectTyped } from "@/utils/object-typed";
+import { logger } from "@utils/logger"
+import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types"
+import { ObjectTyped } from "@/utils/object-typed"
 
 export const contentTypesPrefixes = {
   text: "xmtp.org/text:",
@@ -12,23 +12,23 @@ export const contentTypesPrefixes = {
   groupUpdated: "xmtp.org/group_updated:",
   // coinbasePayment: "coinbase.com/coinbase-messaging-payment-activity:",
   // transactionReference: "xmtp.org/transactionReference:",
-};
+}
 
-export type IConvosContentType = keyof typeof contentTypesPrefixes;
+export type IConvosContentType = keyof typeof contentTypesPrefixes
 
 export function getMessageContentType(args: { message: IXmtpDecodedMessage }) {
-  const { message } = args;
+  const { message } = args
 
-  const contentType = message.contentTypeId;
+  const contentType = message.contentTypeId
 
   if (!contentType) {
-    logger.debug(`[getMessageContentType] Content type is undefined`);
-    return undefined;
+    logger.debug(`[getMessageContentType] Content type is undefined`)
+    return undefined
   }
 
   const result = ObjectTyped.keys(contentTypesPrefixes).find((key) =>
     contentType.startsWith(contentTypesPrefixes[key]),
-  );
+  )
 
-  return result;
+  return result
 }

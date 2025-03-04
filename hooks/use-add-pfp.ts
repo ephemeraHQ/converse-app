@@ -1,18 +1,11 @@
 import { translate } from "@i18n"
 import { useMutation } from "@tanstack/react-query"
 import { executeAfterKeyboardClosed } from "@utils/keyboard"
-import {
-  compressAndResizeImage,
-  pickMediaFromLibrary,
-  takePictureFromCamera,
-} from "@utils/media"
+import { compressAndResizeImage, pickMediaFromLibrary, takePictureFromCamera } from "@utils/media"
 import { ImagePickerAsset, ImagePickerOptions } from "expo-image-picker"
 import { useCallback, useState } from "react"
 import { showActionSheet } from "@/components/action-sheet"
-import {
-  getPresignedUploadUrl,
-  uploadFileWithPresignedUrl,
-} from "@/features/uploads/upload.api"
+import { getPresignedUploadUrl, uploadFileWithPresignedUrl } from "@/features/uploads/upload.api"
 import { captureError } from "@/utils/capture-error"
 import { prefetchImageUrl } from "@/utils/image"
 import { logger } from "@/utils/logger"
@@ -44,11 +37,7 @@ async function uploadImage(imageAsset: ImagePickerAsset): Promise<string> {
   const { url: presignedUrl } = await getPresignedUploadUrl("image/jpeg")
 
   // Upload the image
-  const publicUrl = await uploadFileWithPresignedUrl(
-    presignedUrl,
-    resizedImage.uri,
-    "image/jpeg",
-  )
+  const publicUrl = await uploadFileWithPresignedUrl(presignedUrl, resizedImage.uri, "image/jpeg")
 
   prefetchImageUrl(publicUrl).catch(captureError)
 

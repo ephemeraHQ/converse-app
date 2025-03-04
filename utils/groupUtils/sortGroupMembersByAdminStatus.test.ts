@@ -1,13 +1,13 @@
-import { Member } from "@xmtp/react-native-sdk";
-import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client";
-import { EntityObjectWithAddress } from "../../queries/entify";
-import { getAccountIsAdmin, getAccountIsSuperAdmin } from "./adminUtils";
-import { sortGroupMembersByAdminStatus } from "./sortGroupMembersByAdminStatus"; // adjust the import path
+import { Member } from "@xmtp/react-native-sdk"
+import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client"
+import { EntityObjectWithAddress } from "../../queries/entify"
+import { getAccountIsAdmin, getAccountIsSuperAdmin } from "./adminUtils"
+import { sortGroupMembersByAdminStatus } from "./sortGroupMembersByAdminStatus" // adjust the import path
 
 jest.mock("./adminUtils", () => ({
   getAccountIsAdmin: jest.fn(),
   getAccountIsSuperAdmin: jest.fn(),
-}));
+}))
 
 describe("sortGroupMembersByAdminStatus", () => {
   const mockMembers: EntityObjectWithAddress<Member, InboxId> = {
@@ -40,46 +40,43 @@ describe("sortGroupMembersByAdminStatus", () => {
       address4: "member4",
     },
     ids: ["member1", "member2", "member3", "member4"],
-  } as unknown as EntityObjectWithAddress<Member, InboxId>;
+  } as unknown as EntityObjectWithAddress<Member, InboxId>
 
   beforeEach(() => {
-    (getAccountIsAdmin as jest.Mock).mockImplementation((members, id) => {
-      return members.byId[id].permissionLevel === "admin";
-    });
-    (getAccountIsSuperAdmin as jest.Mock).mockImplementation((members, id) => {
-      return members.byId[id].permissionLevel === "super-admin";
-    });
-  });
+    ;(getAccountIsAdmin as jest.Mock).mockImplementation((members, id) => {
+      return members.byId[id].permissionLevel === "admin"
+    })
+    ;(getAccountIsSuperAdmin as jest.Mock).mockImplementation((members, id) => {
+      return members.byId[id].permissionLevel === "super-admin"
+    })
+  })
 
   it("should return an empty array if members are undefined", () => {
-    const result = sortGroupMembersByAdminStatus(undefined, "currentAccount");
-    expect(result).toEqual([]);
-  });
+    const result = sortGroupMembersByAdminStatus(undefined, "currentAccount")
+    expect(result).toEqual([])
+  })
 
   it("should sort members with super-admins first, then admins, then the current account, and then others", () => {
-    const result = sortGroupMembersByAdminStatus(mockMembers, "member1");
+    const result = sortGroupMembersByAdminStatus(mockMembers, "member1")
 
     expect(result).toEqual([
       { inboxId: "member3", address: "address3" }, // super-admin
       { inboxId: "member2", address: "address2" }, // admin
       { inboxId: "member1", address: "address1" }, // current account
       { inboxId: "member4", address: "address4" }, // member
-    ]);
-  });
+    ])
+  })
 
   it("should handle case where current account is not in members", () => {
-    const result = sortGroupMembersByAdminStatus(
-      mockMembers,
-      "nonexistentAccount",
-    );
+    const result = sortGroupMembersByAdminStatus(mockMembers, "nonexistentAccount")
 
     expect(result).toEqual([
       { inboxId: "member3", address: "address3" }, // super-admin
       { inboxId: "member2", address: "address2" }, // admin
       { inboxId: "member1", address: "address1" }, // member
       { inboxId: "member4", address: "address4" }, // member
-    ]);
-  });
+    ])
+  })
 
   it("should handle case where multiple members have the same permission level", () => {
     const customMockMembers = {
@@ -93,9 +90,9 @@ describe("sortGroupMembersByAdminStatus", () => {
         },
       },
       ids: [...mockMembers.ids, "member5"],
-    } as unknown as EntityObjectWithAddress<Member, InboxId>;
+    } as unknown as EntityObjectWithAddress<Member, InboxId>
 
-    const result = sortGroupMembersByAdminStatus(customMockMembers, "member1");
+    const result = sortGroupMembersByAdminStatus(customMockMembers, "member1")
 
     expect(result).toEqual([
       { inboxId: "member3", address: "address3" }, // super-admin
@@ -103,6 +100,6 @@ describe("sortGroupMembersByAdminStatus", () => {
       { inboxId: "member5", address: "address5" }, // admin
       { inboxId: "member1", address: "address1" }, // current account
       { inboxId: "member4", address: "address4" }, // member
-    ]);
-  });
-});
+    ])
+  })
+})

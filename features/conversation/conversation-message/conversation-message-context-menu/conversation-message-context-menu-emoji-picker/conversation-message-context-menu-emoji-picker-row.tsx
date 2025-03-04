@@ -1,26 +1,25 @@
-import { ICategorizedEmojisRecord, IEmoji } from "@utils/emojis/emoji-types";
-import { FC, memo, useMemo } from "react";
-import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
+import { ICategorizedEmojisRecord, IEmoji } from "@utils/emojis/emoji-types"
+import { FC, memo, useMemo } from "react"
+import { Platform, Pressable, StyleSheet, Text, View } from "react-native"
 
 type EmojiRowProps = {
-  item: ICategorizedEmojisRecord;
-  onPress: (emoji: string) => void;
-};
+  item: ICategorizedEmojisRecord
+  onPress: (emoji: string) => void
+}
 
 export const EmojiRow: FC<EmojiRowProps> = memo(({ item, onPress }) => {
   const items = useMemo(() => {
-    const sliced: (string | IEmoji)[] = item.emojis.slice(0, 6);
+    const sliced: (string | IEmoji)[] = item.emojis.slice(0, 6)
     while (sliced.length < 6) {
-      sliced.push("");
+      sliced.push("")
     }
-    return sliced;
-  }, [item.emojis]);
+    return sliced
+  }, [item.emojis])
 
   return (
     <View style={styles.rowContainer}>
       {items.map((emoji, id) => {
-        if (typeof emoji === "string")
-          return <View key={id} style={styles.empty} />;
+        if (typeof emoji === "string") return <View key={id} style={styles.empty} />
         return (
           <Pressable
             key={emoji.emoji}
@@ -31,12 +30,12 @@ export const EmojiRow: FC<EmojiRowProps> = memo(({ item, onPress }) => {
               {emoji.emoji}
             </Text>
           </Pressable>
-        );
+        )
       })}
       {item.emojis.length !== 6 && <View style={{ flexGrow: 1 }} />}
     </View>
-  );
-});
+  )
+})
 
 const styles = StyleSheet.create({
   listEmoji: {
@@ -58,4 +57,4 @@ const styles = StyleSheet.create({
   empty: {
     flex: 1,
   },
-});
+})

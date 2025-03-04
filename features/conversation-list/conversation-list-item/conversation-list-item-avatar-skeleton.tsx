@@ -1,12 +1,9 @@
-import { memo } from "react";
-import { Center } from "@/design-system/Center";
+import { memo } from "react"
+import { Center } from "@/design-system/Center"
 
 export const ConversationListItemAvatarSkeleton = memo(
-  function ConversationListItemAvatarSkeleton(props: {
-    color: string;
-    size: number;
-  }) {
-    const { color, size } = props;
+  function ConversationListItemAvatarSkeleton(props: { color: string; size: number }) {
+    const { color, size } = props
 
     return (
       <Center
@@ -32,6 +29,6 @@ export const ConversationListItemAvatarSkeleton = memo(
           ]}
         /> */}
       </Center>
-    );
+    )
   },
-);
+)

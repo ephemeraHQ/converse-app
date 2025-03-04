@@ -1,17 +1,17 @@
-import { useQueries } from "@tanstack/react-query";
-import { useMemo } from "react";
-import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
-import { getConversationMetadataQueryOptions } from "@/features/conversation/conversation-metadata/conversation-metadata.query";
-import { isConversationDenied } from "@/features/conversation/utils/is-conversation-denied";
-import { useAllowedConsentConversationsQuery } from "@/queries/conversations-allowed-consent-query";
+import { useQueries } from "@tanstack/react-query"
+import { useMemo } from "react"
+import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
+import { getConversationMetadataQueryOptions } from "@/features/conversation/conversation-metadata/conversation-metadata.query"
+import { isConversationDenied } from "@/features/conversation/utils/is-conversation-denied"
+import { useAllowedConsentConversationsQuery } from "@/queries/conversations-allowed-consent-query"
 
 export const useBlockedConversationsForCurrentAccount = () => {
-  const currentAccount = useCurrentSenderEthAddress();
+  const currentAccount = useCurrentSenderEthAddress()
 
   const { data } = useAllowedConsentConversationsQuery({
     account: currentAccount!,
     caller: "useBlockedConversationsForCurrentAccount",
-  });
+  })
 
   const conversationsMetadataQueries = useQueries({
     queries: (data ?? []).map((conversation) =>
@@ -20,21 +20,21 @@ export const useBlockedConversationsForCurrentAccount = () => {
         topic: conversation.topic,
       }),
     ),
-  });
+  })
 
   const blockedConversations = useMemo(() => {
-    if (!data) return [];
+    if (!data) return []
 
     return data.filter((conversation, index) => {
-      const query = conversationsMetadataQueries[index];
+      const query = conversationsMetadataQueries[index]
       return (
         // Include deleted conversations
         query?.data?.deleted ||
         // Include denied conversations
         isConversationDenied(conversation)
-      );
-    });
-  }, [data, conversationsMetadataQueries]);
+      )
+    })
+  }, [data, conversationsMetadataQueries])
 
-  return { data: blockedConversations };
-};
+  return { data: blockedConversations }
+}

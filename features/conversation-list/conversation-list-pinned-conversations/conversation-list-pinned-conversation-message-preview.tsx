@@ -1,27 +1,25 @@
-import { ViewStyle } from "react-native";
-import { AnimatedHStack, HStack } from "@/design-system/HStack";
-import { Text } from "@/design-system/Text";
-import { useMessagePlainText } from "@/features/conversation-list/hooks/use-message-plain-text";
-import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types";
-import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
-import { captureError } from "@/utils/capture-error";
+import { ViewStyle } from "react-native"
+import { AnimatedHStack, HStack } from "@/design-system/HStack"
+import { Text } from "@/design-system/Text"
+import { useMessagePlainText } from "@/features/conversation-list/hooks/use-message-plain-text"
+import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types"
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme"
+import { captureError } from "@/utils/capture-error"
 
 export type IPinnedConversationMessagePreviewProps = {
-  message: IXmtpDecodedMessage;
-};
+  message: IXmtpDecodedMessage
+}
 
-export const PinnedConversationMessagePreview = (
-  props: IPinnedConversationMessagePreviewProps,
-) => {
-  const { message } = props;
+export const PinnedConversationMessagePreview = (props: IPinnedConversationMessagePreviewProps) => {
+  const { message } = props
 
-  const { themed, theme } = useAppTheme();
+  const { themed, theme } = useAppTheme()
 
-  const textContent = useMessagePlainText(message);
+  const textContent = useMessagePlainText(message)
 
   if (!textContent) {
-    captureError;
-    return null;
+    captureError
+    return null
   }
 
   return (
@@ -37,8 +35,8 @@ export const PinnedConversationMessagePreview = (
         </Text>
       </AnimatedHStack>
     </HStack>
-  );
-};
+  )
+}
 
 const $containerStyle: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   position: "absolute",
@@ -46,14 +44,9 @@ const $containerStyle: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   left: -spacing.xs, // Make the preview message expand to the left
   right: -spacing.xs, // Make the preview message expand to the right
   justifyContent: "center",
-});
+})
 
-const $innerStyle: ThemedStyle<ViewStyle> = ({
-  colors,
-  borderRadius,
-  borderWidth,
-  spacing,
-}) => ({
+const $innerStyle: ThemedStyle<ViewStyle> = ({ colors, borderRadius, borderWidth, spacing }) => ({
   backgroundColor: colors.background.raised,
   paddingHorizontal: spacing.xs,
   paddingVertical: spacing.xxs,
@@ -63,4 +56,4 @@ const $innerStyle: ThemedStyle<ViewStyle> = ({
   borderRadius: borderRadius.sm,
   borderWidth: borderWidth.sm,
   borderColor: colors.border.subtle,
-});
+})

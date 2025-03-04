@@ -5,9 +5,9 @@
  * @template KeyType The type of ids (default: string)
  */
 export type EntityObject<T, KeyType extends string = string> = {
-  byId: Record<KeyType, T>;
-  ids: KeyType[];
-};
+  byId: Record<KeyType, T>
+  ids: KeyType[]
+}
 
 /**
  * Transforms an array of items into an EntityObject.
@@ -37,27 +37,27 @@ export function entify<T, KeyType extends string = string>(
 ): EntityObject<T, KeyType> {
   return items.reduce<EntityObject<T, KeyType>>(
     (acc, item) => {
-      const id = idFunc(item);
-      acc.ids.push(id);
-      acc.byId[id] = item;
-      return acc;
+      const id = idFunc(item)
+      acc.ids.push(id)
+      acc.byId[id] = item
+      return acc
     },
     {
       byId: {} as Record<KeyType, T>,
       ids: [],
     },
-  );
+  )
 }
 
 /**
  * Represents an EntityObject with an additional byAddress index.
  */
 export type EntityObjectWithAddress<T, KeyType extends string = string> = {
-  byId: Record<KeyType, T>;
-  byAddress: Record<string, KeyType>;
-  ids: KeyType[];
-  addresses: string[];
-};
+  byId: Record<KeyType, T>
+  byAddress: Record<string, KeyType>
+  ids: KeyType[]
+  addresses: string[]
+}
 
 /**
  * Transforms an array of items into an EntityObjectWithAddress.
@@ -97,13 +97,13 @@ export function entifyWithAddress<T, KeyType extends string = string>(
 ): EntityObjectWithAddress<T, KeyType> {
   return items.reduce<EntityObjectWithAddress<T, KeyType>>(
     (acc, item) => {
-      const id = idFunc(item);
-      const address = addressFunc(item);
-      acc.ids.push(id);
-      acc.addresses.push(address);
-      acc.byId[id] = item;
-      acc.byAddress[address] = id;
-      return acc;
+      const id = idFunc(item)
+      const address = addressFunc(item)
+      acc.ids.push(id)
+      acc.addresses.push(address)
+      acc.byId[id] = item
+      acc.byAddress[address] = id
+      return acc
     },
     {
       byId: {} as Record<KeyType, T>,
@@ -111,7 +111,7 @@ export function entifyWithAddress<T, KeyType extends string = string>(
       ids: [],
       addresses: [],
     },
-  );
+  )
 }
 
 /**
@@ -134,20 +134,17 @@ export function entifyWithAddress<T, KeyType extends string = string>(
  * //   ids: ['user1', 'user2']
  * // }
  */
-export function enitifyPages<T>(
-  pages: T[][],
-  idFunc: (item: T) => string,
-): EntityObject<T> {
+export function enitifyPages<T>(pages: T[][], idFunc: (item: T) => string): EntityObject<T> {
   return pages.reduce<EntityObject<T>>(
     (acc, page) => {
-      const { byId, ids } = entify(page, idFunc);
-      acc.ids.push(...ids);
-      acc.byId = { ...acc.byId, ...byId };
-      return acc;
+      const { byId, ids } = entify(page, idFunc)
+      acc.ids.push(...ids)
+      acc.byId = { ...acc.byId, ...byId }
+      return acc
     },
     {
       byId: {},
       ids: [],
     },
-  );
+  )
 }

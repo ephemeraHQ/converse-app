@@ -1,33 +1,31 @@
-import { queryOptions, skipToken } from "@tanstack/react-query";
-import { ConversationTopic } from "@xmtp/react-native-sdk";
-import { getXmtpClientByEthAddress } from "@/features/xmtp/xmtp-client/xmtp-client.service";
-import { IXmtpConversationWithCodecs } from "@/features/xmtp/xmtp.types";
-import { setConversationQueryData } from "@/queries/conversation-query";
-import { ensureConversationSyncAllQuery } from "@/queries/conversation-sync-all-query";
-import { unknownConsentConversationsQueryKey } from "@/queries/QueryKeys";
-import logger from "@/utils/logger";
-import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
-import { queryClient } from "./queryClient";
+import { queryOptions, skipToken } from "@tanstack/react-query"
+import { ConversationTopic } from "@xmtp/react-native-sdk"
+import { getXmtpClientByEthAddress } from "@/features/xmtp/xmtp-client/xmtp-client.service"
+import { IXmtpConversationWithCodecs } from "@/features/xmtp/xmtp.types"
+import { setConversationQueryData } from "@/queries/conversation-query"
+import { ensureConversationSyncAllQuery } from "@/queries/conversation-sync-all-query"
+import { unknownConsentConversationsQueryKey } from "@/queries/QueryKeys"
+import logger from "@/utils/logger"
+import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
+import { queryClient } from "./queryClient"
 
-export type IUnknownConversationsQuery = Awaited<
-  ReturnType<typeof getUnknownConversations>
->;
+export type IUnknownConversationsQuery = Awaited<ReturnType<typeof getUnknownConversations>>
 
 async function getUnknownConversations(args: { account: string }) {
-  const { account } = args;
+  const { account } = args
 
   if (!account) {
-    throw new Error("Account is required");
+    throw new Error("Account is required")
   }
 
   await ensureConversationSyncAllQuery({
     ethAddress: account,
     consentStates: ["unknown"],
-  });
+  })
 
   const client = await getXmtpClientByEthAddress({
     ethAddress: account,
-  });
+  })
 
   const conversations = await client.conversations.list(
     {
@@ -41,7 +39,7 @@ async function getUnknownConversations(args: { account: string }) {
     },
     20, // For now we only fetch 20 until we have the right pagination system. At least people will be able to see their conversations
     ["unknown"],
-  );
+  )
 
   // For now conversations have all the same properties as one conversation
   for (const conversation of conversations) {
@@ -49,125 +47,119 @@ async function getUnknownConversations(args: { account: string }) {
       account,
       topic: conversation.topic,
       conversation,
-    });
+    })
   }
 
-  return conversations;
+  return conversations
 }
 
-export const prefetchUnknownConsentConversationsQuery = (args: {
-  account: string;
-}) => {
-  return queryClient.prefetchQuery(
-    getUnknownConsentConversationsQueryOptions(args),
-  );
-};
+export const prefetchUnknownConsentConversationsQuery = (args: { account: string }) => {
+  return queryClient.prefetchQuery(getUnknownConsentConversationsQueryOptions(args))
+}
 
 export const addConversationToUnknownConsentConversationsQuery = (args: {
-  account: string;
-  conversation: IXmtpConversationWithCodecs;
+  account: string
+  conversation: IXmtpConversationWithCodecs
 }) => {
-  const { account, conversation } = args;
+  const { account, conversation } = args
 
   const previousConversationsData = getUnknownConsentConversationsQueryData({
     account,
-  });
+  })
 
   if (!previousConversationsData) {
     queryClient.setQueryData<IUnknownConversationsQuery>(
       getUnknownConsentConversationsQueryOptions({ account }).queryKey,
       [conversation],
-    );
-    return;
+    )
+    return
   }
 
-  const conversationExists = previousConversationsData.some(
-    (c) => c.topic === conversation.topic,
-  );
+  const conversationExists = previousConversationsData.some((c) => c.topic === conversation.topic)
 
   if (conversationExists) {
-    return;
+    return
   }
 
   queryClient.setQueryData<IUnknownConversationsQuery>(
     getUnknownConsentConversationsQueryOptions({ account }).queryKey,
     [conversation, ...previousConversationsData],
-  );
-};
+  )
+}
 
-export const getUnknownConsentConversationsQueryData = (args: {
-  account: string;
-}) => {
+export const getUnknownConsentConversationsQueryData = (args: { account: string }) => {
   return queryClient.getQueryData<IUnknownConversationsQuery>(
     getUnknownConsentConversationsQueryOptions(args).queryKey,
-  );
-};
+  )
+}
 
 export const updateConversationInUnknownConsentConversationsQueryData = (args: {
-  account: string;
-  topic: ConversationTopic;
-  conversationUpdate: Partial<IXmtpConversationWithCodecs>;
+  account: string
+  topic: ConversationTopic
+  conversationUpdate: Partial<IXmtpConversationWithCodecs>
 }) => {
-  const { account, topic, conversationUpdate } = args;
+  const { account, topic, conversationUpdate } = args
 
   logger.debug(
     `[UnknownConversationsQuery] updateConversationInUnknownConsentConversationsQueryData for account ${account} and topic ${topic}`,
-  );
+  )
 
   const previousConversationsData = getUnknownConsentConversationsQueryData({
     account,
-  });
+  })
   if (!previousConversationsData) {
-    return;
+    return
   }
   const newConversations = previousConversationsData.map((c) => {
     if (c.topic === topic) {
-      return updateObjectAndMethods(c, conversationUpdate);
+      return updateObjectAndMethods(c, conversationUpdate)
     }
-    return c;
-  });
+    return c
+  })
 
   queryClient.setQueryData<IUnknownConversationsQuery>(
     getUnknownConsentConversationsQueryOptions({
       account,
     }).queryKey,
     newConversations,
-  );
-};
+  )
+}
 
-export const removeConversationFromUnknownConsentConversationsQueryData =
-  (args: { account: string; topic: ConversationTopic }) => {
-    const { account, topic } = args;
+export const removeConversationFromUnknownConsentConversationsQueryData = (args: {
+  account: string
+  topic: ConversationTopic
+}) => {
+  const { account, topic } = args
 
-    logger.debug(
-      `[UnknownConversationsQuery] removeConversationFromUnknownConsentConversationsQueryData for account ${account} and topic ${topic}`,
-    );
+  logger.debug(
+    `[UnknownConversationsQuery] removeConversationFromUnknownConsentConversationsQueryData for account ${account} and topic ${topic}`,
+  )
 
-    const previousConversationsData = getUnknownConsentConversationsQueryData({
-      account,
-    });
+  const previousConversationsData = getUnknownConsentConversationsQueryData({
+    account,
+  })
 
-    if (!previousConversationsData) {
-      return;
-    }
+  if (!previousConversationsData) {
+    return
+  }
 
-    const newConversations = previousConversationsData.filter(
-      (conversation) => conversation.topic !== topic,
-    );
+  const newConversations = previousConversationsData.filter(
+    (conversation) => conversation.topic !== topic,
+  )
 
-    queryClient.setQueryData<IUnknownConversationsQuery>(
-      getUnknownConsentConversationsQueryOptions({ account }).queryKey,
-      newConversations,
-    );
-  };
+  queryClient.setQueryData<IUnknownConversationsQuery>(
+    getUnknownConsentConversationsQueryOptions({ account }).queryKey,
+    newConversations,
+  )
+}
 
 export function getUnknownConsentConversationsQueryOptions(args: {
-  account: string;
-  caller?: string;
+  account: string
+  caller?: string
 }) {
-  const { account, caller } = args;
+  const { account, caller } = args
 
-  const enabled = !!account;
+  const enabled = !!account
 
   return queryOptions({
     enabled,
@@ -182,5 +174,5 @@ export function getUnknownConsentConversationsQueryOptions(args: {
           })
       : skipToken,
     refetchOnMount: true, // Just for now to make sure we always have the lastest conversations
-  });
+  })
 }

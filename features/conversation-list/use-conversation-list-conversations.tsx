@@ -1,16 +1,16 @@
-import { useQueries, useQuery } from "@tanstack/react-query";
-import { useEffect, useMemo } from "react";
-import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
-import { prefetchConversationMessages } from "@/features/conversation/conversation-messages.query";
-import { getConversationMetadataQueryOptions } from "@/features/conversation/conversation-metadata/conversation-metadata.query";
-import { isConversationAllowed } from "@/features/conversation/utils/is-conversation-allowed";
-import { useScreenFocusEffectOnce } from "@/hooks/use-screen-focus-effect-once";
-import { useAppStateHandlers } from "@/hooks/useAppStateHandlers";
-import { getAllowedConsentConversationsQueryOptions } from "@/queries/conversations-allowed-consent-query";
-import { captureError } from "@/utils/capture-error";
+import { useQueries, useQuery } from "@tanstack/react-query"
+import { useEffect, useMemo } from "react"
+import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
+import { prefetchConversationMessages } from "@/features/conversation/conversation-messages.query"
+import { getConversationMetadataQueryOptions } from "@/features/conversation/conversation-metadata/conversation-metadata.query"
+import { isConversationAllowed } from "@/features/conversation/utils/is-conversation-allowed"
+import { useScreenFocusEffectOnce } from "@/hooks/use-screen-focus-effect-once"
+import { useAppStateHandlers } from "@/hooks/useAppStateHandlers"
+import { getAllowedConsentConversationsQueryOptions } from "@/queries/conversations-allowed-consent-query"
+import { captureError } from "@/utils/capture-error"
 
 export const useConversationListConversations = () => {
-  const currentAccount = useCurrentSenderEthAddress();
+  const currentAccount = useCurrentSenderEthAddress()
 
   const {
     data: conversations,
@@ -21,7 +21,7 @@ export const useConversationListConversations = () => {
       account: currentAccount!,
       caller: "useConversationListConversations",
     }),
-  );
+  )
 
   // Let's prefetch the messages for all the conversations
   useEffect(() => {
@@ -31,22 +31,22 @@ export const useConversationListConversations = () => {
           account: currentAccount!,
           topic: conversation.topic,
           caller: "useConversationListConversations",
-        }).catch(captureError);
+        }).catch(captureError)
       }
     }
-  }, [conversations, currentAccount]);
+  }, [conversations, currentAccount])
 
   /// note(lustig): @thierryskoda why not just use refetchOnWindowFocus in the queryOptions for these?
   // For now, let's make sure we always are up to date with the conversations
   useScreenFocusEffectOnce(() => {
-    refetch().catch(captureError);
-  });
+    refetch().catch(captureError)
+  })
   // For now, let's make sure we always are up to date with the conversations
   useAppStateHandlers({
     onForeground: () => {
-      refetch().catch(captureError);
+      refetch().catch(captureError)
     },
-  });
+  })
 
   const conversationsMetadataQueries = useQueries({
     queries: (conversations ?? []).map((conversation) =>
@@ -64,28 +64,28 @@ export const useConversationListConversations = () => {
     //     }
     //   });
     // },
-  });
+  })
 
   const filteredAndSortedConversations = useMemo(() => {
-    if (!conversations) return [];
+    if (!conversations) return []
 
     // Filter out conversations that don't meet criteria
     const filtered = conversations.filter((conversation, index) => {
-      const query = conversationsMetadataQueries[index];
-      const isAllowed = isConversationAllowed(conversation);
-      const isPinned = query?.data?.pinned;
-      const isDeleted = query?.data?.deleted;
-      const isLoading = query?.isLoading;
+      const query = conversationsMetadataQueries[index]
+      const isAllowed = isConversationAllowed(conversation)
+      const isPinned = query?.data?.pinned
+      const isDeleted = query?.data?.deleted
+      const isLoading = query?.isLoading
 
-      return isAllowed && !isPinned && !isDeleted && !isLoading;
-    });
+      return isAllowed && !isPinned && !isDeleted && !isLoading
+    })
 
     // Sort by timestamp descending (newest first)
     return filtered.sort((a, b) => {
-      const timestampA = a.lastMessage?.sentNs ?? 0;
-      const timestampB = b.lastMessage?.sentNs ?? 0;
-      return timestampB - timestampA;
-    });
+      const timestampA = a.lastMessage?.sentNs ?? 0
+      const timestampB = b.lastMessage?.sentNs ?? 0
+      return timestampB - timestampA
+    })
 
     /*
      * note(lustig): potential fix using existing libraries could be exploring `combine` above
@@ -96,14 +96,11 @@ export const useConversationListConversations = () => {
      * the return value of useQueries and pass the destructured values into
      * the dependency array of useMemo.eslint@tanstack/query/no-unstable-deps
      */
-  }, [conversations, conversationsMetadataQueries]);
+  }, [conversations, conversationsMetadataQueries])
 
   const isLoading = useMemo(() => {
-    return (
-      isLoadingConversations ||
-      conversationsMetadataQueries.some((query) => query.isLoading)
-    );
-  }, [isLoadingConversations, conversationsMetadataQueries]);
+    return isLoadingConversations || conversationsMetadataQueries.some((query) => query.isLoading)
+  }, [isLoadingConversations, conversationsMetadataQueries])
 
-  return { data: filteredAndSortedConversations, refetch, isLoading };
-};
+  return { data: filteredAndSortedConversations, refetch, isLoading }
+}

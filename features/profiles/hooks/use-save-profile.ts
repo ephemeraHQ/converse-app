@@ -1,8 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import {
-  type IConvosProfileForInbox,
-  type ProfileInput,
-} from "@/features/profiles/profile.types"
+import { type IConvosProfileForInbox, type ProfileInput } from "@/features/profiles/profile.types"
 import { saveProfileAsync } from "@/features/profiles/profiles.api"
 import {
   getProfileQueryData,

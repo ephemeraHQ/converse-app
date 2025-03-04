@@ -8,10 +8,7 @@ import { HStack } from "@/design-system/HStack"
 import { iconRegistry } from "@/design-system/Icon/Icon"
 import { Text } from "@/design-system/Text"
 import { useSaveProfile } from "@/features/profiles/hooks/use-save-profile"
-import {
-  useProfileMeStore,
-  useProfileMeStoreValue,
-} from "@/features/profiles/profile-me.store"
+import { useProfileMeStore, useProfileMeStoreValue } from "@/features/profiles/profile-me.store"
 import { getProfileQueryData } from "@/features/profiles/profiles.query"
 import { translate } from "@/i18n"
 import { navigate } from "@/navigation/navigation.utils"
@@ -43,18 +40,10 @@ export function useProfileMeScreenHeader(args: { inboxId: InboxId }) {
           // Initialize the store with current profile values before entering edit mode
           if (profile) {
             // Set the store values to match the current profile
-            profileMeStore
-              .getState()
-              .actions.setNameTextValue(profile.name || "")
-            profileMeStore
-              .getState()
-              .actions.setUsernameTextValue(profile.username || "")
-            profileMeStore
-              .getState()
-              .actions.setDescriptionTextValue(profile.description || "")
-            profileMeStore
-              .getState()
-              .actions.setAvatarUri(profile.avatar || undefined)
+            profileMeStore.getState().actions.setNameTextValue(profile.name || "")
+            profileMeStore.getState().actions.setUsernameTextValue(profile.username || "")
+            profileMeStore.getState().actions.setDescriptionTextValue(profile.description || "")
+            profileMeStore.getState().actions.setAvatarUri(profile.avatar || undefined)
           }
           // Enable edit mode to show editable fields
           profileMeStore.getState().actions.setEditMode(true)
@@ -81,11 +70,7 @@ export function useProfileMeScreenHeader(args: { inboxId: InboxId }) {
       titleComponent: editMode ? undefined : <AccountSwitcher noAvatar />,
       LeftActionComponent: editMode ? (
         // Show Cancel button when in edit mode
-        <Button
-          text={translate("Cancel")}
-          variant="text"
-          onPress={handleCancelEdit}
-        />
+        <Button text={translate("Cancel")} variant="text" onPress={handleCancelEdit} />
       ) : (
         // Show back button when not in edit mode
         <HeaderAction
@@ -130,14 +115,7 @@ export function useProfileMeScreenHeader(args: { inboxId: InboxId }) {
         </HStack>
       ),
     },
-    [
-      router,
-      theme,
-      editMode,
-      handleContextMenuAction,
-      inboxId,
-      handleCancelEdit,
-    ],
+    [router, theme, editMode, handleContextMenuAction, inboxId, handleCancelEdit],
   )
 }
 
@@ -145,10 +123,7 @@ const DoneAction = memo(function DoneAction({ inboxId }: { inboxId: InboxId }) {
   const profileMeStore = useProfileMeStore(inboxId)
   const profile = getProfileQueryData({ xmtpId: inboxId })
   const { saveProfile } = useSaveProfile()
-  const isAvatarUploading = useProfileMeStoreValue(
-    inboxId,
-    (state) => state.isAvatarUploading,
-  )
+  const isAvatarUploading = useProfileMeStoreValue(inboxId, (state) => state.isAvatarUploading)
 
   const handleDoneEditProfile = useCallback(async () => {
     // Get all the profile data from the store
@@ -197,8 +172,7 @@ const DoneAction = memo(function DoneAction({ inboxId }: { inboxId: InboxId }) {
           }
 
           // Fallback to the general message if we couldn't extract specific error
-          const backendMessage =
-            error.response?.data?.message || `Error ${statusCode}`
+          const backendMessage = error.response?.data?.message || `Error ${statusCode}`
           captureErrorWithToast(error, { message: backendMessage })
           return
         }

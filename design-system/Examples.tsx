@@ -1,19 +1,19 @@
-import { BottomSheetExample } from "@design-system/BottomSheet/BottomSheet.example";
-import { Button } from "@design-system/Button/Button";
-import { ButtonExample } from "@design-system/Button/Button.example";
-import { IconExample } from "@design-system/Icon/Icon.example";
-import { IconButtonExample } from "@design-system/IconButton/IconButton.example";
-import { Text } from "@design-system/Text/Text";
-import { TextExample } from "@design-system/Text/Text.example";
-import { TextFieldExample } from "@design-system/TextField/TextField.example";
-import { VStack } from "@design-system/VStack";
-import { useState } from "react";
-import { Switch, useColorScheme } from "react-native";
-import { Screen } from "@/components/screen/screen";
-import { SnackbarExample } from "@/components/snackbar/snackbar.example";
-import { useAppTheme } from "@/theme/use-app-theme";
-import { HeaderExample } from "./Header/Header.example";
-import { HStack } from "./HStack";
+import { BottomSheetExample } from "@design-system/BottomSheet/BottomSheet.example"
+import { Button } from "@design-system/Button/Button"
+import { ButtonExample } from "@design-system/Button/Button.example"
+import { IconExample } from "@design-system/Icon/Icon.example"
+import { IconButtonExample } from "@design-system/IconButton/IconButton.example"
+import { Text } from "@design-system/Text/Text"
+import { TextExample } from "@design-system/Text/Text.example"
+import { TextFieldExample } from "@design-system/TextField/TextField.example"
+import { VStack } from "@design-system/VStack"
+import { useState } from "react"
+import { Switch, useColorScheme } from "react-native"
+import { Screen } from "@/components/screen/screen"
+import { SnackbarExample } from "@/components/snackbar/snackbar.example"
+import { useAppTheme } from "@/theme/use-app-theme"
+import { HeaderExample } from "./Header/Header.example"
+import { HStack } from "./HStack"
 
 type IDesignSystemComponent =
   | "buttons"
@@ -23,14 +23,13 @@ type IDesignSystemComponent =
   | "icon"
   | "header"
   | "bottom-sheet"
-  | "snackbar";
+  | "snackbar"
 
 export function Examples() {
-  const { theme, toggleTheme, themeContext } = useAppTheme();
-  const colorScheme = useColorScheme();
+  const { theme, toggleTheme, themeContext } = useAppTheme()
+  const colorScheme = useColorScheme()
 
-  const [selectedComponent, setSelectedComponent] =
-    useState<IDesignSystemComponent | null>(null);
+  const [selectedComponent, setSelectedComponent] = useState<IDesignSystemComponent | null>(null)
 
   return (
     <Screen
@@ -55,11 +54,7 @@ export function Examples() {
       </VStack>
       {selectedComponent ? (
         <VStack style={{ gap: theme.spacing.lg }}>
-          <Button
-            text="Back"
-            onPress={() => setSelectedComponent(null)}
-            variant="link"
-          />
+          <Button text="Back" onPress={() => setSelectedComponent(null)} variant="link" />
           <VStack>
             {selectedComponent === "buttons" && <ButtonExample />}
             {selectedComponent === "text" && <TextExample />}
@@ -77,36 +72,16 @@ export function Examples() {
             gap: theme.spacing.sm,
           }}
         >
-          <Button
-            text="Buttons"
-            onPress={() => setSelectedComponent("buttons")}
-          />
+          <Button text="Buttons" onPress={() => setSelectedComponent("buttons")} />
           <Button text="Text" onPress={() => setSelectedComponent("text")} />
-          <Button
-            text="Icon Button"
-            onPress={() => setSelectedComponent("icon-button")}
-          />
-          <Button
-            text="Text Field"
-            onPress={() => setSelectedComponent("text-field")}
-          />
+          <Button text="Icon Button" onPress={() => setSelectedComponent("icon-button")} />
+          <Button text="Text Field" onPress={() => setSelectedComponent("text-field")} />
           <Button text="Icon" onPress={() => setSelectedComponent("icon")} />
-          {
-            <Button
-              text="Header"
-              onPress={() => setSelectedComponent("header")}
-            />
-          }
-          <Button
-            text="Bottom Sheet"
-            onPress={() => setSelectedComponent("bottom-sheet")}
-          />
-          <Button
-            text="Snackbar"
-            onPress={() => setSelectedComponent("snackbar")}
-          />
+          {<Button text="Header" onPress={() => setSelectedComponent("header")} />}
+          <Button text="Bottom Sheet" onPress={() => setSelectedComponent("bottom-sheet")} />
+          <Button text="Snackbar" onPress={() => setSelectedComponent("snackbar")} />
         </VStack>
       )}
     </Screen>
-  );
+  )
 }

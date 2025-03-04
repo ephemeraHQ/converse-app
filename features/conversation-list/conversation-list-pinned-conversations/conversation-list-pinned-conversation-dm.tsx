@@ -43,9 +43,7 @@ export const ConversationListPinnedConversationDm = ({
   }, [conversation.topic])
 
   const displayMessagePreview =
-    conversation.lastMessage &&
-    isTextMessage(conversation.lastMessage) &&
-    isUnread
+    conversation.lastMessage && isTextMessage(conversation.lastMessage) && isUnread
 
   const contextMenuProps = useDmConversationContextMenuViewProps({
     dmConversationTopic: conversationTopic,
@@ -55,11 +53,7 @@ export const ConversationListPinnedConversationDm = ({
     <VStack>
       <ConversationListPinnedConversation
         avatarComponent={
-          <Avatar
-            sizeNumber={avatarSize}
-            uri={avatarUrl}
-            name={displayName ?? ""}
-          />
+          <Avatar sizeNumber={avatarSize} uri={avatarUrl} name={displayName ?? ""} />
         }
         onPress={onPress}
         showUnread={isUnread}

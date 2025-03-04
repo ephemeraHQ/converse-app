@@ -11,9 +11,7 @@ type IWalletConnectedProps = {
   activeWallet: IWallet
 }
 
-export const WalletConnected = memo(function WalletConnected(
-  props: IWalletConnectedProps,
-) {
+export const WalletConnected = memo(function WalletConnected(props: IWalletConnectedProps) {
   const { activeWallet } = props
 
   // Get the wallet address

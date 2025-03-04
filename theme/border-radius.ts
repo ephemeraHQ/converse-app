@@ -9,9 +9,9 @@ export const borderRadius = {
     bubble: 16,
     attachment: 16,
   },
-} as const;
+} as const
 
-export type IBorderRadius = typeof borderRadius;
+export type IBorderRadius = typeof borderRadius
 
 /**
  * TIP:

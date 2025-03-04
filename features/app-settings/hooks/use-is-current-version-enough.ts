@@ -1,62 +1,59 @@
-import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
-import { Alert, Platform } from "react-native";
-import { config } from "@/config";
-import { getAppSettingsQueryOptions } from "@/features/app-settings/app-settings.query";
-import { openLink } from "@/utils/linking";
+import { useQuery } from "@tanstack/react-query"
+import { useEffect } from "react"
+import { Alert, Platform } from "react-native"
+import { config } from "@/config"
+import { getAppSettingsQueryOptions } from "@/features/app-settings/app-settings.query"
+import { openLink } from "@/utils/linking"
 
 type VersionComparisonArgs = {
-  currentVersion: string;
-  minimumVersion: string;
-};
+  currentVersion: string
+  minimumVersion: string
+}
 
 function parseVersion(version: string): number[] {
-  return version.split(".").map(Number);
+  return version.split(".").map(Number)
 }
 
 // Compare version strings like "1.2.3"
 function isVersionGreaterOrEqual(args: VersionComparisonArgs) {
-  const { currentVersion, minimumVersion } = args;
+  const { currentVersion, minimumVersion } = args
 
-  const current = parseVersion(currentVersion);
-  const minimum = parseVersion(minimumVersion);
+  const current = parseVersion(currentVersion)
+  const minimum = parseVersion(minimumVersion)
 
   // Compare each version segment
   for (let i = 0; i < 3; i++) {
     if (current[i] > minimum[i]) {
-      return true;
+      return true
     }
     if (current[i] < minimum[i]) {
-      return false;
+      return false
     }
   }
-  return true;
+  return true
 }
 
 export function useIsCurrentVersionEnough() {
-  const {
-    data: currentVersionIsEnough,
-    isFetching: isCheckingIfCurrentVersionIsEnough,
-  } = useQuery({
-    ...getAppSettingsQueryOptions(),
-    select: (backendConfig) => {
-      const minimumVersion = Platform.select({
-        android: backendConfig.minimumAppVersion.android,
-        default: backendConfig.minimumAppVersion.ios,
-      });
+  const { data: currentVersionIsEnough, isFetching: isCheckingIfCurrentVersionIsEnough } = useQuery(
+    {
+      ...getAppSettingsQueryOptions(),
+      select: (backendConfig) => {
+        const minimumVersion = Platform.select({
+          android: backendConfig.minimumAppVersion.android,
+          default: backendConfig.minimumAppVersion.ios,
+        })
 
-      return isVersionGreaterOrEqual({
-        currentVersion: config.appVersion,
-        minimumVersion,
-      });
+        return isVersionGreaterOrEqual({
+          currentVersion: config.appVersion,
+          minimumVersion,
+        })
+      },
     },
-  });
+  )
 
   useEffect(() => {
     const shouldShowUpdateAlert =
-      !currentVersionIsEnough &&
-      !isCheckingIfCurrentVersionIsEnough &&
-      !__DEV__;
+      !currentVersionIsEnough && !isCheckingIfCurrentVersionIsEnough && !__DEV__
 
     if (shouldShowUpdateAlert) {
       Alert.alert(
@@ -70,7 +67,7 @@ export function useIsCurrentVersionEnough() {
         ],
         // Prevent dismissing the alert by tapping outside
         { cancelable: false },
-      );
+      )
     }
-  }, [currentVersionIsEnough, isCheckingIfCurrentVersionIsEnough]);
+  }, [currentVersionIsEnough, isCheckingIfCurrentVersionIsEnough])
 }

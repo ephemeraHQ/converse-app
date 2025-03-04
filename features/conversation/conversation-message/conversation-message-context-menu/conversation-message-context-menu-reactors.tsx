@@ -1,49 +1,45 @@
-import { Text } from "@design-system/Text";
-import { InboxId, ReactionContent } from "@xmtp/react-native-sdk";
-import React, { FC, memo, useMemo } from "react";
-import { FlatList } from "react-native-gesture-handler";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { GroupAvatarInboxIds } from "@/components/group-avatar";
-import { AnimatedCenter, Center } from "@/design-system/Center";
-import { HStack } from "@/design-system/HStack";
-import { getReactionContent } from "@/features/xmtp/xmtp-codecs/xmtp-codecs-reaction";
-import { useAppTheme } from "@/theme/use-app-theme";
-import { ObjectTyped } from "@/utils/object-typed";
+import { Text } from "@design-system/Text"
+import { InboxId, ReactionContent } from "@xmtp/react-native-sdk"
+import React, { FC, memo, useMemo } from "react"
+import { FlatList } from "react-native-gesture-handler"
+import { useSafeAreaInsets } from "react-native-safe-area-context"
+import { GroupAvatarInboxIds } from "@/components/group-avatar"
+import { AnimatedCenter, Center } from "@/design-system/Center"
+import { HStack } from "@/design-system/HStack"
+import { getReactionContent } from "@/features/xmtp/xmtp-codecs/xmtp-codecs-reaction"
+import { useAppTheme } from "@/theme/use-app-theme"
+import { ObjectTyped } from "@/utils/object-typed"
 
 type MessageContextMenuReactorsProps = {
   reactors: {
-    [reactor: InboxId]: ReactionContent[];
-  };
-};
+    [reactor: InboxId]: ReactionContent[]
+  }
+}
 
-export const MessageContextMenuReactors: FC<
-  MessageContextMenuReactorsProps
-> = ({ reactors }) => {
-  const { theme } = useAppTheme();
+export const MessageContextMenuReactors: FC<MessageContextMenuReactorsProps> = ({ reactors }) => {
+  const { theme } = useAppTheme()
 
-  const safeAreaInsets = useSafeAreaInsets();
+  const safeAreaInsets = useSafeAreaInsets()
 
   const listData = useMemo(() => {
     if (!reactors) {
-      return [];
+      return []
     }
 
-    const reactionMap: Record<string, InboxId[]> = {};
+    const reactionMap: Record<string, InboxId[]> = {}
     ObjectTyped.entries(reactors).forEach(([reactorInboxId, reactions]) => {
       if (!reactions || reactions.length === 0) {
-        return;
+        return
       }
       for (const reaction of reactions) {
         if (!reactionMap[getReactionContent(reaction)]) {
-          reactionMap[getReactionContent(reaction)] = [];
+          reactionMap[getReactionContent(reaction)] = []
         }
-        reactionMap[getReactionContent(reaction)].push(
-          reactorInboxId as InboxId,
-        );
+        reactionMap[getReactionContent(reaction)].push(reactorInboxId as InboxId)
       }
-    });
-    return Object.entries(reactionMap);
-  }, [reactors]);
+    })
+    return Object.entries(reactionMap)
+  }, [reactors])
 
   return (
     <AnimatedCenter
@@ -72,19 +68,16 @@ export const MessageContextMenuReactors: FC<
         showsHorizontalScrollIndicator={false}
       />
     </AnimatedCenter>
-  );
-};
+  )
+}
 
 type MessageReactionsItemProps = {
-  content: string;
-  inboxIds: InboxId[];
-};
+  content: string
+  inboxIds: InboxId[]
+}
 
-const Item = memo(function Item({
-  content,
-  inboxIds,
-}: MessageReactionsItemProps) {
-  const { theme } = useAppTheme();
+const Item = memo(function Item({ content, inboxIds }: MessageReactionsItemProps) {
+  const { theme } = useAppTheme()
 
   return (
     <Center
@@ -106,5 +99,5 @@ const Item = memo(function Item({
         </Text>
       </HStack>
     </Center>
-  );
-});
+  )
+})

@@ -157,17 +157,12 @@ export function OnboardingContactCardScreen() {
   })
 
   // Get isAvatarUploading from the store
-  const isAvatarUploading = useOnboardingContactCardStore(
-    (state) => state.isAvatarUploading,
-  )
+  const isAvatarUploading = useOnboardingContactCardStore((state) => state.isAvatarUploading)
   const { container } = useProfileContactCardStyles()
 
   return (
     <>
-      <Screen
-        contentContainerStyle={$globalStyles.flex1}
-        safeAreaEdges={["bottom"]}
-      >
+      <Screen contentContainerStyle={$globalStyles.flex1} safeAreaEdges={["bottom"]}>
         <AnimatedVStack
           // {...debugBorder()}
           style={[
@@ -194,9 +189,7 @@ export function OnboardingContactCardScreen() {
               textContainerHeightAV.value = event.nativeEvent.layout.height
             }}
           >
-            <OnboardingTitle size={"xl"}>
-              Complete your{`\n`}contact card
-            </OnboardingTitle>
+            <OnboardingTitle size={"xl"}>Complete your{`\n`}contact card</OnboardingTitle>
             <OnboardingSubtitle>Choose how you show up</OnboardingSubtitle>
           </AnimatedVStack>
 
@@ -220,8 +213,7 @@ export function OnboardingContactCardScreen() {
               paddingHorizontal: theme.spacing.lg,
             }}
           >
-            Add and edit Contact Cards anytime,{`\n`}or go Rando for extra
-            privacy.
+            Add and edit Contact Cards anytime,{`\n`}or go Rando for extra privacy.
           </Text>
         </AnimatedVStack>
         <VStack
@@ -247,39 +239,34 @@ const $contentContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   justifyContent: "center",
 })
 
-const ProfileContactCardNameInput = memo(
-  function ProfileContactCardNameInput() {
-    useIsFocused()
+const ProfileContactCardNameInput = memo(function ProfileContactCardNameInput() {
+  useIsFocused()
 
-    const [nameValidationError, setNameValidationError] = useState<string>()
+  const [nameValidationError, setNameValidationError] = useState<string>()
 
-    const handleDisplayNameChange = useCallback(
-      (args: { text: string; error?: string }) => {
-        const { text, error } = args
-        const { actions } = useOnboardingContactCardStore.getState()
+  const handleDisplayNameChange = useCallback((args: { text: string; error?: string }) => {
+    const { text, error } = args
+    const { actions } = useOnboardingContactCardStore.getState()
 
-        if (error) {
-          setNameValidationError(error)
-          actions.setName("")
-          return
-        }
+    if (error) {
+      setNameValidationError(error)
+      actions.setName("")
+      return
+    }
 
-        setNameValidationError(undefined)
-        actions.setName(text)
-      },
-      [],
-    )
+    setNameValidationError(undefined)
+    actions.setName(text)
+  }, [])
 
-    return (
-      <ProfileContactCardEditableNameInput
-        defaultValue={useOnboardingContactCardStore.getState().name}
-        onChangeText={handleDisplayNameChange}
-        status={nameValidationError ? "error" : undefined}
-        helper={nameValidationError}
-      />
-    )
-  },
-)
+  return (
+    <ProfileContactCardEditableNameInput
+      defaultValue={useOnboardingContactCardStore.getState().name}
+      onChangeText={handleDisplayNameChange}
+      status={nameValidationError ? "error" : undefined}
+      helper={nameValidationError}
+    />
+  )
+})
 
 const ProfileContactCardAvatar = memo(function ProfileContactCardAvatar() {
   const { addPFP, asset, isUploading } = useAddPfp()
@@ -289,9 +276,7 @@ const ProfileContactCardAvatar = memo(function ProfileContactCardAvatar() {
 
   // Update upload status in the store
   useEffect(() => {
-    useOnboardingContactCardStore
-      .getState()
-      .actions.setIsAvatarUploading(isUploading)
+    useOnboardingContactCardStore.getState().actions.setIsAvatarUploading(isUploading)
   }, [isUploading])
 
   const addAvatar = useCallback(async () => {
@@ -310,16 +295,14 @@ const ProfileContactCardAvatar = memo(function ProfileContactCardAvatar() {
   )
 })
 
-const ProfileContactCardAdditionalOptions = memo(
-  function ProfileContactCardAdditionalOptions() {
-    const router = useRouter()
+const ProfileContactCardAdditionalOptions = memo(function ProfileContactCardAdditionalOptions() {
+  const router = useRouter()
 
-    return (
-      <ProfileContactCardImportName
-        onPress={() => {
-          router.navigate("OnboardingCreateContactCardImportName")
-        }}
-      />
-    )
-  },
-)
+  return (
+    <ProfileContactCardImportName
+      onPress={() => {
+        router.navigate("OnboardingCreateContactCardImportName")
+      }}
+    />
+  )
+})

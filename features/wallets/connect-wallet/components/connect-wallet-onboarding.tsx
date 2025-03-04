@@ -18,9 +18,7 @@ export const ConnectWalletOnboarding = memo(function ConnectWalletOnboarding() {
   const actions = useDynamicPagesStoreContext((state) => state.actions)
   const router = useRouter()
 
-  const renderHeader = () => (
-    <ConnectWalletHeader title="Import an onchain identity" />
-  )
+  const renderHeader = () => <ConnectWalletHeader title="Import an onchain identity" />
 
   const renderText = () => (
     <ConnectWalletTextSection
@@ -43,10 +41,7 @@ export const ConnectWalletOnboarding = memo(function ConnectWalletOnboarding() {
         }}
       >
         <Chip size="lg">
-          <ChipAvatar
-            uri={require("@assets/images/web3/base.png")}
-            name="Base"
-          />
+          <ChipAvatar uri={require("@assets/images/web3/base.png")} name="Base" />
           <ChipText>name.base.eth</ChipText>
         </Chip>
         <HStack
@@ -55,17 +50,11 @@ export const ConnectWalletOnboarding = memo(function ConnectWalletOnboarding() {
           }}
         >
           <Chip size="lg">
-            <ChipAvatar
-              uri={require("@assets/images/web3/ens.png")}
-              name="ENS"
-            />
+            <ChipAvatar uri={require("@assets/images/web3/ens.png")} name="ENS" />
             <ChipText>hello.eth</ChipText>
           </Chip>
           <Chip size="lg">
-            <ChipAvatar
-              uri={require("@assets/images/web3/farcaster.png")}
-              name="Farcaster"
-            />
+            <ChipAvatar uri={require("@assets/images/web3/farcaster.png")} name="Farcaster" />
             <ChipText>farcaster</ChipText>
           </Chip>
         </HStack>
@@ -75,10 +64,7 @@ export const ConnectWalletOnboarding = memo(function ConnectWalletOnboarding() {
 
   const renderButtons = () => (
     <>
-      <ConnectWalletPrimaryButton
-        text="Connect Wallet"
-        onPress={actions.goToNextPage}
-      />
+      <ConnectWalletPrimaryButton text="Connect Wallet" onPress={actions.goToNextPage} />
       <ConnectWalletLinkButton onPress={router.goBack} />
     </>
   )

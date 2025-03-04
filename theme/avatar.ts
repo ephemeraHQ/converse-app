@@ -5,6 +5,6 @@ export const avatarSize = {
   lg: 56,
   xl: 80,
   xxl: 96,
-} as const;
+} as const
 
-export type IAvatarSize = typeof avatarSize;
+export type IAvatarSize = typeof avatarSize
