@@ -6847,15 +6847,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native-clipboard/clipboard@npm:^1.14.1":
-  version: 1.14.1
-  resolution: "@react-native-clipboard/clipboard@npm:1.14.1"
+"@react-native-clipboard/clipboard@npm:1.11.2":
+  version: 1.11.2
+  resolution: "@react-native-clipboard/clipboard@npm:1.11.2"
   peerDependencies:
-    react: 16.9.0 || 16.11.0 || 16.13.1 || 17.0.1 || 17.0.2 || 18.0.0 || 18.1.0 || 18.2.0
-    react-native: ^0.61.5 || ^0.62.3 || ^0.63.2 || ^0.64.2 || ^0.65.0 || ^0.66.0 || ^0.67.0 || ^0.68.0 || ^0.69.0 || ^0.70.0 || ^0.71.0 || ^0.72.0 || ^0.73.0
-    react-native-macos: ^0.61.0 || ^0.62.0 || ^0.63.0 || ^0.64.0 || ^0.65.0 || ^0.66.0 || ^0.67.0 || ^0.68.0 || ^0.69.0 || ^0.70.0 || ^0.71.0 || ^0.72.0 || ^0.73.0
-    react-native-windows: ^0.61.0 || ^0.62.0 || ^0.63.0 || ^0.64.0 || ^0.65.0 || ^0.66.0 || ^0.67.0 || ^0.68.0 || ^0.69.0 || ^0.70.0 || ^0.71.0 || ^0.72.0 || ^0.73.0
-  checksum: 10c0/581512d46cb23ec14a93244eaf09138ce78f2d0a7003ef4a172f7c83665509a6043348d80be3adb899b34f1a131ce36aa5b17f7ec1f94fbfedad37321f105c90
+    react: ">=16.0"
+    react-native: ">=0.57.0"
+  checksum: 10c0/c6c485ead093da496e8448de13144c1a5da909e6d749615e72fccccc92167920ee9f18c0c32f35cac2275f07fb2cd11e3ba42282f5c39726772a3676fcd4687f
   languageName: node
   linkType: hard
 
@@ -13135,7 +13133,7 @@ __metadata:
     "@privy-io/expo": "npm:^0.45.0"
     "@privy-io/expo-native-extensions": "npm:^0.0.3"
     "@react-native-async-storage/async-storage": "npm:1.23.1"
-    "@react-native-clipboard/clipboard": "npm:^1.14.1"
+    "@react-native-clipboard/clipboard": "npm:1.11.2"
     "@react-native-community/netinfo": "npm:11.4.1"
     "@react-native-firebase/app": "npm:^21.4.0"
     "@react-native-firebase/app-check": "npm:^21.4.0"

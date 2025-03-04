@@ -53,7 +53,7 @@
     "@privy-io/expo": "^0.45.0",
     "@privy-io/expo-native-extensions": "^0.0.3",
     "@react-native-async-storage/async-storage": "1.23.1",
-    "@react-native-clipboard/clipboard": "^1.14.1",
+    "@react-native-clipboard/clipboard": "1.11.2",
     "@react-native-community/netinfo": "11.4.1",
     "@react-native-firebase/app": "^21.4.0",
     "@react-native-firebase/app-check": "^21.4.0",
