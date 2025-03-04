@@ -31,6 +31,15 @@ This will create the appropriate `.env.local` file with environment variables co
 yarn
 ```
 
+### Install Ruby dependencies
+
+To ensure you're using the correct version of CocoaPods, install the Ruby dependencies:
+
+```sh
+gem install bundler
+bundle install
+```
+
 ## Quick start
 
 iOS:

@@ -1,3 +1,4 @@
+import { usePrivy } from "@privy-io/expo"
 import { memo, useCallback, useEffect } from "react"
 import { TextStyle } from "react-native"
 import { Screen } from "@/components/screen/screen"
@@ -65,6 +66,9 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
 
   const handleLogin = useCallback(async () => {
     try {
+      // Just to make sure we're fully logged out
+      await logout()
+
       const { inboxId, ethereumAddress } = await login()
       useMultiInboxStore.getState().actions.setCurrentSender({
         ethereumAddress,
@@ -72,6 +76,8 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
       })
     } catch (error) {
       const typedError = ensureError(error)
+      console.log("typedError:", typedError)
+
       // Don't show toast for passkey cancellation
       if (
         typedError.message.includes("AuthenticationServices.AuthorizationError error 1001") ||
@@ -84,7 +90,7 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
         })
       }
     }
-  }, [login])
+  }, [login, logout])
 
   const handleReset = useCallback(async () => {
     try {
