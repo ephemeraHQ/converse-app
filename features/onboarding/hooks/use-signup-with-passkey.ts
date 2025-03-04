@@ -1,4 +1,4 @@
-import { useEmbeddedEthereumWallet } from "@privy-io/expo"
+import { useEmbeddedEthereumWallet as usePrivyEmbeddedEthereumWallet } from "@privy-io/expo"
 import { useSignupWithPasskey as usePrivySignupWithPasskey } from "@privy-io/expo/passkey"
 import { useSmartWallets } from "@privy-io/expo/smart-wallets"
 import { useEffect, useRef, useState } from "react"
@@ -30,7 +30,7 @@ import { RELYING_PARTY } from "../onboarding.constants"
 //     }
 
 export function useSignupWithPasskey() {
-  const { create: createEmbeddedWallet } = useEmbeddedEthereumWallet()
+  const { create: createEmbeddedWallet } = usePrivyEmbeddedEthereumWallet()
   const { client: smartWalletClient } = useSmartWallets()
   const { signupWithPasskey: privySignupWithPasskey } = usePrivySignupWithPasskey()
   const [isSigningUp, setIsSigningUp] = useState(false)

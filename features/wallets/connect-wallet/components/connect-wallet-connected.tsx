@@ -26,8 +26,6 @@ export const WalletConnected = memo(function WalletConnected(props: IWalletConne
       targetEthAddress: walletAddress,
     })
 
-  const currentSenderInboxId = currentSender.inboxId
-
   if (isLoadingInboxId) {
     return <ConnectWalletLoadingContent />
   }
@@ -38,7 +36,7 @@ export const WalletConnected = memo(function WalletConnected(props: IWalletConne
   }
 
   // If the wallet is already linked to the current inbox, show names
-  if (activeWalletInboxId === currentSenderInboxId) {
+  if (activeWalletInboxId === currentSender.inboxId) {
     return <ConnectWalletChooseName ethAddress={walletAddress} />
   }
 
