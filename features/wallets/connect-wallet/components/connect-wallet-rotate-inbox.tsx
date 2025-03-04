@@ -6,7 +6,7 @@ import { createXmtpSignerFromPrivySwc } from "@/features/onboarding/utils/create
 import { IWallet } from "@/features/wallets/connect-wallet/connect-wallet.types"
 import { createXmtpClient } from "@/features/xmtp/xmtp-client/xmtp-client.service"
 import { getXmtpSigner } from "@/features/xmtp/xmtp-signer/get-xmtp-signer"
-import { usePersitState } from "@/hooks/use-persit-state"
+import { usePersistState } from "@/hooks/use-persit-state"
 import { useRouter } from "@/navigation/use-navigation"
 import { captureErrorWithToast } from "@/utils/capture-error"
 import { shortAddress } from "@/utils/strings/shortAddress"
@@ -41,7 +41,7 @@ export const ConnectWalletRotateInbox = memo(function ConnectWalletRotateInbox(
     value: hasRotatedWalletAddress,
     setValue: setHasRotatedWalletAddress,
     isLoaded: isHasRotatedWalletAddressLoaded,
-  } = usePersitState(`has-rotated-wallet-${smartWalletClientEthAddress}`)
+  } = usePersistState(`has-rotated-wallet-${smartWalletClientEthAddress}`)
 
   // Handle creating a new inbox ID
   const handleCreateNewInboxId = useCallback(async () => {
