@@ -1,8 +1,7 @@
-import { usePrivy } from "@privy-io/expo"
+import { reloadAppAsync } from "expo"
 import { memo, useCallback, useEffect } from "react"
 import { TextStyle } from "react-native"
 import { Screen } from "@/components/screen/screen"
-import { showSnackbar } from "@/components/snackbar/snackbar.service"
 import { Center } from "@/design-system/Center"
 import { Pressable } from "@/design-system/Pressable"
 import { AnimatedText, Text } from "@/design-system/Text"
@@ -30,14 +29,14 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
 
   // Safer to fully logout when we're here
   useEffect(() => {
-    logout()
+    logout({ caller: "OnboardingWelcomeScreen onMount" })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleSignup = useCallback(async () => {
     try {
       // If the user decides to sign up again, make sure we're fully logged out
-      await logout()
+      // await logout({ caller: "OnboardingWelcomeScreen handleSignup" })
 
       const { inboxId, ethereumAddress } = await signup()
       useMultiInboxStore.getState().actions.setCurrentSender({
@@ -62,13 +61,10 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
         })
       }
     }
-  }, [signup, logout])
+  }, [signup])
 
   const handleLogin = useCallback(async () => {
     try {
-      // Just to make sure we're fully logged out
-      await logout()
-
       const { inboxId, ethereumAddress } = await login()
       useMultiInboxStore.getState().actions.setCurrentSender({
         ethereumAddress,
@@ -76,7 +72,6 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
       })
     } catch (error) {
       const typedError = ensureError(error)
-      console.log("typedError:", typedError)
 
       // Don't show toast for passkey cancellation
       if (
@@ -90,20 +85,17 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
         })
       }
     }
-  }, [login, logout])
+  }, [login])
 
   const handleReset = useCallback(async () => {
     try {
-      await logout()
-      showSnackbar({
-        message: "State reset. You can now sign in again",
-      })
+      await reloadAppAsync().catch(captureErrorWithToast)
     } catch (error) {
       captureErrorWithToast(error, {
         message: "Error resetting state. Please close the app and try again",
       })
     }
-  }, [logout])
+  }, [])
 
   useHeader({
     safeAreaEdges: ["top"],
@@ -133,7 +125,7 @@ export const OnboardingWelcomeScreen = memo(function OnboardingWelcomeScreen() {
           text="Create a Contact Card"
           onPress={handleSignup}
           disabled={isSigningUp || isLoggingIn}
-          isLoading={isSigningUp}
+          isLoading={isSigningUp || isLoggingIn}
         />
 
         <Center

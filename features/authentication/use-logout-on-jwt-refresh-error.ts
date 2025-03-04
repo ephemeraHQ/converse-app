@@ -14,7 +14,7 @@ export const useLogoutOnJwtRefreshError = () => {
       refreshJwtInterceptor(api, () => {
         apiLogger.debug("[useLogoutOnJwtRefreshError] Logging out")
         // Now we can use hook-based functions here
-        logout()
+        logout({ caller: "useLogoutOnJwtRefreshError" })
       }),
     )
 

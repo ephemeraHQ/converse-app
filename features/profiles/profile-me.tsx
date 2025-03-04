@@ -128,7 +128,7 @@ export function ProfileMe(props: { inboxId: InboxId }) {
                     label: translate("Log out"),
                     isWarning: true,
                     onPress: () => {
-                      logout()
+                      logout({ caller: "ProfileMe" })
                     },
                   },
                 ]}

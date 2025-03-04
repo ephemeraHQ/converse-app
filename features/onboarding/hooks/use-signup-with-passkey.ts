@@ -7,6 +7,28 @@ import { createXmtpClient } from "@/features/xmtp/xmtp-client/xmtp-client.servic
 import { authLogger } from "@/utils/logger"
 import { RELYING_PARTY } from "../onboarding.constants"
 
+// Couldn't import it from @privy-io/expo/passkey
+// type PrivyPasskeyFlowState =
+//   | {
+//       status: "initial"
+//     }
+//   | {
+//       status: "error"
+//       error: Error | null
+//     }
+//   | {
+//       status: "generating-challenege"
+//     }
+//   | {
+//       status: "awaiting-passkey"
+//     }
+//   | {
+//       status: "submitting-response"
+//     }
+//   | {
+//       status: "done"
+//     }
+
 export function useSignupWithPasskey() {
   const { create: createEmbeddedWallet } = useEmbeddedEthereumWallet()
   const { client: smartWalletClient } = useSmartWallets()
