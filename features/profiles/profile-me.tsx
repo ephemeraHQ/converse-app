@@ -25,6 +25,7 @@ import { useCurrentSender } from "../authentication/multi-inbox.store";
 import { TextField } from "@/design-system/TextField/TextField";
 import { VStack } from "@/design-system/VStack";
 import { Text } from "@/design-system/Text";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export function ProfileMe(props: { inboxId: InboxId }) {
   const { inboxId } = props;
@@ -34,6 +35,8 @@ export function ProfileMe(props: { inboxId: InboxId }) {
   const router = useRouter();
 
   const { logout } = useLogout();
+
+  const insets = useSafeAreaInsets();
 
   // Get the edit mode state from the store
   const editMode = useProfileMeStoreValue(inboxId, (state) => state.editMode);
@@ -50,7 +53,12 @@ export function ProfileMe(props: { inboxId: InboxId }) {
   useProfileMeScreenHeader({ inboxId });
 
   return (
-    <Screen preset="fixed" backgroundColor={theme.colors.background.surface}>
+    <Screen 
+      preset="scroll"
+      backgroundColor={theme.colors.background.surface}
+      keyboardOffset={insets.bottom}
+      keyboardShouldPersistTaps="handled"
+    >
       <ProfileSection>
         {/* Show editable avatar and name when in edit mode */}
         {editMode ? (
