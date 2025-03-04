@@ -6,7 +6,7 @@ import { sentryTrackError } from "@/utils/sentry"
 export async function captureError(
   error: unknown,
   options: {
-    extras?: Record<string, string>
+    extras?: Record<string, string | number>
   } = {},
 ) {
   try {

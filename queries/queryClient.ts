@@ -1,4 +1,5 @@
 import { Mutation, MutationCache, QueryCache, QueryClient } from "@tanstack/react-query"
+import { AxiosError } from "axios"
 import { captureError } from "@/utils/capture-error"
 import { ReactQueryError } from "@/utils/error"
 import { logger } from "@/utils/logger"
@@ -12,11 +13,16 @@ export const queryClient = new QueryClient({
       context: unknown,
       mutation: Mutation<unknown, unknown, unknown, unknown>,
     ) => {
-      const extras: Record<string, string> = {
-        type: "mutation",
+      const extras: Record<string, string | number> = {
         mutationKey: mutation.options.mutationKey
           ? JSON.stringify(mutation.options.mutationKey)
           : "",
+        ...(error instanceof AxiosError && {
+          apiErrorStatus: error.response?.status,
+          apiErrorStatusText: error.response?.statusText,
+          apiErrorData: JSON.stringify(error.response?.data),
+          apiErrorParams: JSON.stringify(error.config?.params),
+        }),
       }
 
       if (mutation.meta?.caller) {
@@ -47,9 +53,14 @@ export const queryClient = new QueryClient({
       )
     },
     onError: (error: Error, query) => {
-      const extras: Record<string, string> = {
-        type: "query",
+      const extras: Record<string, string | number> = {
         queryKey: JSON.stringify(query.queryKey),
+        ...(error instanceof AxiosError && {
+          apiErrorStatus: error.response?.status,
+          apiErrorStatusText: error.response?.statusText,
+          apiErrorData: JSON.stringify(error.response?.data),
+          apiErrorParams: JSON.stringify(error.config?.params),
+        }),
       }
 
       if (query.meta?.caller) {

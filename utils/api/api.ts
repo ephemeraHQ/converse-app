@@ -21,21 +21,3 @@ api.interceptors.request.use((config) => {
 
   return config
 })
-
-// Debugging interceptors
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (axios.isAxiosError(error)) {
-      apiLogger.error(`API Error:`, {
-        url: error.config?.url,
-        method: error.config?.method,
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        data: error.response?.data,
-        params: error.config?.params,
-      })
-    }
-    return Promise.reject(error)
-  },
-)

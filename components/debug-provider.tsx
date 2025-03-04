@@ -179,7 +179,9 @@ function useShowDebugMenu() {
     return {
       Logout: async () => {
         try {
-          await logout()
+          await logout({
+            caller: "debug_menu",
+          })
         } catch (error) {
           alert(error)
         }

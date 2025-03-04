@@ -43,19 +43,6 @@ export function sentryInit() {
     },
 
     beforeSend: (event: ErrorEvent, hint: EventHint) => {
-      // Filter out specific errors
-      if (event.exception?.values?.length === 1) {
-        const exception = event.exception.values[0]
-        const shouldFilter = errorsToFilterOut.some((errorStr) =>
-          exception.value?.includes(errorStr),
-        )
-
-        if (shouldFilter) {
-          // Drop the event
-          return null
-        }
-      }
-
       event.tags = {
         ...event.tags,
         "expo-update-id": Updates.updateId,
@@ -74,6 +61,15 @@ type ISentryTrackErrorArgs = {
 }
 
 export function sentryTrackError({ error, extras, tags }: ISentryTrackErrorArgs) {
+  // Check if we should filter this error
+  const errorMessage = error.message || ""
+  const shouldFilter = errorsToFilterOut.some((errorStr) => errorMessage.includes(errorStr))
+
+  if (shouldFilter) {
+    // logger.debug(`Filtering out error: ${errorMessage}`)
+    return
+  }
+
   Sentry.withScope(async (scope) => {
     if (extras) {
       Object.entries(extras).forEach(([key, value]) => {
