@@ -37,7 +37,7 @@ type GroupAvatarUIProps = {
   members?: GroupAvatarMember[]
 }
 
-type AvatarSize = "sm" | "md" | "lg"
+type IGroupAvatarSize = "sm" | "md" | "lg" | "xl" | "xxl"
 
 type ExtraMembersIndicatorProps = {
   pos: Position
@@ -82,7 +82,7 @@ export const GroupAvatarInboxIds = memo(function GroupAvatarInboxIds(props: {
  */
 export const GroupAvatar = memo(function GroupAvatar(props: {
   groupTopic: ConversationTopic
-  size?: AvatarSize
+  size?: IGroupAvatarSize
   sizeNumber?: number
 }) {
   const { groupTopic, size = "md", sizeNumber: sizeNumberProp } = props
@@ -159,8 +159,13 @@ export const GroupAvatar = memo(function GroupAvatar(props: {
         return theme.avatarSize.md
       case "lg":
         return theme.avatarSize.lg
+      case "xl":
+        return theme.avatarSize.xl
+      case "xxl":
+        return theme.avatarSize.xxl
       default:
-        return theme.avatarSize.md
+        const _ensureNever: never = size
+        throw new Error("Invalid group avatar size")
     }
   }, [size, theme, sizeNumberProp])
 

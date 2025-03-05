@@ -11,9 +11,17 @@ import { BlockedConversationsScreen } from "@/features/blocked-conversations/blo
 import { ConversationListScreen } from "@/features/conversation-list/conversation-list.screen"
 import { ConversationRequestsListNav } from "@/features/conversation-requests-list/conversation-requests-list.nav"
 import {
+  AddGroupMembersNav,
+  AddGroupMembersScreenConfig,
+} from "@/features/group-details/screens/add-group-members.nav"
+import {
   GroupDetailsNav,
   GroupDetailsScreenConfig,
-} from "@/features/group-details/group-details.nav"
+} from "@/features/group-details/screens/group-details.nav"
+import {
+  GroupMembersListNav,
+  GroupMembersListScreenConfig,
+} from "@/features/group-details/screens/group-members-list.nav"
 import { OnboardingContactCardImportNameScreen } from "@/features/onboarding/screens/onboarding-contact-card-import-name.screen"
 import { OnboardingContactCardScreen } from "@/features/onboarding/screens/onboarding-contact-card.screen"
 import { OnboardingWelcomeScreen } from "@/features/onboarding/screens/onboarding-welcome.screen"
@@ -40,6 +48,8 @@ const linking: LinkingOptions<NavigationParamList> = {
       Profile: ProfileScreenConfig,
       ShareProfile: ShareProfileScreenConfig,
       GroupDetails: GroupDetailsScreenConfig,
+      AddGroupMembers: AddGroupMembersScreenConfig,
+      GroupMembersList: GroupMembersListScreenConfig,
     },
   },
   // TODO: Fix this
@@ -153,12 +163,13 @@ const AppStacks = memo(function AppStacks() {
           />
           <AppNativeStack.Screen name="Blocked" component={BlockedConversationsScreen} />
           {ConversationRequestsListNav()}
-          <AppNativeStack.Screen name="ChatsRequests" component={ConversationRequestsListNav} />
           {ConversationNav()}
           {ShareProfileNav()}
           {WebviewPreviewNav()}
           {ProfileNav()}
           {GroupDetailsNav()}
+          {AddGroupMembersNav()}
+          {GroupMembersListNav()}
           <AppNativeStack.Screen
             name="ProfileImportName"
             component={ProfileImportNameScreen}

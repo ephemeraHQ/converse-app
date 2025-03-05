@@ -7,6 +7,7 @@ import { HeaderAction } from "@/design-system/Header/HeaderAction"
 import { HStack } from "@/design-system/HStack"
 import { iconRegistry } from "@/design-system/Icon/Icon"
 import { Text } from "@/design-system/Text"
+import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
 import { translate } from "@/i18n"
 import { useHeader } from "@/navigation/use-header"
 import { useRouter } from "@/navigation/use-navigation"
@@ -17,8 +18,10 @@ export function useProfileOtherScreenHeader({ inboxId }: { inboxId: InboxId }) {
   const { theme, themed } = useAppTheme()
   const router = useRouter()
 
+  const { displayName } = usePreferredDisplayInfo({ inboxId })
+
   const handleChatPress = useCallback(() => {
-    router.push("Conversation", {
+    router.navigate("Conversation", {
       searchSelectedUserInboxIds: [inboxId],
     })
   }, [router, inboxId])
@@ -83,13 +86,7 @@ export function useProfileOtherScreenHeader({ inboxId }: { inboxId: InboxId }) {
     {
       backgroundColor: theme.colors.background.surface,
       safeAreaEdges: ["top"],
-      titleComponent: (
-        <Text preset="body">
-          {router.canGoBack()
-            ? router.getState().routes[router.getState().routes.length - 2].name
-            : ""}
-        </Text>
-      ),
+      title: displayName,
       LeftActionComponent: (
         <HeaderAction
           icon="chevron.left"

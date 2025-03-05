@@ -171,37 +171,6 @@ function sendMessage(args: { recipientId: string; content: string }) {
 - Append "Override" to style props that override default component styles.
 
 ```typescript
-// ❌ Bad: Inline complex styles
-<VStack
-  style={{
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 16,
-    backgroundColor: theme.colors.background,
-    borderRadius: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  }}
-/>
-
-// ✅ Good: Extract complex styles with $ prefix
-<VStack style={$container} />
-
-// Define outside the component
-const $container: ViewStyle = {
-  alignItems: "center",
-  justifyContent: "center",
-  paddingHorizontal: 16,
-  backgroundColor: theme.colors.background,
-  borderRadius: 8,
-  shadowColor: "#000",
-  shadowOffset: { width: 0, height: 2 },
-  shadowOpacity: 0.1,
-  shadowRadius: 4,
-};
-
 // ✅ Good: Use ThemedStyle for theme-dependent styles
 <VStack style={themed($container)} />
 
@@ -395,6 +364,37 @@ export const ConnectWalletButtonContainer = memo(
     );
   }
 );
+```
+
+- When extracting components or creating reusable components:
+  1. Always extend from existing design system components when possible
+  2. Directly use the base component's prop types (e.g., ITextProps, IVStackProps)
+  3. Only add default props/styling that are consistent across all uses
+  4. Use memo() for all extracted components
+  5. Use named exports
+  6. Keep a flat props structure - avoid creating new prop types unless absolutely necessary
+
+```typescript
+// ❌ Bad: Creating unnecessary prop types and complexity
+type ICustomTitleProps = {
+  text: string
+  style?: StyleProp<TextStyle>
+}
+
+export const CustomTitle = memo(function CustomTitle(props: ICustomTitleProps) {
+  const { text, style } = props
+  return <Text style={style}>{text}</Text>
+})
+
+// ✅ Good: Extending base component with its props
+export const CustomTitle = memo(function CustomTitle(props: ITextProps) {
+  return <Text preset="title" {...props} />
+})
+
+// ✅ Good: Adding default styling while maintaining prop flexibility
+export const CustomSubtitle = memo(function CustomSubtitle(props: ITextProps) {
+  return <Text preset="small" color="secondary" {...props} />
+})
 ```
 
 ## File Structure
