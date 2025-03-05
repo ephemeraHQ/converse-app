@@ -54,3 +54,13 @@ export function ensureEthAddressForXmtpInboxId(args: IStrictArgs) {
     }),
   )
 }
+
+export function invalidateEthAddressesForXmtpInboxId(args: IStrictArgs) {
+  const { clientEthAddress, inboxId } = args
+  return queryClient.invalidateQueries(
+    getEthAddressesForXmtpInboxIdQueryOptions({
+      clientEthAddress,
+      inboxId,
+    }),
+  )
+}

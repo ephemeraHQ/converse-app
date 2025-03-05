@@ -17,7 +17,6 @@ import { ProfileSocialsNames } from "@/features/profiles/components/profile-soci
 import { useProfileMeScreenHeader } from "@/features/profiles/profile-me.screen-header"
 import { useProfileMeStore, useProfileMeStoreValue } from "@/features/profiles/profile-me.store"
 import { useProfileQuery } from "@/features/profiles/profiles.query"
-import { useSocialProfilesForAddressQuery } from "@/features/social-profiles/social-profiles.query"
 import { useAddPfp } from "@/hooks/use-add-pfp"
 import { translate } from "@/i18n"
 import { useRouter } from "@/navigation/use-navigation"
@@ -41,10 +40,6 @@ export function ProfileMe(props: { inboxId: InboxId }) {
   const isMyProfile = useCurrentSender()?.inboxId === inboxId
 
   const { data: profile } = useProfileQuery({ xmtpId: inboxId })
-
-  const { data: socialProfiles } = useSocialProfilesForAddressQuery({
-    ethAddress: profile?.privyAddress,
-  })
 
   // Set up the screen header with edit functionality
   useProfileMeScreenHeader({ inboxId })
@@ -150,6 +145,10 @@ const EditableProfileContactCardNameInput = memo(function EditableProfileContact
 
   const nameDefaultTextValue = profileMeStore.getState().nameTextValue
 
+  const isOnChainName = useProfileMeStoreValue(inboxId, (state) =>
+    state.nameTextValue?.includes("."),
+  )
+
   const [nameValidationError, setNameValidationError] = useState<string>()
 
   const handleDisplayNameChange = useCallback(
@@ -170,6 +169,7 @@ const EditableProfileContactCardNameInput = memo(function EditableProfileContact
       onChangeText={handleDisplayNameChange}
       status={nameValidationError ? "error" : undefined}
       helper={nameValidationError}
+      isOnchainName={isOnChainName}
     />
   )
 })
@@ -214,7 +214,7 @@ const EditableProfileContactCardImportName = memo(function EditableProfileContac
   return (
     <ProfileContactCardImportName
       onPress={() => {
-        router.navigate("ProfileImportName")
+        router.navigate("ProfileImportInfo")
       }}
     />
   )
@@ -259,24 +259,11 @@ const EditableProfileContactCardAvatar = memo(function EditableProfileContactCar
   const { addPFP, asset, isUploading } = useAddPfp()
   const profileMeStore = useProfileMeStore(inboxId)
   const { data: profile } = useProfileQuery({ xmtpId: inboxId })
+  const storeAvatar = useProfileMeStoreValue(inboxId, (state) => state.avatarUri)
 
-  // Determine which avatar to display with priority: store avatar > profile avatar
-  const storeAvatar = profileMeStore.getState().avatarUri
-  const profileAvatar = profile?.avatar
+  // Priority: local asset (during upload) > store avatar > profile avatar
+  const avatarUri = asset?.uri || storeAvatar || profile?.avatar
 
-  // Create a display URI with a cache-busting parameter
-  const getDisplayUri = useCallback(() => {
-    // Priority: local asset (during upload) > store avatar > profile avatar
-    const sourceUri = asset?.uri || storeAvatar || profileAvatar
-
-    if (!sourceUri) {
-      return undefined
-    }
-
-    return sourceUri
-  }, [asset?.uri, storeAvatar, profileAvatar])
-
-  // Update upload status
   useEffect(() => {
     profileMeStore.getState().actions.setIsAvatarUploading(isUploading)
   }, [isUploading, profileMeStore])
@@ -290,7 +277,7 @@ const EditableProfileContactCardAvatar = memo(function EditableProfileContactCar
 
   return (
     <ProfileContactCardEditableAvatar
-      avatarUri={getDisplayUri()}
+      avatarUri={avatarUri}
       avatarName={profile?.name}
       onPress={addAvatar}
     />

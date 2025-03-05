@@ -244,6 +244,8 @@ const ProfileContactCardNameInput = memo(function ProfileContactCardNameInput() 
 
   const [nameValidationError, setNameValidationError] = useState<string>()
 
+  const isOnchainName = useOnboardingContactCardStore((state) => state.name?.includes("."))
+
   const handleDisplayNameChange = useCallback((args: { text: string; error?: string }) => {
     const { text, error } = args
     const { actions } = useOnboardingContactCardStore.getState()
@@ -264,6 +266,7 @@ const ProfileContactCardNameInput = memo(function ProfileContactCardNameInput() 
       onChangeText={handleDisplayNameChange}
       status={nameValidationError ? "error" : undefined}
       helper={nameValidationError}
+      isOnchainName={isOnchainName}
     />
   )
 })

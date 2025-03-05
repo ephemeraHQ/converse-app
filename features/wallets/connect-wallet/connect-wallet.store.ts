@@ -2,24 +2,21 @@ import { WalletId } from "thirdweb/wallets"
 import { create } from "zustand"
 import { IWallet } from "./connect-wallet.types"
 
-type IPage = "choose-app" | "choose-name" | "link-inbox" | "rotate-inbox"
+// type IPage = "choose-app" | "choose-name" | "link-inbox" | "rotate-inbox"
 
 type IConnectWalletState = {
-  // Connection state
-  page: IPage
   thirdwebWalletIdThatIsConnecting: WalletId | undefined
-  ethereumAddressThatIsConnecting: string | undefined
   activeWallet: IWallet | undefined
+  selectedInfo: { name: string; avatar: string | undefined } | undefined
+  // page: IPage
 }
 
 type IConnectWalletActions = {
-  // Connection actions
   setWalletIdThatIsConnecting: (walletId: WalletId | undefined) => void
-  setEthereumAddressThatIsConnecting: (ethereumAddress: string) => void
   setActiveWallet: (wallet: IWallet | undefined) => void
-  setPage: (page: IPage) => void
-  // Reset action
+  setSelectedInfo: (info: { name: string; avatar: string | undefined } | undefined) => void
   reset: () => void
+  // setPage: (page: IPage) => void
 }
 
 type IConnectWalletStore = IConnectWalletState & {
@@ -27,10 +24,10 @@ type IConnectWalletStore = IConnectWalletState & {
 }
 
 const initialState: IConnectWalletState = {
-  page: "choose-app",
+  // page: "choose-app",
   thirdwebWalletIdThatIsConnecting: undefined,
-  ethereumAddressThatIsConnecting: undefined,
   activeWallet: undefined,
+  selectedInfo: undefined,
 }
 
 /**
@@ -48,17 +45,14 @@ export const useConnectWalletStore = create<IConnectWalletStore>((set) => ({
     setWalletIdThatIsConnecting: (walletId) =>
       set({
         thirdwebWalletIdThatIsConnecting: walletId,
-        ethereumAddressThatIsConnecting: undefined,
       }),
-
-    setEthereumAddressThatIsConnecting: (ethereumAddress: string) =>
-      set({ ethereumAddressThatIsConnecting: ethereumAddress }),
 
     setActiveWallet: (wallet) => set({ activeWallet: wallet }),
 
-    setPage: (page) => set({ page }),
+    setSelectedInfo: (info) => set({ selectedInfo: info }),
 
-    // Reset action
     reset: () => set(initialState),
+
+    // setPage: (page) => set({ page }),
   },
 }))

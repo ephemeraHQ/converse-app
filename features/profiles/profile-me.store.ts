@@ -5,9 +5,9 @@ import { createJSONStorage, persist, subscribeWithSelector } from "zustand/middl
 
 type IProfileMeStoreState = {
   editMode: boolean
-  nameTextValue: string
-  usernameTextValue: string
-  descriptionTextValue: string
+  nameTextValue: string | undefined
+  usernameTextValue: string | undefined
+  descriptionTextValue: string | undefined
   avatarUri?: string
   isAvatarUploading: boolean
 }

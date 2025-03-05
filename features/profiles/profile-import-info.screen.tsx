@@ -4,21 +4,24 @@ import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.stor
 import { useProfileMeStore } from "@/features/profiles/profile-me.store"
 import { ConnectWallet } from "@/features/wallets/connect-wallet/connect-wallet"
 
-export const ProfileImportNameScreen = memo(function ProfileImportNameScreen() {
+export const ProfileImportInfoScreen = memo(function ProfileImportInfoScreen() {
   const currentSender = useSafeCurrentSender()
 
   const profileMeStore = useProfileMeStore(currentSender.inboxId)
 
   const handleSelectName = useCallback(
-    (name: string) => {
-      profileMeStore.getState().actions.setNameTextValue(name)
+    (info: { name: string; avatar: string | undefined }) => {
+      profileMeStore.getState().actions.setNameTextValue(info.name)
+      if (info.avatar) {
+        profileMeStore.getState().actions.setAvatarUri(info.avatar)
+      }
     },
     [profileMeStore],
   )
 
   return (
     <>
-      <ConnectWallet onSelectName={handleSelectName} />
+      <ConnectWallet onSelectInfo={handleSelectName} />
       {/* Not sure why but if not here, they appear behind the screen? (formSheet problem?) */}
       <Snackbars />
     </>

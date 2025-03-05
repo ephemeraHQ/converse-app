@@ -1,4 +1,5 @@
 // IMPORTANT: DO NOT CHANGE THE ORDER OF THESE IMPORTS
+import "@thirdweb-dev/react-native-adapter"
 import "@walletconnect/react-native-compat"
 // For Privy https://github.com/privy-io/expo-starter/blob/main/entrypoint.js
 import "fast-text-encoding"

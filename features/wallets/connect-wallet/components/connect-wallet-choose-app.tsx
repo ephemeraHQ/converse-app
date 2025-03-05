@@ -2,13 +2,13 @@ import { memo, useCallback } from "react"
 import { Alert } from "react-native"
 import { Loader } from "@/design-system/loader"
 import { VStack } from "@/design-system/VStack"
+import { connectWallet } from "@/features/wallets/connect-wallet/connect-wallet.service"
 import { useConnectWalletStore } from "@/features/wallets/connect-wallet/connect-wallet.store"
 import { useInstalledWalletsQuery } from "@/features/wallets/installed-wallets.query"
 import { ISupportedWallet, supportedWallets } from "@/features/wallets/supported-wallets"
 import { useRouter } from "@/navigation/use-navigation"
 import { captureErrorWithToast } from "@/utils/capture-error"
 import { openLink } from "@/utils/linking"
-import { connectWallet } from "../connect-wallet.service"
 import {
   ConnectWalletHeader,
   ConnectWalletItem,
@@ -93,9 +93,7 @@ type IInstalledWalletItemProps = {
   wallet: ISupportedWallet
 }
 
-export const InstalledWalletItem = memo(function InstalledWalletItem(
-  props: IInstalledWalletItemProps,
-) {
+const InstalledWalletItem = memo(function InstalledWalletItem(props: IInstalledWalletItemProps) {
   const { wallet } = props
 
   const walletIdThatIsConnecting = useConnectWalletStore(

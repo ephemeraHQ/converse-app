@@ -2,8 +2,8 @@ import { memo } from "react"
 import { Avatar } from "@/components/avatar"
 import { useSocialProfilesForAddressQuery } from "@/features/social-profiles/social-profiles.query"
 import { supportedSocialProfiles } from "@/features/social-profiles/supported-social-profiles"
-import { useConnectWalletContext } from "@/features/wallets/connect-wallet/connect-wallet.context"
 import { disconnectActiveWallet } from "@/features/wallets/connect-wallet/connect-wallet.service"
+import { useConnectWalletStore } from "@/features/wallets/connect-wallet/connect-wallet.store"
 import { useRouter } from "@/navigation/use-navigation"
 import { captureError } from "@/utils/capture-error"
 import { shortAddress } from "@/utils/strings/shortAddress"
@@ -29,8 +29,6 @@ export const ConnectWalletChooseName = memo(function ConnectWalletChooseName(
   const { ethAddress } = props
 
   const router = useRouter()
-
-  const { onSelectName } = useConnectWalletContext()
 
   const { data: socialProfiles, isLoading: isLoadingSocialProfiles } =
     useSocialProfilesForAddressQuery({
@@ -92,12 +90,14 @@ export const ConnectWalletChooseName = memo(function ConnectWalletChooseName(
       }
       content={socialProfiles?.map((socialProfile) => (
         <ConnectWalletItem
-          key={socialProfile.name}
+          key={`${socialProfile.name}-${socialProfile.type}-${socialProfile.avatar}-${socialProfile.address}`}
           name={socialProfile.name}
           image={<Avatar uri={socialProfile.avatar} name={socialProfile.name} />}
           onPress={() => {
-            onSelectName(socialProfile.name)
-            router.goBack()
+            useConnectWalletStore.getState().actions.setSelectedInfo({
+              name: socialProfile.name,
+              avatar: socialProfile.avatar,
+            })
           }}
         />
       ))}

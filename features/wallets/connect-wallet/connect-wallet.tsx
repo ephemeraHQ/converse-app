@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useMemo } from "react"
 import { LayoutChangeEvent, useWindowDimensions } from "react-native"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
-import { useActiveWallet } from "thirdweb/react"
 import { DynamicPages } from "@/components/dynamic-pages/dynamic-pages"
 import { Screen } from "@/components/screen/screen"
 import { VStack } from "@/design-system/VStack"
@@ -13,18 +12,16 @@ import { captureError } from "@/utils/capture-error"
 import { GenericError } from "@/utils/error"
 import { ConnectWalletOnboarding } from "./components/connect-wallet-onboarding"
 import { disconnectActiveWallet, resetConnectWalletStore } from "./connect-wallet.service"
-import { useConnectWalletStore } from "./connect-wallet.store"
 
-export function ConnectWallet(props: { onSelectName: (name: string) => void }) {
-  const { onSelectName } = props
+export function ConnectWallet(props: {
+  onSelectInfo: (info: { name: string; avatar: string | undefined }) => void
+}) {
+  const { onSelectInfo } = props
 
   const { theme } = useAppTheme()
   const insets = useSafeAreaInsets()
   const router = useRouter()
   const windowHeight = useWindowDimensions().height
-
-  // Sync ThirdWeb wallet state with our store
-  useSyncThirdwebWallet()
 
   // Set up the pages for the dynamic pages component
   const pages = useMemo(
@@ -68,7 +65,7 @@ export function ConnectWallet(props: { onSelectName: (name: string) => void }) {
   }, [])
 
   return (
-    <ConnectWalletContextProvider onSelectName={onSelectName}>
+    <ConnectWalletContextProvider onSelectInfo={onSelectInfo}>
       <Screen backgroundColor={theme.colors.background.raised}>
         <VStack onLayout={handleLayout}>
           <DynamicPages pages={pages} />
@@ -76,21 +73,4 @@ export function ConnectWallet(props: { onSelectName: (name: string) => void }) {
       </Screen>
     </ConnectWalletContextProvider>
   )
-}
-
-/**
- * Hook to synchronize ThirdWeb wallet state with our store
- * Disconnects ThirdWeb wallet if we don't have a corresponding wallet in our store
- */
-function useSyncThirdwebWallet() {
-  const activeWallet = useActiveWallet()
-  const thirdwebWalletIdThatIsConnecting = useConnectWalletStore(
-    (state) => state.thirdwebWalletIdThatIsConnecting,
-  )
-
-  useEffect(() => {
-    if (!thirdwebWalletIdThatIsConnecting && activeWallet) {
-      disconnectActiveWallet()
-    }
-  }, [activeWallet, thirdwebWalletIdThatIsConnecting])
 }

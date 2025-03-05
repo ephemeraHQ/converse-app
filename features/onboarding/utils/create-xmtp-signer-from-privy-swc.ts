@@ -1,9 +1,7 @@
-import { useSmartWallets } from "@privy-io/expo/smart-wallets"
+import { ISmartWalletClient } from "@/features/wallets/smart-wallet"
 import { IXmtpSigner } from "@/features/xmtp/xmtp.types"
 
-export function createXmtpSignerFromPrivySwc(
-  smartWalletClient: NonNullable<ReturnType<typeof useSmartWallets>["client"]>,
-): IXmtpSigner {
+export function createXmtpSignerFromSwc(smartWalletClient: ISmartWalletClient): IXmtpSigner {
   return {
     getAddress: async () => smartWalletClient.account.address,
     getChainId: () => smartWalletClient.chain?.id,

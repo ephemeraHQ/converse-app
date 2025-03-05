@@ -1,12 +1,12 @@
-import { useSmartWallets } from "@privy-io/expo/smart-wallets"
 import { memo, useCallback } from "react"
 import { Text } from "@/design-system/Text"
 import {
   getSafeCurrentSender,
   useMultiInboxStore,
 } from "@/features/authentication/multi-inbox.store"
-import { createXmtpSignerFromPrivySwc } from "@/features/onboarding/utils/create-xmtp-signer-from-privy-swc"
+import { createXmtpSignerFromSwc } from "@/features/onboarding/utils/create-xmtp-signer-from-privy-swc"
 import { IWallet } from "@/features/wallets/connect-wallet/connect-wallet.types"
+import { useSmartWalletClient } from "@/features/wallets/smart-wallet"
 import { createXmtpClient } from "@/features/xmtp/xmtp-client/xmtp-client.service"
 import { getXmtpSigner } from "@/features/xmtp/xmtp-signer/get-xmtp-signer"
 import { usePersistState } from "@/hooks/use-persist-state"
@@ -34,7 +34,7 @@ export const ConnectWalletRotateInbox = memo(function ConnectWalletRotateInbox(
   const { activeWallet } = props
 
   const router = useRouter()
-  const { client: smartWalletClient } = useSmartWallets()
+  const { smartWalletClient } = useSmartWalletClient()
   const currentRoute = getCurrentRoute()
 
   const smartWalletClientEthAddress = smartWalletClient?.account.address
@@ -55,7 +55,7 @@ export const ConnectWalletRotateInbox = memo(function ConnectWalletRotateInbox(
         throw new Error("No smart wallet client found")
       }
 
-      const currentSender = getSafeCurrentSender()
+      const previousCurrentSender = getSafeCurrentSender()
 
       const activeWalletAccount = activeWallet.getAccount()!
       const activeWalletEthAddress = activeWalletAccount.address
@@ -71,7 +71,7 @@ export const ConnectWalletRotateInbox = memo(function ConnectWalletRotateInbox(
       })
 
       // Add the privy SWC to the new client inbox
-      await newXmtpClient.addAccount(createXmtpSignerFromPrivySwc(smartWalletClient), true)
+      await newXmtpClient.addAccount(createXmtpSignerFromSwc(smartWalletClient), true)
 
       // Set the new inbox ID as the current sender
       useMultiInboxStore.getState().actions.setCurrentSender({
@@ -80,7 +80,7 @@ export const ConnectWalletRotateInbox = memo(function ConnectWalletRotateInbox(
       })
 
       // Remove the previous sender since it's no longer valid
-      useMultiInboxStore.getState().actions.removeSender(currentSender)
+      useMultiInboxStore.getState().actions.removeSender(previousCurrentSender)
 
       setHasRotatedWalletAddress("true")
     } catch (error) {
@@ -94,7 +94,11 @@ export const ConnectWalletRotateInbox = memo(function ConnectWalletRotateInbox(
     return <ConnectWalletLoadingContent />
   }
 
-  if (hasRotatedWalletAddress === "true") {
+  // Only show rotate inbox error in the onboarding flow
+  if (
+    hasRotatedWalletAddress === "true" &&
+    currentRoute?.name === "OnboardingCreateContactCardImportName"
+  ) {
     return (
       <ConnectWalletLayout
         header={<ConnectWalletHeader title="Inbox already rotated" />}
@@ -115,7 +119,7 @@ export const ConnectWalletRotateInbox = memo(function ConnectWalletRotateInbox(
   }
 
   // Temporary until we have multi-inbox support
-  if (currentRoute?.name === "ProfileImportName") {
+  if (currentRoute?.name === "ProfileImportInfo") {
     return (
       <ConnectWalletLayout
         header={<ConnectWalletHeader title="Address in use" />}
@@ -132,7 +136,7 @@ export const ConnectWalletRotateInbox = memo(function ConnectWalletRotateInbox(
         }
         buttons={
           <>
-            <ConnectWalletLinkButton text="Cancel" onPress={router.goBack} />
+            <ConnectWalletOutlineButton text="Cancel" onPress={router.goBack} />
           </>
         }
       />

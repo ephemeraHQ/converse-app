@@ -45,6 +45,7 @@ export function Chip({
   return (
     <ChipContext.Provider value={{ size, disabled, isSelected }}>
       <Pressable
+        withHaptics
         onPress={onPress}
         disabled={disabled}
         style={[

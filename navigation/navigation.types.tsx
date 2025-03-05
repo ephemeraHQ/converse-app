@@ -34,7 +34,7 @@ export type NavigationParamList = {
   ShareProfile: undefined
   TopUp: undefined
   Profile: ProfileNavParams
-  ProfileImportName: undefined
+  ProfileImportInfo: undefined
   // InviteUsersToExistingGroup: InviteUsersToExistingGroupParams;
   UserProfile: undefined
 

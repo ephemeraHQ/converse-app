@@ -22,10 +22,10 @@ import {
   GroupMembersListNav,
   GroupMembersListScreenConfig,
 } from "@/features/group-details/screens/group-members-list.nav"
-import { OnboardingContactCardImportNameScreen } from "@/features/onboarding/screens/onboarding-contact-card-import-name.screen"
+import { OnboardingContactCardImportInfoScreen } from "@/features/onboarding/screens/onboarding-contact-card-import-info.screen"
 import { OnboardingContactCardScreen } from "@/features/onboarding/screens/onboarding-contact-card.screen"
 import { OnboardingWelcomeScreen } from "@/features/onboarding/screens/onboarding-welcome.screen"
-import { ProfileImportNameScreen } from "@/features/profiles/profile-import-name.screen"
+import { ProfileImportInfoScreen } from "@/features/profiles/profile-import-info.screen"
 import { ProfileNav, ProfileScreenConfig } from "@/features/profiles/profile.nav"
 import { NavigationParamList } from "@/navigation/navigation.types"
 import { navigationRef } from "@/navigation/navigation.utils"
@@ -136,7 +136,7 @@ const AppStacks = memo(function AppStacks() {
           />
           <AppNativeStack.Screen
             name="OnboardingCreateContactCardImportName"
-            component={OnboardingContactCardImportNameScreen}
+            component={OnboardingContactCardImportInfoScreen}
             options={{
               presentation: "formSheet",
               sheetAllowedDetents: [0.5],
@@ -171,8 +171,8 @@ const AppStacks = memo(function AppStacks() {
           {AddGroupMembersNav()}
           {GroupMembersListNav()}
           <AppNativeStack.Screen
-            name="ProfileImportName"
-            component={ProfileImportNameScreen}
+            name="ProfileImportInfo"
+            component={ProfileImportInfoScreen}
             options={{
               presentation: "formSheet",
               sheetAllowedDetents: [0.5],

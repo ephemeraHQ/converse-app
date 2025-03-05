@@ -51,14 +51,8 @@ export async function getXmtpClientByEthAddress(args: { ethAddress: string }) {
 
 export async function getXmtpClientByInboxId(args: { inboxId: InboxId }) {
   const { inboxId } = args
-  console.log("inboxId:", inboxId)
+
   const sender = useMultiInboxStore.getState().senders.find((s) => s.inboxId === inboxId)
-
-  const senders = useMultiInboxStore.getState().senders
-
-  console.log("senders:", senders)
-
-  console.log("sender:", sender)
 
   if (!sender) {
     throw new Error(`No sender found for inboxId: ${inboxId}`)

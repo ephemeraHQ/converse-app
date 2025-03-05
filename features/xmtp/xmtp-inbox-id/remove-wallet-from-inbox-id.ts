@@ -1,19 +1,19 @@
 import { InboxId } from "@xmtp/react-native-sdk"
+import { IXmtpSigner } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
 import { XMTPError } from "@/utils/error"
 import { xmtpLogger } from "@/utils/logger"
 import { getXmtpClientByInboxId } from "../xmtp-client/xmtp-client.service"
-import { IXmtpSigner } from "../xmtp.types"
 
-export async function addWalletToInboxId(args: {
+export async function removeWalletFromInboxId(args: {
   inboxId: InboxId
-  wallet: IXmtpSigner
-  allowReassignInboxId?: boolean
+  signer: IXmtpSigner
+  ethAddressToRemove: string
 }) {
-  const { inboxId, wallet, allowReassignInboxId = false } = args
+  const { inboxId, signer, ethAddressToRemove } = args
 
   xmtpLogger.debug(
-    `[addWalletToInboxId] Adding wallet ${await wallet.getAddress()} to inbox ID: ${inboxId} with allowReassignInboxId: ${allowReassignInboxId}`,
+    `[removeWalletFromInboxId] Removing wallet address ${ethAddressToRemove} from inbox ID: ${inboxId}`,
   )
 
   try {
@@ -22,15 +22,17 @@ export async function addWalletToInboxId(args: {
     })
 
     const beforeMs = new Date().getTime()
-    await client.addAccount(wallet, allowReassignInboxId)
-
+    await client.removeAccount(signer, ethAddressToRemove)
     const afterMs = new Date().getTime()
+
     const timeDiffMs = afterMs - beforeMs
 
     if (timeDiffMs > 3000) {
       captureError(
         new XMTPError({
-          error: new Error(`Adding wallet to inbox ID took ${timeDiffMs}ms for inboxId ${inboxId}`),
+          error: new Error(
+            `Removing wallet address ${ethAddressToRemove} from inbox ID ${inboxId} took ${timeDiffMs}ms`,
+          ),
         }),
       )
     }
@@ -39,7 +41,7 @@ export async function addWalletToInboxId(args: {
   } catch (error) {
     throw new XMTPError({
       error,
-      additionalMessage: `Error adding wallet address ${await wallet.getAddress()} to inbox ID for inboxId ${inboxId}`,
+      additionalMessage: `Error removing wallet address ${ethAddressToRemove} from inbox ID ${inboxId}`,
     })
   }
 }

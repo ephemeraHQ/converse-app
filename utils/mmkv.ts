@@ -97,7 +97,6 @@ function createMMKVPersister(storage: MMKV): Persister {
         storage.delete("reactQuery")
         storage.set("reactQuery", clientString)
       } catch (error) {
-        console.log("client:", client)
         captureError(error, {
           extras: {
             type: "reactQueryPersister",

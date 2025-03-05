@@ -221,16 +221,17 @@ export const ConnectWalletErrorContent = memo(function ConnectWalletErrorContent
   const { onPressCancel } = props
 
   return (
-    <>
-      <ConnectWalletHeader title="Something went wrong" />
-      <ConnectWalletContentContainer>
+    <ConnectWalletLayout
+      header={<ConnectWalletHeader title="Something went wrong" />}
+      text={
         <ConnectWalletTextSection
           text="Please try again"
           secondaryText="If the problem persists, please contact support."
         />
-        <ConnectWalletOutlineButton onPress={onPressCancel} />
-      </ConnectWalletContentContainer>
-    </>
+      }
+      content={<></>}
+      buttons={<ConnectWalletOutlineButton onPress={onPressCancel} />}
+    />
   )
 })
 

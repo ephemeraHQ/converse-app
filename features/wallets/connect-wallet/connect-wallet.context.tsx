@@ -1,12 +1,12 @@
 import React, { createContext, useCallback, useContext, useMemo } from "react"
 
 type IConnectWalletContextType = {
-  onSelectName: (name: string) => void
+  onSelectInfo: (args: { name: string; avatar: string | undefined }) => void
 }
 
 type IConnectWalletContextProps = {
   children: React.ReactNode
-  onSelectName: (name: string) => void
+  onSelectInfo: (args: { name: string; avatar: string | undefined }) => void
 }
 
 const ConnectWalletContext = createContext<IConnectWalletContextType>(
@@ -14,16 +14,16 @@ const ConnectWalletContext = createContext<IConnectWalletContextType>(
 )
 
 export const ConnectWalletContextProvider = (props: IConnectWalletContextProps) => {
-  const { children, onSelectName: onSelectNameProp } = props
+  const { children, onSelectInfo: onSelectInfoProp } = props
 
-  const onSelectName = useCallback(
-    (name: string) => {
-      onSelectNameProp(name)
+  const onSelectInfo = useCallback(
+    (args: { name: string; avatar: string | undefined }) => {
+      onSelectInfoProp(args)
     },
-    [onSelectNameProp],
+    [onSelectInfoProp],
   )
 
-  const value = useMemo(() => ({ onSelectName }), [onSelectName])
+  const value = useMemo(() => ({ onSelectInfo }), [onSelectInfo])
 
   return <ConnectWalletContext.Provider value={value}>{children}</ConnectWalletContext.Provider>
 }

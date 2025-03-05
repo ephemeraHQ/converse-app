@@ -3,10 +3,11 @@ import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.stor
 import { IWallet } from "@/features/wallets/connect-wallet/connect-wallet.types"
 import { supportedWallets } from "@/features/wallets/supported-wallets"
 import { addWalletToInboxId } from "@/features/xmtp/xmtp-inbox-id/add-wallet-to-inbox-id"
+import { invalidateXmtpInboxIdFromEthAddressQuery } from "@/features/xmtp/xmtp-inbox-id/xmtp-inbox-id-from-eth-address.query"
 import { getXmtpSigner } from "@/features/xmtp/xmtp-signer/get-xmtp-signer"
 import { useRouter } from "@/navigation/use-navigation"
 import { useAppTheme } from "@/theme/use-app-theme"
-import { captureErrorWithToast } from "@/utils/capture-error"
+import { captureError, captureErrorWithToast } from "@/utils/capture-error"
 import { shortAddress } from "@/utils/strings/shortAddress"
 import {
   ConnectWalletErrorContent,
@@ -29,29 +30,40 @@ export const ConnectWalletLinkToInbox = memo(function ConnectWalletLinkToInbox(
   const { theme } = useAppTheme()
   const router = useRouter()
 
-  const walletEthAddress = activeWallet.getAccount()?.address
+  const walletEthAddress = activeWallet?.getAccount()?.address
 
-  // Handle linking the wallet to the current inbox
   const handleLinkToCurrentInbox = useCallback(async () => {
     try {
-      const walletAccount = activeWallet.getAccount()!
+      const walletAccount = activeWallet.getAccount()
 
-      // Get the XMTP signer from the wallet
-      const xmtpSigner = await getXmtpSigner({
+      if (!walletAccount) {
+        throw new Error("Wallet account not found")
+      }
+
+      const chainId = activeWallet.getChain()?.id
+
+      if (!chainId) {
+        throw new Error("Chain ID not found")
+      }
+
+      const xmtpSigner = getXmtpSigner({
         ethAddress: walletAccount.address,
         type: "EOA",
-        chainId: activeWallet.getChain()?.id!,
-        signMessage: (message: string) => walletAccount.signMessage({ message }),
+        chainId,
+        signMessage: async (message: string) => walletAccount?.signMessage({ message }),
       })
 
-      // Get the current sender
       const currentSender = getSafeCurrentSender()
 
-      // Add the wallet to the inbox ID
       await addWalletToInboxId({
         inboxId: currentSender.inboxId,
         wallet: xmtpSigner,
       })
+
+      invalidateXmtpInboxIdFromEthAddressQuery({
+        clientEthAddress: currentSender.ethereumAddress,
+        targetEthAddress: walletAccount.address,
+      }).catch(captureError)
     } catch (error) {
       captureErrorWithToast(error, {
         message: "Error linking wallet to inbox",
@@ -59,7 +71,7 @@ export const ConnectWalletLinkToInbox = memo(function ConnectWalletLinkToInbox(
     }
   }, [activeWallet])
 
-  const supportedWallet = supportedWallets.find((wallet) => wallet.thirdwebId === activeWallet.id)
+  const supportedWallet = supportedWallets.find((wallet) => wallet.thirdwebId === activeWallet?.id)
 
   if (!walletEthAddress) {
     return <ConnectWalletErrorContent onPressCancel={router.goBack} />

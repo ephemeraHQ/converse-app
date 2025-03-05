@@ -1,13 +1,13 @@
 import { useLoginWithPasskey as usePrivyLoginWithPasskey } from "@privy-io/expo/passkey"
-import { useSmartWallets } from "@privy-io/expo/smart-wallets"
 import { useEffect, useRef, useState } from "react"
-import { createXmtpSignerFromPrivySwc } from "@/features/onboarding/utils/create-xmtp-signer-from-privy-swc"
+import { createXmtpSignerFromSwc } from "@/features/onboarding/utils/create-xmtp-signer-from-privy-swc"
+import { useSmartWalletClient } from "@/features/wallets/smart-wallet"
 import { createXmtpClient } from "@/features/xmtp/xmtp-client/xmtp-client.service"
 import { logger } from "@/utils/logger"
 import { RELYING_PARTY } from "../onboarding.constants"
 
 export function useLoginWithPasskey() {
-  const { client: smartWalletClient } = useSmartWallets()
+  const { smartWalletClient: smartWalletClient } = useSmartWalletClient()
   const [isLoggingIn, setIsLoggingIn] = useState(false)
   const clientRef = useRef(smartWalletClient)
   const { loginWithPasskey: privyLoginWithPasskey } = usePrivyLoginWithPasskey()
@@ -39,7 +39,7 @@ export function useLoginWithPasskey() {
       // Step 2: Wallet setup
       logger.debug(`[Wallet Setup] Getting smart wallet client`)
       const client = await waitForSmartWalletClient()
-      const signer = createXmtpSignerFromPrivySwc(client)
+      const signer = createXmtpSignerFromSwc(client)
 
       // Step 3: Inbox setup
       logger.debug(`[Inbox Setup] Creating inbox for address: ${client.account.address}`)
