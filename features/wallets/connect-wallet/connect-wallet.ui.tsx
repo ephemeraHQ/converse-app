@@ -105,19 +105,6 @@ export const ConnectWalletPrimaryButton = memo(function ConnectWalletPrimaryButt
   return <Button text={text} onPress={onPress} loading={loading} disabled={disabled} />
 })
 
-export const ConnectWalletButtonsContainer = memo(function ConnectWalletButtonsContainer(
-  props: IVStackProps,
-) {
-  const { children, ...rest } = props
-  const { theme } = useAppTheme()
-
-  return (
-    <VStack style={{ rowGap: theme.spacing.xxs }} {...rest}>
-      {children}
-    </VStack>
-  )
-})
-
 /**
  * Cancel button for connect wallet flows
  */

@@ -142,7 +142,7 @@ const AppStacks = memo(function AppStacks() {
               sheetAllowedDetents: [0.5],
               // sheetCornerRadius: theme.borderRadius.sm, // Not sure why but adding this breaks the animation between different height transitions
               contentStyle: {
-                backgroundColor: theme.colors.background.surface,
+                backgroundColor: theme.colors.background.raised,
               },
             }}
           />
@@ -178,7 +178,7 @@ const AppStacks = memo(function AppStacks() {
               sheetAllowedDetents: [0.5],
               // sheetCornerRadius: theme.borderRadius.sm, // Not sure why but adding this breaks the animation between different height transitions
               contentStyle: {
-                backgroundColor: theme.colors.background.surface,
+                backgroundColor: theme.colors.background.raised,
               },
             }}
           />

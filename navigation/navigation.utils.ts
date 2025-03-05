@@ -91,3 +91,7 @@ RNLinking.openURL = (url: string) => {
     return Promise.reject(error)
   }
 }
+
+export function getCurrentRoute() {
+  return navigationRef.getCurrentRoute()
+}

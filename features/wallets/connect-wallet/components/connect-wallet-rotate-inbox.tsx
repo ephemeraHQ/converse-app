@@ -10,6 +10,7 @@ import { IWallet } from "@/features/wallets/connect-wallet/connect-wallet.types"
 import { createXmtpClient } from "@/features/xmtp/xmtp-client/xmtp-client.service"
 import { getXmtpSigner } from "@/features/xmtp/xmtp-signer/get-xmtp-signer"
 import { usePersistState } from "@/hooks/use-persist-state"
+import { getCurrentRoute } from "@/navigation/navigation.utils"
 import { useRouter } from "@/navigation/use-navigation"
 import { captureErrorWithToast } from "@/utils/capture-error"
 import { shortAddress } from "@/utils/strings/shortAddress"
@@ -34,6 +35,7 @@ export const ConnectWalletRotateInbox = memo(function ConnectWalletRotateInbox(
 
   const router = useRouter()
   const { client: smartWalletClient } = useSmartWallets()
+  const currentRoute = getCurrentRoute()
 
   const smartWalletClientEthAddress = smartWalletClient?.account.address
 
@@ -108,6 +110,31 @@ export const ConnectWalletRotateInbox = memo(function ConnectWalletRotateInbox(
           </Text>
         }
         buttons={<ConnectWalletOutlineButton text="Cancel" onPress={router.goBack} />}
+      />
+    )
+  }
+
+  // Temporary until we have multi-inbox support
+  if (currentRoute?.name === "ProfileImportName") {
+    return (
+      <ConnectWalletLayout
+        header={<ConnectWalletHeader title="Address in use" />}
+        text={
+          <ConnectWalletTextSection
+            text="This wallet address is already delivering messages to a different inbox."
+            secondaryText="Coming soon, you'll be able to add it as an additional inbox."
+          />
+        }
+        content={
+          <Text preset="small" color="secondary">
+            {shortAddress(activeWallet.getAccount()?.address ?? "")}
+          </Text>
+        }
+        buttons={
+          <>
+            <ConnectWalletLinkButton text="Cancel" onPress={router.goBack} />
+          </>
+        }
       />
     )
   }
