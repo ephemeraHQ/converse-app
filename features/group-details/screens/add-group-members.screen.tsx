@@ -1,7 +1,6 @@
-import { memo, useCallback, useState } from "react"
+import { memo, useState } from "react"
 import { ViewStyle } from "react-native"
 import { Screen } from "@/components/screen/screen"
-import { HeaderAction } from "@/design-system/Header/HeaderAction"
 import { TextInput } from "@/design-system/text-input"
 import { VStack } from "@/design-system/VStack"
 import { useAddGroupMembers } from "@/features/group-details/hooks/use-add-group-members"
