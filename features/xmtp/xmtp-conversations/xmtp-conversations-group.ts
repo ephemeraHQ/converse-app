@@ -1,7 +1,8 @@
 import { InboxId } from "@xmtp/react-native-sdk"
 import { PermissionPolicySet } from "@xmtp/react-native-sdk/build/lib/types/PermissionPolicySet"
+import { IXmtpGroupWithCodecs } from "@/features/xmtp/xmtp.types"
+import { captureError } from "@/utils/capture-error"
 import { XMTPError } from "@/utils/error"
-import { xmtpLogger } from "@/utils/logger"
 import { getXmtpClientByEthAddress } from "../xmtp-client/xmtp-client.service"
 
 const defaultPermissionPolicySet: PermissionPolicySet = {
@@ -52,7 +53,7 @@ export async function createXmtpGroup(args: {
     const duration = Date.now() - startTime
 
     if (duration > 3000) {
-      xmtpLogger.warn(`Creating group took ${duration}ms`)
+      captureError(new Error(`Creating group took ${duration}ms`))
     }
 
     return group
@@ -60,6 +61,26 @@ export async function createXmtpGroup(args: {
     throw new XMTPError({
       error,
       additionalMessage: "failed to create XMTP group",
+    })
+  }
+}
+
+export async function addGroupMembers(args: { group: IXmtpGroupWithCodecs; inboxIds: InboxId[] }) {
+  try {
+    const { group, inboxIds } = args
+
+    const startTime = Date.now()
+    await group.addMembersByInboxId(inboxIds)
+    const duration = Date.now() - startTime
+
+    if (duration > 3000) {
+      captureError(new Error(`Adding group members took ${duration}ms`))
+    }
+  } catch (error) {
+    captureError(error)
+    throw new XMTPError({
+      error,
+      additionalMessage: "failed to add group members",
     })
   }
 }

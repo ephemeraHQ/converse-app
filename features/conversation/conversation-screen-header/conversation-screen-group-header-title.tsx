@@ -6,6 +6,7 @@ import { Text } from "@/design-system/Text"
 import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
 import { ConversationHeaderTitle } from "@/features/conversation/conversation-screen-header/conversation-screen-header-title"
 import { useGroupName } from "@/hooks/useGroupName"
+import { useRouter } from "@/navigation/use-navigation"
 // import { useGroupPendingRequests } from "@/hooks/useGroupPendingRequests";
 import { useGroupMembersQuery } from "@/queries/useGroupMembersQuery"
 
@@ -15,6 +16,7 @@ type GroupConversationTitleProps = {
 
 export const GroupConversationTitle = memo(({ conversationTopic }: GroupConversationTitleProps) => {
   const currentAccount = useCurrentSenderEthAddress()!
+  const router = useRouter()
 
   const { data: members } = useGroupMembersQuery({
     caller: "GroupConversationTitle",
@@ -27,8 +29,8 @@ export const GroupConversationTitle = memo(({ conversationTopic }: GroupConversa
   })
 
   const onPress = useCallback(() => {
-    // TODO: Implement
-  }, [])
+    router.navigate("GroupDetails", { conversationTopic })
+  }, [router, conversationTopic])
 
   const requestsCount = 0 // TODO useGroupPendingRequests(conversationTopic).length;
 

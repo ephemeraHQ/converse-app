@@ -10,6 +10,18 @@ import { useAuthStore } from "@/features/authentication/authentication.store"
 import { BlockedConversationsScreen } from "@/features/blocked-conversations/blocked-conversations.screen"
 import { ConversationListScreen } from "@/features/conversation-list/conversation-list.screen"
 import { ConversationRequestsListNav } from "@/features/conversation-requests-list/conversation-requests-list.nav"
+import {
+  AddGroupMembersNav,
+  AddGroupMembersScreenConfig,
+} from "@/features/group-details/screens/add-group-members.nav"
+import {
+  GroupDetailsNav,
+  GroupDetailsScreenConfig,
+} from "@/features/group-details/screens/group-details.nav"
+import {
+  GroupMembersListNav,
+  GroupMembersListScreenConfig,
+} from "@/features/group-details/screens/group-members-list.nav"
 import { OnboardingContactCardImportNameScreen } from "@/features/onboarding/screens/onboarding-contact-card-import-name.screen"
 import { OnboardingContactCardScreen } from "@/features/onboarding/screens/onboarding-contact-card.screen"
 import { OnboardingWelcomeScreen } from "@/features/onboarding/screens/onboarding-welcome.screen"
@@ -35,6 +47,9 @@ const linking: LinkingOptions<NavigationParamList> = {
       Conversation: ConversationScreenConfig,
       Profile: ProfileScreenConfig,
       ShareProfile: ShareProfileScreenConfig,
+      GroupDetails: GroupDetailsScreenConfig,
+      AddGroupMembers: AddGroupMembersScreenConfig,
+      GroupMembersList: GroupMembersListScreenConfig,
     },
   },
   // TODO: Fix this
@@ -152,6 +167,9 @@ const AppStacks = memo(function AppStacks() {
           {ShareProfileNav()}
           {WebviewPreviewNav()}
           {ProfileNav()}
+          {GroupDetailsNav()}
+          {AddGroupMembersNav()}
+          {GroupMembersListNav()}
           <AppNativeStack.Screen
             name="ProfileImportName"
             component={ProfileImportNameScreen}

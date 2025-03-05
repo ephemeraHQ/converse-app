@@ -1,41 +1,34 @@
 import Clipboard from "@react-native-clipboard/clipboard"
-import React, { useMemo } from "react"
+import { InboxId } from "@xmtp/react-native-sdk"
+import React from "react"
 import { Alert, ViewStyle } from "react-native"
-import { Chip, ChipText } from "@/design-system/chip"
+import { Chip, ChipAvatar, ChipText } from "@/design-system/chip"
 import { HStack } from "@/design-system/HStack"
 import { Text } from "@/design-system/Text"
 import { VStack } from "@/design-system/VStack"
-import { ISocialProfile } from "@/features/social-profiles/social-profiles.api"
+import { useSocialProfilesForInboxId } from "@/features/social-profiles/hooks/use-social-profiles-for-inbox-id"
+import { supportedSocialProfiles } from "@/features/social-profiles/supported-social-profiles"
 import { translate } from "@/i18n"
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme"
 
 type IProfileSocialsNamesProps = {
-  socialProfiles: ISocialProfile[]
+  inboxId: InboxId
 }
 
-export function ProfileSocialsNames({ socialProfiles }: IProfileSocialsNamesProps) {
+export function ProfileSocialsNames({ inboxId }: IProfileSocialsNamesProps) {
   const { theme, themed } = useAppTheme()
 
-  // Group valid social profiles by name
-  const profilesByName = useMemo(() => {
-    return socialProfiles.reduce(
-      (acc, profile) => {
-        if (profile.name) {
-          acc.push({ name: profile.name })
-        }
-        return acc
-      },
-      [] as { name: string }[],
-    )
-  }, [socialProfiles])
-
-  if (profilesByName.length === 0) {
-    return null
-  }
+  const { data: socialProfiles } = useSocialProfilesForInboxId({
+    inboxId,
+  })
 
   const handleNamePress = (name: string) => {
     Clipboard.setString(name)
     Alert.alert(translate("userProfile.copied"))
+  }
+
+  if (!socialProfiles || socialProfiles.length === 0) {
+    return null
   }
 
   return (
@@ -43,9 +36,18 @@ export function ProfileSocialsNames({ socialProfiles }: IProfileSocialsNamesProp
       <VStack style={{ paddingVertical: theme.spacing.sm }}>
         <Text>{translate("userProfile.names")}</Text>
         <HStack style={themed($chipContainer)}>
-          {profilesByName.map((item) => (
-            <Chip key={item.name} onPress={() => handleNamePress(item.name)}>
-              <ChipText>{item.name}</ChipText>
+          {socialProfiles.map((socialProfile) => (
+            <Chip key={socialProfile.name} onPress={() => handleNamePress(socialProfile.name)}>
+              <ChipAvatar
+                name={socialProfile.name}
+                source={
+                  socialProfile.avatar
+                    ? { uri: socialProfile.avatar }
+                    : supportedSocialProfiles.find((profile) => profile.type === socialProfile.type)
+                        ?.imageLocalUri
+                }
+              />
+              <ChipText>{socialProfile.name}</ChipText>
             </Chip>
           ))}
         </HStack>

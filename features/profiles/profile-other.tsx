@@ -5,8 +5,6 @@ import { ProfileContactCard } from "@/features/profiles/components/profile-conta
 import { ProfileSection } from "@/features/profiles/components/profile-section"
 import { ProfileSocialsNames } from "@/features/profiles/components/profile-social-names"
 import { useProfileOtherScreenHeader } from "@/features/profiles/profile-other.screen-header"
-import { useProfileQuery } from "@/features/profiles/profiles.query"
-import { useSocialProfilesForAddressQuery } from "@/features/social-profiles/social-profiles.query"
 import { useAppTheme } from "@/theme/use-app-theme"
 
 export const ProfileOther = memo(function (props: { inboxId: InboxId }) {
@@ -16,19 +14,18 @@ export const ProfileOther = memo(function (props: { inboxId: InboxId }) {
 
   useProfileOtherScreenHeader({ inboxId })
 
-  const { data: profile } = useProfileQuery({ xmtpId: inboxId })
-
-  const { data: socialProfiles } = useSocialProfilesForAddressQuery({
-    ethAddress: profile?.privyAddress,
-  })
-
   return (
     <Screen preset="fixed" backgroundColor={theme.colors.background.surface}>
-      <ProfileSection>
+      <ProfileSection
+        style={{
+          paddingHorizontal: 0, // Since the ProfileContactCardLayout already has margin for the shadow
+          paddingVertical: 0, // Since the ProfileContactCardLayout already has margin for the shadow
+        }}
+      >
         <ProfileContactCard inboxId={inboxId} />
       </ProfileSection>
 
-      {socialProfiles && <ProfileSocialsNames socialProfiles={socialProfiles} />}
+      <ProfileSocialsNames inboxId={inboxId} />
     </Screen>
   )
 })

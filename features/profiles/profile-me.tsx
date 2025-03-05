@@ -106,7 +106,7 @@ export function ProfileMe(props: { inboxId: InboxId }) {
             </ProfileSection>
           ) : null}
 
-          {socialProfiles && <ProfileSocialsNames socialProfiles={socialProfiles} />}
+          <ProfileSocialsNames inboxId={inboxId} />
 
           {/* Only show settings when viewing your own profile and not in edit mode */}
           {isMyProfile && !editMode && (
