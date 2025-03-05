@@ -1,6 +1,6 @@
 {
   "name": "converse",
-  "version": "2.2.42",
+  "version": "2.2.43",
   "private": true,
   "scripts": {
     "android": "expo run:android",
