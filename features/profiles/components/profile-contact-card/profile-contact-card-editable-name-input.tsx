@@ -2,7 +2,7 @@ import { memo, useCallback } from "react"
 import { Center } from "@/design-system/Center"
 import { IconButton } from "@/design-system/IconButton/IconButton"
 import { TextField } from "@/design-system/TextField/TextField"
-import { TextFieldProps } from "@/design-system/TextField/TextField.props"
+import { TextFieldAccessoryProps, TextFieldProps } from "@/design-system/TextField/TextField.props"
 import { translate } from "@/i18n"
 import { useAppTheme } from "@/theme/use-app-theme"
 
@@ -19,6 +19,14 @@ export const ProfileContactCardEditableNameInput = memo(
 
     const handleChangeText = useCallback(
       (text: string) => {
+        if (text.includes(".")) {
+          onChangeText?.({
+            text: "",
+            error: "Dots ('.') are only allowed for imported onchain names",
+          })
+          return
+        }
+
         // const result = profileValidationSchema.shape.name.safeParse(text)
         onChangeText?.({
           text,
@@ -27,6 +35,26 @@ export const ProfileContactCardEditableNameInput = memo(
         })
       },
       [onChangeText],
+    )
+
+    const renderClearTextAccessory = useCallback(
+      (props: TextFieldAccessoryProps) => {
+        return (
+          <Center
+            style={{
+              paddingRight: theme.spacing.xxs,
+            }}
+          >
+            <IconButton
+              iconName="xmark.circle.fill"
+              onPress={() => {
+                handleChangeText("")
+              }}
+            />
+          </Center>
+        )
+      },
+      [handleChangeText, theme.spacing.xxs],
     )
 
     return (
@@ -52,24 +80,7 @@ export const ProfileContactCardEditableNameInput = memo(
         autoCorrect={false}
         onChangeText={handleChangeText}
         editable={!isOnchainName}
-        RightAccessory={
-          isOnchainName
-            ? (props) => (
-                <Center
-                  style={{
-                    paddingRight: theme.spacing.xxs,
-                  }}
-                >
-                  <IconButton
-                    onPress={() => {
-                      handleChangeText("")
-                    }}
-                    iconName="xmark.circle.fill"
-                  />
-                </Center>
-              )
-            : undefined
-        }
+        RightAccessory={isOnchainName ? renderClearTextAccessory : undefined}
         {...rest}
       />
     )

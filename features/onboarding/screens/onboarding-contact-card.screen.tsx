@@ -3,12 +3,7 @@ import { useIsFocused } from "@react-navigation/native"
 import { isAxiosError } from "axios"
 import React, { memo, useCallback, useEffect, useState } from "react"
 import { ViewStyle } from "react-native"
-import {
-  interpolate,
-  useAnimatedKeyboard,
-  useAnimatedStyle,
-  useSharedValue,
-} from "react-native-reanimated"
+import { interpolate, useAnimatedStyle, useSharedValue } from "react-native-reanimated"
 import { Screen } from "@/components/screen/screen"
 import { showSnackbar } from "@/components/snackbar/snackbar.service"
 import { Text } from "@/design-system/Text"
@@ -25,6 +20,7 @@ import { ProfileContactCardImportName } from "@/features/profiles/components/pro
 import { ProfileContactCardLayout } from "@/features/profiles/components/profile-contact-card/profile-contact-card-layout"
 import { useProfileContactCardStyles } from "@/features/profiles/components/profile-contact-card/use-profile-contact-card.styles"
 import { useAddPfp } from "@/hooks/use-add-pfp"
+import { useAnimatedKeyboard } from "@/hooks/use-animated-keyboard"
 import { useHeader } from "@/navigation/use-header"
 import { useRouter } from "@/navigation/use-navigation"
 import { $globalStyles } from "@/theme/styles"
@@ -40,7 +36,7 @@ export function OnboardingContactCardScreen() {
 
   const { user: privyUser } = usePrivy()
 
-  const keyboard = useAnimatedKeyboard()
+  const { progress: keyboardProgressAV } = useAnimatedKeyboard()
 
   const handleRealContinue = useCallback(async () => {
     try {
@@ -133,8 +129,8 @@ export function OnboardingContactCardScreen() {
       transform: [
         {
           translateY: interpolate(
-            keyboard.height.value,
-            [0, 200],
+            keyboardProgressAV.value,
+            [0, 1],
             [
               0,
               -contentContainerHeightAV.value / 2 +
@@ -152,7 +148,7 @@ export function OnboardingContactCardScreen() {
 
   const textContainerAnimatedStyle = useAnimatedStyle(() => {
     return {
-      opacity: interpolate(keyboard.height.value, [0, 200], [1, 0], "clamp"),
+      opacity: interpolate(keyboardProgressAV.value, [0, 1], [1, 0], "clamp"),
     }
   })
 

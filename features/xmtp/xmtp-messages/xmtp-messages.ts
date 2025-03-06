@@ -1,5 +1,5 @@
 import { Conversation } from "@xmtp/react-native-sdk"
-import { isReadReceiptMessage } from "@/features/conversation/conversation-message/conversation-message.utils"
+import { isReadReceiptMessage } from "@/features/conversation/conversation-chat/conversation-chat-message/conversation-message.utils"
 import { captureError } from "@/utils/capture-error"
 import { XMTPError } from "@/utils/error"
 import { IXmtpDecodedMessage } from "../xmtp.types"

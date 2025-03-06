@@ -13,7 +13,7 @@ import {
 import {
   addConversationMessageQuery,
   refetchConversationMessages,
-} from "@/features/conversation/conversation-messages.query"
+} from "@/features/conversation/conversation-chat/conversation-messages.query"
 import { getConversationForCurrentAccount } from "@/features/conversation/utils/get-conversation-for-current-account"
 import { contentTypesPrefixes } from "@/features/xmtp/xmtp-content-types/xmtp-content-types"
 import { captureErrorWithToast } from "@/utils/capture-error"

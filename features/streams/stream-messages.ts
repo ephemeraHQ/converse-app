@@ -1,5 +1,5 @@
 import { ConversationTopic, GroupUpdatedContent } from "@xmtp/react-native-sdk"
-import { addConversationMessageQuery } from "@/features/conversation/conversation-messages.query"
+import { addConversationMessageQuery } from "@/features/conversation/conversation-chat/conversation-messages.query"
 import { streamAllMessages } from "@/features/xmtp/xmtp-messages/xmtp-messages-stream"
 import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types"
 import { updateConversationQueryData } from "@/queries/conversation-query"

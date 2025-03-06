@@ -110,15 +110,14 @@ export const GroupAvatar = memo(function GroupAvatar(props: {
 
     return members.ids.reduce<InboxId[]>((inboxIds, memberId) => {
       const memberInboxId = members.byId[memberId].inboxId
-      const isCurrentSender = memberInboxId?.toLowerCase() === currentSender?.inboxId?.toLowerCase()
 
-      if (memberInboxId && !isCurrentSender) {
+      if (memberInboxId) {
         inboxIds.push(memberInboxId)
       }
 
       return inboxIds
     }, [])
-  }, [members, currentSender])
+  }, [members])
 
   // Get display info for all members
   const preferredDisplayData = usePreferredDisplayInfoBatch({

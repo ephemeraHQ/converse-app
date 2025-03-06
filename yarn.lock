@@ -6402,36 +6402,36 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@privy-io/api-base@npm:1.4.3, @privy-io/api-base@npm:^1.4.3":
-  version: 1.4.3
-  resolution: "@privy-io/api-base@npm:1.4.3"
+"@privy-io/api-base@npm:1.4.4, @privy-io/api-base@npm:^1.4.4":
+  version: 1.4.4
+  resolution: "@privy-io/api-base@npm:1.4.4"
   dependencies:
     zod: "npm:^3.21.4"
-  checksum: 10c0/56a9e730b2a511cb7271071207a5b7cd0112df8d1d3da51b17042a5e431fbfdea03c20d3a37b56d44125548df0dd4742d28ad4c216a7595500ea81126130f784
+  checksum: 10c0/035d39b0448955d09cd956091004e4943cddfe801aba5b17157383de494eab380b8809854fe6e0c104e71fdfe8a857791181c0718e29b9b279e7bc9b30fd3941
   languageName: node
   linkType: hard
 
-"@privy-io/expo-native-extensions@npm:^0.0.3":
-  version: 0.0.3
-  resolution: "@privy-io/expo-native-extensions@npm:0.0.3"
+"@privy-io/expo-native-extensions@npm:^0.0.4":
+  version: 0.0.4
+  resolution: "@privy-io/expo-native-extensions@npm:0.0.4"
   peerDependencies:
     expo: "*"
     react: "*"
     react-native: "*"
-  checksum: 10c0/0e15cd1c2f6338d2c8a909cfc927e21a5c78891daaa423205610d827d70f051f791efe67bc144fcd0c2f811ae58b6dacd01bb34cd0af42f3ad891af250eb915e
+  checksum: 10c0/f73ca66c132b12777660cbeaeea9cd15ea3d13a25eee9a79fce12fbb683b4d6a31ac6eef1648a5518ea76bd120310985e8ad33d8c9221077e1727ff42ec69f9d
   languageName: node
   linkType: hard
 
-"@privy-io/expo@npm:^0.45.0":
-  version: 0.45.0
-  resolution: "@privy-io/expo@npm:0.45.0"
+"@privy-io/expo@npm:^0.49.0":
+  version: 0.49.0
+  resolution: "@privy-io/expo@npm:0.49.0"
   dependencies:
-    "@privy-io/js-sdk-core": "npm:0.42.0"
+    "@privy-io/js-sdk-core": "npm:0.45.0"
     react-fast-compare: "npm:^3.2.2"
     zustand: "npm:^4.4.1"
   peerDependencies:
     "@expo-google-fonts/inter": "*"
-    "@privy-io/expo-native-extensions": 0.0.3
+    "@privy-io/expo-native-extensions": 0.0.4
     expo-apple-authentication: "*"
     expo-application: "*"
     expo-clipboard: "*"
@@ -6459,13 +6459,13 @@ __metadata:
       optional: true
     viem:
       optional: true
-  checksum: 10c0/f7e0d94bce259699c18a27301b7690d778ce83da527163df146bb615deef46e1762f8a6e5dc1645f342b7771184b80aac5366390118dbb1a0e6919163292fd03
+  checksum: 10c0/fb1cb66664806463ec0624d8c250362cd40ec062e9f0bc6228b1d50e3ac514b54bd395f9ed1e002ff2913dc29bfe7933a9cfcb5c12c4371f1ee6f8050670b4b4
   languageName: node
   linkType: hard
 
-"@privy-io/js-sdk-core@npm:0.42.0":
-  version: 0.42.0
-  resolution: "@privy-io/js-sdk-core@npm:0.42.0"
+"@privy-io/js-sdk-core@npm:0.45.0":
+  version: 0.45.0
+  resolution: "@privy-io/js-sdk-core@npm:0.45.0"
   dependencies:
     "@ethersproject/abstract-signer": "npm:^5.7.0"
     "@ethersproject/bignumber": "npm:^5.7.0"
@@ -6473,8 +6473,8 @@ __metadata:
     "@ethersproject/providers": "npm:^5.7.2"
     "@ethersproject/transactions": "npm:^5.7.0"
     "@ethersproject/units": "npm:^5.7.0"
-    "@privy-io/api-base": "npm:^1.4.3"
-    "@privy-io/public-api": "npm:2.18.6"
+    "@privy-io/api-base": "npm:^1.4.4"
+    "@privy-io/public-api": "npm:2.19.0"
     eventemitter3: "npm:^5.0.1"
     fetch-retry: "npm:^5.0.6"
     jose: "npm:^4.15.5"
@@ -6490,20 +6490,20 @@ __metadata:
       optional: true
     viem:
       optional: true
-  checksum: 10c0/223b02f2c20907f260142e3ddd1c68c4bdae27d1a2512faaacff15f30ae9737daac249d1a78e591da01994d1288868dc87e901cd8bea9465724a26cfd013adb7
+  checksum: 10c0/a8880fe51ee99cf8c1efc8fe3e5701aaaaeaa2edfb3966b712519e0753f9172f4ecfaec78b419db87aa869b735840d2fa8c7e1b4278b0a90d708f3964dd52b47
   languageName: node
   linkType: hard
 
-"@privy-io/public-api@npm:2.18.6":
-  version: 2.18.6
-  resolution: "@privy-io/public-api@npm:2.18.6"
+"@privy-io/public-api@npm:2.19.0":
+  version: 2.19.0
+  resolution: "@privy-io/public-api@npm:2.19.0"
   dependencies:
-    "@privy-io/api-base": "npm:1.4.3"
+    "@privy-io/api-base": "npm:1.4.4"
     bs58: "npm:^5.0.0"
-    ethers: "npm:^5.7.2"
     libphonenumber-js: "npm:^1.10.31"
+    viem: "npm:^2"
     zod: "npm:^3.22.4"
-  checksum: 10c0/fbed3595b4057021d187ee06a4a04bd268235bcfabca8958fb3b08033c144817d156f1d5f00a93250881ff5b67864e41790843c3a8e72f4d51f101d736e8c17f
+  checksum: 10c0/5335b75a92f21ea01291176d13447e22da21ad6c8ae94bfce7711b096ff2c39c49f16eb06ace6c00764a7c0fa0c6bc54bb0ea3e6ee81032263fe082b51dd1362
   languageName: node
   linkType: hard
 
@@ -12037,8 +12037,8 @@ __metadata:
     "@expo/vector-icons": "npm:^14.0.3"
     "@gorhom/bottom-sheet": "npm:5.0.6"
     "@ianvs/prettier-plugin-sort-imports": "npm:^4.4.1"
-    "@privy-io/expo": "npm:^0.45.0"
-    "@privy-io/expo-native-extensions": "npm:^0.0.3"
+    "@privy-io/expo": "npm:^0.49.0"
+    "@privy-io/expo-native-extensions": "npm:^0.0.4"
     "@react-native-async-storage/async-storage": "npm:1.23.1"
     "@react-native-clipboard/clipboard": "npm:^1.14.1"
     "@react-native-community/netinfo": "npm:11.4.1"
@@ -13938,7 +13938,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ethers@npm:5.7.2, ethers@npm:^5.7.2":
+"ethers@npm:5.7.2":
   version: 5.7.2
   resolution: "ethers@npm:5.7.2"
   dependencies:
@@ -25330,6 +25330,27 @@ __metadata:
     typescript:
       optional: true
   checksum: 10c0/205d3e6b57df8be9bc13e775e5eddeeb54b3e212e977a4aacab5824248ca6e3e599fd805ee4b10ba3e18f57cba46d592d722c509327937f72e672ec0ab84615f
+  languageName: node
+  linkType: hard
+
+"viem@npm:^2":
+  version: 2.23.6
+  resolution: "viem@npm:2.23.6"
+  dependencies:
+    "@noble/curves": "npm:1.8.1"
+    "@noble/hashes": "npm:1.7.1"
+    "@scure/bip32": "npm:1.6.2"
+    "@scure/bip39": "npm:1.5.4"
+    abitype: "npm:1.0.8"
+    isows: "npm:1.0.6"
+    ox: "npm:0.6.7"
+    ws: "npm:8.18.0"
+  peerDependencies:
+    typescript: ">=5.0.4"
+  peerDependenciesMeta:
+    typescript:
+      optional: true
+  checksum: 10c0/6879cc5c69c9fd2087eb7ca1818c7a4585d57b4d4791827a4390b7f6b5593dfe98fa524e3a4461c50420cd498930c5fe5f3cef8b01c0f22682f58f1c2c0a7d8c
   languageName: node
   linkType: hard
 

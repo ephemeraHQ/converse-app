@@ -8,10 +8,10 @@ import { IXmtpConversationWithCodecs } from "@/features/xmtp/xmtp.types"
 import { setConversationQueryData } from "@/queries/conversation-query"
 import { addConversationToAllowedConsentConversationsQuery } from "@/queries/conversations-allowed-consent-query"
 import { addConversationToUnknownConsentConversationsQuery } from "@/queries/conversations-unknown-consent-query"
-import { queryClient } from "@/queries/queryClient"
 import { ensureGroupMembersQueryData } from "@/queries/useGroupMembersQuery"
 import { captureError } from "@/utils/capture-error"
 import { streamLogger } from "@/utils/logger"
+import { reactQueryClient } from "@/utils/react-query/react-query-client"
 
 export async function startConversationStreaming(ethAddress: string) {
   try {
@@ -46,7 +46,7 @@ async function handleNewConversation(args: {
   if (isConversationAllowed(conversation)) {
     // Create conversation metadata
     const markAsReadMutationObserver = new MutationObserver(
-      queryClient,
+      reactQueryClient,
       getMarkConversationAsReadMutationOptions({
         topic: conversation.topic,
       }),

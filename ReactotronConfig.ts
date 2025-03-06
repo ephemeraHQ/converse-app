@@ -1,9 +1,9 @@
 import Reactotron from "reactotron-react-native"
 import { QueryClientManager, reactotronReactQuery } from "reactotron-react-query"
-import { queryClient } from "./queries/queryClient"
+import { reactQueryClient } from "./utils/react-query/react-query-client"
 
 const queryClientManager = new QueryClientManager({
-  queryClient,
+  queryClient: reactQueryClient,
 })
 
 // eslint-disable-next-line react-hooks/rules-of-hooks

@@ -1,8 +1,7 @@
-import { queryClient } from "@queries/queryClient"
 import { MutationObserver, MutationOptions, useMutation } from "@tanstack/react-query"
-import { getV3IdFromTopic } from "@utils/groupUtils/groupId"
 import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk"
 import { updateInboxIdsConsentForAccount } from "@/features/consent/update-inbox-ids-consent-for-account"
+import { getConversationIdFromTopic } from "@/features/conversation/utils/get-conversation-id-from-topic"
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group"
 import { IXmtpGroupWithCodecs } from "@/features/xmtp/xmtp.types"
 import {
@@ -14,6 +13,7 @@ import {
   removeConversationFromUnknownConsentConversationsQueryData,
 } from "@/queries/conversations-unknown-consent-query"
 import { getGroupQueryData, getOrFetchGroupQuery, setGroupQueryData } from "@/queries/useGroupQuery"
+import { reactQueryClient } from "@/utils/react-query/react-query-client"
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
 import { MutationKeys } from "../../queries/MutationKeys"
 import { updateConsentForGroupsForAccount } from "./update-consent-for-groups-for-account"
@@ -62,7 +62,7 @@ async function allowGroup({ includeAddedBy, includeCreator, account, topic }: IA
   await Promise.all([
     updateConsentForGroupsForAccount({
       account,
-      groupIds: [getV3IdFromTopic(groupTopic)],
+      groupIds: [getConversationIdFromTopic(groupTopic)],
       consent: "allow",
     }),
     ...(inboxIdsToAllow.length > 0
@@ -150,7 +150,7 @@ export const getAllowGroupMutationOptions = (
 
 export const createAllowGroupMutationObserver = (args: IAllowGroupMutationOptions) => {
   const allowGroupMutationObserver = new MutationObserver(
-    queryClient,
+    reactQueryClient,
     getAllowGroupMutationOptions(args),
   )
   return allowGroupMutationObserver

@@ -1,8 +1,8 @@
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query"
 import { InboxId } from "@xmtp/react-native-sdk"
 import { getRecoveryAddressesForInboxIds } from "@/features/xmtp/xmtp-inbox-id/get-recovery-address-for-inbox-ids"
-import { queryClient } from "@/queries/queryClient"
 import { IEthereumAddress } from "@/utils/evm/address"
+import { reactQueryClient } from "@/utils/react-query/react-query-client"
 
 type IArgs = {
   clientEthAddress: IEthereumAddress | undefined
@@ -36,5 +36,5 @@ export function useRecoveryAddressesForInboxIdsQuery(args: IArgs) {
 }
 
 export async function invalidateRecoveryAddressesForInboxIdsQuery(args: IStrictArgs) {
-  await queryClient.invalidateQueries(getRecoveryAddressesForInboxIdsQueryOptions(args))
+  await reactQueryClient.invalidateQueries(getRecoveryAddressesForInboxIdsQueryOptions(args))
 }

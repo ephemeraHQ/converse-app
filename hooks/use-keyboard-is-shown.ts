@@ -1,22 +1,18 @@
 import { useState } from "react"
-import {
-  KeyboardState,
-  runOnJS,
-  useAnimatedKeyboard,
-  useAnimatedReaction,
-} from "react-native-reanimated"
+import { runOnJS, useAnimatedReaction } from "react-native-reanimated"
+import { useAnimatedKeyboard } from "@/hooks/use-animated-keyboard"
 
 export function useKeyboardIsShown() {
   const [isKeyboardShown, setIsKeyboardShown] = useState(false)
 
-  const { state } = useAnimatedKeyboard()
+  const { progress } = useAnimatedKeyboard()
 
   useAnimatedReaction(
-    () => state.value,
-    (state) => {
-      if (state === KeyboardState.OPEN) {
+    () => progress.value,
+    (progress) => {
+      if (progress === 1) {
         runOnJS(setIsKeyboardShown)(true)
-      } else if (state === KeyboardState.CLOSED) {
+      } else if (progress === 0) {
         runOnJS(setIsKeyboardShown)(false)
       }
     },

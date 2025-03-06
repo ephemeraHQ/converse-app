@@ -1,6 +1,6 @@
 import { queryOptions, skipToken, useQueries, useQuery } from "@tanstack/react-query"
-import { queryClient } from "@/queries/queryClient"
 import { IEthereumAddress, isEthereumAddress } from "@/utils/evm/address"
+import { reactQueryClient } from "@/utils/react-query/react-query-client"
 import { fetchSocialProfilesForAddress } from "./social-profiles.api"
 
 type IArgs = {
@@ -47,7 +47,7 @@ export function useSocialProfilesForEthAddressQueries(args: { ethAddresses: IEth
 }
 
 export const ensureSocialProfilesForAddressQuery = async (args: IStrictArgs) => {
-  return queryClient.ensureQueryData(getSocialProfilesForAddressQueryOptions(args))
+  return reactQueryClient.ensureQueryData(getSocialProfilesForAddressQueryOptions(args))
 }
 
 export async function ensureSocialProfilesForAddressesQuery(args: {
@@ -56,12 +56,12 @@ export async function ensureSocialProfilesForAddressesQuery(args: {
   return (
     await Promise.all(
       args.ethAddresses.map((ethAddress) =>
-        queryClient.fetchQuery(getSocialProfilesForAddressQueryOptions({ ethAddress })),
+        reactQueryClient.fetchQuery(getSocialProfilesForAddressQueryOptions({ ethAddress })),
       ),
     )
   ).flat()
 }
 
 export function prefetchSocialProfilesForAddress(args: { ethAddress: IEthereumAddress }) {
-  return queryClient.prefetchQuery(getSocialProfilesForAddressQueryOptions(args))
+  return reactQueryClient.prefetchQuery(getSocialProfilesForAddressQueryOptions(args))
 }

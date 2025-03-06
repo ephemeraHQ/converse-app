@@ -9,7 +9,7 @@ import { ensureConversationSyncAllQuery } from "@/queries/conversation-sync-all-
 import { Optional } from "@/types/general"
 import { captureError } from "@/utils/capture-error"
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
-import { queryClient } from "./queryClient"
+import { reactQueryClient } from "../utils/react-query/react-query-client"
 import { ensureGroupMembersQueryData } from "./useGroupMembersQuery"
 
 export type IAllowedConsentConversationsQuery = Awaited<
@@ -25,7 +25,7 @@ type IArgsWithCaller = IArgs & { caller: string }
 export const createAllowedConsentConversationsQueryObserver = (
   args: IArgs & { caller: string },
 ) => {
-  return new QueryObserver(queryClient, getAllowedConsentConversationsQueryOptions(args))
+  return new QueryObserver(reactQueryClient, getAllowedConsentConversationsQueryOptions(args))
 }
 
 export const useAllowedConsentConversationsQuery = (args: IArgs & { caller: string }) => {
@@ -44,9 +44,10 @@ export function addConversationToAllowedConsentConversationsQuery(
   })
 
   if (!previousConversationsData) {
-    queryClient.setQueryData(getAllowedConsentConversationsQueryOptions({ account }).queryKey, [
-      conversation,
-    ])
+    reactQueryClient.setQueryData(
+      getAllowedConsentConversationsQueryOptions({ account }).queryKey,
+      [conversation],
+    )
     return
   }
 
@@ -60,7 +61,7 @@ export function addConversationToAllowedConsentConversationsQuery(
     })
   }
 
-  queryClient.setQueryData<IAllowedConsentConversationsQuery>(
+  reactQueryClient.setQueryData<IAllowedConsentConversationsQuery>(
     getAllowedConsentConversationsQueryOptions({ account }).queryKey,
     [conversation, ...previousConversationsData],
   )
@@ -81,14 +82,14 @@ export const removeConversationFromAllowedConsentConversationsQuery = (
     return
   }
 
-  queryClient.setQueryData(
+  reactQueryClient.setQueryData(
     getAllowedConsentConversationsQueryOptions({ account }).queryKey,
     previousConversationsData.filter((c) => c.topic !== topic),
   )
 }
 
 export const getAllowedConsentConversationsQueryData = (args: IArgs) => {
-  return queryClient.getQueryData(getAllowedConsentConversationsQueryOptions(args).queryKey)
+  return reactQueryClient.getQueryData(getAllowedConsentConversationsQueryOptions(args).queryKey)
 }
 
 const getAllowedConsentConversations = async (args: IArgs) => {
@@ -185,7 +186,7 @@ export const updateConversationInAllowedConsentConversationsQueryData = (
     return c
   })
 
-  queryClient.setQueryData<IAllowedConsentConversationsQuery>(
+  reactQueryClient.setQueryData<IAllowedConsentConversationsQuery>(
     getAllowedConsentConversationsQueryOptions({
       account,
     }).queryKey,
@@ -194,5 +195,5 @@ export const updateConversationInAllowedConsentConversationsQueryData = (
 }
 
 export function fetchAllowedConsentConversationsQuery(args: IArgsWithCaller) {
-  return queryClient.fetchQuery(getAllowedConsentConversationsQueryOptions(args))
+  return reactQueryClient.fetchQuery(getAllowedConsentConversationsQueryOptions(args))
 }

@@ -1,7 +1,7 @@
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query"
 import { getInboxIdFromEthAddress } from "@/features/xmtp/xmtp-inbox-id/xmtp-inbox-id-from-eth-address"
-import { queryClient } from "@/queries/queryClient"
 import { IEthereumAddress } from "@/utils/evm/address"
+import { reactQueryClient } from "@/utils/react-query/react-query-client"
 
 type IArgs = {
   clientEthAddress: IEthereumAddress | undefined
@@ -35,5 +35,5 @@ export function useXmtpInboxIdFromEthAddressQuery(args: IArgs) {
 }
 
 export async function invalidateXmtpInboxIdFromEthAddressQuery(args: IStrictArgs) {
-  await queryClient.invalidateQueries(getXmtpInboxIdFromEthAddressQueryOptions(args))
+  await reactQueryClient.invalidateQueries(getXmtpInboxIdFromEthAddressQueryOptions(args))
 }

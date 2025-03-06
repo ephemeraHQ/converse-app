@@ -21,7 +21,7 @@ import {
   $rowContainer,
   $titleContainer,
   ProfileAvatar,
-} from "../../conversation-list/conversation-list.screen-header"
+} from "../../conversation/conversation-list/conversation-list.screen-header"
 
 export function AccountSwitcher(props: { noAvatar?: boolean }) {
   const { noAvatar } = props

@@ -2,7 +2,7 @@ import { queryOptions, skipToken } from "@tanstack/react-query"
 import type { ConversationTopic } from "@xmtp/react-native-sdk"
 import { getConversationMetadata } from "@/features/conversation/conversation-metadata/conversation-metadata.api"
 import { conversationMetadataQueryKey } from "@/queries/QueryKeys"
-import { queryClient } from "../../../queries/queryClient"
+import { reactQueryClient } from "../../../utils/react-query/react-query-client"
 
 export type IConversationMetadataQueryData = Awaited<ReturnType<typeof getConversationMetadata>>
 
@@ -21,19 +21,21 @@ export function getConversationMetadataQueryOptions({ account, topic }: IArgs) {
 }
 
 export function prefetchConversationMetadataQuery(account: string, topic: ConversationTopic) {
-  return queryClient.prefetchQuery(getConversationMetadataQueryOptions({ account, topic }))
+  return reactQueryClient.prefetchQuery(getConversationMetadataQueryOptions({ account, topic }))
 }
 
 export const getConversationMetadataQueryData = (args: IArgs) => {
   const { account, topic } = args
-  return queryClient.getQueryData(getConversationMetadataQueryOptions({ account, topic }).queryKey)
+  return reactQueryClient.getQueryData(
+    getConversationMetadataQueryOptions({ account, topic }).queryKey,
+  )
 }
 
 export function updateConversationMetadataQueryData(
   args: IArgs & { updateData: Partial<IConversationMetadataQueryData> },
 ) {
   const { updateData, account, topic } = args
-  queryClient.setQueryData(
+  reactQueryClient.setQueryData(
     getConversationMetadataQueryOptions({ account, topic }).queryKey,
     (previousData) => ({
       account: args.account,

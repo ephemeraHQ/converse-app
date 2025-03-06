@@ -1,7 +1,7 @@
 import { QueryKey, queryOptions, skipToken, useQuery } from "@tanstack/react-query"
 import { ISearchProfilesResult, searchProfiles } from "@/features/profiles/profiles.search.api"
 import { DateUtils } from "@/utils/time.utils"
-import { queryClient } from "../../queries/queryClient"
+import { reactQueryClient } from "../../utils/react-query/react-query-client"
 
 const profileSearchQueryKey = (args: { query: string }): QueryKey => ["profileSearch", args.query]
 
@@ -21,15 +21,15 @@ export const useProfileSearchQuery = (args: { query?: string }) => {
 }
 
 export const prefetchProfileSearchQuery = (args: { query: string }) => {
-  return queryClient.prefetchQuery(profileSearchQueryConfig(args))
+  return reactQueryClient.prefetchQuery(profileSearchQueryConfig(args))
 }
 
 export const fetchProfileSearchQuery = (args: { query: string }) => {
-  return queryClient.fetchQuery<ISearchProfilesResult[]>(profileSearchQueryConfig(args))
+  return reactQueryClient.fetchQuery<ISearchProfilesResult[]>(profileSearchQueryConfig(args))
 }
 
 export const invalidateProfileSearchQuery = (args: { query: string }) => {
-  queryClient.invalidateQueries({
+  reactQueryClient.invalidateQueries({
     queryKey: profileSearchQueryKey(args),
   })
 }

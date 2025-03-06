@@ -1,0 +1,34 @@
+import { memo, useCallback } from "react"
+import { Alert } from "react-native"
+import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
+import { SearchUsersResultsListItemEthAddress } from "@/features/search-users/search-users-results-list-item-eth-address"
+import { useXmtpInboxIdFromEthAddressQuery } from "@/features/xmtp/xmtp-inbox-id/xmtp-inbox-id-from-eth-address.query"
+import { useAddGroupMembersStore } from "../stores/add-group-members.store"
+
+export const AddGroupMembersSearchUsersResultsListItemEthAddress = memo(
+  function AddGroupMembersSearchUsersResultsListItemEthAddress(props: { ethAddress: string }) {
+    const { ethAddress } = props
+    const currentSender = useSafeCurrentSender()
+    const { addSelectedInboxId } = useAddGroupMembersStore((state) => state.actions)
+
+    const { data: inboxId, isLoading: isLoadingInboxId } = useXmtpInboxIdFromEthAddressQuery({
+      clientEthAddress: currentSender.ethereumAddress,
+      targetEthAddress: ethAddress,
+    })
+
+    const handlePress = useCallback(() => {
+      if (!inboxId) {
+        Alert.alert("This user is not on XMTP yet!")
+        return
+      }
+
+      addSelectedInboxId(inboxId)
+    }, [inboxId, addSelectedInboxId])
+
+    if (isLoadingInboxId) {
+      return null
+    }
+
+    return <SearchUsersResultsListItemEthAddress ethAddress={ethAddress} onPress={handlePress} />
+  },
+)

@@ -2,17 +2,6 @@
 
 import type { IXmtpEnv } from "@/features/xmtp/xmtp.types"
 
-type IWalletConnectConfig = {
-  projectId: string | undefined
-  appMetadata: {
-    name: string
-    description: string
-    url: string
-    logoUrl: string
-    icons: string[]
-  }
-}
-
 type IEvmConfig = {
   rpcEndpoint: string
   transactionChainId: string

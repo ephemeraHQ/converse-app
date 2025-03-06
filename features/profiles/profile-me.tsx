@@ -145,6 +145,8 @@ const EditableProfileContactCardNameInput = memo(function EditableProfileContact
 
   const nameDefaultTextValue = profileMeStore.getState().nameTextValue
 
+  console.log("nameDefaultTextValue:", nameDefaultTextValue)
+
   const isOnChainName = useProfileMeStoreValue(inboxId, (state) =>
     state.nameTextValue?.includes("."),
   )
@@ -155,6 +157,7 @@ const EditableProfileContactCardNameInput = memo(function EditableProfileContact
     (args: { text: string; error?: string }) => {
       if (args.error) {
         setNameValidationError(args.error)
+        profileMeStore.getState().actions.setNameTextValue("")
       } else {
         setNameValidationError(undefined)
       }

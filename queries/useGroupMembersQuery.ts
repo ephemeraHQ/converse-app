@@ -1,25 +1,26 @@
 import { queryOptions as reactQueryOptions, skipToken, useQuery } from "@tanstack/react-query"
-import { getCleanAddress } from "@utils/evm/getCleanAddress"
-import { ConversationTopic, Member } from "@xmtp/react-native-sdk"
-import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client"
+import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk"
+import { IGroupMember } from "@/features/groups/group.types"
 import { getOrFetchConversation } from "@/queries/conversation-query"
 import { Optional } from "@/types/general"
-import { entifyWithAddress, EntityObjectWithAddress } from "./entify"
-import { queryClient } from "./queryClient"
+import { entify } from "../utils/entify"
+import { reactQueryClient } from "../utils/react-query/react-query-client"
 import { groupMembersQueryKey } from "./QueryKeys"
 
-export type GroupMembersSelectData = EntityObjectWithAddress<Member, InboxId>
+const memberEntityConfig = {
+  getId: (member: IGroupMember) => member.inboxId,
+} as const
 
-type IGroupMembersArgs = {
+type IGroupMembersArgsStrict = {
   account: string
   topic: ConversationTopic
 }
 
-type IGroupMembersArgsWithCaller = IGroupMembersArgs & { caller: string }
+type IGroupMembersArgsWithCaller = IGroupMembersArgsStrict & { caller: string }
 
-const fetchGroupMembers = async (
-  args: IGroupMembersArgsWithCaller,
-): Promise<EntityObjectWithAddress<Member, InboxId>> => {
+type IGroupMembersEntity = Awaited<ReturnType<typeof fetchGroupMembers>>
+
+const fetchGroupMembers = async (args: IGroupMembersArgsWithCaller) => {
   const { account, topic, caller } = args
 
   const conversation = await getOrFetchConversation({
@@ -44,11 +45,15 @@ const fetchGroupMembers = async (
     throw new Error("Empty members list")
   }
 
-  return entifyWithAddress(
-    members,
-    (member) => member.inboxId,
-    (member) => getCleanAddress(member.addresses[0]),
+  const convosMembers = members.map(
+    (member): IGroupMember => ({
+      inboxId: member.inboxId,
+      permission: member.permissionLevel,
+      consentState: member.consentState,
+    }),
   )
+
+  return entify(convosMembers, memberEntityConfig.getId)
 }
 
 export const getGroupMembersQueryOptions = (
@@ -83,50 +88,88 @@ export const useGroupMembersQuery = (args: IGroupMembersArgsWithCaller) => {
   return useQuery(getGroupMembersQueryOptions(args))
 }
 
-export const getGroupMembersQueryData = (
-  args: IGroupMembersArgs,
-): GroupMembersSelectData | undefined => {
+export const getGroupMembersQueryData = (args: IGroupMembersArgsStrict) => {
   const { account, topic } = args
-  return queryClient.getQueryData(getGroupMembersQueryOptions({ account, topic }).queryKey)
+  return reactQueryClient.getQueryData(getGroupMembersQueryOptions({ account, topic }).queryKey)
 }
 
 export const setGroupMembersQueryData = (
-  args: IGroupMembersArgs & {
-    members: GroupMembersSelectData
+  args: IGroupMembersArgsStrict & {
+    members: IGroupMembersEntity
   },
 ) => {
   const { account, topic, members } = args
-  queryClient.setQueryData(getGroupMembersQueryOptions({ account, topic }).queryKey, members)
+  reactQueryClient.setQueryData(getGroupMembersQueryOptions({ account, topic }).queryKey, members)
 }
 
-export const cancelGroupMembersQuery = async (args: IGroupMembersArgs) => {
+export const cancelGroupMembersQuery = async (args: IGroupMembersArgsStrict) => {
   const { account, topic } = args
-  return queryClient.cancelQueries({
+  return reactQueryClient.cancelQueries({
     queryKey: getGroupMembersQueryOptions({ account, topic }).queryKey,
   })
 }
 
-export const invalidateGroupMembersQuery = (args: IGroupMembersArgs) => {
+export const invalidateGroupMembersQuery = (args: IGroupMembersArgsStrict) => {
   const { account, topic } = args
-  return queryClient.invalidateQueries({
+  return reactQueryClient.invalidateQueries({
     queryKey: getGroupMembersQueryOptions({ account, topic }).queryKey,
   })
 }
 
-export function refetchGroupMembersQuery(args: IGroupMembersArgs) {
+export function refetchGroupMembersQuery(args: IGroupMembersArgsStrict) {
   const { account, topic } = args
-  return queryClient.refetchQueries({
+  return reactQueryClient.refetchQueries({
     queryKey: getGroupMembersQueryOptions({ account, topic }).queryKey,
   })
 }
 
 export async function ensureGroupMembersQueryData(args: IGroupMembersArgsWithCaller) {
   const { account, topic, caller } = args
-  return queryClient.ensureQueryData(
+  return reactQueryClient.ensureQueryData(
     getGroupMembersQueryOptions({
       account,
       topic,
       caller,
     }),
   )
+}
+
+export function addGroupMembersToQueryData(
+  args: IGroupMembersArgsStrict & {
+    member: IGroupMember
+  },
+) {
+  const { account, topic, member } = args
+  const members = getGroupMembersQueryData({ account, topic })
+  if (!members) {
+    return
+  }
+
+  const entifiedMembers = entify([...Object.values(members.byId), member], memberEntityConfig.getId)
+
+  setGroupMembersQueryData({ account, topic, members: entifiedMembers })
+}
+
+export function removeMembersFromGroupQueryData(
+  args: IGroupMembersArgsStrict & {
+    memberInboxIds: InboxId[]
+  },
+) {
+  const { account, topic, memberInboxIds } = args
+
+  const members = getGroupMembersQueryData({ account, topic })
+
+  if (!members) {
+    return
+  }
+
+  const newMembers = {
+    ...members,
+    ids: members.ids.filter((id) => !memberInboxIds.includes(id)),
+    byId: Object.fromEntries(
+      Object.entries(members.byId).filter(([id]) => !memberInboxIds.includes(id)),
+    ),
+  }
+
+  setGroupMembersQueryData({ account, topic, members: newMembers })
 }

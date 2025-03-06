@@ -2,11 +2,11 @@ import { memo, useCallback } from "react"
 import { useAppTheme } from "../../theme/use-app-theme"
 import { HStack } from "../HStack"
 import { IconButton } from "../IconButton/IconButton"
-import { Text } from "../Text"
+import { ITextProps, Text } from "../Text"
 import { useBottomSheet } from "./BottomSheet.utils"
 
 type IBottomSheetHeaderProps = {
-  title?: string
+  title?: string | React.ReactNode
   onClose?: () => void
 }
 
@@ -26,7 +26,7 @@ export const BottomSheetHeaderBase = memo(function BottomSheetHeaderBase(
         padding: theme.spacing.lg,
       }}
     >
-      {!!title && <Text preset="bigBold">{title}</Text>}
+      {typeof title === "string" ? <BottomSheetHeaderTitle>{title}</BottomSheetHeaderTitle> : title}
       {onClose && (
         <IconButton
           action="primary"
@@ -41,6 +41,10 @@ export const BottomSheetHeaderBase = memo(function BottomSheetHeaderBase(
       )}
     </HStack>
   )
+})
+
+export const BottomSheetHeaderTitle = memo(function BottomSheetHeaderTitle(props: ITextProps) {
+  return <Text preset="bigBold" {...props} />
 })
 
 // Smart component that uses useBottomSheet

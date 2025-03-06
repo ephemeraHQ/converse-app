@@ -22,8 +22,10 @@ export function useRoute<ScreenName extends keyof NavigationParamList>(): RouteP
   return useRouteNavigation<RouteProp<NavigationParamList, ScreenName>>()
 }
 
-export function useRouteParams<ScreenName extends keyof NavigationParamList>() {
-  return useRoute<ScreenName>().params
+export function useRouteParams<
+  ScreenName extends keyof NavigationParamList,
+>(): NavigationParamList[ScreenName] {
+  return useRoute<ScreenName>().params as NavigationParamList[ScreenName]
 }
 
 // Wrapper around useNavigation to add some useful hooks.

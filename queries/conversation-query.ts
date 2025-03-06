@@ -5,7 +5,7 @@ import { ensureConversationSyncAllQuery } from "@/queries/conversation-sync-all-
 import { Optional } from "@/types/general"
 import { captureError } from "@/utils/capture-error"
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
-import { queryClient } from "./queryClient"
+import { reactQueryClient } from "../utils/react-query/react-query-client"
 import { conversationQueryKey } from "./QueryKeys"
 
 export type ConversationQueryData = Awaited<ReturnType<typeof getConversation>>
@@ -128,7 +128,7 @@ export const setConversationQueryData = (
   },
 ) => {
   const { account, topic, conversation } = args
-  queryClient.setQueryData(
+  reactQueryClient.setQueryData(
     getConversationQueryOptions({
       account,
       topic,
@@ -143,18 +143,21 @@ export function updateConversationQueryData(
   },
 ) {
   const { conversationUpdate } = args
-  queryClient.setQueryData(getConversationQueryOptions(args).queryKey, (previousConversation) => {
-    if (!previousConversation) {
-      return undefined
-    }
-    return updateObjectAndMethods(previousConversation, conversationUpdate)
-  })
+  reactQueryClient.setQueryData(
+    getConversationQueryOptions(args).queryKey,
+    (previousConversation) => {
+      if (!previousConversation) {
+        return undefined
+      }
+      return updateObjectAndMethods(previousConversation, conversationUpdate)
+    },
+  )
 }
 
 export const getConversationQueryData = (args: IGetConversationArgs) => {
-  return queryClient.getQueryData(getConversationQueryOptions(args).queryKey)
+  return reactQueryClient.getQueryData(getConversationQueryOptions(args).queryKey)
 }
 
 export function getOrFetchConversation(args: IGetConversationArgsWithCaller) {
-  return queryClient.ensureQueryData(getConversationQueryOptions(args))
+  return reactQueryClient.ensureQueryData(getConversationQueryOptions(args))
 }
