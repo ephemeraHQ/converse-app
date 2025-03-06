@@ -101,11 +101,11 @@ export const ConnectWalletRotateInbox = memo(function ConnectWalletRotateInbox(
   ) {
     return (
       <ConnectWalletLayout
-        header={<ConnectWalletHeader title="Inbox already rotated" />}
+        header={<ConnectWalletHeader title="Cannot rotate inbox again" />}
         text={
           <ConnectWalletTextSection
-            text="Each wallet can only be rotated to a new inbox once. This wallet has already been rotated."
-            secondaryText="Contact support if you believe this is incorrect."
+            text="This smart contract wallet has already been rotated once to connect with an existing inbox. For security reasons, each wallet can only be rotated once."
+            secondaryText="Please use a different wallet. Later we'll support adding multiple inboxes to the same account."
           />
         }
         content={
@@ -145,9 +145,12 @@ export const ConnectWalletRotateInbox = memo(function ConnectWalletRotateInbox(
 
   return (
     <ConnectWalletLayout
-      header={<ConnectWalletHeader title="Address in use" />}
+      header={<ConnectWalletHeader title="Existing XMTP inbox detected" />}
       text={
-        <ConnectWalletTextSection text="This wallet address is already delivering messages to a different inbox." />
+        <ConnectWalletTextSection
+          text="This wallet address is already linked to an existing XMTP inbox."
+          secondaryText="Would you like to use this existing inbox instead of creating a new one?"
+        />
       }
       content={
         <Text preset="small" color="secondary">
@@ -156,7 +159,7 @@ export const ConnectWalletRotateInbox = memo(function ConnectWalletRotateInbox(
       }
       buttons={
         <>
-          <ConnectWalletPrimaryButton text="Use this address" onPress={handleCreateNewInboxId} />
+          <ConnectWalletPrimaryButton text="Use existing inbox" onPress={handleCreateNewInboxId} />
           <ConnectWalletLinkButton text="Cancel" onPress={router.goBack} />
         </>
       }
