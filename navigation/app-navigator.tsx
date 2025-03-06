@@ -1,4 +1,3 @@
-import { ConversationNav, ConversationScreenConfig } from "@features/conversation/conversation.nav"
 import { LinkingOptions, NavigationContainer } from "@react-navigation/native"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import * as Linking from "expo-linking"
@@ -7,21 +6,27 @@ import { config } from "@/config"
 import { AppSettingsScreen } from "@/features/app-settings/app-settings.screen"
 import { useIsCurrentVersionEnough } from "@/features/app-settings/hooks/use-is-current-version-enough"
 import { useAuthStore } from "@/features/authentication/authentication.store"
+import { useHydrateAuth } from "@/features/authentication/use-hydrate-auth"
+import { useLogoutOnJwtRefreshError } from "@/features/authentication/use-logout-on-jwt-refresh-error"
 import { BlockedConversationsScreen } from "@/features/blocked-conversations/blocked-conversations.screen"
-import { ConversationListScreen } from "@/features/conversation-list/conversation-list.screen"
-import { ConversationRequestsListNav } from "@/features/conversation-requests-list/conversation-requests-list.nav"
+import {
+  ConversationNav,
+  ConversationScreenConfig,
+} from "@/features/conversation/conversation-chat/conversation.nav"
+import { ConversationListScreen } from "@/features/conversation/conversation-list/conversation-list.screen"
+import { ConversationRequestsListNav } from "@/features/conversation/conversation-requests-list/conversation-requests-list.nav"
 import {
   AddGroupMembersNav,
   AddGroupMembersScreenConfig,
-} from "@/features/group-details/screens/add-group-members.nav"
+} from "@/features/groups/group-details/add-group-members/add-group-members.nav"
 import {
   GroupDetailsNav,
   GroupDetailsScreenConfig,
-} from "@/features/group-details/screens/group-details.nav"
+} from "@/features/groups/group-details/group-details.nav"
 import {
   GroupMembersListNav,
   GroupMembersListScreenConfig,
-} from "@/features/group-details/screens/group-members-list.nav"
+} from "@/features/groups/group-details/members-list/group-members-list.nav"
 import { OnboardingContactCardImportInfoScreen } from "@/features/onboarding/screens/onboarding-contact-card-import-info.screen"
 import { OnboardingContactCardScreen } from "@/features/onboarding/screens/onboarding-contact-card.screen"
 import { OnboardingWelcomeScreen } from "@/features/onboarding/screens/onboarding-welcome.screen"
@@ -64,6 +69,8 @@ export function AppNavigator() {
 
   useUpdateSentry()
   useIsCurrentVersionEnough()
+  useLogoutOnJwtRefreshError()
+  useHydrateAuth()
 
   return (
     <>

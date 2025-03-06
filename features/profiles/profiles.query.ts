@@ -2,7 +2,7 @@ import { queryOptions, skipToken, useQueries, useQuery } from "@tanstack/react-q
 import { InboxId } from "@xmtp/react-native-sdk"
 import { type IConvosProfileForInbox } from "@/features/profiles/profile.types"
 import { fetchProfile } from "@/features/profiles/profiles.api"
-import { queryClient } from "@/queries/queryClient"
+import { reactQueryClient } from "@/utils/react-query/react-query-client"
 
 const profileQueryKey = ({ xmtpId }: { xmtpId: string }) => ["profile", xmtpId] as const
 
@@ -25,18 +25,21 @@ export const setProfileQueryData = (args: {
   updatedAt?: number
 }) => {
   const { xmtpId, data } = args
-  return queryClient.setQueryData<Partial<IConvosProfileForInbox>>(profileQueryKey({ xmtpId }), {
-    ...data,
-    // updatedAt: updatedAt ? updatedAt.toString() : Date.now().toString(),
-  })
+  return reactQueryClient.setQueryData<Partial<IConvosProfileForInbox>>(
+    profileQueryKey({ xmtpId }),
+    {
+      ...data,
+      // updatedAt: updatedAt ? updatedAt.toString() : Date.now().toString(),
+    },
+  )
 }
 
 export const ensureProfileQueryData = ({ xmtpId }: { xmtpId: string }) => {
-  return queryClient.ensureQueryData(getProfileQueryConfig({ xmtpId }))
+  return reactQueryClient.ensureQueryData(getProfileQueryConfig({ xmtpId }))
 }
 
 export const invalidateProfileQuery = ({ xmtpId }: { xmtpId: string }) => {
-  queryClient.invalidateQueries({
+  reactQueryClient.invalidateQueries({
     queryKey: profileQueryKey({ xmtpId }),
   })
 }
@@ -56,5 +59,5 @@ export const useProfilesQueries = ({ xmtpInboxIds }: { xmtpInboxIds: string[] | 
 }
 
 export const getProfileQueryData = ({ xmtpId }: { xmtpId: InboxId }) => {
-  return queryClient.getQueryData(getProfileQueryConfig({ xmtpId }).queryKey)
+  return reactQueryClient.getQueryData(getProfileQueryConfig({ xmtpId }).queryKey)
 }

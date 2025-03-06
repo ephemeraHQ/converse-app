@@ -8,6 +8,7 @@ import {
 } from "@/features/preferred-display-info/preferred-display-info.utils"
 import { useProfileQuery } from "@/features/profiles/profiles.query"
 import { useSocialProfilesForInboxId } from "@/features/social-profiles/hooks/use-social-profiles-for-inbox-id"
+import { useEthAddressesForXmtpInboxId } from "@/features/xmtp/xmtp-inbox-id/eth-addresses-for-xmtp-inbox-id.query"
 import { getXmtpInboxIdFromEthAddressQueryOptions } from "@/features/xmtp/xmtp-inbox-id/xmtp-inbox-id-from-eth-address.query"
 import { IEthereumAddress } from "@/utils/evm/address"
 
@@ -23,19 +24,24 @@ type PreferredDisplayInfoArgs =
     }
 
 export function usePreferredDisplayInfo(args: PreferredDisplayInfoArgs) {
-  const { inboxId: inboxIdArg, ethAddress } = args
+  const { inboxId: inboxIdArg, ethAddress: ethAddressArg } = args
 
   const currentSender = useSafeCurrentSender()
 
   const { data: inboxIdFromEthAddress } = useQuery({
     ...getXmtpInboxIdFromEthAddressQueryOptions({
       clientEthAddress: currentSender.ethereumAddress,
-      targetEthAddress: ethAddress!, // ! because we check enabled
+      targetEthAddress: ethAddressArg!, // ! because we check enabled
     }),
-    enabled: !!ethAddress,
+    enabled: !!ethAddressArg,
   })
 
   const inboxId = inboxIdArg ?? inboxIdFromEthAddress
+
+  const { data: ethAddressesForXmtpInboxId } = useEthAddressesForXmtpInboxId({
+    clientEthAddress: currentSender.ethereumAddress,
+    inboxId,
+  })
 
   // Get Convos profile data
   const { data: profile, isLoading: isLoadingProfile } = useProfileQuery({
@@ -46,6 +52,8 @@ export function usePreferredDisplayInfo(args: PreferredDisplayInfoArgs) {
   const { data: socialProfiles, isLoading: isLoadingSocialProfiles } = useSocialProfilesForInboxId({
     inboxId,
   })
+
+  const ethAddress = ethAddressArg || ethAddressesForXmtpInboxId?.[0]
 
   const displayName = getPreferredDisplayName({
     profile,

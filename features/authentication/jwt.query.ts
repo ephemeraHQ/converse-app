@@ -1,5 +1,5 @@
 import { queryOptions, skipToken } from "@tanstack/react-query"
-import { queryClient } from "@/queries/queryClient"
+import { reactQueryClient } from "@/utils/react-query/react-query-client"
 import { fetchJwt } from "./authentication.api"
 import { getCurrentSender } from "./multi-inbox.store"
 
@@ -22,15 +22,15 @@ export function getJwtQueryOptions() {
 }
 
 export async function ensureJwtQueryData() {
-  return queryClient.ensureQueryData(getJwtQueryOptions())
+  return reactQueryClient.ensureQueryData(getJwtQueryOptions())
 }
 
 export async function refreshAndGetNewJwtQuery() {
   // Force invalidate the query to ensure we get fresh data
-  await queryClient.invalidateQueries(getJwtQueryOptions())
+  await reactQueryClient.invalidateQueries(getJwtQueryOptions())
 
   // Fetch the new token
-  const newToken = await queryClient.fetchQuery(getJwtQueryOptions())
+  const newToken = await reactQueryClient.fetchQuery(getJwtQueryOptions())
 
   return newToken
 }

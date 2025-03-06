@@ -22,6 +22,7 @@ export type HeaderProps = {
   titleTx?: ITextProps["tx"]
   titleComponent?: ReactElement
   titleTxOptions?: ITextProps["txOptions"]
+  withBottomBorder?: boolean
   leftIcon?: IPicto
   leftIconColor?: string
   leftText?: ITextProps["text"]
@@ -71,6 +72,7 @@ export function Header(props: HeaderProps) {
     containerStyle: $containerStyleOverride,
     isCollapsible,
     onBack,
+    withBottomBorder,
   } = props
 
   const $containerInsets = useSafeAreaInsetsStyle(safeAreaEdges)
@@ -82,7 +84,16 @@ export function Header(props: HeaderProps) {
   return (
     <VStack
       // {...debugBorder()}
-      style={[$container, $containerInsets, { backgroundColor }, $containerStyleOverride]}
+      style={[
+        $container,
+        $containerInsets,
+        { backgroundColor },
+        withBottomBorder && {
+          borderBottomWidth: theme.borderWidth.xs,
+          borderBottomColor: theme.colors.border.subtle,
+        },
+        $containerStyleOverride,
+      ]}
     >
       <HStack
         // {...debugBorder("yellow")}

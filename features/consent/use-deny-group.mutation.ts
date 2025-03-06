@@ -1,8 +1,8 @@
 import { useMutation } from "@tanstack/react-query"
-import { getV3IdFromTopic } from "@utils/groupUtils/groupId"
 import { logger } from "@utils/logger"
 import type { ConversationTopic } from "@xmtp/react-native-sdk"
 import { updateConsentForGroupsForAccount } from "@/features/consent/update-consent-for-groups-for-account"
+import { getConversationIdFromTopic } from "@/features/conversation/utils/get-conversation-id-from-topic"
 import {
   addConversationToAllowedConsentConversationsQuery,
   removeConversationFromAllowedConsentConversationsQuery,
@@ -24,7 +24,7 @@ export const useDenyGroupMutation = (account: string, topic: ConversationTopic) 
       }
       await updateConsentForGroupsForAccount({
         account,
-        groupIds: [getV3IdFromTopic(topic)],
+        groupIds: [getConversationIdFromTopic(topic)],
         consent: "deny",
       })
       return "denied"

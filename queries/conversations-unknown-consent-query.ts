@@ -7,7 +7,7 @@ import { ensureConversationSyncAllQuery } from "@/queries/conversation-sync-all-
 import { unknownConsentConversationsQueryKey } from "@/queries/QueryKeys"
 import logger from "@/utils/logger"
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
-import { queryClient } from "./queryClient"
+import { reactQueryClient } from "../utils/react-query/react-query-client"
 
 export type IUnknownConversationsQuery = Awaited<ReturnType<typeof getUnknownConversations>>
 
@@ -54,7 +54,7 @@ async function getUnknownConversations(args: { account: string }) {
 }
 
 export const prefetchUnknownConsentConversationsQuery = (args: { account: string }) => {
-  return queryClient.prefetchQuery(getUnknownConsentConversationsQueryOptions(args))
+  return reactQueryClient.prefetchQuery(getUnknownConsentConversationsQueryOptions(args))
 }
 
 export const addConversationToUnknownConsentConversationsQuery = (args: {
@@ -68,7 +68,7 @@ export const addConversationToUnknownConsentConversationsQuery = (args: {
   })
 
   if (!previousConversationsData) {
-    queryClient.setQueryData<IUnknownConversationsQuery>(
+    reactQueryClient.setQueryData<IUnknownConversationsQuery>(
       getUnknownConsentConversationsQueryOptions({ account }).queryKey,
       [conversation],
     )
@@ -81,14 +81,14 @@ export const addConversationToUnknownConsentConversationsQuery = (args: {
     return
   }
 
-  queryClient.setQueryData<IUnknownConversationsQuery>(
+  reactQueryClient.setQueryData<IUnknownConversationsQuery>(
     getUnknownConsentConversationsQueryOptions({ account }).queryKey,
     [conversation, ...previousConversationsData],
   )
 }
 
 export const getUnknownConsentConversationsQueryData = (args: { account: string }) => {
-  return queryClient.getQueryData<IUnknownConversationsQuery>(
+  return reactQueryClient.getQueryData<IUnknownConversationsQuery>(
     getUnknownConsentConversationsQueryOptions(args).queryKey,
   )
 }
@@ -117,7 +117,7 @@ export const updateConversationInUnknownConsentConversationsQueryData = (args: {
     return c
   })
 
-  queryClient.setQueryData<IUnknownConversationsQuery>(
+  reactQueryClient.setQueryData<IUnknownConversationsQuery>(
     getUnknownConsentConversationsQueryOptions({
       account,
     }).queryKey,
@@ -147,7 +147,7 @@ export const removeConversationFromUnknownConsentConversationsQueryData = (args:
     (conversation) => conversation.topic !== topic,
   )
 
-  queryClient.setQueryData<IUnknownConversationsQuery>(
+  reactQueryClient.setQueryData<IUnknownConversationsQuery>(
     getUnknownConsentConversationsQueryOptions({ account }).queryKey,
     newConversations,
   )

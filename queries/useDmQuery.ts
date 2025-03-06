@@ -4,7 +4,7 @@
 import { queryOptions } from "@tanstack/react-query"
 import { InboxId } from "@xmtp/react-native-sdk"
 import { getXmtpDmByInboxId } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-dm"
-import { queryClient } from "@/queries/queryClient"
+import { reactQueryClient } from "@/utils/react-query/react-query-client"
 import { setConversationQueryData } from "./conversation-query"
 import { dmQueryKey } from "./QueryKeys"
 
@@ -46,7 +46,7 @@ export function getDmQueryOptions(args: IDmQueryArgs) {
 
 export function setDmQueryData(args: IDmQueryArgs & { dm: IDmQueryData }) {
   const { ethAccountAddress, inboxId, dm } = args
-  queryClient.setQueryData(getDmQueryOptions({ ethAccountAddress, inboxId }).queryKey, dm)
+  reactQueryClient.setQueryData(getDmQueryOptions({ ethAccountAddress, inboxId }).queryKey, dm)
 
   // Update the main conversation query because it's a 1-1
   if (dm) {
@@ -59,5 +59,5 @@ export function setDmQueryData(args: IDmQueryArgs & { dm: IDmQueryData }) {
 }
 
 export function getDmQueryData(args: IDmQueryArgs) {
-  return queryClient.getQueryData(getDmQueryOptions(args).queryKey)
+  return reactQueryClient.getQueryData(getDmQueryOptions(args).queryKey)
 }

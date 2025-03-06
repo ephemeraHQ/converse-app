@@ -2,6 +2,13 @@
 
 - When I ask you to "clean" a file, rewrite the content following the rules and best practices listed below.
 - When I ask you to "Make more readable", rewrite the content following the rules and best practices listed below and add some comments to explain the code. The comments need to be short and direct. Don't add comments when it's obvious what the code is doing. Also add some comments to explain why we are doing something in a certain way.
+- When I ask you to rename files, move files, or rename exports, ONLY perform the requested operation and update the corresponding import paths where needed. Do not modify any other logic or attempt to improve the code.
+- When I ask you to extract code into separate files or components, ONLY move the code as is - do not modify the logic, add new features, change styling, or create additional components. The goal is to maintain the exact same functionality while organizing it into separate files.
+- When extracting a component that wraps or customizes a base component into a new file, the new component name and file name should be derived from the parent file's name:
+  - Component name should be prefixed with the parent file's feature/context name (e.g., `ListItemWrapper` becomes `AddGroupMemberListItem` when extracted from `add-group-member.tsx`)
+  - File name should match the component name in kebab-case (e.g., `add-group-member-list-item.tsx`)
+  - The component's implementation should remain exactly the same, only the name changes
+- When I'm saying "Convo" or "Convos" it's the name of our app. It's not an abbreviation for Conversation
 
 ## Core Principles
 

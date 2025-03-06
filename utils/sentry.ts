@@ -9,8 +9,8 @@ import {
   getCurrentUserQueryOptions,
 } from "@/features/current-user/curent-user.query"
 import { getProfileQueryConfig, getProfileQueryData } from "@/features/profiles/profiles.query"
-import { queryClient } from "@/queries/queryClient"
 import { getEnv, isDev } from "@/utils/getEnv"
+import { reactQueryClient } from "@/utils/react-query/react-query-client"
 import { config } from "../config"
 
 // Sentry has ~8KB limit for string values
@@ -111,7 +111,7 @@ export function useUpdateSentry() {
     })
 
     // Track user changes
-    const userQueryObserver = new QueryObserver(queryClient, getCurrentUserQueryOptions())
+    const userQueryObserver = new QueryObserver(reactQueryClient, getCurrentUserQueryOptions())
 
     const unsubscribeFromUserQueryObserver = userQueryObserver.subscribe((result) => {
       if (result.data) {
@@ -123,7 +123,7 @@ export function useUpdateSentry() {
 
     // Track profile changes
     const profileQueryObserver = new QueryObserver(
-      queryClient,
+      reactQueryClient,
       getProfileQueryConfig({
         xmtpId: useMultiInboxStore.getState().currentSender?.inboxId,
       }),

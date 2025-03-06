@@ -2,7 +2,7 @@ import { queryOptions } from "@tanstack/react-query"
 import { MessageId } from "@xmtp/react-native-sdk"
 import { getXmtpClientByEthAddress } from "@/features/xmtp/xmtp-client/xmtp-client.service"
 import { logger } from "@/utils/logger"
-import { queryClient } from "./queryClient"
+import { reactQueryClient } from "../utils/react-query/react-query-client"
 import { conversationMessageQueryKey } from "./QueryKeys"
 
 type IArgs = {
@@ -45,12 +45,12 @@ export function getConversationMessageQueryOptions({ account, messageId }: IArgs
 }
 
 export function fetchConversationMessageQuery(args: IArgs) {
-  return queryClient.fetchQuery(getConversationMessageQueryOptions(args))
+  return reactQueryClient.fetchQuery(getConversationMessageQueryOptions(args))
 }
 
 export function getOrFetchConversationMessageQuery(args: IArgs) {
   return (
-    queryClient.getQueryData(conversationMessageQueryKey(args.account, args.messageId)) ??
+    reactQueryClient.getQueryData(conversationMessageQueryKey(args.account, args.messageId)) ??
     fetchConversationMessageQuery(args)
   )
 }

@@ -1,6 +1,6 @@
 import { queryOptions } from "@tanstack/react-query"
 import { IXmtpClient } from "@/features/xmtp/xmtp.types"
-import { queryClient } from "@/queries/queryClient"
+import { reactQueryClient } from "@/utils/react-query/react-query-client"
 import { validateClientInstallation } from "../xmtp-installations/xmtp-installations"
 import { buildXmtpClientInstance } from "./xmtp-client"
 
@@ -30,5 +30,5 @@ export const getXmtpClientQueryOptions = (args: { ethAddress: string }) => {
 }
 
 export function setXmtpClientQueryData(args: { ethAddress: string; client: IXmtpClient }) {
-  return queryClient.setQueryData(xmtpClientQueryKey(args), args.client)
+  return reactQueryClient.setQueryData(xmtpClientQueryKey(args), args.client)
 }

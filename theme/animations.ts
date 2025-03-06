@@ -88,8 +88,6 @@ export const animation = {
     restSpeedThreshold: 0.001,
   },
 
-  springLayoutTransition: LinearTransition.springify(),
-
   reanimatedLayoutSpringTransition: LinearTransition.springify()
     .damping(SICK_DAMPING)
     .stiffness(SICK_STIFFNESS),

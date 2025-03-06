@@ -1,7 +1,7 @@
 import { LocalAttachment, LocalAttachmentMetadata } from "@utils/attachment/types"
 import RNFS from "react-native-fs"
 import { v4 as uuidv4 } from "uuid"
-import { moveFileAndReplace } from "@/utils/fileSystem"
+import { moveFileAndReplace } from "@/utils/file-system"
 import { getImageSize, isImageMimetype } from "../media"
 
 export function getMessagesAttachmentsLocalFolderPath(messageId: string) {

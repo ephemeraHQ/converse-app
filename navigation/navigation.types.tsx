@@ -1,7 +1,7 @@
-import { ConversationNavParams } from "@/features/conversation/conversation.nav"
-import { AddGroupMembersNavParams } from "@/features/group-details/screens/add-group-members.nav"
-import { GroupDetailsNavParams } from "@/features/group-details/screens/group-details.nav"
-import { GroupMembersListNavParams } from "@/features/group-details/screens/group-members-list.nav"
+import { ConversationNavParams } from "@/features/conversation/conversation-chat/conversation.nav"
+import { AddGroupMembersNavParams } from "@/features/groups/group-details/add-group-members/add-group-members.nav"
+import { GroupDetailsNavParams } from "@/features/groups/group-details/group-details.nav"
+import { GroupMembersListNavParams } from "@/features/groups/group-details/members-list/group-members-list.nav"
 // import {
 //   InviteUsersToExistingGroupNav,
 //   InviteUsersToExistingGroupParams,

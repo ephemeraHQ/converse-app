@@ -1,9 +1,9 @@
 import { queryOptions, skipToken } from "@tanstack/react-query"
 import { ConsentState } from "@xmtp/react-native-sdk"
 import { getXmtpClientByEthAddress } from "@/features/xmtp/xmtp-client/xmtp-client.service"
-import { queryClient } from "@/queries/queryClient"
 import { conversationSyncAllQueryKey } from "@/queries/QueryKeys"
 import { captureError } from "@/utils/capture-error"
+import { reactQueryClient } from "@/utils/react-query/react-query-client"
 
 type IArgs = {
   ethAddress: string
@@ -50,5 +50,5 @@ export function getConversationSyncAllQueryOptions(args: IArgs) {
 }
 
 export function ensureConversationSyncAllQuery(args: IArgs) {
-  return queryClient.ensureQueryData(getConversationSyncAllQueryOptions(args))
+  return reactQueryClient.ensureQueryData(getConversationSyncAllQueryOptions(args))
 }

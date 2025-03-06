@@ -3,12 +3,12 @@ import { useMultiInboxStore } from "@/features/authentication/multi-inbox.store"
 import { createXmtpClientInstance } from "@/features/xmtp/xmtp-client/xmtp-client"
 import { validateClientInstallation } from "@/features/xmtp/xmtp-installations/xmtp-installations"
 import { IXmtpSigner } from "@/features/xmtp/xmtp.types"
-import { queryClient } from "@/queries/queryClient"
 import { enhanceError } from "@/utils/error"
+import { reactQueryClient } from "@/utils/react-query/react-query-client"
 import { getXmtpClientQueryOptions, setXmtpClientQueryData } from "./xmtp-client.query"
 
 export async function getXmtpClient(args: { ethAddress: string }) {
-  return queryClient.ensureQueryData(getXmtpClientQueryOptions(args))
+  return reactQueryClient.ensureQueryData(getXmtpClientQueryOptions(args))
 }
 
 export async function createXmtpClient(args: { inboxSigner: IXmtpSigner }) {

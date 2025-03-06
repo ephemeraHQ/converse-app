@@ -2,10 +2,10 @@ import {
   getMessageAttachmentLocalPath,
   getMessagesAttachmentsLocalFolderPath,
 } from "@utils/attachment/attachment.utils"
-import { moveFileAndReplace } from "@utils/fileSystem"
 import { DecryptedLocalAttachment } from "@xmtp/react-native-sdk"
 import mime from "mime"
 import RNFS from "react-native-fs"
+import { moveFileAndReplace } from "@/utils/file-system"
 import { getLocalAttachment } from "./handleAttachment"
 
 export const handleDecryptedLocalAttachment = async (args: {

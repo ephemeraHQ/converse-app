@@ -1,5 +1,5 @@
 import RNFS from "react-native-fs"
-import { moveFileAndReplace } from "../fileSystem"
+import { moveFileAndReplace } from "../file-system"
 import { getLocalAttachment } from "./handleAttachment"
 
 export const saveAttachmentForPendingMessage = async (args: {

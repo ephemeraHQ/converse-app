@@ -1,10 +1,10 @@
 import { queryOptions, useQuery } from "@tanstack/react-query"
 import { type ConversationTopic } from "@xmtp/react-native-sdk"
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm"
-import { queryClient } from "@/queries/queryClient"
 import { Optional } from "@/types/general"
 import logger from "@/utils/logger"
 import { reactQueryPersister } from "@/utils/mmkv"
+import { reactQueryClient } from "@/utils/react-query/react-query-client"
 import { getOrFetchConversation } from "./conversation-query"
 import { dmPeerInboxIdQueryKey } from "./QueryKeys"
 
@@ -53,9 +53,9 @@ export const useDmPeerInboxIdQuery = (args: IArgsWithCaller) => {
 }
 
 export const ensureDmPeerInboxIdQueryData = async (args: IArgsWithCaller) => {
-  return queryClient.ensureQueryData(getDmPeerInboxIdQueryOptions(args))
+  return reactQueryClient.ensureQueryData(getDmPeerInboxIdQueryOptions(args))
 }
 
 export function getDmPeerInboxIdQueryData(args: IArgs) {
-  return queryClient.getQueryData(getDmPeerInboxIdQueryOptions(args).queryKey)
+  return reactQueryClient.getQueryData(getDmPeerInboxIdQueryOptions(args).queryKey)
 }

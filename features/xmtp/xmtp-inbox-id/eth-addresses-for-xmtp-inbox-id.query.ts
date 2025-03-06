@@ -3,8 +3,8 @@
  */
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query"
 import { InboxId } from "@xmtp/react-native-sdk"
-import { queryClient } from "@/queries/queryClient"
 import { IEthereumAddress } from "@/utils/evm/address"
+import { reactQueryClient } from "@/utils/react-query/react-query-client"
 import { getEthAddressesFromInboxIds } from "./eth-addresses-from-xmtp-inbox-id"
 
 type IArgs = {
@@ -47,7 +47,7 @@ export function useEthAddressesForXmtpInboxId(args: IArgs) {
 
 export function ensureEthAddressForXmtpInboxId(args: IStrictArgs) {
   const { clientEthAddress, inboxId } = args
-  return queryClient.ensureQueryData(
+  return reactQueryClient.ensureQueryData(
     getEthAddressesForXmtpInboxIdQueryOptions({
       clientEthAddress,
       inboxId,
@@ -57,7 +57,7 @@ export function ensureEthAddressForXmtpInboxId(args: IStrictArgs) {
 
 export function invalidateEthAddressesForXmtpInboxId(args: IStrictArgs) {
   const { clientEthAddress, inboxId } = args
-  return queryClient.invalidateQueries(
+  return reactQueryClient.invalidateQueries(
     getEthAddressesForXmtpInboxIdQueryOptions({
       clientEthAddress,
       inboxId,
