@@ -69,7 +69,8 @@ export type IIconName =
   | "restore"
   | "biometric"
   | "camera"
-
+  | "contact-card"
+  | "person-badge-key"
 /**
  * Props for the Icon component.
  * @example
@@ -86,7 +87,7 @@ export type IIconProps = RequireExactlyOne<{
   picto: IIconName
 }> & {
   style?: StyleProp<ViewStyle>
-  color?: ColorValue
+  color?: string
   /**
    * Icon size in pixels (positive number)
    * @default 24
@@ -95,5 +96,5 @@ export type IIconProps = RequireExactlyOne<{
   /**
    * Weight of the icon
    */
-  weight?: "ultralight" | "light" | "thin" | "regular" | "medium" | "semibold" | "bold" | "heavy"
+  weight?: "ultraLight" | "light" | "thin" | "regular" | "medium" | "semibold" | "bold" | "heavy"
 }

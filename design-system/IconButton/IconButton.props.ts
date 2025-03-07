@@ -25,6 +25,11 @@ export type IIconButtonProps = {
   iconWeight?: IIconProps["weight"]
 
   /**
+   * The size of the icon.
+   */
+  iconSize?: IIconProps["size"]
+
+  /**
    * The variant of the button.
    * Determines the button's overall style.
    */

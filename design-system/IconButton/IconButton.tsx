@@ -4,20 +4,20 @@ import {
   GestureResponderEvent,
   PressableStateCallbackType,
   StyleProp,
-  TextStyle,
   ViewStyle,
 } from "react-native"
 import { useAppTheme } from "../../theme/use-app-theme"
 import { Icon } from "../Icon/Icon"
 import { Pressable } from "../Pressable"
 import { IIconButtonProps } from "./IconButton.props"
-import { getIconButtonViewStyle, getIconProps, getIconStyle } from "./IconButton.styles"
+import { getIconButtonViewStyle, getIconProps } from "./IconButton.styles"
 
 export const IconButton = React.forwardRef(function IconButton(props: IIconButtonProps, ref) {
   const {
     icon,
     iconName,
     iconWeight,
+    iconSize,
     variant = "fill",
     size = "md",
     action = "primary",
@@ -59,22 +59,6 @@ export const IconButton = React.forwardRef(function IconButton(props: IIconButto
     ],
   )
 
-  const iconStyle = useCallback(
-    ({ pressed }: PressableStateCallbackType): StyleProp<TextStyle> =>
-      themed(
-        getIconStyle({
-          variant,
-          size,
-          action,
-          pressed,
-          disabled,
-        }),
-      ),
-    [themed, variant, size, action, disabled],
-  )
-
-  // For now until we fix Icon
-
   const iconProps = useCallback(
     ({ pressed }: PressableStateCallbackType) =>
       themed(
@@ -115,13 +99,13 @@ export const IconButton = React.forwardRef(function IconButton(props: IIconButto
     >
       {({ pressed, hovered }) => {
         if (iconName) {
+          const { size, weight, color } = iconProps({ pressed, hovered })
           return (
             <Icon
-              ref={ref}
-              picto={iconName}
-              style={iconStyle({ pressed, hovered })}
-              weight={iconWeight}
-              {...iconProps({ pressed, hovered })}
+              icon={iconName}
+              color={color}
+              weight={iconWeight || weight}
+              size={iconSize || size}
             />
           )
         }

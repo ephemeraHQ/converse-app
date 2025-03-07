@@ -72,6 +72,8 @@ export const iconRegistry: Record<IIconName, keyof typeof MaterialIcons.glyphMap
   restore: "restore",
   biometric: "fingerprint",
   camera: "camera",
+  "contact-card": "person",
+  "person-badge-key": "person",
 }
 
 export function Icon(props: IIconProps) {

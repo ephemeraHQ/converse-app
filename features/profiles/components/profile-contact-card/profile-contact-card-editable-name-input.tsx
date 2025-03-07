@@ -76,6 +76,7 @@ export const ProfileContactCardEditableNameInput = memo(
         style={{
           color: theme.colors.text.inverted.primary,
         }}
+        cursorColor={theme.colors.text.inverted.primary}
         maxLength={32}
         autoCorrect={false}
         onChangeText={handleChangeText}
