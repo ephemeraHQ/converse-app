@@ -1,7 +1,7 @@
 import { usePrivy } from "@privy-io/expo"
 import { useEffect } from "react"
-import { useAuthStore } from "@/features/authentication/authentication.store"
 import { useMultiInboxStore } from "@/features/authentication/multi-inbox.store"
+import { useAuthStore } from "@/features/authentication/stores/authentication.store"
 import { ensureCurrentUserQueryData } from "@/features/current-user/curent-user.query"
 import { getXmtpClient } from "@/features/xmtp/xmtp-client/xmtp-client.service"
 import { captureError } from "@/utils/capture-error"
@@ -41,12 +41,12 @@ export function useHydrateAuth() {
           const user = await ensureCurrentUserQueryData()
 
           if (!user) {
-            useAuthStore.getState().actions.setStatus("onboarding")
+            useAuthStore.getState().actions.setStatus("signedOut")
             return
           }
         } catch {
           // If we can't get XMTP client or fetch user data, send to onboarding
-          useAuthStore.getState().actions.setStatus("onboarding")
+          useAuthStore.getState().actions.setStatus("signedOut")
           return
         }
 

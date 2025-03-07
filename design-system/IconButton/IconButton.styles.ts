@@ -1,5 +1,6 @@
 // IconButton.styles.ts
-import { TextStyle, ViewStyle } from "react-native"
+import { ViewStyle } from "react-native"
+import { IIconProps } from "@/design-system/Icon/Icon.types"
 import { Theme } from "../../theme/use-app-theme"
 import { IIconButtonAction, IIconButtonSize, IIconButtonVariant } from "./IconButton.props"
 
@@ -82,11 +83,6 @@ export const getIconButtonViewStyle =
 
         case "ghost":
           style.backgroundColor = "transparent"
-          // TODO: put back when we're done refactoring all the iconButton and buttons
-          //   if (pressed) {
-          //     style.backgroundColor = colors.fill.minimal;
-          //   }
-          // Temporary opacity change for the variant="text" button
           if (pressed) {
             style.opacity = 0.8
           }
@@ -100,73 +96,14 @@ export const getIconButtonViewStyle =
     return style
   }
 
-export const getIconStyle =
-  ({ variant, size, action, pressed = false, disabled = false }: IconButtonStyleProps) =>
-  (theme: Theme): TextStyle => {
-    const { colors, spacing } = theme
-
-    const style: TextStyle = {}
-
-    // Set icon size
-    const sizeStyles = {
-      sm: {
-        fontSize: spacing.md,
-      },
-      md: {
-        fontSize: spacing.lg,
-      },
-      lg: {
-        fontSize: spacing.xl,
-      },
-      xl: {
-        fontSize: spacing.lg,
-      },
-    }
-
-    Object.assign(style, sizeStyles[size])
-
-    if (action === "primary") {
-      switch (variant) {
-        case "fill":
-          style.color = colors.text.inverted.primary
-          break
-
-        case "outline":
-        case "subtle":
-          style.color = colors.text.primary
-          if (disabled) {
-            style.color = colors.fill.tertiary
-          }
-          break
-
-        case "ghost":
-          style.color = colors.text.primary
-          if (disabled) {
-            style.color = colors.fill.tertiary
-          }
-          break
-
-        default:
-          break
-      }
-    }
-
-    return style
-  }
-
 export const getIconProps =
   ({ variant, size, action, pressed = false, disabled = false }: IconButtonStyleProps) =>
-  (
-    theme: Theme, // TODO: fix once we fixed IconProps
-    // : Partial<IIconProps>
-  ) => {
+  (theme: Theme): Partial<IIconProps> => {
     const { colors, spacing } = theme
 
-    const props: any =
-      // :Partial<IIconProps>
-      {}
+    const props: Partial<IIconProps> = {}
 
-    // Set icon size
+    // Set icon size from size prop
     const sizeMap = {
       sm: spacing.xs,
       md: spacing.sm,
@@ -176,12 +113,10 @@ export const getIconProps =
 
     props.size = sizeMap[size]
 
+    // Handle colors based on variant and state
     if (disabled && variant !== "fill") {
       props.color = colors.text.tertiary
-      return props
-    }
-
-    if (action === "primary") {
+    } else if (action === "primary") {
       switch (variant) {
         case "fill":
           props.color = colors.text.inverted.primary

@@ -103,10 +103,8 @@ export const animation = {
 
   reanimatedFadeInSpring: FadeIn.springify().stiffness(SICK_STIFFNESS).damping(SICK_DAMPING),
 
-  reanimatedFadeInSpringSlow: FadeIn.springify()
-    .stiffness(SICK_STIFFNESS)
-    .damping(SICK_DAMPING)
-    .duration(timing.slow),
+  reanimatedFadeInSpringSlow: () =>
+    FadeIn.springify().stiffness(SICK_STIFFNESS).damping(SICK_DAMPING).duration(timing["3xSlow"]),
 
   reanimatedFadeOutSpring: FadeOut.springify().stiffness(SICK_STIFFNESS).damping(SICK_DAMPING),
 

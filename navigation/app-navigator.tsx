@@ -5,7 +5,8 @@ import React, { memo, useEffect } from "react"
 import { config } from "@/config"
 import { AppSettingsScreen } from "@/features/app-settings/app-settings.screen"
 import { useIsCurrentVersionEnough } from "@/features/app-settings/hooks/use-is-current-version-enough"
-import { useAuthStore } from "@/features/authentication/authentication.store"
+import { AuthScreen } from "@/features/authentication/screens/auth.screen"
+import { useAuthStore } from "@/features/authentication/stores/authentication.store"
 import { useHydrateAuth } from "@/features/authentication/use-hydrate-auth"
 import { useLogoutOnJwtRefreshError } from "@/features/authentication/use-logout-on-jwt-refresh-error"
 import { BlockedConversationsScreen } from "@/features/blocked-conversations/blocked-conversations.screen"
@@ -127,8 +128,8 @@ const AppStacks = memo(function AppStacks() {
       ) : isSignedOut ? (
         <AppNativeStack.Group>
           <AppNativeStack.Screen
-            name="OnboardingWelcome"
-            component={OnboardingWelcomeScreen}
+            name="Auth"
+            component={AuthScreen}
             // Fade animation when transitioning to signed out state
             options={{ animation: "fade" }}
           />

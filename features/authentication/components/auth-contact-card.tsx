@@ -8,12 +8,14 @@ import { Screen } from "@/components/screen/screen"
 import { showSnackbar } from "@/components/snackbar/snackbar.service"
 import { Text } from "@/design-system/Text"
 import { AnimatedVStack, VStack } from "@/design-system/VStack"
+import { useAuthContext } from "@/features/authentication/contexts/auth-context"
 import { useMultiInboxStore } from "@/features/authentication/multi-inbox.store"
 import { useAuthStore } from "@/features/authentication/stores/authentication.store"
 import { useCreateUser } from "@/features/current-user/use-create-user"
 import { OnboardingFooter } from "@/features/onboarding/components/onboarding-footer"
 import { OnboardingSubtitle } from "@/features/onboarding/components/onboarding-subtitle"
 import { OnboardingTitle } from "@/features/onboarding/components/onboarding-title"
+import { useOnboardingContactCardStore } from "@/features/onboarding/screens/onboarding-contact-card.store"
 import { ProfileContactCardEditableAvatar } from "@/features/profiles/components/profile-contact-card/profile-contact-card-editable-avatar"
 import { ProfileContactCardEditableNameInput } from "@/features/profiles/components/profile-contact-card/profile-contact-card-editable-name-input"
 import { ProfileContactCardImportName } from "@/features/profiles/components/profile-contact-card/profile-contact-card-import-name"
@@ -27,12 +29,15 @@ import { $globalStyles } from "@/theme/styles"
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme"
 import { captureErrorWithToast } from "@/utils/capture-error"
 import { getFirstZodValidationError, isZodValidationError } from "@/utils/zod"
-import { useOnboardingContactCardStore } from "./onboarding-contact-card.store"
 
-export function OnboardingContactCardScreen() {
+export const AuthContactCard = memo(function AuthContactCard() {
   const { themed, theme } = useAppTheme()
 
+  const [pressedOnContinue, setPressedOnContinue] = useState(false)
+
   const { createUserAsync, isCreatingUser } = useCreateUser()
+
+  const { restart, isProcessingWeb3Stuff } = useAuthContext()
 
   const { user: privyUser } = usePrivy()
 
@@ -40,6 +45,8 @@ export function OnboardingContactCardScreen() {
 
   const handleRealContinue = useCallback(async () => {
     try {
+      setPressedOnContinue(true)
+
       const currentSender = useMultiInboxStore.getState().currentSender
       const store = useOnboardingContactCardStore.getState()
 
@@ -63,15 +70,6 @@ export function OnboardingContactCardScreen() {
       })
 
       useAuthStore.getState().actions.setStatus("signedIn")
-
-      // TODO: Notification permissions screen
-      // if (success) {
-      //   if (needToShowNotificationsPermissions()) {
-      //     router.push("OnboardingNotifications");
-      //   } else {
-      //     setAuthStatus(AuthStatuses.signedIn);
-      //   }
-      // }
     } catch (error) {
       if (isZodValidationError(error)) {
         showSnackbar({
@@ -92,25 +90,15 @@ export function OnboardingContactCardScreen() {
           message: "An unexpected error occurred. Please try again.",
         })
       }
+    } finally {
+      setPressedOnContinue(false)
     }
   }, [createUserAsync, privyUser])
-
-  // const [
-  //   isConnectWalletBottomSheetVisible,
-  //   setIsConnectWalletBottomSheetVisible,
-  // ] = useState(false);
-
-  // const handleImportPress = useCallback(() => {
-  //   alert("Working on this right now 🤙");
-  //   // setIsConnectWalletBottomSheetVisible(true);
-  // }, []);
 
   useHeader({
     safeAreaEdges: ["top"],
     leftText: "Cancel",
-    onLeftPress: () => {
-      useAuthStore.getState().actions.setStatus("signedOut")
-    },
+    onLeftPress: restart,
   })
 
   useEffect(() => {
@@ -157,7 +145,12 @@ export function OnboardingContactCardScreen() {
   const { container } = useProfileContactCardStyles()
 
   return (
-    <>
+    <AnimatedVStack
+      entering={theme.animation.reanimatedFadeInSpringSlow()}
+      style={{
+        flex: 1,
+      }}
+    >
       <Screen contentContainerStyle={$globalStyles.flex1} safeAreaEdges={["bottom"]}>
         <AnimatedVStack
           // {...debugBorder()}
@@ -221,13 +214,15 @@ export function OnboardingContactCardScreen() {
             text={"Continue"}
             iconName="chevron.right"
             onPress={handleRealContinue}
-            isLoading={isCreatingUser || isAvatarUploading}
+            isLoading={
+              isCreatingUser || isAvatarUploading || (pressedOnContinue && isProcessingWeb3Stuff)
+            }
           />
         </VStack>
       </Screen>
-    </>
+    </AnimatedVStack>
   )
-}
+})
 
 const $contentContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flex: 1,

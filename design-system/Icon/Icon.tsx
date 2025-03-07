@@ -1,11 +1,10 @@
 import { logger } from "@utils/logger"
-import { useMemo } from "react"
-import { SFSymbol } from "react-native-sfsymbols"
+import { SFSymbol, SymbolView } from "expo-symbols"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { IIconName, IIconProps } from "./Icon.types"
 
 // For now we don't have tpying for SFSymbols but we use a 1-1 with the key name
-export const iconRegistry: Record<IIconName, string> = {
+export const iconRegistry: Record<IIconName, SFSymbol> = {
   xmark: "xmark",
   "xmark.circle.fill": "xmark.circle.fill",
   plus: "plus",
@@ -73,16 +72,22 @@ export const iconRegistry: Record<IIconName, string> = {
   restore: "archivebox.circle.fill",
   biometric: "faceid",
   camera: "camera.fill",
+  "contact-card": "person.text.rectangle",
+  "person-badge-key": "person.badge.key",
 }
 
 export function Icon(props: IIconProps) {
   const { theme } = useAppTheme()
 
-  const defaultSize = useMemo(() => theme.iconSize.lg, [theme])
-
-  const defaultColor = useMemo(() => theme.colors.fill.primary, [theme])
-
-  const { picto, icon, style, size = defaultSize, color = defaultColor, ...rest } = props
+  const {
+    picto,
+    icon,
+    style,
+    size = theme.iconSize.lg,
+    color = theme.colors.fill.primary,
+    weight,
+    ...rest
+  } = props
 
   if (!icon && !picto) {
     throw new Error("Either 'icon' or 'picto' must be provided")
@@ -104,13 +109,14 @@ export function Icon(props: IIconProps) {
   }
 
   return (
-    <SFSymbol
+    <SymbolView
       name={iconName}
-      color={color}
+      tintColor={color}
       size={size}
-      multicolor={false}
-      resizeMode="center"
-      style={[{ width: size, height: size }, style]}
+      scale="default"
+      weight={weight}
+      resizeMode="scaleAspectFit"
+      style={style}
       {...rest}
     />
   )

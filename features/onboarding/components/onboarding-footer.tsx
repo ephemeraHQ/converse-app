@@ -1,10 +1,9 @@
 import { ViewStyle } from "react-native"
 import { ActivityIndicator } from "@/design-system/activity-indicator"
 import { IIconName } from "@/design-system/Icon/Icon.types"
-import { AnimatedVStack } from "@/design-system/VStack"
+import { IIconButtonProps } from "@/design-system/IconButton/IconButton.props"
 import { OnboardingIconButton } from "@/features/onboarding/components/onboarding-icon-button"
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme"
-import { ONBOARDING_ENTERING_DELAY, ONBOARDING_ENTERING_DURATION } from "../onboarding.constants"
 import { OnboardingFooterText } from "./onboarding-footer-text"
 
 type IOnboardingFooterProps = {
@@ -13,6 +12,7 @@ type IOnboardingFooterProps = {
   onPress: () => void
   disabled?: boolean
   isLoading?: boolean
+  iconButtonProps?: IIconButtonProps
 }
 
 const $iconButtonStyle: ThemedStyle<ViewStyle> = ({ borderRadius }) => ({
@@ -25,17 +25,12 @@ export function OnboardingFooter({
   onPress,
   disabled,
   isLoading,
+  iconButtonProps,
 }: IOnboardingFooterProps) {
-  const { themed, theme } = useAppTheme()
-  const { animation } = theme
+  const { themed } = useAppTheme()
 
   return (
-    <AnimatedVStack
-      entering={animation
-        .fadeInDownSpring()
-        .delay(ONBOARDING_ENTERING_DELAY.THIRD)
-        .duration(ONBOARDING_ENTERING_DURATION)}
-    >
+    <>
       <OnboardingIconButton
         action="primary"
         size="xl"
@@ -47,8 +42,9 @@ export function OnboardingFooter({
           : {
               iconName,
             })}
+        {...iconButtonProps}
       />
       <OnboardingFooterText color={disabled ? "inactive" : "primary"}>{text}</OnboardingFooterText>
-    </AnimatedVStack>
+    </>
   )
 }

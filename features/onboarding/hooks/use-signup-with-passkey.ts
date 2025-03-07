@@ -59,24 +59,24 @@ export function useSignupWithPasskey() {
       authLogger.debug(`[Passkey Signup] Starting passkey registration`)
       await privySignupWithPasskey({ relyingParty: RELYING_PARTY })
 
-      // Step 2: Wallet creation
-      authLogger.debug(`[Wallet Setup] Creating embedded`)
-      await createEmbeddedWallet()
+      // // Step 2: Wallet creation
+      // authLogger.debug(`[Wallet Setup] Creating embedded`)
+      // await createEmbeddedWallet()
 
-      authLogger.debug(`[Wallet Setup] Waiting for smart wallet to be created`)
-      const smartWalletclient = await waitForSmartWalletClient()
-      authLogger.debug(`[Wallet Setup] Smart wallet created`)
+      // authLogger.debug(`[Wallet Setup] Waiting for smart wallet to be created`)
+      // const smartWalletclient = await waitForSmartWalletClient()
+      // authLogger.debug(`[Wallet Setup] Smart wallet created`)
 
-      // Step 3: Inbox creation
-      const signer = createXmtpSignerFromSwc(smartWalletclient)
-      const xmtpClient = await createXmtpClient({
-        inboxSigner: signer,
-      })
+      // // Step 3: Inbox creation
+      // const signer = createXmtpSignerFromSwc(smartWalletclient)
+      // const xmtpClient = await createXmtpClient({
+      //   inboxSigner: signer,
+      // })
 
-      return {
-        inboxId: xmtpClient.inboxId,
-        ethereumAddress: smartWalletclient.account.address,
-      }
+      // return {
+      //   inboxId: xmtpClient.inboxId,
+      //   ethereumAddress: smartWalletclient.account.address,
+      // }
     } catch (error) {
       throw error
     } finally {

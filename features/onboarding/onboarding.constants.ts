@@ -1,12 +1,12 @@
 import { config } from "@/config"
-import { timing } from "@/theme/timing"
-
-export const ONBOARDING_ENTERING_DURATION = timing["3xSlow"]
 
 export enum ONBOARDING_ENTERING_DELAY {
-  FIRST = 50,
-  SECOND = 100,
-  THIRD = 150,
+  FIRST = 100,
+  SECOND = 175,
+  THIRD = 250,
+  FOURTH = 850,
+  FIFTH = 925,
+  SIXTH = 1000,
 }
 
 export const RPID = config.websiteDomain
