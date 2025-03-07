@@ -35,6 +35,7 @@ export function useGroupDetailsScreenHeader() {
       title: "Info",
       leftIcon: "chevron.left",
       onLeftPress: handleBackPress,
+      backgroundColor: theme.colors.background.surface,
       // RightActionComponent: (
       //   <HStack>
       //     <HeaderAction icon="square.and.arrow.up" onPress={handleSharePress} />

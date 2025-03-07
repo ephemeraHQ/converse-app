@@ -430,7 +430,7 @@ const Container = memo(function Container(props: { children: React.ReactNode }) 
   const { children } = props
 
   const { theme } = useAppTheme()
-  const { height: keyboardHeightAV } = useAnimatedKeyboard()
+  const { keyboardHeightAV } = useAnimatedKeyboard()
 
   const searchQuery = useConversationStoreContext((state) => state.searchTextValue)
 

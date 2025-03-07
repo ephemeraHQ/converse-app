@@ -7,10 +7,10 @@ type IKeyboardHandlersArgs = {
 }
 
 export function useKeyboardHandlers(args: IKeyboardHandlersArgs) {
-  const { progress } = useAnimatedKeyboard()
+  const { progressAV } = useAnimatedKeyboard()
 
   useAnimatedReaction(
-    () => progress.value,
+    () => progressAV.value,
     (progress) => {
       if (progress === 1) {
         runOnJS(args.onKeyboardOpen)()

@@ -75,6 +75,7 @@ export const GroupDetailsScreen = memo(function GroupDetailsScreen(
       <Pressable
         style={{
           alignItems: "center",
+          backgroundColor: theme.colors.background.surface,
         }}
         onPress={() => alert("Exit pressed")}
       >

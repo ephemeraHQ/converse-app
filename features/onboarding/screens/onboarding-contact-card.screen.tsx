@@ -36,7 +36,7 @@ export function OnboardingContactCardScreen() {
 
   const { user: privyUser } = usePrivy()
 
-  const { progress: keyboardProgressAV } = useAnimatedKeyboard()
+  const { progressAV: keyboardProgressAV } = useAnimatedKeyboard()
 
   const handleRealContinue = useCallback(async () => {
     try {

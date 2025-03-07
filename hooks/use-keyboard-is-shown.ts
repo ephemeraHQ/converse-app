@@ -5,10 +5,10 @@ import { useAnimatedKeyboard } from "@/hooks/use-animated-keyboard"
 export function useKeyboardIsShown() {
   const [isKeyboardShown, setIsKeyboardShown] = useState(false)
 
-  const { progress } = useAnimatedKeyboard()
+  const { progressAV } = useAnimatedKeyboard()
 
   useAnimatedReaction(
-    () => progress.value,
+    () => progressAV.value,
     (progress) => {
       if (progress === 1) {
         runOnJS(setIsKeyboardShown)(true)

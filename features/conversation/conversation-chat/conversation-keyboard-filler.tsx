@@ -1,7 +1,7 @@
 import { AnimatedVStack } from "@design-system/VStack"
 import { memo, useEffect, useRef } from "react"
 import { Keyboard, TextInput } from "react-native"
-import { useAnimatedStyle, useSharedValue } from "react-native-reanimated"
+import { useAnimatedStyle } from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { useConversationMessageContextMenuEmojiPickerStore } from "@/features/conversation/conversation-chat/conversation-chat-message/conversation-message-context-menu/conversation-message-context-menu-emoji-picker/conversation-message-context-menu-emoji-picker.store"
 import { useConversationMessageContextMenuStoreContext } from "@/features/conversation/conversation-chat/conversation-chat-message/conversation-message-context-menu/conversation-message-context-menu.store-context"
@@ -13,11 +13,10 @@ type IConversationKeyboardFillerProps = {}
 export const ConversationKeyboardFiller = memo(function ConversationKeyboardFiller(
   props: IConversationKeyboardFillerProps,
 ) {
-  const { height: keyboardHeightAV } = useAnimatedKeyboard()
+  const { keyboardHeightAV, progressAV, previousOpenKeyboardHeightAV } = useAnimatedKeyboard()
   const insets = useSafeAreaInsets()
-  const lastKeyboardHeight = useSharedValue(0)
+  const wasKeyboardOpenRef = useRef(false)
   const textInputRef = useRef<TextInput>(null)
-  const keyboardWasOpenRef = useRef(false)
   const isKeyboardShown = useKeyboardIsShown()
 
   const messageContextMenuData = useConversationMessageContextMenuStoreContext(
@@ -33,51 +32,42 @@ export const ConversationKeyboardFiller = memo(function ConversationKeyboardFill
       return
     }
 
-    if (!!messageContextMenuData) {
-      // If the keyboard is open, keep track of where it was because we need to open it again when the context menu is dismissed
+    if (messageContextMenuData) {
+      // Store keyboard state when emoji picker opens
       if (isKeyboardShown) {
         Keyboard.dismiss()
-        lastKeyboardHeight.value = keyboardHeightAV.value
-        keyboardWasOpenRef.current = true
+        wasKeyboardOpenRef.current = true
       }
     }
     // Context menu is hidden
     else {
-      // Reopen keyboard if it was open before context menu was shown
-      if (keyboardWasOpenRef.current) {
+      // Restore keyboard state when emoji picker closes
+      if (wasKeyboardOpenRef.current) {
         textInputRef.current?.focus()
-        keyboardWasOpenRef.current = false
+        wasKeyboardOpenRef.current = false
       }
     }
-  }, [
-    isEmojiPickerOpen,
-    messageContextMenuData,
-    isKeyboardShown,
-    keyboardHeightAV,
-    lastKeyboardHeight,
-  ])
-
-  // Reset the last height when context menu is dismissed
-  // And make sure to wait until the keyboard is open to that the height animates back to what it was before
-  useEffect(() => {
-    if (!messageContextMenuData && isKeyboardShown) {
-      lastKeyboardHeight.value = 0
-    }
-  }, [messageContextMenuData, isKeyboardShown, keyboardHeightAV, lastKeyboardHeight])
+  }, [isEmojiPickerOpen, messageContextMenuData, isKeyboardShown])
 
   const fillerAnimatedStyle = useAnimatedStyle(() => {
+    if (messageContextMenuData) {
+      return {
+        height: previousOpenKeyboardHeightAV.value - insets.bottom,
+      }
+    }
+
+    const baseHeight = typeof keyboardHeightAV.value === "number" ? keyboardHeightAV.value : 0
+    const currentHeight = baseHeight * progressAV.value
+
     return {
-      height: Math.max(
-        Math.max(lastKeyboardHeight.value, keyboardHeightAV.value) - insets.bottom,
-        0,
-      ),
+      height: Math.max(currentHeight - insets.bottom, 0),
     }
   })
 
   return (
     <>
       <AnimatedVStack style={fillerAnimatedStyle} />
-      {/* Need for focus on keyboard */}
+      {/* Hidden TextInput for keyboard focus management */}
       <TextInput
         ref={textInputRef}
         style={{ height: 0, width: 0, opacity: 0, position: "absolute" }}
