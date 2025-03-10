@@ -9,10 +9,10 @@ import {
   getConversationMetadataQueryData,
   updateConversationMetadataQueryData,
 } from "@/features/conversation/conversation-metadata/conversation-metadata.query"
+import { getConversationQueryOptions } from "@/features/conversation/conversation-query"
+import { useDmPeerInboxIdQuery } from "@/features/dm/use-dm-peer-inbox-id-query"
 import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
 import { translate } from "@/i18n"
-import { getConversationQueryOptions } from "@/queries/conversation-query"
-import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query"
 import { captureErrorWithToast } from "@/utils/capture-error"
 
 export const useDeleteDm = ({ topic }: { topic: ConversationTopic }) => {

@@ -12,7 +12,7 @@ import { useCoinbaseWalletListener } from "@/features/wallets/utils/coinbase-wal
 import { $globalStyles } from "@/theme/styles"
 import { useThemeProvider } from "@/theme/use-app-theme"
 import { useCachedResources } from "@/utils/cache-resources"
-import { reactQueryClient } from "@/utils/react-query/react-query-client"
+import { reactQueryClient } from "@/utils/react-query/react-query.client"
 import "expo-dev-client"
 import React, { useEffect } from "react"
 import { GestureHandlerRootView } from "react-native-gesture-handler"

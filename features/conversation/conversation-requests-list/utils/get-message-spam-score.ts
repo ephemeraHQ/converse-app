@@ -3,7 +3,7 @@ import {
   isRemoteAttachmentMessage,
   isStaticAttachmentMessage,
   isTextMessage,
-} from "@/features/conversation/conversation-chat/conversation-chat-message/conversation-message.utils"
+} from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
 import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types"
 
 export function getMessageSpamScore(args: { message: IXmtpDecodedMessage }) {

@@ -1,12 +1,12 @@
 import { InboxId } from "@xmtp/react-native-sdk"
 import { getCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
+import { getAllowedConsentConversationsQueryOptions } from "@/features/conversation/conversations-allowed-consent-query"
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm"
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group"
+import { ensureDmPeerInboxIdQueryData } from "@/features/dm/use-dm-peer-inbox-id-query"
+import { ensureGroupMembersQueryData } from "@/features/groups/useGroupMembersQuery"
 import { isSameInboxId } from "@/features/xmtp/xmtp-inbox-id/xmtp-inbox-id.utils"
-import { getAllowedConsentConversationsQueryOptions } from "@/queries/conversations-allowed-consent-query"
-import { ensureDmPeerInboxIdQueryData } from "@/queries/use-dm-peer-inbox-id-query"
-import { ensureGroupMembersQueryData } from "@/queries/useGroupMembersQuery"
-import { reactQueryClient } from "@/utils/react-query/react-query-client"
+import { reactQueryClient } from "@/utils/react-query/react-query.client"
 
 export async function findConversationByInboxIds(args: { inboxIds: InboxId[] }) {
   const { inboxIds } = args

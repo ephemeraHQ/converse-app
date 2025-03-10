@@ -4,37 +4,34 @@ import { NativeScrollEvent, NativeSyntheticEvent, Platform } from "react-native"
 import { FadeInDown } from "react-native-reanimated"
 import { AnimatedVStack } from "@/design-system/VStack"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
-import { useConversationComposerStore } from "@/features/conversation/conversation-chat/conversation-chat-composer/conversation-composer.store-context"
-import { ConversationConsentPopupDm } from "@/features/conversation/conversation-chat/conversation-chat-consent-popup/conversation-consent-popup-dm"
-import { ConversationConsentPopupGroup } from "@/features/conversation/conversation-chat/conversation-chat-consent-popup/conversation-consent-popup-group"
-import { ConversationMessage } from "@/features/conversation/conversation-chat/conversation-chat-message/conversation-message"
-import { ConversationMessageLayout } from "@/features/conversation/conversation-chat/conversation-chat-message/conversation-message-layout"
-import { ConversationMessageReactions } from "@/features/conversation/conversation-chat/conversation-chat-message/conversation-message-reactions/conversation-message-reactions"
-import { ConversationMessageRepliable } from "@/features/conversation/conversation-chat/conversation-chat-message/conversation-message-repliable"
-import { ConversationMessageStatus } from "@/features/conversation/conversation-chat/conversation-chat-message/conversation-message-status/conversation-message-status"
-import { ConversationMessageTimestamp } from "@/features/conversation/conversation-chat/conversation-chat-message/conversation-message-timestamp"
-import { ConversationMessageContextStoreProvider } from "@/features/conversation/conversation-chat/conversation-chat-message/conversation-message.store-context"
+import { useConversationComposerStore } from "@/features/conversation/conversation-chat/conversation-composer/conversation-composer.store-context"
+import { ConversationConsentPopupDm } from "@/features/conversation/conversation-chat/conversation-consent-popup/conversation-consent-popup-dm"
+import { ConversationConsentPopupGroup } from "@/features/conversation/conversation-chat/conversation-consent-popup/conversation-consent-popup-group"
+import { ConversationMessage } from "@/features/conversation/conversation-chat/conversation-message/conversation-message"
+import { ConversationMessageLayout } from "@/features/conversation/conversation-chat/conversation-message/conversation-message-layout"
+import { ConversationMessageReactions } from "@/features/conversation/conversation-chat/conversation-message/conversation-message-reactions/conversation-message-reactions"
+import { ConversationMessageRepliable } from "@/features/conversation/conversation-chat/conversation-message/conversation-message-repliable"
+import { ConversationMessageStatus } from "@/features/conversation/conversation-chat/conversation-message/conversation-message-status/conversation-message-status"
+import { ConversationMessageTimestamp } from "@/features/conversation/conversation-chat/conversation-message/conversation-message-timestamp"
+import { ConversationMessageContextStoreProvider } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.store-context"
 import {
+  getConversationNextMessage,
+  getConversationPreviousMessage,
   getConvosMessageStatusForXmtpMessage,
   isAnActualMessage,
   useMessageHasReactions,
-} from "@/features/conversation/conversation-chat/conversation-chat-message/conversation-message.utils"
+} from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
 import { ConversationMessagesList } from "@/features/conversation/conversation-chat/conversation-messages-list"
-import {
-  getConversationMessagesQueryOptions,
-  useConversationMessagesQuery,
-} from "@/features/conversation/conversation-chat/conversation-messages.query"
+import { useConversationMessagesQuery } from "@/features/conversation/conversation-chat/conversation-messages.query"
 import { useConversationIsUnread } from "@/features/conversation/conversation-list/hooks/use-conversation-is-unread"
 import { useMarkConversationAsRead } from "@/features/conversation/hooks/use-mark-conversation-as-read"
 import { isConversationAllowed } from "@/features/conversation/utils/is-conversation-allowed"
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm"
-import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user"
 import { IXmtpConversationWithCodecs, IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { captureError } from "@/utils/capture-error"
-import { useRefetchQueryOnRefocus } from "@/utils/react-query/use-refetch-query-on-focus"
 import { CONVERSATION_LIST_REFRESH_THRESHOLD } from "../conversation-list/conversation-list.contstants"
-import { ConversationMessageHighlighted } from "./conversation-chat-message/conversation-message-highlighted"
+import { ConversationMessageHighlighted } from "./conversation-message/conversation-message-highlighted"
 import { DmConversationEmpty, GroupConversationEmpty } from "./conversation.screen"
 import { useCurrentConversationTopic } from "./conversation.store-context"
 
@@ -61,20 +58,12 @@ export const ConversationMessages = memo(function ConversationMessages(props: {
     caller: "Conversation Messages",
   })
 
-  useRefetchQueryOnRefocus(
-    getConversationMessagesQueryOptions({ account: currentSenderEthAddress, topic }).queryKey,
-  )
-
   const latestMessageIdByCurrentUser = useMemo(() => {
-    if (!messages?.ids) return -1
-
-    const messageId = messages.ids.find(
+    return messages?.ids?.find(
       (messageId) =>
         isAnActualMessage(messages.byId[messageId]) &&
         messages.byId[messageId].senderInboxId === currentAccountInboxId,
     )
-
-    return messageId
   }, [messages?.ids, messages?.byId, currentAccountInboxId])
 
   const { isUnread } = useConversationIsUnread({
@@ -134,9 +123,14 @@ export const ConversationMessages = memo(function ConversationMessages(props: {
         ) : undefined
       }
       renderMessage={({ message, index }) => {
-        const previousMessage = messages?.byId[messages?.ids[index + 1]]
-        const nextMessage = messages?.byId[messages?.ids[index - 1]]
-
+        const previousMessage = getConversationPreviousMessage({
+          messageId: message.id,
+          topic,
+        })
+        const nextMessage = getConversationNextMessage({
+          messageId: message.id,
+          topic,
+        })
         return (
           <ConversationMessagesListItem
             message={message}
@@ -179,10 +173,6 @@ const ConversationMessagesListItem = memo(function ConversationMessagesListItem(
   const handleReply = useCallback(() => {
     composerStore.getState().setReplyToMessageId(message.id as MessageId)
   }, [composerStore, message])
-
-  const isFromCurrentUser = messageIsFromCurrentAccountInboxId({
-    message,
-  })
 
   const messageHasReactions = useMessageHasReactions({
     messageId: message.id,

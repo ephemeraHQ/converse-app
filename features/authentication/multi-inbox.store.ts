@@ -214,7 +214,7 @@ export function useAllInboxIds() {
   return useMultiInboxStore((state) => state.senders.map((sender) => sender.inboxId))
 }
 
-export function resetAccountStore() {
+export function resetMultiInboxStore() {
   useMultiInboxStore.getState().actions.reset()
 }
 

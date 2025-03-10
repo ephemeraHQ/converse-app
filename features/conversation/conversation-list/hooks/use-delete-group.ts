@@ -9,8 +9,8 @@ import {
   getConversationMetadataQueryData,
   updateConversationMetadataQueryData,
 } from "@/features/conversation/conversation-metadata/conversation-metadata.query"
+import { getGroupQueryData } from "@/features/groups/useGroupQuery"
 import { translate } from "@/i18n"
-import { getGroupQueryData } from "@/queries/useGroupQuery"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { captureErrorWithToast } from "@/utils/capture-error"
 

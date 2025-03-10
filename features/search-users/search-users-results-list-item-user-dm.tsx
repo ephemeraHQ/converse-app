@@ -1,8 +1,8 @@
 import { ConversationTopic } from "@xmtp/react-native-sdk"
 import { memo } from "react"
 import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
+import { useDmPeerInboxIdQuery } from "@/features/dm/use-dm-peer-inbox-id-query"
 import { SearchUsersResultsListItemUser } from "@/features/search-users/search-users-results-list-item-user"
-import { useDmPeerInboxIdQuery } from "@/queries/use-dm-peer-inbox-id-query"
 
 export const SearchUsersResultsListItemUserDm = memo(
   function SearchUsersResultsListItemUserDm(props: {

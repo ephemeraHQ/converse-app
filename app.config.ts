@@ -240,7 +240,7 @@ export default (): ExpoConfig => {
             // you may set `use_modular_headers!` globally in your Podfile,
             // or specify `:modular_headers => true` for particular dependencies"
             useFrameworks: "static",
-            deploymentTarget: "17.5",
+            deploymentTarget: "16.0",
           },
           android: {
             compileSdkVersion: 35,

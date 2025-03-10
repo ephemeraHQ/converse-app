@@ -16,7 +16,7 @@ import {
   rotateXmtpLoggingFile,
   startXmtpLogging,
   stopXmtpLogging,
-} from "@/features/xmtp/utils/xmtp-logs"
+} from "@/features/xmtp/xmtp-logs"
 import { translate } from "@/i18n"
 import { navigate } from "@/navigation/navigation.utils"
 import { $globalStyles } from "@/theme/styles"

@@ -1,4 +1,5 @@
-// import { LegendList } from "@legendapp/list";
+// import { LegendListProps, LegendListRef } from "@legendapp/list"
+// import { AnimatedLegendList } from "@legendapp/list/reanimated"
 import { memo, ReactElement, useEffect } from "react"
 import { FlatList, FlatListProps, Platform } from "react-native"
 import Animated, { AnimatedProps, useAnimatedRef } from "react-native-reanimated"
@@ -19,11 +20,8 @@ export const ConversationMessagesList = memo(function ConversationMessagesList(
   props: ConversationMessagesListProps,
 ) {
   const { messages, renderMessage, ...rest } = props
-
   const { theme } = useAppTheme()
-
-  const scrollRef = useAnimatedRef<FlatList<IXmtpDecodedMessage>>()
-
+  const scrollRef = useAnimatedRef<FlatList>()
   const conversationStore = useConversationStore()
 
   useEffect(() => {
@@ -49,40 +47,35 @@ export const ConversationMessagesList = memo(function ConversationMessagesList(
     }
   }, [conversationStore, messages, scrollRef])
 
-  // WIP. Lib isn't ready yet
   // return (
-  //   <LegendList
-  //     data={messageIds}
+  //   <AnimatedLegendList
+  //     // ref={scrollRef}
+  //     data={messages}
   //     renderItem={({ item, index }) =>
   //       renderMessage({
-  //         messageId: item,
+  //         message: item,
   //         index,
   //       })
   //     }
-  //     itemLayoutAnimation={theme.animation.reanimatedLayoutSpringTransition}
-  //     keyboardDismissMode="interactive"
-  //     estimatedItemSize={100}
   //     maintainScrollAtEnd
+  //     maintainVisibleContentPosition
+  //     initialScrollIndex={messages.length - 1}
   //     alignItemsAtEnd
-  //     automaticallyAdjustContentInsets={false}
-  //     contentInsetAdjustmentBehavior="never"
-  //     keyExtractor={keyExtractor}
+  //     recycleItems={false} // Disable recycling since messages likely have local state
+  //     // estimatedItemSize={176} // Random value that feels right
+  //     // keyExtractor={keyExtractor}
+  //     layout={theme.animation.reanimatedLayoutSpringTransition}
+  //     waitForInitialLayout
+  //     keyboardDismissMode="interactive"
   //     keyboardShouldPersistTaps="handled"
-  //     ItemSeparatorComponent={MessageSeparator}
   //     showsVerticalScrollIndicator={Platform.OS === "ios"} // Size glitch on Android
-  //     pointerEvents="auto"
-  //     /**
-  //      * Causes a glitch on Android, no sure we need it for now
-  //      */
-  //     // maintainVisibleContentPosition={{
-  //     //   minIndexForVisible: 0,
-  //     //   autoscrollToTopThreshold: 100,
-  //     // }}
-  //     // estimatedListSize={Dimensions.get("screen")}
+  //     style={$globalStyles.flex1}
+  //     drawDistance={100} // Increase draw distance for better performance when scrolling
   //     {...rest}
   //   />
-  // );
+  // )
 
+  // Slow but works
   return (
     // @ts-expect-error
     <Animated.FlatList

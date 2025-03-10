@@ -1,16 +1,14 @@
-import { useGroupQuery } from "@queries/useGroupQuery"
 import { useMutation } from "@tanstack/react-query"
-import { logger } from "@utils/logger"
 import type { ConversationTopic } from "@xmtp/react-native-sdk"
 import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client"
+import { useGroupQuery } from "@/features/groups/useGroupQuery"
 import { captureError } from "@/utils/capture-error"
-import { revokeSuperAdminMutationKey } from "../../../../queries/MutationKeys"
 import {
   cancelGroupMembersQuery,
   getGroupMembersQueryData,
   invalidateGroupMembersQuery,
   setGroupMembersQueryData,
-} from "../../../../queries/useGroupMembersQuery"
+} from "../../useGroupMembersQuery"
 
 // import { refreshGroup } from "../utils/xmtpRN/conversations";
 
@@ -18,7 +16,6 @@ export const useRevokeSuperAdminMutation = (account: string, topic: Conversation
   const { data: group } = useGroupQuery({ account, topic })
 
   return useMutation({
-    mutationKey: revokeSuperAdminMutationKey(account, topic!),
     mutationFn: async (inboxId: InboxId) => {
       if (!group) {
         throw new Error("No group found to revoke super admin from")

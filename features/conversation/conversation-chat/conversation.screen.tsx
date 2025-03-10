@@ -6,24 +6,26 @@ import { ActivityIndicator } from "@/design-system/activity-indicator"
 import { Center } from "@/design-system/Center"
 import { VStack } from "@/design-system/VStack"
 import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
-import { ConversationComposer } from "@/features/conversation/conversation-chat/conversation-chat-composer/conversation-composer"
-import { ConversationComposerStoreProvider } from "@/features/conversation/conversation-chat/conversation-chat-composer/conversation-composer.store-context"
-import { ConversationMessageContextMenu } from "@/features/conversation/conversation-chat/conversation-chat-message/conversation-message-context-menu/conversation-message-context-menu"
-import { ConversationMessageContextMenuStoreProvider } from "@/features/conversation/conversation-chat/conversation-chat-message/conversation-message-context-menu/conversation-message-context-menu.store-context"
-import { MessageReactionsDrawer } from "@/features/conversation/conversation-chat/conversation-chat-message/conversation-message-reactions/conversation-message-reaction-drawer/conversation-message-reaction-drawer"
-import { DmConversationTitle } from "@/features/conversation/conversation-chat/conversation-chat-screen-header/conversation-screen-dm-header-title"
-import { GroupConversationTitle } from "@/features/conversation/conversation-chat/conversation-chat-screen-header/conversation-screen-group-header-title"
+import { ConversationComposer } from "@/features/conversation/conversation-chat/conversation-composer/conversation-composer"
+import { ConversationComposerStoreProvider } from "@/features/conversation/conversation-chat/conversation-composer/conversation-composer.store-context"
 import { ConversationKeyboardFiller } from "@/features/conversation/conversation-chat/conversation-keyboard-filler"
+import { ConversationMessageContextMenu } from "@/features/conversation/conversation-chat/conversation-message/conversation-message-context-menu/conversation-message-context-menu"
+import { ConversationMessageContextMenuStoreProvider } from "@/features/conversation/conversation-chat/conversation-message/conversation-message-context-menu/conversation-message-context-menu.store-context"
+import { MessageReactionsDrawer } from "@/features/conversation/conversation-chat/conversation-message/conversation-message-reactions/conversation-message-reaction-drawer/conversation-message-reaction-drawer"
+import { getConversationMessagesQueryOptions } from "@/features/conversation/conversation-chat/conversation-messages.query"
+import { DmConversationTitle } from "@/features/conversation/conversation-chat/conversation-screen-header/conversation-screen-dm-header-title"
+import { GroupConversationTitle } from "@/features/conversation/conversation-chat/conversation-screen-header/conversation-screen-group-header-title"
 import { ConversationCreateListResults } from "@/features/conversation/conversation-create/conversation-create-list-results"
+import { useConversationQuery } from "@/features/conversation/conversation-query"
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm"
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group"
 import { SearchUsersInput } from "@/features/search-users/search-users-input"
 import { NavigationParamList } from "@/navigation/navigation.types"
 import { useHeader } from "@/navigation/use-header"
 import { useRouter } from "@/navigation/use-navigation"
-import { useConversationQuery } from "@/queries/conversation-query"
 import { $globalStyles } from "@/theme/styles"
 import { useAppTheme } from "@/theme/use-app-theme"
+import { useRefetchQueryOnRefocus } from "@/utils/react-query/use-refetch-query-on-focus"
 import { ConversationMessages } from "./conversation-messages"
 import {
   ConversationStoreProvider,
@@ -73,6 +75,12 @@ const Content = memo(function Content() {
     topic: topic!, // ! is okay because we have enabled in useQuery
     caller: "Conversation screen",
   })
+
+  useRefetchQueryOnRefocus(
+    topic
+      ? getConversationMessagesQueryOptions({ account: currentAccount, topic }).queryKey
+      : undefined,
+  )
 
   useHeader(
     {

@@ -1,4 +1,3 @@
-import { getGroupQueryOptions, useGroupQuery } from "@queries/useGroupQuery"
 import { useQuery } from "@tanstack/react-query"
 import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk"
 import { useCallback } from "react"
@@ -6,8 +5,9 @@ import { showSnackbar } from "@/components/snackbar/snackbar.service"
 import { updateInboxIdsConsentForAccount } from "@/features/consent/update-inbox-ids-consent-for-account"
 import { useAllowGroupMutation } from "@/features/consent/use-allow-group.mutation"
 import { useDenyGroupMutation } from "@/features/consent/use-deny-group.mutation"
+import { useGroupCreatorQuery } from "@/features/groups/useGroupCreatorQuery"
+import { getGroupQueryOptions, useGroupQuery } from "@/features/groups/useGroupQuery"
 import { translate } from "@/i18n"
-import { useGroupCreatorQuery } from "@/queries/useGroupCreatorQuery"
 import { useSafeCurrentSender } from "../authentication/multi-inbox.store"
 
 export type IGroupConsentOptions = {

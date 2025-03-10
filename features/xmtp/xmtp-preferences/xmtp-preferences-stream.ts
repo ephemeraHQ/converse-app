@@ -1,4 +1,4 @@
-import { getAllowedConsentConversationsQueryData } from "@/queries/conversations-allowed-consent-query"
+import { getAllowedConsentConversationsQueryData } from "@/features/conversation/conversations-allowed-consent-query"
 import { XMTPError } from "@/utils/error"
 import { xmtpLogger } from "@/utils/logger"
 import { getXmtpClientByEthAddress } from "../xmtp-client/xmtp-client.service"

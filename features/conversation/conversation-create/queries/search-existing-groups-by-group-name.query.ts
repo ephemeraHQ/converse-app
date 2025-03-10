@@ -1,8 +1,8 @@
 import { keepPreviousData, queryOptions, useQuery } from "@tanstack/react-query"
 import { InboxId } from "@xmtp/react-native-sdk"
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
+import { getAllowedConsentConversationsQueryData } from "@/features/conversation/conversations-allowed-consent-query"
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group"
-import { getAllowedConsentConversationsQueryData } from "@/queries/conversations-allowed-consent-query"
 import { normalizeString } from "@/utils/str"
 
 export async function searchExistingGroupsByGroupName(args: { searchQuery: string }) {

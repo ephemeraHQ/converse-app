@@ -91,6 +91,7 @@ const config = {
 
     "padding-line-between-statements": "off",
     "custom-plugin/padding-before-react-hooks": "warn",
+    "custom-plugin/require-promise-error-handling": "warn",
   },
   settings: {
     "import/resolver": {

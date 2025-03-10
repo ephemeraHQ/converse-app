@@ -2,22 +2,20 @@ import { useMutation } from "@tanstack/react-query"
 import { logger } from "@utils/logger"
 import type { ConversationTopic } from "@xmtp/react-native-sdk"
 import { updateConsentForGroupsForAccount } from "@/features/consent/update-consent-for-groups-for-account"
-import { getConversationIdFromTopic } from "@/features/conversation/utils/get-conversation-id-from-topic"
 import {
   addConversationToAllowedConsentConversationsQuery,
   removeConversationFromAllowedConsentConversationsQuery,
-} from "@/queries/conversations-allowed-consent-query"
+} from "@/features/conversation/conversations-allowed-consent-query"
 import {
   addConversationToUnknownConsentConversationsQuery,
   removeConversationFromUnknownConsentConversationsQueryData,
-} from "@/queries/conversations-unknown-consent-query"
-import { getGroupQueryData, setGroupQueryData } from "@/queries/useGroupQuery"
+} from "@/features/conversation/conversations-unknown-consent-query"
+import { getConversationIdFromTopic } from "@/features/conversation/utils/get-conversation-id-from-topic"
+import { getGroupQueryData, setGroupQueryData } from "@/features/groups/useGroupQuery"
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
-import { blockGroupMutationKey } from "../../queries/MutationKeys"
 
 export const useDenyGroupMutation = (account: string, topic: ConversationTopic) => {
   return useMutation({
-    mutationKey: blockGroupMutationKey(account, topic!),
     mutationFn: async () => {
       if (!topic || !account) {
         return

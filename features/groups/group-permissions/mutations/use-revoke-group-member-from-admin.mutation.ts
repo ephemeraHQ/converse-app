@@ -1,21 +1,19 @@
-import { useGroupQuery } from "@queries/useGroupQuery"
 import { useMutation } from "@tanstack/react-query"
 import type { ConversationTopic } from "@xmtp/react-native-sdk"
 import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client"
+import { useGroupQuery } from "@/features/groups/useGroupQuery"
 import { captureError } from "@/utils/capture-error"
-import { revokeAdminMutationKey } from "../../../../queries/MutationKeys"
 import {
   cancelGroupMembersQuery,
   getGroupMembersQueryData,
   invalidateGroupMembersQuery,
   setGroupMembersQueryData,
-} from "../../../../queries/useGroupMembersQuery"
+} from "../../useGroupMembersQuery"
 
 export const useRevokeAdminMutation = (account: string, topic: ConversationTopic) => {
   const { data: group } = useGroupQuery({ account, topic })
 
   return useMutation({
-    mutationKey: revokeAdminMutationKey(account, topic!),
     mutationFn: async (inboxId: InboxId) => {
       if (!group) {
         throw new Error("No group found to revoke admin from")

@@ -2,7 +2,7 @@ import { queryOptions, useQuery } from "@tanstack/react-query"
 import { logger } from "@utils/logger"
 import { InboxId, type ConversationTopic, type ReactionContent } from "@xmtp/react-native-sdk"
 import { MessageId } from "@xmtp/react-native-sdk/build/lib/types"
-import { isReactionMessage } from "@/features/conversation/conversation-chat/conversation-chat-message/conversation-message.utils"
+import { isReactionMessage } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
 import { contentTypesPrefixes } from "@/features/xmtp/xmtp-content-types/xmtp-content-types"
 import { syncConversation } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-sync"
 import {
@@ -11,12 +11,9 @@ import {
 } from "@/features/xmtp/xmtp-messages/xmtp-messages"
 import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types"
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
-import {
-  getConversationQueryData,
-  getOrFetchConversation,
-} from "../../../queries/conversation-query"
 import { conversationMessagesQueryKey } from "../../../queries/QueryKeys"
-import { reactQueryClient } from "../../../utils/react-query/react-query-client"
+import { reactQueryClient } from "../../../utils/react-query/react-query.client"
+import { getConversationQueryData, getOrFetchConversation } from "../conversation-query"
 
 export type ConversationMessagesQueryData = Awaited<ReturnType<typeof conversationMessagesQueryFn>>
 
@@ -144,7 +141,7 @@ export type IMessageAccumulator = {
 function processMessages(args: {
   newMessages: IXmtpDecodedMessage[]
   existingData?: IMessageAccumulator
-  prependNewMessages?: boolean
+  prependNewMessages?: boolean // When true, adds new messages to the end of the list. When false, adds them to the beginning.
 }): IMessageAccumulator {
   const { newMessages, existingData, prependNewMessages = false } = args
 

@@ -1,25 +1,19 @@
 import { Icon } from "@design-system/Icon/Icon"
 import { PressableScale } from "@design-system/pressable-scale"
 import { Text } from "@design-system/Text"
-import { IVStackProps, VStack } from "@design-system/VStack"
+import { IVStackProps } from "@design-system/VStack"
 import { translate } from "@i18n"
-import { useQuery } from "@tanstack/react-query"
-import { getLocalAttachmentForMessageId } from "@utils/attachment/getLocalAttachment"
-import { handleDecryptedLocalAttachment } from "@utils/attachment/handleDecryptedLocalAttachment"
-import { RemoteAttachmentContent } from "@xmtp/react-native-sdk"
-import { Image } from "expo-image"
+import { MessageId, RemoteAttachmentContent } from "@xmtp/react-native-sdk"
 import prettyBytes from "pretty-bytes"
 import { memo } from "react"
-import { getCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
+import { Image } from "@/design-system/image"
 import { AttachmentLoading } from "@/features/conversation/conversation-attachment/conversation-attachment-loading"
-import {
-  fetchAndDecodeRemoteAttachment,
-  MAX_AUTOMATIC_DOWNLOAD_ATTACHMENT_SIZE,
-} from "@/features/xmtp/xmtp-codecs/xmtp-codecs-attachments"
 import { useAppTheme } from "@/theme/use-app-theme"
+import { useRemoteAttachmentQuery } from "./conversation-attachment.query"
+import { ConversationMessageAttachmentContainer } from "./conversation-message-attachment-container"
 
 type IAttachmentRemoteImageProps = {
-  messageId: string
+  messageId: MessageId
   remoteMessageContent: RemoteAttachmentContent
   fitAspectRatio?: boolean
   containerProps?: IVStackProps
@@ -37,36 +31,36 @@ export const AttachmentRemoteImage = memo(function AttachmentRemoteImage(
     isLoading: attachmentLoading,
     error: attachmentError,
     refetch: refetchAttachment,
-  } = useQuery({
-    queryKey: ["attachment", messageId],
-    queryFn: () => fetchAttachment(messageId, remoteMessageContent),
+  } = useRemoteAttachmentQuery({
+    messageId,
+    content: remoteMessageContent,
   })
 
   if (!attachment && attachmentLoading) {
     return (
-      <AttachmentPreviewContainer {...containerProps}>
+      <ConversationMessageAttachmentContainer {...containerProps}>
         <AttachmentLoading />
-      </AttachmentPreviewContainer>
+      </ConversationMessageAttachmentContainer>
     )
   }
 
   if (attachmentError || !attachment) {
     return (
-      <AttachmentPreviewContainer {...containerProps}>
+      <ConversationMessageAttachmentContainer {...containerProps}>
         <Text>{translate("attachment_message_error_download")}</Text>
-      </AttachmentPreviewContainer>
+      </ConversationMessageAttachmentContainer>
     )
   }
 
   if (!attachment.mediaURL) {
     return (
       <PressableScale onPress={() => refetchAttachment()}>
-        <AttachmentPreviewContainer {...containerProps}>
+        <ConversationMessageAttachmentContainer {...containerProps}>
           <Icon icon="arrow.down" size={14} color="white" />
           <Text inverted weight="bold">
             {prettyBytes(attachment.contentLength)}
           </Text>
-        </AttachmentPreviewContainer>
+        </ConversationMessageAttachmentContainer>
       </PressableScale>
     )
   }
@@ -78,7 +72,7 @@ export const AttachmentRemoteImage = memo(function AttachmentRemoteImage(
           // openInWebview
         }}
       >
-        <AttachmentPreviewContainer {...containerProps}>
+        <ConversationMessageAttachmentContainer {...containerProps}>
           <Text
             style={{
               textDecorationLine: "underline",
@@ -86,7 +80,7 @@ export const AttachmentRemoteImage = memo(function AttachmentRemoteImage(
           >
             {translate("attachment_message_view_in_browser")}
           </Text>
-        </AttachmentPreviewContainer>
+        </ConversationMessageAttachmentContainer>
       </PressableScale>
     )
   }
@@ -99,7 +93,7 @@ export const AttachmentRemoteImage = memo(function AttachmentRemoteImage(
   const { style, ...rest } = containerProps || {}
 
   return (
-    <AttachmentPreviewContainer style={[{ aspectRatio }, style]} {...rest}>
+    <ConversationMessageAttachmentContainer style={[{ aspectRatio }, style]} {...rest}>
       <Image
         source={{ uri: attachment.mediaURL }}
         contentFit="cover"
@@ -108,59 +102,6 @@ export const AttachmentRemoteImage = memo(function AttachmentRemoteImage(
           height: "100%",
         }}
       />
-    </AttachmentPreviewContainer>
+    </ConversationMessageAttachmentContainer>
   )
 })
-
-const AttachmentPreviewContainer = memo(function AttachmentPreviewContainer(props: IVStackProps) {
-  const { style, ...rest } = props
-
-  const { theme } = useAppTheme()
-
-  return (
-    <VStack
-      style={[
-        {
-          // ...debugBorder(),
-          overflow: "hidden",
-          borderRadius: theme.borderRadius.sm,
-          width: "100%",
-          justifyContent: "center",
-          alignItems: "center",
-          backgroundColor: theme.colors.fill.tertiary,
-          aspectRatio: 1.5, // Default aspect ratio for attachments
-        },
-        style,
-      ]}
-      {...rest}
-    />
-  )
-})
-
-async function fetchAttachment(messageId: string, content: RemoteAttachmentContent) {
-  const localAttachment = await getLocalAttachmentForMessageId(messageId)
-
-  if (localAttachment) {
-    return localAttachment
-  }
-
-  if (
-    content.contentLength &&
-    parseFloat(content.contentLength) <= MAX_AUTOMATIC_DOWNLOAD_ATTACHMENT_SIZE
-  ) {
-    const decryptedLocalAttachment = await fetchAndDecodeRemoteAttachment({
-      account: getCurrentSenderEthAddress()!,
-      messageId: messageId,
-      remoteAttachmentContent: content,
-    })
-
-    const result = await handleDecryptedLocalAttachment({
-      messageId: messageId,
-      decryptedLocalAttachment: decryptedLocalAttachment,
-    })
-
-    return result
-  }
-
-  return null
-}

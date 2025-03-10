@@ -1,7 +1,7 @@
-import { useGroupQuery } from "@queries/useGroupQuery"
 import { useMutation } from "@tanstack/react-query"
 import type { ConversationTopic } from "@xmtp/react-native-sdk"
 import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client"
+import { useGroupQuery } from "@/features/groups/useGroupQuery"
 import { captureError } from "@/utils/capture-error"
 import {
   cancelGroupMembersQuery,
@@ -9,7 +9,7 @@ import {
   invalidateGroupMembersQuery,
   removeMembersFromGroupQueryData,
   setGroupMembersQueryData,
-} from "../../../queries/useGroupMembersQuery"
+} from "../useGroupMembersQuery"
 
 export const useRemoveGroupMembersFromGroupMutation = (
   account: string,

@@ -10,7 +10,7 @@ import {
 } from "@/features/current-user/curent-user.query"
 import { getProfileQueryConfig, getProfileQueryData } from "@/features/profiles/profiles.query"
 import { getEnv, isDev } from "@/utils/getEnv"
-import { reactQueryClient } from "@/utils/react-query/react-query-client"
+import { reactQueryClient } from "@/utils/react-query/react-query.client"
 import { config } from "../config"
 
 // Sentry has ~8KB limit for string values

@@ -23,6 +23,7 @@
 - Use Zod for external API response validation.
 - Keep files small and focused.
 - Use block-style if statements with curly braces instead of single-line statements.
+- Never make assumptions about library APIs - always verify in the official documentation for the major version being used.
 - Use logger for all logging operations:
 
 ```typescript
@@ -621,4 +622,25 @@ function MessageComponent() {
     }
   }
 }
+```
+
+## Library Usage
+
+- Never assume the existence of functions, components, or features in third-party libraries.
+- Always verify API usage in the official documentation for the major version being used.
+- Check the package.json for the library version before implementing features.
+- When suggesting library usage:
+  1. First verify the library exists in package.json
+  2. Look up the documentation for that major version
+  3. Confirm the feature/API exists and understand its correct usage
+  4. Provide links to relevant documentation when suggesting library features
+- If a library feature's existence or behavior is uncertain, explicitly mention this and suggest verifying it first.
+- For React Native libraries, always check platform compatibility (iOS/Android support) before suggesting usage.
+
+```typescript
+// ❌ Bad: Assuming a library feature exists
+// ✅ Good: Verified in v3 documentation
+import { actualFunction, magicFunction } from "some-library"
+
+// From v3 docs: https://some-library.com/docs/v3/actualFunction
 ```

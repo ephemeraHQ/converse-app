@@ -1,6 +1,6 @@
 import { queryOptions, skipToken, useQueries, useQuery } from "@tanstack/react-query"
 import { IEthereumAddress, isEthereumAddress } from "@/utils/evm/address"
-import { reactQueryClient } from "@/utils/react-query/react-query-client"
+import { reactQueryClient } from "@/utils/react-query/react-query.client"
 import { fetchSocialProfilesForAddress } from "./social-profiles.api"
 
 type IArgs = {

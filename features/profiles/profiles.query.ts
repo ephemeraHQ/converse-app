@@ -2,7 +2,7 @@ import { queryOptions, skipToken, useQueries, useQuery } from "@tanstack/react-q
 import { InboxId } from "@xmtp/react-native-sdk"
 import { type IConvosProfileForInbox } from "@/features/profiles/profile.types"
 import { fetchProfile } from "@/features/profiles/profiles.api"
-import { reactQueryClient } from "@/utils/react-query/react-query-client"
+import { reactQueryClient } from "@/utils/react-query/react-query.client"
 
 const profileQueryKey = ({ xmtpId }: { xmtpId: string }) => ["profile", xmtpId] as const
 

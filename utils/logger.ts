@@ -123,6 +123,6 @@ export const xmtpLogger = createPrefixedLogger("XMTP")
  */
 export default logger
 
-export function logJson(json: any) {
-  console.log(JSON.stringify(json, null, 2))
+export function logJson(label: string, json: any) {
+  console.log(`${label}:`, JSON.stringify(json, null, 2))
 }

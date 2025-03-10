@@ -2,10 +2,10 @@ import { ConversationTopic } from "@xmtp/react-native-sdk"
 import { memo } from "react"
 import { GroupAvatar } from "@/components/group-avatar"
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
+import { useGroupName } from "@/features/groups/hooks/use-group-name"
+import { useGroupMembersQuery } from "@/features/groups/useGroupMembersQuery"
 import { usePreferredDisplayInfoBatch } from "@/features/preferred-display-info/use-preferred-display-info-batch"
 import { SearchUsersResultListItem } from "@/features/search-users/search-users-result-list-item"
-import { useGroupName } from "@/hooks/use-group-name"
-import { useGroupMembersQuery } from "@/queries/useGroupMembersQuery"
 
 export const SearchUsersResultsListItemGroup = memo(
   function SearchUsersResultsListItemGroup(props: {

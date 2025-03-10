@@ -71,22 +71,20 @@ export function useRemoveReactionOnMessage(props: { topic: ConversationTopic }) 
   })
 
   const removeReactionFromMessage = useCallback(
-    async (args: { messageId: MessageId; emoji: string }) => {
-      try {
-        await removeReactionMutationAsync({
-          reaction: {
-            reference: args.messageId,
-            content: args.emoji,
-            schema: "unicode",
-            action: "removed",
-          },
-        })
-      } catch (error) {
-        captureErrorWithToast(error)
-      }
+    (args: { messageId: MessageId; emoji: string }) => {
+      return removeReactionMutationAsync({
+        reaction: {
+          reference: args.messageId,
+          content: args.emoji,
+          schema: "unicode",
+          action: "removed",
+        },
+      })
     },
     [removeReactionMutationAsync],
   )
 
-  return removeReactionFromMessage
+  return {
+    removeReactionFromMessage,
+  }
 }
