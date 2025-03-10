@@ -2,22 +2,22 @@ import { useCallback } from "react"
 import { showSnackbar } from "@/components/snackbar/snackbar.service"
 import { useConversationStore } from "@/features/conversation/conversation-chat/conversation.store-context"
 import { useCreateConversationAndSendFirstMessage } from "@/features/conversation/conversation-create/mutations/create-conversation-and-send-first-message.mutation"
-import { ISendMessageParams, useSendMessage } from "@/features/conversation/hooks/use-send-message"
+import {
+  ISendMessageContent,
+  ISendMessageParams,
+  useSendMessage,
+} from "@/features/conversation/hooks/use-send-message"
 import { captureErrorWithToast } from "@/utils/capture-error"
 import { FeedbackError } from "@/utils/error"
 import { waitUntilPromise } from "@/utils/wait-until-promise"
 import { useConversationComposerStore } from "./conversation-composer.store-context"
 
-export function useConversationComposerSend() {
-  const composerStore = useConversationComposerStore()
+// Handles sending messages to existing conversations
+function useSendToExistingConversation() {
   const conversationStore = useConversationStore()
-
   const { sendMessage } = useSendMessage()
-  const { mutateAsync: createConversationAndSendFirstMessage } =
-    useCreateConversationAndSendFirstMessage()
 
-  // Handle sending to existing conversation
-  const sendToExistingConversation = useCallback(
+  return useCallback(
     async (params: ISendMessageParams) => {
       try {
         const { isCreatingNewConversation } = conversationStore.getState()
@@ -33,8 +33,15 @@ export function useConversationComposerSend() {
     },
     [conversationStore, sendMessage],
   )
+}
 
-  const createNewConversation = useCallback(
+// Handles creating new conversations and sending first message
+function useCreateNewConversation() {
+  const conversationStore = useConversationStore()
+  const { mutateAsync: createConversationAndSendFirstMessage } =
+    useCreateConversationAndSendFirstMessage()
+
+  return useCallback(
     async (params: Omit<ISendMessageParams, "topic">) => {
       try {
         const inboxIds = conversationStore.getState().searchSelectedUserInboxIds
@@ -48,7 +55,6 @@ export function useConversationComposerSend() {
         const { conversation } = await createConversationAndSendFirstMessage({
           inboxIds,
           content: {
-            // For now we only support text messages
             text: params.content.text!,
           },
         })
@@ -58,7 +64,6 @@ export function useConversationComposerSend() {
           isCreatingNewConversation: false,
         })
       } catch (error) {
-        // TODO: Maybe find a better way to handle this
         if (error instanceof FeedbackError) {
           showSnackbar({
             message: error.message,
@@ -74,79 +79,84 @@ export function useConversationComposerSend() {
     },
     [conversationStore, createConversationAndSendFirstMessage],
   )
+}
+
+// Handles media upload state management
+async function waitForMediaUploads(composerStore: ReturnType<typeof useConversationComposerStore>) {
+  const { composerMediaPreviews } = composerStore.getState()
+
+  if (composerMediaPreviews.length === 0) {
+    return
+  }
+
+  try {
+    await waitUntilPromise({
+      checkFn: () =>
+        composerMediaPreviews.every((preview) => !preview || preview.status === "uploaded"),
+    })
+
+    composerMediaPreviews.forEach((preview) => {
+      if (preview) {
+        composerStore.getState().updateMediaPreviewStatus(preview.mediaURI, "sending")
+      }
+    })
+  } catch (error) {
+    throw error
+  }
+}
+
+// Main hook that orchestrates the sending process
+export function useConversationComposerSend() {
+  const composerStore = useConversationComposerStore()
+  const conversationStore = useConversationStore()
+  const sendToExistingConversation = useSendToExistingConversation()
+  const createNewConversation = useCreateNewConversation()
 
   const send = useCallback(async () => {
-    const { topic } = conversationStore.getState()
-    const { composerMediaPreviews } = composerStore.getState()
-
-    // If there are media previews, wait for them to finish uploading
-    if (composerMediaPreviews.length > 0) {
-      try {
-        await waitUntilPromise({
-          checkFn: () =>
-            composerMediaPreviews.every((preview) => !preview || preview.status === "uploaded"),
-        })
-
-        // Mark all as sending
-        composerMediaPreviews.forEach((preview) => {
-          if (preview) {
-            composerStore.getState().updateMediaPreviewStatus(preview.mediaURI, "sending")
-          }
-        })
-      } catch (error) {
-        captureErrorWithToast(error, { message: "Failed to upload media" })
-        return
-      }
+    try {
+      await waitForMediaUploads(composerStore)
+    } catch (error) {
+      captureErrorWithToast(error, { message: "Failed to upload media" })
+      return
     }
 
     const { inputValue, replyingToMessageId, composerUploadedAttachments } =
       composerStore.getState()
+    const { topic } = conversationStore.getState()
 
-    // Reset the composer before sending just for better UX
+    // Reset composer state before sending
     composerStore.getState().reset()
 
-    if (composerUploadedAttachments.length > 0 || inputValue.length > 0) {
-      if (topic) {
-        // First send the text message if there is any text
-        if (inputValue.length > 0) {
-          await sendToExistingConversation({
-            topic,
-            content: { text: inputValue },
-            ...(replyingToMessageId && {
-              referencedMessageId: replyingToMessageId,
-            }),
-          })
-        }
+    if (composerUploadedAttachments.length === 0 && inputValue.length === 0) {
+      return
+    }
 
-        // Send all attachments in a single message
-        if (composerUploadedAttachments.length > 0) {
-          await sendToExistingConversation({
-            topic,
-            content: { remoteAttachments: composerUploadedAttachments },
-            ...(replyingToMessageId && {
-              referencedMessageId: replyingToMessageId,
-            }),
-          })
-        }
-      } else {
-        // First send the text message if there is any text
-        if (inputValue.length > 0) {
-          await createNewConversation({
-            content: { text: inputValue },
-            ...(replyingToMessageId && {
-              referencedMessageId: replyingToMessageId,
-            }),
-          })
-        }
-
-        // Send all attachments in a single message
-        await createNewConversation({
-          content: { remoteAttachments: composerUploadedAttachments },
-          ...(replyingToMessageId && {
-            referencedMessageId: replyingToMessageId,
-          }),
-        })
+    const sendContent = async (content: ISendMessageContent) => {
+      const messageParams = {
+        content,
+        ...(replyingToMessageId && {
+          referencedMessageId: replyingToMessageId,
+        }),
       }
+
+      if (topic) {
+        await sendToExistingConversation({
+          ...messageParams,
+          topic,
+        })
+      } else {
+        await createNewConversation(messageParams)
+      }
+    }
+
+    // Send text message if present
+    if (inputValue.length > 0) {
+      await sendContent({ text: inputValue })
+    }
+
+    // Send attachments if present
+    if (composerUploadedAttachments.length > 0) {
+      await sendContent({ remoteAttachments: composerUploadedAttachments })
     }
   }, [composerStore, conversationStore, createNewConversation, sendToExistingConversation])
 

@@ -5,13 +5,15 @@ import { UploadedRemoteAttachment } from "@/features/conversation/conversation-a
 import { getOrFetchConversation } from "@/features/conversation/conversation-query"
 import { sendXmtpConversationMessage } from "@/features/xmtp/xmtp-conversations/xmtp-conversation"
 
+export type ISendMessageContent = {
+  text?: string
+  remoteAttachments?: UploadedRemoteAttachment[]
+}
+
 export type ISendMessageParams = {
   topic: ConversationTopic
   referencedMessageId?: MessageId
-  content: {
-    text?: string
-    remoteAttachments?: UploadedRemoteAttachment[]
-  }
+  content: ISendMessageContent
 }
 
 function convertConvosUploadedRemoteAttachmentToXmtpRemoteAttachment(
@@ -106,9 +108,7 @@ export async function sendMessage(args: ISendMessageParams) {
 
 export function useSendMessage() {
   const mutation = useMutation({
-    mutationFn: (variables: ISendMessageParams) => {
-      return sendMessage(variables)
-    },
+    mutationFn: sendMessage,
     // onMutate: (variables) => {
     //   const currentAccount = getCurrentAccount()!;
     //   const currentUserInboxId = getSafeCurrentSender().inboxId;
