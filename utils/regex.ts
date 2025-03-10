@@ -13,7 +13,7 @@ export const URL_REGEX =
 export const ADDRESS_REGEX = new RegExp(`${BOUNDARY_START}0x[a-fA-F0-9]{40}${BOUNDARY_END}`, "gi")
 
 export const LENS_REGEX = getDomainExpression(/\.lens/)
-export const ETH_REGEX = getDomainExpression(/\.eth/)
+export const ENS_REGEX = getDomainExpression(/\.eth/)
 export const FARCASTER_REGEX = getDomainExpression(/\.fc/)
 export const CB_ID_REGEX = getDomainExpression(/\.cb\.id/)
 export const UNS_REGEX = getDomainExpression(

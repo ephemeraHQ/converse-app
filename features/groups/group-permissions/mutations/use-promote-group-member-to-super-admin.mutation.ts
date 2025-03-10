@@ -2,20 +2,18 @@ import { useMutation } from "@tanstack/react-query"
 import type { ConversationTopic } from "@xmtp/react-native-sdk"
 import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client"
 import { captureError } from "@/utils/capture-error"
-import { promoteSuperAdminMutationKey } from "../../../../queries/MutationKeys"
 import {
   cancelGroupMembersQuery,
   getGroupMembersQueryData,
   invalidateGroupMembersQuery,
   setGroupMembersQueryData,
-} from "../../../../queries/useGroupMembersQuery"
-import { useGroupQuery } from "../../../../queries/useGroupQuery"
+} from "../../useGroupMembersQuery"
+import { useGroupQuery } from "../../useGroupQuery"
 
 export const usePromoteToSuperAdminMutation = (account: string, topic: ConversationTopic) => {
   const { data: group } = useGroupQuery({ account, topic })
 
   return useMutation({
-    mutationKey: promoteSuperAdminMutationKey(account, topic!),
     mutationFn: async (inboxId: InboxId) => {
       if (!group) {
         throw new Error("No group found to promote member to super admin")

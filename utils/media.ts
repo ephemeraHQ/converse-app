@@ -340,7 +340,7 @@ export const compressAndResizeImage = async (imageURI: string, avatar?: boolean)
   const newSize = calculateImageOptiSize(imageSize, avatar)
 
   logger.debug(
-    `[ImageUtils] Resizing and compressing image to ${newSize.height}x${newSize.width} (was ${imageSize.height}x${imageSize.width})`,
+    `Resizing and compressing image to ${newSize.height}x${newSize.width} (was ${imageSize.height}x${imageSize.width})`,
   )
 
   const context = ImageManipulator.manipulate(imageURI)
@@ -355,21 +355,46 @@ export const compressAndResizeImage = async (imageURI: string, avatar?: boolean)
   return result
 }
 
-export const pickMediaFromLibrary = async (
-  options?: ImagePicker.ImagePickerOptions | undefined,
+export const pickSingleMediaFromLibrary = async (
+  options?: Omit<ImagePicker.ImagePickerOptions, "allowsMultipleSelection">,
 ) => {
   const mediaPicked = await ImagePicker.launchImageLibraryAsync({
-    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    mediaTypes: ["images"],
     quality: 1,
     base64: false,
     allowsMultipleSelection: false,
     ...options,
   })
 
-  if (mediaPicked.canceled) return
+  if (mediaPicked.canceled) {
+    return
+  }
+
   const asset = mediaPicked.assets?.[0]
-  if (!asset) return
+
+  if (!asset) {
+    return
+  }
+
   return asset
+}
+
+export async function pickMultipleMediaFromLibrary(
+  options?: Omit<ImagePicker.ImagePickerOptions, "allowsMultipleSelection">,
+) {
+  const mediaPicked = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ["images"],
+    allowsMultipleSelection: true,
+    quality: 1,
+    base64: false,
+    ...options,
+  })
+
+  if (mediaPicked.canceled) {
+    return
+  }
+
+  return mediaPicked.assets
 }
 
 export const takePictureFromCamera = async (
@@ -394,7 +419,7 @@ export const takePictureFromCamera = async (
   }
 
   const mediaPicked = await ImagePicker.launchCameraAsync({
-    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    mediaTypes: ["images"],
     quality: 1,
     base64: false,
     allowsEditing: false,
@@ -404,4 +429,15 @@ export const takePictureFromCamera = async (
   const asset = mediaPicked.assets?.[0]
   if (!asset) return
   return asset
+}
+
+export function getMimeTypeFromAsset(asset: ImagePicker.ImagePickerAsset) {
+  let mimeType = asset.mimeType
+  if (!mimeType) {
+    const match = asset.uri.match(/data:(.*?);/)
+    if (match && match[1]) {
+      mimeType = match[1]
+    }
+  }
+  return mimeType ?? null
 }

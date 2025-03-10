@@ -4,9 +4,9 @@ import {
   getSafeCurrentSender,
   useMultiInboxStore,
 } from "@/features/authentication/multi-inbox.store"
-import { createXmtpSignerFromSwc } from "@/features/onboarding/utils/create-xmtp-signer-from-privy-swc"
 import { IWallet } from "@/features/wallets/connect-wallet/connect-wallet.types"
 import { useSmartWalletClient } from "@/features/wallets/smart-wallet"
+import { createXmtpSignerFromSwc } from "@/features/wallets/utils/create-xmtp-signer-from-swc"
 import { createXmtpClient } from "@/features/xmtp/xmtp-client/xmtp-client.service"
 import { getXmtpSigner } from "@/features/xmtp/xmtp-signer/get-xmtp-signer"
 import { usePersistState } from "@/hooks/use-persist-state"

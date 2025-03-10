@@ -1,7 +1,7 @@
 import { QueryKey, queryOptions, skipToken, useQuery } from "@tanstack/react-query"
 import { ISearchProfilesResult, searchProfiles } from "@/features/profiles/profiles.search.api"
 import { DateUtils } from "@/utils/time.utils"
-import { reactQueryClient } from "../../utils/react-query/react-query-client"
+import { reactQueryClient } from "../../utils/react-query/react-query.client"
 
 const profileSearchQueryKey = (args: { query: string }): QueryKey => ["profileSearch", args.query]
 

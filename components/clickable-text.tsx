@@ -7,7 +7,7 @@ import {
   ADDRESS_REGEX,
   CB_ID_REGEX,
   EMAIL_REGEX,
-  ETH_REGEX,
+  ENS_REGEX,
   FARCASTER_REGEX,
   LENS_REGEX,
   UNS_REGEX,
@@ -87,7 +87,7 @@ export function ClickableText({ children, style }: Props) {
         {
           onPress: handleNewConversationPress,
           onLongPress: showCopyActionSheet("Copy ENS name"),
-          pattern: ETH_REGEX,
+          pattern: ENS_REGEX,
           style: styles.clickableText,
         },
         {

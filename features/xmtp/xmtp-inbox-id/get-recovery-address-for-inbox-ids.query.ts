@@ -2,7 +2,7 @@ import { queryOptions, skipToken, useQuery } from "@tanstack/react-query"
 import { InboxId } from "@xmtp/react-native-sdk"
 import { getRecoveryAddressesForInboxIds } from "@/features/xmtp/xmtp-inbox-id/get-recovery-address-for-inbox-ids"
 import { IEthereumAddress } from "@/utils/evm/address"
-import { reactQueryClient } from "@/utils/react-query/react-query-client"
+import { reactQueryClient } from "@/utils/react-query/react-query.client"
 
 type IArgs = {
   clientEthAddress: IEthereumAddress | undefined

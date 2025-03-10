@@ -3,6 +3,7 @@ import { Avatar } from "@/components/avatar"
 import { Chip, ChipText } from "@/design-system/chip"
 import { HStack } from "@/design-system/HStack"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
+import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
 import {
   SearchResultsListItemTitle,
   SearchUsersResultListItem,
@@ -28,9 +29,13 @@ export const SearchUsersResultsListItemEthAddress = memo(
       targetEthAddress: ethAddress,
     })
 
+    const { displayName, avatarUrl } = usePreferredDisplayInfo({
+      ethAddress,
+    })
+
     return (
       <SearchUsersResultListItem
-        avatar={<Avatar uri={undefined} sizeNumber={theme.avatarSize.md} name={ethAddress} />}
+        avatar={<Avatar uri={avatarUrl} sizeNumber={theme.avatarSize.md} name={displayName} />}
         title={
           <HStack
             style={{
@@ -38,17 +43,13 @@ export const SearchUsersResultsListItemEthAddress = memo(
               columnGap: theme.spacing.xxxs,
             }}
           >
-            <SearchResultsListItemTitle>{shortAddress(ethAddress)}</SearchResultsListItemTitle>
+            <SearchResultsListItemTitle>{displayName}</SearchResultsListItemTitle>
           </HStack>
         }
-        subtitle={
+        subtitle={shortAddress(ethAddress)}
+        endElement={
           !inboxId ? (
-            <HStack
-              style={{
-                alignItems: "center",
-                columnGap: theme.spacing.xxxs,
-              }}
-            >
+            <HStack>
               <Chip size="xs">
                 <ChipText>Not on XMTP</ChipText>
               </Chip>

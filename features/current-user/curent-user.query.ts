@@ -1,5 +1,5 @@
 import { queryOptions } from "@tanstack/react-query"
-import { reactQueryClient } from "@/utils/react-query/react-query-client"
+import { reactQueryClient } from "@/utils/react-query/react-query.client"
 import { fetchCurrentUser, ICurrentUser } from "./current-user-api"
 
 const currentUserQueryKey = () => ["current-user"] as const

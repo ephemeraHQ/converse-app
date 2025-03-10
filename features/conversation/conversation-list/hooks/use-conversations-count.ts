@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
-import { getAllowedConsentConversationsQueryOptions } from "@/queries/conversations-allowed-consent-query"
+import { getAllowedConsentConversationsQueryOptions } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 
 export const useAllowedConversationsCount = () => {
   const account = useCurrentSenderEthAddress()

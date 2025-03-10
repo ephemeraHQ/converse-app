@@ -6,7 +6,7 @@ import {
   isRemoteAttachmentMessage,
   isReplyMessage,
   isStaticAttachmentMessage,
-} from "@/features/conversation/conversation-chat/conversation-chat-message/conversation-message.utils"
+} from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
 import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
 import { usePreferredDisplayInfoBatch } from "@/features/preferred-display-info/use-preferred-display-info-batch"
 import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types"

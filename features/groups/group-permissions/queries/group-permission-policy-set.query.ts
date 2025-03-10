@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { ConversationTopic } from "@xmtp/react-native-sdk"
 import { groupPermissionPolicyQueryKey } from "../../../../queries/QueryKeys"
-import { getGroupQueryData } from "../../../../queries/useGroupQuery"
+import { getGroupQueryData } from "../../useGroupQuery"
 
 export const useGroupPermissionPolicySetQuery = (account: string, topic: ConversationTopic) => {
   return useQuery({

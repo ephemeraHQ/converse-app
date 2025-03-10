@@ -53,21 +53,18 @@ export function useIsCurrentVersionEnough() {
 
   useEffect(() => {
     const shouldShowUpdateAlert =
-      !currentVersionIsEnough && !isCheckingIfCurrentVersionIsEnough && !__DEV__
+      typeof currentVersionIsEnough === "boolean" &&
+      !currentVersionIsEnough &&
+      !isCheckingIfCurrentVersionIsEnough &&
+      !__DEV__
 
     if (shouldShowUpdateAlert) {
-      Alert.alert(
-        "Version is out of date",
-        "Please update to the latest version",
-        [
-          {
-            text: "Update",
-            onPress: () => openLink({ url: config.appStoreUrl }),
-          },
-        ],
-        // Prevent dismissing the alert by tapping outside
-        { cancelable: false },
-      )
+      Alert.alert("Version is out of date", "Please update to the latest version", [
+        {
+          text: "Update",
+          onPress: () => openLink({ url: config.appStoreUrl }),
+        },
+      ])
     }
   }, [currentVersionIsEnough, isCheckingIfCurrentVersionIsEnough])
 }

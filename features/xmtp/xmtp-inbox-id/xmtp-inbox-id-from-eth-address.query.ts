@@ -1,7 +1,7 @@
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query"
 import { getInboxIdFromEthAddress } from "@/features/xmtp/xmtp-inbox-id/xmtp-inbox-id-from-eth-address"
 import { IEthereumAddress } from "@/utils/evm/address"
-import { reactQueryClient } from "@/utils/react-query/react-query-client"
+import { reactQueryClient } from "@/utils/react-query/react-query.client"
 
 type IArgs = {
   clientEthAddress: IEthereumAddress | undefined

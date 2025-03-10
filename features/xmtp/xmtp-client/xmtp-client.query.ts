@@ -1,6 +1,6 @@
 import { queryOptions } from "@tanstack/react-query"
 import { IXmtpClient } from "@/features/xmtp/xmtp.types"
-import { reactQueryClient } from "@/utils/react-query/react-query-client"
+import { reactQueryClient } from "@/utils/react-query/react-query.client"
 import { validateClientInstallation } from "../xmtp-installations/xmtp-installations"
 import { buildXmtpClientInstance } from "./xmtp-client"
 

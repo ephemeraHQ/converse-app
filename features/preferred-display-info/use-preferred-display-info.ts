@@ -8,8 +8,10 @@ import {
 } from "@/features/preferred-display-info/preferred-display-info.utils"
 import { useProfileQuery } from "@/features/profiles/profiles.query"
 import { useSocialProfilesForInboxId } from "@/features/social-profiles/hooks/use-social-profiles-for-inbox-id"
+import { useSocialProfilesForAddressQuery } from "@/features/social-profiles/social-profiles.query"
 import { useEthAddressesForXmtpInboxId } from "@/features/xmtp/xmtp-inbox-id/eth-addresses-for-xmtp-inbox-id.query"
 import { getXmtpInboxIdFromEthAddressQueryOptions } from "@/features/xmtp/xmtp-inbox-id/xmtp-inbox-id-from-eth-address.query"
+import { mergeArraysObjects } from "@/utils/array"
 import { IEthereumAddress } from "@/utils/evm/address"
 
 // At least one of these properties must be defined
@@ -49,11 +51,23 @@ export function usePreferredDisplayInfo(args: PreferredDisplayInfoArgs) {
   })
 
   // Get social profiles data
-  const { data: socialProfiles, isLoading: isLoadingSocialProfiles } = useSocialProfilesForInboxId({
-    inboxId,
-  })
+  const { data: socialProfilesForInboxId, isLoading: isLoadingSocialProfilesForInboxId } =
+    useSocialProfilesForInboxId({
+      inboxId,
+    })
 
   const ethAddress = ethAddressArg || ethAddressesForXmtpInboxId?.[0]
+
+  const { data: socialProfilesForEthAddress, isLoading: isLoadingSocialProfilesForEthAddress } =
+    useSocialProfilesForAddressQuery({
+      ethAddress,
+    })
+
+  const socialProfiles = mergeArraysObjects({
+    arr1: socialProfilesForInboxId ?? [],
+    arr2: socialProfilesForEthAddress ?? [],
+    compareObjects: (obj1, obj2) => obj1.type === obj2.type,
+  })
 
   const displayName = getPreferredDisplayName({
     profile,
@@ -80,6 +94,7 @@ export function usePreferredDisplayInfo(args: PreferredDisplayInfoArgs) {
     avatarUrl,
     username: preferredUsername,
     ethAddress: preferredEthAddress,
-    isLoading: isLoadingProfile || isLoadingSocialProfiles,
+    isLoading:
+      isLoadingProfile || isLoadingSocialProfilesForInboxId || isLoadingSocialProfilesForEthAddress,
   }
 }

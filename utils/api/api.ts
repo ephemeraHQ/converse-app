@@ -1,7 +1,7 @@
 import axios from "axios"
 import { apiLogger } from "@/utils/logger"
 import { config } from "../../config"
-import { headersInterceptor } from "../../features/authentication/interceptor.headers"
+import { axiosHeadersInterceptor } from "../../features/authentication/headers.axios-interceptor"
 
 export const api = axios.create({
   baseURL: config.apiURI,
@@ -9,7 +9,7 @@ export const api = axios.create({
 
 // Setup request interceptor for attaching appropriate headers
 // depending on the route in the request
-api.interceptors.request.use(headersInterceptor)
+api.interceptors.request.use(axiosHeadersInterceptor)
 
 // Debugging interceptors
 api.interceptors.request.use((config) => {

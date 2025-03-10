@@ -1,53 +1,18 @@
 import { useMutation } from "@tanstack/react-query"
-import {
-  ConversationId,
-  ConversationTopic,
-  DecodedMessage,
-  Dm,
-  Group,
-  MessageDeliveryStatus,
-  MessageId,
-  RemoteAttachmentContent,
-} from "@xmtp/react-native-sdk"
-import { InboxId, InstallationId } from "@xmtp/react-native-sdk/build/lib/Client"
-import { DmParams } from "@xmtp/react-native-sdk/build/lib/Dm"
-import { GroupParams } from "@xmtp/react-native-sdk/build/lib/Group"
+import { ConversationTopic, MessageId, RemoteAttachmentContent } from "@xmtp/react-native-sdk"
+import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client"
 import { getCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
 import {
-  addConversationMessageQuery,
   getConversationMessagesQueryData,
-  getConversationMessagesQueryOptions,
-  IMessageAccumulator,
-  replaceOptimisticMessageWithReal,
   setConversationMessagesQueryData,
 } from "@/features/conversation/conversation-chat/conversation-messages.query"
-import { useConversationStore } from "@/features/conversation/conversation-chat/conversation.store-context"
-import { ISupportedXmtpCodecs } from "@/features/xmtp/xmtp-codecs/xmtp-codecs"
-import { contentTypesPrefixes } from "@/features/xmtp/xmtp-content-types/xmtp-content-types"
+import {
+  getConversationQueryData,
+  updateConversationQueryData,
+} from "@/features/conversation/queries/conversation.query"
 import { createXmtpDm } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-dm"
 import { createXmtpGroup } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-group"
-import {
-  IXmtpConversationWithCodecs,
-  IXmtpDmWithCodecs,
-  IXmtpGroupWithCodecs,
-} from "@/features/xmtp/xmtp.types"
-import { getConversationQueryData, updateConversationQueryData } from "@/queries/conversation-query"
-import {
-  addConversationToAllowedConsentConversationsQuery,
-  removeConversationFromAllowedConsentConversationsQuery,
-} from "@/queries/conversations-allowed-consent-query"
-import {
-  allowedConsentConversationsQueryKey,
-  conversationMessagesQueryKey,
-} from "@/queries/QueryKeys"
-import { setDmQueryData } from "@/queries/useDmQuery"
-import { setGroupQueryData } from "@/queries/useGroupQuery"
-import { captureErrorWithToast } from "@/utils/capture-error"
-import { getTodayNs } from "@/utils/date"
-import { getRandomId } from "@/utils/general"
-import logger from "@/utils/logger"
-import { reactQueryClient } from "@/utils/react-query/react-query-client"
-import { sentryTrackError } from "@/utils/sentry"
+import { IXmtpDmWithCodecs, IXmtpGroupWithCodecs } from "@/features/xmtp/xmtp.types"
 import { sendMessage } from "../../hooks/use-send-message"
 
 export type ISendMessageParams = {
@@ -108,7 +73,7 @@ function getConversationTempTopic(args: { inboxIds: InboxId[] }) {
 }
 
 export function useCreateConversationAndSendFirstMessage() {
-  const conversationStore = useConversationStore()
+  // const conversationStore = useConversationStore()
 
   return useMutation({
     mutationFn: async (args: { inboxIds: InboxId[]; content: { text: string } }) => {

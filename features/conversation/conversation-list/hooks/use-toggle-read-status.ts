@@ -4,8 +4,8 @@ import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.stor
 import { getConversationMetadataQueryData } from "@/features/conversation/conversation-metadata/conversation-metadata.query"
 import { useMarkConversationAsRead } from "@/features/conversation/hooks/use-mark-conversation-as-read"
 import { useMarkConversationAsUnread } from "@/features/conversation/hooks/use-mark-conversation-as-unread"
+import { getConversationQueryData } from "@/features/conversation/queries/conversation.query"
 import { conversationIsUnreadForInboxId } from "@/features/conversation/utils/conversation-is-unread-by-current-account"
-import { getConversationQueryData } from "@/queries/conversation-query"
 
 type UseToggleReadStatusProps = {
   topic: ConversationTopic

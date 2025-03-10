@@ -6,11 +6,11 @@ import {
 import {
   ensureDmPeerInboxIdQueryData,
   getDmPeerInboxIdQueryData,
-} from "@/queries/use-dm-peer-inbox-id-query"
+} from "@/features/dm/use-dm-peer-inbox-id-query"
 import {
   ensureGroupMembersQueryData,
   getGroupMembersQueryData,
-} from "@/queries/useGroupMembersQuery"
+} from "@/features/groups/useGroupMembersQuery"
 
 export function inboxIdIsPartOfConversationUsingCacheData(args: {
   inboxId: InboxId

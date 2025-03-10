@@ -6,17 +6,17 @@ import {
 } from "@/features/authentication/multi-inbox.store"
 import { updateConsentForGroupsForAccount } from "@/features/consent/update-consent-for-groups-for-account"
 import { updateInboxIdsConsentForAccount } from "@/features/consent/update-inbox-ids-consent-for-account"
-import { IXmtpConversationWithCodecs, IXmtpDmWithCodecs } from "@/features/xmtp/xmtp.types"
-import { getConversationQueryData } from "@/queries/conversation-query"
 import {
   addConversationToAllowedConsentConversationsQuery,
   removeConversationFromAllowedConsentConversationsQuery,
-} from "@/queries/conversations-allowed-consent-query"
+} from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import {
   addConversationToUnknownConsentConversationsQuery,
   removeConversationFromUnknownConsentConversationsQueryData,
-} from "@/queries/conversations-unknown-consent-query"
-import { getDmQueryData, setDmQueryData } from "@/queries/useDmQuery"
+} from "@/features/conversation/conversation-requests-list/conversations-unknown-consent.query"
+import { getConversationQueryData } from "@/features/conversation/queries/conversation.query"
+import { getDmQueryData, setDmQueryData } from "@/features/dm/use-dm-query"
+import { IXmtpConversationWithCodecs, IXmtpDmWithCodecs } from "@/features/xmtp/xmtp.types"
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
 
 export function useAllowDmMutation() {

@@ -2,9 +2,9 @@ import { InboxId } from "@xmtp/react-native-sdk"
 import { memo, useCallback } from "react"
 import { Chip, ChipText } from "@/design-system/chip"
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
+import { useGroupMembersQuery } from "@/features/groups/useGroupMembersQuery"
 import { SearchUsersResultsListItemUser } from "@/features/search-users/search-users-results-list-item-user"
 import { useRouteParams } from "@/navigation/use-navigation"
-import { useGroupMembersQuery } from "@/queries/useGroupMembersQuery"
 import { useAddGroupMembersStore } from "../stores/add-group-members.store"
 
 export const AddGroupMembersSearchUsersResultsListItemUser = memo(

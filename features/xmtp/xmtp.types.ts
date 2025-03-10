@@ -7,6 +7,7 @@ import {
   Dm as XmtpDm,
   Group as XmtpGroup,
   GroupUpdatedCodec as XmtpGroupUpdatedCodec,
+  MultiRemoteAttachmentCodec as XmtpMultiRemoteAttachmentCodec,
   ReactionCodec as XmtpReactionCodec,
   // ReadReceiptCodec as XmtpReadReceiptCodec,
   RemoteAttachmentCodec as XmtpRemoteAttachmentCodec,
@@ -31,6 +32,8 @@ export type IXmtpDecodedReplyMessage = XmtpDecodedMessage<XmtpReplyCodec>
 //   XmtpDecodedMessage<XmtpReadReceiptCodec>;
 export type IXmtpDecodedRemoteAttachmentMessage = XmtpDecodedMessage<XmtpRemoteAttachmentCodec>
 export type IXmtpDecodedStaticAttachmentMessage = XmtpDecodedMessage<XmtpStaticAttachmentCodec>
+export type IXmtpDecodedMultiRemoteAttachmentMessage =
+  XmtpDecodedMessage<XmtpMultiRemoteAttachmentCodec>
 
 export type IXmtpInboxId = InboxId
 
@@ -43,9 +46,9 @@ export type IXmtpDecodedMessage =
   | IXmtpDecodedReactionMessage
   | IXmtpDecodedGroupUpdatedMessage
   | IXmtpDecodedReplyMessage
-  // | IXmtpDecodedReadReceiptMessage
   | IXmtpDecodedRemoteAttachmentMessage
   | IXmtpDecodedStaticAttachmentMessage
+  | IXmtpDecodedMultiRemoteAttachmentMessage
 
 export type IXmtpDecodedActualMessage =
   | IXmtpDecodedTextMessage
@@ -53,6 +56,7 @@ export type IXmtpDecodedActualMessage =
   | IXmtpDecodedReplyMessage
   | IXmtpDecodedRemoteAttachmentMessage
   | IXmtpDecodedStaticAttachmentMessage
+  | IXmtpDecodedMultiRemoteAttachmentMessage
 
 export type IXmtpSigner = XmtpSigner
 

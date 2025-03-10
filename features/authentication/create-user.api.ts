@@ -1,8 +1,9 @@
 import { z } from "zod"
 import { profileValidationSchema } from "@/features/profiles/schemas/profile-validation.schema"
 import { api } from "@/utils/api/api"
-import { handleApiError } from "@/utils/api/api.error"
+import { captureError } from "@/utils/capture-error"
 import { buildDeviceMetadata } from "@/utils/device-metadata"
+import { ApiError } from "@/utils/error"
 
 const deviceOSEnum = z.enum(["android", "ios", "web"])
 const createUserApiRequestBodySchema = z
@@ -57,7 +58,7 @@ export const createUser = async (args: {
     username: string
     avatar?: string
   }
-}): Promise<CreateUserResponse> => {
+}) => {
   const { privyUserId, smartContractWalletAddress, inboxId, profile } = args
 
   try {
@@ -72,20 +73,29 @@ export const createUser = async (args: {
     }
 
     const validationResult = createUserApiRequestBodySchema.safeParse(requestPayload)
+
     if (!validationResult.success) {
       throw new Error(`Invalid request body: ${validationResult.error.message}`)
     }
 
-    const response = await api.post<CreateUserResponse>("/api/v1/users", validationResult.data)
+    const apiResponse = await api.post<CreateUserResponse>("/api/v1/users", validationResult.data)
 
-    // Validate the response
-    const responseValidation = createUserApiResponseSchema.safeParse(response.data)
+    const responseValidation = createUserApiResponseSchema.safeParse(apiResponse.data)
+
     if (!responseValidation.success) {
-      throw new Error(`Invalid response data: ${responseValidation.error.message}`)
+      captureError(
+        new ApiError({
+          error: responseValidation.error,
+          additionalMessage: "Invalid create user response data",
+        }),
+      )
     }
 
-    return responseValidation.data
+    return apiResponse.data
   } catch (error) {
-    throw handleApiError(error, "createUser")
+    throw new ApiError({
+      error,
+      additionalMessage: "Failed to create user",
+    })
   }
 }

@@ -1,17 +1,17 @@
 import { MutationObserver } from "@tanstack/react-query"
 import { StreamError } from "@utils/error"
+import { addConversationToAllowedConsentConversationsQuery } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
+import { addConversationToUnknownConsentConversationsQuery } from "@/features/conversation/conversation-requests-list/conversations-unknown-consent.query"
 import { getMarkConversationAsReadMutationOptions } from "@/features/conversation/hooks/use-mark-conversation-as-read"
+import { setConversationQueryData } from "@/features/conversation/queries/conversation.query"
 import { isConversationAllowed } from "@/features/conversation/utils/is-conversation-allowed"
 import { isConversationConsentUnknown } from "@/features/conversation/utils/is-conversation-consent-unknown"
+import { ensureGroupMembersQueryData } from "@/features/groups/useGroupMembersQuery"
 import { streamConversations } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-stream"
 import { IXmtpConversationWithCodecs } from "@/features/xmtp/xmtp.types"
-import { setConversationQueryData } from "@/queries/conversation-query"
-import { addConversationToAllowedConsentConversationsQuery } from "@/queries/conversations-allowed-consent-query"
-import { addConversationToUnknownConsentConversationsQuery } from "@/queries/conversations-unknown-consent-query"
-import { ensureGroupMembersQueryData } from "@/queries/useGroupMembersQuery"
 import { captureError } from "@/utils/capture-error"
 import { streamLogger } from "@/utils/logger"
-import { reactQueryClient } from "@/utils/react-query/react-query-client"
+import { reactQueryClient } from "@/utils/react-query/react-query.client"
 
 export async function startConversationStreaming(ethAddress: string) {
   try {

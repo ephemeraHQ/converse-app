@@ -12,9 +12,13 @@ import { useSearchExistingDmsQuery } from "@/features/conversation/conversation-
 import { useSearchExistingGroupsByGroupMembersQuery } from "@/features/conversation/conversation-create/queries/search-existing-groups-by-group-members.query"
 import { useSearchExistingGroupsByGroupNameQuery } from "@/features/conversation/conversation-create/queries/search-existing-groups-by-group-name.query"
 import { inboxIdIsPartOfConversationUsingCacheData } from "@/features/conversation/utils/inbox-id-is-part-of-converastion"
-import { useSearchConvosUsersQuery } from "@/features/search-users/use-search-convos-users"
-import { ISocialProfile } from "@/features/social-profiles/social-profiles.api"
-import { useSocialProfilesForAddressQuery } from "@/features/social-profiles/social-profiles.query"
+import { useDmPeerInboxIdQuery } from "@/features/dm/use-dm-peer-inbox-id-query"
+import { useSearchConvosUsersQuery } from "@/features/search-users/queries/search-convos-users.query"
+import {
+  useBaseNameResolution,
+  useEnsNameResolution,
+  useUnstoppableDomainNameResolution,
+} from "@/features/social-profiles/identity-resolution.query"
 import { useXmtpInboxIdFromEthAddressQuery } from "@/features/xmtp/xmtp-inbox-id/xmtp-inbox-id-from-eth-address.query"
 import { useAnimatedKeyboard } from "@/hooks/use-animated-keyboard"
 import { $globalStyles } from "@/theme/styles"
@@ -23,7 +27,6 @@ import { isEthereumAddress } from "@/utils/evm/address"
 import { SearchUsersResultsList } from "../../search-users/search-users-results-list"
 import { SearchUsersResultsListItemEthAddress } from "../../search-users/search-users-results-list-item-eth-address"
 import { SearchUsersResultsListItemGroup } from "../../search-users/search-users-results-list-item-group"
-import { SearchUsersResultsListItemNoConvosUser } from "../../search-users/search-users-results-list-item-no-convos-user"
 import { SearchUsersResultsListItemUser } from "../../search-users/search-users-results-list-item-user"
 import { SearchUsersResultsListItemUserDm } from "../../search-users/search-users-results-list-item-user-dm"
 
@@ -45,22 +48,17 @@ type ISearchResultItemProfile = {
   inboxId: InboxId
 }
 
-type ISearchResultItemSocialProfile = {
-  type: "socialProfile"
-  profile: ISocialProfile
-}
-
-type ISearchResultItemEthAddress = {
-  type: "ethAddress"
+type ISearchResultItemExternalIdentity = {
+  type: "external_identity"
   address: string
+  displayName?: string // For ENS, Base, or Unstoppable domains, this would be the original name
 }
 
 type SearchResultItem =
   | ISearchResultItemDm
   | ISearchResultItemGroup
   | ISearchResultItemProfile
-  | ISearchResultItemSocialProfile
-  | ISearchResultItemEthAddress
+  | ISearchResultItemExternalIdentity
 
 function searchResultIsDm(item: SearchResultItem): item is ISearchResultItemDm {
   return item.type === "dm"
@@ -74,34 +72,51 @@ function searchResultIsProfile(item: SearchResultItem): item is ISearchResultIte
   return item.type === "profile"
 }
 
-function searchResultIsSocialProfile(
+function searchResultIsExternalIdentity(
   item: SearchResultItem,
-): item is ISearchResultItemSocialProfile {
-  return item.type === "socialProfile"
-}
-
-function searchResultIsEthAddress(item: SearchResultItem): item is ISearchResultItemEthAddress {
-  return item.type === "ethAddress"
+): item is ISearchResultItemExternalIdentity {
+  return item.type === "external_identity"
 }
 
 const SearchUsersResultsListItemUserDmWrapper = memo(
   function SearchUsersResultsListItemUserDmWrapper(props: {
     conversationTopic: ConversationTopic
   }) {
+    const { conversationTopic } = props
+
     const conversationStore = useConversationStore()
 
+    const currentSender = useSafeCurrentSender()
+
+    const { data: peerInboxId, isLoading: isLoadingPeerInboxId } = useDmPeerInboxIdQuery({
+      account: currentSender.ethereumAddress,
+      topic: conversationTopic,
+      caller: "SearchUsersResultsListItemUserDmWrapper",
+    })
+
     const handlePress = useCallback(() => {
-      conversationStore.setState({
-        searchTextValue: "",
-        searchSelectedUserInboxIds: [],
-        topic: props.conversationTopic,
-        isCreatingNewConversation: false,
-      })
-    }, [conversationStore, props.conversationTopic])
+      if (peerInboxId) {
+        conversationStore.setState({
+          searchTextValue: "",
+          searchSelectedUserInboxIds: [peerInboxId],
+        })
+      } else {
+        conversationStore.setState({
+          searchTextValue: "",
+          searchSelectedUserInboxIds: [],
+          topic: conversationTopic,
+          isCreatingNewConversation: false,
+        })
+      }
+    }, [conversationStore, peerInboxId, conversationTopic])
+
+    if (isLoadingPeerInboxId) {
+      return null
+    }
 
     return (
       <SearchUsersResultsListItemUserDm
-        conversationTopic={props.conversationTopic}
+        conversationTopic={conversationTopic}
         onPress={handlePress}
       />
     )
@@ -148,15 +163,17 @@ const SearchUsersResultsListItemUserWrapper = memo(
   },
 )
 
-const SearchUsersResultsListItemNoConvosUserWrapper = memo(
-  function SearchUsersResultsListItemNoConvosUserWrapper(props: { socialProfile: ISocialProfile }) {
+const SearchUsersResultsListItemExternalIdentityWrapper = memo(
+  function SearchUsersResultsListItemExternalIdentityWrapper(props: {
+    externalIdentity: ISearchResultItemExternalIdentity
+  }) {
+    const { externalIdentity } = props
     const conversationStore = useConversationStore()
-
     const currentSender = useSafeCurrentSender()
 
     const { data: inboxId, isLoading: isLoadingInboxId } = useXmtpInboxIdFromEthAddressQuery({
       clientEthAddress: currentSender.ethereumAddress,
-      targetEthAddress: props.socialProfile.address,
+      targetEthAddress: externalIdentity.address,
     })
 
     const handlePress = useCallback(() => {
@@ -178,47 +195,11 @@ const SearchUsersResultsListItemNoConvosUserWrapper = memo(
     }
 
     return (
-      <SearchUsersResultsListItemNoConvosUser
-        socialProfile={props.socialProfile}
+      <SearchUsersResultsListItemEthAddress
+        ethAddress={externalIdentity.address}
         onPress={handlePress}
       />
     )
-  },
-)
-
-const SearchUsersResultsListItemEthAddressWrapper = memo(
-  function SearchUsersResultsListItemEthAddressWrapper(props: { ethAddress: string }) {
-    const { ethAddress } = props
-
-    const conversationStore = useConversationStore()
-
-    const currentSender = useSafeCurrentSender()
-
-    const { data: inboxId, isLoading: isLoadingInboxId } = useXmtpInboxIdFromEthAddressQuery({
-      clientEthAddress: currentSender.ethereumAddress,
-      targetEthAddress: ethAddress,
-    })
-
-    const handlePress = () => {
-      if (!inboxId) {
-        Alert.alert("This user is not on XMTP yet!")
-        return
-      }
-
-      conversationStore.setState({
-        searchTextValue: "",
-        searchSelectedUserInboxIds: [
-          ...(conversationStore.getState().searchSelectedUserInboxIds ?? []),
-          inboxId,
-        ],
-      })
-    }
-
-    if (isLoadingInboxId) {
-      return null
-    }
-
-    return <SearchUsersResultsListItemEthAddress ethAddress={ethAddress} onPress={handlePress} />
   },
 )
 
@@ -229,25 +210,6 @@ export const ConversationCreateListResults = memo(function ConversationCreateLis
   )
 
   const currentUserInboxId = useSafeCurrentSender().inboxId
-
-  const { data: searchConvosUsersData, isLoading: isSearchingConvosUsers } =
-    useSearchConvosUsersQuery({
-      searchQuery: searchTextValue,
-      inboxIdsToOmit: [...selectedSearchUserInboxIds, currentUserInboxId],
-    })
-
-  const { data: existingDmTopics = [], isLoading: isLoadingExistingDmTopics } =
-    useSearchExistingDmsQuery({
-      searchQuery: searchTextValue,
-      inboxId: currentUserInboxId,
-    })
-
-  const {
-    data: socialProfilesForEthAddress = [],
-    isLoading: isLoadingSocialProfilesForEthAddress,
-  } = useSocialProfilesForAddressQuery({
-    ethAddress: searchTextValue,
-  })
 
   const { data: existingGroupsByGroupNameTopics = [], isLoading: isLoadingExistingGroupsByName } =
     useSearchExistingGroupsByGroupNameQuery({
@@ -262,6 +224,23 @@ export const ConversationCreateListResults = memo(function ConversationCreateLis
     searchQuery: searchTextValue,
     searcherInboxId: currentUserInboxId,
   })
+
+  const { data: existingDmTopics = [], isLoading: isLoadingExistingDmTopics } =
+    useSearchExistingDmsQuery({
+      searchQuery: searchTextValue,
+      inboxId: currentUserInboxId,
+    })
+
+  const { data: searchConvosUsersData, isLoading: isSearchingConvosUsers } =
+    useSearchConvosUsersQuery({
+      searchQuery: searchTextValue,
+      inboxIdsToOmit: [...selectedSearchUserInboxIds, currentUserInboxId],
+    })
+
+  const { data: ensEthAddressResolution } = useEnsNameResolution(searchTextValue)
+  const { data: baseEthAddressResolution } = useBaseNameResolution(searchTextValue)
+  const { data: unstoppableDomainEthAddressResolution } =
+    useUnstoppableDomainNameResolution(searchTextValue)
 
   const isEthAddress = useMemo(() => {
     return isEthereumAddress(searchTextValue)
@@ -329,28 +308,35 @@ export const ConversationCreateListResults = memo(function ConversationCreateLis
 
     items.push(...(profilesNotInDms ?? []))
 
-    // 5. Add social profiles only if we don't have any conversation users
-    if (searchConvosUsersData?.length === 0 && socialProfilesForEthAddress.length > 0) {
-      items.push(
-        ...socialProfilesForEthAddress.map((profile) => ({
-          type: "socialProfile" as const,
-          profile,
-        })),
-      )
+    // 5. Add raw Ethereum address if the search query is an Ethereum address
+    // and we don't have any Convos users
+    if (isEthAddress && searchConvosUsersData?.length === 0) {
+      items.push({
+        type: "external_identity" as const,
+        address: searchTextValue,
+      })
     }
 
-    // 6. Add raw Ethereum address if:
-    // - The search query is an Ethereum address
-    // - We don't have any social profiles for it
-    // - We don't have any conversation users
-    if (
-      isEthAddress &&
-      socialProfilesForEthAddress.length === 0 &&
-      searchConvosUsersData?.length === 0
-    ) {
+    // 6. Add ENS, Base, or Unstoppable domains if resolved
+    if (ensEthAddressResolution) {
       items.push({
-        type: "ethAddress",
-        address: searchTextValue,
+        type: "external_identity" as const,
+        address: ensEthAddressResolution,
+        displayName: searchTextValue,
+      })
+    }
+    if (baseEthAddressResolution) {
+      items.push({
+        type: "external_identity" as const,
+        address: baseEthAddressResolution,
+        displayName: searchTextValue,
+      })
+    }
+    if (unstoppableDomainEthAddressResolution) {
+      items.push({
+        type: "external_identity" as const,
+        address: unstoppableDomainEthAddressResolution,
+        displayName: searchTextValue,
       })
     }
 
@@ -361,17 +347,18 @@ export const ConversationCreateListResults = memo(function ConversationCreateLis
     existingGroupsByGroupNameTopics,
     searchConvosUsersData,
     selectedSearchUserInboxIds,
-    socialProfilesForEthAddress,
     searchTextValue,
     isEthAddress,
+    ensEthAddressResolution,
+    baseEthAddressResolution,
+    unstoppableDomainEthAddressResolution,
   ])
 
   const isStillLoadingSearchResults =
     isLoadingExistingDmTopics ||
     isLoadingExistingGroupsByName ||
     isLoadingExistingGroupsByMembers ||
-    isSearchingConvosUsers ||
-    isLoadingSocialProfilesForEthAddress
+    isSearchingConvosUsers
 
   const renderItem: ListRenderItem<SearchResultItem> = ({ item }) => {
     if (searchResultIsDm(item)) {
@@ -383,11 +370,8 @@ export const ConversationCreateListResults = memo(function ConversationCreateLis
     if (searchResultIsProfile(item)) {
       return <SearchUsersResultsListItemUserWrapper inboxId={item.inboxId} />
     }
-    if (searchResultIsSocialProfile(item)) {
-      return <SearchUsersResultsListItemNoConvosUserWrapper socialProfile={item.profile} />
-    }
-    if (searchResultIsEthAddress(item)) {
-      return <SearchUsersResultsListItemEthAddressWrapper ethAddress={item.address} />
+    if (searchResultIsExternalIdentity(item)) {
+      return <SearchUsersResultsListItemExternalIdentityWrapper externalIdentity={item} />
     }
     const _ensureNever: never = item
     return null
@@ -403,11 +387,8 @@ export const ConversationCreateListResults = memo(function ConversationCreateLis
     if (searchResultIsProfile(item)) {
       return `profile-${item.inboxId}`
     }
-    if (searchResultIsSocialProfile(item)) {
-      return `social-profile-${item.profile.type}-${item.profile.address}`
-    }
-    if (searchResultIsEthAddress(item)) {
-      return `eth-address-${item.address}`
+    if (searchResultIsExternalIdentity(item)) {
+      return `external-identity-${item.address}`
     }
     const _ensureNever: never = item
     throw new Error("Invalid item type")

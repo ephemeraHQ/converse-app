@@ -2,10 +2,10 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack"
 import { memo, useCallback } from "react"
 import { Screen } from "@/components/screen/screen"
 import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
+import { useGroupMembersQuery } from "@/features/groups/useGroupMembersQuery"
 import { NavigationParamList } from "@/navigation/navigation.types"
 import { useHeader } from "@/navigation/use-header"
 import { useRouter } from "@/navigation/use-navigation"
-import { useGroupMembersQuery } from "@/queries/useGroupMembersQuery"
 
 export const GroupMembersListScreen = memo(function GroupMembersListScreen(
   props: NativeStackScreenProps<NavigationParamList, "GroupMembersList">,

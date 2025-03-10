@@ -6,8 +6,8 @@ import {
   useSafeCurrentSender,
 } from "@/features/authentication/multi-inbox.store"
 import { getConversationMetadataQueryOptions } from "@/features/conversation/conversation-metadata/conversation-metadata.query"
+import { getConversationQueryOptions } from "@/features/conversation/queries/conversation.query"
 import { conversationIsUnreadForInboxId } from "@/features/conversation/utils/conversation-is-unread-by-current-account"
-import { getConversationQueryOptions } from "@/queries/conversation-query"
 
 type UseConversationIsUnreadArgs = {
   topic: ConversationTopic
@@ -38,9 +38,9 @@ export const useConversationIsUnread = ({ topic }: UseConversationIsUnreadArgs) 
       return false
     }
 
-    // For now, if we don't have conversation metadata, we consider the conversation unread
+    // For now, if we don't have conversation metadata, we consider the conversation read because we don't want to be dependent on the BE
     if (!conversationMetadata) {
-      return true
+      return false
     }
 
     return conversationIsUnreadForInboxId({

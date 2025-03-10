@@ -10,6 +10,7 @@ export const contentTypesPrefixes = {
   reply: "xmtp.org/reply:",
   readReceipt: "xmtp.org/readReceipt:",
   groupUpdated: "xmtp.org/group_updated:",
+  multiRemoteAttachment: "xmtp.org/multiRemoteAttachment:",
   // coinbasePayment: "coinbase.com/coinbase-messaging-payment-activity:",
   // transactionReference: "xmtp.org/transactionReference:",
 }

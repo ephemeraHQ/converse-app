@@ -5,9 +5,12 @@ import React, { memo, useEffect } from "react"
 import { config } from "@/config"
 import { AppSettingsScreen } from "@/features/app-settings/app-settings.screen"
 import { useIsCurrentVersionEnough } from "@/features/app-settings/hooks/use-is-current-version-enough"
-import { useAuthStore } from "@/features/authentication/authentication.store"
-import { useHydrateAuth } from "@/features/authentication/use-hydrate-auth"
-import { useLogoutOnJwtRefreshError } from "@/features/authentication/use-logout-on-jwt-refresh-error"
+import { AuthOnboardingContactCardImportInfoScreen } from "@/features/auth-onboarding/screens/auth-onboarding-contact-card-import-info.screen"
+import { AuthScreen } from "@/features/auth-onboarding/screens/auth-onboarding.screen"
+import { useAuthenticationStore } from "@/features/authentication/authentication.store"
+import { hydrateAuth } from "@/features/authentication/hydrate-auth"
+import { useSignoutIfNoPrivyUser } from "@/features/authentication/use-logout-if-no-privy-user"
+import { useRefreshJwtAxiosInterceptor } from "@/features/authentication/use-refresh-jwt.axios-interceptor"
 import { BlockedConversationsScreen } from "@/features/blocked-conversations/blocked-conversations.screen"
 import {
   ConversationNav,
@@ -27,9 +30,6 @@ import {
   GroupMembersListNav,
   GroupMembersListScreenConfig,
 } from "@/features/groups/group-details/members-list/group-members-list.nav"
-import { OnboardingContactCardImportInfoScreen } from "@/features/onboarding/screens/onboarding-contact-card-import-info.screen"
-import { OnboardingContactCardScreen } from "@/features/onboarding/screens/onboarding-contact-card.screen"
-import { OnboardingWelcomeScreen } from "@/features/onboarding/screens/onboarding-welcome.screen"
 import { ProfileImportInfoScreen } from "@/features/profiles/profile-import-info.screen"
 import { ProfileNav, ProfileScreenConfig } from "@/features/profiles/profile.nav"
 import { NavigationParamList } from "@/navigation/navigation.types"
@@ -69,8 +69,13 @@ export function AppNavigator() {
 
   useUpdateSentry()
   useIsCurrentVersionEnough()
-  useLogoutOnJwtRefreshError()
-  useHydrateAuth()
+  useRefreshJwtAxiosInterceptor()
+  useSignoutIfNoPrivyUser()
+
+  // Hydrate auth when the app is loaded
+  useEffect(() => {
+    hydrateAuth().catch(captureError)
+  }, [])
 
   return (
     <>
@@ -97,7 +102,7 @@ export const AppNativeStack = createNativeStackNavigator<NavigationParamList>()
 const AppStacks = memo(function AppStacks() {
   const { theme } = useAppTheme()
 
-  const authStatus = useAuthStore((state) => state.status)
+  const authStatus = useAuthenticationStore((state) => state.status)
 
   useEffect(() => {
     if (authStatus !== "undetermined") {
@@ -106,7 +111,7 @@ const AppStacks = memo(function AppStacks() {
   }, [authStatus])
 
   const isUndetermined = authStatus === "undetermined"
-  const isOnboarding = authStatus === "onboarding"
+  // const isOnboarding = authStatus === "onboarding"
   const isSignedOut = authStatus === "signedOut"
 
   return (
@@ -127,23 +132,14 @@ const AppStacks = memo(function AppStacks() {
       ) : isSignedOut ? (
         <AppNativeStack.Group>
           <AppNativeStack.Screen
-            name="OnboardingWelcome"
-            component={OnboardingWelcomeScreen}
+            name="Auth"
+            component={AuthScreen}
             // Fade animation when transitioning to signed out state
-            options={{ animation: "fade" }}
-          />
-        </AppNativeStack.Group>
-      ) : isOnboarding ? (
-        <AppNativeStack.Group>
-          <AppNativeStack.Screen
-            name="OnboardingCreateContactCard"
-            component={OnboardingContactCardScreen}
-            // Fade animation when transitioning to onboarding state
             options={{ animation: "fade" }}
           />
           <AppNativeStack.Screen
             name="OnboardingCreateContactCardImportName"
-            component={OnboardingContactCardImportInfoScreen}
+            component={AuthOnboardingContactCardImportInfoScreen}
             options={{
               presentation: "formSheet",
               sheetAllowedDetents: [0.5],
@@ -153,13 +149,23 @@ const AppStacks = memo(function AppStacks() {
               },
             }}
           />
-
-          {/* <NativeStack.Screen
-            name="OnboardingNotifications"
-            component={OnboardingNotificationsScreen}
-          /> */}
         </AppNativeStack.Group>
       ) : (
+        //  : isOnboarding ? (
+        //   <AppNativeStack.Group>
+        //     <AppNativeStack.Screen
+        //       name="OnboardingCreateContactCard"
+        //       component={OnboardingContactCardScreen}
+        //       // Fade animation when transitioning to onboarding state
+        //       options={{ animation: "fade" }}
+        //     />
+
+        //     {/* <NativeStack.Screen
+        //       name="OnboardingNotifications"
+        //       component={OnboardingNotificationsScreen}
+        //     /> */}
+        //   </AppNativeStack.Group>
+        // )
         // Main app screens
         <AppNativeStack.Group>
           <AppNativeStack.Screen

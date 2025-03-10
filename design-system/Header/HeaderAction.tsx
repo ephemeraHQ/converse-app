@@ -18,10 +18,21 @@ type HeaderActionProps = {
   onPress?: ITouchableOpacityProps["onPress"]
   ActionComponent?: ReactElement
   style?: ViewStyle
+  disabled?: boolean
 }
 export function HeaderAction(props: HeaderActionProps) {
-  const { backgroundColor, icon, text, tx, txOptions, onPress, ActionComponent, iconColor, style } =
-    props
+  const {
+    backgroundColor,
+    icon,
+    text,
+    tx,
+    txOptions,
+    onPress,
+    ActionComponent,
+    iconColor,
+    style,
+    disabled,
+  } = props
   const { themed, theme } = useAppTheme()
 
   const content = tx ? translate(tx, txOptions) : text
@@ -33,7 +44,7 @@ export function HeaderAction(props: HeaderActionProps) {
       <TouchableOpacity
         style={[themed([$actionTextContainer, { backgroundColor }]), style]}
         onPress={onPress}
-        disabled={!onPress}
+        disabled={disabled || !onPress}
         activeOpacity={0.8}
         hitSlop={theme.spacing.sm}
       >
@@ -47,10 +58,11 @@ export function HeaderAction(props: HeaderActionProps) {
       <Pressable
         // {...debugBorder()}
         onPress={onPress}
+        disabled={disabled || !onPress}
         style={[themed([$actionIconContainer, { backgroundColor }]), style]}
         hitSlop={theme.spacing.sm}
       >
-        <Icon size={theme.iconSize.md} icon={icon} color={iconColor} />
+        <Icon size={theme.iconSize.lg} icon={icon} color={iconColor} />
       </Pressable>
     )
   }

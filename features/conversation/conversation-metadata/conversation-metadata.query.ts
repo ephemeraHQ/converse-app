@@ -2,7 +2,7 @@ import { queryOptions, skipToken } from "@tanstack/react-query"
 import type { ConversationTopic } from "@xmtp/react-native-sdk"
 import { getConversationMetadata } from "@/features/conversation/conversation-metadata/conversation-metadata.api"
 import { conversationMetadataQueryKey } from "@/queries/QueryKeys"
-import { reactQueryClient } from "../../../utils/react-query/react-query-client"
+import { reactQueryClient } from "../../../utils/react-query/react-query.client"
 
 export type IConversationMetadataQueryData = Awaited<ReturnType<typeof getConversationMetadata>>
 

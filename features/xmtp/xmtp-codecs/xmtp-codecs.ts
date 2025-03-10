@@ -1,5 +1,6 @@
 import {
   GroupUpdatedCodec,
+  MultiRemoteAttachmentCodec,
   ReactionCodec,
   // ReadReceiptCodec,
   RemoteAttachmentCodec,
@@ -16,6 +17,7 @@ export const supportedXmtpCodecs = [
   // new ReadReceiptCodec(),
   new RemoteAttachmentCodec(),
   new StaticAttachmentCodec(),
+  new MultiRemoteAttachmentCodec(),
 ]
 
 export type ISupportedXmtpCodecs = typeof supportedXmtpCodecs

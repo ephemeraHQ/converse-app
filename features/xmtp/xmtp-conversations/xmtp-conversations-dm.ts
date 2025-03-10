@@ -1,11 +1,11 @@
 import { InboxId } from "@xmtp/react-native-sdk"
 import { captureError } from "@/utils/capture-error"
 import { XMTPError } from "@/utils/error"
-import { XMTP_MAX_MS_UNTIL_LOG_ERROR } from "../utils/xmtp-logs"
 import {
   getXmtpClientByEthAddress,
   getXmtpClientByInboxId,
 } from "../xmtp-client/xmtp-client.service"
+import { XMTP_MAX_MS_UNTIL_LOG_ERROR } from "../xmtp-logs"
 
 export async function getXmtpDmByInboxId(args: { ethAccountAddress: string; inboxId: InboxId }) {
   const { ethAccountAddress, inboxId } = args

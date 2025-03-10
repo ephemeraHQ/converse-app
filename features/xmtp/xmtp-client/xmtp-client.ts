@@ -1,7 +1,7 @@
 import { InboxId, Client as XmtpClient } from "@xmtp/react-native-sdk"
 import { getRandomBytesAsync } from "expo-crypto"
 import { config } from "@/config"
-import { XMTP_MAX_MS_UNTIL_LOG_ERROR } from "@/features/xmtp/utils/xmtp-logs"
+import { XMTP_MAX_MS_UNTIL_LOG_ERROR } from "@/features/xmtp/xmtp-logs"
 import { captureError } from "@/utils/capture-error"
 import { XMTPError } from "@/utils/error"
 import { getSecureItemAsync, setSecureItemAsync } from "@/utils/keychain"

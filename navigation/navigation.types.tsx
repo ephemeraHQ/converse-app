@@ -11,7 +11,10 @@ import { ProfileNavParams } from "@/features/profiles/profile.nav"
 export type NavigationParamList = {
   Idle: undefined
 
-  // Auth / Onboarding
+  // Auth
+  Auth: undefined
+
+  // Onboarding
   OnboardingWelcome: undefined
   OnboardingCreateContactCard: undefined
   OnboardingCreateContactCardImportName: undefined

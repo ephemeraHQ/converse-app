@@ -1,21 +1,24 @@
 import { MutationObserver, MutationOptions, useMutation } from "@tanstack/react-query"
 import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk"
 import { updateInboxIdsConsentForAccount } from "@/features/consent/update-inbox-ids-consent-for-account"
-import { getConversationIdFromTopic } from "@/features/conversation/utils/get-conversation-id-from-topic"
-import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group"
-import { IXmtpGroupWithCodecs } from "@/features/xmtp/xmtp.types"
 import {
   addConversationToAllowedConsentConversationsQuery,
   removeConversationFromAllowedConsentConversationsQuery,
-} from "@/queries/conversations-allowed-consent-query"
+} from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import {
   addConversationToUnknownConsentConversationsQuery,
   removeConversationFromUnknownConsentConversationsQueryData,
-} from "@/queries/conversations-unknown-consent-query"
-import { getGroupQueryData, getOrFetchGroupQuery, setGroupQueryData } from "@/queries/useGroupQuery"
-import { reactQueryClient } from "@/utils/react-query/react-query-client"
+} from "@/features/conversation/conversation-requests-list/conversations-unknown-consent.query"
+import { getConversationIdFromTopic } from "@/features/conversation/utils/get-conversation-id-from-topic"
+import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group"
+import {
+  getGroupQueryData,
+  getOrFetchGroupQuery,
+  setGroupQueryData,
+} from "@/features/groups/useGroupQuery"
+import { IXmtpGroupWithCodecs } from "@/features/xmtp/xmtp.types"
+import { reactQueryClient } from "@/utils/react-query/react-query.client"
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
-import { MutationKeys } from "../../queries/MutationKeys"
 import { updateConsentForGroupsForAccount } from "./update-consent-for-groups-for-account"
 
 type IAllowGroupMutationOptions = {
@@ -87,9 +90,8 @@ export const getAllowGroupMutationOptions = (
   IAllowGroupArgs,
   { previousGroup: IXmtpGroupWithCodecs } | undefined
 > => {
-  const { account, topic } = args
+  const { topic } = args
   return {
-    mutationKey: [MutationKeys.ALLOW_GROUP, account, topic],
     mutationFn: allowGroup,
     onMutate: async (args) => {
       const { account } = args

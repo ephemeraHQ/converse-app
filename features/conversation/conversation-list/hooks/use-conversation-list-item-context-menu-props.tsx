@@ -3,12 +3,12 @@ import { useCallback } from "react"
 import { IContextMenuViewProps, IMenuActionConfig } from "@/design-system/context-menu/context-menu"
 import { iconRegistry } from "@/design-system/Icon/Icon"
 import { VStack } from "@/design-system/VStack"
-import { ConversationChatPreview } from "@/features/conversation/conversation-chat-preview/conversation-chat-preview"
 import { useConversationIsPinned } from "@/features/conversation/conversation-list/hooks/use-conversation-is-pinned"
 import { useConversationIsUnread } from "@/features/conversation/conversation-list/hooks/use-conversation-is-unread"
 import { useDeleteDm } from "@/features/conversation/conversation-list/hooks/use-delete-dm"
 import { useDeleteGroup } from "@/features/conversation/conversation-list/hooks/use-delete-group"
 import { useToggleReadStatus } from "@/features/conversation/conversation-list/hooks/use-toggle-read-status"
+import { ConversationPreview } from "@/features/conversation/conversation-preview/conversation-preview"
 import { translate } from "@/i18n"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { captureErrorWithToast } from "@/utils/capture-error"
@@ -75,7 +75,7 @@ function useBaseConversationContextMenuViewProps(args: {
             paddingBottom: theme.spacing.xs,
           }}
         >
-          <ConversationChatPreview topic={conversationTopic} />
+          <ConversationPreview topic={conversationTopic} />
         </VStack>
       )
     },

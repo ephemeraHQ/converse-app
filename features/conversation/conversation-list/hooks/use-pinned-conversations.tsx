@@ -1,8 +1,8 @@
 import { useQueries } from "@tanstack/react-query"
 import { useMemo } from "react"
 import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
+import { useAllowedConsentConversationsQuery } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import { getConversationMetadataQueryOptions } from "@/features/conversation/conversation-metadata/conversation-metadata.query"
-import { useAllowedConsentConversationsQuery } from "@/queries/conversations-allowed-consent-query"
 
 export function usePinnedConversations() {
   const currentAccount = useCurrentSenderEthAddress()

@@ -1,6 +1,6 @@
 import { z } from "zod"
 import { api } from "@/utils/api/api"
-import { handleApiError } from "@/utils/api/api.error"
+import { ApiError } from "@/utils/error"
 import { AUTHENTICATE_ROUTE } from "./authentication.constants"
 
 const fetchJwtResponseSchema = z.object({
@@ -16,6 +16,9 @@ export async function fetchJwt({ signal }: { signal?: AbortSignal }): Promise<Fe
     })
     return fetchJwtResponseSchema.parse(response.data)
   } catch (error) {
-    throw handleApiError(error, "fetchJwt")
+    throw new ApiError({
+      error,
+      additionalMessage: "Failed to fetch JWT",
+    })
   }
 }

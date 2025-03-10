@@ -1,6 +1,6 @@
 import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
-import { useGroupMembersQuery } from "@/queries/useGroupMembersQuery"
+import { useGroupMembersQuery } from "@/features/groups/useGroupMembersQuery"
 
 export function useGroupMember(args: {
   memberInboxId: InboxId | undefined

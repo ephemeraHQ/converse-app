@@ -6,25 +6,23 @@ import { ActivityIndicator } from "@/design-system/activity-indicator"
 import { Center } from "@/design-system/Center"
 import { VStack } from "@/design-system/VStack"
 import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
-import { ConversationComposer } from "@/features/conversation/conversation-chat/conversation-chat-composer/conversation-composer"
-import { ConversationComposerStoreProvider } from "@/features/conversation/conversation-chat/conversation-chat-composer/conversation-composer.store-context"
-import { ConversationMessageContextMenu } from "@/features/conversation/conversation-chat/conversation-chat-message/conversation-message-context-menu/conversation-message-context-menu"
-import { ConversationMessageContextMenuStoreProvider } from "@/features/conversation/conversation-chat/conversation-chat-message/conversation-message-context-menu/conversation-message-context-menu.store-context"
-import { MessageReactionsDrawer } from "@/features/conversation/conversation-chat/conversation-chat-message/conversation-message-reactions/conversation-message-reaction-drawer/conversation-message-reaction-drawer"
-import { DmConversationTitle } from "@/features/conversation/conversation-chat/conversation-chat-screen-header/conversation-screen-dm-header-title"
-import { GroupConversationTitle } from "@/features/conversation/conversation-chat/conversation-chat-screen-header/conversation-screen-group-header-title"
-import { ConversationKeyboardFiller } from "@/features/conversation/conversation-chat/conversation-keyboard-filler"
+import { ConversationComposer } from "@/features/conversation/conversation-chat/conversation-composer/conversation-composer"
+import { ConversationComposerStoreProvider } from "@/features/conversation/conversation-chat/conversation-composer/conversation-composer.store-context"
+import { ConversationKeyboardFiller } from "@/features/conversation/conversation-chat/conversation-keyboard-filler.component"
+import { ConversationMessageContextMenu } from "@/features/conversation/conversation-chat/conversation-message/conversation-message-context-menu/conversation-message-context-menu"
+import { ConversationMessageContextMenuStoreProvider } from "@/features/conversation/conversation-chat/conversation-message/conversation-message-context-menu/conversation-message-context-menu.store-context"
+import { MessageReactionsDrawer } from "@/features/conversation/conversation-chat/conversation-message/conversation-message-reactions/conversation-message-reaction-drawer/conversation-message-reaction-drawer"
+import { getConversationMessagesQueryOptions } from "@/features/conversation/conversation-chat/conversation-messages.query"
+import { useConversationScreenHeader } from "@/features/conversation/conversation-chat/conversation.screen-header"
 import { ConversationCreateListResults } from "@/features/conversation/conversation-create/conversation-create-list-results"
-import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm"
-import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group"
+import { useConversationQuery } from "@/features/conversation/queries/conversation.query"
 import { SearchUsersInput } from "@/features/search-users/search-users-input"
 import { NavigationParamList } from "@/navigation/navigation.types"
-import { useHeader } from "@/navigation/use-header"
 import { useRouter } from "@/navigation/use-navigation"
-import { useConversationQuery } from "@/queries/conversation-query"
 import { $globalStyles } from "@/theme/styles"
 import { useAppTheme } from "@/theme/use-app-theme"
-import { ConversationMessages } from "./conversation-messages"
+import { useRefetchQueryOnRefocus } from "@/utils/react-query/use-refetch-query-on-focus"
+import { ConversationMessages } from "./conversation-messages.component"
 import {
   ConversationStoreProvider,
   useConversationStore,
@@ -74,30 +72,13 @@ const Content = memo(function Content() {
     caller: "Conversation screen",
   })
 
-  useHeader(
-    {
-      onBack: () => navigation.goBack(),
-      safeAreaEdges: ["top"],
-      // DM params
-      ...(!isCreatingNewConversation &&
-        conversation &&
-        isConversationDm(conversation) && {
-          titleComponent: <DmConversationTitle topic={conversation.topic} />,
-        }),
-      // Group params
-      ...(!isCreatingNewConversation &&
-        conversation &&
-        isConversationGroup(conversation) && {
-          titleComponent: <GroupConversationTitle conversationTopic={conversation.topic} />,
-        }),
-      // New conversation params
-      ...(isCreatingNewConversation && {
-        title: "New chat",
-        withBottomBorder: true,
-      }),
-    },
-    [conversation, isCreatingNewConversation],
+  useRefetchQueryOnRefocus(
+    topic
+      ? getConversationMessagesQueryOptions({ account: currentAccount, topic }).queryKey
+      : undefined,
   )
+
+  useConversationScreenHeader()
 
   if (isLoadingConversation) {
     return (

@@ -2,9 +2,9 @@ import { useQueries, useQuery } from "@tanstack/react-query"
 import { useEffect, useMemo } from "react"
 import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
 import { prefetchConversationMessages } from "@/features/conversation/conversation-chat/conversation-messages.query"
+import { getAllowedConsentConversationsQueryOptions } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import { getConversationMetadataQueryOptions } from "@/features/conversation/conversation-metadata/conversation-metadata.query"
 import { isConversationAllowed } from "@/features/conversation/utils/is-conversation-allowed"
-import { getAllowedConsentConversationsQueryOptions } from "@/queries/conversations-allowed-consent-query"
 import { captureError } from "@/utils/capture-error"
 
 export const useConversationListConversations = () => {

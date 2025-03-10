@@ -1,11 +1,15 @@
 import { translate } from "@i18n"
 import { useMutation } from "@tanstack/react-query"
 import { executeAfterKeyboardClosed } from "@utils/keyboard"
-import { compressAndResizeImage, pickMediaFromLibrary, takePictureFromCamera } from "@utils/media"
+import {
+  compressAndResizeImage,
+  pickSingleMediaFromLibrary,
+  takePictureFromCamera,
+} from "@utils/media"
 import { ImagePickerAsset, ImagePickerOptions } from "expo-image-picker"
 import { useCallback, useState } from "react"
 import { showActionSheet } from "@/components/action-sheet"
-import { getPresignedUploadUrl, uploadFileWithPresignedUrl } from "@/features/uploads/upload.api"
+import { uploadFile } from "@/features/uploads/upload.api"
 import { captureError } from "@/utils/capture-error"
 import { prefetchImageUrl } from "@/utils/image"
 import { logger } from "@/utils/logger"
@@ -34,10 +38,12 @@ async function uploadImage(imageAsset: ImagePickerAsset): Promise<string> {
 
   // Get presigned URL for upload
   logger.debug("[useAddPfp] Getting presigned URL")
-  const { url: presignedUrl } = await getPresignedUploadUrl("image/jpeg")
 
   // Upload the image
-  const publicUrl = await uploadFileWithPresignedUrl(presignedUrl, resizedImage.uri, "image/jpeg")
+  const publicUrl = await uploadFile({
+    filePath: resizedImage.uri,
+    contentType: "image/jpeg",
+  })
 
   prefetchImageUrl(publicUrl).catch(captureError)
 
@@ -107,7 +113,7 @@ export function useAddPfp() {
               const pickedAsset =
                 source === "camera"
                   ? await takePictureFromCamera(options)
-                  : await pickMediaFromLibrary(options)
+                  : await pickSingleMediaFromLibrary(options)
 
               if (!pickedAsset) {
                 reject(new Error("No image selected"))

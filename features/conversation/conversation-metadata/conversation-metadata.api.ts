@@ -1,7 +1,7 @@
 import type { ConversationTopic } from "@xmtp/react-native-sdk"
 import { z } from "zod"
+import { getOrFetchConversation } from "@/features/conversation/queries/conversation.query"
 import { getCurrentUserQueryData } from "@/features/current-user/curent-user.query"
-import { getOrFetchConversation } from "@/queries/conversation-query"
 import { api } from "@/utils/api/api"
 import { captureError } from "@/utils/capture-error"
 import { enhanceError } from "@/utils/error"

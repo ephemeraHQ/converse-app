@@ -1,7 +1,7 @@
 import { memo, useCallback, useMemo } from "react"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
+import { useSearchConvosUsersQuery } from "@/features/search-users/queries/search-convos-users.query"
 import { SearchUsersResultsList } from "@/features/search-users/search-users-results-list"
-import { useSearchConvosUsersQuery } from "@/features/search-users/use-search-convos-users"
 import { useSocialProfilesForAddressQuery } from "@/features/social-profiles/social-profiles.query"
 import { isEthereumAddress } from "@/utils/evm/address"
 import {

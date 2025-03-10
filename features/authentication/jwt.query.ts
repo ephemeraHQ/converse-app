@@ -1,5 +1,5 @@
 import { queryOptions, skipToken } from "@tanstack/react-query"
-import { reactQueryClient } from "@/utils/react-query/react-query-client"
+import { reactQueryClient } from "@/utils/react-query/react-query.client"
 import { fetchJwt } from "./authentication.api"
 import { getCurrentSender } from "./multi-inbox.store"
 

@@ -1,59 +1,114 @@
 import { useMutation } from "@tanstack/react-query"
-import { ConversationTopic, MessageId, RemoteAttachmentContent } from "@xmtp/react-native-sdk"
-import { useCallback } from "react"
+import { ConversationTopic, MessageId, RemoteAttachmentInfo } from "@xmtp/react-native-sdk"
 import { getCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
-import { getOrFetchConversation } from "@/queries/conversation-query"
-import { captureErrorWithToast } from "@/utils/capture-error"
+import { UploadedRemoteAttachment } from "@/features/conversation/conversation-chat/conversation-attachment/conversation-attachments.types"
+import { getOrFetchConversation } from "@/features/conversation/queries/conversation.query"
+import { sendXmtpConversationMessage } from "@/features/xmtp/xmtp-conversations/xmtp-conversation"
+
+export type ISendMessageContent = {
+  text?: string
+  remoteAttachments?: UploadedRemoteAttachment[]
+}
 
 export type ISendMessageParams = {
   topic: ConversationTopic
   referencedMessageId?: MessageId
-  content:
-    | { text: string; remoteAttachment?: RemoteAttachmentContent }
-    | { text?: string; remoteAttachment: RemoteAttachmentContent }
+  content: ISendMessageContent
+}
+
+function convertConvosUploadedRemoteAttachmentToXmtpRemoteAttachment(
+  attachment: UploadedRemoteAttachment,
+): RemoteAttachmentInfo {
+  return {
+    ...attachment,
+    contentLength: attachment.contentLength.toString(),
+    scheme: "https://",
+  }
 }
 
 export async function sendMessage(args: ISendMessageParams) {
   const { referencedMessageId, content, topic } = args
 
-  // Need at least a text or remoteAttachment
-  if (!content.remoteAttachment && !content.text) {
-    throw new Error("Invalid content: Either text or remoteAttachment must be provided")
+  if (!content.remoteAttachments?.length && !content.text) {
+    throw new Error("Invalid content: Either text or remoteAttachments must be provided")
   }
 
   const conversation = await getOrFetchConversation({
     topic,
     account: getCurrentSenderEthAddress()!,
-    caller: "use-send-message#sendMessage",
+    caller: "use-send-message",
   })
 
   if (!conversation) {
     throw new Error("Conversation not found when sending message")
   }
 
-  if (referencedMessageId) {
-    return conversation.send({
-      reply: {
-        reference: referencedMessageId,
-        content: content.remoteAttachment
-          ? { remoteAttachment: content.remoteAttachment }
-          : { text: content.text },
+  // Handle direct messages (no reply)
+  if (!referencedMessageId) {
+    // Text-only message
+    if (!content.remoteAttachments?.length) {
+      return sendXmtpConversationMessage({
+        conversation,
+        content: { text: content.text! },
+      })
+    }
+
+    // Multiple attachments
+    if (content.remoteAttachments.length > 1) {
+      return sendXmtpConversationMessage({
+        conversation,
+        content: {
+          multiRemoteAttachment: {
+            attachments: content.remoteAttachments.map(
+              convertConvosUploadedRemoteAttachmentToXmtpRemoteAttachment,
+            ),
+          },
+        },
+      })
+    }
+
+    // Single attachment
+    return sendXmtpConversationMessage({
+      conversation,
+      content: {
+        remoteAttachment: convertConvosUploadedRemoteAttachmentToXmtpRemoteAttachment(
+          content.remoteAttachments[0],
+        ),
       },
     })
   }
 
-  return conversation.send(
-    content.remoteAttachment
-      ? { remoteAttachment: content.remoteAttachment }
-      : { text: content.text! },
-  )
+  // Handle reply messages
+  const replyContent = !content.remoteAttachments?.length
+    ? { text: content.text! }
+    : content.remoteAttachments.length > 1
+      ? {
+          multiRemoteAttachment: {
+            attachments: content.remoteAttachments.map(
+              convertConvosUploadedRemoteAttachmentToXmtpRemoteAttachment,
+            ),
+          },
+        }
+      : {
+          remoteAttachment: convertConvosUploadedRemoteAttachmentToXmtpRemoteAttachment(
+            content.remoteAttachments[0],
+          ),
+        }
+
+  return sendXmtpConversationMessage({
+    conversation,
+    content: {
+      reply: {
+        reference: referencedMessageId,
+        content: replyContent,
+      },
+    },
+  })
 }
 
 export function useSendMessage() {
-  const { mutateAsync, error, isError } = useMutation({
-    mutationFn: (variables: ISendMessageParams) => {
-      return sendMessage(variables)
-    },
+  const mutation = useMutation({
+    mutationFn: sendMessage,
     // onMutate: (variables) => {
     //   const currentAccount = getCurrentAccount()!;
     //   const currentUserInboxId = getSafeCurrentSender().inboxId;
@@ -124,20 +179,9 @@ export function useSendMessage() {
     // },
   })
 
-  const sendMessageMutation = useCallback(
-    async (args: ISendMessageParams) => {
-      try {
-        await mutateAsync(args)
-      } catch (error) {
-        captureErrorWithToast(error)
-      }
-    },
-    [mutateAsync],
-  )
-
   return {
-    sendMessage: sendMessageMutation,
-    error,
-    isError,
+    sendMessage: mutation.mutateAsync,
+    isSending: mutation.isPending,
+    error: mutation.error,
   }
 }
