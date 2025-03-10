@@ -6,7 +6,7 @@ import { InboxId } from "@xmtp/react-native-sdk"
 import { getXmtpDmByInboxId } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-dm"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
 import { dmQueryKey } from "../../queries/QueryKeys"
-import { setConversationQueryData } from "./conversation-query"
+import { setConversationQueryData } from "../conversation/queries/conversation.query"
 
 type IDmQueryArgs = {
   ethAccountAddress: string

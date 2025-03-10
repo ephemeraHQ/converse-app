@@ -9,7 +9,7 @@ import {
   getConversationMetadataQueryData,
   updateConversationMetadataQueryData,
 } from "@/features/conversation/conversation-metadata/conversation-metadata.query"
-import { getConversationQueryOptions } from "@/features/conversation/conversation-query"
+import { getConversationQueryOptions } from "@/features/conversation/queries/conversation.query"
 import { useDmPeerInboxIdQuery } from "@/features/dm/use-dm-peer-inbox-id-query"
 import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
 import { translate } from "@/i18n"

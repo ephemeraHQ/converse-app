@@ -2,18 +2,18 @@ import { allowedConsentConversationsQueryKey } from "@queries/QueryKeys"
 import { QueryObserver, queryOptions, skipToken, useQuery } from "@tanstack/react-query"
 import { ConversationTopic } from "@xmtp/react-native-sdk"
 import { useMultiInboxStore } from "@/features/authentication/multi-inbox.store"
+import { ensureConversationSyncAllQuery } from "@/features/conversation/queries/conversation-sync-all.query"
 import {
   getConversationQueryData,
   setConversationQueryData,
-} from "@/features/conversation/conversation-query"
-import { ensureConversationSyncAllQuery } from "@/features/conversation/conversation-sync-all-query"
+} from "@/features/conversation/queries/conversation.query"
 import { getXmtpClientByEthAddress } from "@/features/xmtp/xmtp-client/xmtp-client.service"
 import { IXmtpConversationWithCodecs } from "@/features/xmtp/xmtp.types"
 import { Optional } from "@/types/general"
 import { captureError } from "@/utils/capture-error"
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
-import { reactQueryClient } from "../../utils/react-query/react-query.client"
-import { ensureGroupMembersQueryData } from "../groups/useGroupMembersQuery"
+import { reactQueryClient } from "../../../utils/react-query/react-query.client"
+import { ensureGroupMembersQueryData } from "../../groups/useGroupMembersQuery"
 
 export type IAllowedConsentConversationsQuery = Awaited<
   ReturnType<typeof getAllowedConsentConversations>

@@ -1,13 +1,13 @@
 import { queryOptions, skipToken } from "@tanstack/react-query"
 import { ConversationTopic } from "@xmtp/react-native-sdk"
-import { setConversationQueryData } from "@/features/conversation/conversation-query"
-import { ensureConversationSyncAllQuery } from "@/features/conversation/conversation-sync-all-query"
+import { ensureConversationSyncAllQuery } from "@/features/conversation/queries/conversation-sync-all.query"
+import { setConversationQueryData } from "@/features/conversation/queries/conversation.query"
 import { getXmtpClientByEthAddress } from "@/features/xmtp/xmtp-client/xmtp-client.service"
 import { IXmtpConversationWithCodecs } from "@/features/xmtp/xmtp.types"
 import { unknownConsentConversationsQueryKey } from "@/queries/QueryKeys"
 import logger from "@/utils/logger"
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
-import { reactQueryClient } from "../../utils/react-query/react-query.client"
+import { reactQueryClient } from "../../../utils/react-query/react-query.client"
 
 export type IUnknownConversationsQuery = Awaited<ReturnType<typeof getUnknownConversations>>
 

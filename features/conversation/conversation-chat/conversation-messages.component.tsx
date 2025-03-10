@@ -21,7 +21,7 @@ import {
   isAnActualMessage,
   useMessageHasReactions,
 } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
-import { ConversationMessagesList } from "@/features/conversation/conversation-chat/conversation-messages-list"
+import { ConversationMessagesList } from "@/features/conversation/conversation-chat/conversation-messages-list.component"
 import { useConversationMessagesQuery } from "@/features/conversation/conversation-chat/conversation-messages.query"
 import { useConversationIsUnread } from "@/features/conversation/conversation-list/hooks/use-conversation-is-unread"
 import { useMarkConversationAsRead } from "@/features/conversation/hooks/use-mark-conversation-as-read"

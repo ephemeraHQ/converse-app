@@ -4,8 +4,8 @@ import { v4 as uuidv4 } from "uuid"
 import {
   LocalAttachment,
   LocalAttachmentMetadata,
-} from "@/features/conversation/conversation-attachment/conversation-attachments.types"
-import { getImageSize, isImageMimetype } from "../../../utils/media"
+} from "@/features/conversation/conversation-chat/conversation-attachment/conversation-attachments.types"
+import { getImageSize, isImageMimetype } from "../../../../utils/media"
 import { storeRemoteAttachment } from "./remote-attachment-local-storage"
 
 /**

@@ -6,7 +6,7 @@ import logger from "@/utils/logger"
 import { reactQueryPersister } from "@/utils/mmkv"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
 import { dmPeerInboxIdQueryKey } from "../../queries/QueryKeys"
-import { getOrFetchConversation } from "../conversation/conversation-query"
+import { getOrFetchConversation } from "../conversation/queries/conversation.query"
 
 type IArgs = {
   account: string

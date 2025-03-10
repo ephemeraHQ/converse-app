@@ -6,7 +6,7 @@ import {
   useSafeCurrentSender,
 } from "@/features/authentication/multi-inbox.store"
 import { getConversationMetadataQueryOptions } from "@/features/conversation/conversation-metadata/conversation-metadata.query"
-import { getConversationQueryOptions } from "@/features/conversation/conversation-query"
+import { getConversationQueryOptions } from "@/features/conversation/queries/conversation.query"
 import { conversationIsUnreadForInboxId } from "@/features/conversation/utils/conversation-is-unread-by-current-account"
 
 type UseConversationIsUnreadArgs = {

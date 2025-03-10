@@ -5,11 +5,11 @@ import { updateConsentForGroupsForAccount } from "@/features/consent/update-cons
 import {
   addConversationToAllowedConsentConversationsQuery,
   removeConversationFromAllowedConsentConversationsQuery,
-} from "@/features/conversation/conversations-allowed-consent-query"
+} from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import {
   addConversationToUnknownConsentConversationsQuery,
   removeConversationFromUnknownConsentConversationsQueryData,
-} from "@/features/conversation/conversations-unknown-consent-query"
+} from "@/features/conversation/conversation-requests-list/conversations-unknown-consent.query"
 import { getConversationIdFromTopic } from "@/features/conversation/utils/get-conversation-id-from-topic"
 import { getGroupQueryData, setGroupQueryData } from "@/features/groups/useGroupQuery"
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods"

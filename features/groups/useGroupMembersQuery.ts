@@ -1,6 +1,6 @@
 import { queryOptions as reactQueryOptions, skipToken, useQuery } from "@tanstack/react-query"
 import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk"
-import { getOrFetchConversation } from "@/features/conversation/conversation-query"
+import { getOrFetchConversation } from "@/features/conversation/queries/conversation.query"
 import { IGroupMember } from "@/features/groups/group.types"
 import { Optional } from "@/types/general"
 import { groupMembersQueryKey } from "../../queries/QueryKeys"

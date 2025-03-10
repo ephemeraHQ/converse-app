@@ -1,7 +1,7 @@
 import { DecodedMessage, MultiRemoteAttachmentCodec } from "@xmtp/react-native-sdk"
 import { memo } from "react"
 import { VStack } from "@/design-system/VStack"
-import { AttachmentRemoteImage } from "@/features/conversation/conversation-attachment/conversation-attachment-remote-image"
+import { AttachmentRemoteImage } from "@/features/conversation/conversation-chat/conversation-attachment/conversation-attachment-remote-image"
 import { ConversationMessageGestures } from "@/features/conversation/conversation-chat/conversation-message/conversation-message-gestures"
 import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user"
 import { useAppTheme } from "@/theme/use-app-theme"

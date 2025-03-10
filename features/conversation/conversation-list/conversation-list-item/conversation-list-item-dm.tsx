@@ -13,7 +13,7 @@ import { useDeleteDm } from "@/features/conversation/conversation-list/hooks/use
 import { useMessagePlainText } from "@/features/conversation/conversation-list/hooks/use-message-plain-text"
 import { useRestoreConversation } from "@/features/conversation/conversation-list/hooks/use-restore-conversation"
 import { useToggleReadStatus } from "@/features/conversation/conversation-list/hooks/use-toggle-read-status"
-import { useConversationQuery } from "@/features/conversation/conversation-query"
+import { useConversationQuery } from "@/features/conversation/queries/conversation.query"
 import { useDmPeerInboxIdQuery } from "@/features/dm/use-dm-peer-inbox-id-query"
 import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
 import { useFocusRerender } from "@/hooks/use-focus-rerender"

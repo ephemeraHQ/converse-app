@@ -12,7 +12,7 @@ import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.stor
 import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user"
 import { getReactionContent } from "@/features/xmtp/xmtp-codecs/xmtp-codecs-reaction"
 import { useAppTheme } from "@/theme/use-app-theme"
-import { useConversationMessageById } from "../use-conversation-message"
+import { useConversationMessageById } from "../use-conversation-message-by-id"
 import { MESSAGE_CONTEXT_MENU_ABOVE_MESSAGE_REACTIONS_HEIGHT } from "./conversation-message-context-menu.constants"
 
 export const MessageContextMenuAboveMessageReactions = memo(

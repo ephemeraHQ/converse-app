@@ -1,12 +1,12 @@
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query"
 import type { ConversationTopic } from "@xmtp/react-native-sdk"
-import { ensureConversationSyncAllQuery } from "@/features/conversation/conversation-sync-all-query"
+import { ensureConversationSyncAllQuery } from "@/features/conversation/queries/conversation-sync-all.query"
 import { getXmtpClientByEthAddress } from "@/features/xmtp/xmtp-client/xmtp-client.service"
 import { Optional } from "@/types/general"
 import { captureError } from "@/utils/capture-error"
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
-import { conversationQueryKey } from "../../queries/QueryKeys"
-import { reactQueryClient } from "../../utils/react-query/react-query.client"
+import { conversationQueryKey } from "../../../queries/QueryKeys"
+import { reactQueryClient } from "../../../utils/react-query/react-query.client"
 
 export type ConversationQueryData = Awaited<ReturnType<typeof getConversation>>
 

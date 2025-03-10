@@ -10,7 +10,7 @@ import {
   getOrFetchConversation,
   setConversationQueryData,
   updateConversationQueryData,
-} from "@/features/conversation/conversation-query"
+} from "@/features/conversation/queries/conversation.query"
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group"
 import { IXmtpGroupWithCodecs } from "@/features/xmtp/xmtp.types"
 

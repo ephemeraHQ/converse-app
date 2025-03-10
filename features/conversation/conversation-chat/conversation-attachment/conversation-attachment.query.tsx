@@ -1,10 +1,10 @@
 import { queryOptions, useQuery } from "@tanstack/react-query"
 import { MessageId, RemoteAttachmentContent } from "@xmtp/react-native-sdk"
-import { downloadRemoteAttachment } from "@/features/conversation/conversation-attachment/download-remote-attachment"
+import { downloadRemoteAttachment } from "@/features/conversation/conversation-chat/conversation-attachment/download-remote-attachment"
 import {
   getStoredRemoteAttachment,
   storeRemoteAttachment,
-} from "@/features/conversation/conversation-attachment/remote-attachment-local-storage"
+} from "@/features/conversation/conversation-chat/conversation-attachment/remote-attachment-local-storage"
 import { decryptAttachment } from "@/features/xmtp/xmtp-codecs/xmtp-codecs-attachments"
 
 export function useRemoteAttachmentQuery(args: {

@@ -14,10 +14,10 @@ import { ConversationMessageReactions } from "@/features/conversation/conversati
 import { ConversationMessageTimestamp } from "@/features/conversation/conversation-chat/conversation-message/conversation-message-timestamp"
 import { ConversationMessageContextStoreProvider } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.store-context"
 import { useMessageHasReactions } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
-import { conversationListDefaultProps } from "@/features/conversation/conversation-chat/conversation-messages-list"
+import { conversationListDefaultProps } from "@/features/conversation/conversation-chat/conversation-messages-list.component"
 import { useConversationMessagesQuery } from "@/features/conversation/conversation-chat/conversation-messages.query"
 import { ConversationStoreProvider } from "@/features/conversation/conversation-chat/conversation.store-context"
-import { useConversationQuery } from "@/features/conversation/conversation-query"
+import { useConversationQuery } from "@/features/conversation/queries/conversation.query"
 import { $globalStyles } from "@/theme/styles"
 
 type ConversationPreviewProps = {

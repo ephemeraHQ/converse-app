@@ -11,7 +11,7 @@ import { useConversationListPinnedConversationsStyles } from "@/features/convers
 import { useConversationListStyles } from "@/features/conversation/conversation-list/conversation-list.styles"
 import { useAllowedConversationsCount } from "@/features/conversation/conversation-list/hooks/use-conversations-count"
 import { usePinnedConversations } from "@/features/conversation/conversation-list/hooks/use-pinned-conversations"
-import { useConversationQuery } from "@/features/conversation/conversation-query"
+import { useConversationQuery } from "@/features/conversation/queries/conversation.query"
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group"
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme"
 import { captureError } from "@/utils/capture-error"

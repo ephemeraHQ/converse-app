@@ -13,7 +13,7 @@ import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types"
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
 import { conversationMessagesQueryKey } from "../../../queries/QueryKeys"
 import { reactQueryClient } from "../../../utils/react-query/react-query.client"
-import { getConversationQueryData, getOrFetchConversation } from "../conversation-query"
+import { getConversationQueryData, getOrFetchConversation } from "../queries/conversation.query"
 
 export type ConversationMessagesQueryData = Awaited<ReturnType<typeof conversationMessagesQueryFn>>
 

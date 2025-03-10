@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query"
 import type { ConversationTopic } from "@xmtp/react-native-sdk"
-import { updateConversationInAllowedConsentConversationsQueryData } from "@/features/conversation/conversations-allowed-consent-query"
+import { updateConversationInAllowedConsentConversationsQueryData } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import {
   getGroupQueryData,
   updateGroupQueryData,

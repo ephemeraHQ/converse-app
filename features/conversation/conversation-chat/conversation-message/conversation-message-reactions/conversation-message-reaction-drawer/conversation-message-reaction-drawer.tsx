@@ -14,7 +14,7 @@ import { Avatar } from "@/components/avatar"
 import { useMessageReactionsStore } from "@/features/conversation/conversation-chat/conversation-message/conversation-message-reactions/conversation-message-reaction-drawer/conversation-message-reaction-drawer.store"
 import { useConversationMessageReactionsRolledUp } from "@/features/conversation/conversation-chat/conversation-message/conversation-message-reactions/use-conversation-message-reactions-rolled-up"
 import { useCurrentConversationTopicSafe } from "@/features/conversation/conversation-chat/conversation.store-context"
-import { useRemoveReactionOnMessage } from "@/features/conversation/hooks/use-remove-reaction-on-message"
+import { useRemoveReactionOnMessage } from "@/features/conversation/conversation-chat/use-remove-reaction-on-message.mutation"
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme"
 import { captureErrorWithToast } from "@/utils/capture-error"
 import {
@@ -76,7 +76,9 @@ const BottomSheetContent = memo(function BottomSheetContent() {
 
   const [filterReactions, setFilterReactions] = useState<string | null>(null)
 
-  const { removeReactionFromMessage } = useRemoveReactionOnMessage({ topic })
+  const { removeReactionOnMessage: removeReactionFromMessage } = useRemoveReactionOnMessage({
+    topic,
+  })
 
   const handleRemoveReaction = useCallback(
     async ({ content }: { content: string }) => {

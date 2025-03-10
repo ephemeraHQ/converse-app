@@ -6,7 +6,7 @@ import { createJSONStorage, persist, subscribeWithSelector } from "zustand/middl
 import {
   LocalAttachment,
   UploadedRemoteAttachment,
-} from "@/features/conversation/conversation-attachment/conversation-attachments.types"
+} from "@/features/conversation/conversation-chat/conversation-attachment/conversation-attachments.types"
 import { useCurrentConversationTopic } from "@/features/conversation/conversation-chat/conversation.store-context"
 import { usePrevious } from "@/hooks/use-previous-value"
 

@@ -1,7 +1,7 @@
 import { keepPreviousData, queryOptions, useQuery } from "@tanstack/react-query"
 import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk"
 import { getCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
-import { getAllowedConsentConversationsQueryData } from "@/features/conversation/conversations-allowed-consent-query"
+import { getAllowedConsentConversationsQueryData } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm"
 import { ensureDmPeerInboxIdQueryData } from "@/features/dm/use-dm-peer-inbox-id-query"
 import { ensureGroupMembersQueryData } from "@/features/groups/useGroupMembersQuery"

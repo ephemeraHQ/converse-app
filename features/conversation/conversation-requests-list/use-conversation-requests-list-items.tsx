@@ -1,8 +1,8 @@
 import { useQueries, useQuery } from "@tanstack/react-query"
 import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
 import { getMessageStringContent } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
+import { getUnknownConsentConversationsQueryOptions } from "@/features/conversation/conversation-requests-list/conversations-unknown-consent.query"
 import { getMessageSpamScore } from "@/features/conversation/conversation-requests-list/utils/get-message-spam-score"
-import { getUnknownConsentConversationsQueryOptions } from "@/features/conversation/conversations-unknown-consent-query"
 import { captureError } from "@/utils/capture-error"
 
 export function useConversationRequestsListItem() {

@@ -15,7 +15,7 @@ import {
 } from "@xmtp/react-native-sdk"
 import { memo, useCallback, useEffect } from "react"
 import { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated"
-import { AttachmentRemoteImage } from "@/features/conversation/conversation-attachment/conversation-attachment-remote-image"
+import { AttachmentRemoteImage } from "@/features/conversation/conversation-chat/conversation-attachment/conversation-attachment-remote-image"
 import {
   isGroupUpdatedMessage,
   isReactionMessage,
@@ -29,7 +29,7 @@ import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/util
 import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
 import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types"
 import { useAppTheme } from "@/theme/use-app-theme"
-import { useConversationMessageById } from "../conversation-message/use-conversation-message"
+import { useConversationMessageById } from "../conversation-message/use-conversation-message-by-id"
 import { useCurrentConversationTopic } from "../conversation.store-context"
 import {
   useConversationComposerStore,

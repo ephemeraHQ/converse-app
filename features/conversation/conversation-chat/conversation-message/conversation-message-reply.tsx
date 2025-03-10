@@ -5,7 +5,7 @@ import { VStack } from "@design-system/VStack"
 import { DecodedMessage, MessageId, ReplyCodec } from "@xmtp/react-native-sdk"
 import { memo } from "react"
 import { Gesture, GestureDetector } from "react-native-gesture-handler"
-import { AttachmentRemoteImage } from "@/features/conversation/conversation-attachment/conversation-attachment-remote-image"
+import { AttachmentRemoteImage } from "@/features/conversation/conversation-chat/conversation-attachment/conversation-attachment-remote-image"
 import {
   BubbleContainer,
   BubbleContentContainer,
@@ -28,7 +28,7 @@ import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types"
 import { useSelect } from "@/stores/stores.utils"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { captureError } from "@/utils/capture-error"
-import { useConversationMessageById } from "./use-conversation-message"
+import { useConversationMessageById } from "./use-conversation-message-by-id"
 
 export const MessageReply = memo(function MessageReply(props: {
   message: DecodedMessage<ReplyCodec>

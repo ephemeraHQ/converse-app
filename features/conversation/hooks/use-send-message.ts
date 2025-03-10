@@ -1,8 +1,8 @@
 import { useMutation } from "@tanstack/react-query"
 import { ConversationTopic, MessageId, RemoteAttachmentInfo } from "@xmtp/react-native-sdk"
 import { getCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
-import { UploadedRemoteAttachment } from "@/features/conversation/conversation-attachment/conversation-attachments.types"
-import { getOrFetchConversation } from "@/features/conversation/conversation-query"
+import { UploadedRemoteAttachment } from "@/features/conversation/conversation-chat/conversation-attachment/conversation-attachments.types"
+import { getOrFetchConversation } from "@/features/conversation/queries/conversation.query"
 import { sendXmtpConversationMessage } from "@/features/xmtp/xmtp-conversations/xmtp-conversation"
 
 export type ISendMessageContent = {

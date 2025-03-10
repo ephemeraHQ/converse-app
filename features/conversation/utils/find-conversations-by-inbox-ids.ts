@@ -1,6 +1,6 @@
 import { InboxId } from "@xmtp/react-native-sdk"
 import { getCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
-import { getAllowedConsentConversationsQueryOptions } from "@/features/conversation/conversations-allowed-consent-query"
+import { getAllowedConsentConversationsQueryOptions } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm"
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group"
 import { ensureDmPeerInboxIdQueryData } from "@/features/dm/use-dm-peer-inbox-id-query"

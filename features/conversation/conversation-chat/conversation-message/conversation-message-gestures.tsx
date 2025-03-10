@@ -6,8 +6,8 @@ import {
 } from "@/features/conversation/conversation-chat/conversation-message/conversation-message-gestures.dumb"
 import { useConversationMessageContextStore } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.store-context"
 import { getCurrentUserAlreadyReactedOnMessage } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
-import { useReactOnMessage } from "@/features/conversation/hooks/use-react-on-message"
-import { useRemoveReactionOnMessage } from "@/features/conversation/hooks/use-remove-reaction-on-message"
+import { useReactOnMessage } from "@/features/conversation/conversation-chat/use-react-on-message.mutation"
+import { useRemoveReactionOnMessage } from "@/features/conversation/conversation-chat/use-remove-reaction-on-message.mutation"
 import { useCurrentConversationTopic } from "../conversation.store-context"
 
 export const ConversationMessageGestures = memo(function ConversationMessageGestures(props: {
@@ -17,10 +17,10 @@ export const ConversationMessageGestures = memo(function ConversationMessageGest
   const messageStore = useConversationMessageContextStore()
   const topic = useCurrentConversationTopic()!
 
-  const reactOnMessage = useReactOnMessage({
+  const { reactOnMessage } = useReactOnMessage({
     topic,
   })
-  const { removeReactionFromMessage } = useRemoveReactionOnMessage({
+  const { removeReactionOnMessage } = useRemoveReactionOnMessage({
     topic,
   })
 
@@ -53,7 +53,7 @@ export const ConversationMessageGestures = memo(function ConversationMessageGest
       emoji: "❤️",
     })
     if (alreadyReacted) {
-      removeReactionFromMessage({
+      removeReactionOnMessage({
         messageId,
         emoji: "❤️",
       })
@@ -63,7 +63,7 @@ export const ConversationMessageGestures = memo(function ConversationMessageGest
         emoji: "❤️",
       })
     }
-  }, [reactOnMessage, removeReactionFromMessage, messageStore, topic])
+  }, [reactOnMessage, removeReactionOnMessage, messageStore, topic])
 
   return (
     <ConversationMessageGesturesDumb

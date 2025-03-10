@@ -4,11 +4,11 @@ import { updateInboxIdsConsentForAccount } from "@/features/consent/update-inbox
 import {
   addConversationToAllowedConsentConversationsQuery,
   removeConversationFromAllowedConsentConversationsQuery,
-} from "@/features/conversation/conversations-allowed-consent-query"
+} from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import {
   addConversationToUnknownConsentConversationsQuery,
   removeConversationFromUnknownConsentConversationsQueryData,
-} from "@/features/conversation/conversations-unknown-consent-query"
+} from "@/features/conversation/conversation-requests-list/conversations-unknown-consent.query"
 import { getConversationIdFromTopic } from "@/features/conversation/utils/get-conversation-id-from-topic"
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group"
 import {

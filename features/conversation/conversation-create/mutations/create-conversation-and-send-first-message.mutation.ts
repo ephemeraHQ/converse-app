@@ -9,7 +9,7 @@ import {
 import {
   getConversationQueryData,
   updateConversationQueryData,
-} from "@/features/conversation/conversation-query"
+} from "@/features/conversation/queries/conversation.query"
 import { createXmtpDm } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-dm"
 import { createXmtpGroup } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-group"
 import { IXmtpDmWithCodecs, IXmtpGroupWithCodecs } from "@/features/xmtp/xmtp.types"

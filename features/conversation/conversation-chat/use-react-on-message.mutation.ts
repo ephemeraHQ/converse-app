@@ -19,30 +19,31 @@ import { contentTypesPrefixes } from "@/features/xmtp/xmtp-content-types/xmtp-co
 import { captureErrorWithToast } from "@/utils/capture-error"
 import { getTodayNs } from "@/utils/date"
 import { getRandomId } from "@/utils/general"
+import { Haptics } from "@/utils/haptics"
 
-export function useRemoveReactionOnMessage(props: { topic: ConversationTopic }) {
+export function useReactOnMessage(props: { topic: ConversationTopic }) {
   const { topic } = props
 
-  const { mutateAsync: removeReactionMutationAsync } = useMutation({
+  const { mutateAsync: reactOnMessageMutationAsync } = useMutation({
     mutationFn: async (variables: { reaction: ReactionContent }) => {
       const { reaction } = variables
       const conversation = getConversationForCurrentAccount(topic)
       if (!conversation) {
-        throw new Error("Conversation not found when removing reaction")
+        throw new Error("Conversation not found when reacting on message")
       }
       await conversation.send({
         reaction,
       })
     },
     onMutate: (variables) => {
-      const currentAccount = getCurrentSenderEthAddress()!
-      const { inboxId: currentInboxId } = getSafeCurrentSender()
+      const { ethereumAddress: currentEthereumAddress, inboxId: currentInboxId } =
+        getSafeCurrentSender()
       const conversation = getConversationForCurrentAccount(topic)
 
       if (conversation) {
-        // Add the removal reaction message
+        // Add the reaction to the message
         addConversationMessageQuery({
-          account: currentAccount,
+          account: currentEthereumAddress,
           topic: conversation.topic,
           message: {
             id: getRandomId() as MessageId,
@@ -65,26 +66,31 @@ export function useRemoveReactionOnMessage(props: { topic: ConversationTopic }) 
       refetchConversationMessages({
         account: currentAccount,
         topic,
-        caller: "useRemoveReactionOnMessage mutation onError",
+        caller: "useReactOnMessage mutation onError",
       }).catch(captureErrorWithToast)
     },
   })
 
-  const removeReactionFromMessage = useCallback(
-    (args: { messageId: MessageId; emoji: string }) => {
-      return removeReactionMutationAsync({
-        reaction: {
-          reference: args.messageId,
-          content: args.emoji,
-          schema: "unicode",
-          action: "removed",
-        },
-      })
+  const reactOnMessage = useCallback(
+    async (args: { messageId: MessageId; emoji: string }) => {
+      try {
+        Haptics.softImpactAsync()
+        await reactOnMessageMutationAsync({
+          reaction: {
+            reference: args.messageId,
+            content: args.emoji,
+            schema: "unicode",
+            action: "added",
+          },
+        })
+      } catch (error) {
+        captureErrorWithToast(error)
+      }
     },
-    [removeReactionMutationAsync],
+    [reactOnMessageMutationAsync],
   )
 
   return {
-    removeReactionFromMessage,
+    reactOnMessage,
   }
 }

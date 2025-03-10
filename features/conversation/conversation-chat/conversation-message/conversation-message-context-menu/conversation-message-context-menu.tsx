@@ -24,8 +24,8 @@ import {
 } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
 import { getConversationMessagesQueryData } from "@/features/conversation/conversation-chat/conversation-messages.query"
 import { useCurrentConversationTopicSafe } from "@/features/conversation/conversation-chat/conversation.store-context"
-import { useReactOnMessage } from "@/features/conversation/hooks/use-react-on-message"
-import { useRemoveReactionOnMessage } from "@/features/conversation/hooks/use-remove-reaction-on-message"
+import { useReactOnMessage } from "@/features/conversation/conversation-chat/use-react-on-message.mutation"
+import { useRemoveReactionOnMessage } from "@/features/conversation/conversation-chat/use-remove-reaction-on-message.mutation"
 import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user"
 import { MessageContextMenuAboveMessageReactions } from "./conversation-message-context-menu-above-message-reactions"
 import { MessageContextMenuContainer } from "./conversation-message-context-menu-container"
@@ -103,10 +103,10 @@ const Content = memo(function Content(props: {
   const { itemHeight } = useDropdownMenuCustomStyles()
   const menuHeight = itemHeight * menuItems.length
 
-  const reactOnMessage = useReactOnMessage({
+  const { reactOnMessage } = useReactOnMessage({
     topic,
   })
-  const { removeReactionFromMessage } = useRemoveReactionOnMessage({
+  const { removeReactionOnMessage } = useRemoveReactionOnMessage({
     topic,
   })
 
@@ -123,7 +123,7 @@ const Content = memo(function Content(props: {
       })
 
       if (currentUserAlreadyReacted) {
-        removeReactionFromMessage({
+        removeReactionOnMessage({
           messageId: messageId,
           emoji,
         })
@@ -132,7 +132,7 @@ const Content = memo(function Content(props: {
       }
       messageContextMenuStore.getState().setMessageContextMenuData(null)
     },
-    [reactOnMessage, messageId, removeReactionFromMessage, messageContextMenuStore, topic],
+    [reactOnMessage, messageId, removeReactionOnMessage, messageContextMenuStore, topic],
   )
 
   const handleChooseMoreEmojis = useCallback(() => {

@@ -2,8 +2,8 @@ import { queryOptions } from "@tanstack/react-query"
 import { MessageId } from "@xmtp/react-native-sdk"
 import { getXmtpClientByEthAddress } from "@/features/xmtp/xmtp-client/xmtp-client.service"
 import { logger } from "@/utils/logger"
-import { conversationMessageQueryKey } from "../../queries/QueryKeys"
-import { reactQueryClient } from "../../utils/react-query/react-query.client"
+import { conversationMessageQueryKey } from "../../../../queries/QueryKeys"
+import { reactQueryClient } from "../../../../utils/react-query/react-query.client"
 
 type IArgs = {
   account: string
