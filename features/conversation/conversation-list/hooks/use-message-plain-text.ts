@@ -3,13 +3,17 @@ import { useMemo } from "react"
 import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
 import {
   isGroupUpdatedMessage,
+  isMultiRemoteAttachmentMessage,
+  isReactionMessage,
   isRemoteAttachmentMessage,
   isReplyMessage,
   isStaticAttachmentMessage,
+  isTextMessage,
 } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
 import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
 import { usePreferredDisplayInfoBatch } from "@/features/preferred-display-info/use-preferred-display-info-batch"
 import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types"
+import { captureError } from "@/utils/capture-error"
 import logger from "@/utils/logger"
 
 // Handles group metadata changes (name, description, image)
@@ -69,7 +73,9 @@ export function useMessagePlainText(message: IXmtpDecodedMessage | undefined) {
   })
 
   return useMemo(() => {
-    if (!account || !message) return ""
+    if (!account || !message) {
+      return ""
+    }
 
     try {
       // Handle reply messages
@@ -114,11 +120,22 @@ export function useMessagePlainText(message: IXmtpDecodedMessage | undefined) {
         return "Group updated"
       }
 
-      // Handle regular messages
-      const content = message.content()
-      return typeof content === "string" ? content : message.fallback
+      if (isTextMessage(message)) {
+        const content = message.content()
+        return typeof content === "string" ? content : message.fallback
+      }
+
+      if (isMultiRemoteAttachmentMessage(message)) {
+        return "Attachment"
+      }
+
+      if (isReactionMessage(message)) {
+        return "Reaction"
+      }
+
+      const _ensureNever: never = message
     } catch (error) {
-      logger.error(`Error getting message text for content type ${message.contentTypeId}: ${error}`)
+      captureError(error)
       return message.fallback
     }
   }, [message, account, initiatorDisplayName, addedMemberDisplayInfos, removedMemberDisplayInfos])

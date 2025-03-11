@@ -1,4 +1,5 @@
 import { logger } from "@utils/logger"
+import { MultiRemoteAttachmentCodec } from "@xmtp/react-native-sdk"
 import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types"
 import { ObjectTyped } from "@/utils/object-typed"
 
@@ -10,7 +11,7 @@ export const contentTypesPrefixes = {
   reply: "xmtp.org/reply:",
   readReceipt: "xmtp.org/readReceipt:",
   groupUpdated: "xmtp.org/group_updated:",
-  multiRemoteAttachment: "xmtp.org/multiRemoteAttachment:",
+  multiRemoteAttachment: "xmtp.org/multiRemoteStaticAttachment:",
   // coinbasePayment: "coinbase.com/coinbase-messaging-payment-activity:",
   // transactionReference: "xmtp.org/transactionReference:",
 }

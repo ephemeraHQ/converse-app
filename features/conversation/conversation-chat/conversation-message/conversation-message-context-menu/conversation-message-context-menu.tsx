@@ -187,7 +187,6 @@ const Content = memo(function Content(props: {
                   previousMessage={previousMessage}
                 >
                   {/* TODO: maybe make ConversationMessage more dumb to not need any context? */}
-
                   <ConversationMessage message={message} />
                 </ConversationMessageContextStoreProvider>
 

@@ -13,6 +13,7 @@ export type IConversationMessageContextMenuStoreState =
       itemRectY: number
       itemRectHeight: number
       itemRectWidth: number
+      extra?: Record<string, any>
     } | null
     setMessageContextMenuData: (
       data: IConversationMessageContextMenuStoreState["messageContextMenuData"],

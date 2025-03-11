@@ -26,22 +26,26 @@ export const MessageMultiRemoteAttachment = memo(function MessageMultiRemoteAtta
 
   return (
     <VStack
-      // {...debugBorder("green")}
       style={{
         maxWidth: theme.layout.screen.width * 0.7,
         alignSelf: fromMe ? "flex-end" : "flex-start",
+        rowGap: theme.spacing.xxs,
       }}
     >
-      <ConversationMessageGestures>
-        {content.attachments.map((attachment) => (
+      {content.attachments.map((attachment) => (
+        <ConversationMessageGestures
+          key={attachment.url}
+          contextMenuExtra={{
+            attachmentUrl: attachment.url,
+          }}
+        >
           <AttachmentRemoteImage
-            key={attachment.url}
             messageId={message.id}
             remoteMessageContent={attachment}
             fitAspectRatio
           />
-        ))}
-      </ConversationMessageGestures>
+        </ConversationMessageGestures>
+      ))}
     </VStack>
   )
 })
