@@ -22,12 +22,6 @@ type EnvironmentConfig = {
   alchemyApiKey: string
 }
 
-// Type assertion for process.env to include our Expo public variables
-const env = process.env as {
-  EXPO_PUBLIC_ALCHEMY_API_KEY?: string
-  EXPO_ENV?: string
-}
-
 const settings: Record<Environment, EnvironmentConfig> = {
   development: {
     scheme: "converse-dev",
@@ -49,7 +43,7 @@ const settings: Record<Environment, EnvironmentConfig> = {
     appDomainGetConverse: "dev.getconverse.app",
     appName: "Converse DEV",
     icon: "./assets/icon-preview.png",
-    alchemyApiKey: env.EXPO_PUBLIC_ALCHEMY_API_KEY || "",
+    alchemyApiKey: process.env.EXPO_PUBLIC_ALCHEMY_API_KEY || "",
   },
   preview: {
     scheme: "converse-preview",
@@ -71,7 +65,7 @@ const settings: Record<Environment, EnvironmentConfig> = {
     appDomainGetConverse: "preview.getconverse.app",
     appName: "Converse PREVIEW",
     icon: "./assets/icon-preview.png",
-    alchemyApiKey: env.EXPO_PUBLIC_ALCHEMY_API_KEY || "",
+    alchemyApiKey: process.env.EXPO_PUBLIC_ALCHEMY_API_KEY || "",
   },
   production: {
     scheme: "converse",
@@ -93,7 +87,7 @@ const settings: Record<Environment, EnvironmentConfig> = {
     appDomainGetConverse: "getconverse.app",
     appName: "Converse",
     icon: "./assets/icon.png",
-    alchemyApiKey: env.EXPO_PUBLIC_ALCHEMY_API_KEY || "",
+    alchemyApiKey: process.env.EXPO_PUBLIC_ALCHEMY_API_KEY || "",
   },
 }
 
