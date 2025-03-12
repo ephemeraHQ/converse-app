@@ -1,4 +1,4 @@
-import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk"
+import { IXmtpConversationTopic, IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import React, { memo, useMemo } from "react"
 import { StyleProp, TextStyle, ViewStyle } from "react-native"
 import { Center } from "@/design-system/Center"
@@ -49,7 +49,7 @@ type ExtraMembersIndicatorProps = {
  * Component to render a group avatar from a list of inbox IDs
  */
 export const GroupAvatarInboxIds = memo(function GroupAvatarInboxIds(props: {
-  inboxIds: InboxId[]
+  inboxIds: IXmtpInboxId[]
 }) {
   const { inboxIds } = props
 
@@ -81,7 +81,7 @@ export const GroupAvatarInboxIds = memo(function GroupAvatarInboxIds(props: {
  * Will render the group image if available, otherwise shows member avatars
  */
 export const GroupAvatar = memo(function GroupAvatar(props: {
-  groupTopic: ConversationTopic
+  groupTopic: IXmtpConversationTopic
   size?: IGroupAvatarSize
   sizeNumber?: number
 }) {
@@ -91,14 +91,14 @@ export const GroupAvatar = memo(function GroupAvatar(props: {
 
   // Fetch group data
   const { data: group } = useGroupQuery({
-    account: currentSender.ethereumAddress,
+    inboxId: currentSender.inboxId,
     topic: groupTopic,
   })
 
   // Fetch group members
   const { data: members } = useGroupMembersQuery({
     caller: "GroupAvatar",
-    account: currentSender.ethereumAddress,
+    clientInboxId: currentSender.inboxId,
     topic: groupTopic,
   })
 
@@ -108,7 +108,7 @@ export const GroupAvatar = memo(function GroupAvatar(props: {
       return []
     }
 
-    return members.ids.reduce<InboxId[]>((inboxIds, memberId) => {
+    return members.ids.reduce<IXmtpInboxId[]>((inboxIds, memberId) => {
       const memberInboxId = members.byId[memberId].inboxId
 
       if (memberInboxId) {
@@ -169,8 +169,8 @@ export const GroupAvatar = memo(function GroupAvatar(props: {
   }, [size, theme, sizeNumberProp])
 
   // If group has an image, use it instead of member avatars
-  if (group?.imageUrlSquare) {
-    return <Avatar uri={group.imageUrlSquare} sizeNumber={sizeNumber} name={group.name} />
+  if (group?.groupImageUrl) {
+    return <Avatar uri={group.groupImageUrl} sizeNumber={sizeNumber} name={group.groupName} />
   }
 
   return <GroupAvatarUI members={memberData} size={sizeNumber} />

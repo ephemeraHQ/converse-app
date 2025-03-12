@@ -1,25 +1,25 @@
+import { IXmtpDecodedMessage, IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { xmtpLogger } from "@utils/logger"
 import { XMTPError } from "@/utils/error"
 import { isProd } from "@/utils/getEnv"
-import { getXmtpClientByEthAddress } from "../xmtp-client/xmtp-client.service"
-import { IXmtpDecodedMessage } from "../xmtp.types"
+import { getXmtpClientByInboxId } from "../xmtp-client/xmtp-client.service"
 
 export const streamAllMessages = async (args: {
-  account: string
+  inboxId: IXmtpInboxId
   onNewMessage: (message: IXmtpDecodedMessage) => void | Promise<void>
 }) => {
-  const { account, onNewMessage } = args
+  const { inboxId, onNewMessage } = args
 
-  const client = await getXmtpClientByEthAddress({
-    ethAddress: account,
+  const client = await getXmtpClientByInboxId({
+    inboxId,
   })
 
-  xmtpLogger.debug(`Streaming messages for ${client.address}`)
+  xmtpLogger.debug(`Streaming messages for ${inboxId}`)
 
   try {
     await client.conversations.streamAllMessages(async (message) => {
       xmtpLogger.debug(
-        `Received message for ${client.address} with id: ${message.id}, text: ${
+        `Received message for ${inboxId} with id: ${message.id}, text: ${
           isProd ? "Redacted" : message.nativeContent.text
         }, topic: ${message.topic}`,
       )
@@ -34,17 +34,17 @@ export const streamAllMessages = async (args: {
   }
 }
 
-export const stopStreamingAllMessage = async (args: { ethAddress: string }) => {
-  const { ethAddress } = args
-
-  const client = await getXmtpClientByEthAddress({
-    ethAddress: ethAddress,
-  })
+export const stopStreamingAllMessage = async (args: { inboxId: IXmtpInboxId }) => {
+  const { inboxId } = args
 
   try {
+    const client = await getXmtpClientByInboxId({
+      inboxId,
+    })
+
     await client.conversations.cancelStreamAllMessages()
 
-    xmtpLogger.debug(`Stopped streaming messages for ${client.address}`)
+    xmtpLogger.debug(`Stopped streaming messages for ${inboxId}`)
   } catch (error) {
     throw new XMTPError({
       error,

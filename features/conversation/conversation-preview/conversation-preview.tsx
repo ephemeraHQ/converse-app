@@ -6,7 +6,7 @@ import { Center } from "@/design-system/Center"
 import { EmptyState } from "@/design-system/empty-state"
 import { Text } from "@/design-system/Text"
 import { VStack } from "@/design-system/VStack"
-import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
+import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { ConversationMessage } from "@/features/conversation/conversation-chat/conversation-message/conversation-message"
 import { ConversationMessageContextMenuStoreProvider } from "@/features/conversation/conversation-chat/conversation-message/conversation-message-context-menu/conversation-message-context-menu.store-context"
 import { ConversationMessageLayout } from "@/features/conversation/conversation-chat/conversation-message/conversation-message-layout"
@@ -18,23 +18,24 @@ import { conversationListDefaultProps } from "@/features/conversation/conversati
 import { useConversationMessagesQuery } from "@/features/conversation/conversation-chat/conversation-messages.query"
 import { ConversationStoreProvider } from "@/features/conversation/conversation-chat/conversation.store-context"
 import { useConversationQuery } from "@/features/conversation/queries/conversation.query"
+import { IXmtpConversationTopic } from "@/features/xmtp/xmtp.types"
 import { $globalStyles } from "@/theme/styles"
 
 type ConversationPreviewProps = {
-  topic: ConversationTopic
+  topic: IXmtpConversationTopic
 }
 
 export const ConversationPreview = ({ topic }: ConversationPreviewProps) => {
-  const currentAccount = useCurrentSenderEthAddress()!
+  const currentSender = getSafeCurrentSender()
 
   const { data: messages, isLoading: isLoadingMessages } = useConversationMessagesQuery({
-    account: currentAccount,
+    clientInboxId: currentSender.inboxId,
     topic,
     caller: "Conversation Preview",
   })
 
   const { data: conversation, isLoading: isLoadingConversation } = useConversationQuery({
-    account: currentAccount,
+    inboxId: currentSender.inboxId,
     topic,
     caller: "Conversation Preview",
   })

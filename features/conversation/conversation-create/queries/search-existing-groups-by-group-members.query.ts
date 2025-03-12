@@ -1,5 +1,5 @@
+import { IXmtpConversationTopic, IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { keepPreviousData, queryOptions, useQuery } from "@tanstack/react-query"
-import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk"
 import { matchSorter } from "match-sorter"
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { getAllowedConsentConversationsQueryData } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
@@ -13,28 +13,28 @@ import { normalizeString } from "@/utils/str"
 
 export async function searchExistingGroupsByGroupMembers(args: {
   searchQuery: string
-  searcherInboxId: InboxId
+  searcherInboxId: IXmtpInboxId
 }) {
   const { searchQuery, searcherInboxId } = args
 
-  const currentAccount = getSafeCurrentSender().ethereumAddress
+  const currentSender = getSafeCurrentSender()
 
   const conversations = getAllowedConsentConversationsQueryData({
-    account: currentAccount,
+    inboxId: currentSender.inboxId,
   })
 
   if (!conversations || !searchQuery) {
     return []
   }
 
-  const matchingTopics: ConversationTopic[] = []
+  const matchingTopics: IXmtpConversationTopic[] = []
 
   await Promise.all(
     conversations.filter(isConversationGroup).map(async (group) => {
       try {
         const members = await ensureGroupMembersQueryData({
           caller: "searchExistingGroupsByGroupMembers",
-          account: currentAccount,
+          clientInboxId: currentSender.inboxId,
           topic: group.topic,
         })
 
@@ -80,7 +80,7 @@ export async function searchExistingGroupsByGroupMembers(args: {
 
 export function getSearchExistingGroupsByGroupMembersQueryOptions(args: {
   searchQuery: string
-  searcherInboxId: InboxId
+  searcherInboxId: IXmtpInboxId
 }) {
   const { searchQuery, searcherInboxId } = args
   const normalizedSearchQuery = normalizeString(searchQuery)
@@ -102,7 +102,7 @@ export function getSearchExistingGroupsByGroupMembersQueryOptions(args: {
 
 export function useSearchExistingGroupsByGroupMembersQuery(args: {
   searchQuery: string
-  searcherInboxId: InboxId
+  searcherInboxId: IXmtpInboxId
 }) {
   return useQuery(getSearchExistingGroupsByGroupMembersQueryOptions(args))
 }

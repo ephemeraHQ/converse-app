@@ -231,8 +231,8 @@
 //         [getV3IdFromTopic(topic).toLowerCase()]: "allowed",
 //       });
 
-//       const inboxIdsToAllow: InboxId[] = [];
-//       const inboxIds: { [inboxId: string]: "allowed" } = {};
+//       const inboxIdsToAllow: IXmtpInboxId[] = [];
+//       const inboxIds: { [inboxId: IXmtpInboxId]: "allowed" } = {};
 //       if (
 //         options.includeAddedBy &&
 //         conversation.version === ConversationVersion.GROUP &&
@@ -305,7 +305,7 @@
 //         creatorInboxId: async () => "0xabc" as InboxId,
 //         name: "Group Name",
 //         addedByInboxId: "0x123" as InboxId,
-//         imageUrlSquare: "https://www.google.com",
+//         groupImageUrl: "https://www.google.com",
 //         description: "Group Description",
 //       } as const;
 
@@ -321,7 +321,7 @@
 //         creatorInboxId: async () => "0xabc" as InboxId,
 //         name: "Group Name",
 //         addedByInboxId: "0x123" as InboxId,
-//         imageUrlSquare: "https://www.google.com",
+//         groupImageUrl: "https://www.google.com",
 //         description: "Group Description",
 //       };
 
@@ -398,7 +398,7 @@
 //         creatorInboxId: async () => "0xabc" as InboxId,
 //         name: "Group Name",
 //         addedByInboxId: "0x123" as InboxId,
-//         imageUrlSquare: "https://www.google.com",
+//         groupImageUrl: "https://www.google.com",
 //         description: "Group Description",
 //       } as const;
 
@@ -476,7 +476,7 @@
 //         creatorInboxId: async () => "0xabc" as InboxId,
 //         name: "Group Name",
 //         addedByInboxId: "0x123" as InboxId,
-//         imageUrlSquare: "https://www.google.com",
+//         groupImageUrl: "https://www.google.com",
 //         description: "Group Description",
 //       } as const;
 

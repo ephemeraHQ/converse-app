@@ -1,32 +1,28 @@
+import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
 import { useQuery } from "@tanstack/react-query"
-import { ConversationTopic } from "@xmtp/react-native-sdk"
 import { useMemo } from "react"
-import {
-  useCurrentSenderEthAddress,
-  useSafeCurrentSender,
-} from "@/features/authentication/multi-inbox.store"
+import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { getConversationMetadataQueryOptions } from "@/features/conversation/conversation-metadata/conversation-metadata.query"
 import { getConversationQueryOptions } from "@/features/conversation/queries/conversation.query"
 import { conversationIsUnreadForInboxId } from "@/features/conversation/utils/conversation-is-unread-by-current-account"
 
 type UseConversationIsUnreadArgs = {
-  topic: ConversationTopic
+  topic: IXmtpConversationTopic
 }
 
 export const useConversationIsUnread = ({ topic }: UseConversationIsUnreadArgs) => {
-  const currentAccount = useCurrentSenderEthAddress()
-  const currentUserInboxId = useSafeCurrentSender().inboxId
+  const currentSender = useSafeCurrentSender()
 
   const { data: conversationMetadata, isLoading: isLoadingConversationMetadata } = useQuery(
     getConversationMetadataQueryOptions({
-      account: currentAccount!,
+      clientInboxId: currentSender.inboxId,
       topic,
     }),
   )
 
   const { data: lastMessage, isLoading: isLoadingLastMessage } = useQuery({
     ...getConversationQueryOptions({
-      account: currentAccount!,
+      inboxId: currentSender.inboxId,
       topic,
     }),
     select: (data) => data?.lastMessage,
@@ -46,13 +42,13 @@ export const useConversationIsUnread = ({ topic }: UseConversationIsUnreadArgs) 
     return conversationIsUnreadForInboxId({
       lastMessageSent: lastMessage?.sentNs ?? null,
       lastMessageSenderInboxId: lastMessage?.senderInboxId ?? null,
-      consumerInboxId: currentUserInboxId!,
+      consumerInboxId: currentSender.inboxId,
       markedAsUnread: conversationMetadata?.unread ?? false,
       readUntil: conversationMetadata?.readUntil
         ? new Date(conversationMetadata.readUntil).getTime()
         : null,
     })
-  }, [lastMessage, conversationMetadata, isLoadingConversationMetadata, currentUserInboxId])
+  }, [lastMessage, conversationMetadata, isLoadingConversationMetadata, currentSender])
 
   return {
     isUnread,

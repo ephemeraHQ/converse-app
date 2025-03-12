@@ -1,10 +1,10 @@
+import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
 import { getCompactRelativeTime } from "@utils/date"
-import { ConversationTopic } from "@xmtp/react-native-sdk"
 import { memo, useCallback } from "react"
 import { GroupAvatar } from "@/components/group-avatar"
 import { ISwipeableRenderActionsArgs } from "@/components/swipeable"
 import { MIDDLE_DOT } from "@/design-system/middle-dot"
-import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
+import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { ConversationListItemSwipeable } from "@/features/conversation/conversation-list/conversation-list-item/conversation-list-item-swipeable/conversation-list-item-swipeable"
 import { useConversationIsUnread } from "@/features/conversation/conversation-list/hooks/use-conversation-is-unread"
 import { useDeleteGroup } from "@/features/conversation/conversation-list/hooks/use-delete-group"
@@ -19,20 +19,20 @@ import { DeleteSwipeableAction } from "./conversation-list-item-swipeable/conver
 import { ToggleUnreadSwipeableAction } from "./conversation-list-item-swipeable/conversation-list-item-swipeable-toggle-read-action"
 
 type IConversationListItemGroupProps = {
-  conversationTopic: ConversationTopic
+  conversationTopic: IXmtpConversationTopic
 }
 
 export const ConversationListItemGroup = memo(function ConversationListItemGroup({
   conversationTopic,
 }: IConversationListItemGroupProps) {
-  const currentAccount = useCurrentSenderEthAddress()!
+  const currentSender = useSafeCurrentSender()
   const router = useRouter()
 
   // Need this so the timestamp is updated on every focus
   useFocusRerender()
 
   const { data: group } = useGroupQuery({
-    account: currentAccount,
+    inboxId: currentSender.inboxId,
     topic: conversationTopic,
   })
 

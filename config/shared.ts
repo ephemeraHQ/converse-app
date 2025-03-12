@@ -49,4 +49,7 @@ export const shared = {
     Platform.OS === "android"
       ? process.env.EXPO_PUBLIC_FIREBASE_APP_CHECK_DEBUG_TOKEN_ANDROID
       : process.env.EXPO_PUBLIC_FIREBASE_APP_CHECK_DEBUG_TOKEN_IOS,
+  xmtp: {
+    maxMsUntilLogError: 3000,
+  },
 } as const satisfies Partial<IConfig>

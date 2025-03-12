@@ -1,16 +1,15 @@
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { queryOptions, skipToken, useQueries, useQuery } from "@tanstack/react-query"
-import { InboxId } from "@xmtp/react-native-sdk"
-import { type IConvosProfileForInbox } from "@/features/profiles/profile.types"
 import { fetchProfile } from "@/features/profiles/profiles.api"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
 
-const profileQueryKey = ({ xmtpId }: { xmtpId: string }) => ["profile", xmtpId] as const
+type IProfileQueryData = Awaited<ReturnType<typeof fetchProfile>>
 
 export const getProfileQueryConfig = ({ xmtpId }: { xmtpId: string | undefined }) => {
   const enabled = !!xmtpId
   return queryOptions({
     enabled,
-    queryKey: profileQueryKey({ xmtpId: xmtpId! }),
+    queryKey: ["profile", xmtpId],
     queryFn: enabled ? () => fetchProfile({ xmtpId: xmtpId! }) : skipToken,
   })
 }
@@ -19,28 +18,30 @@ export const useProfileQuery = ({ xmtpId }: { xmtpId: string | undefined }) => {
   return useQuery(getProfileQueryConfig({ xmtpId }))
 }
 
-export const setProfileQueryData = (args: {
-  xmtpId: string
-  data: Partial<Omit<IConvosProfileForInbox, "updatedAt" | "createdAt">>
-  updatedAt?: number
-}) => {
+export const setProfileQueryData = (args: { xmtpId: string; data: IProfileQueryData }) => {
   const { xmtpId, data } = args
-  return reactQueryClient.setQueryData<Partial<IConvosProfileForInbox>>(
-    profileQueryKey({ xmtpId }),
-    {
-      ...data,
-      // updatedAt: updatedAt ? updatedAt.toString() : Date.now().toString(),
-    },
-  )
+  return reactQueryClient.setQueryData(getProfileQueryConfig({ xmtpId }).queryKey, data)
 }
 
+export function updateProfileQueryData(args: { xmtpId: string; data: Partial<IProfileQueryData> }) {
+  const { xmtpId, data } = args
+  return reactQueryClient.setQueryData(getProfileQueryConfig({ xmtpId }).queryKey, (oldData) => {
+    if (!oldData) {
+      return oldData
+    }
+    return {
+      ...oldData,
+      ...data,
+    }
+  })
+}
 export const ensureProfileQueryData = ({ xmtpId }: { xmtpId: string }) => {
   return reactQueryClient.ensureQueryData(getProfileQueryConfig({ xmtpId }))
 }
 
 export const invalidateProfileQuery = ({ xmtpId }: { xmtpId: string }) => {
   reactQueryClient.invalidateQueries({
-    queryKey: profileQueryKey({ xmtpId }),
+    queryKey: getProfileQueryConfig({ xmtpId }).queryKey,
   })
 }
 
@@ -58,6 +59,6 @@ export const useProfilesQueries = ({ xmtpInboxIds }: { xmtpInboxIds: string[] | 
   })
 }
 
-export const getProfileQueryData = ({ xmtpId }: { xmtpId: InboxId }) => {
+export const getProfileQueryData = ({ xmtpId }: { xmtpId: IXmtpInboxId }) => {
   return reactQueryClient.getQueryData(getProfileQueryConfig({ xmtpId }).queryKey)
 }

@@ -1,9 +1,11 @@
 import { z } from "zod"
 import { profileValidationSchema } from "@/features/profiles/schemas/profile-validation.schema"
+import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { api } from "@/utils/api/api"
 import { captureError } from "@/utils/capture-error"
 import { buildDeviceMetadata } from "@/utils/device-metadata"
 import { ApiError } from "@/utils/error"
+import { IEthereumAddress } from "@/utils/evm/address"
 
 const deviceOSEnum = z.enum(["android", "ios", "web"])
 const createUserApiRequestBodySchema = z
@@ -35,8 +37,8 @@ const createUserApiResponseSchema = z.object({
   }),
   identity: z.object({
     id: z.string(),
-    privyAddress: z.string(),
-    xmtpId: z.string(),
+    privyAddress: z.custom<IEthereumAddress>(),
+    xmtpId: z.custom<IXmtpInboxId>(),
   }),
   profile: z.object({
     id: z.string(),
@@ -52,7 +54,7 @@ type CreateUserResponse = z.infer<typeof createUserApiResponseSchema>
 export const createUser = async (args: {
   privyUserId: string
   smartContractWalletAddress: string
-  inboxId: string
+  inboxId: IXmtpInboxId
   profile: {
     name: string
     username: string

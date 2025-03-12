@@ -1,19 +1,19 @@
 import { useQuery } from "@tanstack/react-query"
-import { ConversationTopic, MessageId } from "@xmtp/react-native-sdk"
-import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
+import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { getConversationMessageQueryOptions } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.query"
 import { useConversationMessagesQuery } from "@/features/conversation/conversation-chat/conversation-messages.query"
+import { IXmtpConversationTopic, IXmtpMessageId } from "@/features/xmtp/xmtp.types"
 
 export function useConversationMessageById(args: {
-  messageId: MessageId
-  conversationTopic: ConversationTopic
+  messageId: IXmtpMessageId
+  conversationTopic: IXmtpConversationTopic
 }) {
   const { messageId, conversationTopic } = args
 
-  const currentAccount = useCurrentSenderEthAddress()!
+  const currentSender = useSafeCurrentSender()
 
   const { data: messages } = useConversationMessagesQuery({
-    account: currentAccount,
+    clientInboxId: currentSender.inboxId,
     topic: conversationTopic,
     caller: "useConversationMessageById",
   })
@@ -22,11 +22,11 @@ export function useConversationMessageById(args: {
 
   const { data: message, isLoading: isLoadingMessage } = useQuery({
     ...getConversationMessageQueryOptions({
-      account: currentAccount,
+      clientInboxId: currentSender.inboxId,
       messageId,
     }),
     // Only fetch the message if it's not already in the conversation messages
-    enabled: !cachedMessage && !!messageId && !!currentAccount,
+    enabled: !cachedMessage && !!messageId && !!currentSender.inboxId,
   })
 
   return {

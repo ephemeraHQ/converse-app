@@ -1,5 +1,5 @@
+import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
 import { useMutation } from "@tanstack/react-query"
-import type { ConversationTopic } from "@xmtp/react-native-sdk"
 import { updateConversationInAllowedConsentConversationsQueryData } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import {
   getGroupQueryData,
@@ -10,32 +10,32 @@ import { captureError } from "@/utils/capture-error"
 
 type IArgs = {
   account: string
-  topic: ConversationTopic
+  topic: IXmtpConversationTopic
 }
 
 export function useGroupPhotoMutation(args: IArgs) {
   const { account, topic } = args
-  const { data: group } = useGroupQuery({ account, topic })
+  const { data: group } = useGroupQuery({ inboxId: account, topic })
 
   return useMutation({
-    mutationFn: async (imageUrlSquare: string) => {
+    mutationFn: async (groupImageUrl: string) => {
       if (!group || !account || !topic) {
         throw new Error("Missing required data in useGroupPhotoMutation")
       }
 
-      await group.updateGroupImageUrlSquare(imageUrlSquare)
-      return imageUrlSquare
+      await group.updateImageUrl(groupImageUrl)
+      return groupImageUrl
     },
-    onMutate: async (imageUrlSquare: string) => {
-      const previousGroup = getGroupQueryData({ account, topic })
-      const updates = { imageUrlSquare }
+    onMutate: async (groupImageUrl: string) => {
+      const previousGroup = getGroupQueryData({ inboxId: account, topic })
+      const updates = { groupImageUrl }
 
       if (previousGroup) {
-        updateGroupQueryData({ account, topic, updates })
+        updateGroupQueryData({ inboxId: account, topic, updates })
       }
 
       updateConversationInAllowedConsentConversationsQueryData({
-        account,
+        inboxId: account,
         topic,
         conversationUpdate: updates,
       })
@@ -47,10 +47,10 @@ export function useGroupPhotoMutation(args: IArgs) {
 
       const { previousGroup } = context || {}
 
-      const updates = { imageUrlSquare: previousGroup?.imageUrlSquare ?? "" }
-      updateGroupQueryData({ account, topic, updates })
+      const updates = { groupImageUrl: previousGroup?.groupImageUrl ?? "" }
+      updateGroupQueryData({ inboxId: account, topic, updates })
       updateConversationInAllowedConsentConversationsQueryData({
-        account,
+        inboxId: account,
         topic,
         conversationUpdate: updates,
       })

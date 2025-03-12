@@ -1,16 +1,16 @@
-import { ConversationTopic, InboxId, MessageId } from "@xmtp/react-native-sdk"
 import { createContext, memo, useContext, useEffect, useRef } from "react"
 import { createStore, useStore } from "zustand"
 import { subscribeWithSelector } from "zustand/middleware"
 import { findConversationByInboxIds } from "@/features/conversation/utils/find-conversations-by-inbox-ids"
+import { IXmtpConversationTopic, IXmtpInboxId, IXmtpMessageId } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
 import { getSafeCurrentSender } from "../../authentication/multi-inbox.store"
 
 type IConversationStoreProps = {
-  topic?: ConversationTopic | null
-  highlightedMessageId?: MessageId | null
-  scrollToMessageId?: MessageId | null
-  searchSelectedUserInboxIds?: InboxId[]
+  topic?: IXmtpConversationTopic | null
+  highlightedMessageId?: IXmtpMessageId | null
+  scrollToMessageId?: IXmtpMessageId | null
+  searchSelectedUserInboxIds?: IXmtpInboxId[]
   isCreatingNewConversation?: boolean
 }
 
@@ -40,10 +40,11 @@ export const ConversationStoreProvider = memo(
             return
           }
 
-          const { inboxId: currentUserInboxId } = getSafeCurrentSender()
+          const currentSender = getSafeCurrentSender()
 
           const conversation = await findConversationByInboxIds({
-            inboxIds: [currentUserInboxId, ...nextState.searchSelectedUserInboxIds],
+            inboxIds: [currentSender.inboxId, ...nextState.searchSelectedUserInboxIds],
+            clientInboxId: currentSender.inboxId,
           })
 
           storeRef.current?.setState({

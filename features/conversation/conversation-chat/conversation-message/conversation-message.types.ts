@@ -1,5 +1,8 @@
-import { NativeMessageContent } from "@xmtp/react-native-sdk"
-import { IXmtpDecodedMessage, IXmtpInboxId } from "@/features/xmtp/xmtp.types"
+import {
+  IXmtpDecodedMessage,
+  IXmtpInboxId,
+  IXmtpNativeMessageContent,
+} from "@/features/xmtp/xmtp.types"
 
 export type IConvosMessageStatus = "sending" | "sent" | "error"
 
@@ -19,7 +22,7 @@ export type IConvosMessage = {
   senderInboxId: IXmtpInboxId
   sentNs: number
   type: IConvosMessageContentType
-  content: NativeMessageContent // TODO
+  content: IXmtpNativeMessageContent
 }
 
 export type IConvosMessageId = IConvosMessage["convosMessageId"]

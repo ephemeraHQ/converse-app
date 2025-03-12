@@ -1,3 +1,4 @@
+import { IXmtpInboxId , IXmtpConversationWithCodecs } from "@features/xmtp/xmtp.types"
 import { MutationObserver } from "@tanstack/react-query"
 import { StreamError } from "@utils/error"
 import { addConversationToAllowedConsentConversationsQuery } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
@@ -8,38 +9,41 @@ import { isConversationAllowed } from "@/features/conversation/utils/is-conversa
 import { isConversationConsentUnknown } from "@/features/conversation/utils/is-conversation-consent-unknown"
 import { ensureGroupMembersQueryData } from "@/features/groups/useGroupMembersQuery"
 import { streamConversations } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-stream"
-import { IXmtpConversationWithCodecs } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
 import { streamLogger } from "@/utils/logger"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
 
-export async function startConversationStreaming(ethAddress: string) {
+export async function startConversationStreaming(args: { clientInboxId: IXmtpInboxId }) {
+  const { clientInboxId } = args
+
   try {
     await streamConversations({
-      ethAddress: ethAddress,
+      inboxId: clientInboxId,
       onNewConversation: (conversation) =>
-        handleNewConversation({ account: ethAddress, conversation }).catch(captureError),
+        handleNewConversation({ clientInboxId, conversation }).catch(captureError),
     })
   } catch (error) {
     throw new StreamError({
       error,
-      additionalMessage: `Failed to stream conversations for ${ethAddress}`,
+      additionalMessage: `Failed to stream conversations for ${clientInboxId}`,
     })
   }
 }
 
 async function handleNewConversation(args: {
-  account: string
+  clientInboxId: IXmtpInboxId
   conversation: IXmtpConversationWithCodecs
 }) {
-  const { account, conversation } = args
+  const { clientInboxId, conversation } = args
 
-  streamLogger.debug(`[Stream] Received new conversation for ${account}: ${conversation.topic}`)
+  streamLogger.debug(
+    `[Stream] Received new conversation for ${clientInboxId}: ${conversation.topic}`,
+  )
 
   // For some reason, when receiving a new conversation, the group members are not available?
   ensureGroupMembersQueryData({
     caller: "handleNewConversation",
-    account,
+    clientInboxId,
     topic: conversation.topic,
   }).catch(captureError)
 
@@ -54,18 +58,18 @@ async function handleNewConversation(args: {
     markAsReadMutationObserver.mutate().catch(captureError)
 
     addConversationToAllowedConsentConversationsQuery({
-      account,
+      inboxId: clientInboxId,
       conversation,
     })
   } else if (isConversationConsentUnknown(conversation)) {
     addConversationToUnknownConsentConversationsQuery({
-      account,
+      inboxId: clientInboxId,
       conversation,
     })
   }
 
   setConversationQueryData({
-    account,
+    inboxId: clientInboxId,
     topic: conversation.topic,
     conversation,
   })

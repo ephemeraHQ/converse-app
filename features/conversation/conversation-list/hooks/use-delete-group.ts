@@ -1,39 +1,35 @@
+import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
 import { useMutation } from "@tanstack/react-query"
-import { ConversationTopic } from "@xmtp/react-native-sdk"
 import { useCallback } from "react"
 import { showActionSheet } from "@/components/action-sheet"
-import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
-import { updateInboxIdsConsentForAccount } from "@/features/consent/update-inbox-ids-consent-for-account"
-import { deleteConversation } from "@/features/conversation/conversation-metadata/conversation-metadata.api"
+import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
+import { deleteConversationMetadata } from "@/features/conversation/conversation-metadata/conversation-metadata.api"
 import {
   getConversationMetadataQueryData,
   updateConversationMetadataQueryData,
 } from "@/features/conversation/conversation-metadata/conversation-metadata.query"
 import { getGroupQueryData } from "@/features/groups/useGroupQuery"
 import { translate } from "@/i18n"
-import { useAppTheme } from "@/theme/use-app-theme"
 import { captureErrorWithToast } from "@/utils/capture-error"
 
-export const useDeleteGroup = (args: { groupTopic: ConversationTopic }) => {
+export const useDeleteGroup = (args: { groupTopic: IXmtpConversationTopic }) => {
   const { groupTopic } = args
-  const currentAccount = useCurrentSenderEthAddress()!
-  const { theme } = useAppTheme()
-  const colorScheme = theme.isDark ? "dark" : "light"
+  const currentSender = useSafeCurrentSender()
 
   const { mutateAsync: deleteGroupAsync } = useMutation({
     mutationFn: () =>
-      deleteConversation({
-        account: currentAccount,
+      deleteConversationMetadata({
+        clientInboxId: currentSender.inboxId,
         topic: groupTopic,
       }),
     onMutate: () => {
       const previousDeleted = getConversationMetadataQueryData({
-        account: currentAccount,
+        clientInboxId: currentSender.inboxId,
         topic: groupTopic,
       })?.deleted
 
       updateConversationMetadataQueryData({
-        account: currentAccount,
+        clientInboxId: currentSender.inboxId,
         topic: groupTopic,
         updateData: { deleted: true },
       })
@@ -42,7 +38,7 @@ export const useDeleteGroup = (args: { groupTopic: ConversationTopic }) => {
     },
     onError: (error, _, context) => {
       updateConversationMetadataQueryData({
-        account: currentAccount,
+        clientInboxId: currentSender.inboxId,
         topic: groupTopic,
         updateData: { deleted: context?.previousDeleted },
       })
@@ -51,7 +47,7 @@ export const useDeleteGroup = (args: { groupTopic: ConversationTopic }) => {
 
   return useCallback(() => {
     const group = getGroupQueryData({
-      account: currentAccount,
+      inboxId: currentSender.inboxId,
       topic: groupTopic,
     })
 
@@ -59,7 +55,7 @@ export const useDeleteGroup = (args: { groupTopic: ConversationTopic }) => {
       throw new Error("Group not found")
     }
 
-    const title = `${translate("delete_chat_with")} ${group.name}?`
+    const title = `${translate("delete_chat_with")} ${group.groupName}?`
 
     const actions = [
       {
@@ -78,11 +74,11 @@ export const useDeleteGroup = (args: { groupTopic: ConversationTopic }) => {
           try {
             await deleteGroupAsync()
             await group.updateConsent("denied")
-            await updateInboxIdsConsentForAccount({
-              account: currentAccount,
+            await {
+              clientInboxId: currentSender.inboxId,
               inboxIds: [group.addedByInboxId],
-              consent: "deny",
-            })
+              consent: "denied",
+            }
           } catch (error) {
             captureErrorWithToast(error)
           }
@@ -107,5 +103,5 @@ export const useDeleteGroup = (args: { groupTopic: ConversationTopic }) => {
         }
       },
     })
-  }, [currentAccount, groupTopic, deleteGroupAsync])
+  }, [currentSender, groupTopic, deleteGroupAsync])
 }

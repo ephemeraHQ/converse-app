@@ -1,4 +1,5 @@
 import { z } from "zod"
+import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { api } from "@/utils/api/api"
 import { captureError } from "@/utils/capture-error"
 import {
@@ -93,10 +94,10 @@ export const updateProfile = async (args: { xmtpId: string; updates: ProfileUpda
   }
 }
 
-export const fetchProfile = async (args: { xmtpId: string }): Promise<IConvosProfileForInbox> => {
+export const fetchProfile = async (args: { xmtpId: IXmtpInboxId }) => {
   const { xmtpId } = args
 
-  const { data } = await api.get(`/api/v1/profiles/${xmtpId}`)
+  const { data } = await api.get<IConvosProfileForInbox>(`/api/v1/profiles/${xmtpId}`)
 
   const result = ConvosProfileForInboxSchema.safeParse(data)
   if (!result.success) {
@@ -132,9 +133,9 @@ export const claimProfile = async (args: { profile: ClaimProfileRequest }) => {
   }
 }
 
-export const saveProfileAsync = async (args: {
+export const saveProfile = async (args: {
   profile: ProfileInput
-  inboxId: string
+  inboxId: IXmtpInboxId
   currentProfile?: IConvosProfileForInbox
 }) => {
   const { profile, inboxId, currentProfile } = args

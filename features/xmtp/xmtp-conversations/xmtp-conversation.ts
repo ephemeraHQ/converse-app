@@ -1,7 +1,8 @@
+import { IXmtpInboxId , IXmtpConsentState, IXmtpConversationWithCodecs } from "@features/xmtp/xmtp.types"
 import { ConversationSendPayload } from "@xmtp/react-native-sdk/build/lib/types"
+import { config } from "@/config"
+import { getXmtpClientByInboxId } from "@/features/xmtp/xmtp-client/xmtp-client.service"
 import { ISupportedXmtpCodecs } from "@/features/xmtp/xmtp-codecs/xmtp-codecs"
-import { XMTP_MAX_MS_UNTIL_LOG_ERROR } from "@/features/xmtp/xmtp-logs"
-import { IXmtpConversationWithCodecs } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
 import { XMTPError } from "@/utils/error"
 
@@ -17,7 +18,7 @@ export async function sendXmtpConversationMessage(args: {
     const result = await conversation.send(content)
 
     const duration = Date.now() - startTime
-    if (duration > XMTP_MAX_MS_UNTIL_LOG_ERROR) {
+    if (duration > config.xmtp.maxMsUntilLogError) {
       captureError(
         new XMTPError({
           error: new Error(
@@ -32,6 +33,57 @@ export async function sendXmtpConversationMessage(args: {
     throw new XMTPError({
       error,
       additionalMessage: `Failed to send message to conversation: ${conversation.topic}`,
+    })
+  }
+}
+
+export async function getXmtpConversations(args: {
+  clientInboxId: IXmtpInboxId
+  consentStates: IXmtpConsentState[]
+  limit?: number
+}) {
+  const {
+    clientInboxId,
+    consentStates,
+    limit = 9999, // All of them by default
+  } = args
+
+  const startTime = Date.now()
+
+  try {
+    const client = await getXmtpClientByInboxId({
+      inboxId: clientInboxId,
+    })
+
+    const conversations = await client.conversations.list(
+      {
+        isActive: true,
+        addedByInboxId: true,
+        name: true,
+        imageUrl: true,
+        consentState: true,
+        lastMessage: true,
+        description: true,
+      },
+      limit,
+      consentStates,
+    )
+
+    const duration = Date.now() - startTime
+
+    if (duration > config.xmtp.maxMsUntilLogError) {
+      captureError(
+        new XMTPError({
+          error: new Error(`Getting conversations took ${duration}ms for inbox: ${clientInboxId}`),
+        }),
+      )
+    }
+
+    return conversations
+  } catch (error) {
+    throw new XMTPError({
+      error,
+      additionalMessage: `Failed to get conversations for inbox: ${clientInboxId}`,
     })
   }
 }

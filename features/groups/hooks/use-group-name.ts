@@ -1,29 +1,32 @@
+import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
 import { useQuery } from "@tanstack/react-query"
-import type { ConversationTopic } from "@xmtp/react-native-sdk"
-import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
+import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group"
 import { getGroupMembersQueryOptions } from "@/features/groups/useGroupMembersQuery"
 import { useGroupNameMutation } from "@/features/groups/useGroupNameMutation"
 import { getGroupQueryOptions } from "@/features/groups/useGroupQuery"
 import { usePreferredDisplayInfoBatch } from "@/features/preferred-display-info/use-preferred-display-info-batch"
 
-export const useGroupName = (args: { conversationTopic: ConversationTopic }) => {
+export const useGroupName = (args: { conversationTopic: IXmtpConversationTopic }) => {
   const { conversationTopic } = args
 
-  const account = useCurrentSenderEthAddress()!
+  const currentSenderInboxId = useSafeCurrentSender().inboxId
 
   const {
     data: groupName,
     isLoading: groupNameLoading,
     isError,
   } = useQuery({
-    ...getGroupQueryOptions({ account, topic: conversationTopic }),
-    select: (group) => (isConversationGroup(group) ? group.name : undefined),
+    ...getGroupQueryOptions({ inboxId: currentSenderInboxId, topic: conversationTopic }),
+    select: (group) => (isConversationGroup(group) ? group.groupName : undefined),
   })
 
   const { data: groupMembers, isLoading: isLoadingGroupMembers } = useQuery({
-    ...getGroupMembersQueryOptions({ account, topic: conversationTopic }),
-    enabled: !groupName && !!conversationTopic && !!account, // If we have the group name, we don't need to fetch the members
+    ...getGroupMembersQueryOptions({
+      clientInboxId: currentSenderInboxId,
+      topic: conversationTopic,
+    }),
+    enabled: !groupName && !!conversationTopic && !!currentSenderInboxId, // If we have the group name, we don't need to fetch the members
   })
 
   const preferredDisplayData = usePreferredDisplayInfoBatch({
@@ -33,7 +36,7 @@ export const useGroupName = (args: { conversationTopic: ConversationTopic }) => 
   const names = preferredDisplayData?.map((profile) => profile?.displayName)
 
   const { mutateAsync } = useGroupNameMutation({
-    account,
+    clientInboxId: currentSenderInboxId,
     topic: conversationTopic!,
   })
 

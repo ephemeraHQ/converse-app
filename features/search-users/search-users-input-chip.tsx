@@ -1,4 +1,4 @@
-import { InboxId } from "@xmtp/react-native-sdk"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { memo, useCallback } from "react"
 import { Chip, ChipAvatar, ChipText } from "@/design-system/chip"
 import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
@@ -6,7 +6,7 @@ import { useSearchUsersInputStore } from "@/features/search-users/search-users-i
 import { Haptics } from "@/utils/haptics"
 
 export const SearchUsersInputChip = memo(function SearchUsersInputChip(props: {
-  inboxId: InboxId
+  inboxId: IXmtpInboxId
 }) {
   const { inboxId } = props
 

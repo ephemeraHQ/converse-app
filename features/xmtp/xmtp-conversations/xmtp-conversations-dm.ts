@@ -1,25 +1,25 @@
-import { InboxId } from "@xmtp/react-native-sdk"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import { config } from "@/config"
 import { captureError } from "@/utils/capture-error"
 import { XMTPError } from "@/utils/error"
-import {
-  getXmtpClientByEthAddress,
-  getXmtpClientByInboxId,
-} from "../xmtp-client/xmtp-client.service"
-import { XMTP_MAX_MS_UNTIL_LOG_ERROR } from "../xmtp-logs"
+import { getXmtpClientByInboxId } from "../xmtp-client/xmtp-client.service"
 
-export async function getXmtpDmByInboxId(args: { ethAccountAddress: string; inboxId: InboxId }) {
-  const { ethAccountAddress, inboxId } = args
-  const startTime = Date.now()
+export async function getXmtpDmByInboxId(args: {
+  clientInboxId: IXmtpInboxId
+  inboxId: IXmtpInboxId
+}) {
+  const { clientInboxId, inboxId } = args
 
   try {
-    const client = await getXmtpClientByEthAddress({
-      ethAddress: ethAccountAddress,
+    const client = await getXmtpClientByInboxId({
+      inboxId: clientInboxId,
     })
 
+    const startTime = Date.now()
     const conversation = await client.conversations.findDmByInboxId(inboxId)
 
     const duration = Date.now() - startTime
-    if (duration > XMTP_MAX_MS_UNTIL_LOG_ERROR) {
+    if (duration > config.xmtp.maxMsUntilLogError) {
       captureError(
         new XMTPError({
           error: new Error(
@@ -38,19 +38,23 @@ export async function getXmtpDmByInboxId(args: { ethAccountAddress: string; inbo
   }
 }
 
-export async function createXmtpDm(args: { senderEthAddress: string; peerInboxId: InboxId }) {
-  const { senderEthAddress, peerInboxId } = args
-  const startTime = Date.now()
+export async function createXmtpDm(args: {
+  senderClientInboxId: IXmtpInboxId
+  peerInboxId: IXmtpInboxId
+}) {
+  const { senderClientInboxId, peerInboxId } = args
 
   try {
-    const client = await getXmtpClientByEthAddress({
-      ethAddress: senderEthAddress,
+    const client = await getXmtpClientByInboxId({
+      inboxId: senderClientInboxId,
     })
 
-    const conversation = await client.conversations.findOrCreateDmWithInboxId(peerInboxId)
+    const startTime = Date.now()
+    const conversation = await client.conversations.findOrCreateDm(peerInboxId)
+    const endTime = Date.now()
 
-    const duration = Date.now() - startTime
-    if (duration > XMTP_MAX_MS_UNTIL_LOG_ERROR) {
+    const duration = endTime - startTime
+    if (duration > config.xmtp.maxMsUntilLogError) {
       captureError(
         new XMTPError({
           error: new Error(`Creating DM took ${duration}ms for inboxId: ${peerInboxId}`),
@@ -65,19 +69,4 @@ export async function createXmtpDm(args: { senderEthAddress: string; peerInboxId
       additionalMessage: `Failed to create XMTP DM with inbox ID: ${peerInboxId}`,
     })
   }
-}
-
-export async function createXmtpDmWithEthAddress(args: {
-  senderInboxId: InboxId
-  peerEthAddress: string
-}) {
-  const { senderInboxId, peerEthAddress } = args
-
-  const client = await getXmtpClientByInboxId({
-    inboxId: senderInboxId,
-  })
-
-  const conversation = await client.conversations.findOrCreateDm(peerEthAddress)
-
-  return conversation
 }

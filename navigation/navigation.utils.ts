@@ -1,5 +1,5 @@
+import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
 import { createNavigationContainerRef } from "@react-navigation/native"
-import type { ConversationTopic } from "@xmtp/react-native-sdk"
 import * as Linking from "expo-linking"
 import { Linking as RNLinking } from "react-native"
 import { config } from "../config"
@@ -33,7 +33,7 @@ export const navigate = async <T extends keyof NavigationParamList>(
   navigationRef.navigate(screen, params)
 }
 
-export const navigateToTopic = async (topic: ConversationTopic) => {
+export const navigateToTopic = async (topic: IXmtpConversationTopic) => {
   navigate("Conversation", { topic })
 }
 

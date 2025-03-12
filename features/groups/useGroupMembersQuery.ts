@@ -1,9 +1,8 @@
+import { IXmtpConversationTopic, IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { queryOptions as reactQueryOptions, skipToken, useQuery } from "@tanstack/react-query"
-import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk"
-import { getOrFetchConversation } from "@/features/conversation/queries/conversation.query"
+import { getOrFetchConversationQuery } from "@/features/conversation/queries/conversation.query"
 import { IGroupMember } from "@/features/groups/group.types"
 import { Optional } from "@/types/general"
-import { groupMembersQueryKey } from "../../queries/QueryKeys"
 import { entify } from "../../utils/entify"
 import { reactQueryClient } from "../../utils/react-query/react-query.client"
 
@@ -12,8 +11,8 @@ const memberEntityConfig = {
 } as const
 
 type IGroupMembersArgsStrict = {
-  account: string
-  topic: ConversationTopic
+  clientInboxId: IXmtpInboxId
+  topic: IXmtpConversationTopic
 }
 
 type IGroupMembersArgsWithCaller = IGroupMembersArgsStrict & { caller: string }
@@ -21,10 +20,10 @@ type IGroupMembersArgsWithCaller = IGroupMembersArgsStrict & { caller: string }
 type IGroupMembersEntity = Awaited<ReturnType<typeof fetchGroupMembers>>
 
 const fetchGroupMembers = async (args: IGroupMembersArgsWithCaller) => {
-  const { account, topic, caller } = args
+  const { clientInboxId, topic, caller } = args
 
-  const conversation = await getOrFetchConversation({
-    account,
+  const conversation = await getOrFetchConversationQuery({
+    inboxId: clientInboxId,
     topic,
     caller,
   })
@@ -59,16 +58,16 @@ const fetchGroupMembers = async (args: IGroupMembersArgsWithCaller) => {
 export const getGroupMembersQueryOptions = (
   args: Optional<IGroupMembersArgsWithCaller, "caller">,
 ) => {
-  const { account, topic, caller } = args
+  const { clientInboxId, topic, caller } = args
   const enabled = !!topic
   return reactQueryOptions({
     meta: {
       caller,
     },
     // eslint-disable-next-line @tanstack/query/exhaustive-deps
-    queryKey: groupMembersQueryKey({ account, topic }),
+    queryKey: ["group-members", args.clientInboxId, args.topic],
     queryFn: enabled
-      ? () => fetchGroupMembers({ account, topic, caller: caller ?? "unknown" })
+      ? () => fetchGroupMembers({ clientInboxId, topic, caller: caller ?? "unknown" })
       : skipToken,
     enabled,
     /**
@@ -89,8 +88,10 @@ export const useGroupMembersQuery = (args: IGroupMembersArgsWithCaller) => {
 }
 
 export const getGroupMembersQueryData = (args: IGroupMembersArgsStrict) => {
-  const { account, topic } = args
-  return reactQueryClient.getQueryData(getGroupMembersQueryOptions({ account, topic }).queryKey)
+  const { clientInboxId: inboxId, topic } = args
+  return reactQueryClient.getQueryData(
+    getGroupMembersQueryOptions({ clientInboxId: inboxId, topic }).queryKey,
+  )
 }
 
 export const setGroupMembersQueryData = (
@@ -98,36 +99,39 @@ export const setGroupMembersQueryData = (
     members: IGroupMembersEntity
   },
 ) => {
-  const { account, topic, members } = args
-  reactQueryClient.setQueryData(getGroupMembersQueryOptions({ account, topic }).queryKey, members)
+  const { clientInboxId, topic, members } = args
+  reactQueryClient.setQueryData(
+    getGroupMembersQueryOptions({ clientInboxId, topic }).queryKey,
+    members,
+  )
 }
 
-export const cancelGroupMembersQuery = async (args: IGroupMembersArgsStrict) => {
-  const { account, topic } = args
+export async function cancelGroupMembersQuery(args: IGroupMembersArgsStrict) {
+  const { clientInboxId, topic } = args
   return reactQueryClient.cancelQueries({
-    queryKey: getGroupMembersQueryOptions({ account, topic }).queryKey,
+    queryKey: getGroupMembersQueryOptions({ clientInboxId, topic }).queryKey,
   })
 }
 
-export const invalidateGroupMembersQuery = (args: IGroupMembersArgsStrict) => {
-  const { account, topic } = args
+export async function invalidateGroupMembersQuery(args: IGroupMembersArgsStrict) {
+  const { clientInboxId, topic } = args
   return reactQueryClient.invalidateQueries({
-    queryKey: getGroupMembersQueryOptions({ account, topic }).queryKey,
+    queryKey: getGroupMembersQueryOptions({ clientInboxId, topic }).queryKey,
   })
 }
 
-export function refetchGroupMembersQuery(args: IGroupMembersArgsStrict) {
-  const { account, topic } = args
+export async function refetchGroupMembersQuery(args: IGroupMembersArgsStrict) {
+  const { clientInboxId, topic } = args
   return reactQueryClient.refetchQueries({
-    queryKey: getGroupMembersQueryOptions({ account, topic }).queryKey,
+    queryKey: getGroupMembersQueryOptions({ clientInboxId, topic }).queryKey,
   })
 }
 
 export async function ensureGroupMembersQueryData(args: IGroupMembersArgsWithCaller) {
-  const { account, topic, caller } = args
+  const { clientInboxId, topic, caller } = args
   return reactQueryClient.ensureQueryData(
     getGroupMembersQueryOptions({
-      account,
+      clientInboxId,
       topic,
       caller,
     }),
@@ -139,25 +143,25 @@ export function addGroupMembersToQueryData(
     member: IGroupMember
   },
 ) {
-  const { account, topic, member } = args
-  const members = getGroupMembersQueryData({ account, topic })
+  const { clientInboxId, topic, member } = args
+  const members = getGroupMembersQueryData({ clientInboxId, topic })
   if (!members) {
     return
   }
 
   const entifiedMembers = entify([...Object.values(members.byId), member], memberEntityConfig.getId)
 
-  setGroupMembersQueryData({ account, topic, members: entifiedMembers })
+  setGroupMembersQueryData({ clientInboxId, topic, members: entifiedMembers })
 }
 
 export function removeMembersFromGroupQueryData(
   args: IGroupMembersArgsStrict & {
-    memberInboxIds: InboxId[]
+    memberInboxIds: IXmtpInboxId[]
   },
 ) {
-  const { account, topic, memberInboxIds } = args
+  const { clientInboxId, topic, memberInboxIds } = args
 
-  const members = getGroupMembersQueryData({ account, topic })
+  const members = getGroupMembersQueryData({ clientInboxId, topic })
 
   if (!members) {
     return
@@ -171,5 +175,5 @@ export function removeMembersFromGroupQueryData(
     ),
   }
 
-  setGroupMembersQueryData({ account, topic, members: newMembers })
+  setGroupMembersQueryData({ clientInboxId, topic, members: newMembers })
 }

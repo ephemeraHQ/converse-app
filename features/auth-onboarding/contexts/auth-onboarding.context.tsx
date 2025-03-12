@@ -16,7 +16,10 @@ import { useLogout } from "@/features/authentication/use-logout"
 import { useSmartWalletClient } from "@/features/wallets/smart-wallet"
 import { createXmtpSignerFromSwc } from "@/features/wallets/utils/create-xmtp-signer-from-swc"
 import { createXmtpClient } from "@/features/xmtp/xmtp-client/xmtp-client.service"
+import { validateClientInstallation } from "@/features/xmtp/xmtp-installations/xmtp-installations"
+import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { captureError, captureErrorWithToast } from "@/utils/capture-error"
+import { IEthereumAddress } from "@/utils/evm/address"
 import { authLogger } from "@/utils/logger"
 import { tryCatch } from "@/utils/try-catch"
 
@@ -114,29 +117,31 @@ export const AuthOnboardingContextProvider = (props: IAuthOnboardingContextProps
       authLogger.debug(`Smart wallet created`)
 
       // Step 3: XMTP Inbox client
-      const signer = createXmtpSignerFromSwc(swcClient)
-      const { data: xmtpClient, error: xmtpError } = await tryCatch(
-        createXmtpClient({
-          inboxSigner: signer,
-        }),
-      )
-
-      if (xmtpError) {
-        throw xmtpError
-      }
+      const xmtpClient = await createXmtpClient({
+        inboxSigner: createXmtpSignerFromSwc(swcClient),
+      })
 
       if (!xmtpClient) {
         throw new Error("XMTP client creation failed")
       }
 
+      const isValid = await validateClientInstallation({
+        client: xmtpClient,
+      })
+
+      if (!isValid) {
+        throw new Error("Invalid client installation")
+      }
+
       // Step 4: Set the current sender
       useMultiInboxStore.getState().actions.setCurrentSender({
-        ethereumAddress: swcClient.account.address,
-        inboxId: xmtpClient.inboxId,
+        ethereumAddress: swcClient.account.address as IEthereumAddress,
+        inboxId: xmtpClient.inboxId as IXmtpInboxId,
       })
 
       await hydrateAuth()
     } catch (error) {
+      useAuthOnboardingStore.getState().actions.reset()
       captureErrorWithToast(error, {
         message: "Failed to login with passkey",
       })
@@ -194,10 +199,9 @@ export const AuthOnboardingContextProvider = (props: IAuthOnboardingContextProps
       authLogger.debug(`Smart wallet created`)
 
       // Step 3: Create XMTP Inbox
-      const signer = createXmtpSignerFromSwc(swcClient)
       const { data: xmtpClient, error: xmtpError } = await tryCatch(
         createXmtpClient({
-          inboxSigner: signer,
+          inboxSigner: createXmtpSignerFromSwc(swcClient),
         }),
       )
 
@@ -211,10 +215,11 @@ export const AuthOnboardingContextProvider = (props: IAuthOnboardingContextProps
 
       // Step 4: Set the current sender
       useMultiInboxStore.getState().actions.setCurrentSender({
-        ethereumAddress: swcClient.account.address,
-        inboxId: xmtpClient.inboxId,
+        ethereumAddress: swcClient.account.address as IEthereumAddress,
+        inboxId: xmtpClient.inboxId as IXmtpInboxId,
       })
     } catch (error) {
+      useAuthOnboardingStore.getState().actions.reset()
       captureErrorWithToast(error, {
         message: "Failed to sign up with passkey",
       })

@@ -1,9 +1,13 @@
 import { useMutation } from "@tanstack/react-query"
-import { ConversationTopic, MessageId, RemoteAttachmentInfo } from "@xmtp/react-native-sdk"
-import { getCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
+import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { UploadedRemoteAttachment } from "@/features/conversation/conversation-chat/conversation-attachment/conversation-attachments.types"
-import { getOrFetchConversation } from "@/features/conversation/queries/conversation.query"
+import { getOrFetchConversationQuery } from "@/features/conversation/queries/conversation.query"
 import { sendXmtpConversationMessage } from "@/features/xmtp/xmtp-conversations/xmtp-conversation"
+import {
+  IXmtpConversationTopic,
+  IXmtpMessageId,
+  IXmtpRemoteAttachmentInfo,
+} from "@/features/xmtp/xmtp.types"
 
 export type ISendMessageContent = {
   text?: string
@@ -11,14 +15,14 @@ export type ISendMessageContent = {
 }
 
 export type ISendMessageParams = {
-  topic: ConversationTopic
-  referencedMessageId?: MessageId
+  topic: IXmtpConversationTopic
+  referencedMessageId?: IXmtpMessageId
   content: ISendMessageContent
 }
 
 function convertConvosUploadedRemoteAttachmentToXmtpRemoteAttachment(
   attachment: UploadedRemoteAttachment,
-): RemoteAttachmentInfo {
+): IXmtpRemoteAttachmentInfo {
   return {
     ...attachment,
     contentLength: attachment.contentLength.toString(),
@@ -33,9 +37,9 @@ export async function sendMessage(args: ISendMessageParams) {
     throw new Error("Invalid content: Either text or remoteAttachments must be provided")
   }
 
-  const conversation = await getOrFetchConversation({
+  const conversation = await getOrFetchConversationQuery({
     topic,
-    account: getCurrentSenderEthAddress()!,
+    inboxId: getSafeCurrentSender().inboxId,
     caller: "use-send-message",
   })
 

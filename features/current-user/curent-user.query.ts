@@ -6,7 +6,7 @@ const currentUserQueryKey = () => ["current-user"] as const
 
 export function getCurrentUserQueryOptions() {
   return queryOptions({
-    queryKey: currentUserQueryKey(),
+    queryKey: ["current-user"],
     queryFn: fetchCurrentUser,
   })
 }

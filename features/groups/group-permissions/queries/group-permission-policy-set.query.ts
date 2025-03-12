@@ -1,13 +1,15 @@
+import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
 import { useQuery } from "@tanstack/react-query"
-import { ConversationTopic } from "@xmtp/react-native-sdk"
-import { groupPermissionPolicyQueryKey } from "../../../../queries/QueryKeys"
 import { getGroupQueryData } from "../../useGroupQuery"
 
-export const useGroupPermissionPolicySetQuery = (account: string, topic: ConversationTopic) => {
+export const useGroupPermissionPolicySetQuery = (
+  account: string,
+  topic: IXmtpConversationTopic,
+) => {
   return useQuery({
-    queryKey: groupPermissionPolicyQueryKey(account, topic!),
+    queryKey: ["group-permission-policy-set", account, topic],
     queryFn: () => {
-      const group = getGroupQueryData({ account, topic })
+      const group = getGroupQueryData({ inboxId: account, topic })
       if (!group) {
         return
       }

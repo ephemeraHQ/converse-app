@@ -1,26 +1,25 @@
+import { IXmtpConversationTopic, IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { useQuery } from "@tanstack/react-query"
-import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk"
 import { useCallback } from "react"
 import { showSnackbar } from "@/components/snackbar/snackbar.service"
-import { updateInboxIdsConsentForAccount } from "@/features/consent/update-inbox-ids-consent-for-account"
 import { useAllowGroupMutation } from "@/features/consent/use-allow-group.mutation"
 import { useDenyGroupMutation } from "@/features/consent/use-deny-group.mutation"
 import { useGroupCreatorQuery } from "@/features/groups/useGroupCreatorQuery"
 import { getGroupQueryOptions, useGroupQuery } from "@/features/groups/useGroupQuery"
 import { translate } from "@/i18n"
 import { useSafeCurrentSender } from "../authentication/multi-inbox.store"
+import { setXmtpConsentStateForInboxId } from "../xmtp/xmtp-consent/xmtp-consent"
 
 export type IGroupConsentOptions = {
   includeCreator?: boolean
   includeAddedBy?: boolean
 }
 
-export const useGroupConsentForCurrentAccount = (topic: ConversationTopic) => {
+export const useGroupConsentForCurrentAccount = (topic: IXmtpConversationTopic) => {
   const currentSender = useSafeCurrentSender()
-  const account = currentSender.ethereumAddress
 
   const { data: group, isLoading: isGroupLoading } = useGroupQuery({
-    account,
+    inboxId: currentSender.inboxId,
     topic,
   })
 
@@ -31,19 +30,19 @@ export const useGroupConsentForCurrentAccount = (topic: ConversationTopic) => {
     isLoading: isGroupConsentLoading,
     isError,
   } = useQuery({
-    ...getGroupQueryOptions({ account, topic }),
+    ...getGroupQueryOptions({ inboxId: currentSender.inboxId, topic }),
     select: (group) => group?.state,
   })
 
-  const { mutateAsync: allowGroupMutation, isPending: isAllowingGroup } = useAllowGroupMutation(
-    account,
+  const { mutateAsync: allowGroupMutation, isPending: isAllowingGroup } = useAllowGroupMutation({
+    clientInboxId: currentSender.inboxId,
     topic,
-  )
+  })
 
-  const { mutateAsync: denyGroupMutation, isPending: isDenyingGroup } = useDenyGroupMutation(
-    account,
-    topic!,
-  )
+  const { mutateAsync: denyGroupMutation, isPending: isDenyingGroup } = useDenyGroupMutation({
+    clientInboxId: currentSender.inboxId,
+    topic,
+  })
 
   const allowGroup = useCallback(
     async (args: IGroupConsentOptions) => {
@@ -54,7 +53,7 @@ export const useGroupConsentForCurrentAccount = (topic: ConversationTopic) => {
       }
 
       await allowGroupMutation({
-        account: currentSender.ethereumAddress,
+        clientInboxId: currentSender.inboxId,
         topic,
         includeAddedBy,
         includeCreator,
@@ -77,7 +76,7 @@ export const useGroupConsentForCurrentAccount = (topic: ConversationTopic) => {
 
       await denyGroupMutation()
 
-      const inboxIdsToDeny: InboxId[] = []
+      const inboxIdsToDeny: IXmtpInboxId[] = []
 
       if (includeAddedBy && group.addedByInboxId) {
         inboxIdsToDeny.push(group.addedByInboxId)
@@ -88,14 +87,17 @@ export const useGroupConsentForCurrentAccount = (topic: ConversationTopic) => {
       }
 
       if (inboxIdsToDeny.length > 0) {
-        await updateInboxIdsConsentForAccount({
-          account,
-          inboxIds: inboxIdsToDeny,
-          consent: "deny",
-        })
+        await Promise.all(
+          inboxIdsToDeny.map((inboxId) =>
+            setXmtpConsentStateForInboxId({
+              inboxId,
+              consent: "denied",
+            }),
+          ),
+        )
       }
     },
-    [denyGroupMutation, groupCreator, account, group],
+    [denyGroupMutation, groupCreator, group],
   )
 
   const isLoading = isGroupLoading || isGroupCreatorLoading || isGroupConsentLoading

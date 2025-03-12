@@ -1,5 +1,4 @@
 import Clipboard from "@react-native-clipboard/clipboard"
-import { ConversationTopic, MessageId } from "@xmtp/react-native-sdk"
 import { showSnackbar } from "@/components/snackbar/snackbar.service"
 import { IDropdownMenuCustomItemProps } from "@/design-system/dropdown-menu/dropdown-menu-custom"
 import { useConversationComposerStore } from "@/features/conversation/conversation-chat/conversation-composer/conversation-composer.store-context"
@@ -10,12 +9,13 @@ import {
   isRemoteAttachmentMessage,
   isStaticAttachmentMessage,
 } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
+import { IXmtpConversationTopic, IXmtpMessageId } from "@/features/xmtp/xmtp.types"
 import { translate } from "@/i18n"
 import { captureErrorWithToast } from "@/utils/capture-error"
 
 export function useMessageContextMenuItems(args: {
-  messageId: MessageId
-  topic: ConversationTopic
+  messageId: IXmtpMessageId
+  topic: IXmtpConversationTopic
 }) {
   const { messageId, topic } = args
 

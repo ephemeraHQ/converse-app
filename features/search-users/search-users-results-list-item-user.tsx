@@ -1,6 +1,7 @@
 import { memo } from "react"
 import { Avatar } from "@/components/avatar"
 import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
+import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { useAppTheme } from "@/theme/use-app-theme"
 import {
   SearchResultsListItemProps,
@@ -9,7 +10,7 @@ import {
 
 export const SearchUsersResultsListItemUser = memo(function SearchUsersResultsListItemUser(
   props: Partial<SearchResultsListItemProps> & {
-    inboxId: string
+    inboxId: IXmtpInboxId
     onPress: () => void
   },
 ) {

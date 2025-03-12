@@ -1,4 +1,4 @@
-import { ConversationTopic } from "@xmtp/react-native-sdk"
+import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
 import React, { memo, useState } from "react"
 import { runOnJS, useAnimatedReaction } from "react-native-reanimated"
 import { ISwipeableRenderActionsArgs } from "@/components/swipeable"
@@ -9,7 +9,7 @@ import { ConversationListItemSwipeableAction } from "./conversation-list-item-sw
 type IconType = "checkmark.message" | "message.badge"
 
 export const ToggleUnreadSwipeableAction = memo(
-  (props: ISwipeableRenderActionsArgs & { topic: ConversationTopic }) => {
+  (props: ISwipeableRenderActionsArgs & { topic: IXmtpConversationTopic }) => {
     const { progressAnimatedValue, topic } = props
     const { theme } = useAppTheme()
     const { isUnread } = useConversationIsUnread({ topic })

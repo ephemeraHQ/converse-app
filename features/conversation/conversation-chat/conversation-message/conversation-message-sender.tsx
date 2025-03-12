@@ -1,12 +1,12 @@
 import { Text } from "@design-system/Text"
-import { InboxId } from "@xmtp/react-native-sdk"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { Pressable } from "@/design-system/Pressable"
 import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
 import { useRouter } from "@/navigation/use-navigation"
 import { useAppTheme } from "@/theme/use-app-theme"
 
 type IConversationMessageSenderProps = {
-  inboxId: InboxId
+  inboxId: IXmtpInboxId
 }
 
 export function ConversationMessageSender(args: IConversationMessageSenderProps) {

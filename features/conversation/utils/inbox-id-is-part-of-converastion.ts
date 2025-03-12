@@ -1,8 +1,5 @@
-import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk"
-import {
-  getCurrentSenderEthAddress,
-  getSafeCurrentSender,
-} from "@/features/authentication/multi-inbox.store"
+import { IXmtpConversationTopic, IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import {
   ensureDmPeerInboxIdQueryData,
   getDmPeerInboxIdQueryData,
@@ -13,18 +10,18 @@ import {
 } from "@/features/groups/useGroupMembersQuery"
 
 export function inboxIdIsPartOfConversationUsingCacheData(args: {
-  inboxId: InboxId
-  conversationTopic: ConversationTopic
+  inboxId: IXmtpInboxId
+  conversationTopic: IXmtpConversationTopic
 }) {
   const { inboxId, conversationTopic } = args
 
   const members = getGroupMembersQueryData({
-    account: getSafeCurrentSender().ethereumAddress,
+    clientInboxId: getSafeCurrentSender().inboxId,
     topic: conversationTopic,
   })
 
   const peerInboxId = getDmPeerInboxIdQueryData({
-    account: getSafeCurrentSender().ethereumAddress,
+    inboxId: getSafeCurrentSender().inboxId,
     topic: conversationTopic,
   })
 
@@ -32,22 +29,22 @@ export function inboxIdIsPartOfConversationUsingCacheData(args: {
 }
 
 export async function inboxIdIsPartOfConversationUsingEnsure(args: {
-  inboxId: InboxId
-  conversationTopic: ConversationTopic
+  inboxId: IXmtpInboxId
+  conversationTopic: IXmtpConversationTopic
 }) {
   const { inboxId, conversationTopic } = args
 
-  const account = getSafeCurrentSender().ethereumAddress
+  const currentSender = getSafeCurrentSender()
 
   const [members, peerInboxId] = await Promise.all([
     ensureGroupMembersQueryData({
       caller: "inboxIdIsPartOfConversationUsingEnsure",
-      account: account,
+      clientInboxId: currentSender.inboxId,
       topic: conversationTopic,
     }),
     ensureDmPeerInboxIdQueryData({
       caller: "inboxIdIsPartOfConversationUsingEnsure",
-      account: account,
+      inboxId: currentSender.inboxId,
       topic: conversationTopic,
     }),
   ])

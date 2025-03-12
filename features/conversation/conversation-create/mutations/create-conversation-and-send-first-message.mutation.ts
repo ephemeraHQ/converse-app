@@ -1,7 +1,7 @@
+import { IXmtpConversationTopic, IXmtpInboxId , IXmtpDmWithCodecs, IXmtpGroupWithCodecs } from "@features/xmtp/xmtp.types"
 import { useMutation } from "@tanstack/react-query"
 import { ConversationTopic, MessageId, RemoteAttachmentContent } from "@xmtp/react-native-sdk"
-import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client"
-import { getCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
+import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import {
   getConversationMessagesQueryData,
   setConversationMessagesQueryData,
@@ -12,11 +12,10 @@ import {
 } from "@/features/conversation/queries/conversation.query"
 import { createXmtpDm } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-dm"
 import { createXmtpGroup } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-group"
-import { IXmtpDmWithCodecs, IXmtpGroupWithCodecs } from "@/features/xmtp/xmtp.types"
 import { sendMessage } from "../../hooks/use-send-message"
 
 export type ISendMessageParams = {
-  topic: ConversationTopic
+  topic: IXmtpConversationTopic
   referencedMessageId?: MessageId
   content:
     | { text: string; remoteAttachment?: RemoteAttachmentContent }
@@ -65,7 +64,7 @@ export type ISendFirstMessageParams = Omit<ISendMessageParams, "topic">
 
 export const TEMP_CONVERSATION_PREFIX = "tmp-"
 
-function getConversationTempTopic(args: { inboxIds: InboxId[] }) {
+function getConversationTempTopic(args: { inboxIds: IXmtpInboxId[] }) {
   const { inboxIds } = args
   return `${TEMP_CONVERSATION_PREFIX}${generateGroupHashFromMemberIds(
     inboxIds,
@@ -76,29 +75,25 @@ export function useCreateConversationAndSendFirstMessage() {
   // const conversationStore = useConversationStore()
 
   return useMutation({
-    mutationFn: async (args: { inboxIds: InboxId[]; content: { text: string } }) => {
+    mutationFn: async (args: { inboxIds: IXmtpInboxId[]; content: { text: string } }) => {
       const { inboxIds, content } = args
 
       if (!inboxIds.length) {
         throw new Error("No inboxIds provided")
       }
 
-      const currentAccount = getCurrentSenderEthAddress()!
-
-      if (!currentAccount) {
-        throw new Error("No current account")
-      }
+      const currentSender = getSafeCurrentSender()
 
       // Create conversation
       let conversation: IXmtpGroupWithCodecs | IXmtpDmWithCodecs
       if (inboxIds.length > 1) {
         conversation = await createXmtpGroup({
-          account: currentAccount,
+          clientInboxId: currentSender.inboxId,
           inboxIds,
         })
       } else {
         conversation = await createXmtpDm({
-          senderEthAddress: currentAccount,
+          senderClientInboxId: currentSender.inboxId,
           peerInboxId: inboxIds[0],
         })
       }
@@ -143,7 +138,7 @@ export function useCreateConversationAndSendFirstMessage() {
     //       name: "",
     //       isActive: true,
     //       addedByInboxId: currentAccountInboxId,
-    //       imageUrlSquare: "",
+    //       groupImageUrl: "",
     //       description: "",
     //       consentState: "allowed",
     //     };
@@ -297,18 +292,18 @@ export function useCreateConversationAndSendFirstMessage() {
 }
 
 export function maybeReplaceOptimisticConversationWithReal(args: {
-  ethAccountAddress: string
-  memberInboxIds: InboxId[]
-  realTopic: ConversationTopic
+  clientInboxId: IXmtpInboxId
+  memberInboxIds: IXmtpInboxId[]
+  realTopic: IXmtpConversationTopic
 }) {
-  const { ethAccountAddress: ethAccountAddress, memberInboxIds, realTopic } = args
+  const { clientInboxId, memberInboxIds, realTopic } = args
 
   const tempTopic = getConversationTempTopic({
     inboxIds: memberInboxIds,
   })
 
   const realConversation = getConversationQueryData({
-    account: ethAccountAddress,
+    inboxId: clientInboxId,
     topic: realTopic,
   })
 
@@ -317,20 +312,20 @@ export function maybeReplaceOptimisticConversationWithReal(args: {
   }
 
   updateConversationQueryData({
-    account: ethAccountAddress,
+    inboxId: clientInboxId,
     topic: tempTopic,
     conversationUpdate: realConversation,
   })
 
   // Now move the messages from the temp conversation to the real conversation
   const messages = getConversationMessagesQueryData({
-    account: ethAccountAddress,
+    clientInboxId,
     topic: tempTopic,
   })
 
   if (messages) {
     setConversationMessagesQueryData({
-      account: ethAccountAddress,
+      clientInboxId,
       topic: realTopic,
       data: messages,
     })
@@ -380,7 +375,7 @@ export function maybeReplaceOptimisticConversationWithReal(args: {
  *
  * @throws {Error} If members array is empty
  */
-function generateGroupHashFromMemberIds(members: InboxId[]) {
+function generateGroupHashFromMemberIds(members: IXmtpInboxId[]) {
   if (!members.length) {
     return undefined
   }
@@ -422,7 +417,7 @@ function generateGroupHashFromMemberIds(members: InboxId[]) {
 
 // async function ensureConversationInCache(args: {
 //   account: string;
-//   topic: ConversationTopic;
+//   topic: IXmtpConversationTopic;
 // }) {
 //   const MAX_RETRIES = 3;
 //   let retries = 0;

@@ -1,6 +1,6 @@
+import { IXmtpConversationTopic, IXmtpInboxId , IXmtpGroupWithCodecs } from "@features/xmtp/xmtp.types"
 import { MutationObserver, MutationOptions, useMutation } from "@tanstack/react-query"
-import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk"
-import { updateInboxIdsConsentForAccount } from "@/features/consent/update-inbox-ids-consent-for-account"
+import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import {
   addConversationToAllowedConsentConversationsQuery,
   removeConversationFromAllowedConsentConversationsQuery,
@@ -16,14 +16,16 @@ import {
   getOrFetchGroupQuery,
   setGroupQueryData,
 } from "@/features/groups/useGroupQuery"
-import { IXmtpGroupWithCodecs } from "@/features/xmtp/xmtp.types"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
-import { updateConsentForGroupsForAccount } from "./update-consent-for-groups-for-account"
+import {
+  setXmtpConsentStateForInboxId,
+  updateConsentForGroupsForAccount,
+} from "../xmtp/xmtp-consent/xmtp-consent"
 
 type IAllowGroupMutationOptions = {
-  account: string
-  topic: ConversationTopic
+  clientInboxId: IXmtpInboxId
+  topic: IXmtpConversationTopic
 }
 
 type IAllowGroupReturnType = Awaited<ReturnType<typeof allowGroup>>
@@ -31,13 +33,18 @@ type IAllowGroupReturnType = Awaited<ReturnType<typeof allowGroup>>
 type IAllowGroupArgs = {
   includeAddedBy?: boolean
   includeCreator?: boolean
-  account: string
-  topic: ConversationTopic
+  clientInboxId: IXmtpInboxId
+  topic: IXmtpConversationTopic
 }
 
-async function allowGroup({ includeAddedBy, includeCreator, account, topic }: IAllowGroupArgs) {
+async function allowGroup({
+  includeAddedBy,
+  includeCreator,
+  clientInboxId,
+  topic,
+}: IAllowGroupArgs) {
   const group = await getOrFetchGroupQuery({
-    account,
+    inboxId: getSafeCurrentSender().inboxId,
     topic,
     caller: "allowGroup",
   })
@@ -53,7 +60,7 @@ async function allowGroup({ includeAddedBy, includeCreator, account, topic }: IA
   const groupTopic = group.topic
   const groupCreator = await group.creatorInboxId()
 
-  const inboxIdsToAllow: InboxId[] = []
+  const inboxIdsToAllow: IXmtpInboxId[] = []
   if (includeAddedBy && group?.addedByInboxId) {
     inboxIdsToAllow.push(group.addedByInboxId)
   }
@@ -64,16 +71,15 @@ async function allowGroup({ includeAddedBy, includeCreator, account, topic }: IA
 
   await Promise.all([
     updateConsentForGroupsForAccount({
-      account,
+      clientInboxId,
       groupIds: [getConversationIdFromTopic(groupTopic)],
-      consent: "allow",
+      consent: "allowed",
     }),
     ...(inboxIdsToAllow.length > 0
       ? [
-          updateInboxIdsConsentForAccount({
-            account,
-            inboxIds: inboxIdsToAllow,
-            consent: "allow",
+          setXmtpConsentStateForInboxId({
+            inboxId: clientInboxId,
+            consent: "allowed",
           }),
         ]
       : []),
@@ -91,12 +97,13 @@ export const getAllowGroupMutationOptions = (
   { previousGroup: IXmtpGroupWithCodecs } | undefined
 > => {
   const { topic } = args
+
   return {
     mutationFn: allowGroup,
     onMutate: async (args) => {
-      const { account } = args
+      const { clientInboxId } = args
 
-      const previousGroup = getGroupQueryData({ account, topic })
+      const previousGroup = getGroupQueryData({ inboxId: clientInboxId, topic })
 
       if (!previousGroup) {
         throw new Error("Previous group not found")
@@ -106,17 +113,17 @@ export const getAllowGroupMutationOptions = (
         state: "allowed",
       })
 
-      setGroupQueryData({ account, topic, group: updatedGroup })
+      setGroupQueryData({ inboxId: clientInboxId, topic, group: updatedGroup })
 
       // Remove from requests
       removeConversationFromUnknownConsentConversationsQueryData({
-        account,
+        inboxId: clientInboxId,
         topic,
       })
 
       // Add to main conversations list
       addConversationToAllowedConsentConversationsQuery({
-        account,
+        inboxId: clientInboxId,
         conversation: updatedGroup,
       })
 
@@ -127,23 +134,23 @@ export const getAllowGroupMutationOptions = (
         return
       }
 
-      const { account, topic } = variables
+      const { clientInboxId, topic } = variables
 
       setGroupQueryData({
-        account,
+        inboxId: clientInboxId,
         topic,
         group: context.previousGroup,
       })
 
       // Add back in requests
       addConversationToUnknownConsentConversationsQuery({
-        account,
+        inboxId: clientInboxId,
         conversation: context.previousGroup,
       })
 
       // Remove from main conversations list
       removeConversationFromAllowedConsentConversationsQuery({
-        account,
+        inboxId: clientInboxId,
         topic,
       })
     },
@@ -158,6 +165,6 @@ export const createAllowGroupMutationObserver = (args: IAllowGroupMutationOption
   return allowGroupMutationObserver
 }
 
-export const useAllowGroupMutation = (account: string, topic: ConversationTopic) => {
-  return useMutation(getAllowGroupMutationOptions({ account, topic }))
+export const useAllowGroupMutation = (args: IAllowGroupMutationOptions) => {
+  return useMutation(getAllowGroupMutationOptions(args))
 }

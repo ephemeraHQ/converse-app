@@ -1,15 +1,15 @@
-import type { ConversationTopic } from "@xmtp/react-native-sdk"
+import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
 import { getConversationIdFromTopic } from "./get-conversation-id-from-topic"
 
 describe("getConversationIdFromTopic", () => {
   it("should return the group id from a topic with prefix", () => {
-    const topic = "/xmtp/mls/1/g-854565fa1fbb235e241a80e370095740/proto" as ConversationTopic
+    const topic = "/xmtp/mls/1/g-854565fa1fbb235e241a80e370095740/proto" as IXmtpConversationTopic
     const groupId = getConversationIdFromTopic(topic)
     expect(groupId).toBe("854565fa1fbb235e241a80e370095740")
   })
 
   it("should return the group id from a topic without prefix", () => {
-    const topic = "854565fa1fbb235e241a80e370095740" as ConversationTopic
+    const topic = "854565fa1fbb235e241a80e370095740" as IXmtpConversationTopic
     const groupId = getConversationIdFromTopic(topic)
     expect(groupId).toBe("854565fa1fbb235e241a80e370095740")
   })

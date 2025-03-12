@@ -63,13 +63,6 @@ export const useAuthOnboardingStore = create<IAuthOnboardingStore>((set) => ({
     setNameValidationError: (nameValidationError: string) => set({ nameValidationError }),
     setAvatar: (avatar: string) => set({ avatar }),
     setIsAvatarUploading: (isAvatarUploading: boolean) => set({ isAvatarUploading }),
-    reset: () =>
-      set({
-        name: "",
-        username: "",
-        nameValidationError: "",
-        avatar: "",
-        isAvatarUploading: false,
-      }),
+    reset: () => set(initialState),
   },
 }))

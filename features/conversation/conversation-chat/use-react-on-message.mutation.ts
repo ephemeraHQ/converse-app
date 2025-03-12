@@ -1,31 +1,28 @@
 import { useMutation } from "@tanstack/react-query"
-import {
-  ConversationTopic,
-  MessageDeliveryStatus,
-  MessageId,
-  ReactionContent,
-} from "@xmtp/react-native-sdk"
 import { useCallback } from "react"
-import {
-  getCurrentSenderEthAddress,
-  getSafeCurrentSender,
-} from "@/features/authentication/multi-inbox.store"
+import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import {
   addConversationMessageQuery,
   refetchConversationMessages,
 } from "@/features/conversation/conversation-chat/conversation-messages.query"
 import { getConversationForCurrentAccount } from "@/features/conversation/utils/get-conversation-for-current-account"
 import { contentTypesPrefixes } from "@/features/xmtp/xmtp-content-types/xmtp-content-types"
+import {
+  IXmtpConversationTopic,
+  IXmtpMessageDeliveryStatusValues,
+  IXmtpMessageId,
+  IXmtpReactionContent,
+} from "@/features/xmtp/xmtp.types"
 import { captureErrorWithToast } from "@/utils/capture-error"
 import { getTodayNs } from "@/utils/date"
 import { getRandomId } from "@/utils/general"
 import { Haptics } from "@/utils/haptics"
 
-export function useReactOnMessage(props: { topic: ConversationTopic }) {
+export function useReactOnMessage(props: { topic: IXmtpConversationTopic }) {
   const { topic } = props
 
   const { mutateAsync: reactOnMessageMutationAsync } = useMutation({
-    mutationFn: async (variables: { reaction: ReactionContent }) => {
+    mutationFn: async (variables: { reaction: IXmtpReactionContent }) => {
       const { reaction } = variables
       const conversation = getConversationForCurrentAccount(topic)
       if (!conversation) {
@@ -36,23 +33,22 @@ export function useReactOnMessage(props: { topic: ConversationTopic }) {
       })
     },
     onMutate: (variables) => {
-      const { ethereumAddress: currentEthereumAddress, inboxId: currentInboxId } =
-        getSafeCurrentSender()
+      const currentSender = getSafeCurrentSender()
       const conversation = getConversationForCurrentAccount(topic)
 
       if (conversation) {
         // Add the reaction to the message
         addConversationMessageQuery({
-          account: currentEthereumAddress,
+          clientInboxId: currentSender.inboxId,
           topic: conversation.topic,
           message: {
-            id: getRandomId() as MessageId,
+            id: getRandomId() as IXmtpMessageId,
             contentTypeId: contentTypesPrefixes.reaction,
             sentNs: getTodayNs(),
             fallback: variables.reaction.content,
-            deliveryStatus: MessageDeliveryStatus.PUBLISHED,
+            deliveryStatus: IXmtpMessageDeliveryStatusValues.PUBLISHED,
             topic: conversation.topic,
-            senderInboxId: currentInboxId,
+            senderInboxId: currentSender.inboxId,
             nativeContent: {},
             content: () => {
               return variables.reaction
@@ -62,9 +58,9 @@ export function useReactOnMessage(props: { topic: ConversationTopic }) {
       }
     },
     onError: (error) => {
-      const currentAccount = getCurrentSenderEthAddress()!
+      const currentSender = getSafeCurrentSender()
       refetchConversationMessages({
-        account: currentAccount,
+        clientInboxId: currentSender.inboxId,
         topic,
         caller: "useReactOnMessage mutation onError",
       }).catch(captureErrorWithToast)
@@ -72,7 +68,7 @@ export function useReactOnMessage(props: { topic: ConversationTopic }) {
   })
 
   const reactOnMessage = useCallback(
-    async (args: { messageId: MessageId; emoji: string }) => {
+    async (args: { messageId: IXmtpMessageId; emoji: string }) => {
       try {
         Haptics.softImpactAsync()
         await reactOnMessageMutationAsync({

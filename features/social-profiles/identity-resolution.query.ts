@@ -5,13 +5,15 @@ import {
   isValidEnsName,
   isValidUnstoppableDomainName,
 } from "@/features/social-profiles/name-validation.utils"
+import { IEthereumAddress } from "@/utils/evm/address"
 
 export function useEnsNameResolution(name: string | undefined) {
   const isValid = isValidEnsName(name)
 
   return useQuery({
     queryKey: ["identity", "ens", name],
-    queryFn: () => identityResolutionApi.resolveEnsName({ name: name! }),
+    queryFn: async () =>
+      (await identityResolutionApi.resolveEnsName({ name: name! })) as IEthereumAddress,
     enabled: Boolean(name) && isValid,
   })
 }
@@ -21,7 +23,8 @@ export function useBaseNameResolution(name: string | undefined) {
 
   return useQuery({
     queryKey: ["identity", "base", name],
-    queryFn: () => identityResolutionApi.resolveBaseName({ name: name! }),
+    queryFn: async () =>
+      (await identityResolutionApi.resolveBaseName({ name: name! })) as IEthereumAddress,
     enabled: Boolean(name) && isValid,
   })
 }
@@ -31,7 +34,10 @@ export function useUnstoppableDomainNameResolution(name: string | undefined) {
 
   return useQuery({
     queryKey: ["identity", "unstoppable-domains", name],
-    queryFn: () => identityResolutionApi.resolveUnstoppableDomainName({ name: name! }),
+    queryFn: async () =>
+      (await identityResolutionApi.resolveUnstoppableDomainName({
+        name: name!,
+      })) as IEthereumAddress,
     enabled: Boolean(name) && isValid,
   })
 }

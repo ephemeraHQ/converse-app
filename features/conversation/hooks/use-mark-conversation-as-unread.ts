@@ -1,36 +1,32 @@
+import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
 import { useMutation } from "@tanstack/react-query"
-import { ConversationTopic } from "@xmtp/react-native-sdk"
-import {
-  getCurrentSenderEthAddress,
-  useCurrentSenderEthAddress,
-} from "@/features/authentication/multi-inbox.store"
-import { markConversationAsUnread } from "@/features/conversation/conversation-metadata/conversation-metadata.api"
+import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
+import { markConversationMetadataAsUnread } from "@/features/conversation/conversation-metadata/conversation-metadata.api"
 import {
   getConversationMetadataQueryData,
   updateConversationMetadataQueryData,
 } from "@/features/conversation/conversation-metadata/conversation-metadata.query"
 
-export function useMarkConversationAsUnread(args: { topic: ConversationTopic }) {
+export function useMarkConversationAsUnread(args: { topic: IXmtpConversationTopic }) {
   const { topic } = args
 
-  const currentAccount = useCurrentSenderEthAddress()!
+  const currentSender = useSafeCurrentSender()
 
   const { mutateAsync: markAsUnreadAsync } = useMutation({
     mutationFn: async () => {
-      await markConversationAsUnread({
-        account: currentAccount,
+      await markConversationMetadataAsUnread({
+        clientInboxId: currentSender.inboxId,
         topic,
       })
     },
     onMutate: () => {
-      const currentAccount = getCurrentSenderEthAddress()!
       const previousData = getConversationMetadataQueryData({
-        account: currentAccount,
+        clientInboxId: currentSender.inboxId,
         topic,
       })
 
       updateConversationMetadataQueryData({
-        account: currentAccount,
+        clientInboxId: currentSender.inboxId,
         topic,
         updateData: {
           unread: true,
@@ -40,10 +36,9 @@ export function useMarkConversationAsUnread(args: { topic: ConversationTopic }) 
       return { previousData }
     },
     onError: (error, _, context) => {
-      const currentAccount = getCurrentSenderEthAddress()!
       if (context?.previousData) {
         updateConversationMetadataQueryData({
-          account: currentAccount,
+          clientInboxId: currentSender.inboxId,
           topic,
           updateData: context.previousData,
         })

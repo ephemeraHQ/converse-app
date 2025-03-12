@@ -1,5 +1,4 @@
-import { InboxId } from "@xmtp/react-native-sdk"
-import { getCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { getAllowedConsentConversationsQueryOptions } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm"
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group"
@@ -8,14 +7,11 @@ import { ensureGroupMembersQueryData } from "@/features/groups/useGroupMembersQu
 import { isSameInboxId } from "@/features/xmtp/xmtp-inbox-id/xmtp-inbox-id.utils"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
 
-export async function findConversationByInboxIds(args: { inboxIds: InboxId[] }) {
-  const { inboxIds } = args
-
-  const account = getCurrentSenderEthAddress()
-
-  if (!account) {
-    throw new Error("No account found")
-  }
+export async function findConversationByInboxIds(args: {
+  inboxIds: IXmtpInboxId[]
+  clientInboxId: IXmtpInboxId
+}) {
+  const { inboxIds, clientInboxId } = args
 
   if (inboxIds.length === 0) {
     return undefined
@@ -23,7 +19,7 @@ export async function findConversationByInboxIds(args: { inboxIds: InboxId[] }) 
 
   const conversations = await reactQueryClient.ensureQueryData(
     getAllowedConsentConversationsQueryOptions({
-      account,
+      inboxId: clientInboxId,
       caller: "findConversationByMembers",
     }),
   )
@@ -40,7 +36,7 @@ export async function findConversationByInboxIds(args: { inboxIds: InboxId[] }) 
     groups.map((conversation) =>
       ensureGroupMembersQueryData({
         caller: "findConversationByMembers",
-        account,
+        clientInboxId,
         topic: conversation.topic,
       }),
     ),
@@ -69,7 +65,7 @@ export async function findConversationByInboxIds(args: { inboxIds: InboxId[] }) 
   const dmPeerInboxIds = await Promise.all(
     dms.map((dm) =>
       ensureDmPeerInboxIdQueryData({
-        account,
+        inboxId: clientInboxId,
         topic: dm.topic,
         caller: "findConversationByMembers",
       }),

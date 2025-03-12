@@ -1,10 +1,10 @@
+import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
 import { useMutation, useQuery } from "@tanstack/react-query"
-import { ConversationTopic } from "@xmtp/react-native-sdk"
 import { useCallback } from "react"
 import { showActionSheet } from "@/components/action-sheet"
-import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
+import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { useDenyDmMutation } from "@/features/consent/use-deny-dm.mutation"
-import { deleteConversation } from "@/features/conversation/conversation-metadata/conversation-metadata.api"
+import { deleteConversationMetadata } from "@/features/conversation/conversation-metadata/conversation-metadata.api"
 import {
   getConversationMetadataQueryData,
   updateConversationMetadataQueryData,
@@ -15,19 +15,19 @@ import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-p
 import { translate } from "@/i18n"
 import { captureErrorWithToast } from "@/utils/capture-error"
 
-export const useDeleteDm = ({ topic }: { topic: ConversationTopic }) => {
-  const currentAccount = useCurrentSenderEthAddress()!
+export const useDeleteDm = ({ topic }: { topic: IXmtpConversationTopic }) => {
+  const currentSender = useSafeCurrentSender()!
 
   const { data: conversationId } = useQuery({
     ...getConversationQueryOptions({
-      account: currentAccount,
+      inboxId: currentSender.inboxId,
       topic,
     }),
     select: (conversation) => conversation?.id,
   })
 
   const { data: peerInboxId } = useDmPeerInboxIdQuery({
-    account: currentAccount,
+    inboxId: currentSender.inboxId,
     topic,
     caller: "useDeleteDm",
   })
@@ -39,15 +39,15 @@ export const useDeleteDm = ({ topic }: { topic: ConversationTopic }) => {
   const { mutateAsync: denyDmConsentAsync } = useDenyDmMutation()
 
   const { mutateAsync: deleteDmAsync } = useMutation({
-    mutationFn: () => deleteConversation({ account: currentAccount, topic }),
+    mutationFn: () => deleteConversationMetadata({ clientInboxId: currentSender.inboxId, topic }),
     onMutate: () => {
       const previousDeleted = getConversationMetadataQueryData({
-        account: currentAccount,
+        clientInboxId: currentSender.inboxId,
         topic,
       })?.deleted
 
       updateConversationMetadataQueryData({
-        account: currentAccount,
+        clientInboxId: currentSender.inboxId,
         topic,
         updateData: { deleted: true },
       })
@@ -56,7 +56,7 @@ export const useDeleteDm = ({ topic }: { topic: ConversationTopic }) => {
     },
     onError: (error, _, context) => {
       updateConversationMetadataQueryData({
-        account: currentAccount,
+        clientInboxId: currentSender.inboxId,
         topic,
         updateData: { deleted: context?.previousDeleted },
       })

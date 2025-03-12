@@ -1,5 +1,5 @@
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { keepPreviousData, queryOptions, useQuery } from "@tanstack/react-query"
-import { InboxId } from "@xmtp/react-native-sdk"
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { getAllowedConsentConversationsQueryData } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group"
@@ -9,7 +9,7 @@ export async function searchExistingGroupsByGroupName(args: { searchQuery: strin
   const { searchQuery } = args
   const currentAccount = getSafeCurrentSender().ethereumAddress
   const conversations = getAllowedConsentConversationsQueryData({
-    account: currentAccount,
+    inboxId: currentAccount,
   })
 
   if (!conversations || !searchQuery) {
@@ -19,13 +19,13 @@ export async function searchExistingGroupsByGroupName(args: { searchQuery: strin
   const groups = conversations.filter(isConversationGroup)
 
   return groups
-    .filter((group) => normalizeString(group.name).includes(searchQuery))
+    .filter((group) => normalizeString(group.groupName).includes(searchQuery))
     .map((group) => group.topic)
 }
 
 export function getSearchExistingGroupsByGroupNameQueryOptions(args: {
   searchQuery: string
-  searcherInboxId: InboxId
+  searcherInboxId: IXmtpInboxId
 }) {
   const { searchQuery, searcherInboxId } = args
   const normalizedSearchQuery = normalizeString(searchQuery)
@@ -46,7 +46,7 @@ export function getSearchExistingGroupsByGroupNameQueryOptions(args: {
 
 export function useSearchExistingGroupsByGroupNameQuery(args: {
   searchQuery: string
-  searcherInboxId: InboxId
+  searcherInboxId: IXmtpInboxId
 }) {
   return useQuery(getSearchExistingGroupsByGroupNameQueryOptions(args))
 }

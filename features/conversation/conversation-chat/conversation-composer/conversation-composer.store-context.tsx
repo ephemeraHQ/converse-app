@@ -1,5 +1,4 @@
 import { zustandMMKVStorage } from "@utils/mmkv"
-import { ConversationTopic, MessageId } from "@xmtp/react-native-sdk"
 import { createContext, memo, useContext, useRef } from "react"
 import { createStore, useStore } from "zustand"
 import { createJSONStorage, persist, subscribeWithSelector } from "zustand/middleware"
@@ -8,6 +7,7 @@ import {
   UploadedRemoteAttachment,
 } from "@/features/conversation/conversation-chat/conversation-attachment/conversation-attachments.types"
 import { useCurrentConversationTopic } from "@/features/conversation/conversation-chat/conversation.store-context"
+import { IXmtpConversationTopic, IXmtpMessageId } from "@/features/xmtp/xmtp.types"
 import { usePrevious } from "@/hooks/use-previous-value"
 
 export type IComposerMediaPreviewStatus = "picked" | "uploading" | "uploaded" | "error" | "sending"
@@ -25,7 +25,7 @@ type IConversationComposerStoreProps = {
 
 type IConversationComposerState = IConversationComposerStoreProps & {
   inputValue: string
-  replyingToMessageId: MessageId | null
+  replyingToMessageId: IXmtpMessageId | null
   composerMediaPreviews: IComposerMediaPreview[]
   composerUploadedAttachments: UploadedRemoteAttachment[]
 }
@@ -33,7 +33,7 @@ type IConversationComposerState = IConversationComposerStoreProps & {
 type IConversationComposerActions = {
   reset: () => void
   setInputValue: (value: string) => void
-  setReplyToMessageId: (messageId: MessageId | null) => void
+  setReplyToMessageId: (messageId: IXmtpMessageId | null) => void
   addComposerMediaPreview: (mediaPreview: NonNullable<IComposerMediaPreview>) => string
   removeComposerMediaPreview: (mediaURI: string) => void
   addComposerUploadedAttachment: (args: {
@@ -135,7 +135,7 @@ const createConversationComposerStore = (
   )
 }
 
-function getStoreName(topic: ConversationTopic | null) {
+function getStoreName(topic: IXmtpConversationTopic | null) {
   return topic ? `composer-${topic}` : "new"
 }
 

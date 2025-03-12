@@ -8,6 +8,7 @@ import { getXmtpSigner } from "@/features/xmtp/xmtp-signer/get-xmtp-signer"
 import { useRouter } from "@/navigation/use-navigation"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { captureError, captureErrorWithToast } from "@/utils/capture-error"
+import { IEthereumAddress } from "@/utils/evm/address"
 import { shortAddress } from "@/utils/strings/shortAddress"
 import {
   ConnectWalletErrorContent,
@@ -62,7 +63,7 @@ export const ConnectWalletLinkToInbox = memo(function ConnectWalletLinkToInbox(
 
       invalidateXmtpInboxIdFromEthAddressQuery({
         clientEthAddress: currentSender.ethereumAddress,
-        targetEthAddress: walletAccount.address,
+        targetEthAddress: walletAccount.address as IEthereumAddress,
       }).catch(captureError)
     } catch (error) {
       captureErrorWithToast(error, {

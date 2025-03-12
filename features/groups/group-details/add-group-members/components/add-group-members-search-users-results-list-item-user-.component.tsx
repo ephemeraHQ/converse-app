@@ -1,4 +1,4 @@
-import { InboxId } from "@xmtp/react-native-sdk"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { memo, useCallback } from "react"
 import { Chip, ChipText } from "@/design-system/chip"
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
@@ -8,12 +8,12 @@ import { useRouteParams } from "@/navigation/use-navigation"
 import { useAddGroupMembersStore } from "../stores/add-group-members.store"
 
 export const AddGroupMembersSearchUsersResultsListItemUser = memo(
-  function AddGroupMembersSearchUsersResultsListItemUser(props: { inboxId: InboxId }) {
+  function AddGroupMembersSearchUsersResultsListItemUser(props: { inboxId: IXmtpInboxId }) {
     const { addSelectedInboxId } = useAddGroupMembersStore((state) => state.actions)
     const { groupTopic } = useRouteParams<"AddGroupMembers">()
 
     const { data: members } = useGroupMembersQuery({
-      account: getSafeCurrentSender().ethereumAddress,
+      clientInboxId: getSafeCurrentSender().inboxId,
       topic: groupTopic!,
       caller: "add-group-members",
     })

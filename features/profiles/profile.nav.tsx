@@ -1,9 +1,9 @@
-import { InboxId } from "@xmtp/react-native-sdk"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { AppNativeStack } from "@/navigation/app-navigator"
 import { ProfileScreen } from "./profile.screen"
 
 export type ProfileNavParams = {
-  inboxId: InboxId
+  inboxId: IXmtpInboxId
 }
 
 export const ProfileScreenConfig = {

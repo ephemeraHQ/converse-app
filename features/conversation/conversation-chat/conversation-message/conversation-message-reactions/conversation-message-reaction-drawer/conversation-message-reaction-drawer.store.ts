@@ -1,10 +1,10 @@
-import { MessageId } from "@xmtp/react-native-sdk"
 import { create } from "zustand"
+import { IXmtpMessageId } from "@/features/xmtp/xmtp.types"
 
 export type IMessageReactionsStore = {
-  messageId: MessageId | null
+  messageId: IXmtpMessageId | null
   actions: {
-    setMessageId: (messageId: MessageId | null) => void
+    setMessageId: (messageId: IXmtpMessageId | null) => void
   }
 }
 

@@ -1,4 +1,4 @@
-import { InboxId } from "@xmtp/react-native-sdk"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { memo, useCallback } from "react"
 import { create } from "zustand"
 import { Avatar } from "@/components/avatar"
@@ -78,26 +78,26 @@ export const MemberDetailsBottomSheet = memo(function MemberDetailsBottomSheet()
       member: targetGroupMember,
     })
 
-  const { mutateAsync: promoteToAdmin } = usePromoteToAdminMutation(
-    currentSender.ethereumAddress,
-    groupTopic,
-  )
-  const { mutateAsync: promoteToSuperAdmin } = usePromoteToSuperAdminMutation(
-    currentSender.ethereumAddress,
-    groupTopic,
-  )
-  const { mutateAsync: revokeSuperAdmin } = useRevokeSuperAdminMutation(
-    currentSender.ethereumAddress,
-    groupTopic,
-  )
-  const { mutateAsync: revokeAdmin } = useRevokeAdminMutation(
-    currentSender.ethereumAddress,
-    groupTopic,
-  )
-  const { mutateAsync: removeMember } = useRemoveGroupMembersFromGroupMutation(
-    currentSender.ethereumAddress,
-    groupTopic,
-  )
+  const { mutateAsync: promoteToAdmin } = usePromoteToAdminMutation({
+    clientInboxId: currentSender.inboxId,
+    topic: groupTopic,
+  })
+  const { mutateAsync: promoteToSuperAdmin } = usePromoteToSuperAdminMutation({
+    clientInboxId: currentSender.inboxId,
+    topic: groupTopic,
+  })
+  const { mutateAsync: revokeSuperAdmin } = useRevokeSuperAdminMutation({
+    clientInboxId: currentSender.inboxId,
+    topic: groupTopic,
+  })
+  const { mutateAsync: revokeAdmin } = useRevokeAdminMutation({
+    clientInboxId: currentSender.inboxId,
+    topic: groupTopic,
+  })
+  const { mutateAsync: removeMember } = useRemoveGroupMembersFromGroupMutation({
+    clientInboxId: currentSender.inboxId,
+    topic: groupTopic,
+  })
 
   const handleViewProfilePress = useCallback(() => {
     closeMemberDetailsBottomSheet()
@@ -204,16 +204,14 @@ export const MemberDetailsBottomSheet = memo(function MemberDetailsBottomSheet()
         confirmText: "Remove",
         cancelText: "Cancel",
       })
-      console.log("1")
 
       if (confirmed) {
-        console.log("2")
         showSnackbar({
           message: `Removed ${targetDisplayName} from group`,
         })
-        console.log("3")
+
         closeMemberDetailsBottomSheet()
-        console.log("4")
+
         await removeMember([memberInboxId!])
       }
     } catch (error) {
@@ -301,7 +299,7 @@ export const MemberDetailsBottomSheet = memo(function MemberDetailsBottomSheet()
   )
 })
 
-export function openMemberDetailsBottomSheet(memberInboxId: InboxId) {
+export function openMemberDetailsBottomSheet(memberInboxId: IXmtpInboxId) {
   useMemberDetailsBottomSheetStore.getState().actions.setMemberInboxId(memberInboxId)
   memberDetailsBottomSheetRef.current?.present()
 }
@@ -313,11 +311,11 @@ function closeMemberDetailsBottomSheet() {
 const memberDetailsBottomSheetRef = createBottomSheetModalRef()
 
 type IMemberDetailsBottomSheetState = {
-  memberInboxId: InboxId | undefined
+  memberInboxId: IXmtpInboxId | undefined
 }
 
 type IMemberDetailsBottomSheetActions = {
-  setMemberInboxId: (memberInboxId: InboxId) => void
+  setMemberInboxId: (memberInboxId: IXmtpInboxId) => void
   reset: () => void
 }
 

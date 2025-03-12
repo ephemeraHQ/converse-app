@@ -1,4 +1,4 @@
-import { InboxId } from "@xmtp/react-native-sdk"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import React, { memo, useCallback, useEffect, useState } from "react"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { Screen } from "@/components/screen/screen"
@@ -23,7 +23,7 @@ import { useRouter } from "@/navigation/use-navigation"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { useCurrentSender } from "../authentication/multi-inbox.store"
 
-export function ProfileMe(props: { inboxId: InboxId }) {
+export function ProfileMe(props: { inboxId: IXmtpInboxId }) {
   const { inboxId } = props
 
   const { theme } = useAppTheme()
@@ -139,13 +139,11 @@ export function ProfileMe(props: { inboxId: InboxId }) {
 const EditableProfileContactCardNameInput = memo(function EditableProfileContactCardNameInput({
   inboxId,
 }: {
-  inboxId: InboxId
+  inboxId: IXmtpInboxId
 }) {
   const profileMeStore = useProfileMeStore(inboxId)
 
   const nameDefaultTextValue = profileMeStore.getState().nameTextValue
-
-  console.log("nameDefaultTextValue:", nameDefaultTextValue)
 
   const isOnChainName = useProfileMeStoreValue(inboxId, (state) =>
     state.nameTextValue?.includes("."),
@@ -180,7 +178,7 @@ const EditableProfileContactCardNameInput = memo(function EditableProfileContact
 const EditableUsernameInput = memo(function EditableUsernameInput({
   inboxId,
 }: {
-  inboxId: InboxId
+  inboxId: IXmtpInboxId
 }) {
   const { theme } = useAppTheme()
   const profileMeStore = useProfileMeStore(inboxId)
@@ -210,7 +208,7 @@ const EditableUsernameInput = memo(function EditableUsernameInput({
 const EditableProfileContactCardImportName = memo(function EditableProfileContactCardImportName({
   inboxId,
 }: {
-  inboxId: InboxId
+  inboxId: IXmtpInboxId
 }) {
   const router = useRouter()
 
@@ -226,7 +224,7 @@ const EditableProfileContactCardImportName = memo(function EditableProfileContac
 const EditableDescriptionInput = memo(function EditableDescriptionInput({
   inboxId,
 }: {
-  inboxId: InboxId
+  inboxId: IXmtpInboxId
 }) {
   const { theme } = useAppTheme()
   const profileMeStore = useProfileMeStore(inboxId)
@@ -257,7 +255,7 @@ const EditableDescriptionInput = memo(function EditableDescriptionInput({
 const EditableProfileContactCardAvatar = memo(function EditableProfileContactCardAvatar({
   inboxId,
 }: {
-  inboxId: InboxId
+  inboxId: IXmtpInboxId
 }) {
   const { addPFP, asset, isUploading } = useAddPfp()
   const profileMeStore = useProfileMeStore(inboxId)

@@ -1,16 +1,16 @@
-import { InboxId } from "@xmtp/react-native-sdk"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { create } from "zustand"
 import { subscribeWithSelector } from "zustand/middleware"
 
 type IAddGroupMembersState = {
   searchQuery: string
-  selectedInboxIds: InboxId[]
+  selectedInboxIds: IXmtpInboxId[]
 }
 
 type IAddGroupMembersActions = {
   setSearchQuery: (query: string) => void
-  setSelectedInboxIds: (inboxIds: InboxId[]) => void
-  addSelectedInboxId: (inboxId: InboxId) => void
+  setSelectedInboxIds: (inboxIds: IXmtpInboxId[]) => void
+  addSelectedInboxId: (inboxId: IXmtpInboxId) => void
   reset: () => void
 }
 

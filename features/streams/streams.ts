@@ -1,3 +1,4 @@
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { logger, streamLogger } from "@utils/logger"
 import { useEffect } from "react"
 import { useMultiInboxStore } from "@/features/authentication/multi-inbox.store"
@@ -7,6 +8,7 @@ import { stopStreamingConsent } from "@/features/xmtp/xmtp-preferences/xmtp-pref
 import { useAppStore } from "@/stores/app-store"
 import { useAppState } from "@/stores/use-app-state-store"
 import { captureError } from "@/utils/capture-error"
+import { StreamError } from "@/utils/error"
 import { startConversationStreaming } from "./stream-conversations"
 import { startMessageStreaming } from "./stream-messages"
 import { useStreamingStore } from "./stream-store"
@@ -31,32 +33,29 @@ export function useSetupStreamingSubscriptions() {
   // Start streaming for all senders on first render
   useEffect(() => {
     const senders = useMultiInboxStore.getState().senders
-    startStreaming(senders.map((sender) => sender.ethereumAddress))
+    startStreaming(senders.map((sender) => sender.inboxId))
   }, [])
 
   useEffect(() => {
     // Handle app state changes
-    const unsubscribeAppState = useAppState.subscribe(
+    const unsubscribeAppStateStore = useAppState.subscribe(
       (state) => state.currentState,
       (currentState, previousState) => {
         const senders = useMultiInboxStore.getState().senders
-        const ethAddresses = senders.map((sender) => sender.ethereumAddress)
+        const inboxIds = senders.map((sender) => sender.inboxId)
 
         if (currentState === "active" && previousState !== "active") {
           streamLogger.debug("App became active, restarting streams")
-          // Stop existing streams first to ensure clean state
-          stopStreaming(ethAddresses).then(() => {
-            startStreaming(ethAddresses)
-          })
+          startStreaming(inboxIds).catch(captureError)
         } else if (currentState !== "active" && previousState === "active") {
           streamLogger.debug("App went to background, stopping streams")
-          stopStreaming(ethAddresses)
+          stopStreaming(inboxIds).catch(captureError)
         }
       },
     )
 
     // Handle account changes
-    const unsubscribeAccounts = useMultiInboxStore.subscribe(
+    const unsubscribeMultiInboxStore = useMultiInboxStore.subscribe(
       (state) => [state.senders] as const,
       ([senders], [previousSenders]) => {
         const { isInternetReachable } = useAppStore.getState()
@@ -67,26 +66,24 @@ export function useSetupStreamingSubscriptions() {
           return
         }
 
-        const previousAddresses = previousSenders.map((sender) => sender.ethereumAddress)
+        const previousInboxIds = previousSenders.map((sender) => sender.inboxId)
 
-        const currentAddresses = senders.map((sender) => sender.ethereumAddress)
+        const currentInboxIds = senders.map((sender) => sender.inboxId)
 
         // Start streaming for new senders
-        const newAddresses = currentAddresses.filter(
-          (address) => !previousAddresses.includes(address),
-        )
+        const newInboxIds = currentInboxIds.filter((inboxId) => !previousInboxIds.includes(inboxId))
 
-        if (newAddresses.length > 0) {
-          startStreaming(newAddresses)
+        if (newInboxIds.length > 0) {
+          startStreaming(newInboxIds)
         }
 
         // Stop streaming for removed senders
-        const removedAddresses = previousAddresses.filter(
-          (address) => !currentAddresses.includes(address),
+        const removedInboxIds = previousInboxIds.filter(
+          (inboxId) => !currentInboxIds.includes(inboxId),
         )
 
-        if (removedAddresses.length > 0) {
-          stopStreaming(removedAddresses)
+        if (removedInboxIds.length > 0) {
+          stopStreaming(removedInboxIds)
         }
       },
       {
@@ -95,27 +92,27 @@ export function useSetupStreamingSubscriptions() {
     )
 
     return () => {
-      unsubscribeAppState()
-      unsubscribeAccounts()
+      unsubscribeAppStateStore()
+      unsubscribeMultiInboxStore()
     }
   }, [])
 }
 
-async function startStreaming(accountsToStream: string[]) {
+async function startStreaming(inboxIdsToStream: string[]) {
   const store = useStreamingStore.getState()
 
-  for (const account of accountsToStream) {
-    const streamingState = store.accountStreamingStates[account]
+  for (const inboxId of inboxIdsToStream) {
+    const streamingState = store.accountStreamingStates[inboxId]
 
     if (!streamingState?.isStreamingConversations) {
-      logger.debug(`[Streaming] Starting conversation stream for ${account}`)
+      logger.debug(`[Streaming] Starting conversation stream for ${inboxId}`)
       try {
-        await startConversationStreaming(account)
-        store.actions.updateStreamingState(account, {
+        await startConversationStreaming({ clientInboxId: inboxId })
+        store.actions.updateStreamingState(inboxId, {
           isStreamingConversations: true,
         })
       } catch (error) {
-        store.actions.updateStreamingState(account, {
+        store.actions.updateStreamingState(inboxId, {
           isStreamingConversations: false,
         })
         captureError(error)
@@ -123,14 +120,14 @@ async function startStreaming(accountsToStream: string[]) {
     }
 
     if (!streamingState?.isStreamingMessages) {
-      logger.debug(`[Streaming] Starting messages stream for ${account}`)
+      logger.debug(`[Streaming] Starting messages stream for ${inboxId}`)
       try {
-        await startMessageStreaming({ account })
-        store.actions.updateStreamingState(account, {
+        await startMessageStreaming({ clientInboxId: inboxId })
+        store.actions.updateStreamingState(inboxId, {
           isStreamingMessages: true,
         })
       } catch (error) {
-        store.actions.updateStreamingState(account, {
+        store.actions.updateStreamingState(inboxId, {
           isStreamingMessages: false,
         })
         captureError(error)
@@ -155,19 +152,28 @@ async function startStreaming(accountsToStream: string[]) {
   }
 }
 
-async function stopStreaming(accounts: string[]) {
+async function stopStreaming(inboxIds: IXmtpInboxId[]) {
   const store = useStreamingStore.getState()
 
   await Promise.all(
-    accounts.map(async (account) => {
+    inboxIds.map(async (inboxId) => {
       try {
+        logger.debug(`[Streaming] Stopping streams for ${inboxId}`)
         await Promise.all([
-          stopStreamingAllMessage({ ethAddress: account }),
-          stopStreamingConversations({ ethAddress: account }),
-          stopStreamingConsent(account),
+          stopStreamingAllMessage({ inboxId }),
+          stopStreamingConversations({ inboxId }),
+          stopStreamingConsent({ inboxId }),
         ])
+        logger.debug(`[Streaming] Stopped streams for ${inboxId}`)
+      } catch (error) {
+        captureError(
+          new StreamError({
+            error,
+            additionalMessage: `Failed to stop streams for ${inboxId}`,
+          }),
+        )
       } finally {
-        store.actions.resetAccount(account)
+        store.actions.resetAccount(inboxId)
       }
     }),
   )

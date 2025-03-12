@@ -1,7 +1,8 @@
+import { IXmtpConversationTopic, IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { useMutation } from "@tanstack/react-query"
-import type { ConversationTopic } from "@xmtp/react-native-sdk"
-import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client"
+import { type ConversationTopic } from "@xmtp/react-native-sdk"
 import { useGroupQuery } from "@/features/groups/useGroupQuery"
+import { removeXmtpGroupMembers } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-group"
 import { captureError } from "@/utils/capture-error"
 import {
   cancelGroupMembersQuery,
@@ -11,28 +12,30 @@ import {
   setGroupMembersQueryData,
 } from "../useGroupMembersQuery"
 
-export const useRemoveGroupMembersFromGroupMutation = (
-  account: string,
-  topic: ConversationTopic,
-) => {
-  const { data: group } = useGroupQuery({ account, topic })
+export const useRemoveGroupMembersFromGroupMutation = (args: {
+  topic: IXmtpConversationTopic
+  clientInboxId: IXmtpInboxId
+}) => {
+  const { topic, clientInboxId } = args
+
+  const { data: group } = useGroupQuery({ inboxId: clientInboxId, topic })
 
   return useMutation({
-    mutationFn: async (inboxIds: InboxId[]) => {
+    mutationFn: async (inboxIds: IXmtpInboxId[]) => {
       if (!group) {
         throw new Error("No group found to remove members from")
       }
-      return group.removeMembersByInboxId(inboxIds)
+      return removeXmtpGroupMembers({ group, inboxIds })
     },
-    onMutate: async (inboxIds: InboxId[]) => {
+    onMutate: async (inboxIds: IXmtpInboxId[]) => {
       if (!topic) {
         return
       }
 
-      cancelGroupMembersQuery({ account, topic }).catch(captureError)
+      cancelGroupMembersQuery({ clientInboxId, topic }).catch(captureError)
 
       const previousGroupMembers = getGroupMembersQueryData({
-        account,
+        clientInboxId,
         topic,
       })
 
@@ -41,7 +44,7 @@ export const useRemoveGroupMembersFromGroupMutation = (
       }
 
       removeMembersFromGroupQueryData({
-        account,
+        clientInboxId,
         topic,
         memberInboxIds: inboxIds,
       })
@@ -54,13 +57,13 @@ export const useRemoveGroupMembersFromGroupMutation = (
       }
 
       setGroupMembersQueryData({
-        account,
+        clientInboxId,
         topic,
         members: context.previousGroupMembers,
       })
     },
     onSuccess: () => {
-      invalidateGroupMembersQuery({ account, topic }).catch(captureError)
+      invalidateGroupMembersQuery({ clientInboxId, topic }).catch(captureError)
     },
   })
 }

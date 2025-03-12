@@ -1,5 +1,5 @@
+import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
 import { translate } from "@i18n"
-import { ConversationTopic } from "@xmtp/react-native-sdk"
 import React, { memo, useCallback } from "react"
 // import { useGroupPendingRequests } from "@/hooks/useGroupPendingRequests";
 import { Avatar } from "@/components/avatar"
@@ -8,7 +8,7 @@ import { HStack } from "@/design-system/HStack"
 import { Pressable } from "@/design-system/Pressable"
 import { Text } from "@/design-system/Text"
 import { VStack } from "@/design-system/VStack"
-import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
+import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { useConversationStore } from "@/features/conversation/conversation-chat/conversation.store-context"
 import { getConversationQueryData } from "@/features/conversation/queries/conversation.query"
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm"
@@ -26,9 +26,9 @@ export function useConversationScreenHeader() {
   const navigation = useRouter()
   const conversationStore = useConversationStore()
   const isCreatingNewConversation = conversationStore.getState().isCreatingNewConversation
-  const currentAccount = useCurrentSenderEthAddress()!
+  const currentSender = useSafeCurrentSender()
   const conversation = getConversationQueryData({
-    account: currentAccount,
+    inboxId: currentSender.inboxId,
     topic: conversationStore.getState().topic!,
   })
 
@@ -113,16 +113,16 @@ function ConversationHeaderTitle({
 }
 
 type GroupConversationTitleProps = {
-  conversationTopic: ConversationTopic
+  conversationTopic: IXmtpConversationTopic
 }
 
 const GroupConversationTitle = memo(({ conversationTopic }: GroupConversationTitleProps) => {
-  const currentAccount = useCurrentSenderEthAddress()!
+  const currentSender = useSafeCurrentSender()
   const router = useRouter()
 
   const { data: members } = useGroupMembersQuery({
     caller: "GroupConversationTitle",
-    account: currentAccount,
+    clientInboxId: currentSender.inboxId,
     topic: conversationTopic,
   })
 
@@ -171,22 +171,22 @@ const GroupConversationTitle = memo(({ conversationTopic }: GroupConversationTit
 })
 
 type DmConversationTitleProps = {
-  topic: ConversationTopic
+  topic: IXmtpConversationTopic
 }
 
 const DmConversationTitle = ({ topic }: DmConversationTitleProps) => {
-  const account = useCurrentSenderEthAddress()!
+  const currentSender = useSafeCurrentSender()
   const navigation = useRouter()
   const { theme } = useAppTheme()
 
   const { data: peerInboxId } = useDmPeerInboxIdQuery({
-    account,
+    inboxId: currentSender.inboxId,
     topic,
     caller: "DmConversationTitle",
   })
 
   const { displayName, avatarUrl, isLoading } = usePreferredDisplayInfo({
-    inboxId: peerInboxId!,
+    inboxId: peerInboxId,
   })
 
   const onPress = useCallback(() => {

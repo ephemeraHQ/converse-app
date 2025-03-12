@@ -1,4 +1,4 @@
-import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk"
+import { IXmtpConversationTopic, IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { memo, useCallback, useMemo } from "react"
 import { Alert, ListRenderItem } from "react-native"
 import { useAnimatedStyle, useDerivedValue, withSpring } from "react-native-reanimated"
@@ -23,7 +23,7 @@ import { useXmtpInboxIdFromEthAddressQuery } from "@/features/xmtp/xmtp-inbox-id
 import { useAnimatedKeyboard } from "@/hooks/use-animated-keyboard"
 import { $globalStyles } from "@/theme/styles"
 import { useAppTheme } from "@/theme/use-app-theme"
-import { isEthereumAddress } from "@/utils/evm/address"
+import { IEthereumAddress, isEthereumAddress } from "@/utils/evm/address"
 import { SearchUsersResultsList } from "../../search-users/search-users-results-list"
 import { SearchUsersResultsListItemEthAddress } from "../../search-users/search-users-results-list-item-eth-address"
 import { SearchUsersResultsListItemGroup } from "../../search-users/search-users-results-list-item-group"
@@ -35,23 +35,22 @@ const MAX_INITIAL_RESULTS = 3
 
 type ISearchResultItemDm = {
   type: "dm"
-  conversationTopic: ConversationTopic
+  conversationTopic: IXmtpConversationTopic
 }
 
 type ISearchResultItemGroup = {
   type: "group"
-  conversationTopic: ConversationTopic
+  conversationTopic: IXmtpConversationTopic
 }
 
 type ISearchResultItemProfile = {
   type: "profile"
-  inboxId: InboxId
+  inboxId: IXmtpInboxId
 }
 
 type ISearchResultItemExternalIdentity = {
   type: "external_identity"
-  address: string
-  displayName?: string // For ENS, Base, or Unstoppable domains, this would be the original name
+  address: IEthereumAddress
 }
 
 type SearchResultItem =
@@ -80,7 +79,7 @@ function searchResultIsExternalIdentity(
 
 const SearchUsersResultsListItemUserDmWrapper = memo(
   function SearchUsersResultsListItemUserDmWrapper(props: {
-    conversationTopic: ConversationTopic
+    conversationTopic: IXmtpConversationTopic
   }) {
     const { conversationTopic } = props
 
@@ -89,7 +88,7 @@ const SearchUsersResultsListItemUserDmWrapper = memo(
     const currentSender = useSafeCurrentSender()
 
     const { data: peerInboxId, isLoading: isLoadingPeerInboxId } = useDmPeerInboxIdQuery({
-      account: currentSender.ethereumAddress,
+      inboxId: currentSender.inboxId,
       topic: conversationTopic,
       caller: "SearchUsersResultsListItemUserDmWrapper",
     })
@@ -124,7 +123,9 @@ const SearchUsersResultsListItemUserDmWrapper = memo(
 )
 
 const SearchUsersResultsListItemGroupWrapper = memo(
-  function SearchUsersResultsListItemGroupWrapper(props: { conversationTopic: ConversationTopic }) {
+  function SearchUsersResultsListItemGroupWrapper(props: {
+    conversationTopic: IXmtpConversationTopic
+  }) {
     const conversationStore = useConversationStore()
 
     const handlePress = useCallback(() => {
@@ -146,7 +147,7 @@ const SearchUsersResultsListItemGroupWrapper = memo(
 )
 
 const SearchUsersResultsListItemUserWrapper = memo(
-  function SearchUsersResultsListItemUserWrapper(props: { inboxId: InboxId }) {
+  function SearchUsersResultsListItemUserWrapper(props: { inboxId: IXmtpInboxId }) {
     const conversationStore = useConversationStore()
 
     const handlePress = useCallback(() => {
@@ -242,10 +243,6 @@ export const ConversationCreateListResults = memo(function ConversationCreateLis
   const { data: unstoppableDomainEthAddressResolution } =
     useUnstoppableDomainNameResolution(searchTextValue)
 
-  const isEthAddress = useMemo(() => {
-    return isEthereumAddress(searchTextValue)
-  }, [searchTextValue])
-
   const listData = useMemo(() => {
     const items: SearchResultItem[] = []
 
@@ -310,7 +307,7 @@ export const ConversationCreateListResults = memo(function ConversationCreateLis
 
     // 5. Add raw Ethereum address if the search query is an Ethereum address
     // and we don't have any Convos users
-    if (isEthAddress && searchConvosUsersData?.length === 0) {
+    if (isEthereumAddress(searchTextValue) && searchConvosUsersData?.length === 0) {
       items.push({
         type: "external_identity" as const,
         address: searchTextValue,
@@ -322,21 +319,18 @@ export const ConversationCreateListResults = memo(function ConversationCreateLis
       items.push({
         type: "external_identity" as const,
         address: ensEthAddressResolution,
-        displayName: searchTextValue,
       })
     }
     if (baseEthAddressResolution) {
       items.push({
         type: "external_identity" as const,
         address: baseEthAddressResolution,
-        displayName: searchTextValue,
       })
     }
     if (unstoppableDomainEthAddressResolution) {
       items.push({
         type: "external_identity" as const,
         address: unstoppableDomainEthAddressResolution,
-        displayName: searchTextValue,
       })
     }
 
@@ -348,7 +342,6 @@ export const ConversationCreateListResults = memo(function ConversationCreateLis
     searchConvosUsersData,
     selectedSearchUserInboxIds,
     searchTextValue,
-    isEthAddress,
     ensEthAddressResolution,
     baseEthAddressResolution,
     unstoppableDomainEthAddressResolution,

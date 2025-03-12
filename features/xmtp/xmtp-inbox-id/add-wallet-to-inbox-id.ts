@@ -1,19 +1,20 @@
-import { InboxId } from "@xmtp/react-native-sdk"
+import { IXmtpInboxId , IXmtpSigner } from "@features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
 import { XMTPError } from "@/utils/error"
 import { xmtpLogger } from "@/utils/logger"
 import { getXmtpClientByInboxId } from "../xmtp-client/xmtp-client.service"
-import { IXmtpSigner } from "../xmtp.types"
 
 export async function addWalletToInboxId(args: {
-  inboxId: InboxId
+  inboxId: IXmtpInboxId
   wallet: IXmtpSigner
   allowReassignInboxId?: boolean
 }) {
   const { inboxId, wallet, allowReassignInboxId = false } = args
 
+  const walletIdentifier = await wallet.getIdentifier()
+
   xmtpLogger.debug(
-    `[addWalletToInboxId] Adding wallet ${await wallet.getAddress()} to inbox ID: ${inboxId} with allowReassignInboxId: ${allowReassignInboxId}`,
+    `[addWalletToInboxId] Adding wallet ${walletIdentifier} to inbox ID: ${inboxId} with allowReassignInboxId: ${allowReassignInboxId}`,
   )
 
   try {
@@ -39,7 +40,7 @@ export async function addWalletToInboxId(args: {
   } catch (error) {
     throw new XMTPError({
       error,
-      additionalMessage: `Error adding wallet address ${await wallet.getAddress()} to inbox ID for inboxId ${inboxId}`,
+      additionalMessage: `Error adding wallet ${walletIdentifier} to inbox ID for inboxId ${inboxId}`,
     })
   }
 }

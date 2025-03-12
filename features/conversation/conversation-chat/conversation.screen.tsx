@@ -5,7 +5,7 @@ import { Screen } from "@/components/screen/screen"
 import { ActivityIndicator } from "@/design-system/activity-indicator"
 import { Center } from "@/design-system/Center"
 import { VStack } from "@/design-system/VStack"
-import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
+import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { ConversationComposer } from "@/features/conversation/conversation-chat/conversation-composer/conversation-composer"
 import { ConversationComposerStoreProvider } from "@/features/conversation/conversation-chat/conversation-composer/conversation-composer.store-context"
 import { ConversationKeyboardFiller } from "@/features/conversation/conversation-chat/conversation-keyboard-filler.component"
@@ -17,8 +17,8 @@ import { useConversationScreenHeader } from "@/features/conversation/conversatio
 import { ConversationCreateListResults } from "@/features/conversation/conversation-create/conversation-create-list-results"
 import { useConversationQuery } from "@/features/conversation/queries/conversation.query"
 import { SearchUsersInput } from "@/features/search-users/search-users-input"
+import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { NavigationParamList } from "@/navigation/navigation.types"
-import { useRouter } from "@/navigation/use-navigation"
 import { $globalStyles } from "@/theme/styles"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { useRefetchQueryOnRefocus } from "@/utils/react-query/use-refetch-query-on-focus"
@@ -59,22 +59,22 @@ export const ConversationScreen = memo(function ConversationScreen(
 const Content = memo(function Content() {
   const { theme } = useAppTheme()
 
-  const currentAccount = useCurrentSenderEthAddress()!
-  const navigation = useRouter()
+  const currentSender = useSafeCurrentSender()
   const topic = useConversationStoreContext((state) => state.topic)
   const isCreatingNewConversation = useConversationStoreContext(
     (state) => state.isCreatingNewConversation,
   )
 
   const { data: conversation, isLoading: isLoadingConversation } = useConversationQuery({
-    account: currentAccount,
+    inboxId: currentSender.inboxId,
     topic: topic!, // ! is okay because we have enabled in useQuery
     caller: "Conversation screen",
   })
 
   useRefetchQueryOnRefocus(
     topic
-      ? getConversationMessagesQueryOptions({ account: currentAccount, topic }).queryKey
+      ? getConversationMessagesQueryOptions({ clientInboxId: currentSender.inboxId, topic })
+          .queryKey
       : undefined,
   )
 
@@ -126,7 +126,7 @@ const ConversationCreateSearchInputWrapper = memo(function ConversationCreateSea
   )
 
   const handleSelectedInboxIdsChange = useCallback(
-    (inboxIds: string[]) => {
+    (inboxIds: IXmtpInboxId[]) => {
       conversationStore.setState({ searchSelectedUserInboxIds: inboxIds })
     },
     [conversationStore],

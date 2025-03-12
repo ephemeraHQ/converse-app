@@ -1,8 +1,10 @@
 import { Conversation } from "@xmtp/react-native-sdk"
+import { config } from "@/config"
 import { isReadReceiptMessage } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
+import { getXmtpClientByInboxId } from "@/features/xmtp/xmtp-client/xmtp-client.service"
 import { captureError } from "@/utils/capture-error"
 import { XMTPError } from "@/utils/error"
-import { IXmtpDecodedMessage } from "../xmtp.types"
+import { IXmtpDecodedMessage, IXmtpInboxId, IXmtpMessageId } from "../xmtp.types"
 
 export function isSupportedMessage(message: IXmtpDecodedMessage) {
   if (isReadReceiptMessage(message)) {
@@ -40,6 +42,38 @@ export async function getXmtpConversationMessages(args: {
     throw new XMTPError({
       error,
       additionalMessage: `Error fetching messages for conversation ${conversation.topic}`,
+    })
+  }
+}
+
+export async function getXmtpConversationMessage(args: {
+  messageId: IXmtpMessageId
+  clientInboxId: IXmtpInboxId
+}) {
+  const { messageId, clientInboxId } = args
+  try {
+    const client = await getXmtpClientByInboxId({
+      inboxId: clientInboxId,
+    })
+
+    const beforeMs = new Date().getTime()
+    const message = await client.conversations.findMessage(messageId)
+    const afterMs = new Date().getTime()
+
+    const timeDiffMs = afterMs - beforeMs
+    if (timeDiffMs > config.xmtp.maxMsUntilLogError) {
+      captureError(
+        new XMTPError({
+          error: new Error(`Finding message ${messageId} took ${timeDiffMs}ms`),
+        }),
+      )
+    }
+
+    return message
+  } catch (error) {
+    throw new XMTPError({
+      error,
+      additionalMessage: `Error finding message ${messageId}`,
     })
   }
 }

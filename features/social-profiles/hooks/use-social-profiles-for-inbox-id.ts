@@ -1,4 +1,4 @@
-import { InboxId } from "@xmtp/react-native-sdk"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import {
   getSafeCurrentSender,
   useSafeCurrentSender,
@@ -12,14 +12,14 @@ import {
   useEthAddressesForXmtpInboxId,
 } from "@/features/xmtp/xmtp-inbox-id/eth-addresses-for-xmtp-inbox-id.query"
 
-export function useSocialProfilesForInboxId(args: { inboxId: InboxId | undefined }) {
+export function useSocialProfilesForInboxId(args: { inboxId: IXmtpInboxId | undefined }) {
   const { inboxId } = args
 
   const currentSender = useSafeCurrentSender()
 
   const { data: ethAddresses, isLoading: isLoadingEthAddresses } = useEthAddressesForXmtpInboxId({
     inboxId,
-    clientEthAddress: currentSender.ethereumAddress,
+    clientInboxId: currentSender.inboxId,
   })
 
   const { data: socialProfiles, isLoading: isLoadingSocialProfiles } =
@@ -33,14 +33,14 @@ export function useSocialProfilesForInboxId(args: { inboxId: InboxId | undefined
   }
 }
 
-export async function getSocialProfilesForInboxId(args: { inboxId: InboxId }) {
+export async function getSocialProfilesForInboxId(args: { inboxId: IXmtpInboxId }) {
   const { inboxId } = args
 
   const currentSender = getSafeCurrentSender()
 
   const ethAddresses = await ensureEthAddressForXmtpInboxId({
     inboxId,
-    clientEthAddress: currentSender.ethereumAddress,
+    clientInboxId: currentSender.inboxId,
   })
 
   if (!ethAddresses) {
@@ -48,7 +48,7 @@ export async function getSocialProfilesForInboxId(args: { inboxId: InboxId }) {
   }
 
   const socialProfiles = await ensureSocialProfilesForAddressesQuery({
-    ethAddresses: ethAddresses,
+    ethAddresses: ethAddresses.map((ethAddress) => ethAddress),
   })
 
   return socialProfiles

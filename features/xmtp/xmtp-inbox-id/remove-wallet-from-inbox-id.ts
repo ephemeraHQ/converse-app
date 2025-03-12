@@ -1,12 +1,12 @@
-import { InboxId } from "@xmtp/react-native-sdk"
-import { IXmtpSigner } from "@/features/xmtp/xmtp.types"
+import { InboxId, PublicIdentity } from "@xmtp/react-native-sdk"
+import { IXmtpInboxId, IXmtpSigner } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
 import { XMTPError } from "@/utils/error"
 import { xmtpLogger } from "@/utils/logger"
 import { getXmtpClientByInboxId } from "../xmtp-client/xmtp-client.service"
 
 export async function removeWalletFromInboxId(args: {
-  inboxId: InboxId
+  inboxId: IXmtpInboxId
   signer: IXmtpSigner
   ethAddressToRemove: string
 }) {
@@ -22,7 +22,7 @@ export async function removeWalletFromInboxId(args: {
     })
 
     const beforeMs = new Date().getTime()
-    await client.removeAccount(signer, ethAddressToRemove)
+    await client.removeAccount(signer, new PublicIdentity(ethAddressToRemove, "ETHEREUM"))
     const afterMs = new Date().getTime()
 
     const timeDiffMs = afterMs - beforeMs

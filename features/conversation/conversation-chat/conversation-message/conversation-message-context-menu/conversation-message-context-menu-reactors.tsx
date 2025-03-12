@@ -1,5 +1,4 @@
 import { Text } from "@design-system/Text"
-import { InboxId, ReactionContent } from "@xmtp/react-native-sdk"
 import React, { FC, memo, useMemo } from "react"
 import { FlatList } from "react-native-gesture-handler"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
@@ -7,12 +6,13 @@ import { GroupAvatarInboxIds } from "@/components/group-avatar"
 import { AnimatedCenter, Center } from "@/design-system/Center"
 import { HStack } from "@/design-system/HStack"
 import { getReactionContent } from "@/features/xmtp/xmtp-codecs/xmtp-codecs-reaction"
+import { IXmtpInboxId, IXmtpReactionContent } from "@/features/xmtp/xmtp.types"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { ObjectTyped } from "@/utils/object-typed"
 
 type MessageContextMenuReactorsProps = {
   reactors: {
-    [reactor: InboxId]: ReactionContent[]
+    [reactor: IXmtpInboxId]: IXmtpReactionContent[]
   }
 }
 
@@ -26,7 +26,7 @@ export const MessageContextMenuReactors: FC<MessageContextMenuReactorsProps> = (
       return []
     }
 
-    const reactionMap: Record<string, InboxId[]> = {}
+    const reactionMap: Record<string, IXmtpInboxId[]> = {}
     ObjectTyped.entries(reactors).forEach(([reactorInboxId, reactions]) => {
       if (!reactions || reactions.length === 0) {
         return
@@ -35,7 +35,7 @@ export const MessageContextMenuReactors: FC<MessageContextMenuReactorsProps> = (
         if (!reactionMap[getReactionContent(reaction)]) {
           reactionMap[getReactionContent(reaction)] = []
         }
-        reactionMap[getReactionContent(reaction)].push(reactorInboxId as InboxId)
+        reactionMap[getReactionContent(reaction)].push(reactorInboxId as IXmtpInboxId)
       }
     })
     return Object.entries(reactionMap)
@@ -73,7 +73,7 @@ export const MessageContextMenuReactors: FC<MessageContextMenuReactorsProps> = (
 
 type MessageReactionsItemProps = {
   content: string
-  inboxIds: InboxId[]
+  inboxIds: IXmtpInboxId[]
 }
 
 const Item = memo(function Item({ content, inboxIds }: MessageReactionsItemProps) {

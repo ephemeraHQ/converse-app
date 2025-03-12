@@ -1,6 +1,7 @@
-import { InboxId } from "@xmtp/react-native-sdk"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { ReactNode } from "react"
 import { z } from "zod"
+import { IEthereumAddress } from "@/utils/evm/address"
 
 // API Schemas
 export const ConvosProfileForInboxSchema = z.object({
@@ -8,9 +9,9 @@ export const ConvosProfileForInboxSchema = z.object({
   name: z.string(),
   username: z.string(),
   description: z.string().nullable(),
-  xmtpId: z.string(),
+  xmtpId: z.custom<IXmtpInboxId>(),
   avatar: z.string().nullable(),
-  privyAddress: z.string(),
+  privyAddress: z.custom<IEthereumAddress>(),
 })
 
 export const ClaimProfileResponseSchema = z.object({
@@ -30,8 +31,8 @@ export type ProfileUpdates = {
 
 export type ProfileInput = ProfileUpdates & {
   id?: string
-  xmtpId?: string
-  privyAddress?: string
+  xmtpId?: IXmtpInboxId
+  privyAddress?: IEthereumAddress
 }
 
 export type ClaimProfileRequest = {
@@ -90,5 +91,5 @@ export type IContactCardProps = {
 }
 
 export type IProfileContactCardProps = {
-  inboxId: InboxId
+  inboxId: IXmtpInboxId
 }

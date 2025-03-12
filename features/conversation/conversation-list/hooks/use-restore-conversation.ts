@@ -1,19 +1,20 @@
+import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
 import { useMutation } from "@tanstack/react-query"
-import { ConversationTopic } from "@xmtp/react-native-sdk"
-import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
+import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import {
   getConversationMetadataQueryData,
   updateConversationMetadataQueryData,
 } from "@/features/conversation/conversation-metadata/conversation-metadata.query"
 
-export function useRestoreConversation(args: { topic: ConversationTopic }) {
+export function useRestoreConversation(args: { topic: IXmtpConversationTopic }) {
   const { topic } = args
-  const currentAccount = useCurrentSenderEthAddress()!
+
+  const currentSender = useSafeCurrentSender()
 
   const { mutateAsync: restoreConversationAsync } = useMutation({
     mutationFn: () => {
       updateConversationMetadataQueryData({
-        account: currentAccount,
+        clientInboxId: currentSender.inboxId,
         topic,
         updateData: { deleted: false },
       })
@@ -21,7 +22,7 @@ export function useRestoreConversation(args: { topic: ConversationTopic }) {
     },
     onMutate: () => {
       const previousDeleted = getConversationMetadataQueryData({
-        account: currentAccount,
+        clientInboxId: currentSender.inboxId,
         topic,
       })?.deleted
 
@@ -29,7 +30,7 @@ export function useRestoreConversation(args: { topic: ConversationTopic }) {
     },
     onError: (error, _, context) => {
       updateConversationMetadataQueryData({
-        account: currentAccount,
+        clientInboxId: currentSender.inboxId,
         topic,
         updateData: { deleted: context?.previousDeleted },
       })

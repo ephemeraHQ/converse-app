@@ -1,7 +1,7 @@
 import { useCallback } from "react"
 import { Avatar } from "@/components/avatar"
 import { VStack } from "@/design-system/VStack"
-import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
+import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { useConversationListPinnedConversationsStyles } from "@/features/conversation/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversations.styles"
 import { useConversationIsUnread } from "@/features/conversation/conversation-list/hooks/use-conversation-is-unread"
 import { useDmConversationContextMenuViewProps } from "@/features/conversation/conversation-list/hooks/use-conversation-list-item-context-menu-props"
@@ -20,12 +20,12 @@ type IConversationListPinnedConversationDmProps = {
 export const ConversationListPinnedConversationDm = ({
   conversation,
 }: IConversationListPinnedConversationDmProps) => {
-  const currentAccount = useCurrentSenderEthAddress()!
+  const currentSender = useSafeCurrentSender()
   const conversationTopic = conversation.topic
   const { avatarSize } = useConversationListPinnedConversationsStyles()
 
   const { data: peerInboxId } = useDmPeerInboxIdQuery({
-    account: currentAccount!,
+    inboxId: currentSender.inboxId,
     topic: conversationTopic,
     caller: "ConversationListPinnedConversationDm",
   })

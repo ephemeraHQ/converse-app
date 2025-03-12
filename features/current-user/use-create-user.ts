@@ -4,12 +4,13 @@ import { z } from "zod"
 import { setCurrentUserQueryData } from "@/features/current-user/curent-user.query"
 import { invalidateProfileQuery, setProfileQueryData } from "@/features/profiles/profiles.query"
 import { profileValidationSchema } from "@/features/profiles/schemas/profile-validation.schema"
+import { IEthereumAddress } from "@/utils/evm/address"
 import { createUser } from "../authentication/create-user.api"
 
 const createUserRequestSchema = z.object({
   inboxId: z.string(),
   privyUserId: z.string(),
-  smartContractWalletAddress: z.string(),
+  smartContractWalletAddress: z.custom<IEthereumAddress>(),
   profile: profileValidationSchema.pick({
     name: true,
     username: true,
@@ -76,7 +77,9 @@ export function useCreateUser() {
           name: data.profile.name,
           username: data.profile.username,
           description: data.profile.description ?? null,
-          ...(data.profile.avatar && { avatar: data.profile.avatar }),
+          privyAddress: data.identity.privyAddress,
+          xmtpId: data.identity.xmtpId,
+          avatar: data.profile.avatar ?? null,
         },
       })
 

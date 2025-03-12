@@ -1,6 +1,5 @@
+import { IXmtpConversationTopic, IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { useMutation } from "@tanstack/react-query"
-import type { ConversationTopic } from "@xmtp/react-native-sdk"
-import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client"
 import { captureError } from "@/utils/capture-error"
 import {
   cancelGroupMembersQuery,
@@ -10,25 +9,30 @@ import {
 } from "../../useGroupMembersQuery"
 import { useGroupQuery } from "../../useGroupQuery"
 
-export const usePromoteToSuperAdminMutation = (account: string, topic: ConversationTopic) => {
-  const { data: group } = useGroupQuery({ account, topic })
+export const usePromoteToSuperAdminMutation = (args: {
+  clientInboxId: IXmtpInboxId
+  topic: IXmtpConversationTopic
+}) => {
+  const { clientInboxId, topic } = args
+
+  const { data: group } = useGroupQuery({ inboxId: clientInboxId, topic })
 
   return useMutation({
-    mutationFn: async (inboxId: InboxId) => {
+    mutationFn: async (inboxId: IXmtpInboxId) => {
       if (!group) {
         throw new Error("No group found to promote member to super admin")
       }
       return group.addSuperAdmin(inboxId)
     },
-    onMutate: async (inboxId: InboxId) => {
+    onMutate: async (inboxId: IXmtpInboxId) => {
       if (!topic) {
         return
       }
 
-      cancelGroupMembersQuery({ account, topic }).catch(captureError)
+      cancelGroupMembersQuery({ clientInboxId, topic }).catch(captureError)
 
       const previousGroupMembers = getGroupMembersQueryData({
-        account,
+        clientInboxId,
         topic,
       })
       if (!previousGroupMembers) {
@@ -42,7 +46,7 @@ export const usePromoteToSuperAdminMutation = (account: string, topic: Conversat
 
       newMembers.byId[inboxId].permission = "super_admin"
       setGroupMembersQueryData({
-        account,
+        clientInboxId,
         topic,
         members: newMembers,
       })
@@ -55,13 +59,13 @@ export const usePromoteToSuperAdminMutation = (account: string, topic: Conversat
       }
 
       setGroupMembersQueryData({
-        account,
+        clientInboxId,
         topic,
         members: context.previousGroupMembers,
       })
     },
     onSuccess: () => {
-      invalidateGroupMembersQuery({ account, topic }).catch(captureError)
+      invalidateGroupMembersQuery({ clientInboxId, topic }).catch(captureError)
     },
   })
 }

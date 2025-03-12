@@ -1,10 +1,10 @@
-import { InboxId } from "@xmtp/react-native-sdk"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { IEthereumAddress } from "@/utils/evm/address"
 import { getXmtpClientByEthAddress } from "../xmtp-client/xmtp-client.service"
 
 export async function getRecoveryAddressesForInboxIds(args: {
   clientEthAddress: IEthereumAddress
-  inboxIds: InboxId[]
+  inboxIds: IXmtpInboxId[]
 }) {
   const { clientEthAddress, inboxIds } = args
 
@@ -14,5 +14,7 @@ export async function getRecoveryAddressesForInboxIds(args: {
 
   const inboxStates = await client.inboxStates(true, inboxIds)
 
-  return inboxStates.map((inboxState) => inboxState.recoveryAddress)
+  return inboxStates
+    .filter((inboxState) => inboxState.recoveryIdentity.kind === "ETHEREUM")
+    .map((inboxState) => inboxState.recoveryIdentity.identifier)
 }

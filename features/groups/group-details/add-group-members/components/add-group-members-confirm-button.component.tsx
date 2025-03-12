@@ -25,7 +25,7 @@ export const AddGroupMembersConfirmButton = memo(function AddGroupMembersConfirm
   const { mutateAsync: addGroupMembers } = useAddGroupMembersMutation()
 
   const { data: group } = useGroupQuery({
-    account: getSafeCurrentSender().ethereumAddress,
+    inboxId: getSafeCurrentSender().ethereumAddress,
     topic: groupTopic,
   })
 

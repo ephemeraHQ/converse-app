@@ -1,3 +1,4 @@
+import { PublicIdentity } from "@xmtp/react-native-sdk"
 import { captureError } from "@/utils/capture-error"
 import { GenericError, XMTPError } from "@/utils/error"
 import { IEthereumAddress } from "@/utils/evm/address"
@@ -44,7 +45,9 @@ export async function getInboxIdFromEthAddress(args: {
 
   try {
     const lookupStartTime = Date.now()
-    const inboxId = await client.findInboxIdFromAddress(targetEthAddress)
+    const inboxId = await client.findInboxIdFromIdentity(
+      new PublicIdentity(targetEthAddress, "ETHEREUM"),
+    )
     const lookupEndTime = Date.now()
 
     const lookupDuration = lookupEndTime - lookupStartTime

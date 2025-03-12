@@ -1,4 +1,4 @@
-import { ConversationTopic } from "@xmtp/react-native-sdk"
+import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
 import { useCallback } from "react"
 import { IContextMenuViewProps, IMenuActionConfig } from "@/design-system/context-menu/context-menu"
 import { iconRegistry } from "@/design-system/Icon/Icon"
@@ -17,7 +17,7 @@ import { usePinOrUnpinConversation } from "./use-pin-or-unpin-conversation"
 
 // Specific hook for DM conversations
 export function useDmConversationContextMenuViewProps(args: {
-  dmConversationTopic: ConversationTopic
+  dmConversationTopic: IXmtpConversationTopic
 }) {
   const { dmConversationTopic: conversationTopic } = args
   const deleteMenuItem = useDmDeleteMenuItem({ conversationTopic })
@@ -30,7 +30,7 @@ export function useDmConversationContextMenuViewProps(args: {
 
 // Specific hook for Group conversations
 export function useGroupConversationContextMenuViewProps(args: {
-  groupConversationTopic: ConversationTopic
+  groupConversationTopic: IXmtpConversationTopic
 }) {
   const { groupConversationTopic: conversationTopic } = args
   const deleteMenuItem = useGroupDeleteMenuItem({ conversationTopic })
@@ -43,7 +43,7 @@ export function useGroupConversationContextMenuViewProps(args: {
 
 // Base hook with shared functionality
 function useBaseConversationContextMenuViewProps(args: {
-  conversationTopic: ConversationTopic
+  conversationTopic: IXmtpConversationTopic
   deleteMenuItem: IUseContextMenuItemArgs
 }) {
   const { conversationTopic, deleteMenuItem } = args
@@ -97,7 +97,7 @@ function useBaseConversationContextMenuViewProps(args: {
 type IUseContextMenuItemArgs = IMenuActionConfig & { onPress: () => void }
 
 function useConversationContextMenuPinItem(args: {
-  conversationTopic: ConversationTopic
+  conversationTopic: IXmtpConversationTopic
 }): IUseContextMenuItemArgs {
   const { conversationTopic } = args
 
@@ -127,7 +127,7 @@ function useConversationContextMenuPinItem(args: {
 }
 
 function useConversationContextMenuReadItem(args: {
-  conversationTopic: ConversationTopic
+  conversationTopic: IXmtpConversationTopic
 }): IUseContextMenuItemArgs {
   const { conversationTopic } = args
 
@@ -165,7 +165,11 @@ function useBaseDeleteMenuItem({ onDelete }: { onDelete: () => Promise<void> }) 
   } satisfies Omit<IUseContextMenuItemArgs, "onPress">
 }
 
-function useGroupDeleteMenuItem({ conversationTopic }: { conversationTopic: ConversationTopic }) {
+function useGroupDeleteMenuItem({
+  conversationTopic,
+}: {
+  conversationTopic: IXmtpConversationTopic
+}) {
   const deleteGroup = useDeleteGroup({ groupTopic: conversationTopic })
 
   const handleDelete = useCallback(async () => {
@@ -184,7 +188,7 @@ function useGroupDeleteMenuItem({ conversationTopic }: { conversationTopic: Conv
   } satisfies IUseContextMenuItemArgs
 }
 
-function useDmDeleteMenuItem({ conversationTopic }: { conversationTopic: ConversationTopic }) {
+function useDmDeleteMenuItem({ conversationTopic }: { conversationTopic: IXmtpConversationTopic }) {
   const deleteDm = useDeleteDm({ topic: conversationTopic })
 
   const handleDelete = useCallback(async () => {

@@ -1,5 +1,5 @@
+import { IXmtpInboxId , IXmtpGroupWithCodecs } from "@features/xmtp/xmtp.types"
 import { useMutation } from "@tanstack/react-query"
-import { InboxId } from "@xmtp/react-native-sdk"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import {
   addGroupMembersToQueryData,
@@ -8,12 +8,11 @@ import {
   invalidateGroupMembersQuery,
   setGroupMembersQueryData,
 } from "@/features/groups/useGroupMembersQuery"
-import { addGroupMembers } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-group"
-import { IXmtpGroupWithCodecs } from "@/features/xmtp/xmtp.types"
+import { addXmtpGroupMembers } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-group"
 
 type AddGroupMembersVariables = {
   group: IXmtpGroupWithCodecs
-  inboxIds: InboxId[]
+  inboxIds: IXmtpInboxId[]
 }
 
 export function useAddGroupMembersMutation() {
@@ -21,24 +20,27 @@ export function useAddGroupMembersMutation() {
 
   return useMutation({
     mutationFn: async (variables: AddGroupMembersVariables) => {
-      return addGroupMembers(variables)
+      return addXmtpGroupMembers(variables)
     },
     onMutate: async (variables: AddGroupMembersVariables) => {
       const { group, inboxIds } = variables
 
       // Cancel any outgoing refetches
-      await cancelGroupMembersQuery({ account: currentSender.ethereumAddress, topic: group.topic })
+      await cancelGroupMembersQuery({
+        clientInboxId: currentSender.inboxId,
+        topic: group.topic,
+      })
 
       // Get current group members
       const previousMembers = getGroupMembersQueryData({
-        account: currentSender.ethereumAddress,
+        clientInboxId: currentSender.inboxId,
         topic: group.topic,
       })
 
       for (const inboxId of inboxIds) {
         // Create optimistic members
         addGroupMembersToQueryData({
-          account: currentSender.ethereumAddress,
+          clientInboxId: currentSender.inboxId,
           topic: group.topic,
           member: {
             inboxId,
@@ -54,7 +56,7 @@ export function useAddGroupMembersMutation() {
       // Roll back to previous members on error
       if (context?.previousMembers) {
         setGroupMembersQueryData({
-          account: currentSender.ethereumAddress,
+          clientInboxId: currentSender.inboxId,
           topic: variables.group.topic,
           members: context.previousMembers,
         })
@@ -63,7 +65,7 @@ export function useAddGroupMembersMutation() {
     onSettled: (_data, _error, variables) => {
       // Invalidate and refetch after error or success
       invalidateGroupMembersQuery({
-        account: currentSender.ethereumAddress,
+        clientInboxId: currentSender.inboxId,
         topic: variables.group.topic,
       })
     },

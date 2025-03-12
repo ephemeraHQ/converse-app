@@ -1,22 +1,22 @@
 import { useQueries } from "@tanstack/react-query"
 import { useMemo } from "react"
-import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
+import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { useAllowedConsentConversationsQuery } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import { getConversationMetadataQueryOptions } from "@/features/conversation/conversation-metadata/conversation-metadata.query"
 
 export function usePinnedConversations() {
-  const currentAccount = useCurrentSenderEthAddress()
+  const currentSender = useSafeCurrentSender()
 
   const { isLoading: isLoadingConversations, data: conversations } =
     useAllowedConsentConversationsQuery({
-      account: currentAccount!,
+      inboxId: currentSender.inboxId,
       caller: "usePinnedConversations",
     })
 
   const conversationsDataQueries = useQueries({
     queries: (conversations ?? []).map((conversation) =>
       getConversationMetadataQueryOptions({
-        account: currentAccount!,
+        clientInboxId: currentSender.inboxId,
         topic: conversation.topic,
       }),
     ),

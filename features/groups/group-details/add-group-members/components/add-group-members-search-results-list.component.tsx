@@ -2,17 +2,19 @@ import { memo, useCallback, useMemo } from "react"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { useSearchConvosUsersQuery } from "@/features/search-users/queries/search-convos-users.query"
 import { SearchUsersResultsList } from "@/features/search-users/search-users-results-list"
-import { useSocialProfilesForAddressQuery } from "@/features/social-profiles/social-profiles.query"
-import { isEthereumAddress } from "@/utils/evm/address"
 import {
-  searchResultIsEthAddress,
-  searchResultIsProfile,
-  searchResultIsSocialProfile,
+  useBaseNameResolution,
+  useEnsNameResolution,
+  useUnstoppableDomainNameResolution,
+} from "@/features/social-profiles/identity-resolution.query"
+import { IEthereumAddress, isEthereumAddress } from "@/utils/evm/address"
+import {
+  searchResultIsConvosProfile,
+  searchResultIsExternalIdentity,
   SearchResultItem,
 } from "../add-group-members.types"
 import { useAddGroupMembersStore } from "../stores/add-group-members.store"
 import { AddGroupMembersSearchUsersResultsListItemEthAddress } from "./add-group-members-search-users-results-list-item-eth-address.component"
-import { AddGroupMembersSearchUsersResultsListItemNoConvosUser } from "./add-group-members-search-users-results-list-item-no-convos-user.component"
 import { AddGroupMembersSearchUsersResultsListItemUser } from "./add-group-members-search-users-results-list-item-user-.component"
 
 export const AddGroupMembersSearchUsersResultsList = memo(
@@ -27,16 +29,14 @@ export const AddGroupMembersSearchUsersResultsList = memo(
         inboxIdsToOmit: [...selectedInboxIds, currentUserInboxId],
       })
 
+    const { data: ensEthAddressResolution, isLoading: isEnsNameResolutionLoading } =
+      useEnsNameResolution(searchQuery)
+    const { data: baseEthAddressResolution, isLoading: isBaseNameResolutionLoading } =
+      useBaseNameResolution(searchQuery)
     const {
-      data: socialProfilesForEthAddress = [],
-      isLoading: isLoadingSocialProfilesForEthAddress,
-    } = useSocialProfilesForAddressQuery({
-      ethAddress: searchQuery,
-    })
-
-    const isEthAddress = useMemo(() => {
-      return isEthereumAddress(searchQuery)
-    }, [searchQuery])
+      data: unstoppableDomainEthAddressResolution,
+      isLoading: isUnstoppableDomainResolutionLoading,
+    } = useUnstoppableDomainNameResolution(searchQuery)
 
     const listData = useMemo(() => {
       const items: SearchResultItem[] = []
@@ -46,54 +46,61 @@ export const AddGroupMembersSearchUsersResultsList = memo(
       }
 
       // 1. Add user profiles
-      const profiles = searchConvosUsersData?.map((profile) => ({
+      const convosProfiles = searchConvosUsersData?.map((profile) => ({
         type: "profile" as const,
         inboxId: profile.xmtpId,
       }))
 
-      items.push(...(profiles ?? []))
+      items.push(...(convosProfiles ?? []))
 
-      // 2. Add social profiles only if we don't have any conversation users
-      if (searchConvosUsersData?.length === 0 && socialProfilesForEthAddress.length > 0) {
-        items.push(
-          ...socialProfilesForEthAddress.map((profile) => ({
-            type: "socialProfile" as const,
-            profile,
-          })),
-        )
+      // 2. Add raw Ethereum address
+      if (isEthereumAddress(searchQuery)) {
+        items.push({
+          type: "externalIdentity",
+          address: searchQuery as IEthereumAddress,
+        })
       }
 
-      // 3. Add raw Ethereum address if:
-      // - The search query is an Ethereum address
-      // - We don't have any social profiles for it
-      // - We don't have any conversation users
-      if (
-        isEthAddress &&
-        socialProfilesForEthAddress.length === 0 &&
-        searchConvosUsersData?.length === 0
-      ) {
+      // 3. Add ENS, Base, or Unstoppable domains if resolved
+      if (ensEthAddressResolution) {
         items.push({
-          type: "ethAddress",
-          address: searchQuery,
+          type: "externalIdentity",
+          address: ensEthAddressResolution,
+        })
+      }
+      if (baseEthAddressResolution) {
+        items.push({
+          type: "externalIdentity",
+          address: baseEthAddressResolution,
+        })
+      }
+      if (unstoppableDomainEthAddressResolution) {
+        items.push({
+          type: "externalIdentity",
+          address: unstoppableDomainEthAddressResolution,
         })
       }
 
       return items
-    }, [searchConvosUsersData, socialProfilesForEthAddress, searchQuery, isEthAddress])
+    }, [
+      searchConvosUsersData,
+      searchQuery,
+      ensEthAddressResolution,
+      baseEthAddressResolution,
+      unstoppableDomainEthAddressResolution,
+    ])
 
     const isStillLoadingSearchResults =
-      isSearchingConvosUsers || isLoadingSocialProfilesForEthAddress
+      isSearchingConvosUsers ||
+      isEnsNameResolutionLoading ||
+      isBaseNameResolutionLoading ||
+      isUnstoppableDomainResolutionLoading
 
     const renderItem = useCallback(({ item }: { item: SearchResultItem }) => {
-      if (searchResultIsProfile(item)) {
+      if (searchResultIsConvosProfile(item)) {
         return <AddGroupMembersSearchUsersResultsListItemUser inboxId={item.inboxId} />
       }
-      if (searchResultIsSocialProfile(item)) {
-        return (
-          <AddGroupMembersSearchUsersResultsListItemNoConvosUser socialProfile={item.profile} />
-        )
-      }
-      if (searchResultIsEthAddress(item)) {
+      if (searchResultIsExternalIdentity(item)) {
         return <AddGroupMembersSearchUsersResultsListItemEthAddress ethAddress={item.address} />
       }
       const _ensureNever: never = item
@@ -101,14 +108,11 @@ export const AddGroupMembersSearchUsersResultsList = memo(
     }, [])
 
     const keyExtractor = useCallback((item: SearchResultItem): string => {
-      if (searchResultIsProfile(item)) {
+      if (searchResultIsConvosProfile(item)) {
         return `profile-${item.inboxId}`
       }
-      if (searchResultIsSocialProfile(item)) {
-        return `social-profile-${item.profile.type}-${item.profile.address}`
-      }
-      if (searchResultIsEthAddress(item)) {
-        return `eth-address-${item.address}`
+      if (searchResultIsExternalIdentity(item)) {
+        return `external-identity-${item.address}`
       }
       const _ensureNever: never = item
       throw new Error("Invalid item type")

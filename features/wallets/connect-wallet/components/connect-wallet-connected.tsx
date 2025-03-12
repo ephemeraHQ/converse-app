@@ -6,6 +6,7 @@ import { useConnectWalletStore } from "@/features/wallets/connect-wallet/connect
 import { IWallet } from "@/features/wallets/connect-wallet/connect-wallet.types"
 import { useXmtpInboxIdFromEthAddressQuery } from "@/features/xmtp/xmtp-inbox-id/xmtp-inbox-id-from-eth-address.query"
 import { useRouter } from "@/navigation/use-navigation"
+import { IEthereumAddress } from "@/utils/evm/address"
 import { ConnectWalletErrorContent, ConnectWalletLoadingContent } from "../connect-wallet.ui"
 import { ConnectWalletLinkToInbox } from "./connect-wallet-link-to-inbox"
 import { ConnectWalletRotateInbox } from "./connect-wallet-rotate-inbox"
@@ -19,7 +20,7 @@ export const WalletConnected = memo(function WalletConnected(props: IWalletConne
 
   const router = useRouter()
 
-  const walletAddress = activeWallet.getAccount()?.address
+  const walletAddress = activeWallet.getAccount()?.address as IEthereumAddress
 
   const selectedInfo = useConnectWalletStore((state) => state.selectedInfo)
 

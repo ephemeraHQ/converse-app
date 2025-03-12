@@ -1,10 +1,10 @@
+import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
 import { getCompactRelativeTime } from "@utils/date"
-import { ConversationTopic } from "@xmtp/react-native-sdk"
 import { memo, useCallback, useMemo } from "react"
 import { Avatar } from "@/components/avatar"
 import { ISwipeableRenderActionsArgs } from "@/components/swipeable"
 import { MIDDLE_DOT } from "@/design-system/middle-dot"
-import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
+import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { ConversationListItemSwipeable } from "@/features/conversation/conversation-list/conversation-list-item/conversation-list-item-swipeable/conversation-list-item-swipeable"
 import { RestoreSwipeableAction } from "@/features/conversation/conversation-list/conversation-list-item/conversation-list-item-swipeable/conversation-list-item-swipeable-restore-action"
 import { useConversationIsDeleted } from "@/features/conversation/conversation-list/hooks/use-conversation-is-deleted"
@@ -25,13 +25,13 @@ import { DeleteSwipeableAction } from "./conversation-list-item-swipeable/conver
 import { ToggleUnreadSwipeableAction } from "./conversation-list-item-swipeable/conversation-list-item-swipeable-toggle-read-action"
 
 type IConversationListItemDmProps = {
-  conversationTopic: ConversationTopic
+  conversationTopic: IXmtpConversationTopic
 }
 
 export const ConversationListItemDm = memo(function ConversationListItemDm({
   conversationTopic,
 }: IConversationListItemDmProps) {
-  const currentAccount = useCurrentSenderEthAddress()!
+  const currentSender = useSafeCurrentSender()
   const { theme } = useAppTheme()
 
   // Need this so the timestamp is updated on every focus
@@ -39,13 +39,13 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
 
   // Conversation related hooks
   const { data: conversation } = useConversationQuery({
-    account: currentAccount,
+    inboxId: currentSender.inboxId,
     topic: conversationTopic,
     caller: "Conversation List Item Dm",
   })
 
   const { data: peerInboxId } = useDmPeerInboxIdQuery({
-    account: currentAccount,
+    inboxId: currentSender.inboxId,
     topic: conversationTopic,
     caller: "ConversationListItemDm",
   })

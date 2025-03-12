@@ -1,6 +1,6 @@
 {
   "name": "converse",
-  "version": "2.2.50",
+  "version": "2.2.51",
   "private": true,
   "scripts": {
     "android": "expo run:android",
@@ -73,7 +73,7 @@
     "@thirdweb-dev/react-native-adapter": "^1.5.3",
     "@walletconnect/react-native-compat": "^2.19.0",
     "@xmtp/content-type-primitives": "^2.0.0",
-    "@xmtp/react-native-sdk": "^3.1.17",
+    "@xmtp/react-native-sdk": "github:xmtp/xmtp-react-native#np/signature-updates",
     "@xstate/react": "^5.0.0",
     "@yornaath/batshit": "^0.10.1",
     "alchemy-sdk": "^3.4.4",

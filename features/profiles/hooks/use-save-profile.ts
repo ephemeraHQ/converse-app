@@ -1,15 +1,16 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { type IConvosProfileForInbox, type ProfileInput } from "@/features/profiles/profile.types"
-import { saveProfileAsync } from "@/features/profiles/profiles.api"
+import { useMutation } from "@tanstack/react-query"
+import { type ProfileInput } from "@/features/profiles/profile.types"
+import { saveProfile } from "@/features/profiles/profiles.api"
 import {
   getProfileQueryData,
   invalidateProfileQuery,
   setProfileQueryData,
 } from "@/features/profiles/profiles.query"
+import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 
 type SaveProfileArgs = {
   profile: ProfileInput
-  inboxId: string
+  inboxId: IXmtpInboxId
 }
 
 /**
@@ -25,7 +26,7 @@ export function useSaveProfile() {
         ...args.profile,
         xmtpId: args.inboxId,
       }
-      return saveProfileAsync({
+      return saveProfile({
         profile: profileWithXmtpId,
         inboxId: args.inboxId,
       })
@@ -34,11 +35,12 @@ export function useSaveProfile() {
       // Capture the previous profile data for rollback
       const previousProfile = getProfileQueryData({
         xmtpId: args.inboxId,
-      }) as IConvosProfileForInbox | undefined
+      })
 
       // Optimistically update the profile in the cache
       setProfileQueryData({
         xmtpId: args.inboxId,
+        // @ts-expect-error - TODO: fix this
         data: {
           ...(previousProfile || {}),
           ...args.profile,

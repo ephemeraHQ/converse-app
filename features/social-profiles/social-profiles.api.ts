@@ -1,6 +1,7 @@
 import { z } from "zod"
 import { api } from "@/utils/api/api"
 import { captureError } from "@/utils/capture-error"
+import { IEthereumAddress } from "@/utils/evm/address"
 
 // Define the profile type enum to match backend
 const ProfileType = z.enum(["ens", "farcaster", "basename", "lens", "unstoppable-domains"])
@@ -10,7 +11,7 @@ export type ISocialProfileType = z.infer<typeof ProfileType>
 // Define the base social profile schema to match backend
 // Base schema for common social profile fields
 const BaseSocialProfileSchema = z.object({
-  address: z.string(),
+  address: z.custom<IEthereumAddress>(),
   name: z.string(),
   bio: z.string().optional(),
   avatar: z.string().optional(),

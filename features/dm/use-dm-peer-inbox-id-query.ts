@@ -1,28 +1,27 @@
 import { queryOptions, useQuery } from "@tanstack/react-query"
-import { type ConversationTopic } from "@xmtp/react-native-sdk"
+import { InboxId, type ConversationTopic } from "@xmtp/react-native-sdk"
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm"
+import { IXmtpConversationTopic, IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { Optional } from "@/types/general"
 import logger from "@/utils/logger"
-import { reactQueryPersister } from "@/utils/mmkv"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
-import { dmPeerInboxIdQueryKey } from "../../queries/QueryKeys"
-import { getOrFetchConversation } from "../conversation/queries/conversation.query"
+import { getOrFetchConversationQuery } from "../conversation/queries/conversation.query"
 
 type IArgs = {
-  account: string
-  topic: ConversationTopic
+  inboxId: IXmtpInboxId
+  topic: IXmtpConversationTopic
 }
 
 type IArgsWithCaller = IArgs & { caller: string }
 
 export function getDmPeerInboxIdQueryOptions(args: Optional<IArgsWithCaller, "caller">) {
-  const { account, topic, caller } = args
+  const { inboxId, topic, caller } = args
 
   return queryOptions({
-    queryKey: dmPeerInboxIdQueryKey(args),
+    queryKey: ["dm-peer-inbox-id", inboxId, topic],
     queryFn: async function getPeerInboxId() {
-      const conversation = await getOrFetchConversation({
-        account,
+      const conversation = await getOrFetchConversationQuery({
+        inboxId,
         topic,
         caller: "getPeerInboxId",
       })
@@ -36,7 +35,7 @@ export function getDmPeerInboxIdQueryOptions(args: Optional<IArgsWithCaller, "ca
       }
 
       logger.debug(
-        `[getPeerInboxId] getting peer inbox id for ${topic}, account: ${account} and caller ${caller}`,
+        `[getPeerInboxId] getting peer inbox id for ${topic}, inboxId: ${inboxId} and caller ${caller}`,
       )
 
       return conversation.peerInboxId()
@@ -44,7 +43,7 @@ export function getDmPeerInboxIdQueryOptions(args: Optional<IArgsWithCaller, "ca
     meta: {
       caller,
     },
-    enabled: !!account && !!topic,
+    enabled: !!inboxId && !!topic,
   })
 }
 

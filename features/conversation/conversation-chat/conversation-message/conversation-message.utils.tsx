@@ -1,25 +1,19 @@
 import {
-  ConversationTopic,
-  InboxId,
   MessageDeliveryStatus,
-  MessageId,
   ReactionContent,
   RemoteAttachmentContent,
   ReplyContent,
   StaticAttachmentContent,
 } from "@xmtp/react-native-sdk"
 import emojiRegex from "emoji-regex"
-import {
-  getCurrentSenderEthAddress,
-  getSafeCurrentSender,
-  useCurrentSenderEthAddress,
-} from "@/features/authentication/multi-inbox.store"
+import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import {
   getConversationMessagesQueryData,
   useConversationMessagesQuery,
 } from "@/features/conversation/conversation-chat/conversation-messages.query"
 import { getMessageContentType } from "@/features/xmtp/xmtp-content-types/xmtp-content-types"
 import {
+  IXmtpConversationTopic,
   IXmtpDecodedActualMessage,
   IXmtpDecodedGroupUpdatedMessage,
   IXmtpDecodedMessage,
@@ -29,6 +23,7 @@ import {
   IXmtpDecodedReplyMessage,
   IXmtpDecodedStaticAttachmentMessage,
   IXmtpDecodedTextMessage,
+  IXmtpMessageId,
 } from "@/features/xmtp/xmtp.types"
 import { useCurrentConversationTopicSafe } from "../conversation.store-context"
 
@@ -86,12 +81,12 @@ export function getMessageById({
   messageId,
   topic,
 }: {
-  messageId: MessageId
-  topic: ConversationTopic
+  messageId: IXmtpMessageId
+  topic: IXmtpConversationTopic
 }) {
-  const currentAccount = getCurrentSenderEthAddress()!
+  const currentSender = getSafeCurrentSender()
   const messages = getConversationMessagesQueryData({
-    account: currentAccount,
+    clientInboxId: currentSender.inboxId,
     topic,
   })
   if (!messages) {
@@ -158,18 +153,18 @@ export function getMessageStringContent(message: IXmtpDecodedMessage) {
   return ""
 }
 
-export function useMessageHasReactions(args: { messageId: MessageId }) {
+export function useMessageHasReactions(args: { messageId: IXmtpMessageId }) {
   const { messageId } = args
   const reactions = useConversationMessageReactions(messageId)
   return Object.values(reactions.bySender || {}).some((reactions) => reactions.length > 0)
 }
 
-export function useConversationMessageReactions(messageId: MessageId) {
-  const currentAccount = useCurrentSenderEthAddress()!
+export function useConversationMessageReactions(messageId: IXmtpMessageId) {
+  const currentSender = getSafeCurrentSender()
   const topic = useCurrentConversationTopicSafe()
 
   const { data: messages } = useConversationMessagesQuery({
-    account: currentAccount,
+    clientInboxId: currentSender.inboxId,
     topic,
     caller: "useConversationMessageReactions",
   })
@@ -183,20 +178,21 @@ export function useConversationMessageReactions(messageId: MessageId) {
 }
 
 export function getCurrentUserAlreadyReactedOnMessage(args: {
-  messageId: MessageId
-  topic: ConversationTopic
+  messageId: IXmtpMessageId
+  topic: IXmtpConversationTopic
   emoji: string | undefined // Specific emoji or just reacted in general
 }) {
   const { messageId, topic, emoji } = args
-  const currentUserInboxId = getSafeCurrentSender().inboxId
-  const currentAccount = getCurrentSenderEthAddress()!
+  const currentSender = getSafeCurrentSender()
   const messages = getConversationMessagesQueryData({
-    account: currentAccount,
+    clientInboxId: currentSender.inboxId,
     topic,
   })
   const reactions = messages?.reactions[messageId]
   const bySender = reactions?.bySender
-  return bySender?.[currentUserInboxId!]?.some((reaction) => !emoji || reaction.content === emoji)
+  return bySender?.[currentSender.inboxId!]?.some(
+    (reaction) => !emoji || reaction.content === emoji,
+  )
 }
 
 export function getConvosMessageStatusForXmtpMessage(message: IXmtpDecodedMessage) {
@@ -246,12 +242,15 @@ export const shouldRenderBigEmoji = (text: string) => {
 //   };
 // }
 export function getConversationPreviousMessage(args: {
-  messageId: MessageId
-  topic: ConversationTopic
+  messageId: IXmtpMessageId
+  topic: IXmtpConversationTopic
 }) {
   const { messageId, topic } = args
-  const currentAccount = getCurrentSenderEthAddress()!
-  const messages = getConversationMessagesQueryData({ account: currentAccount, topic })
+  const currentSender = getSafeCurrentSender()
+  const messages = getConversationMessagesQueryData({
+    clientInboxId: currentSender.inboxId,
+    topic,
+  })
   if (!messages?.ids.includes(messageId)) {
     return undefined
   }
@@ -261,12 +260,15 @@ export function getConversationPreviousMessage(args: {
 }
 
 export function getConversationNextMessage(args: {
-  messageId: MessageId
-  topic: ConversationTopic
+  messageId: IXmtpMessageId
+  topic: IXmtpConversationTopic
 }) {
   const { messageId, topic } = args
-  const currentAccount = getCurrentSenderEthAddress()!
-  const messages = getConversationMessagesQueryData({ account: currentAccount, topic })
+  const currentSender = getSafeCurrentSender()
+  const messages = getConversationMessagesQueryData({
+    clientInboxId: currentSender.inboxId,
+    topic,
+  })
   if (!messages?.ids.includes(messageId)) {
     return undefined
   }

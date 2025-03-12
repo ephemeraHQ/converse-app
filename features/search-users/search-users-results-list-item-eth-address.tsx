@@ -10,10 +10,11 @@ import {
 } from "@/features/search-users/search-users-result-list-item"
 import { useXmtpInboxIdFromEthAddressQuery } from "@/features/xmtp/xmtp-inbox-id/xmtp-inbox-id-from-eth-address.query"
 import { useAppTheme } from "@/theme/use-app-theme"
+import { IEthereumAddress } from "@/utils/evm/address"
 import { shortAddress } from "@/utils/strings/shortAddress"
 
 type Props = {
-  ethAddress: string
+  ethAddress: IEthereumAddress
   onPress: () => void
 }
 

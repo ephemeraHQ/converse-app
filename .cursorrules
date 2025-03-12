@@ -498,7 +498,7 @@ export const getMessagesQueryOptions = (args: { id: string }) => {
   const enabled = !!args.id
 
   return queryOptions({
-    queryKey: messagesQueryKey(args.id),
+    queryKey: ["get-message", arg.id],
     queryFn: enabled ? () => fetchMessages(args) : skipToken,
     enabled,
   })
