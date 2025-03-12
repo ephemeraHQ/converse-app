@@ -1,13 +1,11 @@
-import { allowedConsentConversationsQueryKey } from "@queries/QueryKeys"
+import { IXmtpConversationTopic, IXmtpInboxId , IXmtpConversationWithCodecs } from "@features/xmtp/xmtp.types"
 import { QueryObserver, queryOptions, skipToken, useQuery } from "@tanstack/react-query"
-import { ConversationTopic } from "@xmtp/react-native-sdk"
 import { ensureConversationSyncAllQuery } from "@/features/conversation/queries/conversation-sync-all.query"
 import {
   getConversationQueryData,
   setConversationQueryData,
 } from "@/features/conversation/queries/conversation.query"
 import { getXmtpConversations } from "@/features/xmtp/xmtp-conversations/xmtp-conversation"
-import { IXmtpConversationWithCodecs } from "@/features/xmtp/xmtp.types"
 import { Optional } from "@/types/general"
 import { captureError } from "@/utils/capture-error"
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
@@ -19,7 +17,7 @@ export type IAllowedConsentConversationsQuery = Awaited<
 >
 
 type IArgs = {
-  inboxId: string
+  inboxId: IXmtpInboxId
 }
 
 type IArgsWithCaller = IArgs & { caller: string }
@@ -71,7 +69,7 @@ export function addConversationToAllowedConsentConversationsQuery(
 
 export const removeConversationFromAllowedConsentConversationsQuery = (
   args: IArgs & {
-    topic: ConversationTopic
+    topic: IXmtpConversationTopic
   },
 ) => {
   const { inboxId, topic } = args
@@ -139,7 +137,7 @@ export const getAllowedConsentConversationsQueryOptions = (
     meta: {
       caller,
     },
-    queryKey: allowedConsentConversationsQueryKey(inboxId),
+    queryKey: ["allowed-consent-conversations", inboxId],
     queryFn: enabled ? () => getAllowedConsentConversations({ inboxId }) : skipToken,
     enabled,
   })
@@ -147,7 +145,7 @@ export const getAllowedConsentConversationsQueryOptions = (
 
 export const updateConversationInAllowedConsentConversationsQueryData = (
   args: IArgs & {
-    topic: ConversationTopic
+    topic: IXmtpConversationTopic
     conversationUpdate: Partial<IXmtpConversationWithCodecs>
   },
 ) => {

@@ -1,5 +1,5 @@
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import Clipboard from "@react-native-clipboard/clipboard"
-import { InboxId } from "@xmtp/react-native-sdk"
 import React from "react"
 import { Alert, ViewStyle } from "react-native"
 import { showActionSheet } from "@/components/action-sheet"
@@ -14,7 +14,7 @@ import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme"
 import { captureErrorWithToast } from "@/utils/capture-error"
 
 type IProfileSocialsNamesProps = {
-  inboxId: InboxId
+  inboxId: IXmtpInboxId
 }
 
 export function ProfileSocialsNames({ inboxId }: IProfileSocialsNamesProps) {

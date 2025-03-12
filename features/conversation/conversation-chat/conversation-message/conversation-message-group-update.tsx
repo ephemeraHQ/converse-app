@@ -2,22 +2,21 @@ import { HStack } from "@design-system/HStack"
 import { Pressable } from "@design-system/Pressable"
 import { ITextProps, Text } from "@design-system/Text"
 import { translate, TxKeyPath } from "@i18n"
-import {
-  DecodedMessage,
-  GroupUpdatedCodec,
-  GroupUpdatedMetadatEntry,
-  InboxId,
-} from "@xmtp/react-native-sdk"
 import { memo } from "react"
 import { ViewStyle } from "react-native"
 import { Avatar } from "@/components/avatar"
 import { Center } from "@/design-system/Center"
 import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
+import {
+  IXmtpDecodedGroupUpdatedMessage,
+  IXmtpGroupUpdatedMetadataEntry,
+  IXmtpInboxId,
+} from "@/features/xmtp/xmtp.types"
 import { navigate } from "@/navigation/navigation.utils"
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme"
 
 type IConversationMessageGroupUpdateProps = {
-  message: DecodedMessage<GroupUpdatedCodec>
+  message: IXmtpDecodedGroupUpdatedMessage
 }
 
 export function ConversationMessageGroupUpdate({ message }: IConversationMessageGroupUpdateProps) {
@@ -45,13 +44,16 @@ export function ConversationMessageGroupUpdate({ message }: IConversationMessage
       {content.membersAdded.map((member) => (
         <ChatGroupMemberJoined
           key={`joined-${member.inboxId}`}
-          inboxId={member.inboxId as InboxId}
+          inboxId={member.inboxId as IXmtpInboxId}
         />
       ))}
 
       {/* Member removals */}
       {content.membersRemoved.map((member) => (
-        <ChatGroupMemberLeft key={`left-${member.inboxId}`} inboxId={member.inboxId as InboxId} />
+        <ChatGroupMemberLeft
+          key={`left-${member.inboxId}`}
+          inboxId={member.inboxId as IXmtpInboxId}
+        />
       ))}
 
       {/* Metadata changes */}
@@ -59,7 +61,7 @@ export function ConversationMessageGroupUpdate({ message }: IConversationMessage
         <ChatGroupMetadataUpdate
           key={`metadata-${index}`}
           metadataEntry={entry}
-          initiatorInboxId={content.initiatedByInboxId as InboxId}
+          initiatorInboxId={content.initiatedByInboxId as IXmtpInboxId}
         />
       ))}
     </Center>
@@ -67,7 +69,7 @@ export function ConversationMessageGroupUpdate({ message }: IConversationMessage
 }
 
 type IChatGroupMemberLeftProps = {
-  inboxId: InboxId
+  inboxId: IXmtpInboxId
 }
 
 function ChatGroupMemberLeft({ inboxId }: IChatGroupMemberLeftProps) {
@@ -93,7 +95,7 @@ function ChatGroupMemberLeft({ inboxId }: IChatGroupMemberLeftProps) {
 }
 
 type IChatGroupMemberJoinedProps = {
-  inboxId: InboxId
+  inboxId: IXmtpInboxId
 }
 
 function ChatGroupMemberJoined({ inboxId }: IChatGroupMemberJoinedProps) {
@@ -119,8 +121,8 @@ function ChatGroupMemberJoined({ inboxId }: IChatGroupMemberJoinedProps) {
 }
 
 type IChatGroupMetadataUpdateProps = {
-  metadataEntry: GroupUpdatedMetadatEntry
-  initiatorInboxId: InboxId
+  metadataEntry: IXmtpGroupUpdatedMetadataEntry
+  initiatorInboxId: IXmtpInboxId
 }
 
 function ChatGroupMetadataUpdate({

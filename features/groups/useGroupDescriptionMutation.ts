@@ -1,5 +1,4 @@
 import { useMutation } from "@tanstack/react-query"
-import { InboxId, type ConversationTopic } from "@xmtp/react-native-sdk"
 import { updateConversationInAllowedConsentConversationsQueryData } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import {
   getGroupQueryData,
@@ -7,12 +6,16 @@ import {
   useGroupQuery,
 } from "@/features/groups/useGroupQuery"
 import { updateXmtpGroupDescription } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-group"
-import { IXmtpGroupWithCodecs } from "@/features/xmtp/xmtp.types"
+import {
+  IXmtpConversationTopic,
+  IXmtpGroupWithCodecs,
+  IXmtpInboxId,
+} from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
 
 type IArgs = {
-  inboxId: InboxId
-  topic: ConversationTopic
+  inboxId: IXmtpInboxId
+  topic: IXmtpConversationTopic
 }
 
 export function useGroupDescriptionMutation(args: IArgs) {

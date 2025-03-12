@@ -1,11 +1,11 @@
 import { queryOptions, skipToken } from "@tanstack/react-query"
-import { ConsentState, InboxId } from "@xmtp/react-native-sdk"
 import { syncAllXmtpConversations } from "@/features/xmtp/xmtp-sync/xmtp-sync"
+import { IXmtpConsentState, IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
 
 type IArgs = {
-  clientInboxId: InboxId
-  consentStates: ConsentState[]
+  clientInboxId: IXmtpInboxId
+  consentStates: IXmtpConsentState[]
 }
 
 export function getConversationSyncAllQueryOptions(args: IArgs) {

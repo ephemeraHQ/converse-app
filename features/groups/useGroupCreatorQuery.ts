@@ -1,15 +1,14 @@
+import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query"
-import type { ConversationTopic } from "@xmtp/react-native-sdk"
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
-import { groupCreatorQueryKey } from "@/queries/QueryKeys"
 import { getGroupQueryData } from "./useGroupQuery"
 
-const getGroupCreatorQueryOptions = (args: { account: string; topic: ConversationTopic }) => {
+const getGroupCreatorQueryOptions = (args: { account: string; topic: IXmtpConversationTopic }) => {
   const { account, topic } = args
   const enabled = !!account && !!topic
   return queryOptions({
     enabled,
-    queryKey: groupCreatorQueryKey(account, topic),
+    queryKey: ["groupCreatorQueryKey", account, topic],
     queryFn: enabled
       ? async () => {
           const group = getGroupQueryData({ inboxId: account, topic })
@@ -22,7 +21,7 @@ const getGroupCreatorQueryOptions = (args: { account: string; topic: Conversatio
   })
 }
 
-export const useGroupCreatorQuery = (topic: ConversationTopic) => {
+export const useGroupCreatorQuery = (topic: IXmtpConversationTopic) => {
   const account = getSafeCurrentSender().ethereumAddress
 
   return useQuery(getGroupCreatorQueryOptions({ account, topic }))

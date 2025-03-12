@@ -1,4 +1,4 @@
-import { InboxId } from "@xmtp/react-native-sdk"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { IConvosProfileForInbox } from "@/features/profiles/profile.types"
 import { ISocialProfile } from "@/features/social-profiles/social-profiles.api"
 import { Nullable } from "@/types/general"
@@ -12,7 +12,7 @@ export function getPreferredDisplayName(args: {
   profile: Nullable<IConvosProfileForInbox>
   socialProfiles: Nullable<ISocialProfile[]>
   ethAddress: Nullable<IEthereumAddress>
-  inboxId: Nullable<InboxId>
+  inboxId: Nullable<IXmtpInboxId>
 }): string | undefined {
   const { profile, socialProfiles, ethAddress, inboxId } = args
 

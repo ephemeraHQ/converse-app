@@ -1,10 +1,10 @@
-import { InboxId } from "@xmtp/react-native-sdk"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { normalizeTimestampToMs } from "@/utils/date"
 
 export function conversationIsUnreadForInboxId(args: {
   lastMessageSent: number | null
-  lastMessageSenderInboxId: InboxId | null
-  consumerInboxId: InboxId
+  lastMessageSenderInboxId: IXmtpInboxId | null
+  consumerInboxId: IXmtpInboxId
   markedAsUnread: boolean | null
   readUntil: number | null
 }) {

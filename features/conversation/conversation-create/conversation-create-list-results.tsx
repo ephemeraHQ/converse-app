@@ -1,4 +1,4 @@
-import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk"
+import { IXmtpConversationTopic, IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { memo, useCallback, useMemo } from "react"
 import { Alert, ListRenderItem } from "react-native"
 import { useAnimatedStyle, useDerivedValue, withSpring } from "react-native-reanimated"
@@ -35,17 +35,17 @@ const MAX_INITIAL_RESULTS = 3
 
 type ISearchResultItemDm = {
   type: "dm"
-  conversationTopic: ConversationTopic
+  conversationTopic: IXmtpConversationTopic
 }
 
 type ISearchResultItemGroup = {
   type: "group"
-  conversationTopic: ConversationTopic
+  conversationTopic: IXmtpConversationTopic
 }
 
 type ISearchResultItemProfile = {
   type: "profile"
-  inboxId: InboxId
+  inboxId: IXmtpInboxId
 }
 
 type ISearchResultItemExternalIdentity = {
@@ -79,7 +79,7 @@ function searchResultIsExternalIdentity(
 
 const SearchUsersResultsListItemUserDmWrapper = memo(
   function SearchUsersResultsListItemUserDmWrapper(props: {
-    conversationTopic: ConversationTopic
+    conversationTopic: IXmtpConversationTopic
   }) {
     const { conversationTopic } = props
 
@@ -123,7 +123,9 @@ const SearchUsersResultsListItemUserDmWrapper = memo(
 )
 
 const SearchUsersResultsListItemGroupWrapper = memo(
-  function SearchUsersResultsListItemGroupWrapper(props: { conversationTopic: ConversationTopic }) {
+  function SearchUsersResultsListItemGroupWrapper(props: {
+    conversationTopic: IXmtpConversationTopic
+  }) {
     const conversationStore = useConversationStore()
 
     const handlePress = useCallback(() => {
@@ -145,7 +147,7 @@ const SearchUsersResultsListItemGroupWrapper = memo(
 )
 
 const SearchUsersResultsListItemUserWrapper = memo(
-  function SearchUsersResultsListItemUserWrapper(props: { inboxId: InboxId }) {
+  function SearchUsersResultsListItemUserWrapper(props: { inboxId: IXmtpInboxId }) {
     const conversationStore = useConversationStore()
 
     const handlePress = useCallback(() => {

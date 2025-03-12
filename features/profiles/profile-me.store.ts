@@ -1,5 +1,5 @@
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { zustandMMKVStorage } from "@utils/mmkv"
-import { InboxId } from "@xmtp/react-native-sdk"
 import { createStore, useStore } from "zustand"
 import { createJSONStorage, persist, subscribeWithSelector } from "zustand/middleware"
 
@@ -35,11 +35,11 @@ const DEFAULT_STATE: IProfileMeStoreState = {
   isAvatarUploading: false,
 }
 
-function getProfileMeStorageKey(inboxId: InboxId) {
+function getProfileMeStorageKey(inboxId: IXmtpInboxId) {
   return `profile-me-${inboxId}`
 }
 
-function createProfileMeStore(inboxId: InboxId) {
+function createProfileMeStore(inboxId: IXmtpInboxId) {
   const storageKey = getProfileMeStorageKey(inboxId)
 
   return createStore<IProfileMeStore>()(
@@ -79,14 +79,14 @@ function createProfileMeStore(inboxId: InboxId) {
 }
 
 // Store instances cache
-const stores: Record<InboxId, ReturnType<typeof createProfileMeStore>> = {}
+const stores: Record<IXmtpInboxId, ReturnType<typeof createProfileMeStore>> = {}
 
 /**
  * Creates and manages a profile me store for a specific inbox
  * @param inboxId - The ID of the inbox to create/retrieve the store for
  * @returns A Zustand store instance for the specified inbox
  */
-export function useProfileMeStore(inboxId: InboxId) {
+export function useProfileMeStore(inboxId: IXmtpInboxId) {
   if (!stores[inboxId]) {
     stores[inboxId] = createProfileMeStore(inboxId)
   }
@@ -100,7 +100,7 @@ export function useProfileMeStore(inboxId: InboxId) {
  * @returns Selected state from the store
  */
 export function useProfileMeStoreValue<T>(
-  inboxId: InboxId,
+  inboxId: IXmtpInboxId,
   selector: (state: IProfileMeStore) => T,
 ): T {
   const store = useProfileMeStore(inboxId)

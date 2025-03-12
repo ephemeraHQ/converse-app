@@ -1,4 +1,4 @@
-import { InboxId } from "@xmtp/react-native-sdk"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { getAllowedConsentConversationsQueryOptions } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm"
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group"
@@ -8,8 +8,8 @@ import { isSameInboxId } from "@/features/xmtp/xmtp-inbox-id/xmtp-inbox-id.utils
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
 
 export async function findConversationByInboxIds(args: {
-  inboxIds: InboxId[]
-  clientInboxId: InboxId
+  inboxIds: IXmtpInboxId[]
+  clientInboxId: IXmtpInboxId
 }) {
   const { inboxIds, clientInboxId } = args
 

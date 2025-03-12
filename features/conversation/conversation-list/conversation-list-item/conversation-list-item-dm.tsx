@@ -1,5 +1,5 @@
+import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
 import { getCompactRelativeTime } from "@utils/date"
-import { ConversationTopic } from "@xmtp/react-native-sdk"
 import { memo, useCallback, useMemo } from "react"
 import { Avatar } from "@/components/avatar"
 import { ISwipeableRenderActionsArgs } from "@/components/swipeable"
@@ -25,7 +25,7 @@ import { DeleteSwipeableAction } from "./conversation-list-item-swipeable/conver
 import { ToggleUnreadSwipeableAction } from "./conversation-list-item-swipeable/conversation-list-item-swipeable-toggle-read-action"
 
 type IConversationListItemDmProps = {
-  conversationTopic: ConversationTopic
+  conversationTopic: IXmtpConversationTopic
 }
 
 export const ConversationListItemDm = memo(function ConversationListItemDm({

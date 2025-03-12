@@ -1,10 +1,10 @@
-import { Conversation, InboxId, MessageId } from "@xmtp/react-native-sdk"
+import { Conversation } from "@xmtp/react-native-sdk"
 import { config } from "@/config"
 import { isReadReceiptMessage } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
 import { getXmtpClientByInboxId } from "@/features/xmtp/xmtp-client/xmtp-client.service"
 import { captureError } from "@/utils/capture-error"
 import { XMTPError } from "@/utils/error"
-import { IXmtpDecodedMessage } from "../xmtp.types"
+import { IXmtpDecodedMessage, IXmtpInboxId, IXmtpMessageId } from "../xmtp.types"
 
 export function isSupportedMessage(message: IXmtpDecodedMessage) {
   if (isReadReceiptMessage(message)) {
@@ -47,8 +47,8 @@ export async function getXmtpConversationMessages(args: {
 }
 
 export async function getXmtpConversationMessage(args: {
-  messageId: MessageId
-  clientInboxId: InboxId
+  messageId: IXmtpMessageId
+  clientInboxId: IXmtpInboxId
 }) {
   const { messageId, clientInboxId } = args
   try {

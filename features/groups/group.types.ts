@@ -1,8 +1,8 @@
-import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { IConsentState } from "@/features/consent/consent.types"
 
 export type IGroupMember = {
-  inboxId: InboxId
+  inboxId: IXmtpInboxId
   permission: "admin" | "super_admin" | "member"
   consentState: IConsentState
 }

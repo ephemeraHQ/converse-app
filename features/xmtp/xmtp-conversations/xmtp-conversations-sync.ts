@@ -1,11 +1,12 @@
 import { ConsentState, Conversation, InboxId } from "@xmtp/react-native-sdk"
 import { config } from "@/config"
+import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
 import { XMTPError } from "@/utils/error"
 import { getXmtpClientByInboxId } from "../xmtp-client/xmtp-client.service"
 
 export async function syncAllConversations(args: {
-  clientInboxId: InboxId
+  clientInboxId: IXmtpInboxId
   consentStates: ConsentState[]
 }) {
   const { clientInboxId, consentStates } = args

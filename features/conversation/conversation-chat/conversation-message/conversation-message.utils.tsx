@@ -1,7 +1,5 @@
 import {
-  ConversationTopic,
   MessageDeliveryStatus,
-  MessageId,
   ReactionContent,
   RemoteAttachmentContent,
   ReplyContent,
@@ -15,6 +13,7 @@ import {
 } from "@/features/conversation/conversation-chat/conversation-messages.query"
 import { getMessageContentType } from "@/features/xmtp/xmtp-content-types/xmtp-content-types"
 import {
+  IXmtpConversationTopic,
   IXmtpDecodedActualMessage,
   IXmtpDecodedGroupUpdatedMessage,
   IXmtpDecodedMessage,
@@ -24,6 +23,7 @@ import {
   IXmtpDecodedReplyMessage,
   IXmtpDecodedStaticAttachmentMessage,
   IXmtpDecodedTextMessage,
+  IXmtpMessageId,
 } from "@/features/xmtp/xmtp.types"
 import { useCurrentConversationTopicSafe } from "../conversation.store-context"
 
@@ -81,8 +81,8 @@ export function getMessageById({
   messageId,
   topic,
 }: {
-  messageId: MessageId
-  topic: ConversationTopic
+  messageId: IXmtpMessageId
+  topic: IXmtpConversationTopic
 }) {
   const currentSender = getSafeCurrentSender()
   const messages = getConversationMessagesQueryData({
@@ -153,13 +153,13 @@ export function getMessageStringContent(message: IXmtpDecodedMessage) {
   return ""
 }
 
-export function useMessageHasReactions(args: { messageId: MessageId }) {
+export function useMessageHasReactions(args: { messageId: IXmtpMessageId }) {
   const { messageId } = args
   const reactions = useConversationMessageReactions(messageId)
   return Object.values(reactions.bySender || {}).some((reactions) => reactions.length > 0)
 }
 
-export function useConversationMessageReactions(messageId: MessageId) {
+export function useConversationMessageReactions(messageId: IXmtpMessageId) {
   const currentSender = getSafeCurrentSender()
   const topic = useCurrentConversationTopicSafe()
 
@@ -178,8 +178,8 @@ export function useConversationMessageReactions(messageId: MessageId) {
 }
 
 export function getCurrentUserAlreadyReactedOnMessage(args: {
-  messageId: MessageId
-  topic: ConversationTopic
+  messageId: IXmtpMessageId
+  topic: IXmtpConversationTopic
   emoji: string | undefined // Specific emoji or just reacted in general
 }) {
   const { messageId, topic, emoji } = args
@@ -242,8 +242,8 @@ export const shouldRenderBigEmoji = (text: string) => {
 //   };
 // }
 export function getConversationPreviousMessage(args: {
-  messageId: MessageId
-  topic: ConversationTopic
+  messageId: IXmtpMessageId
+  topic: IXmtpConversationTopic
 }) {
   const { messageId, topic } = args
   const currentSender = getSafeCurrentSender()
@@ -260,8 +260,8 @@ export function getConversationPreviousMessage(args: {
 }
 
 export function getConversationNextMessage(args: {
-  messageId: MessageId
-  topic: ConversationTopic
+  messageId: IXmtpMessageId
+  topic: IXmtpConversationTopic
 }) {
   const { messageId, topic } = args
   const currentSender = getSafeCurrentSender()

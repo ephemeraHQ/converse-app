@@ -1,48 +1,66 @@
-// todo(lustig) we'll be able to remove these once multi inbox client has more functionality
 import {
+  Client,
   ConsentState,
+  Conversation,
+  ConversationId,
+  ConversationTopic,
+  ConversationVersion,
+  DecodedMessage,
+  DecryptedLocalAttachment,
+  Dm,
+  Group,
+  GroupUpdatedCodec,
+  GroupUpdatedContent,
+  GroupUpdatedMetadatEntry,
   InboxId,
-  Client as XmtpClient,
-  Conversation as XmtpConversation,
-  DecodedMessage as XmtpDecodedMessage,
-  Dm as XmtpDm,
-  Group as XmtpGroup,
-  GroupUpdatedCodec as XmtpGroupUpdatedCodec,
-  MultiRemoteAttachmentCodec as XmtpMultiRemoteAttachmentCodec,
-  ReactionCodec as XmtpReactionCodec,
-  // ReadReceiptCodec as XmtpReadReceiptCodec,
-  RemoteAttachmentCodec as XmtpRemoteAttachmentCodec,
-  ReplyCodec as XmtpReplyCodec,
-  Signer as XmtpSigner,
-  StaticAttachmentCodec as XmtpStaticAttachmentCodec,
-  TextCodec as XmtpTextCodec,
+  MessageDeliveryStatus,
+  MessageId,
+  MultiRemoteAttachmentCodec,
+  NativeMessageContent,
+  PublicIdentity,
+  ReactionCodec,
+  ReactionContent,
+  RemoteAttachmentCodec,
+  RemoteAttachmentContent,
+  RemoteAttachmentInfo,
+  RemoteAttachmentMetadata,
+  ReplyCodec,
+  Signer,
+  StaticAttachmentCodec,
+  StaticAttachmentContent,
+  TextCodec,
 } from "@xmtp/react-native-sdk"
 import { ISupportedXmtpCodecs } from "./xmtp-codecs/xmtp-codecs"
 
-export type IXmtpConversationWithCodecs = XmtpConversation<ISupportedXmtpCodecs>
+export type IXmtpConversationWithCodecs = Conversation<ISupportedXmtpCodecs>
 
-export type IXmtpDmWithCodecs = XmtpDm<ISupportedXmtpCodecs>
+export type IXmtpDmWithCodecs = Dm<ISupportedXmtpCodecs>
 
-export type IXmtpGroupWithCodecs = XmtpGroup<ISupportedXmtpCodecs>
+export type IXmtpGroupWithCodecs = Group<ISupportedXmtpCodecs>
 
-export type IXmtpDecodedTextMessage = XmtpDecodedMessage<XmtpTextCodec>
-export type IXmtpDecodedReactionMessage = XmtpDecodedMessage<XmtpReactionCodec>
-export type IXmtpDecodedGroupUpdatedMessage = XmtpDecodedMessage<XmtpGroupUpdatedCodec>
-export type IXmtpDecodedReplyMessage = XmtpDecodedMessage<XmtpReplyCodec>
+export type IXmtpDecodedTextMessage = DecodedMessage<TextCodec>
+export type IXmtpDecodedReactionMessage = DecodedMessage<ReactionCodec>
+export type IXmtpDecodedGroupUpdatedMessage = DecodedMessage<GroupUpdatedCodec>
+export type IXmtpDecodedReplyMessage = DecodedMessage<ReplyCodec>
 // export type IXmtpDecodedReadReceiptMessage =
-//   XmtpDecodedMessage<XmtpReadReceiptCodec>;
-export type IXmtpDecodedRemoteAttachmentMessage = XmtpDecodedMessage<XmtpRemoteAttachmentCodec>
-export type IXmtpDecodedStaticAttachmentMessage = XmtpDecodedMessage<XmtpStaticAttachmentCodec>
-export type IXmtpDecodedMultiRemoteAttachmentMessage =
-  XmtpDecodedMessage<XmtpMultiRemoteAttachmentCodec>
+//   DecodedMessage<ReadReceiptCodec>;
+export type IXmtpDecodedRemoteAttachmentMessage = DecodedMessage<RemoteAttachmentCodec>
+export type IXmtpDecodedStaticAttachmentMessage = DecodedMessage<StaticAttachmentCodec>
+export type IXmtpDecodedMultiRemoteAttachmentMessage = DecodedMessage<MultiRemoteAttachmentCodec>
 
-export type IXmtpInboxId = InboxId & {
-  readonly brand: unique symbol
-}
+export type IXmtpInboxId = InboxId
+// Add later
+//  & {
+//   readonly brand: unique symbol
+// }
+
+export type IXmtpConversationTopic = ConversationTopic
 
 export type IXmtpConsentState = ConsentState
 
-// export type IXmtpDecodedMessageWrong = XmtpDecodedMessage<
+export type IXmtpMessageId = MessageId
+
+// export type IXmtpDecodedMessageWrong = DecodedMessage<
 //   ISupportedXmtpCodecs[number]
 // >;
 
@@ -63,8 +81,40 @@ export type IXmtpDecodedActualMessage =
   | IXmtpDecodedStaticAttachmentMessage
   | IXmtpDecodedMultiRemoteAttachmentMessage
 
-export type IXmtpSigner = XmtpSigner
+export type IXmtpSigner = Signer
 
 export type IXmtpEnv = "dev" | "production" | "local"
 
-export type IXmtpClient = XmtpClient<ISupportedXmtpCodecs>
+export type IXmtpClient = Client<ISupportedXmtpCodecs>
+
+export type IXmtpConversationId = ConversationId
+
+export type IXmtpConversationVersion = ConversationVersion
+
+export type IXmtpDecryptedLocalAttachment = DecryptedLocalAttachment
+
+export type IXmtpGroupUpdatedContent = GroupUpdatedContent
+
+export type IXmtpMessageDeliveryStatus =
+  | MessageDeliveryStatus.UNPUBLISHED
+  | MessageDeliveryStatus.PUBLISHED
+  | MessageDeliveryStatus.FAILED
+  | MessageDeliveryStatus.ALL
+
+export const IXmtpMessageDeliveryStatusValues = MessageDeliveryStatus
+
+export type IXmtpGroupUpdatedMetadataEntry = GroupUpdatedMetadatEntry
+
+export type IXmtpNativeMessageContent = NativeMessageContent
+
+export type IXmtpPublicIdentity = PublicIdentity
+
+export type IXmtpReactionContent = ReactionContent
+
+export type IXmtpRemoteAttachmentContent = RemoteAttachmentContent
+
+export type IXmtpRemoteAttachmentInfo = RemoteAttachmentInfo
+
+export type IXmtpRemoteAttachmentMetadata = RemoteAttachmentMetadata
+
+export type IXmtpStaticAttachmentContent = StaticAttachmentContent

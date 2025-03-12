@@ -1,7 +1,6 @@
-import { InboxId } from "@xmtp/react-native-sdk"
+import { IXmtpInboxId , IXmtpGroupWithCodecs } from "@features/xmtp/xmtp.types"
 import { PermissionPolicySet } from "@xmtp/react-native-sdk/build/lib/types/PermissionPolicySet"
 import { config } from "@/config"
-import { IXmtpGroupWithCodecs } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
 import { XMTPError } from "@/utils/error"
 import { getXmtpClientByInboxId } from "../xmtp-client/xmtp-client.service"
@@ -18,8 +17,8 @@ const defaultPermissionPolicySet: PermissionPolicySet = {
 }
 
 export async function createXmtpGroup(args: {
-  clientInboxId: InboxId
-  inboxIds: InboxId[]
+  clientInboxId: IXmtpInboxId
+  inboxIds: IXmtpInboxId[]
   permissionPolicySet?: PermissionPolicySet
   groupName?: string
   groupPhoto?: string
@@ -68,7 +67,7 @@ export async function createXmtpGroup(args: {
 
 export async function addXmtpGroupMembers(args: {
   group: IXmtpGroupWithCodecs
-  inboxIds: InboxId[]
+  inboxIds: IXmtpInboxId[]
 }) {
   try {
     const { group, inboxIds } = args
@@ -90,7 +89,7 @@ export async function addXmtpGroupMembers(args: {
 
 export async function removeXmtpGroupMembers(args: {
   group: IXmtpGroupWithCodecs
-  inboxIds: InboxId[]
+  inboxIds: IXmtpInboxId[]
 }) {
   try {
     const { group, inboxIds } = args

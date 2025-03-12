@@ -1,9 +1,10 @@
 import { create } from "zustand"
+import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 
 type ISearchUsersInputStore = {
   selectedChipInboxId: string | null
   actions: {
-    setSelectedChipInboxId: (inboxId: string | null) => void
+    setSelectedChipInboxId: (inboxId: IXmtpInboxId | null) => void
   }
 }
 

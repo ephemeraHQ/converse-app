@@ -1,9 +1,9 @@
+import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
 import { useQuery } from "@tanstack/react-query"
-import { ConversationTopic } from "@xmtp/react-native-sdk"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { getConversationMetadataQueryOptions } from "@/features/conversation/conversation-metadata/conversation-metadata.query"
 
-export function useConversationIsDeleted(args: { conversationTopic: ConversationTopic }) {
+export function useConversationIsDeleted(args: { conversationTopic: IXmtpConversationTopic }) {
   const { conversationTopic } = args
 
   const currentSender = useSafeCurrentSender()

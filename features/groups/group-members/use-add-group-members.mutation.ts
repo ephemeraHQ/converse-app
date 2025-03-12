@@ -1,5 +1,5 @@
+import { IXmtpInboxId , IXmtpGroupWithCodecs } from "@features/xmtp/xmtp.types"
 import { useMutation } from "@tanstack/react-query"
-import { InboxId } from "@xmtp/react-native-sdk"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import {
   addGroupMembersToQueryData,
@@ -9,11 +9,10 @@ import {
   setGroupMembersQueryData,
 } from "@/features/groups/useGroupMembersQuery"
 import { addXmtpGroupMembers } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-group"
-import { IXmtpGroupWithCodecs } from "@/features/xmtp/xmtp.types"
 
 type AddGroupMembersVariables = {
   group: IXmtpGroupWithCodecs
-  inboxIds: InboxId[]
+  inboxIds: IXmtpInboxId[]
 }
 
 export function useAddGroupMembersMutation() {

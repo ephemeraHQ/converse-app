@@ -1,5 +1,5 @@
+import { IXmtpConversationTopic, IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { keepPreviousData, queryOptions, useQuery } from "@tanstack/react-query"
-import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk"
 import {
   getSafeCurrentSender,
   useSafeCurrentSender,
@@ -14,7 +14,10 @@ import { ensureSocialProfilesForAddressQuery } from "@/features/social-profiles/
 import { captureError } from "@/utils/capture-error"
 import { normalizeString } from "@/utils/str"
 
-export function getSearchExistingDmsQueryOptions(args: { searchQuery: string; inboxId: InboxId }) {
+export function getSearchExistingDmsQueryOptions(args: {
+  searchQuery: string
+  inboxId: IXmtpInboxId
+}) {
   const { searchQuery, inboxId } = args
   const normalizedSearchQuery = normalizeString(searchQuery)
   return queryOptions({
@@ -32,7 +35,7 @@ export function getSearchExistingDmsQueryOptions(args: { searchQuery: string; in
   })
 }
 
-async function searchExistingDms(args: { searchQuery: string; inboxId: InboxId }) {
+async function searchExistingDms(args: { searchQuery: string; inboxId: IXmtpInboxId }) {
   const { searchQuery, inboxId } = args
   const currentSender = getSafeCurrentSender()
   const conversations = getAllowedConsentConversationsQueryData({
@@ -49,7 +52,7 @@ async function searchExistingDms(args: { searchQuery: string; inboxId: InboxId }
     return []
   }
 
-  const matchingTopics: ConversationTopic[] = []
+  const matchingTopics: IXmtpConversationTopic[] = []
   const dmConversations = conversations.filter(isConversationDm)
 
   const results = await Promise.all(
@@ -108,6 +111,6 @@ async function searchExistingDms(args: { searchQuery: string; inboxId: InboxId }
   return matchingTopics
 }
 
-export function useSearchExistingDmsQuery(args: { searchQuery: string; inboxId: InboxId }) {
+export function useSearchExistingDmsQuery(args: { searchQuery: string; inboxId: IXmtpInboxId }) {
   return useQuery(getSearchExistingDmsQueryOptions(args))
 }

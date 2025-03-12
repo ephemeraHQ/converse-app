@@ -1,5 +1,5 @@
+import { IXmtpConversationTopic, IXmtpInboxId , IXmtpGroupWithCodecs } from "@features/xmtp/xmtp.types"
 import { MutationObserver, MutationOptions, useMutation } from "@tanstack/react-query"
-import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk"
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import {
   addConversationToAllowedConsentConversationsQuery,
@@ -16,7 +16,6 @@ import {
   getOrFetchGroupQuery,
   setGroupQueryData,
 } from "@/features/groups/useGroupQuery"
-import { IXmtpGroupWithCodecs } from "@/features/xmtp/xmtp.types"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
 import {
@@ -25,8 +24,8 @@ import {
 } from "../xmtp/xmtp-consent/xmtp-consent"
 
 type IAllowGroupMutationOptions = {
-  clientInboxId: InboxId
-  topic: ConversationTopic
+  clientInboxId: IXmtpInboxId
+  topic: IXmtpConversationTopic
 }
 
 type IAllowGroupReturnType = Awaited<ReturnType<typeof allowGroup>>
@@ -34,8 +33,8 @@ type IAllowGroupReturnType = Awaited<ReturnType<typeof allowGroup>>
 type IAllowGroupArgs = {
   includeAddedBy?: boolean
   includeCreator?: boolean
-  clientInboxId: InboxId
-  topic: ConversationTopic
+  clientInboxId: IXmtpInboxId
+  topic: IXmtpConversationTopic
 }
 
 async function allowGroup({
@@ -61,7 +60,7 @@ async function allowGroup({
   const groupTopic = group.topic
   const groupCreator = await group.creatorInboxId()
 
-  const inboxIdsToAllow: InboxId[] = []
+  const inboxIdsToAllow: IXmtpInboxId[] = []
   if (includeAddedBy && group?.addedByInboxId) {
     inboxIdsToAllow.push(group.addedByInboxId)
   }

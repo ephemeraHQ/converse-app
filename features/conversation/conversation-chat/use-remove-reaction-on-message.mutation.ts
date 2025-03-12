@@ -13,11 +13,12 @@ import {
 } from "@/features/conversation/conversation-chat/conversation-messages.query"
 import { getConversationForCurrentAccount } from "@/features/conversation/utils/get-conversation-for-current-account"
 import { contentTypesPrefixes } from "@/features/xmtp/xmtp-content-types/xmtp-content-types"
+import { IXmtpConversationTopic, IXmtpMessageId } from "@/features/xmtp/xmtp.types"
 import { captureErrorWithToast } from "@/utils/capture-error"
 import { getTodayNs } from "@/utils/date"
 import { getRandomId } from "@/utils/general"
 
-export function useRemoveReactionOnMessage(props: { topic: ConversationTopic }) {
+export function useRemoveReactionOnMessage(props: { topic: IXmtpConversationTopic }) {
   const { topic } = props
 
   const { mutateAsync: removeReactionMutationAsync } = useMutation({
@@ -67,7 +68,7 @@ export function useRemoveReactionOnMessage(props: { topic: ConversationTopic }) 
   })
 
   const removeReactionOnMessage = useCallback(
-    (args: { messageId: MessageId; emoji: string }) => {
+    (args: { messageId: IXmtpMessageId; emoji: string }) => {
       return removeReactionMutationAsync({
         reaction: {
           reference: args.messageId,

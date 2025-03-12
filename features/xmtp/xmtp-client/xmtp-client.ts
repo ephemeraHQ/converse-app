@@ -1,4 +1,4 @@
-import { InboxId, PublicIdentity, Client as XmtpClient } from "@xmtp/react-native-sdk"
+import { PublicIdentity, Client as XmtpClient } from "@xmtp/react-native-sdk"
 import { getRandomBytesAsync } from "expo-crypto"
 import { config } from "@/config"
 import { XMTP_MAX_MS_UNTIL_LOG_ERROR } from "@/features/xmtp/xmtp-logs"
@@ -7,7 +7,7 @@ import { XMTPError } from "@/utils/error"
 import { getSecureItemAsync, setSecureItemAsync } from "@/utils/keychain"
 import { xmtpLogger } from "@/utils/logger"
 import { ISupportedXmtpCodecs, supportedXmtpCodecs } from "../xmtp-codecs/xmtp-codecs"
-import { IXmtpClient, IXmtpSigner } from "../xmtp.types"
+import { IXmtpClient, IXmtpInboxId, IXmtpSigner } from "../xmtp.types"
 
 export async function createXmtpClientInstance(args: {
   inboxSigner: IXmtpSigner
@@ -44,17 +44,22 @@ export async function createXmtpClientInstance(args: {
 
 export async function buildXmtpClientInstance(args: {
   ethereumAddress: string
-  inboxId?: InboxId
-}): Promise<IXmtpClient> {
+  inboxId?: IXmtpInboxId
+}) {
   const { ethereumAddress, inboxId } = args
 
   xmtpLogger.debug(`Building XMTP client for address: ${ethereumAddress}`)
 
   const startTime = Date.now()
 
+  const identity = new PublicIdentity(ethereumAddress, "ETHEREUM")
+
+  console.log("identity:", identity.kind)
+  console.log("identity:", identity.identifier)
+
   try {
     const client = await XmtpClient.build<ISupportedXmtpCodecs>(
-      new PublicIdentity(ethereumAddress, "ETHEREUM"),
+      identity,
       {
         env: config.xmtpEnv,
         codecs: supportedXmtpCodecs,

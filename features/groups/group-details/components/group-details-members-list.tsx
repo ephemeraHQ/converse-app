@@ -1,4 +1,4 @@
-import { ConversationTopic } from "@xmtp/react-native-sdk"
+import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
 import { memo, useCallback, useMemo } from "react"
 import { HStack } from "@/design-system/HStack"
 import { IconButton } from "@/design-system/IconButton/IconButton"
@@ -15,7 +15,7 @@ import { useAppTheme } from "@/theme/use-app-theme"
 import { MemberListItem } from "./group-details-members-list-item"
 
 export const GroupDetailsMembersList = memo(function GroupDetailsMembersList(props: {
-  topic: ConversationTopic
+  topic: IXmtpConversationTopic
 }) {
   const { topic } = props
   const router = useRouter()

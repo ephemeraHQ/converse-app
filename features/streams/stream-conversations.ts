@@ -1,6 +1,6 @@
+import { IXmtpInboxId , IXmtpConversationWithCodecs } from "@features/xmtp/xmtp.types"
 import { MutationObserver } from "@tanstack/react-query"
 import { StreamError } from "@utils/error"
-import { InboxId } from "@xmtp/react-native-sdk"
 import { addConversationToAllowedConsentConversationsQuery } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import { addConversationToUnknownConsentConversationsQuery } from "@/features/conversation/conversation-requests-list/conversations-unknown-consent.query"
 import { getMarkConversationAsReadMutationOptions } from "@/features/conversation/hooks/use-mark-conversation-as-read"
@@ -9,12 +9,11 @@ import { isConversationAllowed } from "@/features/conversation/utils/is-conversa
 import { isConversationConsentUnknown } from "@/features/conversation/utils/is-conversation-consent-unknown"
 import { ensureGroupMembersQueryData } from "@/features/groups/useGroupMembersQuery"
 import { streamConversations } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-stream"
-import { IXmtpConversationWithCodecs } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
 import { streamLogger } from "@/utils/logger"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
 
-export async function startConversationStreaming(args: { clientInboxId: InboxId }) {
+export async function startConversationStreaming(args: { clientInboxId: IXmtpInboxId }) {
   const { clientInboxId } = args
 
   try {
@@ -32,7 +31,7 @@ export async function startConversationStreaming(args: { clientInboxId: InboxId 
 }
 
 async function handleNewConversation(args: {
-  clientInboxId: InboxId
+  clientInboxId: IXmtpInboxId
   conversation: IXmtpConversationWithCodecs
 }) {
   const { clientInboxId, conversation } = args

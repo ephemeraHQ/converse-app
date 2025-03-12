@@ -1,4 +1,4 @@
-import { InboxId } from "@xmtp/react-native-sdk"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { memo, useCallback, useMemo } from "react"
 import { Pressable } from "@/design-system/Pressable"
 import { openMemberDetailsBottomSheet } from "@/features/groups/group-details/components/group-details-member-details.bottom-sheet"
@@ -11,7 +11,7 @@ import {
 import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
 import { useRouteParams } from "@/navigation/use-navigation"
 
-export const MemberListItem = memo(function MemberListItem(props: { memberInboxId: InboxId }) {
+export const MemberListItem = memo(function MemberListItem(props: { memberInboxId: IXmtpInboxId }) {
   const { memberInboxId } = props
 
   const { groupTopic } = useRouteParams<"GroupDetails">()

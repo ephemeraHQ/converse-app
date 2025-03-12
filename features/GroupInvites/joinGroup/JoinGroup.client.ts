@@ -231,8 +231,8 @@
 //         [getV3IdFromTopic(topic).toLowerCase()]: "allowed",
 //       });
 
-//       const inboxIdsToAllow: InboxId[] = [];
-//       const inboxIds: { [inboxId: string]: "allowed" } = {};
+//       const inboxIdsToAllow: IXmtpInboxId[] = [];
+//       const inboxIds: { [inboxId: IXmtpInboxId]: "allowed" } = {};
 //       if (
 //         options.includeAddedBy &&
 //         conversation.version === ConversationVersion.GROUP &&

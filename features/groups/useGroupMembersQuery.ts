@@ -1,5 +1,5 @@
+import { IXmtpConversationTopic, IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { queryOptions as reactQueryOptions, skipToken, useQuery } from "@tanstack/react-query"
-import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk"
 import { getOrFetchConversationQuery } from "@/features/conversation/queries/conversation.query"
 import { IGroupMember } from "@/features/groups/group.types"
 import { Optional } from "@/types/general"
@@ -11,8 +11,8 @@ const memberEntityConfig = {
 } as const
 
 type IGroupMembersArgsStrict = {
-  clientInboxId: InboxId
-  topic: ConversationTopic
+  clientInboxId: IXmtpInboxId
+  topic: IXmtpConversationTopic
 }
 
 type IGroupMembersArgsWithCaller = IGroupMembersArgsStrict & { caller: string }
@@ -156,7 +156,7 @@ export function addGroupMembersToQueryData(
 
 export function removeMembersFromGroupQueryData(
   args: IGroupMembersArgsStrict & {
-    memberInboxIds: InboxId[]
+    memberInboxIds: IXmtpInboxId[]
   },
 ) {
   const { clientInboxId, topic, memberInboxIds } = args

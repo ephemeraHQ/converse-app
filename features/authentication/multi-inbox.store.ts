@@ -1,5 +1,5 @@
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { logger } from "@utils/logger"
-import { InboxId } from "@xmtp/react-native-sdk"
 import { create } from "zustand"
 import { createJSONStorage, persist, subscribeWithSelector } from "zustand/middleware"
 import { captureError } from "@/utils/capture-error"
@@ -9,7 +9,7 @@ import { zustandMMKVStorage } from "@/utils/mmkv"
 
 export type CurrentSender = {
   ethereumAddress: IEthereumAddress
-  inboxId: string
+  inboxId: IXmtpInboxId
 }
 
 type IMultiInboxStoreState = {
@@ -21,10 +21,10 @@ type IMultiInboxStoreActions = {
   reset: () => void
   setCurrentSender: (
     sender: // We let users pass in a partial CurrentSender object and we will find the full object in the store using "senders"
-    CurrentSender | { ethereumAddress: IEthereumAddress } | { inboxId: InboxId } | undefined,
+    CurrentSender | { ethereumAddress: IEthereumAddress } | { inboxId: IXmtpInboxId } | undefined,
   ) => void
   removeSender: (
-    senderIdentifier: { ethereumAddress: IEthereumAddress } | { inboxId: InboxId },
+    senderIdentifier: { ethereumAddress: IEthereumAddress } | { inboxId: IXmtpInboxId },
   ) => void
 }
 
@@ -174,18 +174,8 @@ export function useCurrentSender() {
   return useMultiInboxStore((state) => state.currentSender)
 }
 
-export function useCurrentSenderEthAddress() {
-  const currentSender = useCurrentSender()
-  return currentSender?.ethereumAddress
-}
-
 export function getCurrentSender(): CurrentSender | undefined {
   return useMultiInboxStore.getState().currentSender
-}
-
-export function getCurrentSenderEthAddress() {
-  const currentSender = getCurrentSender()
-  return currentSender?.ethereumAddress
 }
 
 export function getSafeCurrentSender(): CurrentSender {
@@ -219,8 +209,4 @@ export function useAllInboxIds() {
 
 export function resetMultiInboxStore() {
   useMultiInboxStore.getState().actions.reset()
-}
-
-export function getSenderWithInboxId(inboxId: InboxId) {
-  return useMultiInboxStore.getState().senders.find((sender) => sender.inboxId === inboxId)
 }

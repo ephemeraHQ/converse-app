@@ -1,5 +1,5 @@
+import { IXmtpConversationTopic, IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { useQuery } from "@tanstack/react-query"
-import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk"
 import { useCallback } from "react"
 import { showSnackbar } from "@/components/snackbar/snackbar.service"
 import { useAllowGroupMutation } from "@/features/consent/use-allow-group.mutation"
@@ -15,7 +15,7 @@ export type IGroupConsentOptions = {
   includeAddedBy?: boolean
 }
 
-export const useGroupConsentForCurrentAccount = (topic: ConversationTopic) => {
+export const useGroupConsentForCurrentAccount = (topic: IXmtpConversationTopic) => {
   const currentSender = useSafeCurrentSender()
 
   const { data: group, isLoading: isGroupLoading } = useGroupQuery({
@@ -76,7 +76,7 @@ export const useGroupConsentForCurrentAccount = (topic: ConversationTopic) => {
 
       await denyGroupMutation()
 
-      const inboxIdsToDeny: InboxId[] = []
+      const inboxIdsToDeny: IXmtpInboxId[] = []
 
       if (includeAddedBy && group.addedByInboxId) {
         inboxIdsToDeny.push(group.addedByInboxId)

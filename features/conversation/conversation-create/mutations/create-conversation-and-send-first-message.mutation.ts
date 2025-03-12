@@ -1,6 +1,6 @@
+import { IXmtpConversationTopic, IXmtpInboxId , IXmtpDmWithCodecs, IXmtpGroupWithCodecs } from "@features/xmtp/xmtp.types"
 import { useMutation } from "@tanstack/react-query"
 import { ConversationTopic, MessageId, RemoteAttachmentContent } from "@xmtp/react-native-sdk"
-import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client"
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import {
   getConversationMessagesQueryData,
@@ -12,11 +12,10 @@ import {
 } from "@/features/conversation/queries/conversation.query"
 import { createXmtpDm } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-dm"
 import { createXmtpGroup } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-group"
-import { IXmtpDmWithCodecs, IXmtpGroupWithCodecs } from "@/features/xmtp/xmtp.types"
 import { sendMessage } from "../../hooks/use-send-message"
 
 export type ISendMessageParams = {
-  topic: ConversationTopic
+  topic: IXmtpConversationTopic
   referencedMessageId?: MessageId
   content:
     | { text: string; remoteAttachment?: RemoteAttachmentContent }
@@ -65,7 +64,7 @@ export type ISendFirstMessageParams = Omit<ISendMessageParams, "topic">
 
 export const TEMP_CONVERSATION_PREFIX = "tmp-"
 
-function getConversationTempTopic(args: { inboxIds: InboxId[] }) {
+function getConversationTempTopic(args: { inboxIds: IXmtpInboxId[] }) {
   const { inboxIds } = args
   return `${TEMP_CONVERSATION_PREFIX}${generateGroupHashFromMemberIds(
     inboxIds,
@@ -76,7 +75,7 @@ export function useCreateConversationAndSendFirstMessage() {
   // const conversationStore = useConversationStore()
 
   return useMutation({
-    mutationFn: async (args: { inboxIds: InboxId[]; content: { text: string } }) => {
+    mutationFn: async (args: { inboxIds: IXmtpInboxId[]; content: { text: string } }) => {
       const { inboxIds, content } = args
 
       if (!inboxIds.length) {
@@ -293,9 +292,9 @@ export function useCreateConversationAndSendFirstMessage() {
 }
 
 export function maybeReplaceOptimisticConversationWithReal(args: {
-  clientInboxId: InboxId
-  memberInboxIds: InboxId[]
-  realTopic: ConversationTopic
+  clientInboxId: IXmtpInboxId
+  memberInboxIds: IXmtpInboxId[]
+  realTopic: IXmtpConversationTopic
 }) {
   const { clientInboxId, memberInboxIds, realTopic } = args
 
@@ -376,7 +375,7 @@ export function maybeReplaceOptimisticConversationWithReal(args: {
  *
  * @throws {Error} If members array is empty
  */
-function generateGroupHashFromMemberIds(members: InboxId[]) {
+function generateGroupHashFromMemberIds(members: IXmtpInboxId[]) {
   if (!members.length) {
     return undefined
   }
@@ -418,7 +417,7 @@ function generateGroupHashFromMemberIds(members: InboxId[]) {
 
 // async function ensureConversationInCache(args: {
 //   account: string;
-//   topic: ConversationTopic;
+//   topic: IXmtpConversationTopic;
 // }) {
 //   const MAX_RETRIES = 3;
 //   let retries = 0;

@@ -1,10 +1,9 @@
+import { IXmtpInboxId , IXmtpConversationWithCodecs } from "@features/xmtp/xmtp.types"
 import { xmtpLogger } from "@utils/logger"
-import { InboxId } from "@xmtp/react-native-sdk"
-import { IXmtpConversationWithCodecs } from "@/features/xmtp/xmtp.types"
 import { getXmtpClientByInboxId } from "../xmtp-client/xmtp-client.service"
 
 export async function streamConversations(args: {
-  inboxId: InboxId
+  inboxId: IXmtpInboxId
   onNewConversation: (conversation: IXmtpConversationWithCodecs) => void | Promise<void>
 }) {
   const { inboxId, onNewConversation } = args
@@ -21,7 +20,7 @@ export async function streamConversations(args: {
   })
 }
 
-export async function stopStreamingConversations(args: { inboxId: InboxId }) {
+export async function stopStreamingConversations(args: { inboxId: IXmtpInboxId }) {
   const { inboxId } = args
 
   const client = await getXmtpClientByInboxId({

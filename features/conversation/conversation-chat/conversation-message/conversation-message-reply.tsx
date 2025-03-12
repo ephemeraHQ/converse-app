@@ -2,7 +2,6 @@ import { HStack } from "@design-system/HStack"
 import { Icon } from "@design-system/Icon/Icon"
 import { Text } from "@design-system/Text"
 import { VStack } from "@design-system/VStack"
-import { DecodedMessage, MessageId, ReplyCodec } from "@xmtp/react-native-sdk"
 import { memo } from "react"
 import { Gesture, GestureDetector } from "react-native-gesture-handler"
 import { AttachmentRemoteImage } from "@/features/conversation/conversation-chat/conversation-attachment/conversation-attachment-remote-image"
@@ -24,14 +23,18 @@ import {
   useCurrentConversationTopicSafe,
 } from "@/features/conversation/conversation-chat/conversation.store-context"
 import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
-import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types"
+import {
+  IXmtpDecodedMessage,
+  IXmtpDecodedReplyMessage,
+  IXmtpMessageId,
+} from "@/features/xmtp/xmtp.types"
 import { useSelect } from "@/stores/stores.utils"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { captureError } from "@/utils/capture-error"
 import { useConversationMessageById } from "./use-conversation-message-by-id"
 
 export const MessageReply = memo(function MessageReply(props: {
-  message: DecodedMessage<ReplyCodec>
+  message: IXmtpDecodedReplyMessage
 }) {
   const { message } = props
 
@@ -65,7 +68,7 @@ export const MessageReply = memo(function MessageReply(props: {
             }}
           >
             <MessageReplyReference
-              referenceMessageId={replyMessageContent.reference as MessageId}
+              referenceMessageId={replyMessageContent.reference as IXmtpMessageId}
             />
 
             {!!replyMessageContent.content.remoteAttachment && (
@@ -77,7 +80,7 @@ export const MessageReply = memo(function MessageReply(props: {
               >
                 <AttachmentRemoteImage
                   fitAspectRatio
-                  messageId={replyMessageContent.reference as MessageId}
+                  messageId={replyMessageContent.reference as IXmtpMessageId}
                   remoteMessageContent={replyMessageContent.content.remoteAttachment}
                   containerProps={{
                     style: {
@@ -102,7 +105,7 @@ export const MessageReply = memo(function MessageReply(props: {
 })
 
 const MessageReplyReference = memo(function MessageReplyReference(props: {
-  referenceMessageId: MessageId
+  referenceMessageId: IXmtpMessageId
 }) {
   const { referenceMessageId } = props
 

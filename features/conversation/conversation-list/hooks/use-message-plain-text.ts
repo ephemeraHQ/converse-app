@@ -1,6 +1,4 @@
-import { GroupUpdatedCodec } from "@xmtp/react-native-sdk"
 import { useMemo } from "react"
-import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
 import {
   isGroupUpdatedMessage,
   isMultiRemoteAttachmentMessage,
@@ -12,14 +10,13 @@ import {
 } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
 import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
 import { usePreferredDisplayInfoBatch } from "@/features/preferred-display-info/use-preferred-display-info-batch"
-import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types"
+import { IXmtpDecodedMessage, IXmtpGroupUpdatedContent } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
-import logger from "@/utils/logger"
 
 // Handles group metadata changes (name, description, image)
 function handleGroupMetadataChange(args: {
   initiatorName: string
-  content: ReturnType<GroupUpdatedCodec["decode"]>
+  content: IXmtpGroupUpdatedContent
 }) {
   const { initiatorName, content } = args
 
@@ -42,8 +39,6 @@ function handleGroupMetadataChange(args: {
 }
 
 export function useMessagePlainText(message: IXmtpDecodedMessage | undefined) {
-  const account = useCurrentSenderEthAddress()
-
   // Get initiator profile for group updates
   const initiatorInboxId =
     message && isGroupUpdatedMessage(message) ? message.content().initiatedByInboxId : undefined
@@ -73,7 +68,7 @@ export function useMessagePlainText(message: IXmtpDecodedMessage | undefined) {
   })
 
   return useMemo(() => {
-    if (!account || !message) {
+    if (!message) {
       return ""
     }
 
@@ -138,5 +133,5 @@ export function useMessagePlainText(message: IXmtpDecodedMessage | undefined) {
       captureError(error)
       return message.fallback
     }
-  }, [message, account, initiatorDisplayName, addedMemberDisplayInfos, removedMemberDisplayInfos])
+  }, [message, initiatorDisplayName, addedMemberDisplayInfos, removedMemberDisplayInfos])
 }

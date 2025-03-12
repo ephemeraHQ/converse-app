@@ -1,12 +1,12 @@
+import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
 import { useMutation } from "@tanstack/react-query"
-import { ConversationTopic } from "@xmtp/react-native-sdk"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import {
   getConversationMetadataQueryData,
   updateConversationMetadataQueryData,
 } from "@/features/conversation/conversation-metadata/conversation-metadata.query"
 
-export function useRestoreConversation(args: { topic: ConversationTopic }) {
+export function useRestoreConversation(args: { topic: IXmtpConversationTopic }) {
   const { topic } = args
 
   const currentSender = useSafeCurrentSender()

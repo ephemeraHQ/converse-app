@@ -1,5 +1,5 @@
+import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
 import { useQuery } from "@tanstack/react-query"
-import type { ConversationTopic } from "@xmtp/react-native-sdk"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group"
 import { getGroupMembersQueryOptions } from "@/features/groups/useGroupMembersQuery"
@@ -7,7 +7,7 @@ import { useGroupNameMutation } from "@/features/groups/useGroupNameMutation"
 import { getGroupQueryOptions } from "@/features/groups/useGroupQuery"
 import { usePreferredDisplayInfoBatch } from "@/features/preferred-display-info/use-preferred-display-info-batch"
 
-export const useGroupName = (args: { conversationTopic: ConversationTopic }) => {
+export const useGroupName = (args: { conversationTopic: IXmtpConversationTopic }) => {
   const { conversationTopic } = args
 
   const currentSenderInboxId = useSafeCurrentSender().inboxId

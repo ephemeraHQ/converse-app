@@ -17,8 +17,8 @@ import { useConversationScreenHeader } from "@/features/conversation/conversatio
 import { ConversationCreateListResults } from "@/features/conversation/conversation-create/conversation-create-list-results"
 import { useConversationQuery } from "@/features/conversation/queries/conversation.query"
 import { SearchUsersInput } from "@/features/search-users/search-users-input"
+import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { NavigationParamList } from "@/navigation/navigation.types"
-import { useRouter } from "@/navigation/use-navigation"
 import { $globalStyles } from "@/theme/styles"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { useRefetchQueryOnRefocus } from "@/utils/react-query/use-refetch-query-on-focus"
@@ -126,7 +126,7 @@ const ConversationCreateSearchInputWrapper = memo(function ConversationCreateSea
   )
 
   const handleSelectedInboxIdsChange = useCallback(
-    (inboxIds: string[]) => {
+    (inboxIds: IXmtpInboxId[]) => {
       conversationStore.setState({ searchSelectedUserInboxIds: inboxIds })
     },
     [conversationStore],

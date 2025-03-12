@@ -1,19 +1,19 @@
 /**
  * Maybe need to move this file somewhere else? Not sure which specific feature it belongs to.
  */
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query"
-import { InboxId } from "@xmtp/react-native-sdk"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
 import { getEthAddressesFromInboxIds } from "./eth-addresses-from-xmtp-inbox-id"
 
 type IArgs = {
-  clientInboxId: InboxId
-  inboxId: InboxId | undefined
+  clientInboxId: IXmtpInboxId
+  inboxId: IXmtpInboxId | undefined
 }
 
 type IStrictArgs = {
-  clientInboxId: InboxId
-  inboxId: InboxId
+  clientInboxId: IXmtpInboxId
+  inboxId: IXmtpInboxId
 }
 
 export function getEthAddressesForXmtpInboxIdQueryOptions(args: IArgs) {

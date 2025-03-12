@@ -1,10 +1,10 @@
-import { InboxId } from "@xmtp/react-native-sdk"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { IEthereumAddress } from "@/utils/evm/address"
 import { getXmtpClientByInboxId } from "../xmtp-client/xmtp-client.service"
 
 export async function getEthAddressesFromInboxIds(args: {
-  clientInboxId: InboxId
-  inboxIds: InboxId[]
+  clientInboxId: IXmtpInboxId
+  inboxIds: IXmtpInboxId[]
 }) {
   const { clientInboxId, inboxIds } = args
 

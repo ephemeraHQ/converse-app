@@ -1,11 +1,10 @@
-import { ConversationTopic } from "@xmtp/react-native-sdk"
-import { getCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
+import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
+import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { getConversationQueryData } from "@/features/conversation/queries/conversation.query"
 
-export function getConversationForCurrentAccount(topic: ConversationTopic) {
-  const currentAccount = getCurrentSenderEthAddress()!
+export function getConversationForCurrentAccount(topic: IXmtpConversationTopic) {
   return getConversationQueryData({
-    inboxId: currentAccount,
+    inboxId: getSafeCurrentSender().inboxId,
     topic: topic,
   })
 }

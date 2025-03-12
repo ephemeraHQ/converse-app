@@ -1,5 +1,5 @@
+import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
 import { useMutation } from "@tanstack/react-query"
-import { ConversationTopic } from "@xmtp/react-native-sdk"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { markConversationMetadataAsUnread } from "@/features/conversation/conversation-metadata/conversation-metadata.api"
 import {
@@ -7,7 +7,7 @@ import {
   updateConversationMetadataQueryData,
 } from "@/features/conversation/conversation-metadata/conversation-metadata.query"
 
-export function useMarkConversationAsUnread(args: { topic: ConversationTopic }) {
+export function useMarkConversationAsUnread(args: { topic: IXmtpConversationTopic }) {
   const { topic } = args
 
   const currentSender = useSafeCurrentSender()

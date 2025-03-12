@@ -1,4 +1,4 @@
-import { InboxId } from "@xmtp/react-native-sdk"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { memo } from "react"
 import { Screen } from "@/components/screen/screen"
 import { ProfileContactCard } from "@/features/profiles/components/profile-contact-card/profile-contact-card"
@@ -7,7 +7,7 @@ import { ProfileSocialsNames } from "@/features/profiles/components/profile-soci
 import { useProfileOtherScreenHeader } from "@/features/profiles/profile-other.screen-header"
 import { useAppTheme } from "@/theme/use-app-theme"
 
-export const ProfileOther = memo(function (props: { inboxId: InboxId }) {
+export const ProfileOther = memo(function (props: { inboxId: IXmtpInboxId }) {
   const { inboxId } = props
 
   const { theme } = useAppTheme()

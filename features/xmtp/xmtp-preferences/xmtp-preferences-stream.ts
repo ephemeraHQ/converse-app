@@ -1,10 +1,10 @@
-import { InboxId } from "@xmtp/react-native-sdk"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { getAllowedConsentConversationsQueryData } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import { XMTPError } from "@/utils/error"
 import { xmtpLogger } from "@/utils/logger"
 import { getXmtpClientByInboxId } from "../xmtp-client/xmtp-client.service"
 
-export const streamConsent = async (inboxId: InboxId) => {
+export const streamConsent = async (inboxId: IXmtpInboxId) => {
   const client = await getXmtpClientByInboxId({
     inboxId,
   })
@@ -32,7 +32,7 @@ export const streamConsent = async (inboxId: InboxId) => {
   }
 }
 
-export const stopStreamingConsent = async (inboxId: InboxId) => {
+export const stopStreamingConsent = async (inboxId: IXmtpInboxId) => {
   const client = await getXmtpClientByInboxId({
     inboxId,
   })

@@ -1,4 +1,4 @@
-import { InboxId } from "@xmtp/react-native-sdk"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { useCallback } from "react"
 import { Share, ViewStyle } from "react-native"
 import { config } from "@/config"
@@ -14,7 +14,7 @@ import { useRouter } from "@/navigation/use-navigation"
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme"
 import { Haptics } from "@/utils/haptics"
 
-export function useProfileOtherScreenHeader({ inboxId }: { inboxId: InboxId }) {
+export function useProfileOtherScreenHeader({ inboxId }: { inboxId: IXmtpInboxId }) {
   const { theme, themed } = useAppTheme()
   const router = useRouter()
 

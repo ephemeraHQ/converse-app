@@ -1,4 +1,3 @@
-import { MessageId } from "@xmtp/react-native-sdk"
 import React, { memo, useCallback, useEffect, useMemo, useRef } from "react"
 import { NativeScrollEvent, NativeSyntheticEvent, Platform } from "react-native"
 import { FadeInDown } from "react-native-reanimated"
@@ -27,7 +26,11 @@ import { useConversationIsUnread } from "@/features/conversation/conversation-li
 import { useMarkConversationAsRead } from "@/features/conversation/hooks/use-mark-conversation-as-read"
 import { isConversationAllowed } from "@/features/conversation/utils/is-conversation-allowed"
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm"
-import { IXmtpConversationWithCodecs, IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types"
+import {
+  IXmtpConversationWithCodecs,
+  IXmtpDecodedMessage,
+  IXmtpMessageId,
+} from "@/features/xmtp/xmtp.types"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { captureError } from "@/utils/capture-error"
 import { CONVERSATION_LIST_REFRESH_THRESHOLD } from "../conversation-list/conversation-list.contstants"
@@ -170,7 +173,7 @@ const ConversationMessagesListItem = memo(function ConversationMessagesListItem(
   const composerStore = useConversationComposerStore()
 
   const handleReply = useCallback(() => {
-    composerStore.getState().setReplyToMessageId(message.id as MessageId)
+    composerStore.getState().setReplyToMessageId(message.id as IXmtpMessageId)
   }, [composerStore, message])
 
   const messageHasReactions = useMessageHasReactions({

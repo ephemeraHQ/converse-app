@@ -1,9 +1,8 @@
-import { InboxId } from "@xmtp/react-native-sdk"
+import { IXmtpInboxId , IXmtpSigner } from "@features/xmtp/xmtp.types"
 import { useMultiInboxStore } from "@/features/authentication/multi-inbox.store"
 import { createXmtpClientInstance } from "@/features/xmtp/xmtp-client/xmtp-client"
 import { xmtpIdentityIsEthereumAddress } from "@/features/xmtp/xmtp-identifier/xmtp-identifier"
 import { validateClientInstallation } from "@/features/xmtp/xmtp-installations/xmtp-installations"
-import { IXmtpSigner } from "@/features/xmtp/xmtp.types"
 import { IEthereumAddress } from "@/utils/evm/address"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
 import { getXmtpClientQueryOptions, setXmtpClientQueryData } from "./xmtp-client.query"
@@ -43,7 +42,7 @@ export async function createXmtpClient(args: { inboxSigner: IXmtpSigner }) {
   return client
 }
 
-export async function getXmtpClientByInboxId(args: { inboxId: InboxId }) {
+export async function getXmtpClientByInboxId(args: { inboxId: IXmtpInboxId }) {
   const { inboxId } = args
 
   const sender = useMultiInboxStore.getState().senders.find((s) => s.inboxId === inboxId)

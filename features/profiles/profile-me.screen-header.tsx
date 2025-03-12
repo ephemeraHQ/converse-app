@@ -1,4 +1,4 @@
-import { InboxId } from "@xmtp/react-native-sdk"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import React, { memo, useCallback } from "react"
 import { ViewStyle } from "react-native"
 import { Button } from "@/design-system/Button/Button"
@@ -19,7 +19,7 @@ import { captureErrorWithToast } from "@/utils/capture-error"
 import { Haptics } from "@/utils/haptics"
 import { AccountSwitcher } from "../authentication/components/account-switcher"
 
-export function useProfileMeScreenHeader(args: { inboxId: InboxId }) {
+export function useProfileMeScreenHeader(args: { inboxId: IXmtpInboxId }) {
   const { inboxId } = args
 
   const { theme, themed } = useAppTheme()
@@ -119,7 +119,7 @@ export function useProfileMeScreenHeader(args: { inboxId: InboxId }) {
   )
 }
 
-const DoneAction = memo(function DoneAction({ inboxId }: { inboxId: InboxId }) {
+const DoneAction = memo(function DoneAction({ inboxId }: { inboxId: IXmtpInboxId }) {
   const profileMeStore = useProfileMeStore(inboxId)
   const profile = getProfileQueryData({ xmtpId: inboxId })
   const { saveProfile } = useSaveProfile()

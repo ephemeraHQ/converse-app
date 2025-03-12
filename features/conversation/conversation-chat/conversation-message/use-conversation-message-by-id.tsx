@@ -1,12 +1,12 @@
 import { useQuery } from "@tanstack/react-query"
-import { ConversationTopic, MessageId } from "@xmtp/react-native-sdk"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { getConversationMessageQueryOptions } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.query"
 import { useConversationMessagesQuery } from "@/features/conversation/conversation-chat/conversation-messages.query"
+import { IXmtpConversationTopic, IXmtpMessageId } from "@/features/xmtp/xmtp.types"
 
 export function useConversationMessageById(args: {
-  messageId: MessageId
-  conversationTopic: ConversationTopic
+  messageId: IXmtpMessageId
+  conversationTopic: IXmtpConversationTopic
 }) {
   const { messageId, conversationTopic } = args
 

@@ -5,14 +5,6 @@ import { Text } from "@design-system/Text"
 import { AnimatedVStack, VStack } from "@design-system/VStack"
 import { SICK_DAMPING, SICK_STIFFNESS } from "@theme/animations"
 import { Haptics } from "@utils/haptics"
-import {
-  ConversationTopic,
-  DecodedMessage,
-  MessageId,
-  RemoteAttachmentCodec,
-  ReplyCodec,
-  StaticAttachmentCodec,
-} from "@xmtp/react-native-sdk"
 import { memo, useCallback, useEffect } from "react"
 import { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated"
 import { AttachmentRemoteImage } from "@/features/conversation/conversation-chat/conversation-attachment/conversation-attachment-remote-image"
@@ -27,7 +19,14 @@ import {
 import { useMessagePlainText } from "@/features/conversation/conversation-list/hooks/use-message-plain-text"
 import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user"
 import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
-import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types"
+import {
+  IXmtpConversationTopic,
+  IXmtpDecodedMessage,
+  IXmtpDecodedRemoteAttachmentMessage,
+  IXmtpDecodedReplyMessage,
+  IXmtpDecodedStaticAttachmentMessage,
+  IXmtpMessageId,
+} from "@/features/xmtp/xmtp.types"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { useConversationMessageById } from "../conversation-message/use-conversation-message-by-id"
 import { useCurrentConversationTopic } from "../conversation.store-context"
@@ -44,7 +43,7 @@ export const ReplyPreview = memo(function ReplyPreview() {
   return <Content conversationTopic={topic} />
 })
 
-const Content = memo(function Content(props: { conversationTopic: ConversationTopic }) {
+const Content = memo(function Content(props: { conversationTopic: IXmtpConversationTopic }) {
   const { conversationTopic } = props
 
   const replyingToMessageId = useConversationComposerStoreContext(
@@ -170,7 +169,7 @@ const ReplyPreviewEndContent = memo(function ReplyPreviewEndContent(props: {
   const { theme } = useAppTheme()
 
   if (isReplyMessage(replyMessage)) {
-    const replyTyped = replyMessage as DecodedMessage<ReplyCodec>
+    const replyTyped = replyMessage as IXmtpDecodedReplyMessage
 
     const content = replyTyped.content()
 
@@ -181,7 +180,7 @@ const ReplyPreviewEndContent = memo(function ReplyPreviewEndContent(props: {
     if (content.content.remoteAttachment) {
       return (
         <AttachmentRemoteImage
-          messageId={content.reference as MessageId}
+          messageId={content.reference as IXmtpMessageId}
           remoteMessageContent={content.content.remoteAttachment}
           containerProps={{
             style: {
@@ -196,7 +195,7 @@ const ReplyPreviewEndContent = memo(function ReplyPreviewEndContent(props: {
   }
 
   if (isRemoteAttachmentMessage(replyMessage)) {
-    const messageTyped = replyMessage as DecodedMessage<RemoteAttachmentCodec>
+    const messageTyped = replyMessage as IXmtpDecodedRemoteAttachmentMessage
 
     const content = messageTyped.content()
 
@@ -233,7 +232,7 @@ const ReplyPreviewMessageContent = memo(function ReplyPreviewMessageContent(prop
   const clearedMessage = messageText?.replace(/(\n)/gm, " ")
 
   if (isStaticAttachmentMessage(replyMessage)) {
-    const messageTyped = replyMessage as DecodedMessage<StaticAttachmentCodec>
+    const messageTyped = replyMessage as IXmtpDecodedStaticAttachmentMessage
 
     const content = messageTyped.content()
 
@@ -262,7 +261,7 @@ const ReplyPreviewMessageContent = memo(function ReplyPreviewMessageContent(prop
   }
 
   if (isReplyMessage(replyMessage)) {
-    const messageTyped = replyMessage as DecodedMessage<ReplyCodec>
+    const messageTyped = replyMessage as IXmtpDecodedReplyMessage
     const content = messageTyped.content()
 
     if (typeof content === "string") {

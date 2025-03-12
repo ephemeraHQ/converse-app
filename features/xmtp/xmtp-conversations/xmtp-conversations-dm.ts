@@ -1,10 +1,13 @@
-import { InboxId } from "@xmtp/react-native-sdk"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { config } from "@/config"
 import { captureError } from "@/utils/capture-error"
 import { XMTPError } from "@/utils/error"
 import { getXmtpClientByInboxId } from "../xmtp-client/xmtp-client.service"
 
-export async function getXmtpDmByInboxId(args: { clientInboxId: InboxId; inboxId: InboxId }) {
+export async function getXmtpDmByInboxId(args: {
+  clientInboxId: IXmtpInboxId
+  inboxId: IXmtpInboxId
+}) {
   const { clientInboxId, inboxId } = args
 
   try {
@@ -35,7 +38,10 @@ export async function getXmtpDmByInboxId(args: { clientInboxId: InboxId; inboxId
   }
 }
 
-export async function createXmtpDm(args: { senderClientInboxId: InboxId; peerInboxId: InboxId }) {
+export async function createXmtpDm(args: {
+  senderClientInboxId: IXmtpInboxId
+  peerInboxId: IXmtpInboxId
+}) {
   const { senderClientInboxId, peerInboxId } = args
 
   try {

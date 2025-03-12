@@ -1,6 +1,5 @@
 import { Text } from "@design-system/Text"
 import { favoritedEmojis } from "@utils/emojis/favoritedEmojis"
-import { ConversationTopic, InboxId, MessageId, ReactionContent } from "@xmtp/react-native-sdk"
 import React, { memo, useCallback, useMemo } from "react"
 import { EntryAnimationsValues, withSpring } from "react-native-reanimated"
 import { HStack } from "@/design-system/HStack"
@@ -11,6 +10,12 @@ import { AnimatedVStack, VStack } from "@/design-system/VStack"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user"
 import { getReactionContent } from "@/features/xmtp/xmtp-codecs/xmtp-codecs-reaction"
+import {
+  IXmtpConversationTopic,
+  IXmtpInboxId,
+  IXmtpMessageId,
+  IXmtpReactionContent,
+} from "@/features/xmtp/xmtp.types"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { useConversationMessageById } from "../use-conversation-message-by-id"
 import { MESSAGE_CONTEXT_MENU_ABOVE_MESSAGE_REACTIONS_HEIGHT } from "./conversation-message-context-menu.constants"
@@ -25,14 +30,14 @@ export const MessageContextMenuAboveMessageReactions = memo(
     originY,
     reactors,
   }: {
-    topic: ConversationTopic
-    messageId: MessageId
+    topic: IXmtpConversationTopic
+    messageId: IXmtpMessageId
     onChooseMoreEmojis: () => void
     onSelectReaction: (emoji: string) => void
     originX: number
     originY: number
     reactors: {
-      [reactor: InboxId]: ReactionContent[]
+      [reactor: IXmtpInboxId]: IXmtpReactionContent[]
     }
   }) {
     const { theme } = useAppTheme()

@@ -1,12 +1,11 @@
+import { IXmtpInboxId , IXmtpDecodedMessage } from "@features/xmtp/xmtp.types"
 import { xmtpLogger } from "@utils/logger"
-import { InboxId } from "@xmtp/react-native-sdk"
 import { XMTPError } from "@/utils/error"
 import { isProd } from "@/utils/getEnv"
 import { getXmtpClientByInboxId } from "../xmtp-client/xmtp-client.service"
-import { IXmtpDecodedMessage } from "../xmtp.types"
 
 export const streamAllMessages = async (args: {
-  inboxId: InboxId
+  inboxId: IXmtpInboxId
   onNewMessage: (message: IXmtpDecodedMessage) => void | Promise<void>
 }) => {
   const { inboxId, onNewMessage } = args
@@ -35,7 +34,7 @@ export const streamAllMessages = async (args: {
   }
 }
 
-export const stopStreamingAllMessage = async (args: { inboxId: InboxId }) => {
+export const stopStreamingAllMessage = async (args: { inboxId: IXmtpInboxId }) => {
   const { inboxId } = args
 
   const client = await getXmtpClientByInboxId({

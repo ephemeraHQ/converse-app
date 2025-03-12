@@ -1,5 +1,4 @@
 import { useMutation } from "@tanstack/react-query"
-import { ConversationId, ConversationTopic, InboxId } from "@xmtp/react-native-sdk"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import {
   addConversationToAllowedConsentConversationsQuery,
@@ -11,7 +10,13 @@ import {
 } from "@/features/conversation/conversation-requests-list/conversations-unknown-consent.query"
 import { getConversationQueryData } from "@/features/conversation/queries/conversation.query"
 import { getDmQueryData, setDmQueryData } from "@/features/dm/use-dm-query"
-import { IXmtpConversationWithCodecs, IXmtpDmWithCodecs } from "@/features/xmtp/xmtp.types"
+import {
+  IXmtpConversationId,
+  IXmtpConversationTopic,
+  IXmtpConversationWithCodecs,
+  IXmtpDmWithCodecs,
+  IXmtpInboxId,
+} from "@/features/xmtp/xmtp.types"
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
 import {
   setXmtpConsentStateForInboxId,
@@ -23,9 +28,9 @@ export function useAllowDmMutation() {
 
   return useMutation({
     mutationFn: async (args: {
-      peerInboxId: InboxId
-      conversationId: ConversationId
-      topic: ConversationTopic
+      peerInboxId: IXmtpInboxId
+      conversationId: IXmtpConversationId
+      topic: IXmtpConversationTopic
     }) => {
       const { peerInboxId, conversationId } = args
       if (!peerInboxId) {

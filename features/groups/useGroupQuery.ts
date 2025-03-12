@@ -1,8 +1,8 @@
 /**
  * useGroupQuery is derived from useConversationQuery. Like useDmQuery, maybe worth considering if we should just use useConversationQuery instead.
  */
+import type { IXmtpConversationTopic, IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { queryOptions, useQuery } from "@tanstack/react-query"
-import type { ConversationTopic, InboxId } from "@xmtp/react-native-sdk"
 import {
   ConversationQueryData,
   getConversationQueryData,
@@ -14,7 +14,7 @@ import {
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group"
 import { IXmtpGroupWithCodecs } from "@/features/xmtp/xmtp.types"
 
-export function useGroupQuery(args: { inboxId: InboxId; topic: ConversationTopic }) {
+export function useGroupQuery(args: { inboxId: IXmtpInboxId; topic: IXmtpConversationTopic }) {
   const { inboxId, topic } = args
   return useQuery(
     getGroupQueryOptions({
@@ -24,13 +24,13 @@ export function useGroupQuery(args: { inboxId: InboxId; topic: ConversationTopic
   )
 }
 
-export function getGroupQueryData(args: { inboxId: InboxId; topic: ConversationTopic }) {
+export function getGroupQueryData(args: { inboxId: IXmtpInboxId; topic: IXmtpConversationTopic }) {
   return getConversationQueryData(args) as IXmtpGroupWithCodecs | null | undefined
 }
 
 export function setGroupQueryData(args: {
-  inboxId: InboxId
-  topic: ConversationTopic
+  inboxId: IXmtpInboxId
+  topic: IXmtpConversationTopic
   group: IXmtpGroupWithCodecs
 }) {
   const { inboxId, topic, group } = args
@@ -41,7 +41,10 @@ export function setGroupQueryData(args: {
   })
 }
 
-export function getGroupQueryOptions(args: { inboxId: InboxId; topic: ConversationTopic }) {
+export function getGroupQueryOptions(args: {
+  inboxId: IXmtpInboxId
+  topic: IXmtpConversationTopic
+}) {
   const { inboxId, topic } = args
   return queryOptions({
     ...getConversationQueryOptions({
@@ -62,8 +65,8 @@ export function getGroupQueryOptions(args: { inboxId: InboxId; topic: Conversati
 }
 
 export function updateGroupQueryData(args: {
-  inboxId: InboxId
-  topic: ConversationTopic
+  inboxId: IXmtpInboxId
+  topic: IXmtpConversationTopic
   updates: Partial<ConversationQueryData>
 }) {
   updateConversationQueryData({
@@ -74,8 +77,8 @@ export function updateGroupQueryData(args: {
 }
 
 export function getOrFetchGroupQuery(args: {
-  inboxId: InboxId
-  topic: ConversationTopic
+  inboxId: IXmtpInboxId
+  topic: IXmtpConversationTopic
   caller: string
 }) {
   return getOrFetchConversationQuery({

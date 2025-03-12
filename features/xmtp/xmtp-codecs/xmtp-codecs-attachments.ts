@@ -1,5 +1,6 @@
 import { InboxId, RemoteAttachmentMetadata } from "@xmtp/react-native-sdk"
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
+import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
 import { XMTPError } from "@/utils/error"
 import { calculateFileDigest, fileExists } from "@/utils/file-system/file-system"
@@ -12,7 +13,7 @@ export const MAX_AUTOMATIC_DOWNLOAD_ATTACHMENT_SIZE = 10000000 // 10MB
 export const encryptAttachment = async (args: {
   fileUri: string
   mimeType: string | undefined
-  clientInboxId?: InboxId
+  clientInboxId?: IXmtpInboxId
 }) => {
   const { fileUri, mimeType, clientInboxId = getSafeCurrentSender().inboxId } = args
 
@@ -58,7 +59,7 @@ export const encryptAttachment = async (args: {
 export const decryptAttachment = async (args: {
   encryptedLocalFileUri: string
   metadata: RemoteAttachmentMetadata
-  clientInboxId?: InboxId
+  clientInboxId?: IXmtpInboxId
 }) => {
   const { encryptedLocalFileUri, metadata, clientInboxId = getSafeCurrentSender().inboxId } = args
 

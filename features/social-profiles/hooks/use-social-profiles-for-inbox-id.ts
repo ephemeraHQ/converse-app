@@ -1,4 +1,4 @@
-import { InboxId } from "@xmtp/react-native-sdk"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import {
   getSafeCurrentSender,
   useSafeCurrentSender,
@@ -12,7 +12,7 @@ import {
   useEthAddressesForXmtpInboxId,
 } from "@/features/xmtp/xmtp-inbox-id/eth-addresses-for-xmtp-inbox-id.query"
 
-export function useSocialProfilesForInboxId(args: { inboxId: InboxId | undefined }) {
+export function useSocialProfilesForInboxId(args: { inboxId: IXmtpInboxId | undefined }) {
   const { inboxId } = args
 
   const currentSender = useSafeCurrentSender()
@@ -33,7 +33,7 @@ export function useSocialProfilesForInboxId(args: { inboxId: InboxId | undefined
   }
 }
 
-export async function getSocialProfilesForInboxId(args: { inboxId: InboxId }) {
+export async function getSocialProfilesForInboxId(args: { inboxId: IXmtpInboxId }) {
   const { inboxId } = args
 
   const currentSender = getSafeCurrentSender()

@@ -1,4 +1,4 @@
-import { MessageId } from "@xmtp/react-native-sdk"
+import { IXmtpMessageId } from "@/features/xmtp/xmtp.types"
 import { Nullable } from "@/types/general"
 
 /**
@@ -9,7 +9,7 @@ export type RolledUpReactions = {
   userReacted: boolean
   preview: ReactionPreview[]
   detailed: SortedReaction[]
-  messageId: MessageId
+  messageId: IXmtpMessageId
 }
 
 /**

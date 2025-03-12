@@ -1,7 +1,6 @@
 import { Text } from "@design-system/Text"
 import { textSizeStyles } from "@design-system/Text/Text.styles"
 import { VStack } from "@design-system/VStack"
-import { DecodedMessage, TextCodec } from "@xmtp/react-native-sdk"
 import { memo } from "react"
 import {
   BubbleContainer,
@@ -11,10 +10,11 @@ import { ConversationMessageGestures } from "@/features/conversation/conversatio
 import { MessageText } from "@/features/conversation/conversation-chat/conversation-message/conversation-message-text"
 import { useConversationMessageContextStoreContext } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.store-context"
 import { shouldRenderBigEmoji } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
+import { IXmtpDecodedTextMessage } from "@/features/xmtp/xmtp.types"
 import { useSelect } from "@/stores/stores.utils"
 
 export const MessageSimpleText = memo(function MessageSimpleText(props: {
-  message: DecodedMessage<TextCodec>
+  message: IXmtpDecodedTextMessage
 }) {
   const { message } = props
 

@@ -1,4 +1,4 @@
-import { InboxId } from "@xmtp/react-native-sdk"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { memo, useCallback } from "react"
 import { create } from "zustand"
 import { Avatar } from "@/components/avatar"
@@ -301,7 +301,7 @@ export const MemberDetailsBottomSheet = memo(function MemberDetailsBottomSheet()
   )
 })
 
-export function openMemberDetailsBottomSheet(memberInboxId: InboxId) {
+export function openMemberDetailsBottomSheet(memberInboxId: IXmtpInboxId) {
   useMemberDetailsBottomSheetStore.getState().actions.setMemberInboxId(memberInboxId)
   memberDetailsBottomSheetRef.current?.present()
 }
@@ -313,11 +313,11 @@ function closeMemberDetailsBottomSheet() {
 const memberDetailsBottomSheetRef = createBottomSheetModalRef()
 
 type IMemberDetailsBottomSheetState = {
-  memberInboxId: InboxId | undefined
+  memberInboxId: IXmtpInboxId | undefined
 }
 
 type IMemberDetailsBottomSheetActions = {
-  setMemberInboxId: (memberInboxId: InboxId) => void
+  setMemberInboxId: (memberInboxId: IXmtpInboxId) => void
   reset: () => void
 }
 

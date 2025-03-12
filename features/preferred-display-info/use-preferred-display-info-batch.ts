@@ -1,5 +1,5 @@
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { queryOptions, useQueries } from "@tanstack/react-query"
-import { InboxId } from "@xmtp/react-native-sdk"
 import {
   getPreferredAvatarUrl,
   getPreferredDisplayName,
@@ -8,7 +8,7 @@ import {
 import { getProfileQueryConfig } from "@/features/profiles/profiles.query"
 import { getSocialProfilesForInboxId } from "@/features/social-profiles/hooks/use-social-profiles-for-inbox-id"
 
-export function usePreferredDisplayInfoBatch(args: { xmtpInboxIds: InboxId[] }) {
+export function usePreferredDisplayInfoBatch(args: { xmtpInboxIds: IXmtpInboxId[] }) {
   const { xmtpInboxIds } = args
 
   const profileQueries = useQueries({

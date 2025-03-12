@@ -1,5 +1,5 @@
+import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
 import { useMutation } from "@tanstack/react-query"
-import { ConversationTopic } from "@xmtp/react-native-sdk"
 import { useCallback } from "react"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import {
@@ -11,7 +11,7 @@ import {
   updateConversationMetadataQueryData,
 } from "@/features/conversation/conversation-metadata/conversation-metadata.query"
 
-export function usePinOrUnpinConversation(args: { conversationTopic: ConversationTopic }) {
+export function usePinOrUnpinConversation(args: { conversationTopic: IXmtpConversationTopic }) {
   const { conversationTopic } = args
 
   const currentSender = useSafeCurrentSender()

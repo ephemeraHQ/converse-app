@@ -1,5 +1,5 @@
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { useQuery } from "@tanstack/react-query"
-import { InboxId } from "@xmtp/react-native-sdk"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import {
   getPreferredAvatarUrl,
@@ -17,11 +17,11 @@ import { IEthereumAddress } from "@/utils/evm/address"
 // At least one of these properties must be defined
 type PreferredDisplayInfoArgs =
   | {
-      inboxId: InboxId | undefined
+      inboxId: IXmtpInboxId | undefined
       ethAddress?: IEthereumAddress
     }
   | {
-      inboxId?: InboxId
+      inboxId?: IXmtpInboxId
       ethAddress: IEthereumAddress | undefined
     }
 

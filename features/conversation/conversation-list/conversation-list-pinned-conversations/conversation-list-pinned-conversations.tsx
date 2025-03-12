@@ -1,10 +1,10 @@
-import { ConversationTopic } from "@xmtp/react-native-sdk"
+import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
 import { memo } from "react"
 import { useWindowDimensions, ViewStyle } from "react-native"
 import { AnimatedCenter } from "@/design-system/Center"
 import { AnimatedHStack } from "@/design-system/HStack"
 import { AnimatedVStack } from "@/design-system/VStack"
-import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
+import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { ConversationListPinnedConversationDm } from "@/features/conversation/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversation-dm"
 import { ConversationListPinnedConversationGroup } from "@/features/conversation/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversation-group"
 import { useConversationListPinnedConversationsStyles } from "@/features/conversation/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversations.styles"
@@ -81,15 +81,15 @@ export const ConversationListPinnedConversations = memo(
 )
 
 const PinnedConversationWrapper = memo(function PinnedConversationWrapper(props: {
-  topic: ConversationTopic
+  topic: IXmtpConversationTopic
 }) {
   const { topic } = props
 
-  const currentAccount = useCurrentSenderEthAddress()
+  const currentSender = useSafeCurrentSender()
 
   const { data: conversation } = useConversationQuery({
     topic,
-    inboxId: currentAccount!,
+    inboxId: currentSender.inboxId,
     caller: "Conversation List Pinned Conversations",
   })
 

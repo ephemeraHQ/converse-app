@@ -1,4 +1,4 @@
-import { ConversationTopic } from "@xmtp/react-native-sdk"
+import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
 import { memo } from "react"
 import { GroupAvatar } from "@/components/group-avatar"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
@@ -9,7 +9,7 @@ import { SearchUsersResultListItem } from "@/features/search-users/search-users-
 
 export const SearchUsersResultsListItemGroup = memo(
   function SearchUsersResultsListItemGroup(props: {
-    conversationTopic: ConversationTopic
+    conversationTopic: IXmtpConversationTopic
     onPress: () => void
   }) {
     const { conversationTopic, onPress } = props

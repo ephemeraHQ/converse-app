@@ -1,13 +1,12 @@
-import { InboxId } from "@xmtp/react-native-sdk"
+import { IXmtpInboxId , IXmtpConsentState } from "@features/xmtp/xmtp.types"
 import { config } from "@/config"
 import { getXmtpClientByInboxId } from "@/features/xmtp/xmtp-client/xmtp-client.service"
-import { IXmtpConsentState } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
 import { XMTPError } from "@/utils/error"
 import { IEthereumAddress } from "@/utils/evm/address"
 
 export async function xmtpInboxIdCanMessageEthAddress(args: {
-  inboxId: InboxId
+  inboxId: IXmtpInboxId
   ethAddress: IEthereumAddress
 }) {
   const { inboxId, ethAddress } = args
@@ -72,7 +71,7 @@ export async function xmtpInboxIdCanMessageEthAddress(args: {
 //   )
 // }
 
-export const syncXmtpConsent = async (inboxId: InboxId) => {
+export const syncXmtpConsent = async (inboxId: IXmtpInboxId) => {
   const client = await getXmtpClientByInboxId({
     inboxId,
   })
@@ -98,7 +97,7 @@ export const syncXmtpConsent = async (inboxId: InboxId) => {
 }
 
 export async function setXmtpConsentStateForInboxId(args: {
-  inboxId: InboxId
+  inboxId: IXmtpInboxId
   consent: IXmtpConsentState
 }) {
   const { inboxId, consent } = args
@@ -124,7 +123,7 @@ export async function setXmtpConsentStateForInboxId(args: {
 export const updateConsentForGroupsForAccount = async (args: {
   groupIds: string[]
   consent: IXmtpConsentState
-  clientInboxId: InboxId
+  clientInboxId: IXmtpInboxId
 }) => {
   const { clientInboxId, groupIds, consent } = args
   try {

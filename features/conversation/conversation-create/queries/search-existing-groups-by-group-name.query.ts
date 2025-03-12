@@ -1,5 +1,5 @@
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { keepPreviousData, queryOptions, useQuery } from "@tanstack/react-query"
-import { InboxId } from "@xmtp/react-native-sdk"
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { getAllowedConsentConversationsQueryData } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group"
@@ -25,7 +25,7 @@ export async function searchExistingGroupsByGroupName(args: { searchQuery: strin
 
 export function getSearchExistingGroupsByGroupNameQueryOptions(args: {
   searchQuery: string
-  searcherInboxId: InboxId
+  searcherInboxId: IXmtpInboxId
 }) {
   const { searchQuery, searcherInboxId } = args
   const normalizedSearchQuery = normalizeString(searchQuery)
@@ -46,7 +46,7 @@ export function getSearchExistingGroupsByGroupNameQueryOptions(args: {
 
 export function useSearchExistingGroupsByGroupNameQuery(args: {
   searchQuery: string
-  searcherInboxId: InboxId
+  searcherInboxId: IXmtpInboxId
 }) {
   return useQuery(getSearchExistingGroupsByGroupNameQueryOptions(args))
 }

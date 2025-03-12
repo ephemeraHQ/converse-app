@@ -1,5 +1,5 @@
+import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
 import { useQuery } from "@tanstack/react-query"
-import { ConversationTopic } from "@xmtp/react-native-sdk"
 import { useMemo } from "react"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { getConversationMetadataQueryOptions } from "@/features/conversation/conversation-metadata/conversation-metadata.query"
@@ -7,7 +7,7 @@ import { getConversationQueryOptions } from "@/features/conversation/queries/con
 import { conversationIsUnreadForInboxId } from "@/features/conversation/utils/conversation-is-unread-by-current-account"
 
 type UseConversationIsUnreadArgs = {
-  topic: ConversationTopic
+  topic: IXmtpConversationTopic
 }
 
 export const useConversationIsUnread = ({ topic }: UseConversationIsUnreadArgs) => {

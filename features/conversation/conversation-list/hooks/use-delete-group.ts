@@ -1,5 +1,5 @@
+import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
 import { useMutation } from "@tanstack/react-query"
-import { ConversationTopic } from "@xmtp/react-native-sdk"
 import { useCallback } from "react"
 import { showActionSheet } from "@/components/action-sheet"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
@@ -12,7 +12,7 @@ import { getGroupQueryData } from "@/features/groups/useGroupQuery"
 import { translate } from "@/i18n"
 import { captureErrorWithToast } from "@/utils/capture-error"
 
-export const useDeleteGroup = (args: { groupTopic: ConversationTopic }) => {
+export const useDeleteGroup = (args: { groupTopic: IXmtpConversationTopic }) => {
   const { groupTopic } = args
   const currentSender = useSafeCurrentSender()
 

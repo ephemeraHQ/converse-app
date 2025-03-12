@@ -2,7 +2,7 @@
  * This store/context is to avoid prop drilling in message components.
  */
 
-import { InboxId, MessageId } from "@xmtp/react-native-sdk"
+import { IXmtpInboxId, IXmtpMessageId , IXmtpDecodedMessage } from "@features/xmtp/xmtp.types"
 import { createContext, memo, useContext, useEffect, useRef } from "react"
 import { createStore, useStore } from "zustand"
 import { subscribeWithSelector } from "zustand/middleware"
@@ -11,7 +11,6 @@ import { hasNextMessageInSeries } from "@/features/conversation/utils/has-next-m
 import { hasPreviousMessageInSeries } from "@/features/conversation/utils/has-previous-message-in-serie"
 import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user"
 import { messageShouldShowDateChange } from "@/features/conversation/utils/message-should-show-date-change"
-import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types"
 import { convertNanosecondsToMilliseconds } from "@/utils/date"
 
 type IMessageContextStoreProps = {
@@ -21,13 +20,13 @@ type IMessageContextStoreProps = {
 }
 
 type IMessageContextStoreState = IMessageContextStoreProps & {
-  messageId: MessageId
+  messageId: IXmtpMessageId
   hasNextMessageInSeries: boolean
   hasPreviousMessageInSeries: boolean
   fromMe: boolean
   sentAtMs: number
   showDateChange: boolean
-  senderInboxId: InboxId
+  senderInboxId: IXmtpInboxId
   isShowingTime: boolean
   isSystemMessage: boolean
 }
@@ -62,7 +61,7 @@ export const ConversationMessageContextStoreProvider = memo(
 function getStoreStateBasedOnProps(props: IMessageContextStoreProps) {
   return {
     ...props,
-    messageId: props.message.id as MessageId,
+    messageId: props.message.id,
     hasNextMessageInSeries: hasNextMessageInSeries({
       currentMessage: props.message,
       nextMessage: props.nextMessage,

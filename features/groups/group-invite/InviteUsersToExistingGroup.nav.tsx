@@ -3,7 +3,7 @@
 //   navigationAnimation,
 // } from "@/screens/Navigation/Navigation";
 // import { Platform } from "react-native";
-// import { ConversationTopic } from "@xmtp/react-native-sdk";
+// import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types";
 // import { useColorScheme } from "react-native";
 // import { InviteUsersToExistingGroupScreen } from "./invite-users-to-exisiting-group.screen";
 // import { translate } from "@/i18n";
@@ -14,7 +14,7 @@
 // } from "@/styles/colors";
 
 // export type InviteUsersToExistingGroupParams = {
-//   addingToGroupTopic: ConversationTopic;
+//   addingToGroupTopic: IXmtpConversationTopic;
 // };
 
 // export function InviteUsersToExistingGroupNav() {

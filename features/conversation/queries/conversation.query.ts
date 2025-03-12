@@ -1,18 +1,17 @@
+import type { IXmtpConversationTopic, IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query"
-import type { ConversationTopic, InboxId } from "@xmtp/react-native-sdk"
 import { ensureConversationSyncAllQuery } from "@/features/conversation/queries/conversation-sync-all.query"
 import { getXmtpClientByInboxId } from "@/features/xmtp/xmtp-client/xmtp-client.service"
 import { Optional } from "@/types/general"
 import { captureError } from "@/utils/capture-error"
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
-import { conversationQueryKey } from "../../../queries/QueryKeys"
 import { reactQueryClient } from "../../../utils/react-query/react-query.client"
 
 export type ConversationQueryData = Awaited<ReturnType<typeof getConversation>>
 
 type IGetConversationArgs = {
-  inboxId: InboxId
-  topic: ConversationTopic
+  inboxId: IXmtpInboxId
+  topic: IXmtpConversationTopic
 }
 
 type IGetConversationArgsWithCaller = IGetConversationArgs & { caller: string }
@@ -116,7 +115,7 @@ export function getConversationQueryOptions(
     meta: {
       caller,
     },
-    queryKey: conversationQueryKey(inboxId, topic),
+    queryKey: ["conversation", inboxId, topic],
     queryFn: enabled ? () => getConversation({ inboxId, topic }) : skipToken,
     enabled,
   })

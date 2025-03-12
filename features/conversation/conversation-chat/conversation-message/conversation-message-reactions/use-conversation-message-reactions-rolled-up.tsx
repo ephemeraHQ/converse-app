@@ -1,11 +1,11 @@
-import { MessageId } from "@xmtp/react-native-sdk"
 import { useMemo } from "react"
 import { isCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { useConversationMessageReactions } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
 import { usePreferredDisplayInfoBatch } from "@/features/preferred-display-info/use-preferred-display-info-batch"
+import { IXmtpMessageId } from "@/features/xmtp/xmtp.types"
 import { RolledUpReactions, SortedReaction } from "./conversation-message-reactions.types"
 
-export function useConversationMessageReactionsRolledUp(args: { messageId: MessageId }) {
+export function useConversationMessageReactionsRolledUp(args: { messageId: IXmtpMessageId }) {
   const { messageId } = args
 
   const { bySender: reactionsBySender } = useConversationMessageReactions(messageId)

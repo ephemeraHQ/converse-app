@@ -6,11 +6,11 @@
 // import { isSameInboxId } from "@/utils/xmtpRN/xmtp-inbox-id/xmtp-inbox-id";
 // import { useCurrentAccount } from "@data/store/accountsStore";
 // import { useQueries, useQuery } from "@tanstack/react-query";
-// import { InboxId } from "@xmtp/react-native-sdk";
+// import { IXmtpInboxId } from "@features/xmtp/xmtp.types";
 // import { useMemo } from "react";
 
 // export const useFindConversationByInboxIds = (args: {
-//   inboxIds: InboxId[];
+//   inboxIds: IXmtpInboxId[];
 // }) => {
 //   const { inboxIds } = args;
 

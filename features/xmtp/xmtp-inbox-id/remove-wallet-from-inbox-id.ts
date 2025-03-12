@@ -1,12 +1,12 @@
 import { InboxId, PublicIdentity } from "@xmtp/react-native-sdk"
-import { IXmtpSigner } from "@/features/xmtp/xmtp.types"
+import { IXmtpInboxId, IXmtpSigner } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
 import { XMTPError } from "@/utils/error"
 import { xmtpLogger } from "@/utils/logger"
 import { getXmtpClientByInboxId } from "../xmtp-client/xmtp-client.service"
 
 export async function removeWalletFromInboxId(args: {
-  inboxId: InboxId
+  inboxId: IXmtpInboxId
   signer: IXmtpSigner
   ethAddressToRemove: string
 }) {

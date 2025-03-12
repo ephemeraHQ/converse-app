@@ -1,5 +1,5 @@
+import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
 import { useMutation } from "@tanstack/react-query"
-import type { ConversationTopic } from "@xmtp/react-native-sdk"
 import { updateConversationInAllowedConsentConversationsQueryData } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import {
   getGroupQueryData,
@@ -10,7 +10,7 @@ import { captureError } from "@/utils/capture-error"
 
 type IArgs = {
   account: string
-  topic: ConversationTopic
+  topic: IXmtpConversationTopic
 }
 
 export function useGroupPhotoMutation(args: IArgs) {

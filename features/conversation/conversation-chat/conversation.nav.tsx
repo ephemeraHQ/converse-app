@@ -1,12 +1,12 @@
-import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk"
+import { IXmtpConversationTopic, IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { ConversationScreen } from "@/features/conversation/conversation-chat/conversation.screen"
 import { translate } from "@/i18n"
 import { AppNativeStack } from "@/navigation/app-navigator"
 
 export type ConversationNavParams = {
-  topic?: ConversationTopic
+  topic?: IXmtpConversationTopic
   composerTextPrefill?: string
-  searchSelectedUserInboxIds?: InboxId[]
+  searchSelectedUserInboxIds?: IXmtpInboxId[]
   isNew?: boolean
 }
 

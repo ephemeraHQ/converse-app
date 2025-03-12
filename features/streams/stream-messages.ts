@@ -1,15 +1,19 @@
-import { ConversationTopic, GroupUpdatedContent, InboxId } from "@xmtp/react-native-sdk"
+import { GroupUpdatedContent } from "@xmtp/react-native-sdk"
 import { addConversationMessageQuery } from "@/features/conversation/conversation-chat/conversation-messages.query"
 import { updateConversationInAllowedConsentConversationsQueryData } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import { updateConversationQueryData } from "@/features/conversation/queries/conversation.query"
 import { refetchGroupMembersQuery } from "@/features/groups/useGroupMembersQuery"
 import { streamAllMessages } from "@/features/xmtp/xmtp-messages/xmtp-messages-stream"
-import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types"
+import {
+  IXmtpConversationTopic,
+  IXmtpDecodedMessage,
+  IXmtpInboxId,
+} from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
 import { StreamError } from "@/utils/error"
 import { streamLogger } from "@/utils/logger"
 
-export async function startMessageStreaming(args: { clientInboxId: InboxId }) {
+export async function startMessageStreaming(args: { clientInboxId: IXmtpInboxId }) {
   const { clientInboxId } = args
 
   try {
@@ -25,7 +29,10 @@ export async function startMessageStreaming(args: { clientInboxId: InboxId }) {
   }
 }
 
-async function handleNewMessage(args: { clientInboxId: InboxId; message: IXmtpDecodedMessage }) {
+async function handleNewMessage(args: {
+  clientInboxId: IXmtpInboxId
+  message: IXmtpDecodedMessage
+}) {
   const { clientInboxId, message } = args
 
   streamLogger.debug(`[handleNewMessage] message: ${JSON.stringify(message)}`)
@@ -45,7 +52,7 @@ async function handleNewMessage(args: { clientInboxId: InboxId; message: IXmtpDe
   try {
     addConversationMessageQuery({
       clientInboxId,
-      topic: message.topic as ConversationTopic,
+      topic: message.topic,
       message,
     })
   } catch (error) {
@@ -55,7 +62,7 @@ async function handleNewMessage(args: { clientInboxId: InboxId; message: IXmtpDe
   try {
     updateConversationQueryData({
       inboxId: clientInboxId,
-      topic: message.topic as ConversationTopic,
+      topic: message.topic,
       conversationUpdate: {
         lastMessage: message,
       },
@@ -67,7 +74,7 @@ async function handleNewMessage(args: { clientInboxId: InboxId; message: IXmtpDe
   try {
     updateConversationInAllowedConsentConversationsQueryData({
       inboxId: clientInboxId,
-      topic: message.topic as ConversationTopic,
+      topic: message.topic,
       conversationUpdate: {
         lastMessage: message,
       },
@@ -86,8 +93,8 @@ const METADATA_FIELD_MAP = {
 type MetadataField = keyof typeof METADATA_FIELD_MAP
 
 function handleNewGroupUpdatedMessage(args: {
-  inboxId: InboxId
-  topic: ConversationTopic
+  inboxId: IXmtpInboxId
+  topic: IXmtpConversationTopic
   message: IXmtpDecodedMessage
 }) {
   const { inboxId, topic, message } = args

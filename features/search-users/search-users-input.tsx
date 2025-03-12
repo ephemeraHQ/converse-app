@@ -12,6 +12,7 @@ import { HStack } from "@/design-system/HStack"
 import { Text } from "@/design-system/Text"
 import { TextInput } from "@/design-system/text-input"
 import { VStack } from "@/design-system/VStack"
+import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { Haptics } from "@/utils/haptics"
 import { SearchUsersInputChip } from "./search-users-input-chip"
@@ -21,7 +22,7 @@ type ISearchUsersInputProps = {
   inputRef: React.MutableRefObject<RNTextInput | null>
   searchSelectedUserInboxIds: string[]
   onSearchTextChange: (text: string) => void
-  onSelectedInboxIdsChange: (inboxIds: string[]) => void
+  onSelectedInboxIdsChange: (inboxIds: IXmtpInboxId[]) => void
   defaultSearchTextValue?: string
 }
 

@@ -1,9 +1,9 @@
-import { InboxId } from "@xmtp/react-native-sdk"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { IEthereumAddress } from "@/utils/evm/address"
 
 type ISearchResultItemConvosProfile = {
   type: "profile"
-  inboxId: InboxId
+  inboxId: IXmtpInboxId
 }
 
 type ISearchResultItemExternalIdentity = {

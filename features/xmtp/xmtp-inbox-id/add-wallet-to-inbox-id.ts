@@ -1,12 +1,11 @@
-import { InboxId } from "@xmtp/react-native-sdk"
+import { IXmtpInboxId , IXmtpSigner } from "@features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
 import { XMTPError } from "@/utils/error"
 import { xmtpLogger } from "@/utils/logger"
 import { getXmtpClientByInboxId } from "../xmtp-client/xmtp-client.service"
-import { IXmtpSigner } from "../xmtp.types"
 
 export async function addWalletToInboxId(args: {
-  inboxId: InboxId
+  inboxId: IXmtpInboxId
   wallet: IXmtpSigner
   allowReassignInboxId?: boolean
 }) {

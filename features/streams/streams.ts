@@ -1,5 +1,5 @@
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { logger, streamLogger } from "@utils/logger"
-import { InboxId } from "@xmtp/react-native-sdk"
 import { useEffect } from "react"
 import { useMultiInboxStore } from "@/features/authentication/multi-inbox.store"
 import { stopStreamingConversations } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-stream"
@@ -154,7 +154,7 @@ async function startStreaming(inboxIdsToStream: string[]) {
   }
 }
 
-async function stopStreaming(inboxIds: InboxId[]) {
+async function stopStreaming(inboxIds: IXmtpInboxId[]) {
   const store = useStreamingStore.getState()
 
   await Promise.all(

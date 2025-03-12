@@ -1,6 +1,5 @@
 import { useMutation } from "@tanstack/react-query"
 import { logger } from "@utils/logger"
-import type { ConversationTopic, InboxId } from "@xmtp/react-native-sdk"
 import {
   addConversationToAllowedConsentConversationsQuery,
   removeConversationFromAllowedConsentConversationsQuery,
@@ -11,12 +10,13 @@ import {
 } from "@/features/conversation/conversation-requests-list/conversations-unknown-consent.query"
 import { getConversationIdFromTopic } from "@/features/conversation/utils/get-conversation-id-from-topic"
 import { getGroupQueryData, setGroupQueryData } from "@/features/groups/useGroupQuery"
+import { IXmtpConversationTopic, IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
 import { updateConsentForGroupsForAccount } from "../xmtp/xmtp-consent/xmtp-consent"
 
 export const useDenyGroupMutation = (args: {
-  clientInboxId: InboxId
-  topic: ConversationTopic
+  clientInboxId: IXmtpInboxId
+  topic: IXmtpConversationTopic
 }) => {
   const { clientInboxId, topic } = args
 

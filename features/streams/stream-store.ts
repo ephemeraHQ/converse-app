@@ -1,4 +1,4 @@
-import { InboxId } from "@xmtp/react-native-sdk"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { create } from "zustand"
 
 type StreamingState = {
@@ -8,12 +8,12 @@ type StreamingState = {
 }
 
 type State = {
-  accountStreamingStates: Record<InboxId, StreamingState>
+  accountStreamingStates: Record<IXmtpInboxId, StreamingState>
 }
 
 type StoreActions = {
-  updateStreamingState: (inboxId: InboxId, updates: Partial<StreamingState>) => void
-  resetAccount: (inboxId: InboxId) => void
+  updateStreamingState: (inboxId: IXmtpInboxId, updates: Partial<StreamingState>) => void
+  resetAccount: (inboxId: IXmtpInboxId) => void
 }
 
 export const useStreamingStore = create<State & { actions: StoreActions }>((set) => ({

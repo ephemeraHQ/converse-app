@@ -1,6 +1,6 @@
+import { IXmtpConversationTopic, IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { useMutation } from "@tanstack/react-query"
 import { type ConversationTopic } from "@xmtp/react-native-sdk"
-import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client"
 import { useGroupQuery } from "@/features/groups/useGroupQuery"
 import { removeXmtpGroupMembers } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-group"
 import { captureError } from "@/utils/capture-error"
@@ -13,21 +13,21 @@ import {
 } from "../useGroupMembersQuery"
 
 export const useRemoveGroupMembersFromGroupMutation = (args: {
-  topic: ConversationTopic
-  clientInboxId: InboxId
+  topic: IXmtpConversationTopic
+  clientInboxId: IXmtpInboxId
 }) => {
   const { topic, clientInboxId } = args
 
   const { data: group } = useGroupQuery({ inboxId: clientInboxId, topic })
 
   return useMutation({
-    mutationFn: async (inboxIds: InboxId[]) => {
+    mutationFn: async (inboxIds: IXmtpInboxId[]) => {
       if (!group) {
         throw new Error("No group found to remove members from")
       }
       return removeXmtpGroupMembers({ group, inboxIds })
     },
-    onMutate: async (inboxIds: InboxId[]) => {
+    onMutate: async (inboxIds: IXmtpInboxId[]) => {
       if (!topic) {
         return
       }

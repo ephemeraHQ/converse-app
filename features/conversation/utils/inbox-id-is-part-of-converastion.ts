@@ -1,4 +1,4 @@
-import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk"
+import { IXmtpConversationTopic, IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import {
   ensureDmPeerInboxIdQueryData,
@@ -10,8 +10,8 @@ import {
 } from "@/features/groups/useGroupMembersQuery"
 
 export function inboxIdIsPartOfConversationUsingCacheData(args: {
-  inboxId: InboxId
-  conversationTopic: ConversationTopic
+  inboxId: IXmtpInboxId
+  conversationTopic: IXmtpConversationTopic
 }) {
   const { inboxId, conversationTopic } = args
 
@@ -29,8 +29,8 @@ export function inboxIdIsPartOfConversationUsingCacheData(args: {
 }
 
 export async function inboxIdIsPartOfConversationUsingEnsure(args: {
-  inboxId: InboxId
-  conversationTopic: ConversationTopic
+  inboxId: IXmtpInboxId
+  conversationTopic: IXmtpConversationTopic
 }) {
   const { inboxId, conversationTopic } = args
 

@@ -1,5 +1,5 @@
+import type { IXmtpConversationTopic, IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { useMutation } from "@tanstack/react-query"
-import type { ConversationTopic, InboxId } from "@xmtp/react-native-sdk"
 import { updateConversationInAllowedConsentConversationsQueryData } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import {
   getGroupQueryData,
@@ -11,11 +11,14 @@ import { IXmtpGroupWithCodecs } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
 
 type IArgs = {
-  topic: ConversationTopic
-  clientInboxId: InboxId
+  topic: IXmtpConversationTopic
+  clientInboxId: IXmtpInboxId
 }
 
-export function useGroupNameMutation(args: { topic: ConversationTopic; clientInboxId: InboxId }) {
+export function useGroupNameMutation(args: {
+  topic: IXmtpConversationTopic
+  clientInboxId: IXmtpInboxId
+}) {
   const { topic, clientInboxId } = args
 
   const { data: group } = useGroupQuery({ inboxId: clientInboxId, topic })

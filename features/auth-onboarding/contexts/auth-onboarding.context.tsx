@@ -16,6 +16,7 @@ import { useLogout } from "@/features/authentication/use-logout"
 import { useSmartWalletClient } from "@/features/wallets/smart-wallet"
 import { createXmtpSignerFromSwc } from "@/features/wallets/utils/create-xmtp-signer-from-swc"
 import { createXmtpClient } from "@/features/xmtp/xmtp-client/xmtp-client.service"
+import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { captureError, captureErrorWithToast } from "@/utils/capture-error"
 import { IEthereumAddress } from "@/utils/evm/address"
 import { authLogger } from "@/utils/logger"
@@ -133,11 +134,12 @@ export const AuthOnboardingContextProvider = (props: IAuthOnboardingContextProps
       // Step 4: Set the current sender
       useMultiInboxStore.getState().actions.setCurrentSender({
         ethereumAddress: swcClient.account.address as IEthereumAddress,
-        inboxId: xmtpClient.inboxId,
+        inboxId: xmtpClient.inboxId as IXmtpInboxId,
       })
 
       await hydrateAuth()
     } catch (error) {
+      useAuthOnboardingStore.getState().actions.reset()
       captureErrorWithToast(error, {
         message: "Failed to login with passkey",
       })
@@ -213,9 +215,10 @@ export const AuthOnboardingContextProvider = (props: IAuthOnboardingContextProps
       // Step 4: Set the current sender
       useMultiInboxStore.getState().actions.setCurrentSender({
         ethereumAddress: swcClient.account.address as IEthereumAddress,
-        inboxId: xmtpClient.inboxId,
+        inboxId: xmtpClient.inboxId as IXmtpInboxId,
       })
     } catch (error) {
+      useAuthOnboardingStore.getState().actions.reset()
       captureErrorWithToast(error, {
         message: "Failed to sign up with passkey",
       })

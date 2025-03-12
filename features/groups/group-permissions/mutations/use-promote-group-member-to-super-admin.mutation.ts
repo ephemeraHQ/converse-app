@@ -1,6 +1,5 @@
+import { IXmtpConversationTopic, IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { useMutation } from "@tanstack/react-query"
-import type { ConversationTopic } from "@xmtp/react-native-sdk"
-import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client"
 import { captureError } from "@/utils/capture-error"
 import {
   cancelGroupMembersQuery,
@@ -11,21 +10,21 @@ import {
 import { useGroupQuery } from "../../useGroupQuery"
 
 export const usePromoteToSuperAdminMutation = (args: {
-  clientInboxId: InboxId
-  topic: ConversationTopic
+  clientInboxId: IXmtpInboxId
+  topic: IXmtpConversationTopic
 }) => {
   const { clientInboxId, topic } = args
 
   const { data: group } = useGroupQuery({ inboxId: clientInboxId, topic })
 
   return useMutation({
-    mutationFn: async (inboxId: InboxId) => {
+    mutationFn: async (inboxId: IXmtpInboxId) => {
       if (!group) {
         throw new Error("No group found to promote member to super admin")
       }
       return group.addSuperAdmin(inboxId)
     },
-    onMutate: async (inboxId: InboxId) => {
+    onMutate: async (inboxId: IXmtpInboxId) => {
       if (!topic) {
         return
       }

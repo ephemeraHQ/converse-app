@@ -3,11 +3,12 @@ import { Avatar } from "@/components/avatar"
 import { Pressable } from "@/design-system/Pressable"
 import { useConversationMessageStyles } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.styles"
 import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
+import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { useRouter } from "@/navigation/use-navigation"
 import { useAppTheme } from "@/theme/use-app-theme"
 
 type IConversationSenderAvatarProps = {
-  inboxId: string
+  inboxId: IXmtpInboxId
 }
 
 export function ConversationSenderAvatar({ inboxId }: IConversationSenderAvatarProps) {
