@@ -1,6 +1,7 @@
 import { InboxId } from "@xmtp/react-native-sdk"
 import { ReactNode } from "react"
 import { z } from "zod"
+import { IEthereumAddress } from "@/utils/evm/address"
 
 // API Schemas
 export const ConvosProfileForInboxSchema = z.object({
@@ -10,7 +11,7 @@ export const ConvosProfileForInboxSchema = z.object({
   description: z.string().nullable(),
   xmtpId: z.string(),
   avatar: z.string().nullable(),
-  privyAddress: z.string(),
+  privyAddress: z.custom<IEthereumAddress>(),
 })
 
 export const ClaimProfileResponseSchema = z.object({
@@ -31,7 +32,7 @@ export type ProfileUpdates = {
 export type ProfileInput = ProfileUpdates & {
   id?: string
   xmtpId?: string
-  privyAddress?: string
+  privyAddress?: IEthereumAddress
 }
 
 export type ClaimProfileRequest = {

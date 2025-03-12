@@ -1,41 +1,45 @@
 import { useMutation } from "@tanstack/react-query"
-import type { ConversationTopic } from "@xmtp/react-native-sdk"
+import type { ConversationTopic, InboxId } from "@xmtp/react-native-sdk"
 import { updateConversationInAllowedConsentConversationsQueryData } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import {
   getGroupQueryData,
   updateGroupQueryData,
   useGroupQuery,
 } from "@/features/groups/useGroupQuery"
+import { updateXmtpGroupName } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-group"
+import { IXmtpGroupWithCodecs } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
 
 type IArgs = {
-  account: string
   topic: ConversationTopic
+  clientInboxId: InboxId
 }
 
-export function useGroupNameMutation(args: IArgs) {
-  const { account, topic } = args
-  const { data: group } = useGroupQuery({ account, topic })
+export function useGroupNameMutation(args: { topic: ConversationTopic; clientInboxId: InboxId }) {
+  const { topic, clientInboxId } = args
+
+  const { data: group } = useGroupQuery({ inboxId: clientInboxId, topic })
 
   return useMutation({
     mutationFn: async (name: string) => {
-      if (!group || !account || !topic) {
+      if (!group || !topic) {
         throw new Error("Missing required data in useGroupNameMutation")
       }
 
-      await group.updateGroupName(name)
+      await updateXmtpGroupName({ group, name })
+
       return name
     },
     onMutate: async (name: string) => {
-      const previousGroup = getGroupQueryData({ account, topic })
-      const updates = { name }
+      const previousGroup = getGroupQueryData({ inboxId: clientInboxId, topic })
+      const updates: Partial<IXmtpGroupWithCodecs> = { groupName: name }
 
       if (previousGroup) {
-        updateGroupQueryData({ account, topic, updates })
+        updateGroupQueryData({ inboxId: clientInboxId, topic, updates })
       }
 
       updateConversationInAllowedConsentConversationsQueryData({
-        account,
+        inboxId: clientInboxId,
         topic,
         conversationUpdate: updates,
       })
@@ -47,10 +51,11 @@ export function useGroupNameMutation(args: IArgs) {
 
       const { previousGroup } = context || {}
 
-      const updates = { name: previousGroup?.name ?? "" }
-      updateGroupQueryData({ account, topic, updates })
+      const updates: Partial<IXmtpGroupWithCodecs> = { groupName: previousGroup?.groupName ?? "" }
+
+      updateGroupQueryData({ inboxId: clientInboxId, topic, updates })
       updateConversationInAllowedConsentConversationsQueryData({
-        account,
+        inboxId: clientInboxId,
         topic,
         conversationUpdate: updates,
       })

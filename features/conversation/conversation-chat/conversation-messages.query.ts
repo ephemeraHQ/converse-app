@@ -13,23 +13,29 @@ import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types"
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
 import { conversationMessagesQueryKey } from "../../../queries/QueryKeys"
 import { reactQueryClient } from "../../../utils/react-query/react-query.client"
-import { getConversationQueryData, getOrFetchConversation } from "../queries/conversation.query"
+import {
+  getConversationQueryData,
+  getOrFetchConversationQuery,
+} from "../queries/conversation.query"
 
 export type ConversationMessagesQueryData = Awaited<ReturnType<typeof conversationMessagesQueryFn>>
 
-const conversationMessagesQueryFn = async (args: { account: string; topic: ConversationTopic }) => {
-  const { account, topic } = args
+const conversationMessagesQueryFn = async (args: {
+  clientInboxId: InboxId
+  topic: ConversationTopic
+}) => {
+  const { clientInboxId, topic } = args
 
-  if (!account) {
-    throw new Error("account is required")
+  if (!clientInboxId) {
+    throw new Error("clientInboxId is required")
   }
 
   if (!topic) {
     throw new Error("topic is required")
   }
 
-  const conversation = await getOrFetchConversation({
-    account,
+  const conversation = await getOrFetchConversationQuery({
+    inboxId: clientInboxId,
     topic,
     caller: "conversationMessagesQueryFn",
   })
@@ -53,7 +59,7 @@ const conversationMessagesQueryFn = async (args: { account: string; topic: Conve
 }
 
 export const useConversationMessagesQuery = (args: {
-  account: string
+  clientInboxId: InboxId
   topic: ConversationTopic
   caller: string
 }) => {
@@ -61,14 +67,14 @@ export const useConversationMessagesQuery = (args: {
 }
 
 export const getConversationMessagesQueryData = (args: {
-  account: string
+  clientInboxId: InboxId
   topic: ConversationTopic
 }) => {
   return reactQueryClient.getQueryData(getConversationMessagesQueryOptions(args).queryKey)
 }
 
 export function refetchConversationMessages(args: {
-  account: string
+  clientInboxId: InboxId
   topic: ConversationTopic
   caller: string
 }) {
@@ -77,14 +83,14 @@ export function refetchConversationMessages(args: {
 }
 
 export const addConversationMessageQuery = (args: {
-  account: string
+  clientInboxId: InboxId
   topic: ConversationTopic
   message: IXmtpDecodedMessage
 }) => {
-  const { account, topic, message } = args
+  const { clientInboxId, topic, message } = args
 
   reactQueryClient.setQueryData(
-    getConversationMessagesQueryOptions({ account, topic }).queryKey,
+    getConversationMessagesQueryOptions({ clientInboxId, topic }).queryKey,
     (previousMessages) => {
       return processMessages({
         newMessages: [message],
@@ -96,7 +102,7 @@ export const addConversationMessageQuery = (args: {
 }
 
 export const prefetchConversationMessages = async (args: {
-  account: string
+  clientInboxId: InboxId
   topic: ConversationTopic
   caller: string
 }) => {
@@ -104,23 +110,22 @@ export const prefetchConversationMessages = async (args: {
 }
 
 export function getConversationMessagesQueryOptions(args: {
-  account: string
+  clientInboxId: InboxId
   topic: ConversationTopic
   caller?: string // Optional because we don't want functions that just get or set query data to have to pass caller
 }) {
-  const { account, topic, caller } = args
+  const { clientInboxId, topic, caller } = args
   const conversation = getConversationQueryData({
-    account,
+    inboxId: clientInboxId,
     topic,
   })
   return queryOptions({
     meta: {
       caller,
     },
-    queryKey: conversationMessagesQueryKey(account, topic),
-    queryFn: () => conversationMessagesQueryFn({ account, topic }),
+    queryKey: conversationMessagesQueryKey(clientInboxId, topic),
+    queryFn: () => conversationMessagesQueryFn({ clientInboxId, topic }),
     enabled: !!conversation,
-    refetchOnMount: true, // Just for now because messages are very important and we want to make sure we have all of them
   })
 }
 
@@ -246,17 +251,17 @@ function processMessages(args: {
 export function replaceOptimisticMessageWithReal(args: {
   tempId: string
   topic: ConversationTopic
-  account: string
+  clientInboxId: InboxId
   realMessage: IXmtpDecodedMessage
 }) {
-  const { tempId, topic, account, realMessage } = args
+  const { tempId, topic, clientInboxId, realMessage } = args
   logger.debug("[linkOptimisticMessageToReal] linking optimistic message to real", {
     tempId,
     messageId: realMessage.id,
   })
 
   reactQueryClient.setQueryData(
-    getConversationMessagesQueryOptions({ account, topic }).queryKey,
+    getConversationMessagesQueryOptions({ clientInboxId, topic }).queryKey,
     (previousMessages) => {
       logger.debug("[replaceOptimisticMessageWithReal] Processing message update", {
         previousMessagesExists: !!previousMessages,
@@ -329,13 +334,13 @@ export function replaceOptimisticMessageWithReal(args: {
 }
 
 export function setConversationMessagesQueryData(args: {
-  account: string
+  clientInboxId: InboxId
   topic: ConversationTopic
   data: IMessageAccumulator
 }) {
-  const { account, topic, data } = args
+  const { clientInboxId, topic, data } = args
   return reactQueryClient.setQueryData(
-    getConversationMessagesQueryOptions({ account, topic }).queryKey,
+    getConversationMessagesQueryOptions({ clientInboxId, topic }).queryKey,
     data,
   )
 }

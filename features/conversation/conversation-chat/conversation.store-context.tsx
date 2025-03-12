@@ -44,6 +44,7 @@ export const ConversationStoreProvider = memo(
 
           const conversation = await findConversationByInboxIds({
             inboxIds: [currentUserInboxId, ...nextState.searchSelectedUserInboxIds],
+            clientInboxId: currentUserInboxId,
           })
 
           storeRef.current?.setState({

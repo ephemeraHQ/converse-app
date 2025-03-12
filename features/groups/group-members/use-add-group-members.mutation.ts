@@ -8,7 +8,7 @@ import {
   invalidateGroupMembersQuery,
   setGroupMembersQueryData,
 } from "@/features/groups/useGroupMembersQuery"
-import { addGroupMembers } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-group"
+import { addXmtpGroupMembers } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-group"
 import { IXmtpGroupWithCodecs } from "@/features/xmtp/xmtp.types"
 
 type AddGroupMembersVariables = {
@@ -21,24 +21,27 @@ export function useAddGroupMembersMutation() {
 
   return useMutation({
     mutationFn: async (variables: AddGroupMembersVariables) => {
-      return addGroupMembers(variables)
+      return addXmtpGroupMembers(variables)
     },
     onMutate: async (variables: AddGroupMembersVariables) => {
       const { group, inboxIds } = variables
 
       // Cancel any outgoing refetches
-      await cancelGroupMembersQuery({ account: currentSender.ethereumAddress, topic: group.topic })
+      await cancelGroupMembersQuery({
+        clientInboxId: currentSender.inboxId,
+        topic: group.topic,
+      })
 
       // Get current group members
       const previousMembers = getGroupMembersQueryData({
-        account: currentSender.ethereumAddress,
+        clientInboxId: currentSender.inboxId,
         topic: group.topic,
       })
 
       for (const inboxId of inboxIds) {
         // Create optimistic members
         addGroupMembersToQueryData({
-          account: currentSender.ethereumAddress,
+          clientInboxId: currentSender.inboxId,
           topic: group.topic,
           member: {
             inboxId,
@@ -54,7 +57,7 @@ export function useAddGroupMembersMutation() {
       // Roll back to previous members on error
       if (context?.previousMembers) {
         setGroupMembersQueryData({
-          account: currentSender.ethereumAddress,
+          clientInboxId: currentSender.inboxId,
           topic: variables.group.topic,
           members: context.previousMembers,
         })
@@ -63,7 +66,7 @@ export function useAddGroupMembersMutation() {
     onSettled: (_data, _error, variables) => {
       // Invalidate and refetch after error or success
       invalidateGroupMembersQuery({
-        account: currentSender.ethereumAddress,
+        clientInboxId: currentSender.inboxId,
         topic: variables.group.topic,
       })
     },

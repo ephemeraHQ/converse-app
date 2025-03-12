@@ -1,3 +1,3 @@
-import { ConsentState } from "@xmtp/react-native-sdk"
+import { IXmtpConsentState } from "@/features/xmtp/xmtp.types"
 
-export type IConsentState = ConsentState
+export type IConsentState = IXmtpConsentState

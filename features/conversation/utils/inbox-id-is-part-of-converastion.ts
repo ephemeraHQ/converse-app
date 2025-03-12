@@ -1,8 +1,5 @@
 import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk"
-import {
-  getCurrentSenderEthAddress,
-  getSafeCurrentSender,
-} from "@/features/authentication/multi-inbox.store"
+import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import {
   ensureDmPeerInboxIdQueryData,
   getDmPeerInboxIdQueryData,
@@ -19,12 +16,12 @@ export function inboxIdIsPartOfConversationUsingCacheData(args: {
   const { inboxId, conversationTopic } = args
 
   const members = getGroupMembersQueryData({
-    account: getSafeCurrentSender().ethereumAddress,
+    clientInboxId: getSafeCurrentSender().inboxId,
     topic: conversationTopic,
   })
 
   const peerInboxId = getDmPeerInboxIdQueryData({
-    account: getSafeCurrentSender().ethereumAddress,
+    inboxId: getSafeCurrentSender().inboxId,
     topic: conversationTopic,
   })
 
@@ -37,17 +34,17 @@ export async function inboxIdIsPartOfConversationUsingEnsure(args: {
 }) {
   const { inboxId, conversationTopic } = args
 
-  const account = getSafeCurrentSender().ethereumAddress
+  const currentSender = getSafeCurrentSender()
 
   const [members, peerInboxId] = await Promise.all([
     ensureGroupMembersQueryData({
       caller: "inboxIdIsPartOfConversationUsingEnsure",
-      account: account,
+      clientInboxId: currentSender.inboxId,
       topic: conversationTopic,
     }),
     ensureDmPeerInboxIdQueryData({
       caller: "inboxIdIsPartOfConversationUsingEnsure",
-      account: account,
+      inboxId: currentSender.inboxId,
       topic: conversationTopic,
     }),
   ])

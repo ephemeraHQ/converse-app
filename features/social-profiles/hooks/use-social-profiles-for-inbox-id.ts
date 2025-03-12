@@ -19,7 +19,7 @@ export function useSocialProfilesForInboxId(args: { inboxId: InboxId | undefined
 
   const { data: ethAddresses, isLoading: isLoadingEthAddresses } = useEthAddressesForXmtpInboxId({
     inboxId,
-    clientEthAddress: currentSender.ethereumAddress,
+    clientInboxId: currentSender.inboxId,
   })
 
   const { data: socialProfiles, isLoading: isLoadingSocialProfiles } =
@@ -40,7 +40,7 @@ export async function getSocialProfilesForInboxId(args: { inboxId: InboxId }) {
 
   const ethAddresses = await ensureEthAddressForXmtpInboxId({
     inboxId,
-    clientEthAddress: currentSender.ethereumAddress,
+    clientInboxId: currentSender.inboxId,
   })
 
   if (!ethAddresses) {
@@ -48,7 +48,7 @@ export async function getSocialProfilesForInboxId(args: { inboxId: InboxId }) {
   }
 
   const socialProfiles = await ensureSocialProfilesForAddressesQuery({
-    ethAddresses: ethAddresses,
+    ethAddresses: ethAddresses.map((ethAddress) => ethAddress),
   })
 
   return socialProfiles

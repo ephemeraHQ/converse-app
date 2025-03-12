@@ -28,7 +28,7 @@ export const GroupDetailsScreen = memo(function GroupDetailsScreen(
   })
 
   const { data: group } = useGroupQuery({
-    account: currentSender.ethereumAddress,
+    inboxId: currentSender.ethereumAddress,
     topic: conversationTopic,
   })
 
@@ -57,7 +57,9 @@ export const GroupDetailsScreen = memo(function GroupDetailsScreen(
           <Text preset="bigBold" style={{ textAlign: "center" }}>
             {groupName}
           </Text>
-          {group?.description && <Text style={{ textAlign: "center" }}>{group?.description}</Text>}
+          {group?.groupDescription && (
+            <Text style={{ textAlign: "center" }}>{group?.groupDescription}</Text>
+          )}
           {/* <Text color="secondary" style={{ textAlign: "center" }}>
             convos.com/convos-crew
           </Text> */}

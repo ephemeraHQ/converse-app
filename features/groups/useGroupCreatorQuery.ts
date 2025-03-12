@@ -12,7 +12,7 @@ const getGroupCreatorQueryOptions = (args: { account: string; topic: Conversatio
     queryKey: groupCreatorQueryKey(account, topic),
     queryFn: enabled
       ? async () => {
-          const group = getGroupQueryData({ account, topic })
+          const group = getGroupQueryData({ inboxId: account, topic })
           if (!group) return null
           return group.creatorInboxId()
         }

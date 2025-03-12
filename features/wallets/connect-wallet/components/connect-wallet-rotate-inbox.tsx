@@ -13,6 +13,7 @@ import { usePersistState } from "@/hooks/use-persist-state"
 import { getCurrentRoute } from "@/navigation/navigation.utils"
 import { useRouter } from "@/navigation/use-navigation"
 import { captureErrorWithToast } from "@/utils/capture-error"
+import { IEthereumAddress } from "@/utils/evm/address"
 import { shortAddress } from "@/utils/strings/shortAddress"
 import {
   ConnectWalletHeader,
@@ -58,7 +59,7 @@ export const ConnectWalletRotateInbox = memo(function ConnectWalletRotateInbox(
       const previousCurrentSender = getSafeCurrentSender()
 
       const activeWalletAccount = activeWallet.getAccount()!
-      const activeWalletEthAddress = activeWalletAccount.address
+      const activeWalletEthAddress = activeWalletAccount.address as IEthereumAddress
 
       // Create a new XMTP client with the EOA
       const newXmtpClient = await createXmtpClient({

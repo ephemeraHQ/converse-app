@@ -1,7 +1,7 @@
 import { translate } from "@i18n"
 import React, { useCallback } from "react"
 import { showActionSheet } from "@/components/action-sheet"
-import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
+import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { useAllowDmMutation } from "@/features/consent/use-allow-dm.mutation"
 import { useDenyDmMutation } from "@/features/consent/use-deny-dm.mutation"
 import { getConversationQueryData } from "@/features/conversation/queries/conversation.query"
@@ -19,10 +19,10 @@ import {
 
 export function ConversationConsentPopupDm() {
   const topic = useCurrentConversationTopicSafe()
-  const currentAccount = useCurrentSenderEthAddress()!
+  const currentSenderInboxId = useSafeCurrentSender().inboxId
 
   const { data: peerInboxId } = useDmPeerInboxIdQuery({
-    account: currentAccount,
+    inboxId: currentSenderInboxId,
     topic,
     caller: "ConversationConsentPopupDm",
   })
@@ -38,7 +38,7 @@ export function ConversationConsentPopupDm() {
     }
 
     const conversation = getConversationQueryData({
-      account: currentAccount,
+      inboxId: currentSenderInboxId,
       topic,
     })
 
@@ -70,7 +70,7 @@ export function ConversationConsentPopupDm() {
         }
       },
     })
-  }, [navigation, denyDmConsentAsync, peerInboxId, topic, currentAccount])
+  }, [navigation, denyDmConsentAsync, peerInboxId, topic, currentSenderInboxId])
 
   const handleAccept = useCallback(async () => {
     try {
@@ -79,7 +79,7 @@ export function ConversationConsentPopupDm() {
       }
 
       const conversation = getConversationQueryData({
-        account: currentAccount,
+        inboxId: currentSenderInboxId,
         topic,
       })
 
@@ -97,7 +97,7 @@ export function ConversationConsentPopupDm() {
         message: `Error consenting`,
       })
     }
-  }, [allowDmConsentAsync, peerInboxId, topic, currentAccount])
+  }, [allowDmConsentAsync, peerInboxId, topic, currentSenderInboxId])
 
   return (
     <ConversationConsentPopupContainer>

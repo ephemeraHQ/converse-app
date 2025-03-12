@@ -89,7 +89,7 @@ const PinnedConversationWrapper = memo(function PinnedConversationWrapper(props:
 
   const { data: conversation } = useConversationQuery({
     topic,
-    account: currentAccount!,
+    inboxId: currentAccount!,
     caller: "Conversation List Pinned Conversations",
   })
 

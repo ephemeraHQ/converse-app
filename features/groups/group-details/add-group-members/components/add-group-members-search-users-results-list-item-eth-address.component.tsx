@@ -3,10 +3,15 @@ import { Alert } from "react-native"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { SearchUsersResultsListItemEthAddress } from "@/features/search-users/search-users-results-list-item-eth-address"
 import { useXmtpInboxIdFromEthAddressQuery } from "@/features/xmtp/xmtp-inbox-id/xmtp-inbox-id-from-eth-address.query"
+import { IEthereumAddress } from "@/utils/evm/address"
 import { useAddGroupMembersStore } from "../stores/add-group-members.store"
 
+type IProps = {
+  ethAddress: IEthereumAddress
+}
+
 export const AddGroupMembersSearchUsersResultsListItemEthAddress = memo(
-  function AddGroupMembersSearchUsersResultsListItemEthAddress(props: { ethAddress: string }) {
+  function AddGroupMembersSearchUsersResultsListItemEthAddress(props: IProps) {
     const { ethAddress } = props
     const currentSender = useSafeCurrentSender()
     const { addSelectedInboxId } = useAddGroupMembersStore((state) => state.actions)

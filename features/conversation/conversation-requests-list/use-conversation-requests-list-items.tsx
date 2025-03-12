@@ -1,17 +1,17 @@
 import { useQueries, useQuery } from "@tanstack/react-query"
-import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
+import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { getMessageStringContent } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
 import { getUnknownConsentConversationsQueryOptions } from "@/features/conversation/conversation-requests-list/conversations-unknown-consent.query"
 import { getMessageSpamScore } from "@/features/conversation/conversation-requests-list/utils/get-message-spam-score"
 import { captureError } from "@/utils/capture-error"
 
 export function useConversationRequestsListItem() {
-  const currentAccount = useCurrentSenderEthAddress()
+  const currentSenderInboxId = useSafeCurrentSender().inboxId
 
   const { data: unkownConsentConversations, isLoading: unkownConsentConversationsLoading } =
     useQuery({
       ...getUnknownConsentConversationsQueryOptions({
-        account: currentAccount!,
+        inboxId: currentSenderInboxId,
         caller: "useConversationRequestsListItem",
       }),
     })

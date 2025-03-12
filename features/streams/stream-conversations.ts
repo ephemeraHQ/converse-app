@@ -1,5 +1,6 @@
 import { MutationObserver } from "@tanstack/react-query"
 import { StreamError } from "@utils/error"
+import { InboxId } from "@xmtp/react-native-sdk"
 import { addConversationToAllowedConsentConversationsQuery } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import { addConversationToUnknownConsentConversationsQuery } from "@/features/conversation/conversation-requests-list/conversations-unknown-consent.query"
 import { getMarkConversationAsReadMutationOptions } from "@/features/conversation/hooks/use-mark-conversation-as-read"
@@ -13,33 +14,37 @@ import { captureError } from "@/utils/capture-error"
 import { streamLogger } from "@/utils/logger"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
 
-export async function startConversationStreaming(ethAddress: string) {
+export async function startConversationStreaming(args: { clientInboxId: InboxId }) {
+  const { clientInboxId } = args
+
   try {
     await streamConversations({
-      ethAddress: ethAddress,
+      inboxId: clientInboxId,
       onNewConversation: (conversation) =>
-        handleNewConversation({ account: ethAddress, conversation }).catch(captureError),
+        handleNewConversation({ clientInboxId, conversation }).catch(captureError),
     })
   } catch (error) {
     throw new StreamError({
       error,
-      additionalMessage: `Failed to stream conversations for ${ethAddress}`,
+      additionalMessage: `Failed to stream conversations for ${clientInboxId}`,
     })
   }
 }
 
 async function handleNewConversation(args: {
-  account: string
+  clientInboxId: InboxId
   conversation: IXmtpConversationWithCodecs
 }) {
-  const { account, conversation } = args
+  const { clientInboxId: clientInboxId, conversation } = args
 
-  streamLogger.debug(`[Stream] Received new conversation for ${account}: ${conversation.topic}`)
+  streamLogger.debug(
+    `[Stream] Received new conversation for ${clientInboxId}: ${conversation.topic}`,
+  )
 
   // For some reason, when receiving a new conversation, the group members are not available?
   ensureGroupMembersQueryData({
     caller: "handleNewConversation",
-    account,
+    clientInboxId: clientInboxId,
     topic: conversation.topic,
   }).catch(captureError)
 
@@ -54,18 +59,18 @@ async function handleNewConversation(args: {
     markAsReadMutationObserver.mutate().catch(captureError)
 
     addConversationToAllowedConsentConversationsQuery({
-      account,
+      inboxId: clientInboxId,
       conversation,
     })
   } else if (isConversationConsentUnknown(conversation)) {
     addConversationToUnknownConsentConversationsQuery({
-      account,
+      inboxId: clientInboxId,
       conversation,
     })
   }
 
   setConversationQueryData({
-    account,
+    inboxId: clientInboxId,
     topic: conversation.topic,
     conversation,
   })

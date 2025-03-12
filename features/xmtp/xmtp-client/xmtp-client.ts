@@ -1,4 +1,4 @@
-import { InboxId, Client as XmtpClient } from "@xmtp/react-native-sdk"
+import { InboxId, PublicIdentity, Client as XmtpClient } from "@xmtp/react-native-sdk"
 import { getRandomBytesAsync } from "expo-crypto"
 import { config } from "@/config"
 import { XMTP_MAX_MS_UNTIL_LOG_ERROR } from "@/features/xmtp/xmtp-logs"
@@ -18,12 +18,7 @@ export async function createXmtpClientInstance(args: {
   xmtpLogger.debug(`Creating new XMTP client`)
 
   try {
-    const appNameNormalized = config.appName.replace(/\s+/g, "_")
-    const appVersionNormalized = config.appVersion.replace(/\s+/g, "_")
-    const appVersion = `${appNameNormalized}/${appVersionNormalized}`
-
     const client = await XmtpClient.create<ISupportedXmtpCodecs>(inboxSigner, {
-      appVersion: appVersion,
       env: config.xmtpEnv,
       dbEncryptionKey: await getDbEncryptionKey(),
       codecs: supportedXmtpCodecs,
@@ -59,7 +54,7 @@ export async function buildXmtpClientInstance(args: {
 
   try {
     const client = await XmtpClient.build<ISupportedXmtpCodecs>(
-      ethereumAddress,
+      new PublicIdentity(ethereumAddress, "ETHEREUM"),
       {
         env: config.xmtpEnv,
         codecs: supportedXmtpCodecs,

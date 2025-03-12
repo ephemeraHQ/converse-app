@@ -1,5 +1,6 @@
 // todo(lustig) we'll be able to remove these once multi inbox client has more functionality
 import {
+  ConsentState,
   InboxId,
   Client as XmtpClient,
   Conversation as XmtpConversation,
@@ -35,7 +36,11 @@ export type IXmtpDecodedStaticAttachmentMessage = XmtpDecodedMessage<XmtpStaticA
 export type IXmtpDecodedMultiRemoteAttachmentMessage =
   XmtpDecodedMessage<XmtpMultiRemoteAttachmentCodec>
 
-export type IXmtpInboxId = InboxId
+export type IXmtpInboxId = InboxId & {
+  readonly brand: unique symbol
+}
+
+export type IXmtpConsentState = ConsentState
 
 // export type IXmtpDecodedMessageWrong = XmtpDecodedMessage<
 //   ISupportedXmtpCodecs[number]

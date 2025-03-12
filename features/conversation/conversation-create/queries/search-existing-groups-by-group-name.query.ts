@@ -9,7 +9,7 @@ export async function searchExistingGroupsByGroupName(args: { searchQuery: strin
   const { searchQuery } = args
   const currentAccount = getSafeCurrentSender().ethereumAddress
   const conversations = getAllowedConsentConversationsQueryData({
-    account: currentAccount,
+    inboxId: currentAccount,
   })
 
   if (!conversations || !searchQuery) {
@@ -19,7 +19,7 @@ export async function searchExistingGroupsByGroupName(args: { searchQuery: strin
   const groups = conversations.filter(isConversationGroup)
 
   return groups
-    .filter((group) => normalizeString(group.name).includes(searchQuery))
+    .filter((group) => normalizeString(group.groupName).includes(searchQuery))
     .map((group) => group.topic)
 }
 

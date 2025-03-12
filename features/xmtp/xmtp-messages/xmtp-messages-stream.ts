@@ -1,25 +1,26 @@
 import { xmtpLogger } from "@utils/logger"
+import { InboxId } from "@xmtp/react-native-sdk"
 import { XMTPError } from "@/utils/error"
 import { isProd } from "@/utils/getEnv"
-import { getXmtpClientByEthAddress } from "../xmtp-client/xmtp-client.service"
+import { getXmtpClientByInboxId } from "../xmtp-client/xmtp-client.service"
 import { IXmtpDecodedMessage } from "../xmtp.types"
 
 export const streamAllMessages = async (args: {
-  account: string
+  inboxId: InboxId
   onNewMessage: (message: IXmtpDecodedMessage) => void | Promise<void>
 }) => {
-  const { account, onNewMessage } = args
+  const { inboxId: inboxId, onNewMessage } = args
 
-  const client = await getXmtpClientByEthAddress({
-    ethAddress: account,
+  const client = await getXmtpClientByInboxId({
+    inboxId,
   })
 
-  xmtpLogger.debug(`Streaming messages for ${client.address}`)
+  xmtpLogger.debug(`Streaming messages for ${inboxId}`)
 
   try {
     await client.conversations.streamAllMessages(async (message) => {
       xmtpLogger.debug(
-        `Received message for ${client.address} with id: ${message.id}, text: ${
+        `Received message for ${inboxId} with id: ${message.id}, text: ${
           isProd ? "Redacted" : message.nativeContent.text
         }, topic: ${message.topic}`,
       )
@@ -34,17 +35,17 @@ export const streamAllMessages = async (args: {
   }
 }
 
-export const stopStreamingAllMessage = async (args: { ethAddress: string }) => {
-  const { ethAddress } = args
+export const stopStreamingAllMessage = async (args: { inboxId: InboxId }) => {
+  const { inboxId: inboxId } = args
 
-  const client = await getXmtpClientByEthAddress({
-    ethAddress: ethAddress,
+  const client = await getXmtpClientByInboxId({
+    inboxId,
   })
 
   try {
     await client.conversations.cancelStreamAllMessages()
 
-    xmtpLogger.debug(`Stopped streaming messages for ${client.address}`)
+    xmtpLogger.debug(`Stopped streaming messages for ${inboxId}`)
   } catch (error) {
     throw new XMTPError({
       error,

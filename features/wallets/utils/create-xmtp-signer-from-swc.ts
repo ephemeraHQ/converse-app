@@ -1,12 +1,13 @@
+import { PublicIdentity } from "@xmtp/react-native-sdk"
 import { ISmartWalletClient } from "@/features/wallets/smart-wallet"
 import { IXmtpSigner } from "@/features/xmtp/xmtp.types"
 
 export function createXmtpSignerFromSwc(smartWalletClient: ISmartWalletClient): IXmtpSigner {
   return {
-    getAddress: async () => smartWalletClient.account.address,
+    getIdentifier: async () => new PublicIdentity(smartWalletClient.account.address, "ETHEREUM"),
     getChainId: () => smartWalletClient.chain?.id,
     getBlockNumber: () => undefined,
-    walletType: () => "SCW",
+    signerType: () => "SCW",
     signMessage: async (message: string) => smartWalletClient.signMessage({ message }),
   }
 }

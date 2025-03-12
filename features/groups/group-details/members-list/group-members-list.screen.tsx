@@ -1,7 +1,7 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack"
 import { memo, useCallback } from "react"
 import { Screen } from "@/components/screen/screen"
-import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
+import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { useGroupMembersQuery } from "@/features/groups/useGroupMembersQuery"
 import { NavigationParamList } from "@/navigation/navigation.types"
 import { useHeader } from "@/navigation/use-header"
@@ -12,11 +12,11 @@ export const GroupMembersListScreen = memo(function GroupMembersListScreen(
 ) {
   const { groupTopic: conversationTopic } = props.route.params
   const router = useRouter()
-  const currentAccount = useCurrentSenderEthAddress()!
+  const currentSenderInboxId = useSafeCurrentSender().inboxId
 
   const { data: members } = useGroupMembersQuery({
     caller: "GroupMembersListScreen",
-    account: currentAccount,
+    clientInboxId: currentSenderInboxId,
     topic: conversationTopic,
   })
 

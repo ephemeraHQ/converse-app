@@ -7,7 +7,7 @@ export const useGroupPermissionPolicySetQuery = (account: string, topic: Convers
   return useQuery({
     queryKey: groupPermissionPolicyQueryKey(account, topic!),
     queryFn: () => {
-      const group = getGroupQueryData({ account, topic })
+      const group = getGroupQueryData({ inboxId: account, topic })
       if (!group) {
         return
       }

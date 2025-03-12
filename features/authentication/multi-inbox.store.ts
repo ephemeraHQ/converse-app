@@ -4,10 +4,11 @@ import { create } from "zustand"
 import { createJSONStorage, persist, subscribeWithSelector } from "zustand/middleware"
 import { captureError } from "@/utils/capture-error"
 import { enhanceError } from "@/utils/error"
+import { IEthereumAddress } from "@/utils/evm/address"
 import { zustandMMKVStorage } from "@/utils/mmkv"
 
 export type CurrentSender = {
-  ethereumAddress: string
+  ethereumAddress: IEthereumAddress
   inboxId: string
 }
 
@@ -20,9 +21,11 @@ type IMultiInboxStoreActions = {
   reset: () => void
   setCurrentSender: (
     sender: // We let users pass in a partial CurrentSender object and we will find the full object in the store using "senders"
-    CurrentSender | { ethereumAddress: string } | { inboxId: InboxId } | undefined,
+    CurrentSender | { ethereumAddress: IEthereumAddress } | { inboxId: InboxId } | undefined,
   ) => void
-  removeSender: (senderIdentifier: { ethereumAddress: string } | { inboxId: string }) => void
+  removeSender: (
+    senderIdentifier: { ethereumAddress: IEthereumAddress } | { inboxId: InboxId },
+  ) => void
 }
 
 // Combine State and Actions for the store type

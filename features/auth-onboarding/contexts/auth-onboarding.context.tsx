@@ -17,6 +17,7 @@ import { useSmartWalletClient } from "@/features/wallets/smart-wallet"
 import { createXmtpSignerFromSwc } from "@/features/wallets/utils/create-xmtp-signer-from-swc"
 import { createXmtpClient } from "@/features/xmtp/xmtp-client/xmtp-client.service"
 import { captureError, captureErrorWithToast } from "@/utils/capture-error"
+import { IEthereumAddress } from "@/utils/evm/address"
 import { authLogger } from "@/utils/logger"
 import { tryCatch } from "@/utils/try-catch"
 
@@ -131,7 +132,7 @@ export const AuthOnboardingContextProvider = (props: IAuthOnboardingContextProps
 
       // Step 4: Set the current sender
       useMultiInboxStore.getState().actions.setCurrentSender({
-        ethereumAddress: swcClient.account.address,
+        ethereumAddress: swcClient.account.address as IEthereumAddress,
         inboxId: xmtpClient.inboxId,
       })
 
@@ -211,7 +212,7 @@ export const AuthOnboardingContextProvider = (props: IAuthOnboardingContextProps
 
       // Step 4: Set the current sender
       useMultiInboxStore.getState().actions.setCurrentSender({
-        ethereumAddress: swcClient.account.address,
+        ethereumAddress: swcClient.account.address as IEthereumAddress,
         inboxId: xmtpClient.inboxId,
       })
     } catch (error) {

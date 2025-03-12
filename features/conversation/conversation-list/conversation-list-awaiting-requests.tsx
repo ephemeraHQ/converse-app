@@ -5,10 +5,7 @@ import { Center } from "@/design-system/Center"
 import { AnimatedHStack, HStack } from "@/design-system/HStack"
 import { Image } from "@/design-system/image"
 import { AnimatedVStack } from "@/design-system/VStack"
-import {
-  useCurrentSenderEthAddress,
-  useSafeCurrentSender,
-} from "@/features/authentication/multi-inbox.store"
+import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import {
   ConversationListItem,
   ConversationListItemSubtitle,
@@ -21,16 +18,15 @@ import { useAppTheme } from "@/theme/use-app-theme"
 
 export const ConversationListAwaitingRequests = memo(function ConversationListAwaitingRequests() {
   const { theme } = useAppTheme()
-  const currentAccount = useCurrentSenderEthAddress()!
   const navigation = useNavigation()
   const { likelyNotSpam, isLoading: isLoadingUknownConversations } =
     useConversationRequestsListItem()
-  const currentAccountInboxId = useSafeCurrentSender().inboxId
+  const currentSender = useSafeCurrentSender()
 
   const conversationsMetadataQueries = useQueries({
     queries: (likelyNotSpam ?? []).map((conversation) =>
       getConversationMetadataQueryOptions({
-        account: currentAccount,
+        clientInboxId: currentSender.inboxId,
         topic: conversation.topic,
       }),
     ),
@@ -46,12 +42,12 @@ export const ConversationListAwaitingRequests = memo(function ConversationListAw
         return conversationIsUnreadForInboxId({
           lastMessageSent: conversation.lastMessage?.sentNs ?? null,
           lastMessageSenderInboxId: conversation.lastMessage?.senderInboxId ?? null,
-          consumerInboxId: currentAccountInboxId!,
+          consumerInboxId: currentSender.inboxId,
           markedAsUnread: query.data?.unread ?? false,
           readUntil: query.data?.readUntil ? new Date(query.data.readUntil).getTime() : null,
         })
       }),
-    [conversationsMetadataQueries, likelyNotSpam, currentAccountInboxId],
+    [conversationsMetadataQueries, likelyNotSpam, currentSender],
   )
 
   const title = useMemo(() => {

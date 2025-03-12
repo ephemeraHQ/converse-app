@@ -6,11 +6,10 @@ import { ListItemEndRightChevron } from "@/design-system/list-item"
 import { Pressable } from "@/design-system/Pressable"
 import { Text } from "@/design-system/Text"
 import { VStack } from "@/design-system/VStack"
-import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
+import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { MemberDetailsBottomSheet } from "@/features/groups/group-details/components/group-details-member-details.bottom-sheet"
 import { GroupDetailsListItem } from "@/features/groups/group-details/components/group-details.ui"
 import { useGroupMembersQuery } from "@/features/groups/useGroupMembersQuery"
-import { getGroupMemberIsAdmin } from "@/features/groups/utils/group-admin.utils"
 import { useRouter } from "@/navigation/use-navigation"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { MemberListItem } from "./group-details-members-list-item"
@@ -21,11 +20,11 @@ export const GroupDetailsMembersList = memo(function GroupDetailsMembersList(pro
   const { topic } = props
   const router = useRouter()
   const { theme } = useAppTheme()
-  const currentSenderEthAddress = useCurrentSenderEthAddress()!
+  const currentSenderInboxId = useSafeCurrentSender().inboxId
 
   const { data: members } = useGroupMembersQuery({
     caller: "GroupDetailsScreen",
-    account: currentSenderEthAddress,
+    clientInboxId: currentSenderInboxId,
     topic,
   })
 

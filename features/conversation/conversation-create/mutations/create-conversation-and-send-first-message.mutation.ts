@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query"
 import { ConversationTopic, MessageId, RemoteAttachmentContent } from "@xmtp/react-native-sdk"
 import { InboxId } from "@xmtp/react-native-sdk/build/lib/Client"
-import { getCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
+import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import {
   getConversationMessagesQueryData,
   setConversationMessagesQueryData,
@@ -83,22 +83,18 @@ export function useCreateConversationAndSendFirstMessage() {
         throw new Error("No inboxIds provided")
       }
 
-      const currentAccount = getCurrentSenderEthAddress()!
-
-      if (!currentAccount) {
-        throw new Error("No current account")
-      }
+      const currentSender = getSafeCurrentSender()
 
       // Create conversation
       let conversation: IXmtpGroupWithCodecs | IXmtpDmWithCodecs
       if (inboxIds.length > 1) {
         conversation = await createXmtpGroup({
-          account: currentAccount,
+          clientInboxId: currentSender.inboxId,
           inboxIds,
         })
       } else {
         conversation = await createXmtpDm({
-          senderEthAddress: currentAccount,
+          senderClientInboxId: currentSender.inboxId,
           peerInboxId: inboxIds[0],
         })
       }
@@ -143,7 +139,7 @@ export function useCreateConversationAndSendFirstMessage() {
     //       name: "",
     //       isActive: true,
     //       addedByInboxId: currentAccountInboxId,
-    //       imageUrlSquare: "",
+    //       groupImageUrl: "",
     //       description: "",
     //       consentState: "allowed",
     //     };
@@ -297,18 +293,18 @@ export function useCreateConversationAndSendFirstMessage() {
 }
 
 export function maybeReplaceOptimisticConversationWithReal(args: {
-  ethAccountAddress: string
+  clientInboxId: InboxId
   memberInboxIds: InboxId[]
   realTopic: ConversationTopic
 }) {
-  const { ethAccountAddress: ethAccountAddress, memberInboxIds, realTopic } = args
+  const { clientInboxId, memberInboxIds, realTopic } = args
 
   const tempTopic = getConversationTempTopic({
     inboxIds: memberInboxIds,
   })
 
   const realConversation = getConversationQueryData({
-    account: ethAccountAddress,
+    inboxId: clientInboxId,
     topic: realTopic,
   })
 
@@ -317,20 +313,20 @@ export function maybeReplaceOptimisticConversationWithReal(args: {
   }
 
   updateConversationQueryData({
-    account: ethAccountAddress,
+    inboxId: clientInboxId,
     topic: tempTopic,
     conversationUpdate: realConversation,
   })
 
   // Now move the messages from the temp conversation to the real conversation
   const messages = getConversationMessagesQueryData({
-    account: ethAccountAddress,
+    clientInboxId: clientInboxId,
     topic: tempTopic,
   })
 
   if (messages) {
     setConversationMessagesQueryData({
-      account: ethAccountAddress,
+      clientInboxId: clientInboxId,
       topic: realTopic,
       data: messages,
     })

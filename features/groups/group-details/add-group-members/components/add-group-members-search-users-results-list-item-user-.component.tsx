@@ -13,7 +13,7 @@ export const AddGroupMembersSearchUsersResultsListItemUser = memo(
     const { groupTopic } = useRouteParams<"AddGroupMembers">()
 
     const { data: members } = useGroupMembersQuery({
-      account: getSafeCurrentSender().ethereumAddress,
+      clientInboxId: getSafeCurrentSender().inboxId,
       topic: groupTopic!,
       caller: "add-group-members",
     })

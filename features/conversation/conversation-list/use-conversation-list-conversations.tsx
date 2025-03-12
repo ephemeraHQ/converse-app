@@ -1,6 +1,6 @@
 import { useQueries, useQuery } from "@tanstack/react-query"
 import { useEffect, useMemo } from "react"
-import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
+import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { prefetchConversationMessages } from "@/features/conversation/conversation-chat/conversation-messages.query"
 import { getAllowedConsentConversationsQueryOptions } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import { getConversationMetadataQueryOptions } from "@/features/conversation/conversation-metadata/conversation-metadata.query"
@@ -8,7 +8,7 @@ import { isConversationAllowed } from "@/features/conversation/utils/is-conversa
 import { captureError } from "@/utils/capture-error"
 
 export const useConversationListConversations = () => {
-  const currentAccount = useCurrentSenderEthAddress()
+  const currentSender = useSafeCurrentSender()
 
   const {
     data: conversations,
@@ -16,7 +16,7 @@ export const useConversationListConversations = () => {
     isLoading: isLoadingConversations,
   } = useQuery(
     getAllowedConsentConversationsQueryOptions({
-      account: currentAccount!,
+      inboxId: currentSender.inboxId,
       caller: "useConversationListConversations",
     }),
   )
@@ -26,18 +26,18 @@ export const useConversationListConversations = () => {
     if (conversations) {
       for (const conversation of conversations) {
         prefetchConversationMessages({
-          account: currentAccount!,
+          clientInboxId: currentSender.inboxId,
           topic: conversation.topic,
           caller: "useConversationListConversations",
         }).catch(captureError)
       }
     }
-  }, [conversations, currentAccount])
+  }, [conversations, currentSender])
 
   const conversationsMetadataQueries = useQueries({
     queries: (conversations ?? []).map((conversation) =>
       getConversationMetadataQueryOptions({
-        account: currentAccount!,
+        clientInboxId: currentSender.inboxId,
         topic: conversation.topic,
       }),
     ),

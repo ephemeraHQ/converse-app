@@ -3,7 +3,7 @@ import { Modal, Platform, StyleSheet } from "react-native"
 import Animated from "react-native-reanimated"
 import { useDropdownMenuCustomStyles } from "@/design-system/dropdown-menu/dropdown-menu-custom"
 import { AnimatedVStack, VStack } from "@/design-system/VStack"
-import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
+import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { ConversationMessage } from "@/features/conversation/conversation-chat/conversation-message/conversation-message"
 import { MessageContextMenuBackdrop } from "@/features/conversation/conversation-chat/conversation-message/conversation-message-context-menu/conversation-message-context-menu-backdrop"
 import { MessageContextMenuEmojiPicker } from "@/features/conversation/conversation-chat/conversation-message/conversation-message-context-menu/conversation-message-context-menu-emoji-picker/conversation-message-context-menu-emoji-picker"
@@ -54,6 +54,7 @@ const Content = memo(function Content(props: {
 
   const topic = useCurrentConversationTopicSafe()
   const messageContextMenuStore = useConversationMessageContextMenuStore()
+  const currentSender = useSafeCurrentSender()
 
   const { bySender } = useConversationMessageReactions(messageId!)
 
@@ -64,7 +65,7 @@ const Content = memo(function Content(props: {
     })! // ! Because if we are inside this component it's because we selected a message and it exists for sure
 
     const messages = getConversationMessagesQueryData({
-      account: getSafeCurrentSender().ethereumAddress,
+      clientInboxId: currentSender.inboxId,
       topic,
     })
 
@@ -92,7 +93,7 @@ const Content = memo(function Content(props: {
       previousMessage,
       nextMessage,
     }
-  }, [messageId, topic])
+  }, [messageId, topic, currentSender])
 
   const fromMe = messageIsFromCurrentAccountInboxId({ message })
   const menuItems = useMessageContextMenuItems({

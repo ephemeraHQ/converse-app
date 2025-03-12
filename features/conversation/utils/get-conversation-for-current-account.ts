@@ -5,7 +5,7 @@ import { getConversationQueryData } from "@/features/conversation/queries/conver
 export function getConversationForCurrentAccount(topic: ConversationTopic) {
   const currentAccount = getCurrentSenderEthAddress()!
   return getConversationQueryData({
-    account: currentAccount,
+    inboxId: currentAccount,
     topic: topic,
   })
 }

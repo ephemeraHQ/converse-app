@@ -1,4 +1,4 @@
-import type { ConsentState, ConversationTopic, InboxId } from "@xmtp/react-native-sdk"
+import type { ConversationTopic, InboxId } from "@xmtp/react-native-sdk"
 
 export enum QueryKeys {
   // Conversations
@@ -47,11 +47,6 @@ export enum QueryKeys {
 //   account?.toLowerCase(),
 // ];
 
-// Conversations
-export const conversationSyncAllQueryKey = (args: {
-  ethAddress: string
-  consentStates: ConsentState[]
-}) => [QueryKeys.CONVERSATIONS_SYNC_ALL, args.ethAddress, args.consentStates.join(",")]
 export const allowedConsentConversationsQueryKey = (account: string) => [
   QueryKeys.CONVERSATIONS_ALLOWED_CONSENT,
   account?.toLowerCase(),
@@ -79,11 +74,6 @@ export const conversationMetadataQueryKey = (account: string, topic: Conversatio
 ]
 
 // Messages
-export const conversationMessageQueryKey = (account: string, messageId: string) => [
-  QueryKeys.CONVERSATION_MESSAGE,
-  account.toLowerCase(),
-  messageId,
-]
 
 export const conversationMessagesQueryKey = (account: string, topic: ConversationTopic) => [
   QueryKeys.CONVERSATION_MESSAGES,
@@ -95,13 +85,6 @@ export const conversationPreviewMessagesQueryKey = (account: string, topic: Conv
   QueryKeys.CONVERSATION_MESSAGES,
   account?.toLowerCase(),
   topic,
-]
-
-// Members
-export const groupMembersQueryKey = (args: { account: string; topic: ConversationTopic }) => [
-  QueryKeys.GROUP_MEMBERS,
-  args.account?.toLowerCase(),
-  args.topic,
 ]
 
 // Group Mutable Metadata
@@ -140,13 +123,6 @@ export const groupJoinRequestQueryKey = (account: string, requestId: string) => 
 export const pendingJoinRequestsQueryKey = (account: string) => [
   QueryKeys.PENDING_JOIN_REQUESTS,
   account?.toLowerCase(),
-]
-
-// DMs
-export const dmPeerInboxIdQueryKey = (args: { account: string; topic: ConversationTopic }) => [
-  QueryKeys.DM_PEER_INBOX_ID,
-  args.account,
-  args.topic,
 ]
 
 // Conversations Search

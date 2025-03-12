@@ -1,7 +1,7 @@
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query"
-import type { ConversationTopic } from "@xmtp/react-native-sdk"
+import type { ConversationTopic, InboxId } from "@xmtp/react-native-sdk"
 import { ensureConversationSyncAllQuery } from "@/features/conversation/queries/conversation-sync-all.query"
-import { getXmtpClientByEthAddress } from "@/features/xmtp/xmtp-client/xmtp-client.service"
+import { getXmtpClientByInboxId } from "@/features/xmtp/xmtp-client/xmtp-client.service"
 import { Optional } from "@/types/general"
 import { captureError } from "@/utils/capture-error"
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
@@ -11,21 +11,21 @@ import { reactQueryClient } from "../../../utils/react-query/react-query.client"
 export type ConversationQueryData = Awaited<ReturnType<typeof getConversation>>
 
 type IGetConversationArgs = {
-  account: string
+  inboxId: InboxId
   topic: ConversationTopic
 }
 
 type IGetConversationArgsWithCaller = IGetConversationArgs & { caller: string }
 
 async function getConversation(args: IGetConversationArgs) {
-  const { account, topic } = args
+  const { inboxId: inboxId, topic } = args
 
   if (!topic) {
     throw new Error("Topic is required")
   }
 
-  if (!account) {
-    throw new Error("Account is required")
+  if (!inboxId) {
+    throw new Error("Inbox ID is required")
   }
 
   const totalStart = new Date().getTime()
@@ -35,21 +35,21 @@ async function getConversation(args: IGetConversationArgs) {
    */
   await Promise.all([
     ensureConversationSyncAllQuery({
-      ethAddress: account,
+      clientInboxId: inboxId,
       consentStates: ["allowed"],
     }),
     ensureConversationSyncAllQuery({
-      ethAddress: account,
+      clientInboxId: inboxId,
       consentStates: ["unknown"],
     }),
     ensureConversationSyncAllQuery({
-      ethAddress: account,
+      clientInboxId: inboxId,
       consentStates: ["denied"],
     }),
   ])
 
-  const client = await getXmtpClientByEthAddress({
-    ethAddress: account,
+  const client = await getXmtpClientByInboxId({
+    inboxId,
   })
 
   const conversation = (
@@ -57,7 +57,7 @@ async function getConversation(args: IGetConversationArgs) {
       isActive: true,
       addedByInboxId: true,
       name: true,
-      imageUrlSquare: true,
+      imageUrl: true,
       consentState: true,
       lastMessage: true,
       description: true,
@@ -110,14 +110,14 @@ export const useConversationQuery = (args: IGetConversationArgsWithCaller) => {
 export function getConversationQueryOptions(
   args: Optional<IGetConversationArgsWithCaller, "caller">,
 ) {
-  const { account, topic, caller } = args
-  const enabled = !!topic && !!account
+  const { inboxId: inboxId, topic, caller } = args
+  const enabled = !!topic && !!inboxId
   return queryOptions({
     meta: {
       caller,
     },
-    queryKey: conversationQueryKey(account, topic),
-    queryFn: enabled ? () => getConversation({ account, topic }) : skipToken,
+    queryKey: conversationQueryKey(inboxId, topic),
+    queryFn: enabled ? () => getConversation({ inboxId: inboxId, topic }) : skipToken,
     enabled,
   })
 }
@@ -127,10 +127,10 @@ export const setConversationQueryData = (
     conversation: ConversationQueryData
   },
 ) => {
-  const { account, topic, conversation } = args
+  const { inboxId: inboxId, topic, conversation } = args
   reactQueryClient.setQueryData(
     getConversationQueryOptions({
-      account,
+      inboxId: inboxId,
       topic,
     }).queryKey,
     conversation,
@@ -158,6 +158,6 @@ export const getConversationQueryData = (args: IGetConversationArgs) => {
   return reactQueryClient.getQueryData(getConversationQueryOptions(args).queryKey)
 }
 
-export function getOrFetchConversation(args: IGetConversationArgsWithCaller) {
+export function getOrFetchConversationQuery(args: IGetConversationArgsWithCaller) {
   return reactQueryClient.ensureQueryData(getConversationQueryOptions(args))
 }

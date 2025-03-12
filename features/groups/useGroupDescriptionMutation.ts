@@ -1,41 +1,43 @@
 import { useMutation } from "@tanstack/react-query"
-import type { ConversationTopic } from "@xmtp/react-native-sdk"
+import { InboxId, type ConversationTopic } from "@xmtp/react-native-sdk"
 import { updateConversationInAllowedConsentConversationsQueryData } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import {
   getGroupQueryData,
   updateGroupQueryData,
   useGroupQuery,
 } from "@/features/groups/useGroupQuery"
+import { updateXmtpGroupDescription } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-group"
+import { IXmtpGroupWithCodecs } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
 
 type IArgs = {
-  account: string
+  inboxId: InboxId
   topic: ConversationTopic
 }
 
 export function useGroupDescriptionMutation(args: IArgs) {
-  const { account, topic } = args
-  const { data: group } = useGroupQuery({ account, topic })
+  const { inboxId: inboxId, topic } = args
+  const { data: group } = useGroupQuery({ inboxId: inboxId, topic })
 
   return useMutation({
     mutationFn: async (description: string) => {
-      if (!group || !account || !topic) {
+      if (!group || !inboxId || !topic) {
         throw new Error("Missing required data in useGroupDescriptionMutation")
       }
 
-      await group.updateGroupDescription(description)
+      await updateXmtpGroupDescription({ group, description })
       return description
     },
     onMutate: async (description: string) => {
-      const previousGroup = getGroupQueryData({ account, topic })
-      const updates = { description }
+      const previousGroup = getGroupQueryData({ inboxId: inboxId, topic })
+      const updates: Partial<IXmtpGroupWithCodecs> = { groupDescription: description }
 
       if (previousGroup) {
-        updateGroupQueryData({ account, topic, updates })
+        updateGroupQueryData({ inboxId: inboxId, topic, updates })
       }
 
       updateConversationInAllowedConsentConversationsQueryData({
-        account,
+        inboxId: inboxId,
         topic,
         conversationUpdate: updates,
       })
@@ -47,10 +49,13 @@ export function useGroupDescriptionMutation(args: IArgs) {
 
       const { previousGroup } = context || {}
 
-      const updates = { description: previousGroup?.description ?? "" }
-      updateGroupQueryData({ account, topic, updates })
+      const updates: Partial<IXmtpGroupWithCodecs> = {
+        groupDescription: previousGroup?.groupDescription ?? "",
+      }
+
+      updateGroupQueryData({ inboxId: inboxId, topic, updates })
       updateConversationInAllowedConsentConversationsQueryData({
-        account,
+        inboxId: inboxId,
         topic,
         conversationUpdate: updates,
       })

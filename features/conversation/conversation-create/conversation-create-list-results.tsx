@@ -23,7 +23,7 @@ import { useXmtpInboxIdFromEthAddressQuery } from "@/features/xmtp/xmtp-inbox-id
 import { useAnimatedKeyboard } from "@/hooks/use-animated-keyboard"
 import { $globalStyles } from "@/theme/styles"
 import { useAppTheme } from "@/theme/use-app-theme"
-import { isEthereumAddress } from "@/utils/evm/address"
+import { IEthereumAddress, isEthereumAddress } from "@/utils/evm/address"
 import { SearchUsersResultsList } from "../../search-users/search-users-results-list"
 import { SearchUsersResultsListItemEthAddress } from "../../search-users/search-users-results-list-item-eth-address"
 import { SearchUsersResultsListItemGroup } from "../../search-users/search-users-results-list-item-group"
@@ -50,8 +50,7 @@ type ISearchResultItemProfile = {
 
 type ISearchResultItemExternalIdentity = {
   type: "external_identity"
-  address: string
-  displayName?: string // For ENS, Base, or Unstoppable domains, this would be the original name
+  address: IEthereumAddress
 }
 
 type SearchResultItem =
@@ -89,7 +88,7 @@ const SearchUsersResultsListItemUserDmWrapper = memo(
     const currentSender = useSafeCurrentSender()
 
     const { data: peerInboxId, isLoading: isLoadingPeerInboxId } = useDmPeerInboxIdQuery({
-      account: currentSender.ethereumAddress,
+      inboxId: currentSender.inboxId,
       topic: conversationTopic,
       caller: "SearchUsersResultsListItemUserDmWrapper",
     })
@@ -242,10 +241,6 @@ export const ConversationCreateListResults = memo(function ConversationCreateLis
   const { data: unstoppableDomainEthAddressResolution } =
     useUnstoppableDomainNameResolution(searchTextValue)
 
-  const isEthAddress = useMemo(() => {
-    return isEthereumAddress(searchTextValue)
-  }, [searchTextValue])
-
   const listData = useMemo(() => {
     const items: SearchResultItem[] = []
 
@@ -310,7 +305,7 @@ export const ConversationCreateListResults = memo(function ConversationCreateLis
 
     // 5. Add raw Ethereum address if the search query is an Ethereum address
     // and we don't have any Convos users
-    if (isEthAddress && searchConvosUsersData?.length === 0) {
+    if (isEthereumAddress(searchTextValue) && searchConvosUsersData?.length === 0) {
       items.push({
         type: "external_identity" as const,
         address: searchTextValue,
@@ -322,21 +317,18 @@ export const ConversationCreateListResults = memo(function ConversationCreateLis
       items.push({
         type: "external_identity" as const,
         address: ensEthAddressResolution,
-        displayName: searchTextValue,
       })
     }
     if (baseEthAddressResolution) {
       items.push({
         type: "external_identity" as const,
         address: baseEthAddressResolution,
-        displayName: searchTextValue,
       })
     }
     if (unstoppableDomainEthAddressResolution) {
       items.push({
         type: "external_identity" as const,
         address: unstoppableDomainEthAddressResolution,
-        displayName: searchTextValue,
       })
     }
 
@@ -348,7 +340,6 @@ export const ConversationCreateListResults = memo(function ConversationCreateLis
     searchConvosUsersData,
     selectedSearchUserInboxIds,
     searchTextValue,
-    isEthAddress,
     ensEthAddressResolution,
     baseEthAddressResolution,
     unstoppableDomainEthAddressResolution,

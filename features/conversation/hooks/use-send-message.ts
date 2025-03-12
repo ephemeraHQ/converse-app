@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query"
 import { ConversationTopic, MessageId, RemoteAttachmentInfo } from "@xmtp/react-native-sdk"
 import { getCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
 import { UploadedRemoteAttachment } from "@/features/conversation/conversation-chat/conversation-attachment/conversation-attachments.types"
-import { getOrFetchConversation } from "@/features/conversation/queries/conversation.query"
+import { getOrFetchConversationQuery } from "@/features/conversation/queries/conversation.query"
 import { sendXmtpConversationMessage } from "@/features/xmtp/xmtp-conversations/xmtp-conversation"
 
 export type ISendMessageContent = {
@@ -33,9 +33,9 @@ export async function sendMessage(args: ISendMessageParams) {
     throw new Error("Invalid content: Either text or remoteAttachments must be provided")
   }
 
-  const conversation = await getOrFetchConversation({
+  const conversation = await getOrFetchConversationQuery({
     topic,
-    account: getCurrentSenderEthAddress()!,
+    inboxId: getCurrentSenderEthAddress()!,
     caller: "use-send-message",
   })
 

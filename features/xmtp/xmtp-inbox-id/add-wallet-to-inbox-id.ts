@@ -12,8 +12,10 @@ export async function addWalletToInboxId(args: {
 }) {
   const { inboxId, wallet, allowReassignInboxId = false } = args
 
+  const walletIdentifier = await wallet.getIdentifier()
+
   xmtpLogger.debug(
-    `[addWalletToInboxId] Adding wallet ${await wallet.getAddress()} to inbox ID: ${inboxId} with allowReassignInboxId: ${allowReassignInboxId}`,
+    `[addWalletToInboxId] Adding wallet ${walletIdentifier} to inbox ID: ${inboxId} with allowReassignInboxId: ${allowReassignInboxId}`,
   )
 
   try {
@@ -39,7 +41,7 @@ export async function addWalletToInboxId(args: {
   } catch (error) {
     throw new XMTPError({
       error,
-      additionalMessage: `Error adding wallet address ${await wallet.getAddress()} to inbox ID for inboxId ${inboxId}`,
+      additionalMessage: `Error adding wallet ${walletIdentifier} to inbox ID for inboxId ${inboxId}`,
     })
   }
 }

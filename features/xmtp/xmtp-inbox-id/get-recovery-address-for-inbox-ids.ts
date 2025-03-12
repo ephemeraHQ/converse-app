@@ -14,5 +14,7 @@ export async function getRecoveryAddressesForInboxIds(args: {
 
   const inboxStates = await client.inboxStates(true, inboxIds)
 
-  return inboxStates.map((inboxState) => inboxState.recoveryAddress)
+  return inboxStates
+    .filter((inboxState) => inboxState.recoveryIdentity.kind === "ETHEREUM")
+    .map((inboxState) => inboxState.recoveryIdentity.identifier)
 }

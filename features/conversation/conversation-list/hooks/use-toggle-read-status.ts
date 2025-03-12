@@ -20,21 +20,21 @@ export const useToggleReadStatus = ({ topic }: UseToggleReadStatusProps) => {
   })
 
   const toggleReadStatusAsync = useCallback(async () => {
-    const { ethereumAddress: currentEthereumAddress, inboxId: currentInboxId } =
-      getSafeCurrentSender()
+    const currentSender = getSafeCurrentSender()
+
     const conversationData = getConversationMetadataQueryData({
-      account: currentEthereumAddress,
+      clientInboxId: currentSender.inboxId,
       topic,
     })
     const conversation = getConversationQueryData({
-      account: currentEthereumAddress,
+      inboxId: currentSender.inboxId,
       topic,
     })
 
     const conversationIsUnread = conversationIsUnreadForInboxId({
       lastMessageSent: conversation?.lastMessage?.sentNs ?? null,
       lastMessageSenderInboxId: conversation?.lastMessage?.senderInboxId ?? null,
-      consumerInboxId: currentInboxId,
+      consumerInboxId: currentSender.inboxId,
       readUntil: conversationData?.readUntil
         ? new Date(conversationData.readUntil).getTime()
         : null,

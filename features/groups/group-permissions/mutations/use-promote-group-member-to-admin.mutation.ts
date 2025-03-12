@@ -11,8 +11,13 @@ import {
   setGroupMembersQueryData,
 } from "../../useGroupMembersQuery"
 
-export const usePromoteToAdminMutation = (account: string, topic: ConversationTopic) => {
-  const { data: group } = useGroupQuery({ account, topic })
+export const usePromoteToAdminMutation = (args: {
+  clientInboxId: InboxId
+  topic: ConversationTopic
+}) => {
+  const { clientInboxId, topic } = args
+
+  const { data: group } = useGroupQuery({ inboxId: clientInboxId, topic })
 
   return useMutation({
     mutationFn: async (inboxId: InboxId) => {
@@ -27,10 +32,10 @@ export const usePromoteToAdminMutation = (account: string, topic: ConversationTo
         return
       }
 
-      cancelGroupMembersQuery({ account, topic }).catch(captureError)
+      cancelGroupMembersQuery({ clientInboxId: inboxId, topic }).catch(captureError)
 
       const previousGroupMembers = getGroupMembersQueryData({
-        account,
+        clientInboxId: inboxId,
         topic,
       })
       if (!previousGroupMembers) {
@@ -43,7 +48,7 @@ export const usePromoteToAdminMutation = (account: string, topic: ConversationTo
       }
 
       newMembers.byId[inboxId].permission = "admin"
-      setGroupMembersQueryData({ account, topic, members: newMembers })
+      setGroupMembersQueryData({ clientInboxId: inboxId, topic, members: newMembers })
 
       return { previousGroupMembers }
     },
@@ -53,13 +58,13 @@ export const usePromoteToAdminMutation = (account: string, topic: ConversationTo
       }
 
       setGroupMembersQueryData({
-        account,
+        clientInboxId: clientInboxId,
         topic,
         members: context.previousGroupMembers,
       })
     },
     onSuccess: () => {
-      invalidateGroupMembersQuery({ account, topic }).catch(captureError)
+      invalidateGroupMembersQuery({ clientInboxId: clientInboxId, topic }).catch(captureError)
     },
   })
 }

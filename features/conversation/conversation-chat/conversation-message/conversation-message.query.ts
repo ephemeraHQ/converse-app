@@ -1,46 +1,26 @@
 import { queryOptions } from "@tanstack/react-query"
-import { MessageId } from "@xmtp/react-native-sdk"
-import { getXmtpClientByEthAddress } from "@/features/xmtp/xmtp-client/xmtp-client.service"
-import { logger } from "@/utils/logger"
-import { conversationMessageQueryKey } from "../../../../queries/QueryKeys"
-import { reactQueryClient } from "../../../../utils/react-query/react-query.client"
+import { InboxId, MessageId } from "@xmtp/react-native-sdk"
+import { getXmtpConversationMessage } from "@/features/xmtp/xmtp-messages/xmtp-messages"
+import { reactQueryClient } from "@/utils/react-query/react-query.client"
 
 type IArgs = {
-  account: string
+  clientInboxId: InboxId
   messageId: MessageId
 }
 
 async function getConversationMessage(args: IArgs) {
-  const { account, messageId } = args
-
-  if (!messageId) {
-    throw new Error("Message ID is required")
-  }
-
-  if (!account) {
-    throw new Error("Account is required")
-  }
-
-  logger.debug(`[useConversationMessage] Fetching message ${messageId} for account ${account}`)
-
-  const xmtpClient = await getXmtpClientByEthAddress({
-    ethAddress: account,
+  const { clientInboxId: account, messageId } = args
+  return getXmtpConversationMessage({
+    messageId,
+    clientInboxId: account,
   })
-
-  if (!xmtpClient) {
-    throw new Error("XMTP client not found")
-  }
-
-  const message = await xmtpClient.conversations.findMessage(messageId)
-
-  return message
 }
 
-export function getConversationMessageQueryOptions({ account, messageId }: IArgs) {
+export function getConversationMessageQueryOptions({ clientInboxId, messageId }: IArgs) {
   return queryOptions({
-    queryKey: conversationMessageQueryKey(account, messageId),
-    queryFn: () => getConversationMessage({ account, messageId }),
-    enabled: !!messageId && !!account,
+    queryKey: ["conversation-message", clientInboxId, messageId],
+    queryFn: () => getConversationMessage({ clientInboxId, messageId }),
+    enabled: !!messageId && !!clientInboxId,
   })
 }
 
@@ -49,8 +29,5 @@ export function fetchConversationMessageQuery(args: IArgs) {
 }
 
 export function getOrFetchConversationMessageQuery(args: IArgs) {
-  return (
-    reactQueryClient.getQueryData(conversationMessageQueryKey(args.account, args.messageId)) ??
-    fetchConversationMessageQuery(args)
-  )
+  return reactQueryClient.ensureQueryData(getConversationMessageQueryOptions(args))
 }

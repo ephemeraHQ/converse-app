@@ -1,13 +1,17 @@
 import { queryOptions } from "@tanstack/react-query"
 import { IXmtpClient } from "@/features/xmtp/xmtp.types"
+import { IEthereumAddress } from "@/utils/evm/address"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
 import { validateClientInstallation } from "../xmtp-installations/xmtp-installations"
 import { buildXmtpClientInstance } from "./xmtp-client"
 
 // Query key now uses ethAddress instead of inboxId
-const xmtpClientQueryKey = (args: { ethAddress: string }) => ["xmtp-client", args.ethAddress]
+const xmtpClientQueryKey = (args: { ethAddress: IEthereumAddress }) => [
+  "xmtp-client",
+  args.ethAddress,
+]
 
-export const getXmtpClientQueryOptions = (args: { ethAddress: string }) => {
+export const getXmtpClientQueryOptions = (args: { ethAddress: IEthereumAddress }) => {
   return queryOptions({
     queryKey: xmtpClientQueryKey(args),
     queryFn: async () => {
@@ -29,6 +33,9 @@ export const getXmtpClientQueryOptions = (args: { ethAddress: string }) => {
   })
 }
 
-export function setXmtpClientQueryData(args: { ethAddress: string; client: IXmtpClient }) {
+export function setXmtpClientQueryData(args: {
+  ethAddress: IEthereumAddress
+  client: IXmtpClient
+}) {
   return reactQueryClient.setQueryData(xmtpClientQueryKey(args), args.client)
 }

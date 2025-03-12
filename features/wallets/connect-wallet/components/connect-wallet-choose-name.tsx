@@ -6,6 +6,7 @@ import { disconnectActiveWallet } from "@/features/wallets/connect-wallet/connec
 import { useConnectWalletStore } from "@/features/wallets/connect-wallet/connect-wallet.store"
 import { useRouter } from "@/navigation/use-navigation"
 import { captureError } from "@/utils/capture-error"
+import { IEthereumAddress } from "@/utils/evm/address"
 import { shortAddress } from "@/utils/strings/shortAddress"
 import {
   ConnectWalletButtonContainer,
@@ -20,7 +21,7 @@ import {
 } from "../connect-wallet.ui"
 
 type IConnectWalletChooseNameProps = {
-  ethAddress: string
+  ethAddress: IEthereumAddress
 }
 
 export const ConnectWalletChooseName = memo(function ConnectWalletChooseName(

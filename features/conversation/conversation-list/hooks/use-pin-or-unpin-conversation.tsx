@@ -1,13 +1,10 @@
 import { useMutation } from "@tanstack/react-query"
 import { ConversationTopic } from "@xmtp/react-native-sdk"
 import { useCallback } from "react"
+import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import {
-  getCurrentSenderEthAddress,
-  useCurrentSenderEthAddress,
-} from "@/features/authentication/multi-inbox.store"
-import {
-  pinConversation,
-  unpinConversation,
+  pinConversationMetadata,
+  unpinConversationMetadata,
 } from "@/features/conversation/conversation-metadata/conversation-metadata.api"
 import {
   getConversationMetadataQueryData,
@@ -17,24 +14,23 @@ import {
 export function usePinOrUnpinConversation(args: { conversationTopic: ConversationTopic }) {
   const { conversationTopic } = args
 
-  const currentAccount = useCurrentSenderEthAddress()!
+  const currentSender = useSafeCurrentSender()
 
   const { mutateAsync: pinConversationAsync } = useMutation({
     mutationFn: () => {
-      return pinConversation({
-        account: currentAccount,
+      return pinConversationMetadata({
+        clientInboxId: currentSender.inboxId,
         topic: conversationTopic,
       })
     },
     onMutate: () => {
-      const currentAccount = getCurrentSenderEthAddress()!
       const previousPinned = getConversationMetadataQueryData({
-        account: currentAccount,
+        clientInboxId: currentSender.inboxId,
         topic: conversationTopic,
       })?.pinned
 
       updateConversationMetadataQueryData({
-        account: currentAccount,
+        clientInboxId: currentSender.inboxId,
         topic: conversationTopic,
         updateData: { pinned: true },
       })
@@ -42,9 +38,8 @@ export function usePinOrUnpinConversation(args: { conversationTopic: Conversatio
       return { previousPinned }
     },
     onError: (error, _, context) => {
-      const currentAccount = getCurrentSenderEthAddress()!
       updateConversationMetadataQueryData({
-        account: currentAccount,
+        clientInboxId: currentSender.inboxId,
         topic: conversationTopic,
         updateData: { pinned: context?.previousPinned },
       })
@@ -53,20 +48,19 @@ export function usePinOrUnpinConversation(args: { conversationTopic: Conversatio
 
   const { mutateAsync: unpinConversationAsync } = useMutation({
     mutationFn: () => {
-      return unpinConversation({
-        account: currentAccount,
+      return unpinConversationMetadata({
+        clientInboxId: currentSender.inboxId,
         topic: conversationTopic,
       })
     },
     onMutate: () => {
-      const currentAccount = getCurrentSenderEthAddress()!
       const previousPinned = getConversationMetadataQueryData({
-        account: currentAccount,
+        clientInboxId: currentSender.inboxId,
         topic: conversationTopic,
       })?.pinned
 
       updateConversationMetadataQueryData({
-        account: currentAccount,
+        clientInboxId: currentSender.inboxId,
         topic: conversationTopic,
         updateData: { pinned: false },
       })
@@ -74,9 +68,8 @@ export function usePinOrUnpinConversation(args: { conversationTopic: Conversatio
       return { previousPinned }
     },
     onError: (error, _, context) => {
-      const currentAccount = getCurrentSenderEthAddress()!
       updateConversationMetadataQueryData({
-        account: currentAccount,
+        clientInboxId: currentSender.inboxId,
         topic: conversationTopic,
         updateData: { pinned: context?.previousPinned },
       })
@@ -84,9 +77,8 @@ export function usePinOrUnpinConversation(args: { conversationTopic: Conversatio
   })
 
   const pinOrUnpinConversationAsync = useCallback(async () => {
-    const currentAccount = getCurrentSenderEthAddress()!
     const isPinned = getConversationMetadataQueryData({
-      account: currentAccount,
+      clientInboxId: currentSender.inboxId,
       topic: conversationTopic,
     })?.pinned
 
@@ -95,7 +87,7 @@ export function usePinOrUnpinConversation(args: { conversationTopic: Conversatio
     } else {
       return pinConversationAsync()
     }
-  }, [conversationTopic, pinConversationAsync, unpinConversationAsync])
+  }, [conversationTopic, currentSender, pinConversationAsync, unpinConversationAsync])
 
   return {
     pinOrUnpinConversationAsync,

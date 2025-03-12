@@ -1,3 +1,4 @@
+import { PublicIdentity } from "@xmtp/react-native-sdk"
 import { IXmtpSigner } from "../xmtp.types"
 
 export function getXmtpSigner(args: {
@@ -7,10 +8,12 @@ export function getXmtpSigner(args: {
   signMessage: (message: string) => Promise<string>
 }): IXmtpSigner {
   return {
-    getAddress: async () => args.ethAddress,
+    getIdentifier: async () => {
+      return new PublicIdentity(args.ethAddress, "ETHEREUM")
+    },
     getChainId: () => args.chainId,
     getBlockNumber: () => undefined,
-    walletType: () => args.type,
+    signerType: () => args.type,
     signMessage: (message: string) => {
       return args.signMessage(message)
     },

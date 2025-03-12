@@ -41,7 +41,7 @@ export function usePreferredDisplayInfo(args: PreferredDisplayInfoArgs) {
   const inboxId = inboxIdArg ?? inboxIdFromEthAddress
 
   const { data: ethAddressesForXmtpInboxId } = useEthAddressesForXmtpInboxId({
-    clientEthAddress: currentSender.ethereumAddress,
+    clientInboxId: currentSender.inboxId,
     inboxId,
   })
 

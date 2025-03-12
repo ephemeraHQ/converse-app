@@ -1,12 +1,7 @@
 import { isAddress } from "ethers/lib/utils"
 
-// export type IEthereumAddress = `0x${string}`;
+export type IEthereumAddress = string & { readonly brand: unique symbol }
 
-export type IEthereumAddress = string // Later: `0x${string}`;
-
-export function isEthereumAddress(address: string): boolean {
-  //   if (!address.startsWith("0x")) {
-  //     return false;
-  //   }
+export function isEthereumAddress(address: string): address is IEthereumAddress {
   return isAddress(address)
 }

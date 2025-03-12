@@ -1,6 +1,9 @@
 import { keepPreviousData, queryOptions, useQuery } from "@tanstack/react-query"
 import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk"
-import { getCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
+import {
+  getSafeCurrentSender,
+  useSafeCurrentSender,
+} from "@/features/authentication/multi-inbox.store"
 import { getAllowedConsentConversationsQueryData } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm"
 import { ensureDmPeerInboxIdQueryData } from "@/features/dm/use-dm-peer-inbox-id-query"
@@ -31,9 +34,9 @@ export function getSearchExistingDmsQueryOptions(args: { searchQuery: string; in
 
 async function searchExistingDms(args: { searchQuery: string; inboxId: InboxId }) {
   const { searchQuery, inboxId } = args
-  const currentAccount = getCurrentSenderEthAddress()!
+  const currentSender = getSafeCurrentSender()
   const conversations = getAllowedConsentConversationsQueryData({
-    account: currentAccount,
+    inboxId: currentSender.inboxId,
   })
   const normalizedSearchQuery = searchQuery.toLowerCase().trim()
 
@@ -56,7 +59,7 @@ async function searchExistingDms(args: { searchQuery: string; inboxId: InboxId }
         const [peerInboxId, members] = await Promise.race([
           ensureGroupMembersQueryData({
             caller: "searchExistingDms",
-            account: currentAccount,
+            clientInboxId: currentSender.inboxId,
             topic: conversation.topic,
           }).then((members) => {
             const otherId = members.ids.find((id) => id !== inboxId)
@@ -64,7 +67,7 @@ async function searchExistingDms(args: { searchQuery: string; inboxId: InboxId }
           }),
 
           ensureDmPeerInboxIdQueryData({
-            account: currentAccount,
+            inboxId: currentSender.inboxId,
             topic: conversation.topic,
             caller: "searchExistingDms",
           }).then((peerId) => [peerId, null] as const),

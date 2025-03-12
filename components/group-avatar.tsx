@@ -91,14 +91,14 @@ export const GroupAvatar = memo(function GroupAvatar(props: {
 
   // Fetch group data
   const { data: group } = useGroupQuery({
-    account: currentSender.ethereumAddress,
+    inboxId: currentSender.inboxId,
     topic: groupTopic,
   })
 
   // Fetch group members
   const { data: members } = useGroupMembersQuery({
     caller: "GroupAvatar",
-    account: currentSender.ethereumAddress,
+    clientInboxId: currentSender.inboxId,
     topic: groupTopic,
   })
 
@@ -169,8 +169,8 @@ export const GroupAvatar = memo(function GroupAvatar(props: {
   }, [size, theme, sizeNumberProp])
 
   // If group has an image, use it instead of member avatars
-  if (group?.imageUrlSquare) {
-    return <Avatar uri={group.imageUrlSquare} sizeNumber={sizeNumber} name={group.name} />
+  if (group?.groupImageUrl) {
+    return <Avatar uri={group.groupImageUrl} sizeNumber={sizeNumber} name={group.groupName} />
   }
 
   return <GroupAvatarUI members={memberData} size={sizeNumber} />

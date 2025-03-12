@@ -1,11 +1,6 @@
 import { useMutation } from "@tanstack/react-query"
 import { ConversationId, ConversationTopic, InboxId } from "@xmtp/react-native-sdk"
-import {
-  getCurrentSenderEthAddress,
-  useCurrentSenderEthAddress,
-} from "@/features/authentication/multi-inbox.store"
-import { updateConsentForGroupsForAccount } from "@/features/consent/update-consent-for-groups-for-account"
-import { updateInboxIdsConsentForAccount } from "@/features/consent/update-inbox-ids-consent-for-account"
+import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import {
   addConversationToAllowedConsentConversationsQuery,
   removeConversationFromAllowedConsentConversationsQuery,
@@ -18,9 +13,13 @@ import { getConversationQueryData } from "@/features/conversation/queries/conver
 import { getDmQueryData, setDmQueryData } from "@/features/dm/use-dm-query"
 import { IXmtpConversationWithCodecs, IXmtpDmWithCodecs } from "@/features/xmtp/xmtp.types"
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
+import {
+  setXmtpConsentStateForInboxId,
+  updateConsentForGroupsForAccount,
+} from "../xmtp/xmtp-consent/xmtp-consent"
 
 export function useAllowDmMutation() {
-  const currentAccount = useCurrentSenderEthAddress()!
+  const currentSenderInboxId = useSafeCurrentSender().inboxId
 
   return useMutation({
     mutationFn: async (args: {
@@ -32,23 +31,21 @@ export function useAllowDmMutation() {
       if (!peerInboxId) {
         throw new Error("Peer inbox id not found")
       }
-      const currentAccount = getCurrentSenderEthAddress()!
       await Promise.all([
         updateConsentForGroupsForAccount({
-          account: currentAccount,
+          clientInboxId: currentSenderInboxId,
           groupIds: [conversationId],
-          consent: "allow",
+          consent: "allowed",
         }),
-        updateInboxIdsConsentForAccount({
-          account: currentAccount,
-          inboxIds: [peerInboxId],
-          consent: "allow",
+        setXmtpConsentStateForInboxId({
+          inboxId: currentSenderInboxId,
+          consent: "allowed",
         }),
       ])
     },
     onMutate: ({ topic, peerInboxId }) => {
       const conversation = getConversationQueryData({
-        account: currentAccount,
+        inboxId: currentSenderInboxId,
         topic,
       })
       if (conversation) {
@@ -57,20 +54,20 @@ export function useAllowDmMutation() {
         })
 
         setDmQueryData({
-          ethAccountAddress: currentAccount,
+          ethAccountAddress: currentSenderInboxId,
           inboxId: peerInboxId,
           dm: updatedDm as IXmtpDmWithCodecs,
         })
 
         // Add to main conversations list
         addConversationToAllowedConsentConversationsQuery({
-          account: currentAccount,
+          inboxId: currentSenderInboxId,
           conversation: updatedDm as IXmtpConversationWithCodecs,
         })
 
         // Remove from requests
         removeConversationFromUnknownConsentConversationsQueryData({
-          account: currentAccount,
+          inboxId: currentSenderInboxId,
           topic,
         })
 
@@ -81,7 +78,7 @@ export function useAllowDmMutation() {
       const { previousDmConsent } = context || {}
       if (previousDmConsent) {
         const dm = getDmQueryData({
-          ethAccountAddress: currentAccount,
+          ethAccountAddress: currentSenderInboxId,
           inboxId: peerInboxId,
         })
 
@@ -94,20 +91,20 @@ export function useAllowDmMutation() {
         })
 
         setDmQueryData({
-          ethAccountAddress: currentAccount,
+          ethAccountAddress: currentSenderInboxId,
           inboxId: peerInboxId,
           dm: previousDm,
         })
 
         // Add back in requests
         addConversationToUnknownConsentConversationsQuery({
-          account: currentAccount,
+          inboxId: currentSenderInboxId,
           conversation: previousDm as IXmtpConversationWithCodecs,
         })
 
         // Remove from main conversations list
         removeConversationFromAllowedConsentConversationsQuery({
-          account: currentAccount,
+          inboxId: currentSenderInboxId,
           topic,
         })
       }

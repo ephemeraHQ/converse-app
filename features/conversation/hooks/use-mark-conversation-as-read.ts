@@ -1,7 +1,7 @@
 import { MutationOptions, useMutation } from "@tanstack/react-query"
 import { ConversationTopic } from "@xmtp/react-native-sdk"
-import { getCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store"
-import { markConversationAsRead } from "@/features/conversation/conversation-metadata/conversation-metadata.api"
+import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
+import { markConversationMetadataAsRead } from "@/features/conversation/conversation-metadata/conversation-metadata.api"
 import {
   getConversationMetadataQueryData,
   updateConversationMetadataQueryData,
@@ -21,28 +21,28 @@ export function getMarkConversationAsReadMutationOptions(args: {
 }): MutationOptions<void, Error, void, MarkAsReadContext> {
   const { topic } = args
 
+  const currentSender = getSafeCurrentSender()
+
   return {
     mutationKey: ["markConversationAsRead", topic],
     mutationFn: async () => {
-      const currentAccount = getCurrentSenderEthAddress()!
       const readUntil = formatDateForApi(new Date())
 
-      await markConversationAsRead({
-        account: currentAccount,
+      await markConversationMetadataAsRead({
+        clientInboxId: currentSender.inboxId,
         topic,
         readUntil,
       })
     },
     onMutate: () => {
-      const currentAccount = getCurrentSenderEthAddress()!
       const readUntil = formatDateForApi(new Date())
       const previousData = getConversationMetadataQueryData({
-        account: currentAccount,
+        clientInboxId: currentSender.inboxId,
         topic,
       })
 
       updateConversationMetadataQueryData({
-        account: currentAccount,
+        clientInboxId: currentSender.inboxId,
         topic,
         updateData: {
           readUntil,
@@ -61,9 +61,8 @@ export function getMarkConversationAsReadMutationOptions(args: {
       }
     },
     onError: (error, _, context) => {
-      const currentAccount = getCurrentSenderEthAddress()!
       updateConversationMetadataQueryData({
-        account: currentAccount,
+        clientInboxId: currentSender.inboxId,
         topic,
         updateData: context?.previousData ?? {},
       })

@@ -43,4 +43,7 @@ export type IConfig = {
   evm: IEvmConfig
   appCheckDebugToken: string | undefined
   reactQueryEncryptionKey: string
+  xmtp: {
+    maxMsUntilLogError: number
+  }
 }

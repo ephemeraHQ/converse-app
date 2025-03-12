@@ -1,4 +1,4 @@
-import { ConversationTopic, GroupUpdatedContent } from "@xmtp/react-native-sdk"
+import { ConversationTopic, GroupUpdatedContent, InboxId } from "@xmtp/react-native-sdk"
 import { addConversationMessageQuery } from "@/features/conversation/conversation-chat/conversation-messages.query"
 import { updateConversationInAllowedConsentConversationsQueryData } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import { updateConversationQueryData } from "@/features/conversation/queries/conversation.query"
@@ -9,31 +9,31 @@ import { captureError } from "@/utils/capture-error"
 import { StreamError } from "@/utils/error"
 import { streamLogger } from "@/utils/logger"
 
-export async function startMessageStreaming(args: { account: string }) {
-  const { account } = args
+export async function startMessageStreaming(args: { clientInboxId: InboxId }) {
+  const { clientInboxId } = args
 
   try {
     await streamAllMessages({
-      account,
-      onNewMessage: (message) => handleNewMessage({ account, message }),
+      inboxId: clientInboxId,
+      onNewMessage: (message) => handleNewMessage({ clientInboxId, message }),
     })
   } catch (error) {
     throw new StreamError({
       error,
-      additionalMessage: `Failed to stream messages for ${account}`,
+      additionalMessage: `Failed to stream messages for ${clientInboxId}`,
     })
   }
 }
 
-async function handleNewMessage(args: { account: string; message: IXmtpDecodedMessage }) {
-  const { account, message } = args
+async function handleNewMessage(args: { clientInboxId: InboxId; message: IXmtpDecodedMessage }) {
+  const { clientInboxId, message } = args
 
   streamLogger.debug(`[handleNewMessage] message: ${JSON.stringify(message)}`)
 
   if (message.contentTypeId.includes("group_updated")) {
     try {
       handleNewGroupUpdatedMessage({
-        account,
+        inboxId: clientInboxId,
         topic: message.topic,
         message,
       })
@@ -44,7 +44,7 @@ async function handleNewMessage(args: { account: string; message: IXmtpDecodedMe
 
   try {
     addConversationMessageQuery({
-      account,
+      clientInboxId,
       topic: message.topic as ConversationTopic,
       message,
     })
@@ -54,7 +54,7 @@ async function handleNewMessage(args: { account: string; message: IXmtpDecodedMe
 
   try {
     updateConversationQueryData({
-      account,
+      inboxId: clientInboxId,
       topic: message.topic as ConversationTopic,
       conversationUpdate: {
         lastMessage: message,
@@ -66,7 +66,7 @@ async function handleNewMessage(args: { account: string; message: IXmtpDecodedMe
 
   try {
     updateConversationInAllowedConsentConversationsQueryData({
-      account,
+      inboxId: clientInboxId,
       topic: message.topic as ConversationTopic,
       conversationUpdate: {
         lastMessage: message,
@@ -79,18 +79,18 @@ async function handleNewMessage(args: { account: string; message: IXmtpDecodedMe
 
 const METADATA_FIELD_MAP = {
   group_name: "name",
-  group_image_url_square: "imageUrlSquare",
+  group_image_url_square: "groupImageUrl",
   description: "description",
 } as const
 
 type MetadataField = keyof typeof METADATA_FIELD_MAP
 
 function handleNewGroupUpdatedMessage(args: {
-  account: string
+  inboxId: InboxId
   topic: ConversationTopic
   message: IXmtpDecodedMessage
 }) {
-  const { account, topic, message } = args
+  const { inboxId, topic, message } = args
 
   // Early return if not a group update message
   if (!message.contentTypeId.includes("group_updated")) return
@@ -98,7 +98,7 @@ function handleNewGroupUpdatedMessage(args: {
 
   // Handle member changes by refetching the group members
   if (content.membersAdded.length > 0 || content.membersRemoved.length > 0) {
-    refetchGroupMembersQuery({ account, topic }).catch(captureError)
+    refetchGroupMembersQuery({ clientInboxId: inboxId, topic }).catch(captureError)
     return
   }
 
@@ -120,13 +120,13 @@ function handleNewGroupUpdatedMessage(args: {
 
         // Update both the individual conversation and conversations list queries
         updateConversationQueryData({
-          account,
+          inboxId,
           topic,
           conversationUpdate: update,
         })
 
         updateConversationInAllowedConsentConversationsQueryData({
-          account,
+          inboxId,
           topic,
           conversationUpdate: update,
         })

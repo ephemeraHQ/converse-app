@@ -32,7 +32,7 @@ export const ConversationListItemGroup = memo(function ConversationListItemGroup
   useFocusRerender()
 
   const { data: group } = useGroupQuery({
-    account: currentAccount,
+    inboxId: currentAccount,
     topic: conversationTopic,
   })
 

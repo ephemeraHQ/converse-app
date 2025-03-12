@@ -78,26 +78,26 @@ export const MemberDetailsBottomSheet = memo(function MemberDetailsBottomSheet()
       member: targetGroupMember,
     })
 
-  const { mutateAsync: promoteToAdmin } = usePromoteToAdminMutation(
-    currentSender.ethereumAddress,
-    groupTopic,
-  )
-  const { mutateAsync: promoteToSuperAdmin } = usePromoteToSuperAdminMutation(
-    currentSender.ethereumAddress,
-    groupTopic,
-  )
-  const { mutateAsync: revokeSuperAdmin } = useRevokeSuperAdminMutation(
-    currentSender.ethereumAddress,
-    groupTopic,
-  )
-  const { mutateAsync: revokeAdmin } = useRevokeAdminMutation(
-    currentSender.ethereumAddress,
-    groupTopic,
-  )
-  const { mutateAsync: removeMember } = useRemoveGroupMembersFromGroupMutation(
-    currentSender.ethereumAddress,
-    groupTopic,
-  )
+  const { mutateAsync: promoteToAdmin } = usePromoteToAdminMutation({
+    clientInboxId: currentSender.inboxId,
+    topic: groupTopic,
+  })
+  const { mutateAsync: promoteToSuperAdmin } = usePromoteToSuperAdminMutation({
+    clientInboxId: currentSender.inboxId,
+    topic: groupTopic,
+  })
+  const { mutateAsync: revokeSuperAdmin } = useRevokeSuperAdminMutation({
+    clientInboxId: currentSender.inboxId,
+    topic: groupTopic,
+  })
+  const { mutateAsync: revokeAdmin } = useRevokeAdminMutation({
+    clientInboxId: currentSender.inboxId,
+    topic: groupTopic,
+  })
+  const { mutateAsync: removeMember } = useRemoveGroupMembersFromGroupMutation({
+    clientInboxId: currentSender.inboxId,
+    topic: groupTopic,
+  })
 
   const handleViewProfilePress = useCallback(() => {
     closeMemberDetailsBottomSheet()

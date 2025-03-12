@@ -9960,9 +9960,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@xmtp/react-native-sdk@npm:^3.1.17":
-  version: 3.1.17
-  resolution: "@xmtp/react-native-sdk@npm:3.1.17"
+"@xmtp/react-native-sdk@npm:^4.0.0-rc1":
+  version: 4.0.0-rc1
+  resolution: "@xmtp/react-native-sdk@npm:4.0.0-rc1"
   dependencies:
     "@changesets/changelog-git": "npm:^0.2.0"
     "@changesets/cli": "npm:^2.27.10"
@@ -9976,7 +9976,7 @@ __metadata:
     expo: "*"
     react: "*"
     react-native: "*"
-  checksum: 10c0/e875c9ece8995871514694c1592d3755ecbb688a1e340d4b5f2a637134071aad9c29699de8312d5ea8ff7f38b7e6c62c2abe6ae83928b6a6c788ebfcd218de82
+  checksum: 10c0/d858ca915ad5e7c85964021ccbf62df0d7e0e12b6f9484ec18c2207aab9b9da83cd619a234a788fd8b38eee79f8fc000a1ff4a599e81a562ae12519310bc169b
   languageName: node
   linkType: hard
 
@@ -12084,7 +12084,7 @@ __metadata:
     "@walletconnect/react-native-compat": "npm:^2.19.0"
     "@welldone-software/why-did-you-render": "npm:^8.0.3"
     "@xmtp/content-type-primitives": "npm:^2.0.0"
-    "@xmtp/react-native-sdk": "npm:^3.1.17"
+    "@xmtp/react-native-sdk": "npm:^4.0.0-rc1"
     "@xstate/react": "npm:^5.0.0"
     "@yornaath/batshit": "npm:^0.10.1"
     alchemy-sdk: "npm:^3.4.4"

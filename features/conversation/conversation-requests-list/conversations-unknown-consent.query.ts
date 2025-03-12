@@ -1,8 +1,8 @@
 import { queryOptions, skipToken } from "@tanstack/react-query"
-import { ConversationTopic } from "@xmtp/react-native-sdk"
+import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk"
 import { ensureConversationSyncAllQuery } from "@/features/conversation/queries/conversation-sync-all.query"
 import { setConversationQueryData } from "@/features/conversation/queries/conversation.query"
-import { getXmtpClientByEthAddress } from "@/features/xmtp/xmtp-client/xmtp-client.service"
+import { getXmtpClientByInboxId } from "@/features/xmtp/xmtp-client/xmtp-client.service"
 import { IXmtpConversationWithCodecs } from "@/features/xmtp/xmtp.types"
 import { unknownConsentConversationsQueryKey } from "@/queries/QueryKeys"
 import logger from "@/utils/logger"
@@ -11,20 +11,20 @@ import { reactQueryClient } from "../../../utils/react-query/react-query.client"
 
 export type IUnknownConversationsQuery = Awaited<ReturnType<typeof getUnknownConversations>>
 
-async function getUnknownConversations(args: { account: string }) {
-  const { account } = args
+async function getUnknownConversations(args: { inboxId: InboxId }) {
+  const { inboxId } = args
 
-  if (!account) {
-    throw new Error("Account is required")
+  if (!inboxId) {
+    throw new Error("InboxId is required")
   }
 
   await ensureConversationSyncAllQuery({
-    ethAddress: account,
+    clientInboxId: inboxId,
     consentStates: ["unknown"],
   })
 
-  const client = await getXmtpClientByEthAddress({
-    ethAddress: account,
+  const client = await getXmtpClientByInboxId({
+    inboxId,
   })
 
   const conversations = await client.conversations.list(
@@ -32,7 +32,7 @@ async function getUnknownConversations(args: { account: string }) {
       isActive: true,
       addedByInboxId: true,
       name: true,
-      imageUrlSquare: true,
+      imageUrl: true,
       consentState: true,
       lastMessage: true,
       description: true,
@@ -44,7 +44,7 @@ async function getUnknownConversations(args: { account: string }) {
   // For now conversations have all the same properties as one conversation
   for (const conversation of conversations) {
     setConversationQueryData({
-      account,
+      inboxId,
       topic: conversation.topic,
       conversation,
     })
@@ -53,23 +53,23 @@ async function getUnknownConversations(args: { account: string }) {
   return conversations
 }
 
-export const prefetchUnknownConsentConversationsQuery = (args: { account: string }) => {
+export const prefetchUnknownConsentConversationsQuery = (args: { inboxId: InboxId }) => {
   return reactQueryClient.prefetchQuery(getUnknownConsentConversationsQueryOptions(args))
 }
 
 export const addConversationToUnknownConsentConversationsQuery = (args: {
-  account: string
+  inboxId: InboxId
   conversation: IXmtpConversationWithCodecs
 }) => {
-  const { account, conversation } = args
+  const { inboxId, conversation } = args
 
   const previousConversationsData = getUnknownConsentConversationsQueryData({
-    account,
+    inboxId,
   })
 
   if (!previousConversationsData) {
     reactQueryClient.setQueryData<IUnknownConversationsQuery>(
-      getUnknownConsentConversationsQueryOptions({ account }).queryKey,
+      getUnknownConsentConversationsQueryOptions({ inboxId }).queryKey,
       [conversation],
     )
     return
@@ -82,30 +82,30 @@ export const addConversationToUnknownConsentConversationsQuery = (args: {
   }
 
   reactQueryClient.setQueryData<IUnknownConversationsQuery>(
-    getUnknownConsentConversationsQueryOptions({ account }).queryKey,
+    getUnknownConsentConversationsQueryOptions({ inboxId }).queryKey,
     [conversation, ...previousConversationsData],
   )
 }
 
-export const getUnknownConsentConversationsQueryData = (args: { account: string }) => {
+export const getUnknownConsentConversationsQueryData = (args: { inboxId: InboxId }) => {
   return reactQueryClient.getQueryData<IUnknownConversationsQuery>(
     getUnknownConsentConversationsQueryOptions(args).queryKey,
   )
 }
 
 export const updateConversationInUnknownConsentConversationsQueryData = (args: {
-  account: string
+  inboxId: InboxId
   topic: ConversationTopic
   conversationUpdate: Partial<IXmtpConversationWithCodecs>
 }) => {
-  const { account, topic, conversationUpdate } = args
+  const { inboxId, topic, conversationUpdate } = args
 
   logger.debug(
-    `[UnknownConversationsQuery] updateConversationInUnknownConsentConversationsQueryData for account ${account} and topic ${topic}`,
+    `[UnknownConversationsQuery] updateConversationInUnknownConsentConversationsQueryData for inboxId ${inboxId} and topic ${topic}`,
   )
 
   const previousConversationsData = getUnknownConsentConversationsQueryData({
-    account,
+    inboxId,
   })
   if (!previousConversationsData) {
     return
@@ -119,24 +119,24 @@ export const updateConversationInUnknownConsentConversationsQueryData = (args: {
 
   reactQueryClient.setQueryData<IUnknownConversationsQuery>(
     getUnknownConsentConversationsQueryOptions({
-      account,
+      inboxId,
     }).queryKey,
     newConversations,
   )
 }
 
 export const removeConversationFromUnknownConsentConversationsQueryData = (args: {
-  account: string
+  inboxId: InboxId
   topic: ConversationTopic
 }) => {
-  const { account, topic } = args
+  const { inboxId, topic } = args
 
   logger.debug(
-    `[UnknownConversationsQuery] removeConversationFromUnknownConsentConversationsQueryData for account ${account} and topic ${topic}`,
+    `[UnknownConversationsQuery] removeConversationFromUnknownConsentConversationsQueryData for inboxId ${inboxId} and topic ${topic}`,
   )
 
   const previousConversationsData = getUnknownConsentConversationsQueryData({
-    account,
+    inboxId,
   })
 
   if (!previousConversationsData) {
@@ -148,31 +148,30 @@ export const removeConversationFromUnknownConsentConversationsQueryData = (args:
   )
 
   reactQueryClient.setQueryData<IUnknownConversationsQuery>(
-    getUnknownConsentConversationsQueryOptions({ account }).queryKey,
+    getUnknownConsentConversationsQueryOptions({ inboxId }).queryKey,
     newConversations,
   )
 }
 
 export function getUnknownConsentConversationsQueryOptions(args: {
-  account: string
+  inboxId: InboxId
   caller?: string
 }) {
-  const { account, caller } = args
+  const { inboxId, caller } = args
 
-  const enabled = !!account
+  const enabled = !!inboxId
 
   return queryOptions({
     enabled,
     meta: {
       caller,
     },
-    queryKey: unknownConsentConversationsQueryKey(account),
+    queryKey: unknownConsentConversationsQueryKey(inboxId),
     queryFn: enabled
       ? async () =>
           getUnknownConversations({
-            account,
+            inboxId,
           })
       : skipToken,
-    refetchOnMount: true, // Just for now to make sure we always have the lastest conversations
   })
 }

@@ -1,7 +1,7 @@
 import { ConversationTopic } from "@xmtp/react-native-sdk"
 import { memo } from "react"
 import { GroupAvatar } from "@/components/group-avatar"
-import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
+import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { useGroupName } from "@/features/groups/hooks/use-group-name"
 import { useGroupMembersQuery } from "@/features/groups/useGroupMembersQuery"
 import { usePreferredDisplayInfoBatch } from "@/features/preferred-display-info/use-preferred-display-info-batch"
@@ -14,9 +14,11 @@ export const SearchUsersResultsListItemGroup = memo(
   }) {
     const { conversationTopic, onPress } = props
 
+    const currentSender = useSafeCurrentSender()
+
     const { data: members } = useGroupMembersQuery({
       caller: "SearchUsersResultsListItemGroup",
-      account: getSafeCurrentSender().ethereumAddress,
+      clientInboxId: currentSender.inboxId,
       topic: conversationTopic,
     })
 

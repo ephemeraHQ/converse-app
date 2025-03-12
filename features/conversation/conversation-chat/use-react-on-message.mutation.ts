@@ -6,10 +6,7 @@ import {
   ReactionContent,
 } from "@xmtp/react-native-sdk"
 import { useCallback } from "react"
-import {
-  getCurrentSenderEthAddress,
-  getSafeCurrentSender,
-} from "@/features/authentication/multi-inbox.store"
+import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import {
   addConversationMessageQuery,
   refetchConversationMessages,
@@ -36,14 +33,13 @@ export function useReactOnMessage(props: { topic: ConversationTopic }) {
       })
     },
     onMutate: (variables) => {
-      const { ethereumAddress: currentEthereumAddress, inboxId: currentInboxId } =
-        getSafeCurrentSender()
+      const currentSender = getSafeCurrentSender()
       const conversation = getConversationForCurrentAccount(topic)
 
       if (conversation) {
         // Add the reaction to the message
         addConversationMessageQuery({
-          account: currentEthereumAddress,
+          clientInboxId: currentSender.inboxId,
           topic: conversation.topic,
           message: {
             id: getRandomId() as MessageId,
@@ -52,7 +48,7 @@ export function useReactOnMessage(props: { topic: ConversationTopic }) {
             fallback: variables.reaction.content,
             deliveryStatus: MessageDeliveryStatus.PUBLISHED,
             topic: conversation.topic,
-            senderInboxId: currentInboxId,
+            senderInboxId: currentSender.inboxId,
             nativeContent: {},
             content: () => {
               return variables.reaction
@@ -62,9 +58,9 @@ export function useReactOnMessage(props: { topic: ConversationTopic }) {
       }
     },
     onError: (error) => {
-      const currentAccount = getCurrentSenderEthAddress()!
+      const currentSender = getSafeCurrentSender()
       refetchConversationMessages({
-        account: currentAccount,
+        clientInboxId: currentSender.inboxId,
         topic,
         caller: "useReactOnMessage mutation onError",
       }).catch(captureErrorWithToast)

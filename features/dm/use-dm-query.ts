@@ -19,14 +19,14 @@ async function getDm(args: IDmQueryArgs) {
   const { ethAccountAddress: ethAccountAddress, inboxId } = args
 
   const conversation = await getXmtpDmByInboxId({
-    ethAccountAddress,
+    clientInboxId: ethAccountAddress,
     inboxId,
   })
 
   if (conversation) {
     // Update the main conversation query because it's a 1-1
     setConversationQueryData({
-      account: ethAccountAddress,
+      inboxId: ethAccountAddress,
       topic: conversation.topic,
       conversation,
     })
@@ -51,7 +51,7 @@ export function setDmQueryData(args: IDmQueryArgs & { dm: IDmQueryData }) {
   // Update the main conversation query because it's a 1-1
   if (dm) {
     setConversationQueryData({
-      account: ethAccountAddress,
+      inboxId: ethAccountAddress,
       topic: dm.topic,
       conversation: dm,
     })

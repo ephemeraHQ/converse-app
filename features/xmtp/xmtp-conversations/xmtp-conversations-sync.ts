@@ -1,12 +1,18 @@
-import { ConsentState, Conversation } from "@xmtp/react-native-sdk"
+import { ConsentState, Conversation, InboxId } from "@xmtp/react-native-sdk"
+import { config } from "@/config"
 import { captureError } from "@/utils/capture-error"
 import { XMTPError } from "@/utils/error"
-import { getXmtpClientByEthAddress } from "../xmtp-client/xmtp-client.service"
+import { getXmtpClientByInboxId } from "../xmtp-client/xmtp-client.service"
 
-export async function syncAllConversations(ethAddress: string, consentStates: ConsentState[]) {
+export async function syncAllConversations(args: {
+  clientInboxId: InboxId
+  consentStates: ConsentState[]
+}) {
+  const { clientInboxId, consentStates } = args
+
   try {
-    const client = await getXmtpClientByEthAddress({
-      ethAddress: ethAddress,
+    const client = await getXmtpClientByInboxId({
+      inboxId: clientInboxId,
     })
 
     const beforeSync = new Date().getTime()
@@ -14,11 +20,11 @@ export async function syncAllConversations(ethAddress: string, consentStates: Co
     const afterSync = new Date().getTime()
 
     const timeDiff = afterSync - beforeSync
-    if (timeDiff > 3000) {
+    if (timeDiff > config.xmtp.maxMsUntilLogError) {
       captureError(
         new XMTPError({
           error: new Error(
-            `Syncing conversations from network took ${timeDiff}ms for account ${ethAddress}`,
+            `Syncing conversations from network took ${timeDiff}ms for inboxId ${clientInboxId}`,
           ),
         }),
       )
@@ -26,7 +32,7 @@ export async function syncAllConversations(ethAddress: string, consentStates: Co
   } catch (error) {
     throw new XMTPError({
       error,
-      additionalMessage: `Error syncing all conversations for account ${ethAddress} and consent states ${consentStates.map((c) => c.toString()).join(", ")}`,
+      additionalMessage: `Error syncing all conversations for inboxId ${clientInboxId} and consent states ${consentStates.map((c) => c.toString()).join(", ")}`,
     })
   }
 }
@@ -40,7 +46,7 @@ export async function syncConversation(args: { conversation: Conversation }) {
     const afterSync = new Date().getTime()
 
     const timeDiff = afterSync - beforeSync
-    if (timeDiff > 3000) {
+    if (timeDiff > config.xmtp.maxMsUntilLogError) {
       captureError(
         new XMTPError({
           error: new Error(

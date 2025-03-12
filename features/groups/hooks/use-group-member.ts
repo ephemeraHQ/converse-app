@@ -11,7 +11,7 @@ export function useGroupMember(args: {
   const currentSender = useSafeCurrentSender()
 
   const { data: members, isLoading: isLoadingMembers } = useGroupMembersQuery({
-    account: currentSender.ethereumAddress,
+    clientInboxId: currentSender.inboxId,
     topic,
     caller: "useGroupMember",
   })

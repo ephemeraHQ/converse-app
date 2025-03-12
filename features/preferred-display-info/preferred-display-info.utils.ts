@@ -48,7 +48,7 @@ export function getPreferredEthAddress(args: {
   profile: Nullable<IConvosProfileForInbox>
   socialProfiles: Nullable<ISocialProfile[]>
   ethAddress: Nullable<IEthereumAddress>
-}): IEthereumAddress | undefined {
+}): Nullable<IEthereumAddress> {
   const { profile, socialProfiles, ethAddress } = args
 
   return (

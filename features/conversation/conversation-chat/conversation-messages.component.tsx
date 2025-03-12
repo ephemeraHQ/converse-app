@@ -40,8 +40,7 @@ export const ConversationMessages = memo(function ConversationMessages(props: {
 }) {
   const { conversation } = props
 
-  const { ethereumAddress: currentSenderEthAddress, inboxId: currentAccountInboxId } =
-    useSafeCurrentSender()
+  const currentSender = useSafeCurrentSender()
 
   const topic = useCurrentConversationTopic()!
 
@@ -53,7 +52,7 @@ export const ConversationMessages = memo(function ConversationMessages(props: {
     isRefetching: isRefetchingMessages,
     refetch: refetchMessages,
   } = useConversationMessagesQuery({
-    account: currentSenderEthAddress,
+    clientInboxId: currentSender.inboxId,
     topic,
     caller: "Conversation Messages",
   })
@@ -62,9 +61,9 @@ export const ConversationMessages = memo(function ConversationMessages(props: {
     return messages?.ids?.find(
       (messageId) =>
         isAnActualMessage(messages.byId[messageId]) &&
-        messages.byId[messageId].senderInboxId === currentAccountInboxId,
+        messages.byId[messageId].senderInboxId === currentSender.inboxId,
     )
-  }, [messages?.ids, messages?.byId, currentAccountInboxId])
+  }, [messages?.ids, messages?.byId, currentSender.inboxId])
 
   const { isUnread } = useConversationIsUnread({
     topic,

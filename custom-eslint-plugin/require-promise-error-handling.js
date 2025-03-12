@@ -13,25 +13,81 @@ module.exports = {
     },
   },
   create(context) {
+    // Get the file extension
+    const filename = context.getFilename()
+    const isTsxFile = filename.endsWith(".tsx")
+
     // Track if we're inside a React component
     let insideComponent = false
     // Track if we're inside a try block
     let insideTryBlock = 0
 
+    // Helper to check if a node is a React component
+    function isReactComponent(node) {
+      // Check for JSX in the function body
+      const hasJSX =
+        node.body &&
+        (node.body.type === "JSXElement" ||
+          (node.body.type === "BlockStatement" &&
+            node.body.body.some(
+              (n) =>
+                n.type === "ReturnStatement" &&
+                n.argument &&
+                (n.argument.type === "JSXElement" || n.argument.type === "JSXFragment"),
+            )))
+
+      // Check for React hooks usage
+      const hasHooks =
+        node.body &&
+        node.body.type === "BlockStatement" &&
+        node.body.body.some(
+          (n) =>
+            n.type === "VariableDeclaration" &&
+            n.declarations.some(
+              (d) =>
+                d.init &&
+                d.init.type === "CallExpression" &&
+                d.init.callee.name &&
+                (d.init.callee.name.startsWith("use") || d.init.callee.name === "memo"),
+            ),
+        )
+
+      return hasJSX || hasHooks
+    }
+
     return {
       // Detect React component function declarations
-      "FunctionDeclaration[id.name=/[A-Z].*/]"(node) {
-        insideComponent = true
+      FunctionDeclaration(node) {
+        if (isTsxFile && isReactComponent(node)) {
+          insideComponent = true
+        }
       },
       // Detect React component arrow functions
-      "VariableDeclarator[id.name=/[A-Z].*/] > ArrowFunctionExpression"(node) {
-        insideComponent = true
+      ArrowFunctionExpression(node) {
+        if (isTsxFile && isReactComponent(node)) {
+          insideComponent = true
+        }
+      },
+      // Detect memo wrapped components
+      "CallExpression[callee.name='memo']"(node) {
+        if (isTsxFile) {
+          insideComponent = true
+        }
       },
       "FunctionDeclaration:exit"(node) {
-        insideComponent = false
+        if (isTsxFile && isReactComponent(node)) {
+          insideComponent = false
+        }
       },
       "ArrowFunctionExpression:exit"(node) {
-        insideComponent = false
+        if (isTsxFile && isReactComponent(node)) {
+          insideComponent = false
+        }
+      },
+      "CallExpression[callee.name='memo']:exit"(node) {
+        if (isTsxFile) {
+          insideComponent = false
+        }
       },
       // Track try blocks
       TryStatement(node) {
@@ -42,7 +98,7 @@ module.exports = {
       },
       // Check await expressions
       AwaitExpression(node) {
-        if (!insideComponent) return
+        if (!isTsxFile || !insideComponent) return
 
         // Skip if we're inside a try block
         if (insideTryBlock > 0) return
@@ -61,7 +117,7 @@ module.exports = {
       },
       // Check Promise.then() calls
       "CallExpression[callee.property.name='then']"(node) {
-        if (!insideComponent) return
+        if (!isTsxFile || !insideComponent) return
 
         // Skip if we're inside a try block
         if (insideTryBlock > 0) return

@@ -17,10 +17,10 @@ export async function searchExistingGroupsByGroupMembers(args: {
 }) {
   const { searchQuery, searcherInboxId } = args
 
-  const currentAccount = getSafeCurrentSender().ethereumAddress
+  const currentSender = getSafeCurrentSender()
 
   const conversations = getAllowedConsentConversationsQueryData({
-    account: currentAccount,
+    inboxId: currentSender.inboxId,
   })
 
   if (!conversations || !searchQuery) {
@@ -34,7 +34,7 @@ export async function searchExistingGroupsByGroupMembers(args: {
       try {
         const members = await ensureGroupMembersQueryData({
           caller: "searchExistingGroupsByGroupMembers",
-          account: currentAccount,
+          clientInboxId: currentSender.inboxId,
           topic: group.topic,
         })
 

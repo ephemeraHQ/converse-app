@@ -1,10 +1,9 @@
-import type { ConversationTopic } from "@xmtp/react-native-sdk"
+import type { ConversationTopic, InboxId } from "@xmtp/react-native-sdk"
 import { z } from "zod"
-import { getOrFetchConversation } from "@/features/conversation/queries/conversation.query"
+import { getConversationIdFromTopic } from "@/features/conversation/utils/get-conversation-id-from-topic"
 import { getCurrentUserQueryData } from "@/features/current-user/curent-user.query"
 import { api } from "@/utils/api/api"
 import { captureError } from "@/utils/capture-error"
-import { enhanceError } from "@/utils/error"
 
 const ConversationMetadataSchema = z.object({
   deleted: z.boolean(),
@@ -44,15 +43,17 @@ export type IConversationMetadata = z.infer<typeof ConversationMetadataSchema>
 //   return data as Record<string, IConversationMetadata>;
 // }
 
-export async function getConversationMetadata(args: { account: string; topic: ConversationTopic }) {
-  const { account, topic } = args
-  const conversationId = await getConversationId({ account, topic })
+export async function getConversationMetadata(args: { topic: ConversationTopic }) {
+  const { topic } = args
+
+  const conversationId = await getConversationId({ topic })
 
   const { data } = await api.get<IConversationMetadata>(
     `/api/v1/metadata/conversation/${conversationId}`,
   )
 
   const parseResult = ConversationMetadataSchema.safeParse(data)
+
   if (!parseResult.success) {
     captureError(
       new Error(
@@ -64,13 +65,13 @@ export async function getConversationMetadata(args: { account: string; topic: Co
   return data
 }
 
-export async function markConversationAsRead(args: {
-  account: string
+export async function markConversationMetadataAsRead(args: {
+  clientInboxId: InboxId
   topic: ConversationTopic
   readUntil: string
 }) {
   return updateConversationMetadata({
-    account: args.account,
+    clientInboxId: args.clientInboxId,
     topic: args.topic,
     updates: {
       unread: false,
@@ -79,12 +80,12 @@ export async function markConversationAsRead(args: {
   })
 }
 
-export async function markConversationAsUnread(args: {
-  account: string
+export async function markConversationMetadataAsUnread(args: {
+  clientInboxId: InboxId
   topic: ConversationTopic
 }) {
   return updateConversationMetadata({
-    account: args.account,
+    clientInboxId: args.clientInboxId,
     topic: args.topic,
     updates: {
       unread: true,
@@ -92,9 +93,12 @@ export async function markConversationAsUnread(args: {
   })
 }
 
-export async function pinConversation(args: { account: string; topic: ConversationTopic }) {
+export async function pinConversationMetadata(args: {
+  clientInboxId: InboxId
+  topic: ConversationTopic
+}) {
   return updateConversationMetadata({
-    account: args.account,
+    clientInboxId: args.clientInboxId,
     topic: args.topic,
     updates: {
       pinned: true,
@@ -102,9 +106,12 @@ export async function pinConversation(args: { account: string; topic: Conversati
   })
 }
 
-export async function unpinConversation(args: { account: string; topic: ConversationTopic }) {
+export async function unpinConversationMetadata(args: {
+  clientInboxId: InboxId
+  topic: ConversationTopic
+}) {
   return updateConversationMetadata({
-    account: args.account,
+    clientInboxId: args.clientInboxId,
     topic: args.topic,
     updates: {
       pinned: false,
@@ -112,9 +119,12 @@ export async function unpinConversation(args: { account: string; topic: Conversa
   })
 }
 
-export async function restoreConversation(args: { account: string; topic: ConversationTopic }) {
+export async function restoreConversationMetadata(args: {
+  clientInboxId: InboxId
+  topic: ConversationTopic
+}) {
   return updateConversationMetadata({
-    account: args.account,
+    clientInboxId: args.clientInboxId,
     topic: args.topic,
     updates: {
       deleted: false,
@@ -122,9 +132,12 @@ export async function restoreConversation(args: { account: string; topic: Conver
   })
 }
 
-export async function deleteConversation(args: { account: string; topic: ConversationTopic }) {
+export async function deleteConversationMetadata(args: {
+  clientInboxId: InboxId
+  topic: ConversationTopic
+}) {
   return updateConversationMetadata({
-    account: args.account,
+    clientInboxId: args.clientInboxId,
     topic: args.topic,
     updates: {
       deleted: true,
@@ -135,23 +148,21 @@ export async function deleteConversation(args: { account: string; topic: Convers
 /**
  * Helper functions
  */
-async function getConversationId(args: { account: string; topic: ConversationTopic }) {
-  const conversation = await getOrFetchConversation({
-    account: args.account,
-    topic: args.topic,
-    caller: "conversation-metadata.api",
-  })
+async function getConversationId(args: { topic: ConversationTopic }) {
+  const { topic } = args
 
-  if (!conversation) {
-    throw new Error(`Conversation not found for topic: ${args.topic}`)
+  const conversationId = getConversationIdFromTopic(topic)
+
+  if (!conversationId) {
+    throw new Error(`Conversation ID not found for topic: ${topic}`)
   }
 
-  return conversation.id
+  return conversationId
 }
 
 async function updateConversationMetadata(args: {
-  account: string
   topic: ConversationTopic
+  clientInboxId: InboxId
   updates: {
     pinned?: boolean
     unread?: boolean
@@ -159,9 +170,9 @@ async function updateConversationMetadata(args: {
     readUntil?: string
   }
 }) {
-  const { account, topic, updates } = args
+  const { topic, clientInboxId, updates } = args
 
-  const conversationId = await getConversationId({ account, topic })
+  const conversationId = await getConversationId({ topic })
 
   const currentUser = getCurrentUserQueryData()
 
@@ -171,7 +182,7 @@ async function updateConversationMetadata(args: {
 
   const { data } = await api.post<IConversationMetadata>(`/api/v1/metadata/conversation`, {
     conversationId,
-    deviceIdentityId: currentUser.identities.find((identity) => identity.privyAddress === account)
+    deviceIdentityId: currentUser.identities.find((identity) => identity.xmtpId === clientInboxId)
       ?.id,
     ...updates,
   })

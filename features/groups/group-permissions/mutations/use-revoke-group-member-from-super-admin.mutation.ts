@@ -12,8 +12,13 @@ import {
 
 // import { refreshGroup } from "../utils/xmtpRN/conversations";
 
-export const useRevokeSuperAdminMutation = (account: string, topic: ConversationTopic) => {
-  const { data: group } = useGroupQuery({ account, topic })
+export const useRevokeSuperAdminMutation = (args: {
+  clientInboxId: InboxId
+  topic: ConversationTopic
+}) => {
+  const { clientInboxId, topic } = args
+
+  const { data: group } = useGroupQuery({ inboxId: clientInboxId, topic })
 
   return useMutation({
     mutationFn: async (inboxId: InboxId) => {
@@ -27,10 +32,10 @@ export const useRevokeSuperAdminMutation = (account: string, topic: Conversation
         return
       }
 
-      cancelGroupMembersQuery({ account, topic }).catch(captureError)
+      cancelGroupMembersQuery({ clientInboxId: inboxId, topic }).catch(captureError)
 
       const previousGroupMembers = getGroupMembersQueryData({
-        account,
+        clientInboxId: inboxId,
         topic,
       })
       if (!previousGroupMembers) {
@@ -44,7 +49,7 @@ export const useRevokeSuperAdminMutation = (account: string, topic: Conversation
 
       newMembers.byId[inboxId].permission = "member"
       setGroupMembersQueryData({
-        account,
+        clientInboxId: inboxId,
         topic,
         members: newMembers,
       })
@@ -57,13 +62,13 @@ export const useRevokeSuperAdminMutation = (account: string, topic: Conversation
       }
 
       setGroupMembersQueryData({
-        account,
+        clientInboxId: clientInboxId,
         topic,
         members: context.previousGroupMembers,
       })
     },
     onSuccess: () => {
-      invalidateGroupMembersQuery({ account, topic }).catch(captureError)
+      invalidateGroupMembersQuery({ clientInboxId: clientInboxId, topic }).catch(captureError)
     },
   })
 }
