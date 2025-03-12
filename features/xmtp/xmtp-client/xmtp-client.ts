@@ -15,7 +15,7 @@ export async function createXmtpClientInstance(args: {
   const { inboxSigner } = args
   const startTime = Date.now()
 
-  xmtpLogger.debug(`Creating new XMTP client`)
+  xmtpLogger.debug(`Creating XMTP client instance`)
 
   try {
     const client = await XmtpClient.create<ISupportedXmtpCodecs>(inboxSigner, {
@@ -53,9 +53,6 @@ export async function buildXmtpClientInstance(args: {
   const startTime = Date.now()
 
   const identity = new PublicIdentity(ethereumAddress, "ETHEREUM")
-
-  console.log("identity:", identity.kind)
-  console.log("identity:", identity.identifier)
 
   try {
     const client = await XmtpClient.build<ISupportedXmtpCodecs>(

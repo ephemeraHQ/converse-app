@@ -117,15 +117,10 @@ export const AuthOnboardingContextProvider = (props: IAuthOnboardingContextProps
 
       // Step 3: XMTP Inbox client
       const signer = createXmtpSignerFromSwc(swcClient)
-      const { data: xmtpClient, error: xmtpError } = await tryCatch(
-        createXmtpClient({
-          inboxSigner: signer,
-        }),
-      )
-
-      if (xmtpError) {
-        throw xmtpError
-      }
+      console.log("swcClient.account.address:", swcClient.account.address)
+      const xmtpClient = await createXmtpClient({
+        inboxSigner: signer,
+      })
 
       if (!xmtpClient) {
         throw new Error("XMTP client creation failed")

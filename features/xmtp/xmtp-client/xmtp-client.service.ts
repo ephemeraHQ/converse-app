@@ -1,6 +1,12 @@
-import { IXmtpInboxId , IXmtpSigner } from "@features/xmtp/xmtp.types"
+import { IXmtpInboxId, IXmtpSigner } from "@features/xmtp/xmtp.types"
+import { Client, PublicIdentity } from "@xmtp/react-native-sdk"
+import { config } from "@/config"
 import { useMultiInboxStore } from "@/features/authentication/multi-inbox.store"
-import { createXmtpClientInstance } from "@/features/xmtp/xmtp-client/xmtp-client"
+import {
+  createXmtpClientInstance,
+  getDbEncryptionKey,
+} from "@/features/xmtp/xmtp-client/xmtp-client"
+import { ISupportedXmtpCodecs, supportedXmtpCodecs } from "@/features/xmtp/xmtp-codecs/xmtp-codecs"
 import { xmtpIdentityIsEthereumAddress } from "@/features/xmtp/xmtp-identifier/xmtp-identifier"
 import { validateClientInstallation } from "@/features/xmtp/xmtp-installations/xmtp-installations"
 import { IEthereumAddress } from "@/utils/evm/address"
@@ -14,16 +20,14 @@ export async function getXmtpClientByEthAddress(args: { ethAddress: IEthereumAdd
 export async function createXmtpClient(args: { inboxSigner: IXmtpSigner }) {
   const { inboxSigner } = args
 
-  const identifier = await inboxSigner.getIdentifier()
+  const identity = await inboxSigner.getIdentifier()
 
-  if (!xmtpIdentityIsEthereumAddress(identifier)) {
+  if (!xmtpIdentityIsEthereumAddress(identity)) {
     throw new Error("Identifier is not an Ethereum address")
   }
 
-  const ethAddress = identifier.identifier
-
   const client = await createXmtpClientInstance({
-    inboxSigner: args.inboxSigner,
+    inboxSigner,
   })
 
   const isValid = await validateClientInstallation({
@@ -31,7 +35,7 @@ export async function createXmtpClient(args: { inboxSigner: IXmtpSigner }) {
   })
 
   setXmtpClientQueryData({
-    ethAddress,
+    ethAddress: identity.identifier,
     client,
   })
 
@@ -53,3 +57,34 @@ export async function getXmtpClientByInboxId(args: { inboxId: IXmtpInboxId }) {
 
   return getXmtpClientByEthAddress({ ethAddress: sender.ethereumAddress })
 }
+
+async function test() {
+  const client = await Client.create<ISupportedXmtpCodecs>(
+    {
+      getIdentifier: async () =>
+        new PublicIdentity("0x3F11b27F323b62B159D2642964fa27C46C841897", "ETHEREUM"),
+      getChainId: () => 1,
+      getBlockNumber: () => undefined,
+      signerType: () => "EOA",
+      signMessage: async (message: string) => Promise.resolve("0x"),
+    },
+    {
+      env: config.xmtpEnv,
+      dbEncryptionKey: await getDbEncryptionKey(),
+      codecs: supportedXmtpCodecs,
+    },
+  )
+
+  console.log("client:", client)
+
+  // const client = await Client.createRandom({
+  //   env: "local",
+  //   codecs: supportedXmtpCodecs,
+  //   dbEncryptionKey: await getDbEncryptionKey(),
+  // })
+  // console.log("client:", client)
+}
+
+test().catch((error) => {
+  console.log("error:", error)
+})
