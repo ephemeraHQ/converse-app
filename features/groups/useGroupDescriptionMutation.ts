@@ -16,8 +16,8 @@ type IArgs = {
 }
 
 export function useGroupDescriptionMutation(args: IArgs) {
-  const { inboxId: inboxId, topic } = args
-  const { data: group } = useGroupQuery({ inboxId: inboxId, topic })
+  const { inboxId, topic } = args
+  const { data: group } = useGroupQuery({ inboxId, topic })
 
   return useMutation({
     mutationFn: async (description: string) => {
@@ -29,15 +29,15 @@ export function useGroupDescriptionMutation(args: IArgs) {
       return description
     },
     onMutate: async (description: string) => {
-      const previousGroup = getGroupQueryData({ inboxId: inboxId, topic })
+      const previousGroup = getGroupQueryData({ inboxId, topic })
       const updates: Partial<IXmtpGroupWithCodecs> = { groupDescription: description }
 
       if (previousGroup) {
-        updateGroupQueryData({ inboxId: inboxId, topic, updates })
+        updateGroupQueryData({ inboxId, topic, updates })
       }
 
       updateConversationInAllowedConsentConversationsQueryData({
-        inboxId: inboxId,
+        inboxId,
         topic,
         conversationUpdate: updates,
       })
@@ -53,9 +53,9 @@ export function useGroupDescriptionMutation(args: IArgs) {
         groupDescription: previousGroup?.groupDescription ?? "",
       }
 
-      updateGroupQueryData({ inboxId: inboxId, topic, updates })
+      updateGroupQueryData({ inboxId, topic, updates })
       updateConversationInAllowedConsentConversationsQueryData({
-        inboxId: inboxId,
+        inboxId,
         topic,
         conversationUpdate: updates,
       })

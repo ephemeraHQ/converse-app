@@ -26,7 +26,7 @@ export const useDenyGroupMutation = (args: {
         return
       }
       await updateConsentForGroupsForAccount({
-        clientInboxId: clientInboxId,
+        clientInboxId,
         groupIds: [getConversationIdFromTopic(topic)],
         consent: "denied",
       })

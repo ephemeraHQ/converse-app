@@ -35,7 +35,7 @@ async function handleNewConversation(args: {
   clientInboxId: InboxId
   conversation: IXmtpConversationWithCodecs
 }) {
-  const { clientInboxId: clientInboxId, conversation } = args
+  const { clientInboxId, conversation } = args
 
   streamLogger.debug(
     `[Stream] Received new conversation for ${clientInboxId}: ${conversation.topic}`,
@@ -44,7 +44,7 @@ async function handleNewConversation(args: {
   // For some reason, when receiving a new conversation, the group members are not available?
   ensureGroupMembersQueryData({
     caller: "handleNewConversation",
-    clientInboxId: clientInboxId,
+    clientInboxId,
     topic: conversation.topic,
   }).catch(captureError)
 

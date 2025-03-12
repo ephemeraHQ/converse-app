@@ -320,13 +320,13 @@ export function maybeReplaceOptimisticConversationWithReal(args: {
 
   // Now move the messages from the temp conversation to the real conversation
   const messages = getConversationMessagesQueryData({
-    clientInboxId: clientInboxId,
+    clientInboxId,
     topic: tempTopic,
   })
 
   if (messages) {
     setConversationMessagesQueryData({
-      clientInboxId: clientInboxId,
+      clientInboxId,
       topic: realTopic,
       data: messages,
     })

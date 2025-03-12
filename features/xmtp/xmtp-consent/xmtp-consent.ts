@@ -126,7 +126,7 @@ export const updateConsentForGroupsForAccount = async (args: {
   consent: IXmtpConsentState
   clientInboxId: InboxId
 }) => {
-  const { clientInboxId: clientInboxId, groupIds, consent } = args
+  const { clientInboxId, groupIds, consent } = args
   try {
     const client = await getXmtpClientByInboxId({
       inboxId: clientInboxId,

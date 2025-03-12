@@ -14,7 +14,7 @@ export const useRevokeAdminMutation = (args: {
   clientInboxId: InboxId
   topic: ConversationTopic
 }) => {
-  const { clientInboxId: clientInboxId, topic } = args
+  const { clientInboxId, topic } = args
 
   const { data: group } = useGroupQuery({ inboxId: clientInboxId, topic })
 
@@ -60,13 +60,13 @@ export const useRevokeAdminMutation = (args: {
       }
 
       setGroupMembersQueryData({
-        clientInboxId: clientInboxId,
+        clientInboxId,
         topic,
         members: context.previousGroupMembers,
       })
     },
     onSuccess: () => {
-      invalidateGroupMembersQuery({ clientInboxId: clientInboxId, topic }).catch(captureError)
+      invalidateGroupMembersQuery({ clientInboxId, topic }).catch(captureError)
     },
   })
 }

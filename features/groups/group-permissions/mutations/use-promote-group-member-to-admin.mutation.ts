@@ -58,13 +58,13 @@ export const usePromoteToAdminMutation = (args: {
       }
 
       setGroupMembersQueryData({
-        clientInboxId: clientInboxId,
+        clientInboxId,
         topic,
         members: context.previousGroupMembers,
       })
     },
     onSuccess: () => {
-      invalidateGroupMembersQuery({ clientInboxId: clientInboxId, topic }).catch(captureError)
+      invalidateGroupMembersQuery({ clientInboxId, topic }).catch(captureError)
     },
   })
 }

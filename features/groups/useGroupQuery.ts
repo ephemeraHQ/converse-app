@@ -15,10 +15,10 @@ import { isConversationGroup } from "@/features/conversation/utils/is-conversati
 import { IXmtpGroupWithCodecs } from "@/features/xmtp/xmtp.types"
 
 export function useGroupQuery(args: { inboxId: InboxId; topic: ConversationTopic }) {
-  const { inboxId: inboxId, topic } = args
+  const { inboxId, topic } = args
   return useQuery(
     getGroupQueryOptions({
-      inboxId: inboxId,
+      inboxId,
       topic,
     }),
   )
@@ -33,19 +33,19 @@ export function setGroupQueryData(args: {
   topic: ConversationTopic
   group: IXmtpGroupWithCodecs
 }) {
-  const { inboxId: inboxId, topic, group } = args
+  const { inboxId, topic, group } = args
   setConversationQueryData({
-    inboxId: inboxId,
+    inboxId,
     topic,
     conversation: group,
   })
 }
 
 export function getGroupQueryOptions(args: { inboxId: InboxId; topic: ConversationTopic }) {
-  const { inboxId: inboxId, topic } = args
+  const { inboxId, topic } = args
   return queryOptions({
     ...getConversationQueryOptions({
-      inboxId: inboxId,
+      inboxId,
       topic,
       caller: "getGroupQueryOptions",
     }),

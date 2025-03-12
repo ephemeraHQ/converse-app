@@ -20,7 +20,7 @@ type IGroupMembersArgsWithCaller = IGroupMembersArgsStrict & { caller: string }
 type IGroupMembersEntity = Awaited<ReturnType<typeof fetchGroupMembers>>
 
 const fetchGroupMembers = async (args: IGroupMembersArgsWithCaller) => {
-  const { clientInboxId: clientInboxId, topic, caller } = args
+  const { clientInboxId, topic, caller } = args
 
   const conversation = await getOrFetchConversationQuery({
     inboxId: clientInboxId,
@@ -58,7 +58,7 @@ const fetchGroupMembers = async (args: IGroupMembersArgsWithCaller) => {
 export const getGroupMembersQueryOptions = (
   args: Optional<IGroupMembersArgsWithCaller, "caller">,
 ) => {
-  const { clientInboxId: clientInboxId, topic, caller } = args
+  const { clientInboxId, topic, caller } = args
   const enabled = !!topic
   return reactQueryOptions({
     meta: {
@@ -67,8 +67,7 @@ export const getGroupMembersQueryOptions = (
     // eslint-disable-next-line @tanstack/query/exhaustive-deps
     queryKey: ["group-members", args.clientInboxId, args.topic],
     queryFn: enabled
-      ? () =>
-          fetchGroupMembers({ clientInboxId: clientInboxId, topic, caller: caller ?? "unknown" })
+      ? () => fetchGroupMembers({ clientInboxId, topic, caller: caller ?? "unknown" })
       : skipToken,
     enabled,
     /**
@@ -100,9 +99,9 @@ export const setGroupMembersQueryData = (
     members: IGroupMembersEntity
   },
 ) => {
-  const { clientInboxId: clientInboxId, topic, members } = args
+  const { clientInboxId, topic, members } = args
   reactQueryClient.setQueryData(
-    getGroupMembersQueryOptions({ clientInboxId: clientInboxId, topic }).queryKey,
+    getGroupMembersQueryOptions({ clientInboxId, topic }).queryKey,
     members,
   )
 }
@@ -144,15 +143,15 @@ export function addGroupMembersToQueryData(
     member: IGroupMember
   },
 ) {
-  const { clientInboxId: clientInboxId, topic, member } = args
-  const members = getGroupMembersQueryData({ clientInboxId: clientInboxId, topic })
+  const { clientInboxId, topic, member } = args
+  const members = getGroupMembersQueryData({ clientInboxId, topic })
   if (!members) {
     return
   }
 
   const entifiedMembers = entify([...Object.values(members.byId), member], memberEntityConfig.getId)
 
-  setGroupMembersQueryData({ clientInboxId: clientInboxId, topic, members: entifiedMembers })
+  setGroupMembersQueryData({ clientInboxId, topic, members: entifiedMembers })
 }
 
 export function removeMembersFromGroupQueryData(
@@ -160,9 +159,9 @@ export function removeMembersFromGroupQueryData(
     memberInboxIds: InboxId[]
   },
 ) {
-  const { clientInboxId: clientInboxId, topic, memberInboxIds } = args
+  const { clientInboxId, topic, memberInboxIds } = args
 
-  const members = getGroupMembersQueryData({ clientInboxId: clientInboxId, topic })
+  const members = getGroupMembersQueryData({ clientInboxId, topic })
 
   if (!members) {
     return
@@ -176,5 +175,5 @@ export function removeMembersFromGroupQueryData(
     ),
   }
 
-  setGroupMembersQueryData({ clientInboxId: clientInboxId, topic, members: newMembers })
+  setGroupMembersQueryData({ clientInboxId, topic, members: newMembers })
 }

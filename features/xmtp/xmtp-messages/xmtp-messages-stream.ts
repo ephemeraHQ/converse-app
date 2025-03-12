@@ -9,7 +9,7 @@ export const streamAllMessages = async (args: {
   inboxId: InboxId
   onNewMessage: (message: IXmtpDecodedMessage) => void | Promise<void>
 }) => {
-  const { inboxId: inboxId, onNewMessage } = args
+  const { inboxId, onNewMessage } = args
 
   const client = await getXmtpClientByInboxId({
     inboxId,
@@ -36,7 +36,7 @@ export const streamAllMessages = async (args: {
 }
 
 export const stopStreamingAllMessage = async (args: { inboxId: InboxId }) => {
-  const { inboxId: inboxId } = args
+  const { inboxId } = args
 
   const client = await getXmtpClientByInboxId({
     inboxId,
