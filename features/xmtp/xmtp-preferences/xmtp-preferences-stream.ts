@@ -4,7 +4,9 @@ import { XMTPError } from "@/utils/error"
 import { xmtpLogger } from "@/utils/logger"
 import { getXmtpClientByInboxId } from "../xmtp-client/xmtp-client.service"
 
-export const streamConsent = async (inboxId: IXmtpInboxId) => {
+export const streamConsent = async (args: { inboxId: IXmtpInboxId }) => {
+  const { inboxId } = args
+
   const client = await getXmtpClientByInboxId({
     inboxId,
   })
@@ -32,7 +34,9 @@ export const streamConsent = async (inboxId: IXmtpInboxId) => {
   }
 }
 
-export const stopStreamingConsent = async (inboxId: IXmtpInboxId) => {
+export const stopStreamingConsent = async (args: { inboxId: IXmtpInboxId }) => {
+  const { inboxId } = args
+
   const client = await getXmtpClientByInboxId({
     inboxId,
   })

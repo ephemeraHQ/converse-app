@@ -8,6 +8,7 @@ import { stopStreamingConsent } from "@/features/xmtp/xmtp-preferences/xmtp-pref
 import { useAppStore } from "@/stores/app-store"
 import { useAppState } from "@/stores/use-app-state-store"
 import { captureError } from "@/utils/capture-error"
+import { StreamError } from "@/utils/error"
 import { startConversationStreaming } from "./stream-conversations"
 import { startMessageStreaming } from "./stream-messages"
 import { useStreamingStore } from "./stream-store"
@@ -37,7 +38,7 @@ export function useSetupStreamingSubscriptions() {
 
   useEffect(() => {
     // Handle app state changes
-    const unsubscribeAppState = useAppState.subscribe(
+    const unsubscribeAppStateStore = useAppState.subscribe(
       (state) => state.currentState,
       (currentState, previousState) => {
         const senders = useMultiInboxStore.getState().senders
@@ -45,19 +46,16 @@ export function useSetupStreamingSubscriptions() {
 
         if (currentState === "active" && previousState !== "active") {
           streamLogger.debug("App became active, restarting streams")
-          // Stop existing streams first to ensure clean state
-          stopStreaming(inboxIds).then(() => {
-            startStreaming(inboxIds)
-          })
+          startStreaming(inboxIds).catch(captureError)
         } else if (currentState !== "active" && previousState === "active") {
           streamLogger.debug("App went to background, stopping streams")
-          stopStreaming(inboxIds)
+          stopStreaming(inboxIds).catch(captureError)
         }
       },
     )
 
     // Handle account changes
-    const unsubscribeAccounts = useMultiInboxStore.subscribe(
+    const unsubscribeMultiInboxStore = useMultiInboxStore.subscribe(
       (state) => [state.senders] as const,
       ([senders], [previousSenders]) => {
         const { isInternetReachable } = useAppStore.getState()
@@ -94,8 +92,8 @@ export function useSetupStreamingSubscriptions() {
     )
 
     return () => {
-      unsubscribeAppState()
-      unsubscribeAccounts()
+      unsubscribeAppStateStore()
+      unsubscribeMultiInboxStore()
     }
   }, [])
 }
@@ -158,15 +156,24 @@ async function stopStreaming(inboxIds: IXmtpInboxId[]) {
   const store = useStreamingStore.getState()
 
   await Promise.all(
-    inboxIds.map(async (account) => {
+    inboxIds.map(async (inboxId) => {
       try {
+        logger.debug(`[Streaming] Stopping streams for ${inboxId}`)
         await Promise.all([
-          stopStreamingAllMessage({ inboxId: account }),
-          stopStreamingConversations({ inboxId: account }),
-          stopStreamingConsent(account),
+          stopStreamingAllMessage({ inboxId }),
+          stopStreamingConversations({ inboxId }),
+          stopStreamingConsent({ inboxId }),
         ])
+        logger.debug(`[Streaming] Stopped streams for ${inboxId}`)
+      } catch (error) {
+        captureError(
+          new StreamError({
+            error,
+            additionalMessage: `Failed to stop streams for ${inboxId}`,
+          }),
+        )
       } finally {
-        store.actions.resetAccount(account)
+        store.actions.resetAccount(inboxId)
       }
     }),
   )

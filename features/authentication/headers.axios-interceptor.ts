@@ -1,4 +1,4 @@
-import { AxiosRequestConfig } from "axios"
+import { InternalAxiosRequestConfig } from "axios"
 import {
   AUTHENTICATE_ROUTE,
   NON_AUTHENTICATED_ROUTES,
@@ -15,7 +15,7 @@ import { AuthenticationError } from "../../utils/error"
  * 2. Non-authenticated routes - No headers needed
  * 3. All other routes - Requires standard authenticated headers
  */
-export const axiosHeadersInterceptor = async (config: AxiosRequestConfig) => {
+export const axiosHeadersInterceptor = async (config: InternalAxiosRequestConfig) => {
   const url = config.url
 
   if (!url) {
@@ -41,10 +41,9 @@ export const axiosHeadersInterceptor = async (config: AxiosRequestConfig) => {
       ? await getConvosAuthenticationHeaders()
       : await getConvosAuthenticatedHeaders()
 
-    config.headers = {
-      ...config.headers,
-      ...headers,
-    }
+    Object.entries(headers).forEach(([key, value]) => {
+      config.headers.set(key, value)
+    })
 
     return config
   } catch (error) {

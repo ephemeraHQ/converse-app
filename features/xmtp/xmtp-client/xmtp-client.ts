@@ -1,7 +1,6 @@
 import { PublicIdentity, Client as XmtpClient } from "@xmtp/react-native-sdk"
 import { getRandomBytesAsync } from "expo-crypto"
 import { config } from "@/config"
-import { XMTP_MAX_MS_UNTIL_LOG_ERROR } from "@/features/xmtp/xmtp-logs"
 import { captureError } from "@/utils/capture-error"
 import { XMTPError } from "@/utils/error"
 import { getSecureItemAsync, setSecureItemAsync } from "@/utils/keychain"
@@ -13,19 +12,20 @@ export async function createXmtpClientInstance(args: {
   inboxSigner: IXmtpSigner
 }): Promise<IXmtpClient> {
   const { inboxSigner } = args
-  const startTime = Date.now()
 
   xmtpLogger.debug(`Creating XMTP client instance`)
 
   try {
+    const startTime = Date.now()
     const client = await XmtpClient.create<ISupportedXmtpCodecs>(inboxSigner, {
       env: config.xmtpEnv,
       dbEncryptionKey: await getDbEncryptionKey(),
       codecs: supportedXmtpCodecs,
     })
+    const end = Date.now()
 
-    const duration = Date.now() - startTime
-    if (duration > XMTP_MAX_MS_UNTIL_LOG_ERROR) {
+    const duration = end - startTime
+    if (duration > config.xmtp.maxMsUntilLogError) {
       captureError(
         new XMTPError({
           error: new Error(`Creating XMTP client took ${duration}ms`),
@@ -50,13 +50,11 @@ export async function buildXmtpClientInstance(args: {
 
   xmtpLogger.debug(`Building XMTP client for address: ${ethereumAddress}`)
 
-  const startTime = Date.now()
-
-  const identity = new PublicIdentity(ethereumAddress, "ETHEREUM")
-
   try {
+    const startTime = Date.now()
+
     const client = await XmtpClient.build<ISupportedXmtpCodecs>(
-      identity,
+      new PublicIdentity(ethereumAddress, "ETHEREUM"),
       {
         env: config.xmtpEnv,
         codecs: supportedXmtpCodecs,
@@ -65,8 +63,10 @@ export async function buildXmtpClientInstance(args: {
       inboxId,
     )
 
-    const duration = Date.now() - startTime
-    if (duration > XMTP_MAX_MS_UNTIL_LOG_ERROR) {
+    const end = Date.now()
+
+    const duration = end - startTime
+    if (duration > config.xmtp.maxMsUntilLogError) {
       captureError(
         new XMTPError({
           error: new Error(

@@ -1,4 +1,8 @@
-import { IXmtpConversationTopic, IXmtpInboxId , IXmtpConversationWithCodecs } from "@features/xmtp/xmtp.types"
+import {
+  IXmtpConversationTopic,
+  IXmtpConversationWithCodecs,
+  IXmtpInboxId,
+} from "@features/xmtp/xmtp.types"
 import { QueryObserver, queryOptions, skipToken, useQuery } from "@tanstack/react-query"
 import { ensureConversationSyncAllQuery } from "@/features/conversation/queries/conversation-sync-all.query"
 import {

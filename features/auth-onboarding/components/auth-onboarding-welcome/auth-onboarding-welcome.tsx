@@ -109,18 +109,21 @@ function useHeaderWrapper() {
 
   const isProcessingWeb3Stuff = useAuthOnboardingStore((s) => s.isProcessingWeb3Stuff)
 
-  return useHeader({
-    safeAreaEdges: ["top"],
-    RightActionComponent: (
-      <AnimatedCenter
-        entering={theme.animation
-          .reanimatedFadeInSpringSlow()
-          .delay(ONBOARDING_ENTERING_DELAY.SIXTH)}
-      >
-        <HeaderAction disabled={isProcessingWeb3Stuff} icon="person-badge-key" onPress={login} />
-      </AnimatedCenter>
-    ),
-  })
+  return useHeader(
+    {
+      safeAreaEdges: ["top"],
+      RightActionComponent: (
+        <AnimatedCenter
+          entering={theme.animation
+            .reanimatedFadeInSpringSlow()
+            .delay(ONBOARDING_ENTERING_DELAY.SIXTH)}
+        >
+          <HeaderAction disabled={isProcessingWeb3Stuff} icon="person-badge-key" onPress={login} />
+        </AnimatedCenter>
+      ),
+    },
+    [isProcessingWeb3Stuff],
+  )
 }
 
 const $termsContainer: ThemedStyle<ViewStyle> = ({ spacing, borderRadius, colors }) => ({

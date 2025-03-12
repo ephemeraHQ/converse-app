@@ -145,8 +145,6 @@ const EditableProfileContactCardNameInput = memo(function EditableProfileContact
 
   const nameDefaultTextValue = profileMeStore.getState().nameTextValue
 
-  console.log("nameDefaultTextValue:", nameDefaultTextValue)
-
   const isOnChainName = useProfileMeStoreValue(inboxId, (state) =>
     state.nameTextValue?.includes("."),
   )

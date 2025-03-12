@@ -39,10 +39,12 @@ export function HeaderAction(props: HeaderActionProps) {
 
   if (ActionComponent) return ActionComponent
 
+  const disabledStyle: ViewStyle = disabled ? { opacity: 0.7 } : {}
+
   if (content) {
     return (
       <TouchableOpacity
-        style={[themed([$actionTextContainer, { backgroundColor }]), style]}
+        style={[themed([$actionTextContainer, { backgroundColor }]), style, disabledStyle]}
         onPress={onPress}
         disabled={disabled || !onPress}
         activeOpacity={0.8}
@@ -59,7 +61,7 @@ export function HeaderAction(props: HeaderActionProps) {
         // {...debugBorder()}
         onPress={onPress}
         disabled={disabled || !onPress}
-        style={[themed([$actionIconContainer, { backgroundColor }]), style]}
+        style={[themed([$actionIconContainer, { backgroundColor }]), style, disabledStyle]}
         hitSlop={theme.spacing.sm}
       >
         <Icon size={theme.iconSize.lg} icon={icon} color={iconColor} />

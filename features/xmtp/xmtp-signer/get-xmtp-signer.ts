@@ -14,8 +14,11 @@ export function getXmtpSigner(args: {
     getChainId: () => args.chainId,
     getBlockNumber: () => undefined,
     signerType: () => args.type,
-    signMessage: (message: string) => {
-      return args.signMessage(message)
+    signMessage: async (message: string) => {
+      const signature = await args.signMessage(message)
+      return {
+        signature,
+      }
     },
   }
 }

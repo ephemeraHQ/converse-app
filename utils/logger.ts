@@ -73,7 +73,11 @@ export async function getPreviousSessionLoggingFile() {
   return logFiles[1]?.path ?? null
 }
 
-const converseTransport: transportFunctionType = async (props) => {
+const converseTransport: transportFunctionType<any> = async (props: {
+  msg: string
+  rawMsg: unknown
+  level: { severity: number; text: string }
+}) => {
   let logMessage = props.msg
 
   // Console logging in dev

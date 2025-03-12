@@ -18,6 +18,7 @@ export const useLogout = () => {
       try {
         useAuthenticationStore.getState().actions.setStatus("signedOut")
 
+        // Call this here for now since we can only have 1 identity
         resetMultiInboxStore()
 
         // Clear both in-memory cache and persisted data
@@ -27,7 +28,6 @@ export const useLogout = () => {
         reactQueryMMKV.clearAll()
         secureQueryMMKV.clearAll()
 
-        // First logout from Privy
         await privyLogout()
 
         logger.debug("Successfully logged out")

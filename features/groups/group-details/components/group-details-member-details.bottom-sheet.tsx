@@ -204,16 +204,14 @@ export const MemberDetailsBottomSheet = memo(function MemberDetailsBottomSheet()
         confirmText: "Remove",
         cancelText: "Cancel",
       })
-      console.log("1")
 
       if (confirmed) {
-        console.log("2")
         showSnackbar({
           message: `Removed ${targetDisplayName} from group`,
         })
-        console.log("3")
+
         closeMemberDetailsBottomSheet()
-        console.log("4")
+
         await removeMember([memberInboxId!])
       }
     } catch (error) {

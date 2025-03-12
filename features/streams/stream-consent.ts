@@ -9,7 +9,7 @@ export async function startConsentStreaming(args: { inboxId: IXmtpInboxId }) {
   const { inboxId } = args
 
   try {
-    await streamConsent(inboxId)
+    await streamConsent({ inboxId })
   } catch (error) {
     logger.error(error, {
       context: `Failed to stream consent for ${inboxId}`,

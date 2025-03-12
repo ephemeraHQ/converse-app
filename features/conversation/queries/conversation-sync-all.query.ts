@@ -20,6 +20,9 @@ export function getConversationSyncAllQueryOptions(args: IArgs) {
             clientInboxId: args.clientInboxId,
             consentStates: args.consentStates,
           })
+
+          // React query needs us to return something
+          return true
         }
       : skipToken,
   })
