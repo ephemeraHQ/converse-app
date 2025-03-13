@@ -1,10 +1,11 @@
-import { IXmtpConversationTopic, IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { ConversationScreen } from "@/features/conversation/conversation-chat/conversation.screen"
 import { translate } from "@/i18n"
 import { AppNativeStack } from "@/navigation/app-navigator"
+import { IConversationTopic } from "../conversation.types"
 
 export type ConversationNavParams = {
-  topic?: IXmtpConversationTopic
+  topic?: IConversationTopic
   composerTextPrefill?: string
   searchSelectedUserInboxIds?: IXmtpInboxId[]
   isNew?: boolean

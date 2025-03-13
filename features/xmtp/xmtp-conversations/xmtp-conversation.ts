@@ -1,4 +1,11 @@
-import { IXmtpInboxId , IXmtpConsentState, IXmtpConversationWithCodecs } from "@features/xmtp/xmtp.types"
+import {
+  IXmtpConsentState,
+  IXmtpConversationWithCodecs,
+  IXmtpDmWithCodecs,
+  IXmtpGroupWithCodecs,
+  IXmtpInboxId,
+} from "@features/xmtp/xmtp.types"
+import { ConversationVersion } from "@xmtp/react-native-sdk"
 import { ConversationSendPayload } from "@xmtp/react-native-sdk/build/lib/types"
 import { config } from "@/config"
 import { getXmtpClientByInboxId } from "@/features/xmtp/xmtp-client/xmtp-client.service"
@@ -86,4 +93,16 @@ export async function getXmtpConversations(args: {
       additionalMessage: `Failed to get conversations for inbox: ${clientInboxId}`,
     })
   }
+}
+
+export function isXmtpConversationGroup(
+  conversation: IXmtpConversationWithCodecs,
+): conversation is IXmtpGroupWithCodecs {
+  return conversation.version === ConversationVersion.GROUP
+}
+
+export function isXmtpConversationDm(
+  conversation: IXmtpConversationWithCodecs,
+): conversation is IXmtpDmWithCodecs {
+  return conversation.version === ConversationVersion.GROUP
 }

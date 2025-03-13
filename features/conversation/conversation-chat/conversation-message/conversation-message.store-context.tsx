@@ -2,7 +2,7 @@
  * This store/context is to avoid prop drilling in message components.
  */
 
-import { IXmtpInboxId, IXmtpMessageId , IXmtpDecodedMessage } from "@features/xmtp/xmtp.types"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { createContext, memo, useContext, useEffect, useRef } from "react"
 import { createStore, useStore } from "zustand"
 import { subscribeWithSelector } from "zustand/middleware"
@@ -12,15 +12,16 @@ import { hasPreviousMessageInSeries } from "@/features/conversation/utils/has-pr
 import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user"
 import { messageShouldShowDateChange } from "@/features/conversation/utils/message-should-show-date-change"
 import { convertNanosecondsToMilliseconds } from "@/utils/date"
+import { IConversationMessage, IConversationMessageId } from "./conversation-message.types"
 
 type IMessageContextStoreProps = {
-  message: IXmtpDecodedMessage
-  previousMessage: IXmtpDecodedMessage | undefined
-  nextMessage: IXmtpDecodedMessage | undefined
+  message: IConversationMessage
+  previousMessage: IConversationMessage | undefined
+  nextMessage: IConversationMessage | undefined
 }
 
 type IMessageContextStoreState = IMessageContextStoreProps & {
-  messageId: IXmtpMessageId
+  messageId: IConversationMessageId
   hasNextMessageInSeries: boolean
   hasPreviousMessageInSeries: boolean
   fromMe: boolean

@@ -2,10 +2,12 @@ import { useMemo } from "react"
 import { isCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { useConversationMessageReactions } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
 import { usePreferredDisplayInfoBatch } from "@/features/preferred-display-info/use-preferred-display-info-batch"
-import { IXmtpMessageId } from "@/features/xmtp/xmtp.types"
+import { IConversationMessageId } from "../conversation-message.types"
 import { RolledUpReactions, SortedReaction } from "./conversation-message-reactions.types"
 
-export function useConversationMessageReactionsRolledUp(args: { messageId: IXmtpMessageId }) {
+export function useConversationMessageReactionsRolledUp(args: {
+  messageId: IConversationMessageId
+}) {
   const { messageId } = args
 
   const { bySender: reactionsBySender } = useConversationMessageReactions(messageId)

@@ -12,13 +12,14 @@ import {
   refetchConversationMessages,
 } from "@/features/conversation/conversation-chat/conversation-messages.query"
 import { getConversationForCurrentAccount } from "@/features/conversation/utils/get-conversation-for-current-account"
-import { contentTypesPrefixes } from "@/features/xmtp/xmtp-content-types/xmtp-content-types"
-import { IXmtpConversationTopic, IXmtpMessageId } from "@/features/xmtp/xmtp.types"
+import { xmtpContentTypesPrefixes } from "@/features/xmtp/xmtp-codecs/xmtp-codecs"
 import { captureErrorWithToast } from "@/utils/capture-error"
 import { getTodayNs } from "@/utils/date"
 import { getRandomId } from "@/utils/general"
+import { IConversationTopic } from "../conversation.types"
+import { IConversationMessageId } from "./conversation-message/conversation-message.types"
 
-export function useRemoveReactionOnMessage(props: { topic: IXmtpConversationTopic }) {
+export function useRemoveReactionOnMessage(props: { topic: IConversationTopic }) {
   const { topic } = props
 
   const { mutateAsync: removeReactionMutationAsync } = useMutation({
@@ -43,7 +44,7 @@ export function useRemoveReactionOnMessage(props: { topic: IXmtpConversationTopi
           topic: conversation.topic,
           message: {
             id: getRandomId() as MessageId,
-            contentTypeId: contentTypesPrefixes.reaction,
+            contentTypeId: xmtpContentTypesPrefixes.reaction,
             sentNs: getTodayNs(),
             fallback: variables.reaction.content,
             deliveryStatus: MessageDeliveryStatus.PUBLISHED,
@@ -68,7 +69,7 @@ export function useRemoveReactionOnMessage(props: { topic: IXmtpConversationTopi
   })
 
   const removeReactionOnMessage = useCallback(
-    (args: { messageId: IXmtpMessageId; emoji: string }) => {
+    (args: { messageId: IConversationMessageId; emoji: string }) => {
       return removeReactionMutationAsync({
         reaction: {
           reference: args.messageId,

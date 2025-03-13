@@ -1,8 +1,6 @@
-import { ConversationVersion } from "@xmtp/react-native-sdk"
-import { IXmtpConversationWithCodecs, IXmtpGroupWithCodecs } from "@/features/xmtp/xmtp.types"
+import { IConversation } from "@/features/conversation/conversation.types"
+import { IGroup } from "@/features/groups/group.types"
 
-export function isConversationGroup(
-  conversation: IXmtpConversationWithCodecs,
-): conversation is IXmtpGroupWithCodecs {
-  return conversation.version === ConversationVersion.GROUP
+export function isConversationGroup(conversation: IConversation): conversation is IGroup {
+  return conversation.type === "group"
 }

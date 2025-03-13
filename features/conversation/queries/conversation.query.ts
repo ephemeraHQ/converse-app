@@ -1,17 +1,19 @@
-import type { IXmtpConversationTopic, IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import type { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query"
 import { ensureConversationSyncAllQuery } from "@/features/conversation/queries/conversation-sync-all.query"
+import { convertXmtpConversationToConvosConversation } from "@/features/conversation/utils/convert-xmtp-conversation-to-convos"
 import { getXmtpClientByInboxId } from "@/features/xmtp/xmtp-client/xmtp-client.service"
 import { Optional } from "@/types/general"
 import { captureError } from "@/utils/capture-error"
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
 import { reactQueryClient } from "../../../utils/react-query/react-query.client"
+import type { IConversationTopic } from "../conversation.types"
 
-export type ConversationQueryData = Awaited<ReturnType<typeof getConversation>>
+export type IConversationQueryData = Awaited<ReturnType<typeof getConversation>>
 
 type IGetConversationArgs = {
   inboxId: IXmtpInboxId
-  topic: IXmtpConversationTopic
+  topic: IConversationTopic
 }
 
 type IGetConversationArgsWithCaller = IGetConversationArgs & { caller: string }
@@ -93,13 +95,15 @@ async function getConversation(args: IGetConversationArgs) {
   const totalEnd = new Date().getTime()
   const totalTimeDiff = totalEnd - totalStart
 
-  if (totalTimeDiff > 3000) {
+  if (totalTimeDiff > config.xmtp.maxMsUntilLogError) {
     captureError(
       new Error(`[useConversationQuery] Fetched conversation for ${topic} in ${totalTimeDiff}ms`),
     )
   }
 
-  return conversation
+  const convosConversation = await convertXmtpConversationToConvosConversation(conversation)
+
+  return convosConversation
 }
 
 export const useConversationQuery = (args: IGetConversationArgsWithCaller) => {
@@ -123,7 +127,7 @@ export function getConversationQueryOptions(
 
 export const setConversationQueryData = (
   args: IGetConversationArgs & {
-    conversation: ConversationQueryData
+    conversation: IConversationQueryData
   },
 ) => {
   const { inboxId, topic, conversation } = args
@@ -138,7 +142,7 @@ export const setConversationQueryData = (
 
 export function updateConversationQueryData(
   args: IGetConversationArgs & {
-    conversationUpdate: Partial<ConversationQueryData>
+    conversationUpdate: Partial<IConversationQueryData>
   },
 ) {
   const { conversationUpdate } = args

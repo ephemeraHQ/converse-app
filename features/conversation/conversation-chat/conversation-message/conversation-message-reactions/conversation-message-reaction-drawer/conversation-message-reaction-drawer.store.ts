@@ -1,10 +1,10 @@
 import { create } from "zustand"
-import { IXmtpMessageId } from "@/features/xmtp/xmtp.types"
+import { IConversationMessageId } from "../../conversation-message.types"
 
 export type IMessageReactionsStore = {
-  messageId: IXmtpMessageId | null
+  messageId: IConversationMessageId | null
   actions: {
-    setMessageId: (messageId: IXmtpMessageId | null) => void
+    setMessageId: (messageId: IConversationMessageId | null) => void
   }
 }
 

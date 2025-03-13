@@ -1,4 +1,3 @@
-import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
 import { translate } from "@i18n"
 import React, { memo, useCallback } from "react"
 // import { useGroupPendingRequests } from "@/hooks/useGroupPendingRequests";
@@ -21,6 +20,7 @@ import { useHeader } from "@/navigation/use-header"
 import { useRouter } from "@/navigation/use-navigation"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { copyToClipboard } from "@/utils/clipboard"
+import { IConversationTopic } from "../conversation.types"
 
 export function useConversationScreenHeader() {
   const navigation = useRouter()
@@ -113,7 +113,7 @@ function ConversationHeaderTitle({
 }
 
 type GroupConversationTitleProps = {
-  conversationTopic: IXmtpConversationTopic
+  conversationTopic: IConversationTopic
 }
 
 const GroupConversationTitle = memo(({ conversationTopic }: GroupConversationTitleProps) => {
@@ -171,7 +171,7 @@ const GroupConversationTitle = memo(({ conversationTopic }: GroupConversationTit
 })
 
 type DmConversationTitleProps = {
-  topic: IXmtpConversationTopic
+  topic: IConversationTopic
 }
 
 const DmConversationTitle = ({ topic }: DmConversationTitleProps) => {

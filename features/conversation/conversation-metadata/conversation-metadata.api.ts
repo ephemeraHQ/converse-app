@@ -1,9 +1,10 @@
-import type { IXmtpConversationTopic, IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import type { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { z } from "zod"
 import { getConversationIdFromTopic } from "@/features/conversation/utils/get-conversation-id-from-topic"
 import { getCurrentUserQueryData } from "@/features/current-user/curent-user.query"
 import { api } from "@/utils/api/api"
 import { captureError } from "@/utils/capture-error"
+import type { IConversationTopic } from "../conversation.types"
 
 const ConversationMetadataSchema = z.object({
   deleted: z.boolean(),
@@ -43,7 +44,7 @@ export type IConversationMetadata = z.infer<typeof ConversationMetadataSchema>
 //   return data as Record<string, IConversationMetadata>;
 // }
 
-export async function getConversationMetadata(args: { topic: IXmtpConversationTopic }) {
+export async function getConversationMetadata(args: { topic: IConversationTopic }) {
   const { topic } = args
 
   const conversationId = await getConversationId({ topic })
@@ -67,7 +68,7 @@ export async function getConversationMetadata(args: { topic: IXmtpConversationTo
 
 export async function markConversationMetadataAsRead(args: {
   clientInboxId: IXmtpInboxId
-  topic: IXmtpConversationTopic
+  topic: IConversationTopic
   readUntil: string
 }) {
   return updateConversationMetadata({
@@ -82,7 +83,7 @@ export async function markConversationMetadataAsRead(args: {
 
 export async function markConversationMetadataAsUnread(args: {
   clientInboxId: IXmtpInboxId
-  topic: IXmtpConversationTopic
+  topic: IConversationTopic
 }) {
   return updateConversationMetadata({
     clientInboxId: args.clientInboxId,
@@ -95,7 +96,7 @@ export async function markConversationMetadataAsUnread(args: {
 
 export async function pinConversationMetadata(args: {
   clientInboxId: IXmtpInboxId
-  topic: IXmtpConversationTopic
+  topic: IConversationTopic
 }) {
   return updateConversationMetadata({
     clientInboxId: args.clientInboxId,
@@ -108,7 +109,7 @@ export async function pinConversationMetadata(args: {
 
 export async function unpinConversationMetadata(args: {
   clientInboxId: IXmtpInboxId
-  topic: IXmtpConversationTopic
+  topic: IConversationTopic
 }) {
   return updateConversationMetadata({
     clientInboxId: args.clientInboxId,
@@ -121,7 +122,7 @@ export async function unpinConversationMetadata(args: {
 
 export async function restoreConversationMetadata(args: {
   clientInboxId: IXmtpInboxId
-  topic: IXmtpConversationTopic
+  topic: IConversationTopic
 }) {
   return updateConversationMetadata({
     clientInboxId: args.clientInboxId,
@@ -134,7 +135,7 @@ export async function restoreConversationMetadata(args: {
 
 export async function deleteConversationMetadata(args: {
   clientInboxId: IXmtpInboxId
-  topic: IXmtpConversationTopic
+  topic: IConversationTopic
 }) {
   return updateConversationMetadata({
     clientInboxId: args.clientInboxId,
@@ -148,7 +149,7 @@ export async function deleteConversationMetadata(args: {
 /**
  * Helper functions
  */
-async function getConversationId(args: { topic: IXmtpConversationTopic }) {
+async function getConversationId(args: { topic: IConversationTopic }) {
   const { topic } = args
 
   const conversationId = getConversationIdFromTopic(topic)
@@ -161,7 +162,7 @@ async function getConversationId(args: { topic: IXmtpConversationTopic }) {
 }
 
 async function updateConversationMetadata(args: {
-  topic: IXmtpConversationTopic
+  topic: IConversationTopic
   clientInboxId: IXmtpInboxId
   updates: {
     pinned?: boolean

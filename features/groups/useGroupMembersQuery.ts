@@ -1,10 +1,12 @@
-import { IXmtpConversationTopic, IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { queryOptions as reactQueryOptions, skipToken, useQuery } from "@tanstack/react-query"
 import { getOrFetchConversationQuery } from "@/features/conversation/queries/conversation.query"
+import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group"
 import { IGroupMember } from "@/features/groups/group.types"
 import { Optional } from "@/types/general"
 import { entify } from "../../utils/entify"
 import { reactQueryClient } from "../../utils/react-query/react-query.client"
+import { IConversationTopic } from "../conversation/conversation.types"
 
 const memberEntityConfig = {
   getId: (member: IGroupMember) => member.inboxId,
@@ -12,7 +14,7 @@ const memberEntityConfig = {
 
 type IGroupMembersArgsStrict = {
   clientInboxId: IXmtpInboxId
-  topic: IXmtpConversationTopic
+  topic: IConversationTopic
 }
 
 type IGroupMembersArgsWithCaller = IGroupMembersArgsStrict & { caller: string }
@@ -32,27 +34,11 @@ const fetchGroupMembers = async (args: IGroupMembersArgsWithCaller) => {
     throw new Error(`Group ${topic} not found in query data cache`)
   }
 
-  const members = await conversation.members()
-
-  /**
-   * We can't really have an empty group...
-   * And when a group is created on the SDK, the members are added in a separate call
-   * So it can lead that we try to fetch the members before the group is created
-   * So we retry a few times before giving up
-   */
-  if (members.length === 0) {
-    throw new Error("Empty members list")
+  if (!isConversationGroup(conversation)) {
+    throw new Error(`Conversation ${topic} is not a group`)
   }
 
-  const convosMembers = members.map(
-    (member): IGroupMember => ({
-      inboxId: member.inboxId,
-      permission: member.permissionLevel,
-      consentState: member.consentState,
-    }),
-  )
-
-  return entify(convosMembers, memberEntityConfig.getId)
+  return entify(conversation.members, memberEntityConfig.getId)
 }
 
 export const getGroupMembersQueryOptions = (

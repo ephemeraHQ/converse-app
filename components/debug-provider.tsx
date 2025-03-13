@@ -23,6 +23,7 @@ import { $globalStyles } from "@/theme/styles"
 import { captureError } from "@/utils/capture-error"
 import { GenericError } from "@/utils/error"
 import { getEnv } from "@/utils/getEnv"
+import { ObjectTyped } from "@/utils/object-typed"
 import { showActionSheet } from "./action-sheet"
 
 export function DebugProvider(props: { children: React.ReactNode }) {
@@ -258,17 +259,17 @@ function useShowDebugMenu() {
       },
       "Show Streaming Status": () => {
         const { accountStreamingStates } = useStreamingStore.getState()
-        const accounts = Object.keys(accountStreamingStates)
+        const accounts = ObjectTyped.keys(accountStreamingStates)
 
         if (accounts.length === 0) {
           Alert.alert("No Streaming States", "No accounts are currently streaming")
           return
         }
 
-        const statusMessages = accounts.map((account) => {
-          const state = accountStreamingStates[account]
+        const statusMessages = accounts.map((inboxId) => {
+          const state = accountStreamingStates[inboxId]
           return [
-            `Account: ${account}`,
+            `InboxId: ${inboxId}`,
             `Conversations Streaming: ${state.isStreamingConversations ? "ON" : "OFF"}`,
             `Messages Streaming: ${state.isStreamingMessages ? "ON" : "OFF"}`,
             `Consent Streaming: ${state.isStreamingConsent ? "ON" : "OFF"}`,

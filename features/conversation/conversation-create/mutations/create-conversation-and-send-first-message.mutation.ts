@@ -1,4 +1,4 @@
-import { IXmtpConversationTopic, IXmtpInboxId , IXmtpDmWithCodecs, IXmtpGroupWithCodecs } from "@features/xmtp/xmtp.types"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { useMutation } from "@tanstack/react-query"
 import { ConversationTopic, MessageId, RemoteAttachmentContent } from "@xmtp/react-native-sdk"
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
@@ -10,12 +10,15 @@ import {
   getConversationQueryData,
   updateConversationQueryData,
 } from "@/features/conversation/queries/conversation.query"
+import { IDm } from "@/features/dm/dm.types"
+import { IGroup } from "@/features/groups/group.types"
 import { createXmtpDm } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-dm"
 import { createXmtpGroup } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-group"
+import { IConversationTopic } from "../../conversation.types"
 import { sendMessage } from "../../hooks/use-send-message"
 
 export type ISendMessageParams = {
-  topic: IXmtpConversationTopic
+  topic: IConversationTopic
   referencedMessageId?: MessageId
   content:
     | { text: string; remoteAttachment?: RemoteAttachmentContent }
@@ -85,7 +88,7 @@ export function useCreateConversationAndSendFirstMessage() {
       const currentSender = getSafeCurrentSender()
 
       // Create conversation
-      let conversation: IXmtpGroupWithCodecs | IXmtpDmWithCodecs
+      let conversation: IGroup | IDm
       if (inboxIds.length > 1) {
         conversation = await createXmtpGroup({
           clientInboxId: currentSender.inboxId,
@@ -294,7 +297,7 @@ export function useCreateConversationAndSendFirstMessage() {
 export function maybeReplaceOptimisticConversationWithReal(args: {
   clientInboxId: IXmtpInboxId
   memberInboxIds: IXmtpInboxId[]
-  realTopic: IXmtpConversationTopic
+  realTopic: IConversationTopic
 }) {
   const { clientInboxId, memberInboxIds, realTopic } = args
 

@@ -1,5 +1,6 @@
-import { IXmtpConversationTopic, IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { useMutation } from "@tanstack/react-query"
+import { IConversationTopic } from "@/features/conversation/conversation.types"
 import { useGroupQuery } from "@/features/groups/useGroupQuery"
 // import { refreshGroup } from "../utils/xmtpRN/conversations";
 import { captureError } from "@/utils/capture-error"
@@ -12,7 +13,7 @@ import {
 
 export const usePromoteToAdminMutation = (args: {
   clientInboxId: IXmtpInboxId
-  topic: IXmtpConversationTopic
+  topic: IConversationTopic
 }) => {
   const { clientInboxId, topic } = args
 

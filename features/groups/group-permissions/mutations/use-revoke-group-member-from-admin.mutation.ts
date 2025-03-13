@@ -1,5 +1,6 @@
-import { IXmtpConversationTopic, IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { useMutation } from "@tanstack/react-query"
+import { IConversationTopic } from "@/features/conversation/conversation.types"
 import { useGroupQuery } from "@/features/groups/useGroupQuery"
 import { captureError } from "@/utils/capture-error"
 import {
@@ -11,7 +12,7 @@ import {
 
 export const useRevokeAdminMutation = (args: {
   clientInboxId: IXmtpInboxId
-  topic: IXmtpConversationTopic
+  topic: IConversationTopic
 }) => {
   const { clientInboxId, topic } = args
 

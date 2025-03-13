@@ -1,10 +1,10 @@
-import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
+import { IConversationTopic } from "@/features/conversation/conversation.types"
 import { GroupMembersListScreen } from "@/features/groups/group-details/members-list/group-members-list.screen"
 import { translate } from "@/i18n"
 import { AppNativeStack } from "@/navigation/app-navigator"
 
 export type GroupMembersListNavParams = {
-  groupTopic: IXmtpConversationTopic
+  groupTopic: IConversationTopic
 }
 
 export const GroupMembersListScreenConfig = {

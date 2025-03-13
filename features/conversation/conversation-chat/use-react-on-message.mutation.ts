@@ -6,23 +6,23 @@ import {
   refetchConversationMessages,
 } from "@/features/conversation/conversation-chat/conversation-messages.query"
 import { getConversationForCurrentAccount } from "@/features/conversation/utils/get-conversation-for-current-account"
-import { contentTypesPrefixes } from "@/features/xmtp/xmtp-content-types/xmtp-content-types"
-import {
-  IXmtpConversationTopic,
-  IXmtpMessageDeliveryStatusValues,
-  IXmtpMessageId,
-  IXmtpReactionContent,
-} from "@/features/xmtp/xmtp.types"
+import { xmtpContentTypesPrefixes } from "@/features/xmtp/xmtp-codecs/xmtp-codecs"
+import { IXmtpMessageDeliveryStatusValues } from "@/features/xmtp/xmtp.types"
 import { captureErrorWithToast } from "@/utils/capture-error"
 import { getTodayNs } from "@/utils/date"
 import { getRandomId } from "@/utils/general"
 import { Haptics } from "@/utils/haptics"
+import { IConversationTopic } from "../conversation.types"
+import {
+  IConversationMessageId,
+  IConversationMessageReactionContent,
+} from "./conversation-message/conversation-message.types"
 
-export function useReactOnMessage(props: { topic: IXmtpConversationTopic }) {
+export function useReactOnMessage(props: { topic: IConversationTopic }) {
   const { topic } = props
 
   const { mutateAsync: reactOnMessageMutationAsync } = useMutation({
-    mutationFn: async (variables: { reaction: IXmtpReactionContent }) => {
+    mutationFn: async (variables: { reaction: IConversationMessageReactionContent }) => {
       const { reaction } = variables
       const conversation = getConversationForCurrentAccount(topic)
       if (!conversation) {
@@ -42,8 +42,8 @@ export function useReactOnMessage(props: { topic: IXmtpConversationTopic }) {
           clientInboxId: currentSender.inboxId,
           topic: conversation.topic,
           message: {
-            id: getRandomId() as IXmtpMessageId,
-            contentTypeId: contentTypesPrefixes.reaction,
+            id: getRandomId() as IConversationMessageId,
+            contentTypeId: xmtpContentTypesPrefixes.reaction,
             sentNs: getTodayNs(),
             fallback: variables.reaction.content,
             deliveryStatus: IXmtpMessageDeliveryStatusValues.PUBLISHED,
@@ -68,7 +68,7 @@ export function useReactOnMessage(props: { topic: IXmtpConversationTopic }) {
   })
 
   const reactOnMessage = useCallback(
-    async (args: { messageId: IXmtpMessageId; emoji: string }) => {
+    async (args: { messageId: IConversationMessageId; emoji: string }) => {
       try {
         Haptics.softImpactAsync()
         await reactOnMessageMutationAsync({

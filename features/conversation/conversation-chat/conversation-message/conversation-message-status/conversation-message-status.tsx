@@ -8,10 +8,10 @@ import { translate } from "@/i18n"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { debugBorder } from "@/utils/debug-style"
 import { Haptics } from "@/utils/haptics"
-import { IConvosMessageStatus } from "../conversation-message.types"
+import { IConversationMessageStatus } from "../conversation-message.types"
 
 type IConversationMessageStatusProps = {
-  status: IConvosMessageStatus
+  status: IConversationMessageStatus
 }
 
 export const ConversationMessageStatus = memo(function ConversationMessageStatus({

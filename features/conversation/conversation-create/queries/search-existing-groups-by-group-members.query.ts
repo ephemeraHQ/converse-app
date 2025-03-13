@@ -1,4 +1,4 @@
-import { IXmtpConversationTopic, IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { keepPreviousData, queryOptions, useQuery } from "@tanstack/react-query"
 import { matchSorter } from "match-sorter"
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
@@ -10,6 +10,7 @@ import { doesSocialProfilesMatchTextQuery } from "@/features/profiles/utils/does
 import { ensureSocialProfilesForAddressQuery } from "@/features/social-profiles/social-profiles.query"
 import { captureError } from "@/utils/capture-error"
 import { normalizeString } from "@/utils/str"
+import { IConversationTopic } from "../../conversation.types"
 
 export async function searchExistingGroupsByGroupMembers(args: {
   searchQuery: string
@@ -27,7 +28,7 @@ export async function searchExistingGroupsByGroupMembers(args: {
     return []
   }
 
-  const matchingTopics: IXmtpConversationTopic[] = []
+  const matchingTopics: IConversationTopic[] = []
 
   await Promise.all(
     conversations.filter(isConversationGroup).map(async (group) => {

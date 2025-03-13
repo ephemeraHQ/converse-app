@@ -10,13 +10,16 @@ import {
 } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
 import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
 import { usePreferredDisplayInfoBatch } from "@/features/preferred-display-info/use-preferred-display-info-batch"
-import { IXmtpDecodedMessage, IXmtpGroupUpdatedContent } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
+import {
+  IConversationMessage,
+  IConversationMessageGroupUpdatedContent,
+} from "../../conversation-chat/conversation-message/conversation-message.types"
 
 // Handles group metadata changes (name, description, image)
 function handleGroupMetadataChange(args: {
   initiatorName: string
-  content: IXmtpGroupUpdatedContent
+  content: IConversationMessageGroupUpdatedContent
 }) {
   const { initiatorName, content } = args
 
@@ -38,7 +41,7 @@ function handleGroupMetadataChange(args: {
   }
 }
 
-export function useMessagePlainText(message: IXmtpDecodedMessage | undefined) {
+export function useMessagePlainText(message: IConversationMessage | undefined) {
   // Get initiator profile for group updates
   const initiatorInboxId =
     message && isGroupUpdatedMessage(message) ? message.content().initiatedByInboxId : undefined

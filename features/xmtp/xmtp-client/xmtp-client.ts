@@ -34,7 +34,7 @@ export async function createXmtpClientInstance(args: {
       )
     }
 
-    return client
+    return client as IXmtpClient
   } catch (error) {
     throw new XMTPError({
       error,
@@ -77,7 +77,7 @@ export async function buildXmtpClientInstance(args: {
       )
     }
 
-    return client
+    return client as IXmtpClient
   } catch (error) {
     throw new XMTPError({
       error,

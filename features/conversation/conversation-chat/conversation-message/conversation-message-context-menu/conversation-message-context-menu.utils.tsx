@@ -9,13 +9,14 @@ import {
   isRemoteAttachmentMessage,
   isStaticAttachmentMessage,
 } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
-import { IXmtpConversationTopic, IXmtpMessageId } from "@/features/xmtp/xmtp.types"
+import { IConversationTopic } from "@/features/conversation/conversation.types"
 import { translate } from "@/i18n"
 import { captureErrorWithToast } from "@/utils/capture-error"
+import { IConversationMessageId } from "../conversation-message.types"
 
 export function useMessageContextMenuItems(args: {
-  messageId: IXmtpMessageId
-  topic: IXmtpConversationTopic
+  messageId: IConversationMessageId
+  topic: IConversationTopic
 }) {
   const { messageId, topic } = args
 

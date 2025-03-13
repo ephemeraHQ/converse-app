@@ -1,4 +1,4 @@
-import { IXmtpConversationTopic, IXmtpInboxId , IXmtpGroupWithCodecs } from "@features/xmtp/xmtp.types"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { MutationObserver, MutationOptions, useMutation } from "@tanstack/react-query"
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import {
@@ -18,6 +18,8 @@ import {
 } from "@/features/groups/useGroupQuery"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
+import { IConversationTopic } from "../conversation/conversation.types"
+import { IGroup } from "../groups/group.types"
 import {
   setXmtpConsentStateForInboxId,
   updateConsentForGroupsForAccount,
@@ -25,7 +27,7 @@ import {
 
 type IAllowGroupMutationOptions = {
   clientInboxId: IXmtpInboxId
-  topic: IXmtpConversationTopic
+  topic: IConversationTopic
 }
 
 type IAllowGroupReturnType = Awaited<ReturnType<typeof allowGroup>>
@@ -34,7 +36,7 @@ type IAllowGroupArgs = {
   includeAddedBy?: boolean
   includeCreator?: boolean
   clientInboxId: IXmtpInboxId
-  topic: IXmtpConversationTopic
+  topic: IConversationTopic
 }
 
 async function allowGroup({
@@ -58,7 +60,7 @@ async function allowGroup({
   }
 
   const groupTopic = group.topic
-  const groupCreator = await group.creatorInboxId()
+  const groupCreator = group.creatorInboxId
 
   const inboxIdsToAllow: IXmtpInboxId[] = []
   if (includeAddedBy && group?.addedByInboxId) {
@@ -94,7 +96,7 @@ export const getAllowGroupMutationOptions = (
   IAllowGroupReturnType,
   unknown,
   IAllowGroupArgs,
-  { previousGroup: IXmtpGroupWithCodecs } | undefined
+  { previousGroup: IGroup } | undefined
 > => {
   const { topic } = args
 
@@ -110,7 +112,7 @@ export const getAllowGroupMutationOptions = (
       }
 
       const updatedGroup = updateObjectAndMethods(previousGroup, {
-        state: "allowed",
+        consentState: "allowed",
       })
 
       setGroupQueryData({ inboxId: clientInboxId, topic, group: updatedGroup })

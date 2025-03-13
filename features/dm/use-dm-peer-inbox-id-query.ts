@@ -1,15 +1,16 @@
 import { queryOptions, useQuery } from "@tanstack/react-query"
 import { InboxId, type ConversationTopic } from "@xmtp/react-native-sdk"
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm"
-import { IXmtpConversationTopic, IXmtpInboxId } from "@/features/xmtp/xmtp.types"
+import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { Optional } from "@/types/general"
 import logger from "@/utils/logger"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
+import { IConversationTopic } from "../conversation/conversation.types"
 import { getOrFetchConversationQuery } from "../conversation/queries/conversation.query"
 
 type IArgs = {
   inboxId: IXmtpInboxId
-  topic: IXmtpConversationTopic
+  topic: IConversationTopic
 }
 
 type IArgsWithCaller = IArgs & { caller: string }

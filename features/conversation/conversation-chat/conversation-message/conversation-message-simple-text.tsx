@@ -10,11 +10,11 @@ import { ConversationMessageGestures } from "@/features/conversation/conversatio
 import { MessageText } from "@/features/conversation/conversation-chat/conversation-message/conversation-message-text"
 import { useConversationMessageContextStoreContext } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.store-context"
 import { shouldRenderBigEmoji } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
-import { IXmtpDecodedTextMessage } from "@/features/xmtp/xmtp.types"
 import { useSelect } from "@/stores/stores.utils"
+import { IConversationMessageText } from "./conversation-message.types"
 
 export const MessageSimpleText = memo(function MessageSimpleText(props: {
-  message: IXmtpDecodedTextMessage
+  message: IConversationMessageText
 }) {
   const { message } = props
 

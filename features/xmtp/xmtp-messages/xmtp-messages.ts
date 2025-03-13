@@ -1,13 +1,13 @@
 import { Conversation } from "@xmtp/react-native-sdk"
 import { config } from "@/config"
-import { isReadReceiptMessage } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
 import { getXmtpClientByInboxId } from "@/features/xmtp/xmtp-client/xmtp-client.service"
+import { isXmtpReadReceiptContent } from "@/features/xmtp/xmtp-codecs/xmtp-codecs"
 import { captureError } from "@/utils/capture-error"
 import { XMTPError } from "@/utils/error"
 import { IXmtpDecodedMessage, IXmtpInboxId, IXmtpMessageId } from "../xmtp.types"
 
 export function isSupportedMessage(message: IXmtpDecodedMessage) {
-  if (isReadReceiptMessage(message)) {
+  if (isXmtpReadReceiptContent(message.contentTypeId)) {
     return false
   }
 
@@ -27,7 +27,7 @@ export async function getXmtpConversationMessages(args: {
     const afterMs = new Date().getTime()
 
     const timeDiffMs = afterMs - beforeMs
-    if (timeDiffMs > 3000) {
+    if (timeDiffMs > config.xmtp.maxMsUntilLogError) {
       captureError(
         new XMTPError({
           error: new Error(

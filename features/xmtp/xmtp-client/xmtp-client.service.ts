@@ -63,7 +63,7 @@ export async function createXmtpClient(args: { inboxSigner: IXmtpSigner }) {
   })
 
   registerXmtpClientMapping({
-    inboxId: client.inboxId,
+    inboxId: client.inboxId as IXmtpInboxId,
     ethAddress: identity.identifier,
   })
 

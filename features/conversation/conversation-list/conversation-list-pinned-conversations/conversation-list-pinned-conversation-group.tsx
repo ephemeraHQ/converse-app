@@ -5,14 +5,14 @@ import { isTextMessage } from "@/features/conversation/conversation-chat/convers
 import { useConversationListPinnedConversationsStyles } from "@/features/conversation/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversations.styles"
 import { useConversationIsUnread } from "@/features/conversation/conversation-list/hooks/use-conversation-is-unread"
 import { useGroupConversationContextMenuViewProps } from "@/features/conversation/conversation-list/hooks/use-conversation-list-item-context-menu-props"
+import { IGroup } from "@/features/groups/group.types"
 import { useGroupName } from "@/features/groups/hooks/use-group-name"
-import { IXmtpGroupWithCodecs } from "@/features/xmtp/xmtp.types"
 import { navigate } from "@/navigation/navigation.utils"
 import { ConversationListPinnedConversation } from "./conversation-list-pinned-conversation"
 import { PinnedConversationMessagePreview } from "./conversation-list-pinned-conversation-message-preview"
 
 type IConversationListPinnedConversationGroupProps = {
-  group: IXmtpGroupWithCodecs
+  group: IGroup
 }
 
 export const ConversationListPinnedConversationGroup = ({

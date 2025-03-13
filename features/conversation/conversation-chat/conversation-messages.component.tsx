@@ -16,30 +16,29 @@ import { ConversationMessageContextStoreProvider } from "@/features/conversation
 import {
   getConversationNextMessage,
   getConversationPreviousMessage,
-  getConvosMessageStatusForXmtpMessage,
   isAnActualMessage,
   useMessageHasReactions,
 } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
 import { ConversationMessagesList } from "@/features/conversation/conversation-chat/conversation-messages-list.component"
 import { useConversationMessagesQuery } from "@/features/conversation/conversation-chat/conversation-messages.query"
 import { useConversationIsUnread } from "@/features/conversation/conversation-list/hooks/use-conversation-is-unread"
+import { IConversation } from "@/features/conversation/conversation.types"
 import { useMarkConversationAsRead } from "@/features/conversation/hooks/use-mark-conversation-as-read"
 import { isConversationAllowed } from "@/features/conversation/utils/is-conversation-allowed"
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm"
-import {
-  IXmtpConversationWithCodecs,
-  IXmtpDecodedMessage,
-  IXmtpMessageId,
-} from "@/features/xmtp/xmtp.types"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { captureError } from "@/utils/capture-error"
 import { CONVERSATION_LIST_REFRESH_THRESHOLD } from "../conversation-list/conversation-list.contstants"
 import { ConversationMessageHighlighted } from "./conversation-message/conversation-message-highlighted"
+import {
+  IConversationMessage,
+  IConversationMessageId,
+} from "./conversation-message/conversation-message.types"
 import { DmConversationEmpty, GroupConversationEmpty } from "./conversation.screen"
 import { useCurrentConversationTopic } from "./conversation.store-context"
 
 export const ConversationMessages = memo(function ConversationMessages(props: {
-  conversation: IXmtpConversationWithCodecs
+  conversation: IConversation
 }) {
   const { conversation } = props
 
@@ -156,9 +155,9 @@ export const ConversationMessages = memo(function ConversationMessages(props: {
 })
 
 const ConversationMessagesListItem = memo(function ConversationMessagesListItem(props: {
-  message: IXmtpDecodedMessage
-  previousMessage: IXmtpDecodedMessage | undefined
-  nextMessage: IXmtpDecodedMessage | undefined
+  message: IConversationMessage
+  previousMessage: IConversationMessage | undefined
+  nextMessage: IConversationMessage | undefined
   isLatestMessageSentByCurrentUser: boolean
   animateEntering: boolean
 }) {
@@ -173,7 +172,7 @@ const ConversationMessagesListItem = memo(function ConversationMessagesListItem(
   const composerStore = useConversationComposerStore()
 
   const handleReply = useCallback(() => {
-    composerStore.getState().setReplyToMessageId(message.id as IXmtpMessageId)
+    composerStore.getState().setReplyToMessageId(message.id as IConversationMessageId)
   }, [composerStore, message])
 
   const messageHasReactions = useMessageHasReactions({
@@ -211,7 +210,7 @@ const ConversationMessagesListItem = memo(function ConversationMessagesListItem(
             reactions={messageHasReactions && <ConversationMessageReactions />}
             messageStatus={
               isLatestMessageSentByCurrentUser && (
-                <ConversationMessageStatus status={getConvosMessageStatusForXmtpMessage(message)} />
+                <ConversationMessageStatus status={message.status} />
               )
             }
           />

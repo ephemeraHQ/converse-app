@@ -1,6 +1,7 @@
-import { IXmtpConversationTopic, IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { useMutation } from "@tanstack/react-query"
 import { type ConversationTopic } from "@xmtp/react-native-sdk"
+import { IConversationTopic } from "@/features/conversation/conversation.types"
 import { useGroupQuery } from "@/features/groups/useGroupQuery"
 import { removeXmtpGroupMembers } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-group"
 import { captureError } from "@/utils/capture-error"
@@ -13,7 +14,7 @@ import {
 } from "../useGroupMembersQuery"
 
 export const useRemoveGroupMembersFromGroupMutation = (args: {
-  topic: IXmtpConversationTopic
+  topic: IConversationTopic
   clientInboxId: IXmtpInboxId
 }) => {
   const { topic, clientInboxId } = args

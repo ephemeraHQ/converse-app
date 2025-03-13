@@ -1,4 +1,4 @@
-import { IXmtpConversationTopic, IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import {
   ensureDmPeerInboxIdQueryData,
@@ -8,10 +8,11 @@ import {
   ensureGroupMembersQueryData,
   getGroupMembersQueryData,
 } from "@/features/groups/useGroupMembersQuery"
+import { IConversationTopic } from "../conversation.types"
 
 export function inboxIdIsPartOfConversationUsingCacheData(args: {
   inboxId: IXmtpInboxId
-  conversationTopic: IXmtpConversationTopic
+  conversationTopic: IConversationTopic
 }) {
   const { inboxId, conversationTopic } = args
 
@@ -30,7 +31,7 @@ export function inboxIdIsPartOfConversationUsingCacheData(args: {
 
 export async function inboxIdIsPartOfConversationUsingEnsure(args: {
   inboxId: IXmtpInboxId
-  conversationTopic: IXmtpConversationTopic
+  conversationTopic: IConversationTopic
 }) {
   const { inboxId, conversationTopic } = args
 

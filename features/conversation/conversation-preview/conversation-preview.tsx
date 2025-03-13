@@ -18,11 +18,11 @@ import { conversationListDefaultProps } from "@/features/conversation/conversati
 import { useConversationMessagesQuery } from "@/features/conversation/conversation-chat/conversation-messages.query"
 import { ConversationStoreProvider } from "@/features/conversation/conversation-chat/conversation.store-context"
 import { useConversationQuery } from "@/features/conversation/queries/conversation.query"
-import { IXmtpConversationTopic } from "@/features/xmtp/xmtp.types"
 import { $globalStyles } from "@/theme/styles"
+import { IConversationTopic } from "../conversation.types"
 
 type ConversationPreviewProps = {
-  topic: IXmtpConversationTopic
+  topic: IConversationTopic
 }
 
 export const ConversationPreview = ({ topic }: ConversationPreviewProps) => {

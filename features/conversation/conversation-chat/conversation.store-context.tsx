@@ -2,14 +2,16 @@ import { createContext, memo, useContext, useEffect, useRef } from "react"
 import { createStore, useStore } from "zustand"
 import { subscribeWithSelector } from "zustand/middleware"
 import { findConversationByInboxIds } from "@/features/conversation/utils/find-conversations-by-inbox-ids"
-import { IXmtpConversationTopic, IXmtpInboxId, IXmtpMessageId } from "@/features/xmtp/xmtp.types"
+import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
 import { getSafeCurrentSender } from "../../authentication/multi-inbox.store"
+import { IConversationTopic } from "../conversation.types"
+import { IConversationMessageId } from "./conversation-message/conversation-message.types"
 
 type IConversationStoreProps = {
-  topic?: IXmtpConversationTopic | null
-  highlightedMessageId?: IXmtpMessageId | null
-  scrollToMessageId?: IXmtpMessageId | null
+  topic?: IConversationTopic | null
+  highlightedMessageId?: IConversationMessageId | null
+  scrollToMessageId?: IConversationMessageId | null
   searchSelectedUserInboxIds?: IXmtpInboxId[]
   isCreatingNewConversation?: boolean
 }

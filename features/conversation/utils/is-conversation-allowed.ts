@@ -1,5 +1,5 @@
-import { IXmtpConversationWithCodecs } from "@/features/xmtp/xmtp.types"
+import { IConversation } from "../conversation.types"
 
-export function isConversationAllowed(conversation: IXmtpConversationWithCodecs) {
+export function isConversationAllowed(conversation: IConversation) {
   return conversation.state === "allowed"
 }

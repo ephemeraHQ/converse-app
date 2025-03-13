@@ -5,6 +5,7 @@
 
 import { memo } from "react"
 import { View } from "react-native"
+import { useHeaderHeight } from "@/design-system/Header/Header.utils"
 import { Icon } from "@/design-system/Icon/Icon"
 import { IIconName } from "@/design-system/Icon/Icon.types"
 import { Text } from "@/design-system/Text"
@@ -18,6 +19,7 @@ type IEmptyStateProps = {
   icon?: React.ReactNode
   containerStyle?: IVStackProps["style"]
   style?: IVStackProps["style"]
+  hasScreenHeader?: boolean // Adds bottom padding so it can be centered when using it inside a screen that has a header
 }
 
 export const EmptyState = memo(function EmptyState({
@@ -27,8 +29,11 @@ export const EmptyState = memo(function EmptyState({
   icon,
   containerStyle,
   style,
+  hasScreenHeader = false,
 }: IEmptyStateProps) {
   const { theme } = useAppTheme()
+
+  const headerHeight = useHeaderHeight()
 
   return (
     <VStack
@@ -37,7 +42,8 @@ export const EmptyState = memo(function EmptyState({
           flex: 1,
           alignItems: "center",
           justifyContent: "center",
-          padding: theme.spacing.lg,
+          paddingHorizontal: theme.spacing.lg,
+          paddingBottom: hasScreenHeader ? headerHeight : 0,
         },
         containerStyle,
         style,

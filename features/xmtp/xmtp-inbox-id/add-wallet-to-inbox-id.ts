@@ -1,4 +1,5 @@
-import { IXmtpInboxId , IXmtpSigner } from "@features/xmtp/xmtp.types"
+import { IXmtpInboxId, IXmtpSigner } from "@features/xmtp/xmtp.types"
+import { config } from "@/config"
 import { captureError } from "@/utils/capture-error"
 import { XMTPError } from "@/utils/error"
 import { xmtpLogger } from "@/utils/logger"
@@ -28,7 +29,7 @@ export async function addWalletToInboxId(args: {
     const afterMs = new Date().getTime()
     const timeDiffMs = afterMs - beforeMs
 
-    if (timeDiffMs > 3000) {
+    if (timeDiffMs > config.xmtp.maxMsUntilLogError) {
       captureError(
         new XMTPError({
           error: new Error(`Adding wallet to inbox ID took ${timeDiffMs}ms for inboxId ${inboxId}`),

@@ -4,14 +4,12 @@ import { updateConversationInAllowedConsentConversationsQueryData } from "@/feat
 import { updateConversationQueryData } from "@/features/conversation/queries/conversation.query"
 import { refetchGroupMembersQuery } from "@/features/groups/useGroupMembersQuery"
 import { streamAllMessages } from "@/features/xmtp/xmtp-messages/xmtp-messages-stream"
-import {
-  IXmtpConversationTopic,
-  IXmtpDecodedMessage,
-  IXmtpInboxId,
-} from "@/features/xmtp/xmtp.types"
+import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
 import { StreamError } from "@/utils/error"
 import { streamLogger } from "@/utils/logger"
+import { IConversationMessage } from "../conversation/conversation-chat/conversation-message/conversation-message.types"
+import { IConversationTopic } from "../conversation/conversation.types"
 
 export async function startMessageStreaming(args: { clientInboxId: IXmtpInboxId }) {
   const { clientInboxId } = args
@@ -31,7 +29,7 @@ export async function startMessageStreaming(args: { clientInboxId: IXmtpInboxId 
 
 async function handleNewMessage(args: {
   clientInboxId: IXmtpInboxId
-  message: IXmtpDecodedMessage
+  message: IConversationMessage
 }) {
   const { clientInboxId, message } = args
 
@@ -94,8 +92,8 @@ type MetadataField = keyof typeof METADATA_FIELD_MAP
 
 function handleNewGroupUpdatedMessage(args: {
   inboxId: IXmtpInboxId
-  topic: IXmtpConversationTopic
-  message: IXmtpDecodedMessage
+  topic: IConversationTopic
+  message: IConversationMessage
 }) {
   const { inboxId, topic, message } = args
 

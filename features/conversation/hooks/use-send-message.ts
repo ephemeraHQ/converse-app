@@ -4,10 +4,10 @@ import { UploadedRemoteAttachment } from "@/features/conversation/conversation-c
 import { getOrFetchConversationQuery } from "@/features/conversation/queries/conversation.query"
 import { sendXmtpConversationMessage } from "@/features/xmtp/xmtp-conversations/xmtp-conversation"
 import {
-  IXmtpConversationTopic,
-  IXmtpMessageId,
-  IXmtpRemoteAttachmentInfo,
-} from "@/features/xmtp/xmtp.types"
+  IConversationMessageId,
+  IRemoteAttachmentInfo,
+} from "../conversation-chat/conversation-message/conversation-message.types"
+import { IConversationTopic } from "../conversation.types"
 
 export type ISendMessageContent = {
   text?: string
@@ -15,14 +15,14 @@ export type ISendMessageContent = {
 }
 
 export type ISendMessageParams = {
-  topic: IXmtpConversationTopic
-  referencedMessageId?: IXmtpMessageId
+  topic: IConversationTopic
+  referencedMessageId?: IConversationMessageId
   content: ISendMessageContent
 }
 
 function convertConvosUploadedRemoteAttachmentToXmtpRemoteAttachment(
   attachment: UploadedRemoteAttachment,
-): IXmtpRemoteAttachmentInfo {
+): IRemoteAttachmentInfo {
   return {
     ...attachment,
     contentLength: attachment.contentLength.toString(),

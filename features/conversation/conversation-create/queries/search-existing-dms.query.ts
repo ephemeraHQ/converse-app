@@ -1,4 +1,4 @@
-import { IXmtpConversationTopic, IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { keepPreviousData, queryOptions, useQuery } from "@tanstack/react-query"
 import {
   getSafeCurrentSender,
@@ -13,6 +13,7 @@ import { doesSocialProfilesMatchTextQuery } from "@/features/profiles/utils/does
 import { ensureSocialProfilesForAddressQuery } from "@/features/social-profiles/social-profiles.query"
 import { captureError } from "@/utils/capture-error"
 import { normalizeString } from "@/utils/str"
+import { IConversationTopic } from "../../conversation.types"
 
 export function getSearchExistingDmsQueryOptions(args: {
   searchQuery: string
@@ -52,7 +53,7 @@ async function searchExistingDms(args: { searchQuery: string; inboxId: IXmtpInbo
     return []
   }
 
-  const matchingTopics: IXmtpConversationTopic[] = []
+  const matchingTopics: IConversationTopic[] = []
   const dmConversations = conversations.filter(isConversationDm)
 
   const results = await Promise.all(

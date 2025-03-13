@@ -1,9 +1,9 @@
 import differenceInMinutes from "date-fns/differenceInMinutes"
-import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types"
+import { IConversationMessage } from "../conversation-chat/conversation-message/conversation-message.types"
 
 type MessageShouldShowDateChangePayload = {
-  message: IXmtpDecodedMessage | undefined
-  previousMessage: IXmtpDecodedMessage | undefined
+  message: IConversationMessage | undefined
+  previousMessage: IConversationMessage | undefined
 }
 
 export const messageShouldShowDateChange = ({

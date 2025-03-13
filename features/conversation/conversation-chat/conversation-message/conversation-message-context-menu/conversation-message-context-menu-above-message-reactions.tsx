@@ -8,15 +8,15 @@ import { StaggeredAnimation } from "@/design-system/staggered-animation"
 import { TouchableOpacity } from "@/design-system/TouchableOpacity"
 import { AnimatedVStack, VStack } from "@/design-system/VStack"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
+import { IConversationTopic } from "@/features/conversation/conversation.types"
 import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user"
 import { getReactionContent } from "@/features/xmtp/xmtp-codecs/xmtp-codecs-reaction"
-import {
-  IXmtpConversationTopic,
-  IXmtpInboxId,
-  IXmtpMessageId,
-  IXmtpReactionContent,
-} from "@/features/xmtp/xmtp.types"
+import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { useAppTheme } from "@/theme/use-app-theme"
+import {
+  IConversationMessageId,
+  IConversationMessageReactionContent,
+} from "../conversation-message.types"
 import { useConversationMessageById } from "../use-conversation-message-by-id"
 import { MESSAGE_CONTEXT_MENU_ABOVE_MESSAGE_REACTIONS_HEIGHT } from "./conversation-message-context-menu.constants"
 
@@ -30,14 +30,14 @@ export const MessageContextMenuAboveMessageReactions = memo(
     originY,
     reactors,
   }: {
-    topic: IXmtpConversationTopic
-    messageId: IXmtpMessageId
+    topic: IConversationTopic
+    messageId: IConversationMessageId
     onChooseMoreEmojis: () => void
     onSelectReaction: (emoji: string) => void
     originX: number
     originY: number
     reactors: {
-      [reactor: IXmtpInboxId]: IXmtpReactionContent[]
+      [reactor: IXmtpInboxId]: IConversationMessageReactionContent[]
     }
   }) {
     const { theme } = useAppTheme()

@@ -6,16 +6,14 @@ import {
   useGroupQuery,
 } from "@/features/groups/useGroupQuery"
 import { updateXmtpGroupDescription } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-group"
-import {
-  IXmtpConversationTopic,
-  IXmtpGroupWithCodecs,
-  IXmtpInboxId,
-} from "@/features/xmtp/xmtp.types"
+import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
+import { IConversationTopic } from "../conversation/conversation.types"
+import { IGroup } from "./group.types"
 
 type IArgs = {
   inboxId: IXmtpInboxId
-  topic: IXmtpConversationTopic
+  topic: IConversationTopic
 }
 
 export function useGroupDescriptionMutation(args: IArgs) {
@@ -33,7 +31,7 @@ export function useGroupDescriptionMutation(args: IArgs) {
     },
     onMutate: async (description: string) => {
       const previousGroup = getGroupQueryData({ inboxId, topic })
-      const updates: Partial<IXmtpGroupWithCodecs> = { groupDescription: description }
+      const updates: Partial<IGroup> = { groupDescription: description }
 
       if (previousGroup) {
         updateGroupQueryData({ inboxId, topic, updates })
@@ -52,7 +50,7 @@ export function useGroupDescriptionMutation(args: IArgs) {
 
       const { previousGroup } = context || {}
 
-      const updates: Partial<IXmtpGroupWithCodecs> = {
+      const updates: Partial<IGroup> = {
         groupDescription: previousGroup?.groupDescription ?? "",
       }
 

@@ -1,4 +1,3 @@
-import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
 import { useMutation } from "@tanstack/react-query"
 import { useCallback } from "react"
 import { showActionSheet } from "@/components/action-sheet"
@@ -11,8 +10,9 @@ import {
 import { getGroupQueryData } from "@/features/groups/useGroupQuery"
 import { translate } from "@/i18n"
 import { captureErrorWithToast } from "@/utils/capture-error"
+import { IConversationTopic } from "../../conversation.types"
 
-export const useDeleteGroup = (args: { groupTopic: IXmtpConversationTopic }) => {
+export const useDeleteGroup = (args: { groupTopic: IConversationTopic }) => {
   const { groupTopic } = args
   const currentSender = useSafeCurrentSender()
 
@@ -55,7 +55,7 @@ export const useDeleteGroup = (args: { groupTopic: IXmtpConversationTopic }) => 
       throw new Error("Group not found")
     }
 
-    const title = `${translate("delete_chat_with")} ${group.groupName}?`
+    const title = `${translate("delete_chat_with")} ${group.name}?`
 
     const actions = [
       {

@@ -10,16 +10,16 @@ import Animated, { AnimatedProps } from "react-native-reanimated"
 import { AnimatedVStack } from "@/design-system/VStack"
 import { ConversationListItemDm } from "@/features/conversation/conversation-list/conversation-list-item/conversation-list-item-dm"
 import { ConversationListItemGroup } from "@/features/conversation/conversation-list/conversation-list-item/conversation-list-item-group"
+import { IConversation } from "@/features/conversation/conversation.types"
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group"
-import { IXmtpConversationWithCodecs } from "@/features/xmtp/xmtp.types"
 import { useAppTheme } from "@/theme/use-app-theme"
 
 type IConversationListProps = Omit<
-  AnimatedProps<FlatListProps<IXmtpConversationWithCodecs>>,
+  AnimatedProps<FlatListProps<IConversation>>,
   "data" | "renderItem"
 > & {
-  conversations: IXmtpConversationWithCodecs[]
-  renderConversation?: ListRenderItem<IXmtpConversationWithCodecs>
+  conversations: IConversation[]
+  renderConversation?: ListRenderItem<IConversation>
   onRefetch?: () => Promise<void>
 }
 
@@ -55,7 +55,7 @@ export function ConversationList(props: IConversationListProps) {
   )
 }
 
-const defaultRenderItem: ListRenderItem<IXmtpConversationWithCodecs> = ({ item }) => {
+const defaultRenderItem: ListRenderItem<IConversation> = ({ item }) => {
   const conversation = item
   if (isConversationGroup(conversation)) {
     return <ConversationListItemGroup conversationTopic={conversation.topic} />
@@ -63,7 +63,7 @@ const defaultRenderItem: ListRenderItem<IXmtpConversationWithCodecs> = ({ item }
   return <ConversationListItemDm conversationTopic={conversation.topic} />
 }
 
-function keyExtractor(item: IXmtpConversationWithCodecs) {
+function keyExtractor(item: IConversation) {
   if ("lastMessage" in item) {
     return item.topic
   }

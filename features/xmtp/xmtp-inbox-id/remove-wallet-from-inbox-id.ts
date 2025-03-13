@@ -1,4 +1,5 @@
-import { InboxId, PublicIdentity } from "@xmtp/react-native-sdk"
+import { PublicIdentity } from "@xmtp/react-native-sdk"
+import { config } from "@/config"
 import { IXmtpInboxId, IXmtpSigner } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
 import { XMTPError } from "@/utils/error"
@@ -27,7 +28,7 @@ export async function removeWalletFromInboxId(args: {
 
     const timeDiffMs = afterMs - beforeMs
 
-    if (timeDiffMs > 3000) {
+    if (timeDiffMs > config.xmtp.maxMsUntilLogError) {
       captureError(
         new XMTPError({
           error: new Error(

@@ -1,11 +1,12 @@
-import { IXmtpInboxId, IXmtpMessageId } from "@features/xmtp/xmtp.types"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { queryOptions } from "@tanstack/react-query"
 import { getXmtpConversationMessage } from "@/features/xmtp/xmtp-messages/xmtp-messages"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
+import { IConversationMessageId } from "./conversation-message.types"
 
 type IArgs = {
   clientInboxId: IXmtpInboxId
-  messageId: IXmtpMessageId
+  messageId: IConversationMessageId
 }
 
 async function getConversationMessage(args: IArgs) {

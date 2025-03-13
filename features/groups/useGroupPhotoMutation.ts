@@ -1,4 +1,3 @@
-import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
 import { useMutation } from "@tanstack/react-query"
 import { updateConversationInAllowedConsentConversationsQueryData } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import {
@@ -7,10 +6,11 @@ import {
   useGroupQuery,
 } from "@/features/groups/useGroupQuery"
 import { captureError } from "@/utils/capture-error"
+import { IConversationTopic } from "../conversation/conversation.types"
 
 type IArgs = {
   account: string
-  topic: IXmtpConversationTopic
+  topic: IConversationTopic
 }
 
 export function useGroupPhotoMutation(args: IArgs) {
@@ -47,7 +47,7 @@ export function useGroupPhotoMutation(args: IArgs) {
 
       const { previousGroup } = context || {}
 
-      const updates = { groupImageUrl: previousGroup?.groupImageUrl ?? "" }
+      const updates = { groupImageUrl: previousGroup?.imageUrl ?? "" }
       updateGroupQueryData({ inboxId: account, topic, updates })
       updateConversationInAllowedConsentConversationsQueryData({
         inboxId: account,

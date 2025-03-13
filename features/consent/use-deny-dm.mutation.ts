@@ -10,14 +10,10 @@ import {
 } from "@/features/conversation/conversation-requests-list/conversations-unknown-consent.query"
 import { getConversationQueryData } from "@/features/conversation/queries/conversation.query"
 import { getDmQueryData, setDmQueryData } from "@/features/dm/use-dm-query"
-import {
-  IXmtpConversationId,
-  IXmtpConversationTopic,
-  IXmtpConversationWithCodecs,
-  IXmtpDmWithCodecs,
-  IXmtpInboxId,
-} from "@/features/xmtp/xmtp.types"
+import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
+import { IConversationId, IConversationTopic } from "../conversation/conversation.types"
+import { IDm } from "../dm/dm.types"
 import {
   setXmtpConsentStateForInboxId,
   updateConsentForGroupsForAccount,
@@ -29,8 +25,8 @@ export function useDenyDmMutation() {
   return useMutation({
     mutationFn: async (args: {
       peerInboxId: IXmtpInboxId
-      conversationId: IXmtpConversationId
-      topic: IXmtpConversationTopic
+      conversationId: IConversationId
+      topic: IConversationTopic
     }) => {
       const { peerInboxId, conversationId } = args
 
@@ -61,9 +57,9 @@ export function useDenyDmMutation() {
         })
 
         setDmQueryData({
-          ethAccountAddress: currentSenderInboxId,
-          inboxId: peerInboxId,
-          dm: updatedDm as IXmtpDmWithCodecs,
+          targetInboxId: currentSenderInboxId,
+          clientInboxId: peerInboxId,
+          dm: updatedDm as IDm,
         })
 
         // Remove from main conversations list
@@ -85,8 +81,8 @@ export function useDenyDmMutation() {
       const { previousDmConsent } = context || {}
       if (previousDmConsent) {
         const dm = getDmQueryData({
-          ethAccountAddress: currentSenderInboxId,
-          inboxId: peerInboxId,
+          targetInboxId: currentSenderInboxId,
+          clientInboxId: peerInboxId,
         })
 
         if (!dm) {
@@ -98,21 +94,21 @@ export function useDenyDmMutation() {
         })
 
         setDmQueryData({
-          ethAccountAddress: currentSenderInboxId,
-          inboxId: peerInboxId,
+          targetInboxId: currentSenderInboxId,
+          clientInboxId: peerInboxId,
           dm: previousDm,
         })
 
         // Add back to main conversations list
         addConversationToAllowedConsentConversationsQuery({
           inboxId: currentSenderInboxId,
-          conversation: previousDm as IXmtpConversationWithCodecs,
+          conversation: previousDm,
         })
 
         // Add back to requests
         addConversationToUnknownConsentConversationsQuery({
           inboxId: currentSenderInboxId,
-          conversation: previousDm as IXmtpConversationWithCodecs,
+          conversation: previousDm,
         })
       }
     },

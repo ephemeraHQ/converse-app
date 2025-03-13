@@ -8,81 +8,93 @@ import {
 import emojiRegex from "emoji-regex"
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import {
+  IConversationMessage,
+  IConversationMessageContent,
+  IConversationMessageContentType,
+  IConversationMessageId,
+
+  IConversationMessageGroupUpdated,
+  IConversationMessageMultiRemoteAttachmentContent,
+  IConversationMessageReaction,
+  IConversationMessageRemoteAttachment,
+  IConversationMessageReply,
+  IConversationMessageStaticAttachment,
+  IConversationMessageText} from "@/features/conversation/conversation-chat/conversation-message/conversation-message.types"
+import {
   getConversationMessagesQueryData,
   useConversationMessagesQuery,
 } from "@/features/conversation/conversation-chat/conversation-messages.query"
-import { getMessageContentType } from "@/features/xmtp/xmtp-content-types/xmtp-content-types"
 import {
-  IXmtpConversationTopic,
-  IXmtpDecodedActualMessage,
-  IXmtpDecodedGroupUpdatedMessage,
-  IXmtpDecodedMessage,
-  IXmtpDecodedMultiRemoteAttachmentMessage,
-  IXmtpDecodedReactionMessage,
-  IXmtpDecodedRemoteAttachmentMessage,
-  IXmtpDecodedReplyMessage,
-  IXmtpDecodedStaticAttachmentMessage,
-  IXmtpDecodedTextMessage,
-  IXmtpMessageId,
-} from "@/features/xmtp/xmtp.types"
+  getXmtpMessageContentType,
+  isXmtpGroupUpdatedContent,
+  isXmtpMultiRemoteAttachmentContent,
+  isXmtpReactionContent,
+  isXmtpReadReceiptContent,
+  isXmtpRemoteAttachmentContent,
+  isXmtpReplyContent,
+  isXmtpStaticAttachmentContent,
+  isXmtpTextContent,
+} from "@/features/xmtp/xmtp-codecs/xmtp-codecs"
+import { IXmtpDecodedMessage, IXmtpInboxId } from "@/features/xmtp/xmtp.types"
+import { IConversationTopic } from "../../conversation.types"
 import { useCurrentConversationTopicSafe } from "../conversation.store-context"
 
-export function isAnActualMessage(
-  message: IXmtpDecodedMessage,
-): message is IXmtpDecodedActualMessage {
+export function isAnActualMessage(message: IConversationMessage): message is IConversationMessage {
   return !isReadReceiptMessage(message) && !isGroupUpdatedMessage(message)
 }
 
-export function isTextMessage(message: IXmtpDecodedMessage): message is IXmtpDecodedTextMessage {
-  return getMessageContentType({ message }) === "text"
+export function isTextMessage(message: IConversationMessage): message is IConversationMessageText {
+  return getXmtpMessageContentType({ message }) === "text"
 }
 
 export function isReactionMessage(
-  message: IXmtpDecodedMessage,
-): message is IXmtpDecodedReactionMessage {
-  return getMessageContentType({ message }) === "reaction"
+  message: IConversationMessage,
+): message is IConversationMessageReaction {
+  return getXmtpMessageContentType({ message }) === "reaction"
 }
 
-export function isReadReceiptMessage(message: IXmtpDecodedMessage) {
+export function isReadReceiptMessage(message: IConversationMessage) {
   // return getMessageContentType({message}) === "readReceipt";
   // TODO
   return false
 }
 
 export function isGroupUpdatedMessage(
-  message: IXmtpDecodedMessage,
-): message is IXmtpDecodedGroupUpdatedMessage {
-  return getMessageContentType({ message }) === "groupUpdated"
+  message: IConversationMessage,
+): message is IConversationMessageGroupUpdated {
+  return getXmtpMessageContentType({ message }) === "groupUpdated"
 }
 
-export function isReplyMessage(message: IXmtpDecodedMessage): message is IXmtpDecodedReplyMessage {
-  return getMessageContentType({ message }) === "reply"
+export function isReplyMessage(
+  message: IConversationMessage,
+): message is IConversationMessageReply {
+  return getXmtpMessageContentType({ message }) === "reply"
 }
 
 export function isRemoteAttachmentMessage(
-  message: IXmtpDecodedMessage,
-): message is IXmtpDecodedRemoteAttachmentMessage {
-  return getMessageContentType({ message }) === "remoteAttachment"
+  message: IConversationMessage,
+): message is IConversationMessageRemoteAttachment {
+  return getXmtpMessageContentType({ message }) === "remoteAttachment"
 }
 
 export function isStaticAttachmentMessage(
-  message: IXmtpDecodedMessage,
-): message is IXmtpDecodedStaticAttachmentMessage {
-  return getMessageContentType({ message }) === "attachment"
+  message: IConversationMessage,
+): message is IConversationMessageStaticAttachment {
+  return getXmtpMessageContentType({ message }) === "attachment"
 }
 
 export function isMultiRemoteAttachmentMessage(
-  message: IXmtpDecodedMessage,
-): message is IXmtpDecodedMultiRemoteAttachmentMessage {
-  return getMessageContentType({ message }) === "multiRemoteAttachment"
+  message: IConversationMessage,
+): message is IConversationMessageMultiRemoteAttachmentContent {
+  return getXmtpMessageContentType({ message }) === "multiRemoteAttachment"
 }
 
 export function getMessageById({
   messageId,
   topic,
 }: {
-  messageId: IXmtpMessageId
-  topic: IXmtpConversationTopic
+  messageId: IConversationMessageId
+  topic: IConversationTopic
 }) {
   const currentSender = getSafeCurrentSender()
   const messages = getConversationMessagesQueryData({
@@ -95,7 +107,7 @@ export function getMessageById({
   return messages.byId[messageId]
 }
 
-export function getMessageStringContent(message: IXmtpDecodedMessage) {
+export function getMessageStringContent(message: IConversationMessage) {
   const content = message.content()
 
   if (typeof content === "string") {
@@ -153,13 +165,13 @@ export function getMessageStringContent(message: IXmtpDecodedMessage) {
   return ""
 }
 
-export function useMessageHasReactions(args: { messageId: IXmtpMessageId }) {
+export function useMessageHasReactions(args: { messageId: IConversationMessageId }) {
   const { messageId } = args
   const reactions = useConversationMessageReactions(messageId)
   return Object.values(reactions.bySender || {}).some((reactions) => reactions.length > 0)
 }
 
-export function useConversationMessageReactions(messageId: IXmtpMessageId) {
+export function useConversationMessageReactions(messageId: IConversationMessageId) {
   const currentSender = getSafeCurrentSender()
   const topic = useCurrentConversationTopicSafe()
 
@@ -178,8 +190,8 @@ export function useConversationMessageReactions(messageId: IXmtpMessageId) {
 }
 
 export function getCurrentUserAlreadyReactedOnMessage(args: {
-  messageId: IXmtpMessageId
-  topic: IXmtpConversationTopic
+  messageId: IConversationMessageId
+  topic: IConversationTopic
   emoji: string | undefined // Specific emoji or just reacted in general
 }) {
   const { messageId, topic, emoji } = args
@@ -227,23 +239,62 @@ export const shouldRenderBigEmoji = (text: string) => {
   return hasEmojis && hasFewerThanFourEmojis && containsOnlyEmojis
 }
 
-// TODO: for when we want to have our own message type
-// export function convertXmtpMessageToConversationMessage(
-//   message: DecodedMessageWithCodecsType
-// ): IConvosMessage {
-//   return {
-//     convosMessageId: message.id,
-//     xmtpMessageId: message.id,
-//     status: getConvosMessageStatusForXmtpMessage(message),
-//     senderInboxId: message.senderInboxId,
-//     sentNs: message.sentNs,
-//     type: getMessageContentType({message}),
-//     content: message.content() as NativeMessageContent,
-//   };
-// }
+export function convertXmtpMessageToConvosMessage(
+  message: IXmtpDecodedMessage,
+): IConversationMessage {
+  return {
+    id: message.id as unknown as IConversationMessageId,
+    status: getConvosMessageStatusForXmtpMessage(message),
+    senderInboxId: message.senderInboxId as unknown as IXmtpInboxId,
+    sentNs: message.sentNs,
+    type: getMessageTypeForXmtpMessage({ message }),
+    content: message.nativeContent as IConversationMessageContent,
+  }
+}
+
+export function getMessageTypeForXmtpMessage(args: {
+  message: IXmtpDecodedMessage
+}): IConversationMessageContentType {
+  const { message } = args
+
+  if (isXmtpTextContent(message.contentTypeId)) {
+    return "text"
+  }
+
+  if (isXmtpRemoteAttachmentContent(message.contentTypeId)) {
+    return "remoteAttachment"
+  }
+
+  if (isXmtpStaticAttachmentContent(message.contentTypeId)) {
+    return "staticAttachment"
+  }
+
+  if (isXmtpReactionContent(message.contentTypeId)) {
+    return "reaction"
+  }
+
+  if (isXmtpReplyContent(message.contentTypeId)) {
+    return "reply"
+  }
+
+  if (isXmtpReadReceiptContent(message.contentTypeId)) {
+    return "readReceipt"
+  }
+
+  if (isXmtpGroupUpdatedContent(message.contentTypeId)) {
+    return "groupUpdated"
+  }
+
+  if (isXmtpMultiRemoteAttachmentContent(message.contentTypeId)) {
+    return "multiRemoteAttachment"
+  }
+
+  throw new Error(`Unhandled message type: ${message.contentTypeId}`)
+}
+
 export function getConversationPreviousMessage(args: {
-  messageId: IXmtpMessageId
-  topic: IXmtpConversationTopic
+  messageId: IConversationMessageId
+  topic: IConversationTopic
 }) {
   const { messageId, topic } = args
   const currentSender = getSafeCurrentSender()
@@ -260,8 +311,8 @@ export function getConversationPreviousMessage(args: {
 }
 
 export function getConversationNextMessage(args: {
-  messageId: IXmtpMessageId
-  topic: IXmtpConversationTopic
+  messageId: IConversationMessageId
+  topic: IConversationTopic
 }) {
   const { messageId, topic } = args
   const currentSender = getSafeCurrentSender()

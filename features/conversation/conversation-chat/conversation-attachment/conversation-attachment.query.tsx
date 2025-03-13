@@ -6,17 +6,17 @@ import {
   storeRemoteAttachment,
 } from "@/features/conversation/conversation-chat/conversation-attachment/remote-attachment-local-storage"
 import { decryptAttachment } from "@/features/xmtp/xmtp-codecs/xmtp-codecs-attachments"
-import { IXmtpMessageId } from "@/features/xmtp/xmtp.types"
+import { IConversationMessageId } from "../conversation-message/conversation-message.types"
 
 export function useRemoteAttachmentQuery(args: {
-  messageId: IXmtpMessageId
+  messageId: IConversationMessageId
   content: RemoteAttachmentContent
 }) {
   return useQuery(getRemoteAttachmentQueryOptions(args))
 }
 
 export function getRemoteAttachmentQueryOptions(args: {
-  messageId: IXmtpMessageId
+  messageId: IConversationMessageId
   content: RemoteAttachmentContent
 }) {
   return queryOptions({
@@ -28,7 +28,7 @@ export function getRemoteAttachmentQueryOptions(args: {
 }
 
 async function fetchRemoteAttachment(args: {
-  messageId: IXmtpMessageId
+  messageId: IConversationMessageId
   content: RemoteAttachmentContent
 }) {
   const { messageId, content } = args

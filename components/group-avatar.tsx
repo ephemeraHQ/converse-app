@@ -1,10 +1,11 @@
-import { IXmtpConversationTopic, IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import React, { memo, useMemo } from "react"
 import { StyleProp, TextStyle, ViewStyle } from "react-native"
 import { Center } from "@/design-system/Center"
 import { Text } from "@/design-system/Text"
 import { VStack } from "@/design-system/VStack"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
+import { IConversationTopic } from "@/features/conversation/conversation.types"
 import { useGroupMembersQuery } from "@/features/groups/useGroupMembersQuery"
 import { useGroupQuery } from "@/features/groups/useGroupQuery"
 import { usePreferredDisplayInfoBatch } from "@/features/preferred-display-info/use-preferred-display-info-batch"
@@ -81,7 +82,7 @@ export const GroupAvatarInboxIds = memo(function GroupAvatarInboxIds(props: {
  * Will render the group image if available, otherwise shows member avatars
  */
 export const GroupAvatar = memo(function GroupAvatar(props: {
-  groupTopic: IXmtpConversationTopic
+  groupTopic: IConversationTopic
   size?: IGroupAvatarSize
   sizeNumber?: number
 }) {
@@ -169,8 +170,8 @@ export const GroupAvatar = memo(function GroupAvatar(props: {
   }, [size, theme, sizeNumberProp])
 
   // If group has an image, use it instead of member avatars
-  if (group?.groupImageUrl) {
-    return <Avatar uri={group.groupImageUrl} sizeNumber={sizeNumber} name={group.groupName} />
+  if (group?.imageUrl) {
+    return <Avatar uri={group.imageUrl} sizeNumber={sizeNumber} name={group.name} />
   }
 
   return <GroupAvatarUI members={memberData} size={sizeNumber} />

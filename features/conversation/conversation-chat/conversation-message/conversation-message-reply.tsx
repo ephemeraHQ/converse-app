@@ -23,18 +23,18 @@ import {
   useCurrentConversationTopicSafe,
 } from "@/features/conversation/conversation-chat/conversation.store-context"
 import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
-import {
-  IXmtpDecodedMessage,
-  IXmtpDecodedReplyMessage,
-  IXmtpMessageId,
-} from "@/features/xmtp/xmtp.types"
 import { useSelect } from "@/stores/stores.utils"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { captureError } from "@/utils/capture-error"
+import {
+  IConversationMessage,
+  IConversationMessageId,
+  IConversationMessageReply,
+} from "./conversation-message.types"
 import { useConversationMessageById } from "./use-conversation-message-by-id"
 
 export const MessageReply = memo(function MessageReply(props: {
-  message: IXmtpDecodedReplyMessage
+  message: IConversationMessageReply
 }) {
   const { message } = props
 
@@ -68,7 +68,7 @@ export const MessageReply = memo(function MessageReply(props: {
             }}
           >
             <MessageReplyReference
-              referenceMessageId={replyMessageContent.reference as IXmtpMessageId}
+              referenceMessageId={replyMessageContent.reference as IConversationMessageId}
             />
 
             {!!replyMessageContent.content.remoteAttachment && (
@@ -80,7 +80,7 @@ export const MessageReply = memo(function MessageReply(props: {
               >
                 <AttachmentRemoteImage
                   fitAspectRatio
-                  messageId={replyMessageContent.reference as IXmtpMessageId}
+                  messageId={replyMessageContent.reference as IConversationMessageId}
                   remoteMessageContent={replyMessageContent.content.remoteAttachment}
                   containerProps={{
                     style: {
@@ -105,7 +105,7 @@ export const MessageReply = memo(function MessageReply(props: {
 })
 
 const MessageReplyReference = memo(function MessageReplyReference(props: {
-  referenceMessageId: IXmtpMessageId
+  referenceMessageId: IConversationMessageId
 }) {
   const { referenceMessageId } = props
 
@@ -173,7 +173,7 @@ const MessageReplyReference = memo(function MessageReplyReference(props: {
 })
 
 const MessageReplyReferenceContent = memo(function ReplyMessageReferenceMessageContent(props: {
-  replyMessage: IXmtpDecodedMessage
+  replyMessage: IConversationMessage
 }) {
   const { replyMessage } = props
   const { theme } = useAppTheme()
@@ -187,7 +187,7 @@ const MessageReplyReferenceContent = memo(function ReplyMessageReferenceMessageC
       theme.borderRadius.message.attachment - theme.spacing.message.replyMessage.horizontalPadding,
   }
 
-  function renderMessageContent(message: IXmtpDecodedMessage) {
+  function renderMessageContent(message: IConversationMessage) {
     if (isReadReceiptMessage(message)) {
       return null
     }

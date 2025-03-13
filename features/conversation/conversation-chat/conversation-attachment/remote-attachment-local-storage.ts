@@ -1,10 +1,10 @@
 import { DecryptedLocalAttachment } from "@xmtp/react-native-sdk"
 import mime from "mime"
 import RNFS from "react-native-fs"
-import { IXmtpMessageId } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
 import { moveFileAndReplaceIfExist } from "@/utils/file-system/file-system"
 import { getImageSize, isImageMimetype } from "@/utils/media"
+import { IConversationMessageId } from "../conversation-message/conversation-message.types"
 import { LocalAttachmentMetadata } from "./conversation-attachments.types"
 import { createAttachmentFolder, getAttachmentPaths } from "./conversation-attachments.utils"
 
@@ -32,7 +32,7 @@ export const getStoredRemoteAttachment = async (messageId: string) => {
 }
 
 export const storeRemoteAttachment = async (args: {
-  messageId: IXmtpMessageId
+  messageId: IConversationMessageId
   decryptedAttachment: DecryptedLocalAttachment
 }): Promise<LocalAttachmentMetadata> => {
   const { messageId, decryptedAttachment } = args

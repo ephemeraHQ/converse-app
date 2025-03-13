@@ -1,4 +1,4 @@
-import type { IXmtpConversationTopic, IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import type { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { useMutation } from "@tanstack/react-query"
 import { updateConversationInAllowedConsentConversationsQueryData } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import {
@@ -7,16 +7,17 @@ import {
   useGroupQuery,
 } from "@/features/groups/useGroupQuery"
 import { updateXmtpGroupName } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-group"
-import { IXmtpGroupWithCodecs } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
+import type { IConversationTopic } from "../conversation/conversation.types"
+import { IGroup } from "./group.types"
 
 type IArgs = {
-  topic: IXmtpConversationTopic
+  topic: IConversationTopic
   clientInboxId: IXmtpInboxId
 }
 
 export function useGroupNameMutation(args: {
-  topic: IXmtpConversationTopic
+  topic: IConversationTopic
   clientInboxId: IXmtpInboxId
 }) {
   const { topic, clientInboxId } = args
@@ -35,7 +36,7 @@ export function useGroupNameMutation(args: {
     },
     onMutate: async (name: string) => {
       const previousGroup = getGroupQueryData({ inboxId: clientInboxId, topic })
-      const updates: Partial<IXmtpGroupWithCodecs> = { groupName: name }
+      const updates: Partial<IGroup> = { groupName: name }
 
       if (previousGroup) {
         updateGroupQueryData({ inboxId: clientInboxId, topic, updates })
@@ -54,7 +55,7 @@ export function useGroupNameMutation(args: {
 
       const { previousGroup } = context || {}
 
-      const updates: Partial<IXmtpGroupWithCodecs> = { groupName: previousGroup?.groupName ?? "" }
+      const updates: Partial<IGroup> = { groupName: previousGroup?.name ?? "" }
 
       updateGroupQueryData({ inboxId: clientInboxId, topic, updates })
       updateConversationInAllowedConsentConversationsQueryData({

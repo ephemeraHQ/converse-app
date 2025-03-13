@@ -7,16 +7,16 @@ import { ViewStyle } from "react-native"
 import { Avatar } from "@/components/avatar"
 import { Center } from "@/design-system/Center"
 import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
-import {
-  IXmtpDecodedGroupUpdatedMessage,
-  IXmtpGroupUpdatedMetadataEntry,
-  IXmtpInboxId,
-} from "@/features/xmtp/xmtp.types"
+import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { navigate } from "@/navigation/navigation.utils"
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme"
+import {
+  IConversationMessageGroupUpdated,
+  IGroupUpdatedMetadataEntry,
+} from "./conversation-message.types"
 
 type IConversationMessageGroupUpdateProps = {
-  message: IXmtpDecodedGroupUpdatedMessage
+  message: IConversationMessageGroupUpdated
 }
 
 export function ConversationMessageGroupUpdate({ message }: IConversationMessageGroupUpdateProps) {
@@ -121,7 +121,7 @@ function ChatGroupMemberJoined({ inboxId }: IChatGroupMemberJoinedProps) {
 }
 
 type IChatGroupMetadataUpdateProps = {
-  metadataEntry: IXmtpGroupUpdatedMetadataEntry
+  metadataEntry: IGroupUpdatedMetadataEntry
   initiatorInboxId: IXmtpInboxId
 }
 

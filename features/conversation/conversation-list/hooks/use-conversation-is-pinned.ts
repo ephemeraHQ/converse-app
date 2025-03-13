@@ -1,9 +1,9 @@
-import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
 import { useQuery } from "@tanstack/react-query"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { getConversationMetadataQueryOptions } from "@/features/conversation/conversation-metadata/conversation-metadata.query"
+import { IConversationTopic } from "../../conversation.types"
 
-export function useConversationIsPinned(args: { conversationTopic: IXmtpConversationTopic }) {
+export function useConversationIsPinned(args: { conversationTopic: IConversationTopic }) {
   const { conversationTopic } = args
 
   const currentSender = useSafeCurrentSender()

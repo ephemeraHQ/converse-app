@@ -7,12 +7,12 @@ import { AttachmentLoading } from "@/features/conversation/conversation-chat/con
 import { getAttachmentPaths } from "@/features/conversation/conversation-chat/conversation-attachment/conversation-attachments.utils"
 import { ConversationMessageAttachmentContainer } from "@/features/conversation/conversation-chat/conversation-attachment/conversation-message-attachment-container"
 import { processAndSaveLocalAttachment } from "@/features/conversation/conversation-chat/conversation-attachment/process-and-save-local-attachment"
-import { IXmtpDecodedStaticAttachmentMessage } from "@/features/xmtp/xmtp.types"
 import { translate } from "@/i18n"
 import { createFolderIfNotExists, saveFile } from "@/utils/file-system/file-system"
+import { IConversationMessageStaticAttachment } from "../conversation-message/conversation-message.types"
 
 type IMessageStaticAttachmentProps = {
-  message: IXmtpDecodedStaticAttachmentMessage
+  message: IConversationMessageStaticAttachment
 }
 
 export const ConversationMessageStaticAttachment = memo(

@@ -7,9 +7,10 @@ import { normalizeString } from "@/utils/str"
 
 export async function searchExistingGroupsByGroupName(args: { searchQuery: string }) {
   const { searchQuery } = args
-  const currentAccount = getSafeCurrentSender().ethereumAddress
+  const currentSender = getSafeCurrentSender()
+
   const conversations = getAllowedConsentConversationsQueryData({
-    inboxId: currentAccount,
+    inboxId: currentSender.inboxId,
   })
 
   if (!conversations || !searchQuery) {
@@ -19,7 +20,7 @@ export async function searchExistingGroupsByGroupName(args: { searchQuery: strin
   const groups = conversations.filter(isConversationGroup)
 
   return groups
-    .filter((group) => normalizeString(group.groupName).includes(searchQuery))
+    .filter((group) => normalizeString(group.name).includes(searchQuery))
     .map((group) => group.topic)
 }
 

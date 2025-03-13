@@ -4,9 +4,9 @@ import {
   isStaticAttachmentMessage,
   isTextMessage,
 } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
-import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types"
+import { IConversationMessage } from "../../conversation-chat/conversation-message/conversation-message.types"
 
-export function getMessageSpamScore(args: { message: IXmtpDecodedMessage }) {
+export function getMessageSpamScore(args: { message: IConversationMessage }) {
   const { message } = args
 
   let spamScore = 0

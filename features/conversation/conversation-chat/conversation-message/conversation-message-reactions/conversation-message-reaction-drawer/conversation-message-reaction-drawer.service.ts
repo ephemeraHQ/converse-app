@@ -1,5 +1,5 @@
 import { createBottomSheetModalRef } from "@/design-system/BottomSheet/BottomSheet.utils"
-import { IXmtpMessageId } from "@/features/xmtp/xmtp.types"
+import { IConversationMessageId } from "../../conversation-message.types"
 import {
   resetMessageReactionsStore,
   useMessageReactionsStore,
@@ -7,7 +7,7 @@ import {
 
 export const conversationMessageDrawerBottomSheetRef = createBottomSheetModalRef()
 
-export function openMessageReactionsDrawer(args: { messageId: IXmtpMessageId }) {
+export function openMessageReactionsDrawer(args: { messageId: IConversationMessageId }) {
   const { messageId } = args
   const store = useMessageReactionsStore.getState()
   store.actions.setMessageId(messageId)

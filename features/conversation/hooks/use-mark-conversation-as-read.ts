@@ -1,4 +1,3 @@
-import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
 import { MutationOptions, useMutation } from "@tanstack/react-query"
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { markConversationMetadataAsRead } from "@/features/conversation/conversation-metadata/conversation-metadata.api"
@@ -7,6 +6,7 @@ import {
   updateConversationMetadataQueryData,
 } from "@/features/conversation/conversation-metadata/conversation-metadata.query"
 import { formatDateForApi } from "@/utils/api/api.utils"
+import { IConversationTopic } from "../conversation.types"
 
 // Define the type for the mutation context
 type MarkAsReadContext = {
@@ -17,7 +17,7 @@ type MarkAsReadContext = {
 }
 
 export function getMarkConversationAsReadMutationOptions(args: {
-  topic: IXmtpConversationTopic
+  topic: IConversationTopic
 }): MutationOptions<void, Error, void, MarkAsReadContext> {
   const { topic } = args
 
@@ -70,7 +70,7 @@ export function getMarkConversationAsReadMutationOptions(args: {
   }
 }
 
-export function useMarkConversationAsRead(args: { topic: IXmtpConversationTopic }) {
+export function useMarkConversationAsRead(args: { topic: IConversationTopic }) {
   const { mutateAsync: markAsReadAsync } = useMutation(
     getMarkConversationAsReadMutationOptions(args),
   )

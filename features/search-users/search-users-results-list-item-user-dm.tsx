@@ -1,12 +1,12 @@
-import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
 import { memo } from "react"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { useDmPeerInboxIdQuery } from "@/features/dm/use-dm-peer-inbox-id-query"
 import { SearchUsersResultsListItemUser } from "@/features/search-users/search-users-results-list-item-user"
+import { IConversationTopic } from "../conversation/conversation.types"
 
 export const SearchUsersResultsListItemUserDm = memo(
   function SearchUsersResultsListItemUserDm(props: {
-    conversationTopic: IXmtpConversationTopic
+    conversationTopic: IConversationTopic
     onPress: () => void
   }) {
     const { conversationTopic, onPress } = props

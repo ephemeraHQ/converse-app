@@ -15,10 +15,10 @@ import {
   isStaticAttachmentMessage,
   isTextMessage,
 } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
-import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types"
+import { IConversationMessage } from "./conversation-message.types"
 
 export const ConversationMessage = memo(
-  function ConversationMessage(props: { message: IXmtpDecodedMessage }) {
+  function ConversationMessage(props: { message: IConversationMessage }) {
     const { message } = props
 
     if (isTextMessage(message)) {

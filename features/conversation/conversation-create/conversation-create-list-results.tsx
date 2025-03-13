@@ -1,4 +1,4 @@
-import { IXmtpConversationTopic, IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { memo, useCallback, useMemo } from "react"
 import { Alert, ListRenderItem } from "react-native"
 import { useAnimatedStyle, useDerivedValue, withSpring } from "react-native-reanimated"
@@ -29,18 +29,19 @@ import { SearchUsersResultsListItemEthAddress } from "../../search-users/search-
 import { SearchUsersResultsListItemGroup } from "../../search-users/search-users-results-list-item-group"
 import { SearchUsersResultsListItemUser } from "../../search-users/search-users-results-list-item-user"
 import { SearchUsersResultsListItemUserDm } from "../../search-users/search-users-results-list-item-user-dm"
+import { IConversationTopic } from "../conversation.types"
 
 // Because we want a mix of DMs, groups, and profiles
 const MAX_INITIAL_RESULTS = 3
 
 type ISearchResultItemDm = {
   type: "dm"
-  conversationTopic: IXmtpConversationTopic
+  conversationTopic: IConversationTopic
 }
 
 type ISearchResultItemGroup = {
   type: "group"
-  conversationTopic: IXmtpConversationTopic
+  conversationTopic: IConversationTopic
 }
 
 type ISearchResultItemProfile = {
@@ -79,7 +80,7 @@ function searchResultIsExternalIdentity(
 
 const SearchUsersResultsListItemUserDmWrapper = memo(
   function SearchUsersResultsListItemUserDmWrapper(props: {
-    conversationTopic: IXmtpConversationTopic
+    conversationTopic: IConversationTopic
   }) {
     const { conversationTopic } = props
 
@@ -124,7 +125,7 @@ const SearchUsersResultsListItemUserDmWrapper = memo(
 
 const SearchUsersResultsListItemGroupWrapper = memo(
   function SearchUsersResultsListItemGroupWrapper(props: {
-    conversationTopic: IXmtpConversationTopic
+    conversationTopic: IConversationTopic
   }) {
     const conversationStore = useConversationStore()
 

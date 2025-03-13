@@ -1,4 +1,4 @@
-import { IXmtpInboxId , IXmtpGroupWithCodecs } from "@features/xmtp/xmtp.types"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { useMutation } from "@tanstack/react-query"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import {
@@ -9,9 +9,10 @@ import {
   setGroupMembersQueryData,
 } from "@/features/groups/useGroupMembersQuery"
 import { addXmtpGroupMembers } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-group"
+import { IGroup } from "../group.types"
 
 type AddGroupMembersVariables = {
-  group: IXmtpGroupWithCodecs
+  group: IGroup
   inboxIds: IXmtpInboxId[]
 }
 
