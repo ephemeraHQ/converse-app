@@ -3,6 +3,7 @@ import { getRandomBytesAsync } from "expo-crypto"
 import { config } from "@/config"
 import { captureError } from "@/utils/capture-error"
 import { XMTPError } from "@/utils/error"
+import { IEthereumAddress } from "@/utils/evm/address"
 import { getSecureItemAsync, setSecureItemAsync } from "@/utils/keychain"
 import { xmtpLogger } from "@/utils/logger"
 import { ISupportedXmtpCodecs, supportedXmtpCodecs } from "../xmtp-codecs/xmtp-codecs"
@@ -43,7 +44,7 @@ export async function createXmtpClientInstance(args: {
 }
 
 export async function buildXmtpClientInstance(args: {
-  ethereumAddress: string
+  ethereumAddress: IEthereumAddress
   inboxId?: IXmtpInboxId
 }) {
   const { ethereumAddress, inboxId } = args
