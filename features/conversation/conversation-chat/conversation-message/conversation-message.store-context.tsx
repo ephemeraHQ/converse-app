@@ -9,7 +9,7 @@ import { subscribeWithSelector } from "zustand/middleware"
 import { isGroupUpdatedMessage } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
 import { hasNextMessageInSeries } from "@/features/conversation/utils/has-next-message-in-serie"
 import { hasPreviousMessageInSeries } from "@/features/conversation/utils/has-previous-message-in-serie"
-import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user"
+import { messageIsFromCurrentSenderInboxId } from "@/features/conversation/utils/message-is-from-current-user"
 import { messageShouldShowDateChange } from "@/features/conversation/utils/message-should-show-date-change"
 import { convertNanosecondsToMilliseconds } from "@/utils/date"
 import { IConversationMessage, IConversationMessageId } from "./conversation-message.types"
@@ -71,7 +71,7 @@ function getStoreStateBasedOnProps(props: IMessageContextStoreProps) {
       currentMessage: props.message,
       previousMessage: props.previousMessage,
     }),
-    fromMe: messageIsFromCurrentAccountInboxId({
+    fromMe: messageIsFromCurrentSenderInboxId({
       message: props.message,
     }),
     showDateChange: messageShouldShowDateChange({

@@ -16,5 +16,5 @@ export async function getRecoveryAddressesForInboxIds(args: {
 
   return inboxStates
     .filter((inboxState) => inboxState.recoveryIdentity.kind === "ETHEREUM")
-    .map((inboxState) => inboxState.recoveryIdentity.identifier)
+    .map((inboxState) => inboxState.recoveryIdentity.identifier) as IEthereumAddress[]
 }

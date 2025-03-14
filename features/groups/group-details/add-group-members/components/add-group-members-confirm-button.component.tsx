@@ -8,7 +8,7 @@ import { AnimatedVStack } from "@/design-system/VStack"
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { useAddGroupMembersStore } from "@/features/groups/group-details/add-group-members/stores/add-group-members.store"
 import { useAddGroupMembersMutation } from "@/features/groups/group-members/use-add-group-members.mutation"
-import { useGroupQuery } from "@/features/groups/useGroupQuery"
+import { useGroupQuery } from "@/features/groups/group.query"
 import { useRouteParams, useRouter } from "@/navigation/use-navigation"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { captureErrorWithToast } from "@/utils/capture-error"
@@ -25,7 +25,7 @@ export const AddGroupMembersConfirmButton = memo(function AddGroupMembersConfirm
   const { mutateAsync: addGroupMembers } = useAddGroupMembersMutation()
 
   const { data: group } = useGroupQuery({
-    inboxId: getSafeCurrentSender().ethereumAddress,
+    inboxId: getSafeCurrentSender().inboxId,
     topic: groupTopic,
   })
 

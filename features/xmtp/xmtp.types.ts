@@ -13,6 +13,7 @@ import {
   GroupUpdatedContent,
   GroupUpdatedMetadatEntry,
   InboxId,
+  Member,
   MessageDeliveryStatus,
   MessageId,
   MultiRemoteAttachmentCodec,
@@ -25,6 +26,7 @@ import {
   RemoteAttachmentInfo,
   RemoteAttachmentMetadata,
   ReplyCodec,
+  ReplyContent,
   Signer,
   StaticAttachmentCodec,
   StaticAttachmentContent,
@@ -44,6 +46,7 @@ export type IXmtpGroupWithCodecs = Group<ISupportedXmtpCodecs>
 export type IXmtpConversationId = ConversationId
 export type IXmtpConversationTopic = ConversationTopic
 export type IXmtpConversationVersion = ConversationVersion
+export type IXmtpGroupMember = Member
 
 export type IXmtpConsentState = ConsentState
 
@@ -72,12 +75,14 @@ export type IXmtpDecodedMessage =
   | IXmtpDecodedMultiRemoteAttachmentMessage
 
 // ===== Content Types =====
-export type IXmtpNativeMessageContent = NativeMessageContent
+export type IXmtpDecodedMessageNativeContent = NativeMessageContent
+export type IXmtpTextContent = string
 export type IXmtpReactionContent = ReactionContent
 export type IXmtpGroupUpdatedContent = GroupUpdatedContent
 export type IXmtpGroupUpdatedMetadataEntry = GroupUpdatedMetadatEntry
 export type IXmtpRemoteAttachmentContent = RemoteAttachmentContent
 export type IXmtpStaticAttachmentContent = StaticAttachmentContent
+export type IXmtpReplyContent = ReplyContent
 
 // ===== Attachment Types =====
 export type IXmtpDecryptedLocalAttachment = DecryptedLocalAttachment
@@ -85,11 +90,11 @@ export type IXmtpRemoteAttachmentInfo = RemoteAttachmentInfo
 export type IXmtpRemoteAttachmentMetadata = RemoteAttachmentMetadata
 
 // ===== Client & Identity Types =====
-export type IXmtpClient = Omit<Client<ISupportedXmtpCodecs>, "inboxId"> & {
+export type IXmtpClientWithCodecs = Omit<Client<ISupportedXmtpCodecs>, "inboxId"> & {
   inboxId: IXmtpInboxId
 }
+
 export type IXmtpSigner = Signer
-export type IXmtpPublicIdentity = PublicIdentity
 export type IXmtpEnv = "dev" | "production" | "local"
 
 // ===== Message Delivery Status =====

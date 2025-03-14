@@ -4,8 +4,8 @@ import { useAuthenticationStore } from "@/features/authentication/authentication
 import { resetMultiInboxStore } from "@/features/authentication/multi-inbox.store"
 import { captureError } from "@/utils/capture-error"
 import { GenericError } from "@/utils/error"
-import { reactQueryMMKV, secureQueryMMKV } from "@/utils/mmkv"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
+import { reactQueryMMKV, secureQueryMMKV } from "@/utils/react-query/react-query.utils"
 import { logger } from "../../utils/logger"
 
 export const useLogout = () => {

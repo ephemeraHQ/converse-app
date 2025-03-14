@@ -1,6 +1,6 @@
 import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { IConsentState } from "@/features/consent/consent.types"
-import { IConversation } from "@/features/conversation/conversation.types"
+import { IConversationBase } from "@/features/conversation/conversation.types"
 
 export type IGroupMember = {
   inboxId: IXmtpInboxId
@@ -26,7 +26,7 @@ export type IGroupPermissionPolicySet = {
   updateMessageDisappearingPolicy: IGroupPermissionOption
 }
 
-export type IGroup = IConversation & {
+export type IGroup = IConversationBase & {
   type: "group"
   name: string
   description?: string

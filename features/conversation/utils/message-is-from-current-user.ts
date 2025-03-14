@@ -7,16 +7,19 @@ type MessageFromCurrentUserPayload = {
   message: IConversationMessage
 }
 
-export function messageIsFromCurrentAccountInboxId({ message }: MessageFromCurrentUserPayload) {
+export function messageIsFromCurrentSenderInboxId({ message }: MessageFromCurrentUserPayload) {
   const { inboxId: currentInboxId } = getSafeCurrentSender()
-  const messageSenderInboxId = message?.senderInboxId.toLowerCase()
+  const messageSenderInboxId = message?.senderInboxId
+
   if (!currentInboxId) {
     logger.warn("[messageIsFromCurrentAccountInboxId] No current account inbox id")
     return false
   }
+
   if (!messageSenderInboxId) {
     logger.warn("[messageIsFromCurrentAccountInboxId] No message sender inbox id")
     return false
   }
+
   return isSameInboxId(messageSenderInboxId, currentInboxId)
 }

@@ -1,7 +1,8 @@
-import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import { IXmtpConversationId, IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { useMutation } from "@tanstack/react-query"
 import { IConversationTopic } from "@/features/conversation/conversation.types"
-import { useGroupQuery } from "@/features/groups/useGroupQuery"
+import { useGroupQuery } from "@/features/groups/group.query"
+import { addAdminToXmtpGroup } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-group"
 // import { refreshGroup } from "../utils/xmtpRN/conversations";
 import { captureError } from "@/utils/capture-error"
 import {
@@ -9,7 +10,7 @@ import {
   getGroupMembersQueryData,
   invalidateGroupMembersQuery,
   setGroupMembersQueryData,
-} from "../../useGroupMembersQuery"
+} from "../../group-members.query"
 
 export const usePromoteToAdminMutation = (args: {
   clientInboxId: IXmtpInboxId
@@ -24,7 +25,11 @@ export const usePromoteToAdminMutation = (args: {
       if (!group) {
         throw new Error("No group found to promote member to admin")
       }
-      await group.addAdmin(inboxId)
+      await addAdminToXmtpGroup({
+        clientInboxId,
+        groupId: group.id as unknown as IXmtpConversationId,
+        adminInboxId: inboxId,
+      })
       return inboxId
     },
     onMutate: async (inboxId: IXmtpInboxId) => {

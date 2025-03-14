@@ -9,7 +9,7 @@ import { TouchableOpacity } from "@/design-system/TouchableOpacity"
 import { AnimatedVStack, VStack } from "@/design-system/VStack"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { IConversationTopic } from "@/features/conversation/conversation.types"
-import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user"
+import { messageIsFromCurrentSenderInboxId } from "@/features/conversation/utils/message-is-from-current-user"
 import { getReactionContent } from "@/features/xmtp/xmtp-codecs/xmtp-codecs-reaction"
 import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { useAppTheme } from "@/theme/use-app-theme"
@@ -51,7 +51,7 @@ export const MessageContextMenuAboveMessageReactions = memo(
 
     const messageFromMe =
       message &&
-      messageIsFromCurrentAccountInboxId({
+      messageIsFromCurrentSenderInboxId({
         message,
       })
 

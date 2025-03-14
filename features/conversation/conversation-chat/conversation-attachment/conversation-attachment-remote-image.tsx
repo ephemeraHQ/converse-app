@@ -3,19 +3,21 @@ import { PressableScale } from "@design-system/pressable-scale"
 import { Text } from "@design-system/Text"
 import { IVStackProps } from "@design-system/VStack"
 import { translate } from "@i18n"
-import { RemoteAttachmentContent } from "@xmtp/react-native-sdk"
 import prettyBytes from "pretty-bytes"
 import { memo } from "react"
 import { Image } from "@/design-system/image"
 import { AttachmentLoading } from "@/features/conversation/conversation-chat/conversation-attachment/conversation-attachment-loading"
 import { useAppTheme } from "@/theme/use-app-theme"
-import { IConversationMessageId } from "../conversation-message/conversation-message.types"
+import {
+  IConversationMessageId,
+  IConversationMessageRemoteAttachmentContent,
+} from "../conversation-message/conversation-message.types"
 import { useRemoteAttachmentQuery } from "./conversation-attachment.query"
 import { ConversationMessageAttachmentContainer } from "./conversation-message-attachment-container"
 
 type IAttachmentRemoteImageProps = {
   messageId: IConversationMessageId
-  remoteMessageContent: RemoteAttachmentContent
+  remoteMessageContent: IConversationMessageRemoteAttachmentContent
   fitAspectRatio?: boolean
   containerProps?: IVStackProps
 }

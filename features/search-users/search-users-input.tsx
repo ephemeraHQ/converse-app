@@ -20,7 +20,7 @@ import { useSearchUsersInputStore } from "./search-users-input.store"
 
 type ISearchUsersInputProps = {
   inputRef: React.MutableRefObject<RNTextInput | null>
-  searchSelectedUserInboxIds: string[]
+  searchSelectedUserInboxIds: IXmtpInboxId[]
   onSearchTextChange: (text: string) => void
   onSelectedInboxIdsChange: (inboxIds: IXmtpInboxId[]) => void
   defaultSearchTextValue?: string

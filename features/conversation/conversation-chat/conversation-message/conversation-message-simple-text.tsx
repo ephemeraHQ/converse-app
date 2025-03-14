@@ -18,20 +18,18 @@ export const MessageSimpleText = memo(function MessageSimpleText(props: {
 }) {
   const { message } = props
 
-  const textContent = message.content()
-
   const { hasNextMessageInSeries, fromMe } = useConversationMessageContextStoreContext(
     useSelect(["hasNextMessageInSeries", "fromMe"]),
   )
 
-  if (shouldRenderBigEmoji(textContent)) {
+  if (shouldRenderBigEmoji(message.content.text)) {
     return (
       <VStack
         style={{
           alignItems: fromMe ? "flex-end" : "flex-start",
         }}
       >
-        <Text style={textSizeStyles["5xl"]}>{textContent}</Text>
+        <Text style={textSizeStyles["5xl"]}>{message.content.text}</Text>
       </VStack>
     )
   }
@@ -40,7 +38,7 @@ export const MessageSimpleText = memo(function MessageSimpleText(props: {
     <BubbleContainer fromMe={fromMe}>
       <ConversationMessageGestures>
         <BubbleContentContainer fromMe={fromMe} hasNextMessageInSeries={hasNextMessageInSeries}>
-          <MessageText inverted={fromMe}>{textContent}</MessageText>
+          <MessageText inverted={fromMe}>{message.content.text}</MessageText>
         </BubbleContentContainer>
       </ConversationMessageGestures>
     </BubbleContainer>

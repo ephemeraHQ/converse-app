@@ -10,12 +10,12 @@ import {
 } from "@/features/conversation/conversation-requests-list/conversations-unknown-consent.query"
 import { getConversationQueryData } from "@/features/conversation/queries/conversation.query"
 import { getDmQueryData, setDmQueryData } from "@/features/dm/use-dm-query"
-import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
+import { IXmtpConversationId, IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
 import { IConversationId, IConversationTopic } from "../conversation/conversation.types"
 import {
   setXmtpConsentStateForInboxId,
-  updateConsentForGroupsForAccount,
+  updateConsentForGroupsForInbox,
 } from "../xmtp/xmtp-consent/xmtp-consent"
 
 export function useAllowDmMutation() {
@@ -32,9 +32,9 @@ export function useAllowDmMutation() {
         throw new Error("Peer inbox id not found")
       }
       await Promise.all([
-        updateConsentForGroupsForAccount({
+        updateConsentForGroupsForInbox({
           clientInboxId: currentSenderInboxId,
-          groupIds: [conversationId],
+          groupIds: [conversationId as unknown as IXmtpConversationId],
           consent: "allowed",
         }),
         setXmtpConsentStateForInboxId({

@@ -6,8 +6,8 @@ import {
   refetchConversationMessages,
 } from "@/features/conversation/conversation-chat/conversation-messages.query"
 import { getConversationForCurrentAccount } from "@/features/conversation/utils/get-conversation-for-current-account"
-import { xmtpContentTypesPrefixes } from "@/features/xmtp/xmtp-codecs/xmtp-codecs"
-import { IXmtpMessageDeliveryStatusValues } from "@/features/xmtp/xmtp.types"
+import { sendXmtpConversationMessage } from "@/features/xmtp/xmtp-conversations/xmtp-conversation"
+import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 import { captureErrorWithToast } from "@/utils/capture-error"
 import { getTodayNs } from "@/utils/date"
 import { getRandomId } from "@/utils/general"
@@ -28,8 +28,13 @@ export function useReactOnMessage(props: { topic: IConversationTopic }) {
       if (!conversation) {
         throw new Error("Conversation not found when reacting on message")
       }
-      await conversation.send({
-        reaction,
+      const currentSender = getSafeCurrentSender()
+      await sendXmtpConversationMessage({
+        conversationId: conversation.id as unknown as IXmtpConversationId,
+        clientInboxId: currentSender.inboxId,
+        content: {
+          reaction,
+        },
       })
     },
     onMutate: (variables) => {
@@ -43,15 +48,13 @@ export function useReactOnMessage(props: { topic: IConversationTopic }) {
           topic: conversation.topic,
           message: {
             id: getRandomId() as IConversationMessageId,
-            contentTypeId: xmtpContentTypesPrefixes.reaction,
+            type: "reaction",
             sentNs: getTodayNs(),
-            fallback: variables.reaction.content,
-            deliveryStatus: IXmtpMessageDeliveryStatusValues.PUBLISHED,
+            status: "sent",
             topic: conversation.topic,
             senderInboxId: currentSender.inboxId,
-            nativeContent: {},
-            content: () => {
-              return variables.reaction
+            content: {
+              ...variables.reaction,
             },
           },
         })
@@ -73,7 +76,7 @@ export function useReactOnMessage(props: { topic: IConversationTopic }) {
         Haptics.softImpactAsync()
         await reactOnMessageMutationAsync({
           reaction: {
-            reference: args.messageId,
+            reference: args.messageId as IConversationMessageId,
             content: args.emoji,
             schema: "unicode",
             action: "added",

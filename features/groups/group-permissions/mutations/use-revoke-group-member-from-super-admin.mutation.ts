@@ -1,14 +1,15 @@
-import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import { IXmtpConversationId, IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { useMutation } from "@tanstack/react-query"
 import { IConversationTopic } from "@/features/conversation/conversation.types"
-import { useGroupQuery } from "@/features/groups/useGroupQuery"
+import { useGroupQuery } from "@/features/groups/group.query"
+import { removeSuperAdminFromXmtpGroup } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-group"
 import { captureError } from "@/utils/capture-error"
 import {
   cancelGroupMembersQuery,
   getGroupMembersQueryData,
   invalidateGroupMembersQuery,
   setGroupMembersQueryData,
-} from "../../useGroupMembersQuery"
+} from "../../group-members.query"
 
 // import { refreshGroup } from "../utils/xmtpRN/conversations";
 
@@ -25,7 +26,11 @@ export const useRevokeSuperAdminMutation = (args: {
       if (!group) {
         throw new Error("No group found to revoke super admin from")
       }
-      return group.removeSuperAdmin(inboxId)
+      return removeSuperAdminFromXmtpGroup({
+        clientInboxId,
+        groupId: group.id as unknown as IXmtpConversationId,
+        superAdminInboxId: inboxId,
+      })
     },
     onMutate: async (inboxId: IXmtpInboxId) => {
       if (!topic) {

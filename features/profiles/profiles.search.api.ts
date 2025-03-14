@@ -1,6 +1,8 @@
 import { z } from "zod"
+import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { api } from "@/utils/api/api"
 import { captureError } from "@/utils/capture-error"
+import { IEthereumAddress } from "@/utils/evm/address"
 
 // Schema for individual profile
 const ProfileSchema = z.object({
@@ -8,8 +10,8 @@ const ProfileSchema = z.object({
   name: z.string(),
   avatar: z.string().nullable(),
   description: z.string().nullable(),
-  xmtpId: z.string(),
-  privyAddress: z.string(),
+  xmtpId: z.custom<IXmtpInboxId>(),
+  privyAddress: z.custom<IEthereumAddress>(),
 })
 
 // Schema for the API response

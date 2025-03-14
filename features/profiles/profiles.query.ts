@@ -5,25 +5,28 @@ import { reactQueryClient } from "@/utils/react-query/react-query.client"
 
 type IProfileQueryData = Awaited<ReturnType<typeof fetchProfile>>
 
-export const getProfileQueryConfig = ({ xmtpId }: { xmtpId: string | undefined }) => {
+export const getProfileQueryConfig = ({ xmtpId }: { xmtpId: IXmtpInboxId | undefined }) => {
   const enabled = !!xmtpId
   return queryOptions({
     enabled,
     queryKey: ["profile", xmtpId],
-    queryFn: enabled ? () => fetchProfile({ xmtpId: xmtpId! }) : skipToken,
+    queryFn: enabled ? () => fetchProfile({ xmtpId }) : skipToken,
   })
 }
 
-export const useProfileQuery = ({ xmtpId }: { xmtpId: string | undefined }) => {
+export const useProfileQuery = ({ xmtpId }: { xmtpId: IXmtpInboxId | undefined }) => {
   return useQuery(getProfileQueryConfig({ xmtpId }))
 }
 
-export const setProfileQueryData = (args: { xmtpId: string; data: IProfileQueryData }) => {
+export const setProfileQueryData = (args: { xmtpId: IXmtpInboxId; data: IProfileQueryData }) => {
   const { xmtpId, data } = args
   return reactQueryClient.setQueryData(getProfileQueryConfig({ xmtpId }).queryKey, data)
 }
 
-export function updateProfileQueryData(args: { xmtpId: string; data: Partial<IProfileQueryData> }) {
+export function updateProfileQueryData(args: {
+  xmtpId: IXmtpInboxId
+  data: Partial<IProfileQueryData>
+}) {
   const { xmtpId, data } = args
   return reactQueryClient.setQueryData(getProfileQueryConfig({ xmtpId }).queryKey, (oldData) => {
     if (!oldData) {
@@ -35,17 +38,21 @@ export function updateProfileQueryData(args: { xmtpId: string; data: Partial<IPr
     }
   })
 }
-export const ensureProfileQueryData = ({ xmtpId }: { xmtpId: string }) => {
+export const ensureProfileQueryData = ({ xmtpId }: { xmtpId: IXmtpInboxId }) => {
   return reactQueryClient.ensureQueryData(getProfileQueryConfig({ xmtpId }))
 }
 
-export const invalidateProfileQuery = ({ xmtpId }: { xmtpId: string }) => {
+export const invalidateProfileQuery = ({ xmtpId }: { xmtpId: IXmtpInboxId }) => {
   reactQueryClient.invalidateQueries({
     queryKey: getProfileQueryConfig({ xmtpId }).queryKey,
   })
 }
 
-export const useProfilesQueries = ({ xmtpInboxIds }: { xmtpInboxIds: string[] | undefined }) => {
+export const useProfilesQueries = ({
+  xmtpInboxIds,
+}: {
+  xmtpInboxIds: IXmtpInboxId[] | undefined
+}) => {
   return useQueries({
     queries: (xmtpInboxIds ?? []).map((xmtpInboxId) =>
       getProfileQueryConfig({ xmtpId: xmtpInboxId }),

@@ -3,7 +3,7 @@ import { getAllowedConsentConversationsQueryOptions } from "@/features/conversat
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm"
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group"
 import { ensureDmPeerInboxIdQueryData } from "@/features/dm/use-dm-peer-inbox-id-query"
-import { ensureGroupMembersQueryData } from "@/features/groups/useGroupMembersQuery"
+import { ensureGroupMembersQueryData } from "@/features/groups/group-members.query"
 import { isSameInboxId } from "@/features/xmtp/xmtp-inbox-id/xmtp-inbox-id.utils"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
 

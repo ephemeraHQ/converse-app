@@ -9,11 +9,11 @@ import {
   removeConversationFromUnknownConsentConversationsQueryData,
 } from "@/features/conversation/conversation-requests-list/conversations-unknown-consent.query"
 import { getConversationIdFromTopic } from "@/features/conversation/utils/get-conversation-id-from-topic"
-import { getGroupQueryData, setGroupQueryData } from "@/features/groups/useGroupQuery"
-import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
+import { getGroupQueryData, setGroupQueryData } from "@/features/groups/group.query"
+import { IXmtpConversationId, IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
 import { IConversationTopic } from "../conversation/conversation.types"
-import { updateConsentForGroupsForAccount } from "../xmtp/xmtp-consent/xmtp-consent"
+import { updateConsentForGroupsForInbox } from "../xmtp/xmtp-consent/xmtp-consent"
 
 export const useDenyGroupMutation = (args: {
   clientInboxId: IXmtpInboxId
@@ -26,9 +26,9 @@ export const useDenyGroupMutation = (args: {
       if (!topic || !clientInboxId) {
         return
       }
-      await updateConsentForGroupsForAccount({
+      await updateConsentForGroupsForInbox({
         clientInboxId,
-        groupIds: [getConversationIdFromTopic(topic)],
+        groupIds: [getConversationIdFromTopic(topic) as unknown as IXmtpConversationId],
         consent: "denied",
       })
       return "denied"

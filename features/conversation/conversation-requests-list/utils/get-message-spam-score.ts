@@ -15,13 +15,13 @@ export function getMessageSpamScore(args: { message: IConversationMessage }) {
   URL_REGEX.lastIndex = 0
 
   if (isTextMessage(message)) {
-    const content = message.content()
+    const text = message.content.text
 
-    if (typeof content === "string") {
-      if (URL_REGEX.test(content)) {
+    if (typeof text === "string") {
+      if (URL_REGEX.test(text)) {
         spamScore += 1
       }
-      if (content.includes("$")) {
+      if (text.includes("$")) {
         spamScore += 1
       }
     }

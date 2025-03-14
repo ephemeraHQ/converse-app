@@ -1,3 +1,4 @@
+import { IConversationTopic } from "@/features/conversation/conversation.types"
 import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 
 // Core type identifiers
@@ -22,6 +23,7 @@ export type IConversationMessageBase = {
   status: IConversationMessageStatus
   senderInboxId: IXmtpInboxId
   sentNs: number
+  topic: IConversationTopic
 }
 
 // Message content types
@@ -30,14 +32,14 @@ export type IConversationMessageTextContent = {
 }
 
 export type IConversationMessageReactionContent = {
-  reference: string
+  reference: IConversationMessageId
   action: "added" | "removed" | "unknown"
   schema: "unicode" | "shortcode" | "custom" | "unknown"
   content: string
 }
 
 export type IConversationMessageReplyContent = {
-  reference: string
+  reference: IConversationMessageId
   content: IConversationMessageContent
 }
 

@@ -1,14 +1,15 @@
 import { queryOptions, useQuery } from "@tanstack/react-query"
 import { logger } from "@utils/logger"
-import { MessageId } from "@xmtp/react-native-sdk/build/lib/types"
-import { isReactionMessage } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
-import { xmtpContentTypesPrefixes } from "@/features/xmtp/xmtp-codecs/xmtp-codecs"
-import { syncConversation } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-sync"
+import {
+  convertXmtpMessageToConvosMessage,
+  isReactionMessage,
+} from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
+import { syncXmtpConversation } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-sync"
 import {
   getXmtpConversationMessages,
   isSupportedMessage,
 } from "@/features/xmtp/xmtp-messages/xmtp-messages"
-import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
+import { IXmtpConversationId, IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
 import { reactQueryClient } from "../../../utils/react-query/react-query.client"
 import { IConversationTopic } from "../conversation.types"
@@ -48,18 +49,22 @@ const conversationMessagesQueryFn = async (args: {
     throw new Error("Conversation not found")
   }
 
-  await syncConversation({
-    conversation,
+  await syncXmtpConversation({
+    clientInboxId,
+    conversationId: conversation.id as unknown as IXmtpConversationId,
   })
 
-  const messages = await getXmtpConversationMessages({
-    conversation,
+  const xmtpMessages = await getXmtpConversationMessages({
+    clientInboxId,
+    conversationId: conversation.id as unknown as IXmtpConversationId,
     limit: 30, // Fetch limited messages for better performance until pagination is implemented
   })
 
-  const validMessages = messages.filter(isSupportedMessage)
+  const validMessages = xmtpMessages.filter(isSupportedMessage)
 
-  return processMessages({ newMessages: validMessages })
+  const convosMessages = validMessages.map(convertXmtpMessageToConvosMessage)
+
+  return processMessages({ newMessages: convosMessages })
 }
 
 export const useConversationMessagesQuery = (args: {
@@ -133,8 +138,6 @@ export function getConversationMessagesQueryOptions(args: {
   })
 }
 
-const ignoredContentTypesPrefixes = [xmtpContentTypesPrefixes.readReceipt]
-
 export type IMessageAccumulator = {
   ids: IConversationMessageId[]
   byId: Record<IConversationMessageId, IConversationMessage>
@@ -162,15 +165,10 @@ function processMessages(args: {
         reactions: {},
       }
 
-  const validMessages = newMessages.filter(
-    (message: IConversationMessage) =>
-      !ignoredContentTypesPrefixes.some((prefix) => message.contentTypeId.startsWith(prefix)),
-  )
-
-  for (const message of validMessages) {
+  for (const message of newMessages) {
     if (!isReactionMessage(message)) {
       // After isReactionMessage check, we know this is a regular message
-      const regularMessage = message as IConversationMessage & { id: IConversationMessageId }
+      const regularMessage = message
       const messageId = regularMessage.id
 
       if (result.byId[messageId]) {
@@ -188,13 +186,13 @@ function processMessages(args: {
     }
   }
 
-  const reactionsMessages = validMessages.filter(isReactionMessage)
+  const reactionsMessages = newMessages.filter(isReactionMessage)
   const processedReactions = new Set<string>()
 
   for (const reactionMessage of reactionsMessages) {
-    const reactionContent = reactionMessage.content() as IConversationMessageReactionContent
-    const referenceMessageId = reactionContent?.reference as IConversationMessageId
-    const senderAddress = reactionMessage.senderInboxId as IXmtpInboxId
+    const reactionContent = reactionMessage.content
+    const referenceMessageId = reactionContent?.reference
+    const senderAddress = reactionMessage.senderInboxId
 
     if (!reactionContent || !referenceMessageId) {
       continue
@@ -272,9 +270,9 @@ export function replaceOptimisticMessageWithReal(args: {
 
       if (!previousMessages) {
         const newState = {
-          ids: [realMessage.id as MessageId],
+          ids: [realMessage.id],
           byId: {
-            [realMessage.id as MessageId]: realMessage,
+            [realMessage.id]: realMessage,
           },
           reactions: {},
         } satisfies IMessageAccumulator
@@ -290,7 +288,7 @@ export function replaceOptimisticMessageWithReal(args: {
       }
 
       // Find the index of the temporary message
-      const tempIndex = previousMessages.ids.indexOf(tempId as MessageId)
+      const tempIndex = previousMessages.ids.indexOf(tempId)
 
       logger.debug("[replaceOptimisticMessageWithReal] Found temp message index", {
         tempIndex,
@@ -306,7 +304,7 @@ export function replaceOptimisticMessageWithReal(args: {
 
       // Create new ids array with the real message id replacing the temp id
       const newIds = [...previousMessages.ids]
-      newIds[tempIndex] = realMessage.id as MessageId
+      newIds[tempIndex] = realMessage.id
 
       // Add new message first, then spread existing byId
       const newById: IMessageAccumulator["byId"] = {
@@ -317,7 +315,7 @@ export function replaceOptimisticMessageWithReal(args: {
         ...previousMessages.byId,
       }
       // Remove the temporary message entry
-      delete newById[tempId as MessageId]
+      delete newById[tempId]
 
       const updatedState = {
         ...previousMessages,

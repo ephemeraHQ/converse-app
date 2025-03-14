@@ -2,6 +2,7 @@ import { useMemo } from "react"
 import { isCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { useConversationMessageReactions } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
 import { usePreferredDisplayInfoBatch } from "@/features/preferred-display-info/use-preferred-display-info-batch"
+import { ObjectTyped } from "@/utils/object-typed"
 import { IConversationMessageId } from "../conversation-message.types"
 import { RolledUpReactions, SortedReaction } from "./conversation-message-reactions.types"
 
@@ -12,9 +13,7 @@ export function useConversationMessageReactionsRolledUp(args: {
 
   const { bySender: reactionsBySender } = useConversationMessageReactions(messageId)
 
-  const inboxIds = Array.from(
-    new Set(Object.entries(reactionsBySender ?? {}).map(([senderInboxId]) => senderInboxId)),
-  )
+  const inboxIds = ObjectTyped.keys(reactionsBySender ?? {})
 
   const preferredDisplayData = usePreferredDisplayInfoBatch({
     xmtpInboxIds: inboxIds,
@@ -26,7 +25,7 @@ export function useConversationMessageReactionsRolledUp(args: {
     let userReacted = false
 
     // Flatten reactions and track sender addresses
-    const flatReactions = Object.entries(reactionsBySender ?? {}).flatMap(
+    const flatReactions = ObjectTyped.entries(reactionsBySender ?? {}).flatMap(
       ([senderInboxId, senderReactions]) =>
         senderReactions.map((reaction) => ({ senderInboxId, ...reaction })),
     )

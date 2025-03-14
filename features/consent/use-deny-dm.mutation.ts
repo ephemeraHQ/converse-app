@@ -10,13 +10,13 @@ import {
 } from "@/features/conversation/conversation-requests-list/conversations-unknown-consent.query"
 import { getConversationQueryData } from "@/features/conversation/queries/conversation.query"
 import { getDmQueryData, setDmQueryData } from "@/features/dm/use-dm-query"
-import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
+import { IXmtpConversationId, IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
 import { IConversationId, IConversationTopic } from "../conversation/conversation.types"
 import { IDm } from "../dm/dm.types"
 import {
   setXmtpConsentStateForInboxId,
-  updateConsentForGroupsForAccount,
+  updateConsentForGroupsForInbox,
 } from "../xmtp/xmtp-consent/xmtp-consent"
 
 export function useDenyDmMutation() {
@@ -35,9 +35,9 @@ export function useDenyDmMutation() {
       }
 
       await Promise.all([
-        updateConsentForGroupsForAccount({
+        updateConsentForGroupsForInbox({
           clientInboxId: currentSenderInboxId,
-          groupIds: [conversationId],
+          groupIds: [conversationId as unknown as IXmtpConversationId],
           consent: "denied",
         }),
         setXmtpConsentStateForInboxId({
@@ -53,7 +53,7 @@ export function useDenyDmMutation() {
       })
       if (conversation) {
         const updatedDm = updateObjectAndMethods(conversation, {
-          state: "denied",
+          consentState: "denied",
         })
 
         setDmQueryData({
@@ -74,7 +74,7 @@ export function useDenyDmMutation() {
           topic,
         })
 
-        return { previousDmConsent: conversation.state }
+        return { previousDmConsent: conversation.consentState }
       }
     },
     onError: (error, { topic, peerInboxId }, context) => {
@@ -90,7 +90,7 @@ export function useDenyDmMutation() {
         }
 
         const previousDm = updateObjectAndMethods(dm, {
-          state: previousDmConsent,
+          consentState: previousDmConsent,
         })
 
         setDmQueryData({

@@ -26,7 +26,7 @@ import { getConversationMessagesQueryData } from "@/features/conversation/conver
 import { useCurrentConversationTopicSafe } from "@/features/conversation/conversation-chat/conversation.store-context"
 import { useReactOnMessage } from "@/features/conversation/conversation-chat/use-react-on-message.mutation"
 import { useRemoveReactionOnMessage } from "@/features/conversation/conversation-chat/use-remove-reaction-on-message.mutation"
-import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user"
+import { messageIsFromCurrentSenderInboxId } from "@/features/conversation/utils/message-is-from-current-user"
 import { MessageContextMenuAboveMessageReactions } from "./conversation-message-context-menu-above-message-reactions"
 import { MessageContextMenuContainer } from "./conversation-message-context-menu-container"
 import { useMessageContextMenuItems } from "./conversation-message-context-menu.utils"
@@ -95,7 +95,7 @@ const Content = memo(function Content(props: {
     }
   }, [messageId, topic, currentSender])
 
-  const fromMe = messageIsFromCurrentAccountInboxId({ message })
+  const fromMe = messageIsFromCurrentSenderInboxId({ message })
   const menuItems = useMessageContextMenuItems({
     messageId: messageId,
     topic,

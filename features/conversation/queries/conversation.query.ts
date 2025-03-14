@@ -1,5 +1,6 @@
-import type { IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import type { IXmtpConversationTopic, IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query"
+import { config } from "@/config"
 import { ensureConversationSyncAllQuery } from "@/features/conversation/queries/conversation-sync-all.query"
 import { convertXmtpConversationToConvosConversation } from "@/features/conversation/utils/convert-xmtp-conversation-to-convos"
 import { getXmtpClientByInboxId } from "@/features/xmtp/xmtp-client/xmtp-client.service"
@@ -53,7 +54,7 @@ async function getConversation(args: IGetConversationArgs) {
     inboxId,
   })
 
-  const conversation = (
+  const xmtpConversations = (
     await client.conversations.list({
       isActive: true,
       addedByInboxId: true,
@@ -63,10 +64,10 @@ async function getConversation(args: IGetConversationArgs) {
       lastMessage: true,
       description: true,
     })
-  ).find((c) => c.topic === topic)
+  ).find((c) => c.topic === (topic as unknown as IXmtpConversationTopic))
 
-  if (!conversation) {
-    throw new Error(`Conversation ${topic} not found`)
+  if (!xmtpConversations) {
+    return null
   }
   /**
    * (END) TMP until we can fetch a single conversation and get ALL the properties for it (lastMessage, etc)
@@ -101,7 +102,7 @@ async function getConversation(args: IGetConversationArgs) {
     )
   }
 
-  const convosConversation = await convertXmtpConversationToConvosConversation(conversation)
+  const convosConversation = await convertXmtpConversationToConvosConversation(xmtpConversations)
 
   return convosConversation
 }

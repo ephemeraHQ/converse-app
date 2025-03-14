@@ -1,11 +1,11 @@
-import type { IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import type { IXmtpConversationId, IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { useMutation } from "@tanstack/react-query"
 import { updateConversationInAllowedConsentConversationsQueryData } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import {
   getGroupQueryData,
   updateGroupQueryData,
   useGroupQuery,
-} from "@/features/groups/useGroupQuery"
+} from "@/features/groups/group.query"
 import { updateXmtpGroupName } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-group"
 import { captureError } from "@/utils/capture-error"
 import type { IConversationTopic } from "../conversation/conversation.types"
@@ -30,13 +30,17 @@ export function useGroupNameMutation(args: {
         throw new Error("Missing required data in useGroupNameMutation")
       }
 
-      await updateXmtpGroupName({ group, name })
+      await updateXmtpGroupName({
+        clientInboxId,
+        groupId: group.id as unknown as IXmtpConversationId,
+        name,
+      })
 
       return name
     },
     onMutate: async (name: string) => {
       const previousGroup = getGroupQueryData({ inboxId: clientInboxId, topic })
-      const updates: Partial<IGroup> = { groupName: name }
+      const updates: Partial<IGroup> = { name }
 
       if (previousGroup) {
         updateGroupQueryData({ inboxId: clientInboxId, topic, updates })
@@ -55,7 +59,7 @@ export function useGroupNameMutation(args: {
 
       const { previousGroup } = context || {}
 
-      const updates: Partial<IGroup> = { groupName: previousGroup?.name ?? "" }
+      const updates: Partial<IGroup> = { name: previousGroup?.name ?? "" }
 
       updateGroupQueryData({ inboxId: clientInboxId, topic, updates })
       updateConversationInAllowedConsentConversationsQueryData({

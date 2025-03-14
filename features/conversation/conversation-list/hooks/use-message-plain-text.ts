@@ -44,7 +44,7 @@ function handleGroupMetadataChange(args: {
 export function useMessagePlainText(message: IConversationMessage | undefined) {
   // Get initiator profile for group updates
   const initiatorInboxId =
-    message && isGroupUpdatedMessage(message) ? message.content().initiatedByInboxId : undefined
+    message && isGroupUpdatedMessage(message) ? message.content.initiatedByInboxId : undefined
 
   const { displayName: initiatorDisplayName } = usePreferredDisplayInfo({
     inboxId: initiatorInboxId,
@@ -55,7 +55,7 @@ export function useMessagePlainText(message: IConversationMessage | undefined) {
     if (!message || !isGroupUpdatedMessage(message)) {
       return { addedMemberInboxIds: [], removedMemberInboxIds: [] }
     }
-    const content = message.content()
+    const content = message.content
     return {
       addedMemberInboxIds: content.membersAdded.map((m) => m.inboxId),
       removedMemberInboxIds: content.membersRemoved.map((m) => m.inboxId),
@@ -78,8 +78,8 @@ export function useMessagePlainText(message: IConversationMessage | undefined) {
     try {
       // Handle reply messages
       if (isReplyMessage(message)) {
-        const content = message.content()
-        return typeof content === "string" ? content : content.content.text
+        // TODO
+        return "Reply"
       }
 
       // Handle attachment messages
@@ -89,7 +89,7 @@ export function useMessagePlainText(message: IConversationMessage | undefined) {
 
       // Handle group update messages
       if (isGroupUpdatedMessage(message)) {
-        const content = message.content()
+        const content = message.content
         const initiatorName = initiatorDisplayName ?? "Someone"
 
         // Handle metadata changes
@@ -119,8 +119,7 @@ export function useMessagePlainText(message: IConversationMessage | undefined) {
       }
 
       if (isTextMessage(message)) {
-        const content = message.content()
-        return typeof content === "string" ? content : message.fallback
+        return message.content.text
       }
 
       if (isMultiRemoteAttachmentMessage(message)) {
@@ -134,7 +133,7 @@ export function useMessagePlainText(message: IConversationMessage | undefined) {
       const _ensureNever: never = message
     } catch (error) {
       captureError(error)
-      return message.fallback
+      return "Something went wrong"
     }
   }, [message, initiatorDisplayName, addedMemberDisplayInfos, removedMemberDisplayInfos])
 }

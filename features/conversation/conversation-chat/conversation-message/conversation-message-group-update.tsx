@@ -22,7 +22,7 @@ type IConversationMessageGroupUpdateProps = {
 export function ConversationMessageGroupUpdate({ message }: IConversationMessageGroupUpdateProps) {
   const { theme } = useAppTheme()
 
-  const content = message.content()
+  const content = message.content
 
   if (typeof content === "string") {
     // TODO

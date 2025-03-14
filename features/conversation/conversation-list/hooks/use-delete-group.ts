@@ -7,7 +7,9 @@ import {
   getConversationMetadataQueryData,
   updateConversationMetadataQueryData,
 } from "@/features/conversation/conversation-metadata/conversation-metadata.query"
-import { getGroupQueryData } from "@/features/groups/useGroupQuery"
+import { getGroupQueryData } from "@/features/groups/group.query"
+import { updateConsentForGroupsForInbox } from "@/features/xmtp/xmtp-consent/xmtp-consent"
+import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 import { translate } from "@/i18n"
 import { captureErrorWithToast } from "@/utils/capture-error"
 import { IConversationTopic } from "../../conversation.types"
@@ -73,12 +75,11 @@ export const useDeleteGroup = (args: { groupTopic: IConversationTopic }) => {
         action: async () => {
           try {
             await deleteGroupAsync()
-            await group.updateConsent("denied")
-            await {
+            await updateConsentForGroupsForInbox({
               clientInboxId: currentSender.inboxId,
-              inboxIds: [group.addedByInboxId],
+              groupIds: [group.id as unknown as IXmtpConversationId],
               consent: "denied",
-            }
+            })
           } catch (error) {
             captureErrorWithToast(error)
           }

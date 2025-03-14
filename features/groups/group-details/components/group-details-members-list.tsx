@@ -9,7 +9,7 @@ import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.stor
 import { IConversationTopic } from "@/features/conversation/conversation.types"
 import { MemberDetailsBottomSheet } from "@/features/groups/group-details/components/group-details-member-details.bottom-sheet"
 import { GroupDetailsListItem } from "@/features/groups/group-details/components/group-details.ui"
-import { useGroupMembersQuery } from "@/features/groups/useGroupMembersQuery"
+import { useGroupMembersQuery } from "@/features/groups/group-members.query"
 import { useRouter } from "@/navigation/use-navigation"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { MemberListItem } from "./group-details-members-list-item"

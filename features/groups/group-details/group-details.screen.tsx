@@ -9,8 +9,8 @@ import { Text } from "@/design-system/Text"
 import { VStack } from "@/design-system/VStack"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { GroupDetailsMembersList } from "@/features/groups/group-details/components/group-details-members-list"
+import { useGroupQuery } from "@/features/groups/group.query"
 import { useGroupName } from "@/features/groups/hooks/use-group-name"
-import { useGroupQuery } from "@/features/groups/useGroupQuery"
 import { NavigationParamList } from "@/navigation/navigation.types"
 import { $globalStyles } from "@/theme/styles"
 import { useAppTheme } from "@/theme/use-app-theme"
@@ -30,7 +30,7 @@ export const GroupDetailsScreen = memo(function GroupDetailsScreen(
   })
 
   const { data: group } = useGroupQuery({
-    inboxId: currentSender.ethereumAddress,
+    inboxId: currentSender.inboxId,
     topic: conversationTopic,
   })
 
@@ -67,9 +67,7 @@ export const GroupDetailsScreen = memo(function GroupDetailsScreen(
           <Text preset="bigBold" style={{ textAlign: "center" }}>
             {groupName}
           </Text>
-          {group?.groupDescription && (
-            <Text style={{ textAlign: "center" }}>{group?.groupDescription}</Text>
-          )}
+          {group?.description && <Text style={{ textAlign: "center" }}>{group?.description}</Text>}
           {/* <Text color="secondary" style={{ textAlign: "center" }}>
             convos.com/convos-crew
           </Text> */}
