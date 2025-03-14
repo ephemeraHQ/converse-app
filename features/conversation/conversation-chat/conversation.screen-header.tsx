@@ -1,4 +1,3 @@
-import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
 import { translate } from "@i18n"
 import React, { memo, useCallback } from "react"
 // import { useGroupPendingRequests } from "@/hooks/useGroupPendingRequests";
@@ -14,13 +13,14 @@ import { getConversationQueryData } from "@/features/conversation/queries/conver
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm"
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group"
 import { useDmPeerInboxIdQuery } from "@/features/dm/use-dm-peer-inbox-id-query"
+import { useGroupMembersQuery } from "@/features/groups/group-members.query"
 import { useGroupName } from "@/features/groups/hooks/use-group-name"
-import { useGroupMembersQuery } from "@/features/groups/useGroupMembersQuery"
 import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
 import { useHeader } from "@/navigation/use-header"
 import { useRouter } from "@/navigation/use-navigation"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { copyToClipboard } from "@/utils/clipboard"
+import { IConversationTopic } from "../conversation.types"
 
 export function useConversationScreenHeader() {
   const navigation = useRouter()
@@ -113,7 +113,7 @@ function ConversationHeaderTitle({
 }
 
 type GroupConversationTitleProps = {
-  conversationTopic: IXmtpConversationTopic
+  conversationTopic: IConversationTopic
 }
 
 const GroupConversationTitle = memo(({ conversationTopic }: GroupConversationTitleProps) => {
@@ -171,7 +171,7 @@ const GroupConversationTitle = memo(({ conversationTopic }: GroupConversationTit
 })
 
 type DmConversationTitleProps = {
-  topic: IXmtpConversationTopic
+  topic: IConversationTopic
 }
 
 const DmConversationTitle = ({ topic }: DmConversationTitleProps) => {

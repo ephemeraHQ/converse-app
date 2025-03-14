@@ -1,6 +1,6 @@
 import RNFS from "react-native-fs"
 import { LocalAttachmentMetadata } from "@/features/conversation/conversation-chat/conversation-attachment/conversation-attachments.types"
-import { IXmtpMessageId } from "@/features/xmtp/xmtp.types"
+import { IConversationMessageId } from "../conversation-message/conversation-message.types"
 
 /**
  * Gets all paths related to a message attachment
@@ -29,7 +29,7 @@ export async function createAttachmentFolder(args: { messageId: string }) {
 /**
  * Gets metadata for a local attachment
  */
-export async function getLocalAttachmentMetadata(args: { messageId: IXmtpMessageId }) {
+export async function getLocalAttachmentMetadata(args: { messageId: IConversationMessageId }) {
   const { metadata: metadataPath } = getAttachmentPaths({ messageId: args.messageId })
   const attachmentMetadata = await RNFS.readFile(metadataPath, "utf8")
   return JSON.parse(attachmentMetadata) as LocalAttachmentMetadata

@@ -1,4 +1,12 @@
-import { IXmtpInboxId , IXmtpConsentState, IXmtpConversationWithCodecs } from "@features/xmtp/xmtp.types"
+import {
+  IXmtpConsentState,
+  IXmtpConversationId,
+  IXmtpConversationWithCodecs,
+  IXmtpDmWithCodecs,
+  IXmtpGroupWithCodecs,
+  IXmtpInboxId,
+} from "@features/xmtp/xmtp.types"
+import { ConversationVersion, sendMessage } from "@xmtp/react-native-sdk"
 import { ConversationSendPayload } from "@xmtp/react-native-sdk/build/lib/types"
 import { config } from "@/config"
 import { getXmtpClientByInboxId } from "@/features/xmtp/xmtp-client/xmtp-client.service"
@@ -7,22 +15,27 @@ import { captureError } from "@/utils/capture-error"
 import { XMTPError } from "@/utils/error"
 
 export async function sendXmtpConversationMessage(args: {
-  conversation: IXmtpConversationWithCodecs
+  clientInboxId: IXmtpInboxId
+  conversationId: IXmtpConversationId
   content: ConversationSendPayload<ISupportedXmtpCodecs>
 }) {
-  const { conversation, content } = args
+  const { content, clientInboxId, conversationId } = args
 
-  const startTime = Date.now()
+  const client = await getXmtpClientByInboxId({
+    inboxId: clientInboxId,
+  })
 
   try {
-    const result = await conversation.send(content)
+    const startTime = Date.now()
+    const result = await sendMessage(client.installationId, conversationId, content)
+    const endTime = Date.now()
 
-    const duration = Date.now() - startTime
+    const duration = endTime - startTime
     if (duration > config.xmtp.maxMsUntilLogError) {
       captureError(
         new XMTPError({
           error: new Error(
-            `Sending message took ${duration}ms for conversation: ${conversation.topic}`,
+            `Sending message took ${duration}ms for conversation: ${conversationId}`,
           ),
         }),
       )
@@ -32,7 +45,7 @@ export async function sendXmtpConversationMessage(args: {
   } catch (error) {
     throw new XMTPError({
       error,
-      additionalMessage: `Failed to send message to conversation: ${conversation.topic}`,
+      additionalMessage: `Failed to send message to conversation: ${conversationId}`,
     })
   }
 }
@@ -86,4 +99,16 @@ export async function getXmtpConversations(args: {
       additionalMessage: `Failed to get conversations for inbox: ${clientInboxId}`,
     })
   }
+}
+
+export function isXmtpConversationGroup(
+  conversation: IXmtpConversationWithCodecs,
+): conversation is IXmtpGroupWithCodecs {
+  return conversation.version === ConversationVersion.GROUP
+}
+
+export function isXmtpConversationDm(
+  conversation: IXmtpConversationWithCodecs,
+): conversation is IXmtpDmWithCodecs {
+  return conversation.version === ConversationVersion.GROUP
 }

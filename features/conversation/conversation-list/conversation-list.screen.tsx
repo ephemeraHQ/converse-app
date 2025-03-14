@@ -16,7 +16,8 @@ import {
 } from "@/features/conversation/conversation-list/hooks/use-conversation-list-item-context-menu-props"
 import { usePinnedConversations } from "@/features/conversation/conversation-list/hooks/use-pinned-conversations"
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group"
-import { IXmtpDmWithCodecs, IXmtpGroupWithCodecs } from "@/features/xmtp/xmtp.types"
+import { IDm } from "@/features/dm/dm.types"
+import { IGroup } from "@/features/groups/group.types"
 import { useMinimumLoadingTime } from "@/hooks/use-minimum-loading-time"
 import { NavigationParamList } from "@/navigation/navigation.types"
 import { $globalStyles } from "@/theme/styles"
@@ -92,7 +93,7 @@ export function ConversationListScreen(props: IConversationListProps) {
 }
 
 const ConversationListItemDmWrapper = memo(function ConversationListItemDmWrapper(props: {
-  dm: IXmtpDmWithCodecs
+  dm: IDm
 }) {
   const { dm } = props
 
@@ -121,7 +122,7 @@ const ConversationListItemDmWrapper = memo(function ConversationListItemDmWrappe
 })
 
 const ConversationListItemGroupWrapper = memo(function ConversationListItemGroupWrapper(props: {
-  group: IXmtpGroupWithCodecs
+  group: IGroup
 }) {
   const { group } = props
 

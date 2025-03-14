@@ -1,5 +1,5 @@
 import { queryOptions } from "@tanstack/react-query"
-import { IXmtpClient } from "@/features/xmtp/xmtp.types"
+import { IXmtpClientWithCodecs } from "@/features/xmtp/xmtp.types"
 import { IEthereumAddress } from "@/utils/evm/address"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
 import { buildXmtpClientInstance } from "./xmtp-client"
@@ -18,12 +18,15 @@ export const getXmtpClientQueryOptions = (args: { ethAddress: IEthereumAddress }
 
       return client
     },
+    meta: {
+      persist: false, // For now we don't persit the client because of circular dependency
+    },
   })
 }
 
 export function setXmtpClientQueryData(args: {
   ethAddress: IEthereumAddress
-  client: IXmtpClient
+  client: IXmtpClientWithCodecs
 }) {
   return reactQueryClient.setQueryData(
     getXmtpClientQueryOptions({ ethAddress: args.ethAddress }).queryKey,

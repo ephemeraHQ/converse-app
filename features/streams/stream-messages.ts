@@ -1,17 +1,21 @@
-import { GroupUpdatedContent } from "@xmtp/react-native-sdk"
+import {
+  convertXmtpMessageToConvosMessage,
+  isGroupUpdatedMessage,
+} from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
 import { addConversationMessageQuery } from "@/features/conversation/conversation-chat/conversation-messages.query"
 import { updateConversationInAllowedConsentConversationsQueryData } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import { updateConversationQueryData } from "@/features/conversation/queries/conversation.query"
-import { refetchGroupMembersQuery } from "@/features/groups/useGroupMembersQuery"
+import { refetchGroupMembersQuery } from "@/features/groups/group-members.query"
 import { streamAllMessages } from "@/features/xmtp/xmtp-messages/xmtp-messages-stream"
-import {
-  IXmtpConversationTopic,
-  IXmtpDecodedMessage,
-  IXmtpInboxId,
-} from "@/features/xmtp/xmtp.types"
+import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
 import { StreamError } from "@/utils/error"
 import { streamLogger } from "@/utils/logger"
+import {
+  IConversationMessage,
+  IConversationMessageGroupUpdated,
+} from "../conversation/conversation-chat/conversation-message/conversation-message.types"
+import { IConversationTopic } from "../conversation/conversation.types"
 
 export async function startMessageStreaming(args: { clientInboxId: IXmtpInboxId }) {
   const { clientInboxId } = args
@@ -19,7 +23,8 @@ export async function startMessageStreaming(args: { clientInboxId: IXmtpInboxId 
   try {
     await streamAllMessages({
       inboxId: clientInboxId,
-      onNewMessage: (message) => handleNewMessage({ clientInboxId, message }),
+      onNewMessage: (message) =>
+        handleNewMessage({ clientInboxId, message: convertXmtpMessageToConvosMessage(message) }),
     })
   } catch (error) {
     throw new StreamError({
@@ -31,13 +36,13 @@ export async function startMessageStreaming(args: { clientInboxId: IXmtpInboxId 
 
 async function handleNewMessage(args: {
   clientInboxId: IXmtpInboxId
-  message: IXmtpDecodedMessage
+  message: IConversationMessage
 }) {
   const { clientInboxId, message } = args
 
   streamLogger.debug(`[handleNewMessage] message: ${JSON.stringify(message)}`)
 
-  if (message.contentTypeId.includes("group_updated")) {
+  if (isGroupUpdatedMessage(message)) {
     try {
       handleNewGroupUpdatedMessage({
         inboxId: clientInboxId,
@@ -94,24 +99,19 @@ type MetadataField = keyof typeof METADATA_FIELD_MAP
 
 function handleNewGroupUpdatedMessage(args: {
   inboxId: IXmtpInboxId
-  topic: IXmtpConversationTopic
-  message: IXmtpDecodedMessage
+  topic: IConversationTopic
+  message: IConversationMessageGroupUpdated
 }) {
   const { inboxId, topic, message } = args
 
-  // Early return if not a group update message
-  if (!message.contentTypeId.includes("group_updated")) return
-  const content = message.content() as GroupUpdatedContent
-
   // Handle member changes by refetching the group members
-  if (content.membersAdded.length > 0 || content.membersRemoved.length > 0) {
+  if (message.content.membersAdded.length > 0 || message.content.membersRemoved.length > 0) {
     refetchGroupMembersQuery({ clientInboxId: inboxId, topic }).catch(captureError)
-    return
   }
 
   // Process metadata changes (e.g., group name, image, description)
-  if (content.metadataFieldsChanged.length > 0) {
-    content.metadataFieldsChanged.forEach((field) => {
+  if (message.content.metadataFieldsChanged.length > 0) {
+    message.content.metadataFieldsChanged.forEach((field) => {
       const fieldName = field.fieldName as MetadataField
 
       // Validate that the field is supported

@@ -17,24 +17,28 @@ import {
   isRemoteAttachmentMessage,
   isReplyMessage,
   isTextMessage,
+  messageContentIsGroupUpdated,
+  messageContentIsRemoteAttachment,
+  messageContentIsStaticAttachment,
+  messageContentIsText,
 } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
 import {
   useConversationStore,
   useCurrentConversationTopicSafe,
 } from "@/features/conversation/conversation-chat/conversation.store-context"
 import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
-import {
-  IXmtpDecodedMessage,
-  IXmtpDecodedReplyMessage,
-  IXmtpMessageId,
-} from "@/features/xmtp/xmtp.types"
 import { useSelect } from "@/stores/stores.utils"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { captureError } from "@/utils/capture-error"
+import {
+  IConversationMessage,
+  IConversationMessageId,
+  IConversationMessageReply,
+} from "./conversation-message.types"
 import { useConversationMessageById } from "./use-conversation-message-by-id"
 
 export const MessageReply = memo(function MessageReply(props: {
-  message: IXmtpDecodedReplyMessage
+  message: IConversationMessageReply
 }) {
   const { message } = props
 
@@ -44,7 +48,7 @@ export const MessageReply = memo(function MessageReply(props: {
     useSelect(["fromMe", "hasNextMessageInSeries"]),
   )
 
-  const replyMessageContent = message.content()
+  const replyMessageContent = message.content
 
   if (!replyMessageContent) {
     // TODO
@@ -67,11 +71,9 @@ export const MessageReply = memo(function MessageReply(props: {
               marginTop: theme.spacing.xxxs, // Because for reply bubble we want the padding to be same for horizontal and vertial
             }}
           >
-            <MessageReplyReference
-              referenceMessageId={replyMessageContent.reference as IXmtpMessageId}
-            />
+            <MessageReplyReference referenceMessageId={replyMessageContent.reference} />
 
-            {!!replyMessageContent.content.remoteAttachment && (
+            {messageContentIsRemoteAttachment(replyMessageContent.content) && (
               <VStack
                 style={{
                   marginTop: theme.spacing.xxxs,
@@ -80,8 +82,8 @@ export const MessageReply = memo(function MessageReply(props: {
               >
                 <AttachmentRemoteImage
                   fitAspectRatio
-                  messageId={replyMessageContent.reference as IXmtpMessageId}
-                  remoteMessageContent={replyMessageContent.content.remoteAttachment}
+                  messageId={replyMessageContent.reference}
+                  remoteMessageContent={replyMessageContent.content}
                   containerProps={{
                     style: {
                       width: "100%",
@@ -94,7 +96,7 @@ export const MessageReply = memo(function MessageReply(props: {
               </VStack>
             )}
 
-            {!!replyMessageContent.content.text && (
+            {messageContentIsText(replyMessageContent.content) && (
               <MessageText inverted={fromMe}>{replyMessageContent.content.text}</MessageText>
             )}
           </VStack>
@@ -105,7 +107,7 @@ export const MessageReply = memo(function MessageReply(props: {
 })
 
 const MessageReplyReference = memo(function MessageReplyReference(props: {
-  referenceMessageId: IXmtpMessageId
+  referenceMessageId: IConversationMessageId
 }) {
   const { referenceMessageId } = props
 
@@ -173,7 +175,7 @@ const MessageReplyReference = memo(function MessageReplyReference(props: {
 })
 
 const MessageReplyReferenceContent = memo(function ReplyMessageReferenceMessageContent(props: {
-  replyMessage: IXmtpDecodedMessage
+  replyMessage: IConversationMessage
 }) {
   const { replyMessage } = props
   const { theme } = useAppTheme()
@@ -187,13 +189,13 @@ const MessageReplyReferenceContent = memo(function ReplyMessageReferenceMessageC
       theme.borderRadius.message.attachment - theme.spacing.message.replyMessage.horizontalPadding,
   }
 
-  function renderMessageContent(message: IXmtpDecodedMessage) {
+  function renderMessageContent(message: IConversationMessage) {
     if (isReadReceiptMessage(message)) {
       return null
     }
 
     if (isRemoteAttachmentMessage(message)) {
-      const content = message.content()
+      const content = message.content
       return (
         <AttachmentRemoteImage
           messageId={message.id}
@@ -206,45 +208,45 @@ const MessageReplyReferenceContent = memo(function ReplyMessageReferenceMessageC
     if (isTextMessage(message)) {
       return (
         <Text numberOfLines={1} inverted={fromMe}>
-          {message.content()}
+          {message.content.text}
         </Text>
       )
     }
 
     if (isReplyMessage(message)) {
-      const content = message.content()
+      const content = message.content
 
       // Handle remote attachment in the reply
-      if (content.content.remoteAttachment) {
+      if (messageContentIsRemoteAttachment(content)) {
         return (
           <AttachmentRemoteImage
             messageId={message.id}
-            remoteMessageContent={content.content.remoteAttachment}
+            remoteMessageContent={content}
             containerProps={{ style: attachmentStyle }}
           />
         )
       }
 
       // Handle text in the reply
-      if (content.content.text) {
+      if (messageContentIsText(content)) {
         return (
           <Text numberOfLines={1} inverted={fromMe}>
-            {content.content.text}
+            {content.text}
           </Text>
         )
       }
 
       // Handle static attachment in the reply
-      if (content.content.attachment) {
+      if (messageContentIsStaticAttachment(content)) {
         return (
           <Text numberOfLines={1} inverted={fromMe}>
-            {content.content.attachment.filename}
+            {content.filename}
           </Text>
         )
       }
 
       // Handle group updates in the reply
-      if (content.content.groupUpdated) {
+      if (messageContentIsGroupUpdated(content)) {
         return (
           <Text numberOfLines={1} inverted={fromMe}>
             Group updated
@@ -255,7 +257,7 @@ const MessageReplyReferenceContent = memo(function ReplyMessageReferenceMessageC
 
     captureError(
       new Error(
-        `Reply message reference message content is not handled with message content type id ${message.contentTypeId}`,
+        `Reply message reference message content is not handled with message type ${message.type}`,
       ),
     )
     return null

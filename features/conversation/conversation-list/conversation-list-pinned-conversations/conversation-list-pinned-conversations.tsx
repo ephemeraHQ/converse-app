@@ -1,4 +1,3 @@
-import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
 import { memo } from "react"
 import { useWindowDimensions, ViewStyle } from "react-native"
 import { AnimatedCenter } from "@/design-system/Center"
@@ -16,6 +15,7 @@ import { isConversationGroup } from "@/features/conversation/utils/is-conversati
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme"
 import { captureError } from "@/utils/capture-error"
 import { chunk } from "@/utils/general"
+import { IConversationTopic } from "../../conversation.types"
 
 export const ConversationListPinnedConversations = memo(
   function ConversationListPinnedConversations() {
@@ -81,7 +81,7 @@ export const ConversationListPinnedConversations = memo(
 )
 
 const PinnedConversationWrapper = memo(function PinnedConversationWrapper(props: {
-  topic: IXmtpConversationTopic
+  topic: IConversationTopic
 }) {
   const { topic } = props
 

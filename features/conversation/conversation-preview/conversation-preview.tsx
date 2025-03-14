@@ -1,4 +1,3 @@
-import type { ConversationTopic, DecodedMessage } from "@xmtp/react-native-sdk"
 import React, { memo } from "react"
 import { FlatList } from "react-native"
 import { ActivityIndicator } from "@/design-system/activity-indicator"
@@ -13,16 +12,17 @@ import { ConversationMessageLayout } from "@/features/conversation/conversation-
 import { ConversationMessageReactions } from "@/features/conversation/conversation-chat/conversation-message/conversation-message-reactions/conversation-message-reactions"
 import { ConversationMessageTimestamp } from "@/features/conversation/conversation-chat/conversation-message/conversation-message-timestamp"
 import { ConversationMessageContextStoreProvider } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.store-context"
+import { IConversationMessage } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.types"
 import { useMessageHasReactions } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
 import { conversationListDefaultProps } from "@/features/conversation/conversation-chat/conversation-messages-list.component"
 import { useConversationMessagesQuery } from "@/features/conversation/conversation-chat/conversation-messages.query"
 import { ConversationStoreProvider } from "@/features/conversation/conversation-chat/conversation.store-context"
 import { useConversationQuery } from "@/features/conversation/queries/conversation.query"
-import { IXmtpConversationTopic } from "@/features/xmtp/xmtp.types"
 import { $globalStyles } from "@/theme/styles"
+import { IConversationTopic } from "../conversation.types"
 
 type ConversationPreviewProps = {
-  topic: IXmtpConversationTopic
+  topic: IConversationTopic
 }
 
 export const ConversationPreview = ({ topic }: ConversationPreviewProps) => {
@@ -91,9 +91,9 @@ const MessageWrapper = memo(function MessageWrapper({
   previousMessage,
   nextMessage,
 }: {
-  message: DecodedMessage
-  previousMessage: DecodedMessage | undefined
-  nextMessage: DecodedMessage | undefined
+  message: IConversationMessage
+  previousMessage: IConversationMessage | undefined
+  nextMessage: IConversationMessage | undefined
 }) {
   const hasReactions = useMessageHasReactions({
     messageId: message.id,

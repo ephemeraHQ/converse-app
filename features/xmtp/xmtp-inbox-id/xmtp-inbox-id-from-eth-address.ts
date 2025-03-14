@@ -1,4 +1,6 @@
 import { PublicIdentity } from "@xmtp/react-native-sdk"
+import { config } from "@/config"
+import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
 import { GenericError, XMTPError } from "@/utils/error"
 import { IEthereumAddress } from "@/utils/evm/address"
@@ -52,7 +54,7 @@ export async function getInboxIdFromEthAddress(args: {
 
     const lookupDuration = lookupEndTime - lookupStartTime
 
-    if (lookupDuration > 3000) {
+    if (lookupDuration > config.xmtp.maxMsUntilLogError) {
       captureError(
         new XMTPError({
           error: new Error(
@@ -62,7 +64,7 @@ export async function getInboxIdFromEthAddress(args: {
       )
     }
 
-    return inboxId
+    return inboxId as unknown as IXmtpInboxId
   } catch (error) {
     throw new XMTPError({
       error,

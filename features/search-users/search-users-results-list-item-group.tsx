@@ -1,15 +1,15 @@
-import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
 import { memo } from "react"
 import { GroupAvatar } from "@/components/group-avatar"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
+import { useGroupMembersQuery } from "@/features/groups/group-members.query"
 import { useGroupName } from "@/features/groups/hooks/use-group-name"
-import { useGroupMembersQuery } from "@/features/groups/useGroupMembersQuery"
 import { usePreferredDisplayInfoBatch } from "@/features/preferred-display-info/use-preferred-display-info-batch"
 import { SearchUsersResultListItem } from "@/features/search-users/search-users-result-list-item"
+import { IConversationTopic } from "../conversation/conversation.types"
 
 export const SearchUsersResultsListItemGroup = memo(
   function SearchUsersResultsListItemGroup(props: {
-    conversationTopic: IXmtpConversationTopic
+    conversationTopic: IConversationTopic
     onPress: () => void
   }) {
     const { conversationTopic, onPress } = props

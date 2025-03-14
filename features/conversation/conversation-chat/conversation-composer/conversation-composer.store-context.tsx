@@ -7,8 +7,9 @@ import {
   UploadedRemoteAttachment,
 } from "@/features/conversation/conversation-chat/conversation-attachment/conversation-attachments.types"
 import { useCurrentConversationTopic } from "@/features/conversation/conversation-chat/conversation.store-context"
-import { IXmtpConversationTopic, IXmtpMessageId } from "@/features/xmtp/xmtp.types"
 import { usePrevious } from "@/hooks/use-previous-value"
+import { IConversationTopic } from "../../conversation.types"
+import { IConversationMessageId } from "../conversation-message/conversation-message.types"
 
 export type IComposerMediaPreviewStatus = "picked" | "uploading" | "uploaded" | "error" | "sending"
 
@@ -25,7 +26,7 @@ type IConversationComposerStoreProps = {
 
 type IConversationComposerState = IConversationComposerStoreProps & {
   inputValue: string
-  replyingToMessageId: IXmtpMessageId | null
+  replyingToMessageId: IConversationMessageId | null
   composerMediaPreviews: IComposerMediaPreview[]
   composerUploadedAttachments: UploadedRemoteAttachment[]
 }
@@ -33,7 +34,7 @@ type IConversationComposerState = IConversationComposerStoreProps & {
 type IConversationComposerActions = {
   reset: () => void
   setInputValue: (value: string) => void
-  setReplyToMessageId: (messageId: IXmtpMessageId | null) => void
+  setReplyToMessageId: (messageId: IConversationMessageId | null) => void
   addComposerMediaPreview: (mediaPreview: NonNullable<IComposerMediaPreview>) => string
   removeComposerMediaPreview: (mediaURI: string) => void
   addComposerUploadedAttachment: (args: {
@@ -135,7 +136,7 @@ const createConversationComposerStore = (
   )
 }
 
-function getStoreName(topic: IXmtpConversationTopic | null) {
+function getStoreName(topic: IConversationTopic | null) {
   return topic ? `composer-${topic}` : "new"
 }
 

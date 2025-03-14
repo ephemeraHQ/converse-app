@@ -4,9 +4,9 @@ import {
   isStaticAttachmentMessage,
   isTextMessage,
 } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
-import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types"
+import { IConversationMessage } from "../../conversation-chat/conversation-message/conversation-message.types"
 
-export function getMessageSpamScore(args: { message: IXmtpDecodedMessage }) {
+export function getMessageSpamScore(args: { message: IConversationMessage }) {
   const { message } = args
 
   let spamScore = 0
@@ -15,13 +15,13 @@ export function getMessageSpamScore(args: { message: IXmtpDecodedMessage }) {
   URL_REGEX.lastIndex = 0
 
   if (isTextMessage(message)) {
-    const content = message.content()
+    const text = message.content.text
 
-    if (typeof content === "string") {
-      if (URL_REGEX.test(content)) {
+    if (typeof text === "string") {
+      if (URL_REGEX.test(text)) {
         spamScore += 1
       }
-      if (content.includes("$")) {
+      if (text.includes("$")) {
         spamScore += 1
       }
     }

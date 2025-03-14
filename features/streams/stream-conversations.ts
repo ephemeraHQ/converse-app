@@ -1,17 +1,18 @@
-import { IXmtpInboxId , IXmtpConversationWithCodecs } from "@features/xmtp/xmtp.types"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { MutationObserver } from "@tanstack/react-query"
 import { StreamError } from "@utils/error"
 import { addConversationToAllowedConsentConversationsQuery } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import { addConversationToUnknownConsentConversationsQuery } from "@/features/conversation/conversation-requests-list/conversations-unknown-consent.query"
 import { getMarkConversationAsReadMutationOptions } from "@/features/conversation/hooks/use-mark-conversation-as-read"
 import { setConversationQueryData } from "@/features/conversation/queries/conversation.query"
+import { convertXmtpConversationToConvosConversation } from "@/features/conversation/utils/convert-xmtp-conversation-to-convos"
 import { isConversationAllowed } from "@/features/conversation/utils/is-conversation-allowed"
 import { isConversationConsentUnknown } from "@/features/conversation/utils/is-conversation-consent-unknown"
-import { ensureGroupMembersQueryData } from "@/features/groups/useGroupMembersQuery"
 import { streamConversations } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-stream"
 import { captureError } from "@/utils/capture-error"
 import { streamLogger } from "@/utils/logger"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
+import { IConversation } from "../conversation/conversation.types"
 
 export async function startConversationStreaming(args: { clientInboxId: IXmtpInboxId }) {
   const { clientInboxId } = args
@@ -19,8 +20,11 @@ export async function startConversationStreaming(args: { clientInboxId: IXmtpInb
   try {
     await streamConversations({
       inboxId: clientInboxId,
-      onNewConversation: (conversation) =>
-        handleNewConversation({ clientInboxId, conversation }).catch(captureError),
+      onNewConversation: async (conversation) =>
+        handleNewConversation({
+          clientInboxId,
+          conversation: await convertXmtpConversationToConvosConversation(conversation),
+        }).catch(captureError),
     })
   } catch (error) {
     throw new StreamError({
@@ -32,7 +36,7 @@ export async function startConversationStreaming(args: { clientInboxId: IXmtpInb
 
 async function handleNewConversation(args: {
   clientInboxId: IXmtpInboxId
-  conversation: IXmtpConversationWithCodecs
+  conversation: IConversation
 }) {
   const { clientInboxId, conversation } = args
 
@@ -40,12 +44,11 @@ async function handleNewConversation(args: {
     `[Stream] Received new conversation for ${clientInboxId}: ${conversation.topic}`,
   )
 
-  // For some reason, when receiving a new conversation, the group members are not available?
-  ensureGroupMembersQueryData({
-    caller: "handleNewConversation",
-    clientInboxId,
+  setConversationQueryData({
+    inboxId: clientInboxId,
     topic: conversation.topic,
-  }).catch(captureError)
+    conversation,
+  })
 
   if (isConversationAllowed(conversation)) {
     // Create conversation metadata
@@ -67,12 +70,6 @@ async function handleNewConversation(args: {
       conversation,
     })
   }
-
-  setConversationQueryData({
-    inboxId: clientInboxId,
-    topic: conversation.topic,
-    conversation,
-  })
 
   /**
    * Maybe replace the optimistic conversation with the real one

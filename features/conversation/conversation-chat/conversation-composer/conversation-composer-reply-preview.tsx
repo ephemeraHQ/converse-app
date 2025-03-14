@@ -15,19 +15,25 @@ import {
   isRemoteAttachmentMessage,
   isReplyMessage,
   isStaticAttachmentMessage,
+  messageContentIsGroupUpdated,
+  messageContentisMultiRemoteAttachment,
+  messageContentIsRemoteAttachment,
+  messageContentIsReply,
+  messageContentIsStaticAttachment,
+  messageContentIsText,
 } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
 import { useMessagePlainText } from "@/features/conversation/conversation-list/hooks/use-message-plain-text"
-import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user"
+import { messageIsFromCurrentSenderInboxId } from "@/features/conversation/utils/message-is-from-current-user"
 import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
-import {
-  IXmtpConversationTopic,
-  IXmtpDecodedMessage,
-  IXmtpDecodedRemoteAttachmentMessage,
-  IXmtpDecodedReplyMessage,
-  IXmtpDecodedStaticAttachmentMessage,
-  IXmtpMessageId,
-} from "@/features/xmtp/xmtp.types"
 import { useAppTheme } from "@/theme/use-app-theme"
+import { IConversationTopic } from "../../conversation.types"
+import {
+  IConversationMessage,
+  IConversationMessageId,
+  IConversationMessageRemoteAttachment,
+  IConversationMessageReply,
+  IConversationMessageStaticAttachment,
+} from "../conversation-message/conversation-message.types"
 import { useConversationMessageById } from "../conversation-message/use-conversation-message-by-id"
 import { useCurrentConversationTopic } from "../conversation.store-context"
 import {
@@ -43,7 +49,7 @@ export const ReplyPreview = memo(function ReplyPreview() {
   return <Content conversationTopic={topic} />
 })
 
-const Content = memo(function Content(props: { conversationTopic: IXmtpConversationTopic }) {
+const Content = memo(function Content(props: { conversationTopic: IConversationTopic }) {
   const { conversationTopic } = props
 
   const replyingToMessageId = useConversationComposerStoreContext(
@@ -64,7 +70,7 @@ const Content = memo(function Content(props: { conversationTopic: IXmtpConversat
   })
 
   const replyingTo = replyMessage
-    ? messageIsFromCurrentAccountInboxId({ message: replyMessage })
+    ? messageIsFromCurrentSenderInboxId({ message: replyMessage })
       ? `Replying to you`
       : displayName
         ? `Replying to ${displayName}`
@@ -162,26 +168,24 @@ const Content = memo(function Content(props: { conversationTopic: IXmtpConversat
 })
 
 const ReplyPreviewEndContent = memo(function ReplyPreviewEndContent(props: {
-  replyMessage: IXmtpDecodedMessage
+  replyMessage: IConversationMessage
 }) {
   const { replyMessage } = props
 
   const { theme } = useAppTheme()
 
   if (isReplyMessage(replyMessage)) {
-    const replyTyped = replyMessage as IXmtpDecodedReplyMessage
+    const content = replyMessage.content
 
-    const content = replyTyped.content()
-
-    if (typeof content === "string") {
+    if (messageContentIsText(content.content)) {
       return null
     }
 
-    if (content.content.remoteAttachment) {
+    if (messageContentIsRemoteAttachment(content.content)) {
       return (
         <AttachmentRemoteImage
-          messageId={content.reference as IXmtpMessageId}
-          remoteMessageContent={content.content.remoteAttachment}
+          messageId={content.reference as IConversationMessageId}
+          remoteMessageContent={content.content}
           containerProps={{
             style: {
               height: theme.avatarSize.md,
@@ -195,9 +199,9 @@ const ReplyPreviewEndContent = memo(function ReplyPreviewEndContent(props: {
   }
 
   if (isRemoteAttachmentMessage(replyMessage)) {
-    const messageTyped = replyMessage as IXmtpDecodedRemoteAttachmentMessage
+    const messageTyped = replyMessage as IConversationMessageRemoteAttachment
 
-    const content = messageTyped.content()
+    const content = messageTyped.content
 
     if (typeof content === "string") {
       return null
@@ -222,7 +226,7 @@ const ReplyPreviewEndContent = memo(function ReplyPreviewEndContent(props: {
 })
 
 const ReplyPreviewMessageContent = memo(function ReplyPreviewMessageContent(props: {
-  replyMessage: IXmtpDecodedMessage
+  replyMessage: IConversationMessage
 }) {
   const { replyMessage } = props
 
@@ -232,9 +236,9 @@ const ReplyPreviewMessageContent = memo(function ReplyPreviewMessageContent(prop
   const clearedMessage = messageText?.replace(/(\n)/gm, " ")
 
   if (isStaticAttachmentMessage(replyMessage)) {
-    const messageTyped = replyMessage as IXmtpDecodedStaticAttachmentMessage
+    const messageTyped = replyMessage as IConversationMessageStaticAttachment
 
-    const content = messageTyped.content()
+    const content = messageTyped.content
 
     if (typeof content === "string") {
       return <Text>{content}</Text>
@@ -261,23 +265,32 @@ const ReplyPreviewMessageContent = memo(function ReplyPreviewMessageContent(prop
   }
 
   if (isReplyMessage(replyMessage)) {
-    const messageTyped = replyMessage as IXmtpDecodedReplyMessage
-    const content = messageTyped.content()
+    replyMessage.content.content
+    const messageTyped = replyMessage as IConversationMessageReply
+    const content = messageTyped.content
 
-    if (typeof content === "string") {
-      return <Text>{content}</Text>
-    }
-
-    if (content.content.attachment) {
+    if (messageContentIsStaticAttachment(content.content)) {
       return <Text>Reply with attachment</Text>
     }
 
-    if (content.content.text) {
+    if (messageContentIsText(content.content)) {
       return <Text>{content.content.text}</Text>
     }
 
-    if (content.content.remoteAttachment) {
-      return <Text>Image</Text>
+    if (messageContentIsRemoteAttachment(content.content)) {
+      return <Text>{content.content.filename}</Text>
+    }
+
+    if (messageContentisMultiRemoteAttachment(content.content)) {
+      return <Text>Multi remote attachment</Text>
+    }
+
+    if (messageContentIsGroupUpdated(content.content)) {
+      return <Text>Group updated</Text>
+    }
+
+    if (messageContentIsReply(content.content)) {
+      return <Text>Reply</Text>
     }
 
     return <Text>Reply</Text>

@@ -5,16 +5,16 @@ import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.stor
 import { useConversationListPinnedConversationsStyles } from "@/features/conversation/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversations.styles"
 import { useConversationIsUnread } from "@/features/conversation/conversation-list/hooks/use-conversation-is-unread"
 import { useDmConversationContextMenuViewProps } from "@/features/conversation/conversation-list/hooks/use-conversation-list-item-context-menu-props"
+import { IDm } from "@/features/dm/dm.types"
 import { useDmPeerInboxIdQuery } from "@/features/dm/use-dm-peer-inbox-id-query"
 import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
-import { IXmtpDmWithCodecs } from "@/features/xmtp/xmtp.types"
 import { navigate } from "@/navigation/navigation.utils"
 import { isTextMessage } from "../../conversation-chat/conversation-message/conversation-message.utils"
 import { ConversationListPinnedConversation } from "./conversation-list-pinned-conversation"
 import { PinnedConversationMessagePreview } from "./conversation-list-pinned-conversation-message-preview"
 
 type IConversationListPinnedConversationDmProps = {
-  conversation: IXmtpDmWithCodecs
+  conversation: IDm
 }
 
 export const ConversationListPinnedConversationDm = ({

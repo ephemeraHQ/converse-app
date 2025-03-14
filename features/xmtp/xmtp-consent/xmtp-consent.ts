@@ -1,4 +1,4 @@
-import { IXmtpInboxId , IXmtpConsentState } from "@features/xmtp/xmtp.types"
+import { IXmtpConsentState, IXmtpConversationId, IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { config } from "@/config"
 import { getXmtpClientByInboxId } from "@/features/xmtp/xmtp-client/xmtp-client.service"
 import { captureError } from "@/utils/capture-error"
@@ -120,8 +120,8 @@ export async function setXmtpConsentStateForInboxId(args: {
   }
 }
 
-export const updateConsentForGroupsForAccount = async (args: {
-  groupIds: string[]
+export const updateConsentForGroupsForInbox = async (args: {
+  groupIds: IXmtpConversationId[]
   consent: IXmtpConsentState
   clientInboxId: IXmtpInboxId
 }) => {

@@ -6,13 +6,14 @@ import { GroupAvatarInboxIds } from "@/components/group-avatar"
 import { AnimatedCenter, Center } from "@/design-system/Center"
 import { HStack } from "@/design-system/HStack"
 import { getReactionContent } from "@/features/xmtp/xmtp-codecs/xmtp-codecs-reaction"
-import { IXmtpInboxId, IXmtpReactionContent } from "@/features/xmtp/xmtp.types"
+import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { ObjectTyped } from "@/utils/object-typed"
+import { IConversationMessageReactionContent } from "../conversation-message.types"
 
 type MessageContextMenuReactorsProps = {
   reactors: {
-    [reactor: IXmtpInboxId]: IXmtpReactionContent[]
+    [reactor: IXmtpInboxId]: IConversationMessageReactionContent[]
   }
 }
 

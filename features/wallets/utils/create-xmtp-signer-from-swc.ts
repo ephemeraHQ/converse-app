@@ -1,4 +1,4 @@
-import { getSigner, PublicIdentity } from "@xmtp/react-native-sdk"
+import { PublicIdentity } from "@xmtp/react-native-sdk"
 import { ISmartWalletClient } from "@/features/wallets/smart-wallet"
 import { IXmtpSigner } from "@/features/xmtp/xmtp.types"
 

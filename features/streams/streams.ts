@@ -98,7 +98,7 @@ export function useSetupStreamingSubscriptions() {
   }, [])
 }
 
-async function startStreaming(inboxIdsToStream: string[]) {
+async function startStreaming(inboxIdsToStream: IXmtpInboxId[]) {
   const store = useStreamingStore.getState()
 
   for (const inboxId of inboxIdsToStream) {

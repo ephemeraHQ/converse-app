@@ -1,10 +1,11 @@
-import { IXmtpConversationTopic, IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
-import { useGroupMembersQuery } from "@/features/groups/useGroupMembersQuery"
+import { IConversationTopic } from "@/features/conversation/conversation.types"
+import { useGroupMembersQuery } from "@/features/groups/group-members.query"
 
 export function useGroupMember(args: {
   memberInboxId: IXmtpInboxId | undefined
-  topic: IXmtpConversationTopic
+  topic: IConversationTopic
 }) {
   const { memberInboxId, topic } = args
 

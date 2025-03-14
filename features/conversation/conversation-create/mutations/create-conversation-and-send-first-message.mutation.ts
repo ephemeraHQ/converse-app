@@ -1,6 +1,5 @@
-import { IXmtpConversationTopic, IXmtpInboxId , IXmtpDmWithCodecs, IXmtpGroupWithCodecs } from "@features/xmtp/xmtp.types"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { useMutation } from "@tanstack/react-query"
-import { ConversationTopic, MessageId, RemoteAttachmentContent } from "@xmtp/react-native-sdk"
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import {
   getConversationMessagesQueryData,
@@ -10,19 +9,11 @@ import {
   getConversationQueryData,
   updateConversationQueryData,
 } from "@/features/conversation/queries/conversation.query"
+import { convertXmtpConversationToConvosConversation } from "@/features/conversation/utils/convert-xmtp-conversation-to-convos"
 import { createXmtpDm } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-dm"
 import { createXmtpGroup } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-group"
+import { IConversationTopic } from "../../conversation.types"
 import { sendMessage } from "../../hooks/use-send-message"
-
-export type ISendMessageParams = {
-  topic: IXmtpConversationTopic
-  referencedMessageId?: MessageId
-  content:
-    | { text: string; remoteAttachment?: RemoteAttachmentContent }
-    | { text?: string; remoteAttachment: RemoteAttachmentContent }
-}
-
-export type ISendFirstMessageParams = Omit<ISendMessageParams, "topic">
 
 // export async function sendMessage(
 //   args: ISendMessageParams
@@ -68,7 +59,7 @@ function getConversationTempTopic(args: { inboxIds: IXmtpInboxId[] }) {
   const { inboxIds } = args
   return `${TEMP_CONVERSATION_PREFIX}${generateGroupHashFromMemberIds(
     inboxIds,
-  )}` as ConversationTopic
+  )}` as IConversationTopic
 }
 
 export function useCreateConversationAndSendFirstMessage() {
@@ -85,18 +76,20 @@ export function useCreateConversationAndSendFirstMessage() {
       const currentSender = getSafeCurrentSender()
 
       // Create conversation
-      let conversation: IXmtpGroupWithCodecs | IXmtpDmWithCodecs
-      if (inboxIds.length > 1) {
-        conversation = await createXmtpGroup({
-          clientInboxId: currentSender.inboxId,
-          inboxIds,
-        })
-      } else {
-        conversation = await createXmtpDm({
-          senderClientInboxId: currentSender.inboxId,
-          peerInboxId: inboxIds[0],
-        })
-      }
+      const conversation =
+        inboxIds.length > 1
+          ? await convertXmtpConversationToConvosConversation(
+              await createXmtpGroup({
+                clientInboxId: currentSender.inboxId,
+                inboxIds,
+              }),
+            )
+          : await convertXmtpConversationToConvosConversation(
+              await createXmtpDm({
+                senderClientInboxId: currentSender.inboxId,
+                peerInboxId: inboxIds[0],
+              }),
+            )
 
       // Send message
       const messageId = await sendMessage({
@@ -294,7 +287,7 @@ export function useCreateConversationAndSendFirstMessage() {
 export function maybeReplaceOptimisticConversationWithReal(args: {
   clientInboxId: IXmtpInboxId
   memberInboxIds: IXmtpInboxId[]
-  realTopic: IXmtpConversationTopic
+  realTopic: IConversationTopic
 }) {
   const { clientInboxId, memberInboxIds, realTopic } = args
 

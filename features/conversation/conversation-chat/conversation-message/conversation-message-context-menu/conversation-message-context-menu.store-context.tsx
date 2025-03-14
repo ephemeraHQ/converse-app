@@ -1,14 +1,14 @@
 import { createContext, memo, useContext, useRef } from "react"
 import { createStore, useStore } from "zustand"
 import { subscribeWithSelector } from "zustand/middleware"
-import { IXmtpMessageId } from "@/features/xmtp/xmtp.types"
+import { IConversationMessageId } from "../conversation-message.types"
 
 type IConversationMessageContextMenuStoreProps = {}
 
 export type IConversationMessageContextMenuStoreState =
   IConversationMessageContextMenuStoreProps & {
     messageContextMenuData: {
-      messageId: IXmtpMessageId
+      messageId: IConversationMessageId
       itemRectX: number
       itemRectY: number
       itemRectHeight: number

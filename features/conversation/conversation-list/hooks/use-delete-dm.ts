@@ -1,4 +1,3 @@
-import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { useCallback } from "react"
 import { showActionSheet } from "@/components/action-sheet"
@@ -14,8 +13,9 @@ import { useDmPeerInboxIdQuery } from "@/features/dm/use-dm-peer-inbox-id-query"
 import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
 import { translate } from "@/i18n"
 import { captureErrorWithToast } from "@/utils/capture-error"
+import { IConversationTopic } from "../../conversation.types"
 
-export const useDeleteDm = ({ topic }: { topic: IXmtpConversationTopic }) => {
+export const useDeleteDm = ({ topic }: { topic: IConversationTopic }) => {
   const currentSender = useSafeCurrentSender()!
 
   const { data: conversationId } = useQuery({

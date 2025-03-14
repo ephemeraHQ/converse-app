@@ -1,11 +1,22 @@
-import { IXmtpInboxId , IXmtpGroupWithCodecs } from "@features/xmtp/xmtp.types"
+import { IXmtpConversationId, IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import {
+  addAdmin,
+  addGroupMembers,
+  addSuperAdmin,
+  removeAdmin,
+  removeGroupMembers,
+  removeSuperAdmin,
+  updateGroupDescription,
+  updateGroupImageUrl,
+  updateGroupName,
+} from "@xmtp/react-native-sdk"
 import { PermissionPolicySet } from "@xmtp/react-native-sdk/build/lib/types/PermissionPolicySet"
 import { config } from "@/config"
 import { captureError } from "@/utils/capture-error"
 import { XMTPError } from "@/utils/error"
 import { getXmtpClientByInboxId } from "../xmtp-client/xmtp-client.service"
 
-const defaultPermissionPolicySet: PermissionPolicySet = {
+const defaultCreateGroupPermissionPolicySet: PermissionPolicySet = {
   addMemberPolicy: "allow",
   removeMemberPolicy: "admin",
   addAdminPolicy: "superAdmin",
@@ -28,7 +39,7 @@ export async function createXmtpGroup(args: {
     const {
       clientInboxId,
       inboxIds,
-      permissionPolicySet = defaultPermissionPolicySet,
+      permissionPolicySet = defaultCreateGroupPermissionPolicySet,
       groupName,
       groupPhoto,
       groupDescription,
@@ -66,14 +77,19 @@ export async function createXmtpGroup(args: {
 }
 
 export async function addXmtpGroupMembers(args: {
-  group: IXmtpGroupWithCodecs
+  clientInboxId: IXmtpInboxId
+  groupId: IXmtpConversationId
   inboxIds: IXmtpInboxId[]
 }) {
   try {
-    const { group, inboxIds } = args
+    const { clientInboxId, groupId, inboxIds } = args
+
+    const client = await getXmtpClientByInboxId({
+      inboxId: clientInboxId,
+    })
 
     const startTime = Date.now()
-    await group.addMembers(inboxIds)
+    await addGroupMembers(client.installationId, groupId, inboxIds)
     const duration = Date.now() - startTime
 
     if (duration > config.xmtp.maxMsUntilLogError) {
@@ -88,16 +104,19 @@ export async function addXmtpGroupMembers(args: {
 }
 
 export async function removeXmtpGroupMembers(args: {
-  group: IXmtpGroupWithCodecs
+  clientInboxId: IXmtpInboxId
+  groupId: IXmtpConversationId
   inboxIds: IXmtpInboxId[]
 }) {
   try {
-    const { group, inboxIds } = args
+    const { clientInboxId, groupId, inboxIds } = args
+
+    const client = await getXmtpClientByInboxId({
+      inboxId: clientInboxId,
+    })
 
     const startTime = Date.now()
-
-    await group.removeMembers(inboxIds)
-
+    await removeGroupMembers(client.installationId, groupId, inboxIds)
     const duration = Date.now() - startTime
 
     if (duration > config.xmtp.maxMsUntilLogError) {
@@ -112,13 +131,18 @@ export async function removeXmtpGroupMembers(args: {
 }
 
 export async function updateXmtpGroupDescription(args: {
-  group: IXmtpGroupWithCodecs
+  clientInboxId: IXmtpInboxId
+  groupId: IXmtpConversationId
   description: string
 }) {
-  const { group, description } = args
+  const { clientInboxId, groupId, description } = args
   try {
+    const client = await getXmtpClientByInboxId({
+      inboxId: clientInboxId,
+    })
+
     const startTime = Date.now()
-    await group.updateDescription(description)
+    await updateGroupDescription(client.installationId, groupId, description)
     const duration = Date.now() - startTime
 
     if (duration > config.xmtp.maxMsUntilLogError) {
@@ -133,14 +157,19 @@ export async function updateXmtpGroupDescription(args: {
 }
 
 export async function updateXmtpGroupImage(args: {
-  group: IXmtpGroupWithCodecs
+  clientInboxId: IXmtpInboxId
+  groupId: IXmtpConversationId
   imageUrl: string
 }) {
-  const { group, imageUrl } = args
+  const { clientInboxId, groupId, imageUrl } = args
 
   try {
+    const client = await getXmtpClientByInboxId({
+      inboxId: clientInboxId,
+    })
+
     const startTime = Date.now()
-    await group.updateImageUrl(imageUrl)
+    await updateGroupImageUrl(client.installationId, groupId, imageUrl)
     const duration = Date.now() - startTime
 
     if (duration > config.xmtp.maxMsUntilLogError) {
@@ -154,12 +183,20 @@ export async function updateXmtpGroupImage(args: {
   }
 }
 
-export async function updateXmtpGroupName(args: { group: IXmtpGroupWithCodecs; name: string }) {
-  const { group, name } = args
+export async function updateXmtpGroupName(args: {
+  clientInboxId: IXmtpInboxId
+  groupId: IXmtpConversationId
+  name: string
+}) {
+  const { clientInboxId, groupId, name } = args
 
   try {
+    const client = await getXmtpClientByInboxId({
+      inboxId: clientInboxId,
+    })
+
     const startTime = Date.now()
-    await group.updateName(name)
+    await updateGroupName(client.installationId, groupId, name)
     const duration = Date.now() - startTime
 
     if (duration > config.xmtp.maxMsUntilLogError) {
@@ -169,6 +206,122 @@ export async function updateXmtpGroupName(args: { group: IXmtpGroupWithCodecs; n
     throw new XMTPError({
       error,
       additionalMessage: "failed to update group name",
+    })
+  }
+}
+
+export async function removeAdminFromXmtpGroup(args: {
+  clientInboxId: IXmtpInboxId
+  groupId: IXmtpConversationId
+  adminInboxId: IXmtpInboxId
+}) {
+  const { clientInboxId, groupId, adminInboxId } = args
+
+  try {
+    const client = await getXmtpClientByInboxId({
+      inboxId: clientInboxId,
+    })
+
+    const startTime = Date.now()
+    await removeAdmin(client.installationId, groupId, adminInboxId)
+    const endTime = Date.now()
+
+    const duration = endTime - startTime
+
+    if (duration > config.xmtp.maxMsUntilLogError) {
+      captureError(new Error(`Removing admin from group took ${duration}ms`))
+    }
+  } catch (error) {
+    throw new XMTPError({
+      error,
+      additionalMessage: "Failed to remove admin from group",
+    })
+  }
+}
+
+export async function removeSuperAdminFromXmtpGroup(args: {
+  clientInboxId: IXmtpInboxId
+  groupId: IXmtpConversationId
+  superAdminInboxId: IXmtpInboxId
+}) {
+  const { clientInboxId, groupId, superAdminInboxId } = args
+
+  try {
+    const client = await getXmtpClientByInboxId({
+      inboxId: clientInboxId,
+    })
+
+    const startTime = Date.now()
+    await removeSuperAdmin(client.installationId, groupId, superAdminInboxId)
+    const endTime = Date.now()
+
+    const duration = endTime - startTime
+
+    if (duration > config.xmtp.maxMsUntilLogError) {
+      captureError(new Error(`Removing super admin from group took ${duration}ms`))
+    }
+  } catch (error) {
+    throw new XMTPError({
+      error,
+      additionalMessage: "Failed to remove super admin from group",
+    })
+  }
+}
+
+export async function addAdminToXmtpGroup(args: {
+  clientInboxId: IXmtpInboxId
+  groupId: IXmtpConversationId
+  adminInboxId: IXmtpInboxId
+}) {
+  const { clientInboxId, groupId, adminInboxId } = args
+
+  try {
+    const client = await getXmtpClientByInboxId({
+      inboxId: clientInboxId,
+    })
+
+    const startTime = Date.now()
+    await addAdmin(client.installationId, groupId, adminInboxId)
+    const endTime = Date.now()
+
+    const duration = endTime - startTime
+
+    if (duration > config.xmtp.maxMsUntilLogError) {
+      captureError(new Error(`Adding admin to group took ${duration}ms`))
+    }
+  } catch (error) {
+    throw new XMTPError({
+      error,
+      additionalMessage: "Failed to add admin to group",
+    })
+  }
+}
+
+export async function addSuperAdminToXmtpGroup(args: {
+  clientInboxId: IXmtpInboxId
+  groupId: IXmtpConversationId
+  superAdminInboxId: IXmtpInboxId
+}) {
+  const { clientInboxId, groupId, superAdminInboxId } = args
+
+  try {
+    const client = await getXmtpClientByInboxId({
+      inboxId: clientInboxId,
+    })
+
+    const startTime = Date.now()
+    await addSuperAdmin(client.installationId, groupId, superAdminInboxId)
+    const endTime = Date.now()
+
+    const duration = endTime - startTime
+
+    if (duration > config.xmtp.maxMsUntilLogError) {
+      captureError(new Error(`Adding super admin to group took ${duration}ms`))
+    }
+  } catch (error) {
+    throw new XMTPError({
+      error,
+      additionalMessage: "Failed to add super admin to group",
     })
   }
 }

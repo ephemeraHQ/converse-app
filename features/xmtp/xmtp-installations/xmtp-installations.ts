@@ -1,6 +1,6 @@
-import { IXmtpClient } from "@/features/xmtp/xmtp.types"
+import { IXmtpClientWithCodecs } from "@/features/xmtp/xmtp.types"
 
-export const getOtherInstallations = async (args: { client: IXmtpClient }) => {
+export const getOtherInstallations = async (args: { client: IXmtpClientWithCodecs }) => {
   const { client } = args
 
   const inboxState = await client.inboxState(true)
@@ -11,7 +11,7 @@ export const getOtherInstallations = async (args: { client: IXmtpClient }) => {
   return otherInstallations
 }
 
-export async function validateClientInstallation(args: { client: IXmtpClient }) {
+export async function validateClientInstallation(args: { client: IXmtpClientWithCodecs }) {
   const { client } = args
   const inboxState = await client.inboxState(true)
   const installationsIds = inboxState.installations.map((i) => i.id)

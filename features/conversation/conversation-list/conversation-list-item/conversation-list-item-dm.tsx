@@ -1,4 +1,3 @@
-import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
 import { getCompactRelativeTime } from "@utils/date"
 import { memo, useCallback, useMemo } from "react"
 import { Avatar } from "@/components/avatar"
@@ -20,12 +19,13 @@ import { useFocusRerender } from "@/hooks/use-focus-rerender"
 import { navigate } from "@/navigation/navigation.utils"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { captureErrorWithToast } from "@/utils/capture-error"
+import { IConversationTopic } from "../../conversation.types"
 import { ConversationListItem } from "./conversation-list-item"
 import { DeleteSwipeableAction } from "./conversation-list-item-swipeable/conversation-list-item-swipeable-delete-action"
 import { ToggleUnreadSwipeableAction } from "./conversation-list-item-swipeable/conversation-list-item-swipeable-toggle-read-action"
 
 type IConversationListItemDmProps = {
-  conversationTopic: IXmtpConversationTopic
+  conversationTopic: IConversationTopic
 }
 
 export const ConversationListItemDm = memo(function ConversationListItemDm({

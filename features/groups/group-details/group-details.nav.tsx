@@ -1,9 +1,9 @@
-import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
+import { IConversationTopic } from "@/features/conversation/conversation.types"
 import { GroupDetailsScreen } from "@/features/groups/group-details/group-details.screen"
 import { AppNativeStack } from "@/navigation/app-navigator"
 
 export type GroupDetailsNavParams = {
-  groupTopic: IXmtpConversationTopic
+  groupTopic: IConversationTopic
 }
 
 export const GroupDetailsScreenConfig = {

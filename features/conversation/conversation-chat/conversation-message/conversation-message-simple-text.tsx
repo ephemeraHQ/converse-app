@@ -10,28 +10,26 @@ import { ConversationMessageGestures } from "@/features/conversation/conversatio
 import { MessageText } from "@/features/conversation/conversation-chat/conversation-message/conversation-message-text"
 import { useConversationMessageContextStoreContext } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.store-context"
 import { shouldRenderBigEmoji } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
-import { IXmtpDecodedTextMessage } from "@/features/xmtp/xmtp.types"
 import { useSelect } from "@/stores/stores.utils"
+import { IConversationMessageText } from "./conversation-message.types"
 
 export const MessageSimpleText = memo(function MessageSimpleText(props: {
-  message: IXmtpDecodedTextMessage
+  message: IConversationMessageText
 }) {
   const { message } = props
-
-  const textContent = message.content()
 
   const { hasNextMessageInSeries, fromMe } = useConversationMessageContextStoreContext(
     useSelect(["hasNextMessageInSeries", "fromMe"]),
   )
 
-  if (shouldRenderBigEmoji(textContent)) {
+  if (shouldRenderBigEmoji(message.content.text)) {
     return (
       <VStack
         style={{
           alignItems: fromMe ? "flex-end" : "flex-start",
         }}
       >
-        <Text style={textSizeStyles["5xl"]}>{textContent}</Text>
+        <Text style={textSizeStyles["5xl"]}>{message.content.text}</Text>
       </VStack>
     )
   }
@@ -40,7 +38,7 @@ export const MessageSimpleText = memo(function MessageSimpleText(props: {
     <BubbleContainer fromMe={fromMe}>
       <ConversationMessageGestures>
         <BubbleContentContainer fromMe={fromMe} hasNextMessageInSeries={hasNextMessageInSeries}>
-          <MessageText inverted={fromMe}>{textContent}</MessageText>
+          <MessageText inverted={fromMe}>{message.content.text}</MessageText>
         </BubbleContentContainer>
       </ConversationMessageGestures>
     </BubbleContainer>

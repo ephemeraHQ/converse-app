@@ -1,13 +1,13 @@
-import { IXmtpConversationTopic, IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { useQuery } from "@tanstack/react-query"
 import { useCallback } from "react"
 import { showSnackbar } from "@/components/snackbar/snackbar.service"
 import { useAllowGroupMutation } from "@/features/consent/use-allow-group.mutation"
 import { useDenyGroupMutation } from "@/features/consent/use-deny-group.mutation"
-import { useGroupCreatorQuery } from "@/features/groups/useGroupCreatorQuery"
-import { getGroupQueryOptions, useGroupQuery } from "@/features/groups/useGroupQuery"
+import { getGroupQueryOptions, useGroupQuery } from "@/features/groups/group.query"
 import { translate } from "@/i18n"
 import { useSafeCurrentSender } from "../authentication/multi-inbox.store"
+import { IConversationTopic } from "../conversation/conversation.types"
 import { setXmtpConsentStateForInboxId } from "../xmtp/xmtp-consent/xmtp-consent"
 
 export type IGroupConsentOptions = {
@@ -15,7 +15,7 @@ export type IGroupConsentOptions = {
   includeAddedBy?: boolean
 }
 
-export const useGroupConsentForCurrentAccount = (topic: IXmtpConversationTopic) => {
+export const useGroupConsentForCurrentAccount = (topic: IConversationTopic) => {
   const currentSender = useSafeCurrentSender()
 
   const { data: group, isLoading: isGroupLoading } = useGroupQuery({
@@ -23,15 +23,13 @@ export const useGroupConsentForCurrentAccount = (topic: IXmtpConversationTopic) 
     topic,
   })
 
-  const { data: groupCreator, isLoading: isGroupCreatorLoading } = useGroupCreatorQuery(topic)
-
   const {
     data: groupConsent,
     isLoading: isGroupConsentLoading,
     isError,
   } = useQuery({
     ...getGroupQueryOptions({ inboxId: currentSender.inboxId, topic }),
-    select: (group) => group?.state,
+    select: (group) => group?.consentState,
   })
 
   const { mutateAsync: allowGroupMutation, isPending: isAllowingGroup } = useAllowGroupMutation({
@@ -82,8 +80,8 @@ export const useGroupConsentForCurrentAccount = (topic: IXmtpConversationTopic) 
         inboxIdsToDeny.push(group.addedByInboxId)
       }
 
-      if (includeCreator && groupCreator) {
-        inboxIdsToDeny.push(groupCreator)
+      if (includeCreator && group.creatorInboxId) {
+        inboxIdsToDeny.push(group.creatorInboxId)
       }
 
       if (inboxIdsToDeny.length > 0) {
@@ -97,10 +95,10 @@ export const useGroupConsentForCurrentAccount = (topic: IXmtpConversationTopic) 
         )
       }
     },
-    [denyGroupMutation, groupCreator, group],
+    [denyGroupMutation, group],
   )
 
-  const isLoading = isGroupLoading || isGroupCreatorLoading || isGroupConsentLoading
+  const isLoading = isGroupLoading || isGroupConsentLoading
 
   return {
     consent: groupConsent,

@@ -7,11 +7,9 @@ import { IEthereumAddress } from "@/utils/evm/address"
 import { getSecureItemAsync, setSecureItemAsync } from "@/utils/keychain"
 import { xmtpLogger } from "@/utils/logger"
 import { ISupportedXmtpCodecs, supportedXmtpCodecs } from "../xmtp-codecs/xmtp-codecs"
-import { IXmtpClient, IXmtpInboxId, IXmtpSigner } from "../xmtp.types"
+import { IXmtpClientWithCodecs, IXmtpInboxId, IXmtpSigner } from "../xmtp.types"
 
-export async function createXmtpClientInstance(args: {
-  inboxSigner: IXmtpSigner
-}): Promise<IXmtpClient> {
+export async function createXmtpClientInstance(args: { inboxSigner: IXmtpSigner }) {
   const { inboxSigner } = args
 
   xmtpLogger.debug(`Creating XMTP client instance`)
@@ -34,7 +32,7 @@ export async function createXmtpClientInstance(args: {
       )
     }
 
-    return client
+    return client as IXmtpClientWithCodecs
   } catch (error) {
     throw new XMTPError({
       error,
@@ -77,7 +75,7 @@ export async function buildXmtpClientInstance(args: {
       )
     }
 
-    return client
+    return client as IXmtpClientWithCodecs
   } catch (error) {
     throw new XMTPError({
       error,

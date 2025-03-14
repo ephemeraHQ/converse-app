@@ -1,4 +1,3 @@
-import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
 import { useMutation } from "@tanstack/react-query"
 import { useCallback } from "react"
 import { showActionSheet } from "@/components/action-sheet"
@@ -8,11 +7,14 @@ import {
   getConversationMetadataQueryData,
   updateConversationMetadataQueryData,
 } from "@/features/conversation/conversation-metadata/conversation-metadata.query"
-import { getGroupQueryData } from "@/features/groups/useGroupQuery"
+import { getGroupQueryData } from "@/features/groups/group.query"
+import { updateConsentForGroupsForInbox } from "@/features/xmtp/xmtp-consent/xmtp-consent"
+import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 import { translate } from "@/i18n"
 import { captureErrorWithToast } from "@/utils/capture-error"
+import { IConversationTopic } from "../../conversation.types"
 
-export const useDeleteGroup = (args: { groupTopic: IXmtpConversationTopic }) => {
+export const useDeleteGroup = (args: { groupTopic: IConversationTopic }) => {
   const { groupTopic } = args
   const currentSender = useSafeCurrentSender()
 
@@ -55,7 +57,7 @@ export const useDeleteGroup = (args: { groupTopic: IXmtpConversationTopic }) => 
       throw new Error("Group not found")
     }
 
-    const title = `${translate("delete_chat_with")} ${group.groupName}?`
+    const title = `${translate("delete_chat_with")} ${group.name}?`
 
     const actions = [
       {
@@ -73,12 +75,11 @@ export const useDeleteGroup = (args: { groupTopic: IXmtpConversationTopic }) => 
         action: async () => {
           try {
             await deleteGroupAsync()
-            await group.updateConsent("denied")
-            await {
+            await updateConsentForGroupsForInbox({
               clientInboxId: currentSender.inboxId,
-              inboxIds: [group.addedByInboxId],
+              groupIds: [group.id as unknown as IXmtpConversationId],
               consent: "denied",
-            }
+            })
           } catch (error) {
             captureErrorWithToast(error)
           }

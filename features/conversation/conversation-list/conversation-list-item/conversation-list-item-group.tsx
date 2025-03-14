@@ -1,4 +1,3 @@
-import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
 import { getCompactRelativeTime } from "@utils/date"
 import { memo, useCallback } from "react"
 import { GroupAvatar } from "@/components/group-avatar"
@@ -10,16 +9,17 @@ import { useConversationIsUnread } from "@/features/conversation/conversation-li
 import { useDeleteGroup } from "@/features/conversation/conversation-list/hooks/use-delete-group"
 import { useMessagePlainText } from "@/features/conversation/conversation-list/hooks/use-message-plain-text"
 import { useToggleReadStatus } from "@/features/conversation/conversation-list/hooks/use-toggle-read-status"
+import { useGroupQuery } from "@/features/groups/group.query"
 import { useGroupName } from "@/features/groups/hooks/use-group-name"
-import { useGroupQuery } from "@/features/groups/useGroupQuery"
 import { useFocusRerender } from "@/hooks/use-focus-rerender"
 import { useRouter } from "@/navigation/use-navigation"
+import { IConversationTopic } from "../../conversation.types"
 import { ConversationListItem } from "./conversation-list-item"
 import { DeleteSwipeableAction } from "./conversation-list-item-swipeable/conversation-list-item-swipeable-delete-action"
 import { ToggleUnreadSwipeableAction } from "./conversation-list-item-swipeable/conversation-list-item-swipeable-toggle-read-action"
 
 type IConversationListItemGroupProps = {
-  conversationTopic: IXmtpConversationTopic
+  conversationTopic: IConversationTopic
 }
 
 export const ConversationListItemGroup = memo(function ConversationListItemGroup({

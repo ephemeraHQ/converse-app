@@ -2,11 +2,12 @@ import { useQuery } from "@tanstack/react-query"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { getConversationMessageQueryOptions } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.query"
 import { useConversationMessagesQuery } from "@/features/conversation/conversation-chat/conversation-messages.query"
-import { IXmtpConversationTopic, IXmtpMessageId } from "@/features/xmtp/xmtp.types"
+import { IConversationTopic } from "../../conversation.types"
+import { IConversationMessageId } from "./conversation-message.types"
 
 export function useConversationMessageById(args: {
-  messageId: IXmtpMessageId
-  conversationTopic: IXmtpConversationTopic
+  messageId: IConversationMessageId
+  conversationTopic: IConversationTopic
 }) {
   const { messageId, conversationTopic } = args
 

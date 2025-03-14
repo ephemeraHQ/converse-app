@@ -3,11 +3,9 @@ import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.stor
 import { UploadedRemoteAttachment } from "@/features/conversation/conversation-chat/conversation-attachment/conversation-attachments.types"
 import { getOrFetchConversationQuery } from "@/features/conversation/queries/conversation.query"
 import { sendXmtpConversationMessage } from "@/features/xmtp/xmtp-conversations/xmtp-conversation"
-import {
-  IXmtpConversationTopic,
-  IXmtpMessageId,
-  IXmtpRemoteAttachmentInfo,
-} from "@/features/xmtp/xmtp.types"
+import { IXmtpConversationId, IXmtpRemoteAttachmentInfo } from "@/features/xmtp/xmtp.types"
+import { IConversationMessageId } from "../conversation-chat/conversation-message/conversation-message.types"
+import { IConversationTopic } from "../conversation.types"
 
 export type ISendMessageContent = {
   text?: string
@@ -15,8 +13,8 @@ export type ISendMessageContent = {
 }
 
 export type ISendMessageParams = {
-  topic: IXmtpConversationTopic
-  referencedMessageId?: IXmtpMessageId
+  topic: IConversationTopic
+  referencedMessageId?: IConversationMessageId
   content: ISendMessageContent
 }
 
@@ -43,6 +41,8 @@ export async function sendMessage(args: ISendMessageParams) {
     caller: "use-send-message",
   })
 
+  const currentSender = getSafeCurrentSender()
+
   if (!conversation) {
     throw new Error("Conversation not found when sending message")
   }
@@ -52,7 +52,8 @@ export async function sendMessage(args: ISendMessageParams) {
     // Text-only message
     if (!content.remoteAttachments?.length) {
       return sendXmtpConversationMessage({
-        conversation,
+        clientInboxId: currentSender.inboxId,
+        conversationId: conversation.id as unknown as IXmtpConversationId,
         content: { text: content.text! },
       })
     }
@@ -60,7 +61,8 @@ export async function sendMessage(args: ISendMessageParams) {
     // Multiple attachments
     if (content.remoteAttachments.length > 1) {
       return sendXmtpConversationMessage({
-        conversation,
+        clientInboxId: currentSender.inboxId,
+        conversationId: conversation.id as unknown as IXmtpConversationId,
         content: {
           multiRemoteAttachment: {
             attachments: content.remoteAttachments.map(
@@ -73,7 +75,8 @@ export async function sendMessage(args: ISendMessageParams) {
 
     // Single attachment
     return sendXmtpConversationMessage({
-      conversation,
+      clientInboxId: currentSender.inboxId,
+      conversationId: conversation.id as unknown as IXmtpConversationId,
       content: {
         remoteAttachment: convertConvosUploadedRemoteAttachmentToXmtpRemoteAttachment(
           content.remoteAttachments[0],
@@ -100,7 +103,8 @@ export async function sendMessage(args: ISendMessageParams) {
         }
 
   return sendXmtpConversationMessage({
-    conversation,
+    clientInboxId: currentSender.inboxId,
+    conversationId: conversation.id as unknown as IXmtpConversationId,
     content: {
       reply: {
         reference: referencedMessageId,

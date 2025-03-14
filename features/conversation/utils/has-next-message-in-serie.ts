@@ -1,8 +1,8 @@
-import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types"
+import { IConversationMessage } from "../conversation-chat/conversation-message/conversation-message.types"
 
 type HasNextMessageInSeriesPayload = {
-  currentMessage: IXmtpDecodedMessage
-  nextMessage: IXmtpDecodedMessage | undefined
+  currentMessage: IConversationMessage
+  nextMessage: IConversationMessage | undefined
 }
 
 export const hasNextMessageInSeries = ({

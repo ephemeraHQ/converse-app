@@ -1,12 +1,13 @@
-import type { IXmtpConversationTopic, IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import type { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { queryOptions, skipToken } from "@tanstack/react-query"
 import { getConversationMetadata } from "@/features/conversation/conversation-metadata/conversation-metadata.api"
 import { reactQueryClient } from "../../../utils/react-query/react-query.client"
+import type { IConversationTopic } from "../conversation.types"
 
 export type IConversationMetadataQueryData = Awaited<ReturnType<typeof getConversationMetadata>>
 
 type IArgs = {
-  topic: IXmtpConversationTopic
+  topic: IConversationTopic
   clientInboxId: IXmtpInboxId
 }
 

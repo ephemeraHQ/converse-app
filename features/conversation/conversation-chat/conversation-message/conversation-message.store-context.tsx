@@ -2,25 +2,26 @@
  * This store/context is to avoid prop drilling in message components.
  */
 
-import { IXmtpInboxId, IXmtpMessageId , IXmtpDecodedMessage } from "@features/xmtp/xmtp.types"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { createContext, memo, useContext, useEffect, useRef } from "react"
 import { createStore, useStore } from "zustand"
 import { subscribeWithSelector } from "zustand/middleware"
 import { isGroupUpdatedMessage } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
 import { hasNextMessageInSeries } from "@/features/conversation/utils/has-next-message-in-serie"
 import { hasPreviousMessageInSeries } from "@/features/conversation/utils/has-previous-message-in-serie"
-import { messageIsFromCurrentAccountInboxId } from "@/features/conversation/utils/message-is-from-current-user"
+import { messageIsFromCurrentSenderInboxId } from "@/features/conversation/utils/message-is-from-current-user"
 import { messageShouldShowDateChange } from "@/features/conversation/utils/message-should-show-date-change"
 import { convertNanosecondsToMilliseconds } from "@/utils/date"
+import { IConversationMessage, IConversationMessageId } from "./conversation-message.types"
 
 type IMessageContextStoreProps = {
-  message: IXmtpDecodedMessage
-  previousMessage: IXmtpDecodedMessage | undefined
-  nextMessage: IXmtpDecodedMessage | undefined
+  message: IConversationMessage
+  previousMessage: IConversationMessage | undefined
+  nextMessage: IConversationMessage | undefined
 }
 
 type IMessageContextStoreState = IMessageContextStoreProps & {
-  messageId: IXmtpMessageId
+  messageId: IConversationMessageId
   hasNextMessageInSeries: boolean
   hasPreviousMessageInSeries: boolean
   fromMe: boolean
@@ -70,7 +71,7 @@ function getStoreStateBasedOnProps(props: IMessageContextStoreProps) {
       currentMessage: props.message,
       previousMessage: props.previousMessage,
     }),
-    fromMe: messageIsFromCurrentAccountInboxId({
+    fromMe: messageIsFromCurrentSenderInboxId({
       message: props.message,
     }),
     showDateChange: messageShouldShowDateChange({

@@ -12,6 +12,7 @@ import {
 } from "@/features/authentication/multi-inbox.store"
 import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
 import { usePreferredDisplayInfoBatch } from "@/features/preferred-display-info/use-preferred-display-info-batch"
+import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { translate } from "@/i18n"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { shortAddress } from "@/utils/strings/shortAddress"
@@ -48,7 +49,7 @@ export function AccountSwitcher(props: { noAvatar?: boolean }) {
         navigation.navigate("AppSettings")
       } else {
         useMultiInboxStore.getState().actions.setCurrentSender({
-          inboxId: profileXmtpInboxId,
+          inboxId: profileXmtpInboxId as IXmtpInboxId,
         })
       }
     },

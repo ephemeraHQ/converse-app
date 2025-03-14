@@ -1,17 +1,20 @@
 import type { IXmtpConversationTopic, IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query"
+import { config } from "@/config"
 import { ensureConversationSyncAllQuery } from "@/features/conversation/queries/conversation-sync-all.query"
+import { convertXmtpConversationToConvosConversation } from "@/features/conversation/utils/convert-xmtp-conversation-to-convos"
 import { getXmtpClientByInboxId } from "@/features/xmtp/xmtp-client/xmtp-client.service"
 import { Optional } from "@/types/general"
 import { captureError } from "@/utils/capture-error"
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
 import { reactQueryClient } from "../../../utils/react-query/react-query.client"
+import type { IConversationTopic } from "../conversation.types"
 
-export type ConversationQueryData = Awaited<ReturnType<typeof getConversation>>
+export type IConversationQueryData = Awaited<ReturnType<typeof getConversation>>
 
 type IGetConversationArgs = {
   inboxId: IXmtpInboxId
-  topic: IXmtpConversationTopic
+  topic: IConversationTopic
 }
 
 type IGetConversationArgsWithCaller = IGetConversationArgs & { caller: string }
@@ -51,7 +54,7 @@ async function getConversation(args: IGetConversationArgs) {
     inboxId,
   })
 
-  const conversation = (
+  const xmtpConversations = (
     await client.conversations.list({
       isActive: true,
       addedByInboxId: true,
@@ -61,10 +64,10 @@ async function getConversation(args: IGetConversationArgs) {
       lastMessage: true,
       description: true,
     })
-  ).find((c) => c.topic === topic)
+  ).find((c) => c.topic === (topic as unknown as IXmtpConversationTopic))
 
-  if (!conversation) {
-    throw new Error(`Conversation ${topic} not found`)
+  if (!xmtpConversations) {
+    return null
   }
   /**
    * (END) TMP until we can fetch a single conversation and get ALL the properties for it (lastMessage, etc)
@@ -93,13 +96,15 @@ async function getConversation(args: IGetConversationArgs) {
   const totalEnd = new Date().getTime()
   const totalTimeDiff = totalEnd - totalStart
 
-  if (totalTimeDiff > 3000) {
+  if (totalTimeDiff > config.xmtp.maxMsUntilLogError) {
     captureError(
       new Error(`[useConversationQuery] Fetched conversation for ${topic} in ${totalTimeDiff}ms`),
     )
   }
 
-  return conversation
+  const convosConversation = await convertXmtpConversationToConvosConversation(xmtpConversations)
+
+  return convosConversation
 }
 
 export const useConversationQuery = (args: IGetConversationArgsWithCaller) => {
@@ -123,7 +128,7 @@ export function getConversationQueryOptions(
 
 export const setConversationQueryData = (
   args: IGetConversationArgs & {
-    conversation: ConversationQueryData
+    conversation: IConversationQueryData
   },
 ) => {
   const { inboxId, topic, conversation } = args
@@ -138,7 +143,7 @@ export const setConversationQueryData = (
 
 export function updateConversationQueryData(
   args: IGetConversationArgs & {
-    conversationUpdate: Partial<ConversationQueryData>
+    conversationUpdate: Partial<IConversationQueryData>
   },
 ) {
   const { conversationUpdate } = args

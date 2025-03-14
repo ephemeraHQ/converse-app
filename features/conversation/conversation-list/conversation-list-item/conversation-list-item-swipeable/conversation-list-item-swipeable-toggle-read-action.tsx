@@ -1,15 +1,15 @@
-import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
 import React, { memo, useState } from "react"
 import { runOnJS, useAnimatedReaction } from "react-native-reanimated"
 import { ISwipeableRenderActionsArgs } from "@/components/swipeable"
 import { useConversationIsUnread } from "@/features/conversation/conversation-list/hooks/use-conversation-is-unread"
+import { IConversationTopic } from "@/features/conversation/conversation.types"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { ConversationListItemSwipeableAction } from "./conversation-list-item-swipeable-action"
 
 type IconType = "checkmark.message" | "message.badge"
 
 export const ToggleUnreadSwipeableAction = memo(
-  (props: ISwipeableRenderActionsArgs & { topic: IXmtpConversationTopic }) => {
+  (props: ISwipeableRenderActionsArgs & { topic: IConversationTopic }) => {
     const { progressAnimatedValue, topic } = props
     const { theme } = useAppTheme()
     const { isUnread } = useConversationIsUnread({ topic })

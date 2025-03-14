@@ -1,4 +1,3 @@
-import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
 import { memo, useCallback, useMemo } from "react"
 import { HStack } from "@/design-system/HStack"
 import { IconButton } from "@/design-system/IconButton/IconButton"
@@ -7,15 +6,16 @@ import { Pressable } from "@/design-system/Pressable"
 import { Text } from "@/design-system/Text"
 import { VStack } from "@/design-system/VStack"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
+import { IConversationTopic } from "@/features/conversation/conversation.types"
 import { MemberDetailsBottomSheet } from "@/features/groups/group-details/components/group-details-member-details.bottom-sheet"
 import { GroupDetailsListItem } from "@/features/groups/group-details/components/group-details.ui"
-import { useGroupMembersQuery } from "@/features/groups/useGroupMembersQuery"
+import { useGroupMembersQuery } from "@/features/groups/group-members.query"
 import { useRouter } from "@/navigation/use-navigation"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { MemberListItem } from "./group-details-members-list-item"
 
 export const GroupDetailsMembersList = memo(function GroupDetailsMembersList(props: {
-  topic: IXmtpConversationTopic
+  topic: IConversationTopic
 }) {
   const { topic } = props
   const router = useRouter()

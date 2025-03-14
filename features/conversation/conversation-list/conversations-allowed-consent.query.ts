@@ -1,20 +1,17 @@
-import {
-  IXmtpConversationTopic,
-  IXmtpConversationWithCodecs,
-  IXmtpInboxId,
-} from "@features/xmtp/xmtp.types"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { QueryObserver, queryOptions, skipToken, useQuery } from "@tanstack/react-query"
+import { IConversation , IConversationTopic } from "@/features/conversation/conversation.types"
 import { ensureConversationSyncAllQuery } from "@/features/conversation/queries/conversation-sync-all.query"
 import {
   getConversationQueryData,
   setConversationQueryData,
 } from "@/features/conversation/queries/conversation.query"
+import { convertXmtpConversationToConvosConversation } from "@/features/conversation/utils/convert-xmtp-conversation-to-convos"
 import { getXmtpConversations } from "@/features/xmtp/xmtp-conversations/xmtp-conversation"
 import { Optional } from "@/types/general"
 import { captureError } from "@/utils/capture-error"
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
 import { reactQueryClient } from "../../../utils/react-query/react-query.client"
-import { ensureGroupMembersQueryData } from "../../groups/useGroupMembersQuery"
 
 export type IAllowedConsentConversationsQuery = Awaited<
   ReturnType<typeof getAllowedConsentConversations>
@@ -38,7 +35,7 @@ export const useAllowedConsentConversationsQuery = (args: IArgs & { caller: stri
 
 export function addConversationToAllowedConsentConversationsQuery(
   args: IArgs & {
-    conversation: IXmtpConversationWithCodecs
+    conversation: IConversation
   },
 ) {
   const { inboxId, conversation } = args
@@ -73,7 +70,7 @@ export function addConversationToAllowedConsentConversationsQuery(
 
 export const removeConversationFromAllowedConsentConversationsQuery = (
   args: IArgs & {
-    topic: IXmtpConversationTopic
+    topic: IConversationTopic
   },
 ) => {
   const { inboxId, topic } = args
@@ -109,27 +106,23 @@ const getAllowedConsentConversations = async (args: IArgs) => {
     consentStates: ["allowed"],
   })
 
-  for (const conversation of conversations) {
+  const convosConversations = await Promise.all(
+    conversations.map(convertXmtpConversationToConvosConversation),
+  )
+
+  for (const convoConversation of convosConversations) {
     // Only set if the conversation is not already in the query cache
     // Because otherwise we might put a outdated conversation in the query cache.
-    if (!getConversationQueryData({ inboxId, topic: conversation.topic })) {
+    if (!getConversationQueryData({ inboxId, topic: convoConversation.topic })) {
       setConversationQueryData({
         inboxId,
-        topic: conversation.topic,
-        conversation,
+        topic: convoConversation.topic,
+        conversation: convoConversation,
       })
     }
-
-    // We are often using conversation members info
-    // Call after setting the conversation because we'll need the conversation to get the members
-    ensureGroupMembersQueryData({
-      caller: "getAllowedConsentConversations",
-      clientInboxId: inboxId,
-      topic: conversation.topic,
-    }).catch(captureError)
   }
 
-  return conversations
+  return convosConversations
 }
 
 export const getAllowedConsentConversationsQueryOptions = (
@@ -149,8 +142,8 @@ export const getAllowedConsentConversationsQueryOptions = (
 
 export const updateConversationInAllowedConsentConversationsQueryData = (
   args: IArgs & {
-    topic: IXmtpConversationTopic
-    conversationUpdate: Partial<IXmtpConversationWithCodecs>
+    topic: IConversationTopic
+    conversationUpdate: Partial<IConversation>
   },
 ) => {
   const { inboxId, topic, conversationUpdate } = args

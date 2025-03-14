@@ -1,5 +1,4 @@
 import { queryOptions, useQuery } from "@tanstack/react-query"
-import { StaticAttachmentContent } from "@xmtp/react-native-sdk"
 import { memo } from "react"
 import { Image } from "@/design-system/image"
 import { Text } from "@/design-system/Text"
@@ -7,17 +6,20 @@ import { AttachmentLoading } from "@/features/conversation/conversation-chat/con
 import { getAttachmentPaths } from "@/features/conversation/conversation-chat/conversation-attachment/conversation-attachments.utils"
 import { ConversationMessageAttachmentContainer } from "@/features/conversation/conversation-chat/conversation-attachment/conversation-message-attachment-container"
 import { processAndSaveLocalAttachment } from "@/features/conversation/conversation-chat/conversation-attachment/process-and-save-local-attachment"
-import { IXmtpDecodedStaticAttachmentMessage } from "@/features/xmtp/xmtp.types"
 import { translate } from "@/i18n"
 import { createFolderIfNotExists, saveFile } from "@/utils/file-system/file-system"
+import {
+  IConversationMessageStaticAttachment,
+  IConversationMessageStaticAttachmentContent,
+} from "../conversation-message/conversation-message.types"
 
 type IMessageStaticAttachmentProps = {
-  message: IXmtpDecodedStaticAttachmentMessage
+  message: IConversationMessageStaticAttachment
 }
 
 export const ConversationMessageStaticAttachment = memo(
   function ConversationMessageStaticAttachment({ message }: IMessageStaticAttachmentProps) {
-    const content = message.content()
+    const content = message.content
 
     if (typeof content === "string") {
       // TODO
@@ -30,7 +32,7 @@ export const ConversationMessageStaticAttachment = memo(
 
 const Content = memo(function Content(props: {
   messageId: string
-  staticAttachment: StaticAttachmentContent
+  staticAttachment: IConversationMessageStaticAttachmentContent
 }) {
   const { messageId, staticAttachment } = props
 
@@ -76,7 +78,7 @@ const Content = memo(function Content(props: {
 
 function getStaticAttachmentQueryOptions(args: {
   messageId: string
-  staticAttachment: StaticAttachmentContent
+  staticAttachment: IConversationMessageStaticAttachmentContent
 }) {
   const { messageId, staticAttachment } = args
 

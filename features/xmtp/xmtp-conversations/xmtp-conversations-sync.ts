@@ -1,11 +1,11 @@
-import { ConsentState, Conversation, InboxId } from "@xmtp/react-native-sdk"
+import { ConsentState, syncConversation, syncConversations } from "@xmtp/react-native-sdk"
 import { config } from "@/config"
-import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
+import { IXmtpConversationId, IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
 import { XMTPError } from "@/utils/error"
 import { getXmtpClientByInboxId } from "../xmtp-client/xmtp-client.service"
 
-export async function syncAllConversations(args: {
+export async function syncAllXmtpConversations(args: {
   clientInboxId: IXmtpInboxId
   consentStates: ConsentState[]
 }) {
@@ -17,7 +17,7 @@ export async function syncAllConversations(args: {
     })
 
     const beforeSync = new Date().getTime()
-    await client.conversations.syncAllConversations(consentStates)
+    await syncConversations(client.installationId)
     const afterSync = new Date().getTime()
 
     const timeDiff = afterSync - beforeSync
@@ -38,12 +38,19 @@ export async function syncAllConversations(args: {
   }
 }
 
-export async function syncConversation(args: { conversation: Conversation }) {
-  const { conversation } = args
+export async function syncXmtpConversation(args: {
+  clientInboxId: IXmtpInboxId
+  conversationId: IXmtpConversationId
+}) {
+  const { clientInboxId, conversationId } = args
+
+  const client = await getXmtpClientByInboxId({
+    inboxId: clientInboxId,
+  })
 
   try {
     const beforeSync = new Date().getTime()
-    await conversation.sync()
+    await syncConversation(client.installationId, conversationId)
     const afterSync = new Date().getTime()
 
     const timeDiff = afterSync - beforeSync
@@ -51,7 +58,7 @@ export async function syncConversation(args: { conversation: Conversation }) {
       captureError(
         new XMTPError({
           error: new Error(
-            `Syncing conversation took ${timeDiff}ms for topic ${conversation.topic}`,
+            `Syncing conversation took ${timeDiff}ms for conversationId ${conversationId}`,
           ),
         }),
       )
@@ -59,7 +66,7 @@ export async function syncConversation(args: { conversation: Conversation }) {
   } catch (error) {
     throw new XMTPError({
       error,
-      additionalMessage: `Error syncing conversation ${conversation.topic}`,
+      additionalMessage: `Error syncing conversation ${conversationId}`,
     })
   }
 }

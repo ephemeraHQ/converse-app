@@ -1,11 +1,12 @@
 import { queryOptions, skipToken } from "@tanstack/react-query"
+import { IConsentState } from "@/features/consent/consent.types"
 import { syncAllXmtpConversations } from "@/features/xmtp/xmtp-sync/xmtp-sync"
-import { IXmtpConsentState, IXmtpInboxId } from "@/features/xmtp/xmtp.types"
+import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
 
 type IArgs = {
   clientInboxId: IXmtpInboxId
-  consentStates: IXmtpConsentState[]
+  consentStates: IConsentState[]
 }
 
 export function getConversationSyncAllQueryOptions(args: IArgs) {

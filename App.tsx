@@ -3,7 +3,8 @@ import { useReactQueryDevTools } from "@dev-plugins/react-query"
 import { ActionSheetProvider } from "@expo/react-native-action-sheet"
 import { Chain, PrivyProvider } from "@privy-io/expo"
 import { SmartWalletsProvider } from "@privy-io/expo/smart-wallets"
-import { QueryClientProvider } from "@tanstack/react-query"
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client"
+import { DevToolsBubble } from "react-native-react-query-devtools"
 import { ActionSheet } from "@/components/action-sheet"
 import { DebugProvider } from "@/components/debug-provider"
 import { Snackbars } from "@/components/snackbar/snackbars"
@@ -13,17 +14,19 @@ import { $globalStyles } from "@/theme/styles"
 import { useThemeProvider } from "@/theme/use-app-theme"
 import { useCachedResources } from "@/utils/cache-resources"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
+import { DEFAULT_GC_TIME } from "@/utils/react-query/react-query.constants"
+import { reactQueryPersister } from "@/utils/react-query/react-query.utils"
 import "expo-dev-client"
 import React, { useEffect } from "react"
 import { GestureHandlerRootView } from "react-native-gesture-handler"
 import { KeyboardProvider } from "react-native-keyboard-controller"
+import { SafeAreaProvider } from "react-native-safe-area-context"
 import { ThirdwebProvider } from "thirdweb/react"
 import { base } from "viem/chains"
 import { config } from "./config"
 import { useMonitorNetworkConnectivity } from "./dependencies/NetworkMonitor/use-monitor-network-connectivity"
 import { AppNavigator } from "./navigation/app-navigator"
 import "./utils/ignore-logs"
-import { SafeAreaProvider } from "react-native-safe-area-context"
 import { sentryInit } from "./utils/sentry"
 import { preventSplashScreenAutoHide } from "./utils/splash/splash"
 
@@ -58,14 +61,19 @@ export function App() {
   }, [])
 
   return (
-    // <PersistQueryClientProvider
-    //   client={queryClient}
-    //   persistOptions={{
-    //     persister: reactQueryPersister,
-    //     maxAge: DEFAULT_GC_TIME,
-    //   }}
-    // >
-    <QueryClientProvider client={reactQueryClient}>
+    <PersistQueryClientProvider
+      client={reactQueryClient}
+      persistOptions={{
+        persister: reactQueryPersister,
+        maxAge: DEFAULT_GC_TIME,
+        dehydrateOptions: {
+          shouldDehydrateQuery(query) {
+            return query.meta?.persist !== false
+          },
+        },
+      }}
+    >
+      {/* <QueryClientProvider client={reactQueryClient}> */}
       <PrivyProvider
         appId={config.privy.appId}
         clientId={config.privy.clientId}
@@ -83,7 +91,7 @@ export function App() {
                           {/* <AuthenticateWithPasskeyProvider> */}
                           <AppNavigator />
                           {/* </AuthenticateWithPasskeyProvider> */}
-                          {/* {__DEV__ && <DevToolsBubble />} */}
+                          {__DEV__ && <DevToolsBubble />}
                           <Snackbars />
                           <ActionSheet />
                         </BottomSheetModalProvider>
@@ -96,7 +104,7 @@ export function App() {
           </ThirdwebProvider>
         </SmartWalletsProvider>
       </PrivyProvider>
-    </QueryClientProvider>
-    // </PersistQueryClientProvider>
+      {/* </QueryClientProvider> */}
+    </PersistQueryClientProvider>
   )
 }

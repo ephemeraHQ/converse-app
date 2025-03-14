@@ -1,13 +1,12 @@
-import { IXmtpConversationTopic } from "@features/xmtp/xmtp.types"
 import { useQuery } from "@tanstack/react-query"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
-import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group"
-import { getGroupMembersQueryOptions } from "@/features/groups/useGroupMembersQuery"
-import { useGroupNameMutation } from "@/features/groups/useGroupNameMutation"
-import { getGroupQueryOptions } from "@/features/groups/useGroupQuery"
+import { IConversationTopic } from "@/features/conversation/conversation.types"
+import { getGroupMembersQueryOptions } from "@/features/groups/group-members.query"
+import { useGroupNameMutation } from "@/features/groups/group-name.mutation"
+import { getGroupQueryOptions } from "@/features/groups/group.query"
 import { usePreferredDisplayInfoBatch } from "@/features/preferred-display-info/use-preferred-display-info-batch"
 
-export const useGroupName = (args: { conversationTopic: IXmtpConversationTopic }) => {
+export const useGroupName = (args: { conversationTopic: IConversationTopic }) => {
   const { conversationTopic } = args
 
   const currentSenderInboxId = useSafeCurrentSender().inboxId
@@ -18,7 +17,7 @@ export const useGroupName = (args: { conversationTopic: IXmtpConversationTopic }
     isError,
   } = useQuery({
     ...getGroupQueryOptions({ inboxId: currentSenderInboxId, topic: conversationTopic }),
-    select: (group) => (isConversationGroup(group) ? group.groupName : undefined),
+    select: (group) => group?.name ?? null,
   })
 
   const { data: groupMembers, isLoading: isLoadingGroupMembers } = useQuery({

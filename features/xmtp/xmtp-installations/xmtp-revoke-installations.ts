@@ -1,11 +1,11 @@
 import { translate } from "@i18n"
 import { awaitableAlert } from "@utils/alert"
 import { logger } from "@utils/logger"
-import { IXmtpClient, IXmtpSigner } from "@/features/xmtp/xmtp.types"
+import { IXmtpClientWithCodecs, IXmtpSigner } from "@/features/xmtp/xmtp.types"
 
 export const revokeOtherInstallations = async (
   signer: IXmtpSigner,
-  client: IXmtpClient,
+  client: IXmtpClientWithCodecs,
   otherInstallationsCount: number,
 ) => {
   if (otherInstallationsCount === 0) return false

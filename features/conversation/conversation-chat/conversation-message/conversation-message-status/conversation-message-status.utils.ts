@@ -1,9 +1,9 @@
-import { IXmtpDecodedMessage, IXmtpMessageDeliveryStatusValues } from "@/features/xmtp/xmtp.types"
+import { IConversationMessage } from "../conversation-message.types"
 
-export function messageIsSent(message: IXmtpDecodedMessage) {
-  return message.deliveryStatus === IXmtpMessageDeliveryStatusValues.PUBLISHED
+export function messageIsSent(message: IConversationMessage) {
+  return message.status === "sent"
 }
 
-export function messageIsDelivered(message: IXmtpDecodedMessage) {
-  return message.deliveryStatus === IXmtpMessageDeliveryStatusValues.PUBLISHED
+export function messageIsDelivered(message: IConversationMessage) {
+  return message.status === "sent"
 }

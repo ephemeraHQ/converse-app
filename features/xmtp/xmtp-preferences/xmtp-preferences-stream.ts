@@ -1,4 +1,5 @@
 import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import { config } from "@/config"
 import { getAllowedConsentConversationsQueryData } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import { XMTPError } from "@/utils/error"
 import { xmtpLogger } from "@/utils/logger"
@@ -48,7 +49,7 @@ export const stopStreamingConsent = async (args: { inboxId: IXmtpInboxId }) => {
     await client.preferences.cancelStreamConsent()
     const duration = Date.now() - startTime
 
-    if (duration > 3000) {
+    if (duration > config.xmtp.maxMsUntilLogError) {
       xmtpLogger.warn(`Canceling consent stream took longer than expected`, {
         duration,
         inboxId,
@@ -97,7 +98,7 @@ export const stopStreamingConsent = async (args: { inboxId: IXmtpInboxId }) => {
 //     await client.preferences.cancelStreamPreferenceUpdates()
 //     const duration = Date.now() - startTime
 
-//     if (duration > 3000) {
+//     if (duration > config.xmtp.maxMsUntilLogError) {
 //       xmtpLogger.warn(`Canceling preferences stream took longer than expected`, {
 //         duration,
 //         address: client.address,

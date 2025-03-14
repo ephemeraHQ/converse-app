@@ -1,20 +1,40 @@
 /**
  * useGroupQuery is derived from useConversationQuery. Like useDmQuery, maybe worth considering if we should just use useConversationQuery instead.
  */
-import type { IXmtpConversationTopic, IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import type { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { queryOptions, useQuery } from "@tanstack/react-query"
 import {
-  ConversationQueryData,
   getConversationQueryData,
-  getConversationQueryOptions,
   getOrFetchConversationQuery,
   setConversationQueryData,
   updateConversationQueryData,
 } from "@/features/conversation/queries/conversation.query"
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group"
-import { IXmtpGroupWithCodecs } from "@/features/xmtp/xmtp.types"
+import type { IConversationTopic } from "../conversation/conversation.types"
 
-export function useGroupQuery(args: { inboxId: IXmtpInboxId; topic: IXmtpConversationTopic }) {
+type IGroupQueryData = Awaited<ReturnType<typeof getGroup>>
+
+async function getGroup(args: { inboxId: IXmtpInboxId; topic: IConversationTopic }) {
+  const { inboxId, topic } = args
+
+  const group = await getOrFetchConversationQuery({
+    inboxId,
+    topic,
+    caller: "getGroup",
+  })
+
+  if (!group) {
+    return null
+  }
+
+  if (!isConversationGroup(group)) {
+    throw new Error("Expected group conversation but received different type")
+  }
+
+  return group
+}
+
+export function useGroupQuery(args: { inboxId: IXmtpInboxId; topic: IConversationTopic }) {
   const { inboxId, topic } = args
   return useQuery(
     getGroupQueryOptions({
@@ -24,14 +44,14 @@ export function useGroupQuery(args: { inboxId: IXmtpInboxId; topic: IXmtpConvers
   )
 }
 
-export function getGroupQueryData(args: { inboxId: IXmtpInboxId; topic: IXmtpConversationTopic }) {
-  return getConversationQueryData(args) as IXmtpGroupWithCodecs | null | undefined
+export function getGroupQueryData(args: { inboxId: IXmtpInboxId; topic: IConversationTopic }) {
+  return getConversationQueryData(args) as IGroupQueryData
 }
 
 export function setGroupQueryData(args: {
   inboxId: IXmtpInboxId
-  topic: IXmtpConversationTopic
-  group: IXmtpGroupWithCodecs
+  topic: IConversationTopic
+  group: IGroupQueryData
 }) {
   const { inboxId, topic, group } = args
   setConversationQueryData({
@@ -41,33 +61,23 @@ export function setGroupQueryData(args: {
   })
 }
 
-export function getGroupQueryOptions(args: {
-  inboxId: IXmtpInboxId
-  topic: IXmtpConversationTopic
-}) {
+export function getGroupQueryOptions(args: { inboxId: IXmtpInboxId; topic: IConversationTopic }) {
   const { inboxId, topic } = args
   return queryOptions({
-    ...getConversationQueryOptions({
-      inboxId,
-      topic,
-      caller: "getGroupQueryOptions",
-    }),
-    select: (data) => {
-      if (!data) {
-        return null
-      }
-      if (!isConversationGroup(data)) {
-        throw new Error("Expected group conversation but received different type")
-      }
-      return data
-    },
+    queryKey: ["group", inboxId, topic],
+    enabled: !!topic && !!inboxId,
+    queryFn: () =>
+      getGroup({
+        inboxId,
+        topic,
+      }),
   })
 }
 
 export function updateGroupQueryData(args: {
   inboxId: IXmtpInboxId
-  topic: IXmtpConversationTopic
-  updates: Partial<ConversationQueryData>
+  topic: IConversationTopic
+  updates: Partial<IGroupQueryData>
 }) {
   updateConversationQueryData({
     inboxId: args.inboxId,
@@ -78,7 +88,7 @@ export function updateGroupQueryData(args: {
 
 export function getOrFetchGroupQuery(args: {
   inboxId: IXmtpInboxId
-  topic: IXmtpConversationTopic
+  topic: IConversationTopic
   caller: string
 }) {
   return getOrFetchConversationQuery({

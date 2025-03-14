@@ -2,12 +2,12 @@ import { ViewStyle } from "react-native"
 import { AnimatedHStack, HStack } from "@/design-system/HStack"
 import { Text } from "@/design-system/Text"
 import { useMessagePlainText } from "@/features/conversation/conversation-list/hooks/use-message-plain-text"
-import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types"
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme"
 import { captureError } from "@/utils/capture-error"
+import { IConversationMessage } from "../../conversation-chat/conversation-message/conversation-message.types"
 
 export type IPinnedConversationMessagePreviewProps = {
-  message: IXmtpDecodedMessage
+  message: IConversationMessage
 }
 
 export const PinnedConversationMessagePreview = (props: IPinnedConversationMessagePreviewProps) => {

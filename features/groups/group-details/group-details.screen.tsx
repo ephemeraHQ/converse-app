@@ -2,15 +2,17 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack"
 import { memo } from "react"
 import { GroupAvatar } from "@/components/group-avatar"
 import { Screen } from "@/components/screen/screen"
+import { EmptyState } from "@/design-system/empty-state"
 import { ListItem, ListItemTitle } from "@/design-system/list-item"
 import { Pressable } from "@/design-system/Pressable"
 import { Text } from "@/design-system/Text"
 import { VStack } from "@/design-system/VStack"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { GroupDetailsMembersList } from "@/features/groups/group-details/components/group-details-members-list"
+import { useGroupQuery } from "@/features/groups/group.query"
 import { useGroupName } from "@/features/groups/hooks/use-group-name"
-import { useGroupQuery } from "@/features/groups/useGroupQuery"
 import { NavigationParamList } from "@/navigation/navigation.types"
+import { $globalStyles } from "@/theme/styles"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { useGroupDetailsScreenHeader } from "./group-details.screen-header"
 
@@ -28,14 +30,22 @@ export const GroupDetailsScreen = memo(function GroupDetailsScreen(
   })
 
   const { data: group } = useGroupQuery({
-    inboxId: currentSender.ethereumAddress,
+    inboxId: currentSender.inboxId,
     topic: conversationTopic,
   })
 
   useGroupDetailsScreenHeader()
 
   if (!group) {
-    return null
+    return (
+      <Screen contentContainerStyle={$globalStyles.flex1}>
+        <EmptyState
+          title="Group not found"
+          description="This might be an issue. Please report it to support."
+          hasScreenHeader
+        />
+      </Screen>
+    )
   }
 
   return (
@@ -57,9 +67,7 @@ export const GroupDetailsScreen = memo(function GroupDetailsScreen(
           <Text preset="bigBold" style={{ textAlign: "center" }}>
             {groupName}
           </Text>
-          {group?.groupDescription && (
-            <Text style={{ textAlign: "center" }}>{group?.groupDescription}</Text>
-          )}
+          {group?.description && <Text style={{ textAlign: "center" }}>{group?.description}</Text>}
           {/* <Text color="secondary" style={{ textAlign: "center" }}>
             convos.com/convos-crew
           </Text> */}

@@ -9,14 +9,15 @@ import {
   removeConversationFromUnknownConsentConversationsQueryData,
 } from "@/features/conversation/conversation-requests-list/conversations-unknown-consent.query"
 import { getConversationIdFromTopic } from "@/features/conversation/utils/get-conversation-id-from-topic"
-import { getGroupQueryData, setGroupQueryData } from "@/features/groups/useGroupQuery"
-import { IXmtpConversationTopic, IXmtpInboxId } from "@/features/xmtp/xmtp.types"
+import { getGroupQueryData, setGroupQueryData } from "@/features/groups/group.query"
+import { IXmtpConversationId, IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
-import { updateConsentForGroupsForAccount } from "../xmtp/xmtp-consent/xmtp-consent"
+import { IConversationTopic } from "../conversation/conversation.types"
+import { updateConsentForGroupsForInbox } from "../xmtp/xmtp-consent/xmtp-consent"
 
 export const useDenyGroupMutation = (args: {
   clientInboxId: IXmtpInboxId
-  topic: IXmtpConversationTopic
+  topic: IConversationTopic
 }) => {
   const { clientInboxId, topic } = args
 
@@ -25,9 +26,9 @@ export const useDenyGroupMutation = (args: {
       if (!topic || !clientInboxId) {
         return
       }
-      await updateConsentForGroupsForAccount({
+      await updateConsentForGroupsForInbox({
         clientInboxId,
-        groupIds: [getConversationIdFromTopic(topic)],
+        groupIds: [getConversationIdFromTopic(topic) as unknown as IXmtpConversationId],
         consent: "denied",
       })
       return "denied"
@@ -40,7 +41,7 @@ export const useDenyGroupMutation = (args: {
       }
 
       const updatedGroup = updateObjectAndMethods(previousGroup!, {
-        state: "denied",
+        consentState: "denied",
       })
 
       setGroupQueryData({ inboxId: clientInboxId, topic, group: updatedGroup })

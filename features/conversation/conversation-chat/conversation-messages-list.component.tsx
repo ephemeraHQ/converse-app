@@ -4,16 +4,16 @@ import { memo, ReactElement, useEffect } from "react"
 import { FlatList, FlatListProps, Platform } from "react-native"
 import Animated, { AnimatedProps, useAnimatedRef } from "react-native-reanimated"
 import { useConversationStore } from "@/features/conversation/conversation-chat/conversation.store-context"
-import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types"
 import { $globalStyles } from "@/theme/styles"
 import { useAppTheme } from "@/theme/use-app-theme"
+import { IConversationMessage } from "./conversation-message/conversation-message.types"
 
 type ConversationMessagesListProps = Omit<
-  AnimatedProps<FlatListProps<IXmtpDecodedMessage>>,
+  AnimatedProps<FlatListProps<IConversationMessage>>,
   "renderItem" | "data"
 > & {
-  messages: IXmtpDecodedMessage[]
-  renderMessage: (args: { message: IXmtpDecodedMessage; index: number }) => ReactElement
+  messages: IConversationMessage[]
+  renderMessage: (args: { message: IConversationMessage; index: number }) => ReactElement
 }
 
 export const ConversationMessagesList = memo(function ConversationMessagesList(
@@ -95,7 +95,7 @@ export const ConversationMessagesList = memo(function ConversationMessagesList(
   )
 })
 
-const keyExtractor = (message: IXmtpDecodedMessage) => {
+const keyExtractor = (message: IConversationMessage) => {
   return (
     // @ts-expect-error
     message.tempOptimisticId || // Check use-send-message.ts
@@ -110,4 +110,4 @@ export const conversationListDefaultProps = {
   keyboardShouldPersistTaps: "handled" as const,
   showsVerticalScrollIndicator: Platform.OS === "ios", // Size glitch on Android
   keyExtractor,
-} satisfies Partial<FlatListProps<IXmtpDecodedMessage>>
+} satisfies Partial<FlatListProps<IConversationMessage>>

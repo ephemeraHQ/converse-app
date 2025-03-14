@@ -1,15 +1,19 @@
-import { PersistedClient, Persister } from "@tanstack/react-query-persist-client"
 import { MMKV } from "react-native-mmkv"
 import { StateStorage } from "zustand/middleware"
-import { config } from "@/config"
 import { captureError } from "@/utils/capture-error"
 import { getAccountEncryptionKey } from "./keychain"
 import logger from "./logger"
 
+/**
+ * Default MMKV storage instance
+ */
 const storage = new MMKV()
 
 export default storage
 
+/**
+ * Zustand storage adapter for MMKV
+ */
 export const zustandMMKVStorage: StateStorage = {
   setItem(name, value) {
     // Deleting before setting to avoid memory leak
@@ -26,8 +30,14 @@ export const zustandMMKVStorage: StateStorage = {
   },
 }
 
+/**
+ * Map of secure MMKV instances by account
+ */
 export const secureMmkvByAccount: { [account: string]: MMKV } = {}
 
+/**
+ * Gets or creates a secure MMKV instance for the specified account
+ */
 export const getSecureMmkvForAccount = async (account: string) => {
   if (secureMmkvByAccount[account]) return secureMmkvByAccount[account]
   const encryptionKey = await getAccountEncryptionKey(account)
@@ -40,6 +50,9 @@ export const getSecureMmkvForAccount = async (account: string) => {
   return secureMmkvByAccount[account]
 }
 
+/**
+ * Clears the secure MMKV instance for the specified account
+ */
 export const clearSecureMmkvForAccount = async (account: string) => {
   try {
     const instance = await getSecureMmkvForAccount(account)
@@ -49,82 +62,3 @@ export const clearSecureMmkvForAccount = async (account: string) => {
   }
   delete secureMmkvByAccount[account]
 }
-
-export const reactQueryMMKV = new MMKV({ id: "converse-react-query" })
-export const secureQueryMMKV = new MMKV({
-  id: "secure-convos-react-query",
-  encryptionKey: config.reactQueryEncryptionKey,
-})
-
-// type MaybePromise<T> = T | Promise<T>;
-
-// type PersistStorage<TStorageValue = string> = {
-//   getItem: (key: string) => MaybePromise<TStorageValue | undefined | null>;
-//   setItem: (key: string, value: TStorageValue) => MaybePromise<unknown>;
-//   removeItem: (key: string) => MaybePromise<void>;
-// };
-
-// type MMKVReactQueryStorage = PersistStorage & {
-//   clearAll(): void;
-// };
-
-// function createMMKVStorage(storage: MMKV): MMKVReactQueryStorage {
-//   return {
-//     getItem: (key: string) => {
-//       const stringValue = storage.getString(key);
-//       return stringValue ?? null;
-//     },
-//     setItem: (key: string, value: string) => {
-//       // Deleting before setting to avoid memory leak
-//       // relevant only until we upgrade to v3 of react-native-mmkv
-//       // https://github.com/mrousavy/react-native-mmkv/issues/440#issuecomment-2345737896
-//       storage.delete(key);
-//       if (value) {
-//         storage.set(key, value);
-//       }
-//     },
-//     removeItem: (key: string) => storage.delete(key),
-//     clearAll: () => storage.clearAll(),
-//   };
-// }
-
-function createMMKVPersister(storage: MMKV): Persister {
-  return {
-    persistClient: async (client: PersistedClient) => {
-      try {
-        const clientString = JSON.stringify(client)
-        // Delete before setting to avoid memory leak
-        storage.delete("reactQuery")
-        storage.set("reactQuery", clientString)
-      } catch (error) {
-        captureError(error, {
-          extras: {
-            type: "reactQueryPersister",
-            storage: storage.toString(),
-          },
-        })
-      }
-    },
-    restoreClient: async () => {
-      try {
-        const clientString = storage.getString("reactQuery")
-        if (!clientString) {
-          return undefined
-        }
-        return JSON.parse(clientString) as PersistedClient
-      } catch (error) {
-        logger.error("Failed to restore React Query client", error)
-        return undefined
-      }
-    },
-    removeClient: async () => {
-      try {
-        storage.delete("reactQuery")
-      } catch (error) {
-        logger.error("Failed to remove React Query client", error)
-      }
-    },
-  }
-}
-
-export const reactQueryPersister = createMMKVPersister(reactQueryMMKV)

@@ -1,5 +1,5 @@
-import { IXmtpConversationWithCodecs } from "@/features/xmtp/xmtp.types"
+import { IConversation } from "../conversation.types"
 
-export function isConversationDenied(conversation: IXmtpConversationWithCodecs) {
-  return conversation.state === "denied"
+export function isConversationDenied(conversation: IConversation) {
+  return conversation.consentState === "denied"
 }
