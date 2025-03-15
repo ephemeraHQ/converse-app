@@ -16,12 +16,12 @@ import {
   isReplyMessage,
   isStaticAttachmentMessage,
   messageContentIsGroupUpdated,
-  messageContentisMultiRemoteAttachment,
+  messageContentIsMultiRemoteAttachment,
   messageContentIsRemoteAttachment,
   messageContentIsReply,
   messageContentIsStaticAttachment,
   messageContentIsText,
-} from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
+} from "@/features/conversation/conversation-chat/conversation-message/utils/conversation-message-assertions"
 import { useMessagePlainText } from "@/features/conversation/conversation-list/hooks/use-message-plain-text"
 import { messageIsFromCurrentSenderInboxId } from "@/features/conversation/utils/message-is-from-current-user"
 import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
@@ -281,7 +281,7 @@ const ReplyPreviewMessageContent = memo(function ReplyPreviewMessageContent(prop
       return <Text>{content.content.filename}</Text>
     }
 
-    if (messageContentisMultiRemoteAttachment(content.content)) {
+    if (messageContentIsMultiRemoteAttachment(content.content)) {
       return <Text>Multi remote attachment</Text>
     }
 

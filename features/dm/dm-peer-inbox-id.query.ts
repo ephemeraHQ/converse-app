@@ -24,7 +24,7 @@ export function getDmPeerInboxIdQueryOptions(args: Optional<IArgsWithCaller, "ca
     queryKey: ["dm-peer-inbox-id", inboxId, topic],
     queryFn: async function getPeerInboxId() {
       const conversation = await getOrFetchConversationQuery({
-        inboxId,
+        clientInboxId: inboxId,
         topic,
         caller: "getPeerInboxId",
       })

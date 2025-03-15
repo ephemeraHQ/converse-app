@@ -13,20 +13,20 @@ import type { IConversationTopic } from "../conversation.types"
 export type IConversationQueryData = Awaited<ReturnType<typeof getConversation>>
 
 type IGetConversationArgs = {
-  inboxId: IXmtpInboxId
+  clientInboxId: IXmtpInboxId
   topic: IConversationTopic
 }
 
 type IGetConversationArgsWithCaller = IGetConversationArgs & { caller: string }
 
 async function getConversation(args: IGetConversationArgs) {
-  const { inboxId, topic } = args
+  const { clientInboxId, topic } = args
 
   if (!topic) {
     throw new Error("Topic is required")
   }
 
-  if (!inboxId) {
+  if (!clientInboxId) {
     throw new Error("Inbox ID is required")
   }
 
@@ -37,21 +37,21 @@ async function getConversation(args: IGetConversationArgs) {
    */
   await Promise.all([
     ensureConversationSyncAllQuery({
-      clientInboxId: inboxId,
+      clientInboxId,
       consentStates: ["allowed"],
     }),
     ensureConversationSyncAllQuery({
-      clientInboxId: inboxId,
+      clientInboxId,
       consentStates: ["unknown"],
     }),
     ensureConversationSyncAllQuery({
-      clientInboxId: inboxId,
+      clientInboxId,
       consentStates: ["denied"],
     }),
   ])
 
   const client = await getXmtpClientByInboxId({
-    inboxId,
+    inboxId: clientInboxId,
   })
 
   const xmtpConversations = (
@@ -114,14 +114,14 @@ export const useConversationQuery = (args: IGetConversationArgsWithCaller) => {
 export function getConversationQueryOptions(
   args: Optional<IGetConversationArgsWithCaller, "caller">,
 ) {
-  const { inboxId, topic, caller } = args
-  const enabled = !!topic && !!inboxId
+  const { clientInboxId, topic, caller } = args
+  const enabled = !!topic && !!clientInboxId
   return queryOptions({
     meta: {
       caller,
     },
-    queryKey: ["conversation", inboxId, topic],
-    queryFn: enabled ? () => getConversation({ inboxId, topic }) : skipToken,
+    queryKey: ["conversation", clientInboxId, topic],
+    queryFn: enabled ? () => getConversation({ clientInboxId, topic }) : skipToken,
     enabled,
   })
 }
@@ -131,10 +131,10 @@ export const setConversationQueryData = (
     conversation: IConversationQueryData
   },
 ) => {
-  const { inboxId, topic, conversation } = args
+  const { clientInboxId, topic, conversation } = args
   reactQueryClient.setQueryData(
     getConversationQueryOptions({
-      inboxId,
+      clientInboxId,
       topic,
     }).queryKey,
     conversation,
@@ -164,4 +164,8 @@ export const getConversationQueryData = (args: IGetConversationArgs) => {
 
 export function getOrFetchConversationQuery(args: IGetConversationArgsWithCaller) {
   return reactQueryClient.ensureQueryData(getConversationQueryOptions(args))
+}
+
+export function invalidateConversationQuery(args: IGetConversationArgs) {
+  return reactQueryClient.invalidateQueries(getConversationQueryOptions(args))
 }

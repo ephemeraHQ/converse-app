@@ -26,6 +26,7 @@ export const IconButton = React.forwardRef(function IconButton(props: IIconButto
     disabledStyle: disabledStyleOverride,
     disabled,
     withHaptics = true,
+    preventDoubleTap = false,
     onPress,
     ...rest
   } = props
@@ -95,6 +96,7 @@ export const IconButton = React.forwardRef(function IconButton(props: IIconButto
       disabled={disabled}
       onPress={handlePress}
       hitSlop={theme.spacing.xxs} // By default let's assume we want a small hitSlop
+      preventDoubleTap={preventDoubleTap}
       {...rest}
     >
       {({ pressed, hovered }) => {

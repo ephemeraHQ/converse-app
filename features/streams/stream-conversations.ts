@@ -45,7 +45,7 @@ async function handleNewConversation(args: {
   )
 
   setConversationQueryData({
-    inboxId: clientInboxId,
+    clientInboxId,
     topic: conversation.topic,
     conversation,
   })
@@ -61,7 +61,7 @@ async function handleNewConversation(args: {
     markAsReadMutationObserver.mutate().catch(captureError)
 
     addConversationToAllowedConsentConversationsQuery({
-      inboxId: clientInboxId,
+      clientInboxId,
       conversation,
     })
   } else if (isConversationConsentUnknown(conversation)) {

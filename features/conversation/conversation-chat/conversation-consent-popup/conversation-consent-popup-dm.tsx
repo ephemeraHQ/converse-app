@@ -5,7 +5,7 @@ import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.stor
 import { useAllowDmMutation } from "@/features/consent/use-allow-dm.mutation"
 import { useDenyDmMutation } from "@/features/consent/use-deny-dm.mutation"
 import { getConversationQueryData } from "@/features/conversation/queries/conversation.query"
-import { useDmPeerInboxIdQuery } from "@/features/dm/use-dm-peer-inbox-id-query"
+import { useDmPeerInboxIdQuery } from "@/features/dm/dm-peer-inbox-id.query"
 import { useRouter } from "@/navigation/use-navigation"
 import { captureErrorWithToast } from "@/utils/capture-error"
 import { ensureError } from "@/utils/error"
@@ -38,7 +38,7 @@ export function ConversationConsentPopupDm() {
     }
 
     const conversation = getConversationQueryData({
-      inboxId: currentSenderInboxId,
+      clientInboxId: currentSenderInboxId,
       topic,
     })
 
@@ -79,7 +79,7 @@ export function ConversationConsentPopupDm() {
       }
 
       const conversation = getConversationQueryData({
-        inboxId: currentSenderInboxId,
+        clientInboxId: currentSenderInboxId,
         topic,
       })
 

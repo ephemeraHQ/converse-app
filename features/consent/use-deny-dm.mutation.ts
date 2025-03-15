@@ -9,7 +9,7 @@ import {
   removeConversationFromUnknownConsentConversationsQueryData,
 } from "@/features/conversation/conversation-requests-list/conversations-unknown-consent.query"
 import { getConversationQueryData } from "@/features/conversation/queries/conversation.query"
-import { getDmQueryData, setDmQueryData } from "@/features/dm/use-dm-query"
+import { getDmQueryData, setDmQueryData } from "@/features/dm/dm.query"
 import { IXmtpConversationId, IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
 import { IConversationId, IConversationTopic } from "../conversation/conversation.types"
@@ -48,7 +48,7 @@ export function useDenyDmMutation() {
     },
     onMutate: ({ topic, peerInboxId }) => {
       const conversation = getConversationQueryData({
-        inboxId: currentSenderInboxId,
+        clientInboxId: currentSenderInboxId,
         topic,
       })
       if (conversation) {
@@ -57,14 +57,14 @@ export function useDenyDmMutation() {
         })
 
         setDmQueryData({
-          targetInboxId: currentSenderInboxId,
-          clientInboxId: peerInboxId,
+          clientInboxId: currentSenderInboxId,
+          topic,
           dm: updatedDm as IDm,
         })
 
         // Remove from main conversations list
         removeConversationFromAllowedConsentConversationsQuery({
-          inboxId: currentSenderInboxId,
+          clientInboxId: currentSenderInboxId,
           topic,
         })
 
@@ -81,8 +81,8 @@ export function useDenyDmMutation() {
       const { previousDmConsent } = context || {}
       if (previousDmConsent) {
         const dm = getDmQueryData({
-          targetInboxId: currentSenderInboxId,
-          clientInboxId: peerInboxId,
+          clientInboxId: currentSenderInboxId,
+          topic,
         })
 
         if (!dm) {
@@ -94,14 +94,14 @@ export function useDenyDmMutation() {
         })
 
         setDmQueryData({
-          targetInboxId: currentSenderInboxId,
+          topic,
           clientInboxId: peerInboxId,
           dm: previousDm,
         })
 
         // Add back to main conversations list
         addConversationToAllowedConsentConversationsQuery({
-          inboxId: currentSenderInboxId,
+          clientInboxId: currentSenderInboxId,
           conversation: previousDm,
         })
 

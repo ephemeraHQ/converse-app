@@ -19,7 +19,7 @@ export const useGroupConsentForCurrentAccount = (topic: IConversationTopic) => {
   const currentSender = useSafeCurrentSender()
 
   const { data: group, isLoading: isGroupLoading } = useGroupQuery({
-    inboxId: currentSender.inboxId,
+    clientInboxId: currentSender.inboxId,
     topic,
   })
 
@@ -28,7 +28,11 @@ export const useGroupConsentForCurrentAccount = (topic: IConversationTopic) => {
     isLoading: isGroupConsentLoading,
     isError,
   } = useQuery({
-    ...getGroupQueryOptions({ inboxId: currentSender.inboxId, topic }),
+    ...getGroupQueryOptions({
+      clientInboxId: currentSender.inboxId,
+      topic,
+      caller: "useGroupConsentForCurrentAccount",
+    }),
     select: (group) => group?.consentState,
   })
 

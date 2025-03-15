@@ -90,6 +90,10 @@ export function convertNanosecondsToMilliseconds(nanoseconds: number) {
   return nanoseconds / 1000000
 }
 
+export function convertMillisecondsToNanoseconds(ms: number) {
+  return ms * 1000000
+}
+
 export function isToday(timestamp: number) {
   return _isToday(new Date(timestamp))
 }

@@ -1,6 +1,7 @@
 import type { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { queryOptions, skipToken } from "@tanstack/react-query"
 import { getConversationMetadata } from "@/features/conversation/conversation-metadata/conversation-metadata.api"
+import { isTempConversation } from "@/features/conversation/utils/is-temp-conversation"
 import { reactQueryClient } from "../../../utils/react-query/react-query.client"
 import type { IConversationTopic } from "../conversation.types"
 
@@ -12,7 +13,7 @@ type IArgs = {
 }
 
 export function getConversationMetadataQueryOptions({ topic, clientInboxId }: IArgs) {
-  const enabled = !!topic
+  const enabled = !!topic && !isTempConversation(topic)
   return queryOptions({
     queryKey: ["conversation-metadata", topic, clientInboxId],
     queryFn: enabled ? () => getConversationMetadata({ topic }) : skipToken,

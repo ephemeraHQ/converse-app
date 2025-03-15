@@ -1,7 +1,7 @@
 import { useCallback } from "react"
 import { GroupAvatar } from "@/components/group-avatar"
 import { VStack } from "@/design-system/VStack"
-import { isTextMessage } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
+import { isTextMessage } from "@/features/conversation/conversation-chat/conversation-message/utils/conversation-message-assertions"
 import { useConversationListPinnedConversationsStyles } from "@/features/conversation/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversations.styles"
 import { useConversationIsUnread } from "@/features/conversation/conversation-list/hooks/use-conversation-is-unread"
 import { useGroupConversationContextMenuViewProps } from "@/features/conversation/conversation-list/hooks/use-conversation-list-item-context-menu-props"

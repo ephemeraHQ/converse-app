@@ -13,12 +13,12 @@ import { ConversationMessageReactions } from "@/features/conversation/conversati
 import { ConversationMessageTimestamp } from "@/features/conversation/conversation-chat/conversation-message/conversation-message-timestamp"
 import { ConversationMessageContextStoreProvider } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.store-context"
 import { IConversationMessage } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.types"
-import { useMessageHasReactions } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
 import { conversationListDefaultProps } from "@/features/conversation/conversation-chat/conversation-messages-list.component"
 import { useConversationMessagesQuery } from "@/features/conversation/conversation-chat/conversation-messages.query"
 import { ConversationStoreProvider } from "@/features/conversation/conversation-chat/conversation.store-context"
 import { useConversationQuery } from "@/features/conversation/queries/conversation.query"
 import { $globalStyles } from "@/theme/styles"
+import { useMessageHasReactions } from "../conversation-chat/conversation-message/hooks/use-message-has-reactions"
 import { IConversationTopic } from "../conversation.types"
 
 type ConversationPreviewProps = {
@@ -35,7 +35,7 @@ export const ConversationPreview = ({ topic }: ConversationPreviewProps) => {
   })
 
   const { data: conversation, isLoading: isLoadingConversation } = useConversationQuery({
-    inboxId: currentSender.inboxId,
+    clientInboxId: currentSender.inboxId,
     topic,
     caller: "Conversation Preview",
   })

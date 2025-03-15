@@ -1,5 +1,4 @@
 import { convertConsentStateToXmtpConsentState } from "@/features/consent/consent.utils"
-import { convertXmtpMessageToConvosMessage } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
 import {
   IConversation,
   IConversationId,
@@ -10,6 +9,7 @@ import { IGroup } from "@/features/groups/group.types"
 import { convertXmtpGroupMemberToConvosMember } from "@/features/groups/utils/convert-xmtp-group-member-to-convos-member"
 import { isXmtpConversationGroup } from "@/features/xmtp/xmtp-conversations/xmtp-conversation"
 import { IXmtpConversationWithCodecs, IXmtpInboxId } from "@/features/xmtp/xmtp.types"
+import { convertXmtpMessageToConvosMessage } from "../conversation-chat/conversation-message/utils/convert-xmtp-message-to-convos-message"
 
 export async function convertXmtpConversationToConvosConversation(
   xmtpConversation: IXmtpConversationWithCodecs,

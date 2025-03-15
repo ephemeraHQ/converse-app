@@ -4,7 +4,6 @@ import { ActionSheetProvider } from "@expo/react-native-action-sheet"
 import { Chain, PrivyProvider } from "@privy-io/expo"
 import { SmartWalletsProvider } from "@privy-io/expo/smart-wallets"
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client"
-import { DevToolsBubble } from "react-native-react-query-devtools"
 import { ActionSheet } from "@/components/action-sheet"
 import { DebugProvider } from "@/components/debug-provider"
 import { Snackbars } from "@/components/snackbar/snackbars"
@@ -13,6 +12,7 @@ import { useCoinbaseWalletListener } from "@/features/wallets/utils/coinbase-wal
 import { $globalStyles } from "@/theme/styles"
 import { useThemeProvider } from "@/theme/use-app-theme"
 import { useCachedResources } from "@/utils/cache-resources"
+import logger from "@/utils/logger"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
 import { DEFAULT_GC_TIME } from "@/utils/react-query/react-query.constants"
 import { reactQueryPersister } from "@/utils/react-query/react-query.utils"
@@ -20,6 +20,7 @@ import "expo-dev-client"
 import React, { useEffect } from "react"
 import { GestureHandlerRootView } from "react-native-gesture-handler"
 import { KeyboardProvider } from "react-native-keyboard-controller"
+import { DevToolsBubble } from "react-native-react-query-devtools"
 import { SafeAreaProvider } from "react-native-safe-area-context"
 import { ThirdwebProvider } from "thirdweb/react"
 import { base } from "viem/chains"
@@ -68,9 +69,18 @@ export function App() {
         maxAge: DEFAULT_GC_TIME,
         dehydrateOptions: {
           shouldDehydrateQuery(query) {
-            return query.meta?.persist !== false
+            // Don't persist queries that are explicitly marked as non-persistent
+            // or queries that are in a pending/fetching state
+            return (
+              query.meta?.persist !== false &&
+              query.state.status !== "pending" &&
+              query.state.fetchStatus !== "fetching"
+            )
           },
         },
+      }}
+      onSuccess={() => {
+        logger.debug("React Query client hydrated")
       }}
     >
       {/* <QueryClientProvider client={reactQueryClient}> */}

@@ -1,18 +1,19 @@
 import Clipboard from "@react-native-clipboard/clipboard"
 import { showSnackbar } from "@/components/snackbar/snackbar.service"
 import { IDropdownMenuCustomItemProps } from "@/design-system/dropdown-menu/dropdown-menu-custom"
+import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { useConversationComposerStore } from "@/features/conversation/conversation-chat/conversation-composer/conversation-composer.store-context"
 import { useConversationMessageContextMenuStore } from "@/features/conversation/conversation-chat/conversation-message/conversation-message-context-menu/conversation-message-context-menu.store-context"
 import {
-  getMessageById,
-  getMessageStringContent,
   isRemoteAttachmentMessage,
   isStaticAttachmentMessage,
-} from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
+} from "@/features/conversation/conversation-chat/conversation-message/utils/conversation-message-assertions"
+import { getMessageFromConversationSafe } from "@/features/conversation/conversation-chat/conversation-message/utils/get-message-from-conversation"
 import { IConversationTopic } from "@/features/conversation/conversation.types"
 import { translate } from "@/i18n"
 import { captureErrorWithToast } from "@/utils/capture-error"
 import { IConversationMessageId } from "../conversation-message.types"
+import { getMessageStringContent } from "../utils/get-message-string-content"
 
 export function useMessageContextMenuItems(args: {
   messageId: IConversationMessageId
@@ -20,8 +21,12 @@ export function useMessageContextMenuItems(args: {
 }) {
   const { messageId, topic } = args
 
-  const message = getMessageById({ messageId, topic })
-
+  const currentSender = useSafeCurrentSender()
+  const message = getMessageFromConversationSafe({
+    messageId,
+    topic,
+    clientInboxId: currentSender.inboxId,
+  })
   const composerStore = useConversationComposerStore()
   const messageContextMenuStore = useConversationMessageContextMenuStore()
 

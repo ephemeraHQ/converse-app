@@ -1,6 +1,6 @@
 import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
-import { getDmPeerInboxIdQueryData } from "@/features/dm/use-dm-peer-inbox-id-query"
+import { getDmPeerInboxIdQueryData } from "@/features/dm/dm-peer-inbox-id.query"
 import { getGroupMembersQueryData } from "@/features/groups/group-members.query"
 import { IConversationTopic } from "../conversation.types"
 

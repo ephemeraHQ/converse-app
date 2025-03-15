@@ -32,6 +32,7 @@ import {
   StaticAttachmentContent,
   TextCodec,
 } from "@xmtp/react-native-sdk"
+import { ConversationSendPayload } from "@xmtp/react-native-sdk/build/lib/types"
 import { ISupportedXmtpCodecs } from "./xmtp-codecs/xmtp-codecs"
 
 // ===== Inbox Types =====
@@ -105,3 +106,5 @@ export type IXmtpMessageDeliveryStatus =
   | MessageDeliveryStatus.ALL
 
 export const IXmtpMessageDeliveryStatusValues = MessageDeliveryStatus
+
+export type IXmtpConversationSendPayload = ConversationSendPayload<ISupportedXmtpCodecs>

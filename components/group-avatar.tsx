@@ -92,7 +92,7 @@ export const GroupAvatar = memo(function GroupAvatar(props: {
 
   // Fetch group data
   const { data: group } = useGroupQuery({
-    inboxId: currentSender.inboxId,
+    clientInboxId: currentSender.inboxId,
     topic: groupTopic,
   })
 

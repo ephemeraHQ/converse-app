@@ -22,7 +22,7 @@ export const useConversationIsUnread = ({ topic }: UseConversationIsUnreadArgs) 
 
   const { data: lastMessage, isLoading: isLoadingLastMessage } = useQuery({
     ...getConversationQueryOptions({
-      inboxId: currentSender.inboxId,
+      clientInboxId: currentSender.inboxId,
       topic,
     }),
     select: (data) => data?.lastMessage,

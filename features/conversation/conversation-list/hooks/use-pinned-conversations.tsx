@@ -9,7 +9,7 @@ export function usePinnedConversations() {
 
   const { isLoading: isLoadingConversations, data: conversations } =
     useAllowedConsentConversationsQuery({
-      inboxId: currentSender.inboxId,
+      clientInboxId: currentSender.inboxId,
       caller: "usePinnedConversations",
     })
 

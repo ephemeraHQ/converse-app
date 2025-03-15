@@ -30,7 +30,7 @@ export const GroupDetailsScreen = memo(function GroupDetailsScreen(
   })
 
   const { data: group } = useGroupQuery({
-    inboxId: currentSender.inboxId,
+    clientInboxId: currentSender.inboxId,
     topic: conversationTopic,
   })
 

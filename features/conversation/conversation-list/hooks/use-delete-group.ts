@@ -49,7 +49,7 @@ export const useDeleteGroup = (args: { groupTopic: IConversationTopic }) => {
 
   return useCallback(() => {
     const group = getGroupQueryData({
-      inboxId: currentSender.inboxId,
+      clientInboxId: currentSender.inboxId,
       topic: groupTopic,
     })
 

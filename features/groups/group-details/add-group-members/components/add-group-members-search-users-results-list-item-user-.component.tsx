@@ -9,6 +9,8 @@ import { useAddGroupMembersStore } from "../stores/add-group-members.store"
 
 export const AddGroupMembersSearchUsersResultsListItemUser = memo(
   function AddGroupMembersSearchUsersResultsListItemUser(props: { inboxId: IXmtpInboxId }) {
+    const { inboxId } = props
+
     const { addSelectedInboxId } = useAddGroupMembersStore((state) => state.actions)
     const { groupTopic } = useRouteParams<"AddGroupMembers">()
 
@@ -19,14 +21,14 @@ export const AddGroupMembersSearchUsersResultsListItemUser = memo(
     })
 
     const handlePress = useCallback(() => {
-      addSelectedInboxId(props.inboxId)
-    }, [addSelectedInboxId, props.inboxId])
+      addSelectedInboxId(inboxId)
+    }, [addSelectedInboxId, inboxId])
 
-    const isAlreadyAMember = members?.byId[props.inboxId]
+    const isAlreadyAMember = members?.byId[inboxId]
 
     return (
       <SearchUsersResultsListItemUser
-        inboxId={props.inboxId}
+        inboxId={inboxId}
         onPress={handlePress}
         {...(isAlreadyAMember
           ? {

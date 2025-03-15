@@ -3,8 +3,8 @@ import { createContext, memo, useContext, useRef } from "react"
 import { createStore, useStore } from "zustand"
 import { createJSONStorage, persist, subscribeWithSelector } from "zustand/middleware"
 import {
+  IUploadedRemoteAttachment,
   LocalAttachment,
-  UploadedRemoteAttachment,
 } from "@/features/conversation/conversation-chat/conversation-attachment/conversation-attachments.types"
 import { useCurrentConversationTopic } from "@/features/conversation/conversation-chat/conversation.store-context"
 import { usePrevious } from "@/hooks/use-previous-value"
@@ -28,7 +28,7 @@ type IConversationComposerState = IConversationComposerStoreProps & {
   inputValue: string
   replyingToMessageId: IConversationMessageId | null
   composerMediaPreviews: IComposerMediaPreview[]
-  composerUploadedAttachments: UploadedRemoteAttachment[]
+  composerUploadedAttachments: IUploadedRemoteAttachment[]
 }
 
 type IConversationComposerActions = {
@@ -39,7 +39,7 @@ type IConversationComposerActions = {
   removeComposerMediaPreview: (mediaURI: string) => void
   addComposerUploadedAttachment: (args: {
     mediaURI: string
-    attachment: UploadedRemoteAttachment
+    attachment: IUploadedRemoteAttachment
   }) => void
   updateMediaPreviewStatus: (mediaURI: string, status: IComposerMediaPreviewStatus) => void
 }

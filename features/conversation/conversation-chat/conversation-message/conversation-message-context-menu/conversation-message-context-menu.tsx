@@ -17,16 +17,14 @@ import {
 } from "@/features/conversation/conversation-chat/conversation-message/conversation-message-context-menu/conversation-message-context-menu.store-context"
 import { useConversationMessageContextMenuStyles } from "@/features/conversation/conversation-chat/conversation-message/conversation-message-context-menu/conversation-message-context-menu.styles"
 import { ConversationMessageContextStoreProvider } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.store-context"
-import {
-  getCurrentUserAlreadyReactedOnMessage,
-  getMessageById,
-  useConversationMessageReactions,
-} from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
+import { getMessageFromConversationSafe } from "@/features/conversation/conversation-chat/conversation-message/utils/get-message-from-conversation"
 import { getConversationMessagesQueryData } from "@/features/conversation/conversation-chat/conversation-messages.query"
 import { useCurrentConversationTopicSafe } from "@/features/conversation/conversation-chat/conversation.store-context"
 import { useReactOnMessage } from "@/features/conversation/conversation-chat/use-react-on-message.mutation"
 import { useRemoveReactionOnMessage } from "@/features/conversation/conversation-chat/use-remove-reaction-on-message.mutation"
 import { messageIsFromCurrentSenderInboxId } from "@/features/conversation/utils/message-is-from-current-user"
+import { useConversationMessageReactions } from "../hooks/use-conversation-message-reactions"
+import { getCurrentUserAlreadyReactedOnMessage } from "../utils/get-current-user-already-reacted-on-message"
 import { MessageContextMenuAboveMessageReactions } from "./conversation-message-context-menu-above-message-reactions"
 import { MessageContextMenuContainer } from "./conversation-message-context-menu-container"
 import { useMessageContextMenuItems } from "./conversation-message-context-menu.utils"
@@ -59,10 +57,11 @@ const Content = memo(function Content(props: {
   const { bySender } = useConversationMessageReactions(messageId!)
 
   const { message, previousMessage, nextMessage } = useMemo(() => {
-    const message = getMessageById({
+    const message = getMessageFromConversationSafe({
       messageId,
       topic,
-    })! // ! Because if we are inside this component it's because we selected a message and it exists for sure
+      clientInboxId: currentSender.inboxId,
+    })
 
     const messages = getConversationMessagesQueryData({
       clientInboxId: currentSender.inboxId,
@@ -75,17 +74,19 @@ const Content = memo(function Content(props: {
     const previousMessageId = messageIndex ? messages?.ids[messageIndex - 1] : undefined
 
     const nextMessage = nextMessageId
-      ? (getMessageById({
+      ? getMessageFromConversationSafe({
           messageId: nextMessageId,
           topic,
-        }) ?? undefined)
+          clientInboxId: currentSender.inboxId,
+        })
       : undefined
 
     const previousMessage = previousMessageId
-      ? (getMessageById({
+      ? getMessageFromConversationSafe({
           messageId: previousMessageId,
           topic,
-        }) ?? undefined)
+          clientInboxId: currentSender.inboxId,
+        })
       : undefined
 
     return {

@@ -9,7 +9,7 @@ import {
   updateConversationMetadataQueryData,
 } from "@/features/conversation/conversation-metadata/conversation-metadata.query"
 import { getConversationQueryOptions } from "@/features/conversation/queries/conversation.query"
-import { useDmPeerInboxIdQuery } from "@/features/dm/use-dm-peer-inbox-id-query"
+import { useDmPeerInboxIdQuery } from "@/features/dm/dm-peer-inbox-id.query"
 import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
 import { translate } from "@/i18n"
 import { captureErrorWithToast } from "@/utils/capture-error"
@@ -20,7 +20,7 @@ export const useDeleteDm = ({ topic }: { topic: IConversationTopic }) => {
 
   const { data: conversationId } = useQuery({
     ...getConversationQueryOptions({
-      inboxId: currentSender.inboxId,
+      clientInboxId: currentSender.inboxId,
       topic,
     }),
     select: (conversation) => conversation?.id,

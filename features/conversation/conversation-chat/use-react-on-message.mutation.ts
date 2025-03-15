@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query"
 import { useCallback } from "react"
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import {
-  addConversationMessageQuery,
+  addMessageToConversationMessagesQuery,
   refetchConversationMessages,
 } from "@/features/conversation/conversation-chat/conversation-messages.query"
 import { getConversationForCurrentAccount } from "@/features/conversation/utils/get-conversation-for-current-account"
@@ -43,7 +43,7 @@ export function useReactOnMessage(props: { topic: IConversationTopic }) {
 
       if (conversation) {
         // Add the reaction to the message
-        addConversationMessageQuery({
+        addMessageToConversationMessagesQuery({
           clientInboxId: currentSender.inboxId,
           topic: conversation.topic,
           message: {

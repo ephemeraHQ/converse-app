@@ -46,7 +46,7 @@ async function allowGroup({
   topic,
 }: IAllowGroupArgs) {
   const group = await getOrFetchGroupQuery({
-    inboxId: getSafeCurrentSender().inboxId,
+    clientInboxId: getSafeCurrentSender().inboxId,
     topic,
     caller: "allowGroup",
   })
@@ -105,7 +105,7 @@ export const getAllowGroupMutationOptions = (
     onMutate: async (args) => {
       const { clientInboxId } = args
 
-      const previousGroup = getGroupQueryData({ inboxId: clientInboxId, topic })
+      const previousGroup = getGroupQueryData({ clientInboxId: clientInboxId, topic })
 
       if (!previousGroup) {
         throw new Error("Previous group not found")
@@ -119,7 +119,7 @@ export const getAllowGroupMutationOptions = (
         consentState: "allowed",
       })
 
-      setGroupQueryData({ inboxId: clientInboxId, topic, group: updatedGroup })
+      setGroupQueryData({ clientInboxId: clientInboxId, topic, group: updatedGroup })
 
       // Remove from requests
       removeConversationFromUnknownConsentConversationsQueryData({
@@ -129,7 +129,7 @@ export const getAllowGroupMutationOptions = (
 
       // Add to main conversations list
       addConversationToAllowedConsentConversationsQuery({
-        inboxId: clientInboxId,
+        clientInboxId,
         conversation: updatedGroup,
       })
 
@@ -143,7 +143,7 @@ export const getAllowGroupMutationOptions = (
       const { clientInboxId, topic } = variables
 
       setGroupQueryData({
-        inboxId: clientInboxId,
+        clientInboxId: clientInboxId,
         topic,
         group: context.previousGroup,
       })
@@ -156,7 +156,7 @@ export const getAllowGroupMutationOptions = (
 
       // Remove from main conversations list
       removeConversationFromAllowedConsentConversationsQuery({
-        inboxId: clientInboxId,
+        clientInboxId,
         topic,
       })
     },

@@ -34,32 +34,16 @@ export function getEthAddressesForXmtpInboxIdQueryOptions(args: IArgs) {
 }
 
 export function useEthAddressesForXmtpInboxId(args: IArgs) {
-  const { clientInboxId, inboxId } = args
-
-  return useQuery(
-    getEthAddressesForXmtpInboxIdQueryOptions({
-      clientInboxId,
-      inboxId,
-    }),
-  )
+  return useQuery(getEthAddressesForXmtpInboxIdQueryOptions(args))
 }
 
 export function ensureEthAddressForXmtpInboxId(args: IStrictArgs) {
-  const { clientInboxId, inboxId } = args
-  return reactQueryClient.ensureQueryData(
-    getEthAddressesForXmtpInboxIdQueryOptions({
-      clientInboxId,
-      inboxId,
-    }),
-  )
+  return reactQueryClient.ensureQueryData(getEthAddressesForXmtpInboxIdQueryOptions(args))
 }
 
 export function invalidateEthAddressesForXmtpInboxId(args: IStrictArgs) {
-  const { clientInboxId, inboxId } = args
-  return reactQueryClient.invalidateQueries(
-    getEthAddressesForXmtpInboxIdQueryOptions({
-      clientInboxId,
-      inboxId,
-    }),
-  )
+  return reactQueryClient.invalidateQueries(getEthAddressesForXmtpInboxIdQueryOptions(args))
+}
+export function getEthAddressesForXmtpInboxIdQueryData(args: IStrictArgs) {
+  return reactQueryClient.getQueryData(getEthAddressesForXmtpInboxIdQueryOptions(args).queryKey)
 }

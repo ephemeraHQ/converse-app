@@ -19,7 +19,7 @@ export const streamConsent = async (args: { inboxId: IXmtpInboxId }) => {
       xmtpLogger.debug(`Consent has been updated for ${inboxId}`)
 
       const conversations = getAllowedConsentConversationsQueryData({
-        inboxId,
+        clientInboxId: inboxId,
       })
 
       // TODO: Consent Has Been Updated, resubscribe to notifications

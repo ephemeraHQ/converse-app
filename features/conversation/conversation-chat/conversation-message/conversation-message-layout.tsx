@@ -5,7 +5,7 @@ import { ConversationMessageSender } from "@/features/conversation/conversation-
 import { ConversationSenderAvatar } from "@/features/conversation/conversation-chat/conversation-message/conversation-message-sender-avatar"
 import { useConversationMessageContextStoreContext } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.store-context"
 import { useConversationMessageStyles } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.styles"
-import { isGroupUpdatedMessage } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
+import { isGroupUpdatedMessage } from "@/features/conversation/conversation-chat/conversation-message/utils/conversation-message-assertions"
 import { useSelect } from "@/stores/stores.utils"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { debugBorder } from "@/utils/debug-style"

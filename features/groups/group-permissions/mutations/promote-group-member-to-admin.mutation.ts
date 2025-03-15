@@ -18,7 +18,7 @@ export const usePromoteToAdminMutation = (args: {
 }) => {
   const { clientInboxId, topic } = args
 
-  const { data: group } = useGroupQuery({ inboxId: clientInboxId, topic })
+  const { data: group } = useGroupQuery({ clientInboxId: clientInboxId, topic })
 
   return useMutation({
     mutationFn: async (inboxId: IXmtpInboxId) => {

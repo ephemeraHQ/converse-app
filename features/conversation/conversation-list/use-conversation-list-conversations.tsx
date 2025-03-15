@@ -16,7 +16,7 @@ export const useConversationListConversations = () => {
     isLoading: isLoadingConversations,
   } = useQuery(
     getAllowedConsentConversationsQueryOptions({
-      inboxId: currentSender.inboxId,
+      clientInboxId: currentSender.inboxId,
       caller: "useConversationListConversations",
     }),
   )

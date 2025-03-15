@@ -12,7 +12,7 @@ import { useSearchExistingDmsQuery } from "@/features/conversation/conversation-
 import { useSearchExistingGroupsByGroupMembersQuery } from "@/features/conversation/conversation-create/queries/search-existing-groups-by-group-members.query"
 import { useSearchExistingGroupsByGroupNameQuery } from "@/features/conversation/conversation-create/queries/search-existing-groups-by-group-name.query"
 import { inboxIdIsPartOfConversationUsingCacheData } from "@/features/conversation/utils/inbox-id-is-part-of-converastion"
-import { useDmPeerInboxIdQuery } from "@/features/dm/use-dm-peer-inbox-id-query"
+import { useDmPeerInboxIdQuery } from "@/features/dm/dm-peer-inbox-id.query"
 import { useSearchConvosUsersQuery } from "@/features/search-users/queries/search-convos-users.query"
 import {
   useBaseNameResolution,

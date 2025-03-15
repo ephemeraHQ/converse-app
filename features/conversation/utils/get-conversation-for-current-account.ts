@@ -4,7 +4,7 @@ import { IConversationTopic } from "../conversation.types"
 
 export function getConversationForCurrentAccount(topic: IConversationTopic) {
   return getConversationQueryData({
-    inboxId: getSafeCurrentSender().inboxId,
+    clientInboxId: getSafeCurrentSender().inboxId,
     topic: topic,
   })
 }

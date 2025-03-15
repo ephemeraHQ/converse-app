@@ -17,7 +17,7 @@ type IArgs = {
 
 export function useGroupPhotoMutation(args: IArgs) {
   const { clientInboxId, topic } = args
-  const { data: group } = useGroupQuery({ inboxId: clientInboxId, topic })
+  const { data: group } = useGroupQuery({ clientInboxId: clientInboxId, topic })
 
   return useMutation({
     mutationFn: async (groupImageUrl: string) => {
@@ -26,22 +26,22 @@ export function useGroupPhotoMutation(args: IArgs) {
       }
 
       await updateXmtpGroupImage({
-        clientInboxId: clientInboxId,
+        clientInboxId,
         groupId: topic as unknown as IXmtpConversationId,
         imageUrl: groupImageUrl,
       })
       return groupImageUrl
     },
     onMutate: async (groupImageUrl: string) => {
-      const previousGroup = getGroupQueryData({ inboxId: clientInboxId, topic })
+      const previousGroup = getGroupQueryData({ clientInboxId: clientInboxId, topic })
       const updates = { imageUrl: groupImageUrl }
 
       if (previousGroup) {
-        updateGroupQueryData({ inboxId: clientInboxId, topic, updates })
+        updateGroupQueryData({ clientInboxId: clientInboxId, topic, updates })
       }
 
       updateConversationInAllowedConsentConversationsQueryData({
-        inboxId: clientInboxId,
+        clientInboxId,
         topic,
         conversationUpdate: updates,
       })
@@ -54,9 +54,9 @@ export function useGroupPhotoMutation(args: IArgs) {
       const { previousGroup } = context || {}
 
       const updates = { imageUrl: previousGroup?.imageUrl ?? "" }
-      updateGroupQueryData({ inboxId: clientInboxId, topic, updates })
+      updateGroupQueryData({ clientInboxId: clientInboxId, topic, updates })
       updateConversationInAllowedConsentConversationsQueryData({
-        inboxId: clientInboxId,
+        clientInboxId,
         topic,
         conversationUpdate: updates,
       })

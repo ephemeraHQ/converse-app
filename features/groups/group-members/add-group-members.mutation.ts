@@ -31,12 +31,6 @@ export function useAddGroupMembersMutation() {
     onMutate: async (variables: AddGroupMembersVariables) => {
       const { group, inboxIds } = variables
 
-      // Cancel any outgoing refetches
-      await cancelGroupMembersQuery({
-        clientInboxId: currentSender.inboxId,
-        topic: group.topic,
-      })
-
       // Get current group members
       const previousMembers = getGroupMembersQueryData({
         clientInboxId: currentSender.inboxId,
@@ -51,7 +45,7 @@ export function useAddGroupMembersMutation() {
           member: {
             inboxId,
             permission: "member",
-            consentState: "allowed",
+            consentState: "unknown",
           },
         })
       }

@@ -1,6 +1,6 @@
 import { memo } from "react"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
-import { useDmPeerInboxIdQuery } from "@/features/dm/use-dm-peer-inbox-id-query"
+import { useDmPeerInboxIdQuery } from "@/features/dm/dm-peer-inbox-id.query"
 import { SearchUsersResultsListItemUser } from "@/features/search-users/search-users-results-list-item-user"
 import { IConversationTopic } from "../conversation/conversation.types"
 

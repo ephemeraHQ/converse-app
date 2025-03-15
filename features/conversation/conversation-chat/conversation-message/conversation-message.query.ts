@@ -1,9 +1,9 @@
 import { IXmtpInboxId, IXmtpMessageId } from "@features/xmtp/xmtp.types"
 import { queryOptions } from "@tanstack/react-query"
-import { convertXmtpMessageToConvosMessage } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
 import { getXmtpConversationMessage } from "@/features/xmtp/xmtp-messages/xmtp-messages"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
 import { IConversationMessageId } from "./conversation-message.types"
+import { convertXmtpMessageToConvosMessage } from "./utils/convert-xmtp-message-to-convos-message"
 
 type IArgs = {
   clientInboxId: IXmtpInboxId

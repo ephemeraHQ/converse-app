@@ -1,6 +1,7 @@
 import { Text } from "@design-system/Text"
 import { textSizeStyles } from "@design-system/Text/Text.styles"
 import { VStack } from "@design-system/VStack"
+import emojiRegex from "emoji-regex"
 import { memo } from "react"
 import {
   BubbleContainer,
@@ -9,7 +10,6 @@ import {
 import { ConversationMessageGestures } from "@/features/conversation/conversation-chat/conversation-message/conversation-message-gestures"
 import { MessageText } from "@/features/conversation/conversation-chat/conversation-message/conversation-message-text"
 import { useConversationMessageContextStoreContext } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.store-context"
-import { shouldRenderBigEmoji } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
 import { useSelect } from "@/stores/stores.utils"
 import { IConversationMessageText } from "./conversation-message.types"
 
@@ -44,3 +44,17 @@ export const MessageSimpleText = memo(function MessageSimpleText(props: {
     </BubbleContainer>
   )
 })
+
+// Compile emoji regex once
+const compiledEmojiRegex = emojiRegex()
+
+const shouldRenderBigEmoji = (text: string) => {
+  const trimmedContent = text.trim()
+  const emojis = trimmedContent.match(compiledEmojiRegex) || []
+
+  const hasEmojis = emojis.length > 0
+  const hasFewerThanFourEmojis = emojis.length < 4
+  const containsOnlyEmojis = emojis.join("") === trimmedContent
+
+  return hasEmojis && hasFewerThanFourEmojis && containsOnlyEmojis
+}

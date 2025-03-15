@@ -1,15 +1,14 @@
 import { queryOptions, useQuery } from "@tanstack/react-query"
 import { logger } from "@utils/logger"
-import {
-  convertXmtpMessageToConvosMessage,
-  isReactionMessage,
-} from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
+import { isReactionMessage } from "@/features/conversation/conversation-chat/conversation-message/utils/conversation-message-assertions"
+import { isTempConversation } from "@/features/conversation/utils/is-temp-conversation"
 import { syncXmtpConversation } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-sync"
 import {
   getXmtpConversationMessages,
   isSupportedMessage,
 } from "@/features/xmtp/xmtp-messages/xmtp-messages"
 import { IXmtpConversationId, IXmtpInboxId } from "@/features/xmtp/xmtp.types"
+import { getQueryKey } from "@/utils/react-query/react-query.utils"
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
 import { reactQueryClient } from "../../../utils/react-query/react-query.client"
 import { IConversationTopic } from "../conversation.types"
@@ -22,6 +21,7 @@ import {
   IConversationMessageId,
   IConversationMessageReactionContent,
 } from "./conversation-message/conversation-message.types"
+import { convertXmtpMessageToConvosMessage } from "./conversation-message/utils/convert-xmtp-message-to-convos-message"
 
 export type ConversationMessagesQueryData = Awaited<ReturnType<typeof conversationMessagesQueryFn>>
 
@@ -40,7 +40,7 @@ const conversationMessagesQueryFn = async (args: {
   }
 
   const conversation = await getOrFetchConversationQuery({
-    inboxId: clientInboxId,
+    clientInboxId,
     topic,
     caller: "conversationMessagesQueryFn",
   })
@@ -91,7 +91,7 @@ export function refetchConversationMessages(args: {
   return reactQueryClient.refetchQueries(getConversationMessagesQueryOptions(args))
 }
 
-export const addConversationMessageQuery = (args: {
+export const addMessageToConversationMessagesQuery = (args: {
   clientInboxId: IXmtpInboxId
   topic: IConversationTopic
   message: IConversationMessage
@@ -106,6 +106,32 @@ export const addConversationMessageQuery = (args: {
         existingData: previousMessages,
         prependNewMessages: true,
       })
+    },
+  )
+}
+
+export function removeMessageToConversationMessages(args: {
+  clientInboxId: IXmtpInboxId
+  topic: IConversationTopic
+  messageId: IConversationMessageId
+}) {
+  const { clientInboxId, topic, messageId } = args
+
+  reactQueryClient.setQueryData(
+    getConversationMessagesQueryOptions({ clientInboxId, topic }).queryKey,
+    (previousMessages) => {
+      if (!previousMessages) {
+        return undefined
+      }
+      const newById = {
+        ...previousMessages.byId,
+      }
+      delete newById[messageId]
+      return {
+        ...previousMessages,
+        byId: newById,
+        ids: previousMessages?.ids.filter((id) => id !== messageId),
+      }
     },
   )
 }
@@ -125,16 +151,20 @@ export function getConversationMessagesQueryOptions(args: {
 }) {
   const { clientInboxId, topic, caller } = args
   const conversation = getConversationQueryData({
-    inboxId: clientInboxId,
+    clientInboxId,
     topic,
   })
   return queryOptions({
     meta: {
       caller,
     },
-    queryKey: ["conversation-messages", clientInboxId, topic],
+    queryKey: getQueryKey({
+      baseStr: "conversation-messages",
+      clientInboxId,
+      topic,
+    }),
     queryFn: () => conversationMessagesQueryFn({ clientInboxId, topic }),
-    enabled: !!conversation,
+    enabled: !!conversation && !isTempConversation(topic),
   })
 }
 
@@ -323,10 +353,6 @@ export function replaceOptimisticMessageWithReal(args: {
         byId: newById,
       }
 
-      logger.debug("[replaceOptimisticMessageWithReal] Updated message state", {
-        updatedState: JSON.stringify(updatedState, null, 2),
-      })
-
       return updatedState
     },
   )
@@ -342,4 +368,11 @@ export function setConversationMessagesQueryData(args: {
     getConversationMessagesQueryOptions({ clientInboxId, topic }).queryKey,
     data,
   )
+}
+
+export function invalidateConversationMessagesQuery(args: {
+  clientInboxId: IXmtpInboxId
+  topic: IConversationTopic
+}) {
+  return reactQueryClient.invalidateQueries(getConversationMessagesQueryOptions(args))
 }

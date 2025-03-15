@@ -1,18 +1,18 @@
 import React, { memo, useCallback } from "react"
+import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { useConversationMessageContextMenuStore } from "@/features/conversation/conversation-chat/conversation-message/conversation-message-context-menu/conversation-message-context-menu.store-context"
 import {
   ConversationMessageGesturesDumb,
   IMessageGesturesOnLongPressArgs,
 } from "@/features/conversation/conversation-chat/conversation-message/conversation-message-gestures.dumb"
 import { useConversationMessageContextStore } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.store-context"
-import {
-  getCurrentUserAlreadyReactedOnMessage,
-  getMessageById,
-  isMultiRemoteAttachmentMessage,
-} from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
+import { isMultiRemoteAttachmentMessage } from "@/features/conversation/conversation-chat/conversation-message/utils/conversation-message-assertions"
+import { getMessageFromConversationSafe } from "@/features/conversation/conversation-chat/conversation-message/utils/get-message-from-conversation"
 import { useReactOnMessage } from "@/features/conversation/conversation-chat/use-react-on-message.mutation"
 import { useRemoveReactionOnMessage } from "@/features/conversation/conversation-chat/use-remove-reaction-on-message.mutation"
+import { captureErrorWithToast } from "@/utils/capture-error"
 import { useCurrentConversationTopic } from "../conversation.store-context"
+import { getCurrentUserAlreadyReactedOnMessage } from "./utils/get-current-user-already-reacted-on-message"
 
 export const ConversationMessageGestures = memo(function ConversationMessageGestures(props: {
   children: React.ReactNode
@@ -31,21 +31,30 @@ export const ConversationMessageGestures = memo(function ConversationMessageGest
   })
 
   const handleLongPress = useCallback(
-    (e: IMessageGesturesOnLongPressArgs) => {
-      const messageId = messageStore.getState().messageId
-      const message = getMessageById({ messageId, topic })!
-      messageContextMenuStore.getState().setMessageContextMenuData({
-        messageId,
-        itemRectX: e.pageX,
-        itemRectY: e.pageY,
-        itemRectHeight: e.height,
-        itemRectWidth: e.width,
-        ...(isMultiRemoteAttachmentMessage(message) && {
-          extra: {
-            attachmentUrl: contextMenuExtra?.attachmentUrl,
-          },
-        }),
-      })
+    async (e: IMessageGesturesOnLongPressArgs) => {
+      try {
+        const currentSender = getSafeCurrentSender()
+        const messageId = messageStore.getState().messageId
+        const message = getMessageFromConversationSafe({
+          messageId,
+          topic,
+          clientInboxId: currentSender.inboxId,
+        })
+        messageContextMenuStore.getState().setMessageContextMenuData({
+          messageId,
+          itemRectX: e.pageX,
+          itemRectY: e.pageY,
+          itemRectHeight: e.height,
+          itemRectWidth: e.width,
+          ...(isMultiRemoteAttachmentMessage(message) && {
+            extra: {
+              attachmentUrl: contextMenuExtra?.attachmentUrl,
+            },
+          }),
+        })
+      } catch (error) {
+        captureErrorWithToast(error)
+      }
     },
     [messageContextMenuStore, messageStore, contextMenuExtra, topic],
   )

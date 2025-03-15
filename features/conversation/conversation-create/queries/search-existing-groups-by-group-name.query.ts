@@ -10,7 +10,7 @@ export async function searchExistingGroupsByGroupName(args: { searchQuery: strin
   const currentSender = getSafeCurrentSender()
 
   const conversations = getAllowedConsentConversationsQueryData({
-    inboxId: currentSender.inboxId,
+    clientInboxId: currentSender.inboxId,
   })
 
   if (!conversations || !searchQuery) {

@@ -27,7 +27,7 @@ export const useToggleReadStatus = ({ topic }: UseToggleReadStatusProps) => {
       topic,
     })
     const conversation = getConversationQueryData({
-      inboxId: currentSender.inboxId,
+      clientInboxId: currentSender.inboxId,
       topic,
     })
 

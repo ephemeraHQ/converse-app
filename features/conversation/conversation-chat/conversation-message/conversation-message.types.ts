@@ -45,9 +45,9 @@ export type IConversationMessageReplyContent = {
 
 export type IConversationMessageGroupUpdatedContent = {
   initiatedByInboxId: IXmtpInboxId
-  membersAdded: Array<{ inboxId: IXmtpInboxId }>
-  membersRemoved: Array<{ inboxId: IXmtpInboxId }>
-  metadataFieldsChanged: Array<IGroupUpdatedMetadataEntry>
+  membersAdded: { inboxId: IXmtpInboxId }[]
+  membersRemoved: { inboxId: IXmtpInboxId }[]
+  metadataFieldsChanged: IGroupUpdatedMetadataEntry[]
 }
 
 export type IGroupUpdatedMetadataEntry = {
@@ -56,21 +56,21 @@ export type IGroupUpdatedMetadataEntry = {
   fieldName: string
 }
 
-export type IRemoteAttachmentInfo = {
+export type IConversationAttachment = {
   filename?: string
   secret: string
   salt: string
   nonce: string
   contentDigest: string
-  contentLength?: string
   scheme: "https://"
   url: string
+  contentLength: string
 }
 
-export type IConversationMessageRemoteAttachmentContent = IRemoteAttachmentInfo
+export type IConversationMessageRemoteAttachmentContent = IConversationAttachment
 
 export type IConversationMessageMultiRemoteAttachmentContent = {
-  attachments: Array<IRemoteAttachmentInfo & { contentLength: string }>
+  attachments: IConversationAttachment[]
 }
 
 export type IConversationMessageStaticAttachmentContent = {
@@ -80,7 +80,7 @@ export type IConversationMessageStaticAttachmentContent = {
 }
 
 export type IConversationMessageReadReceiptContent = {
-  readByInboxIds: Array<IXmtpInboxId>
+  readByInboxIds: IXmtpInboxId[]
 }
 
 // Union type for all content types

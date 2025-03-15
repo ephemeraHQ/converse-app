@@ -2,7 +2,7 @@ import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { getAllowedConsentConversationsQueryOptions } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm"
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group"
-import { ensureDmPeerInboxIdQueryData } from "@/features/dm/use-dm-peer-inbox-id-query"
+import { ensureDmPeerInboxIdQueryData } from "@/features/dm/dm-peer-inbox-id.query"
 import { ensureGroupMembersQueryData } from "@/features/groups/group-members.query"
 import { isSameInboxId } from "@/features/xmtp/xmtp-inbox-id/xmtp-inbox-id.utils"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
@@ -19,7 +19,7 @@ export async function findConversationByInboxIds(args: {
 
   const conversations = await reactQueryClient.ensureQueryData(
     getAllowedConsentConversationsQueryOptions({
-      inboxId: clientInboxId,
+      clientInboxId,
       caller: "findConversationByMembers",
     }),
   )

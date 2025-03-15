@@ -21,7 +21,7 @@ import {
   messageContentIsRemoteAttachment,
   messageContentIsStaticAttachment,
   messageContentIsText,
-} from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
+} from "@/features/conversation/conversation-chat/conversation-message/utils/conversation-message-assertions"
 import {
   useConversationStore,
   useCurrentConversationTopicSafe,

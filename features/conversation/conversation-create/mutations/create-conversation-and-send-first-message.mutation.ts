@@ -1,19 +1,35 @@
 import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { useMutation } from "@tanstack/react-query"
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
+import { IConversationMessageId } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.types"
+import { getMessageWithType } from "@/features/conversation/conversation-chat/conversation-message/utils/get-message-with-type"
 import {
-  getConversationMessagesQueryData,
-  setConversationMessagesQueryData,
+  addMessageToConversationMessagesQuery,
+  invalidateConversationMessagesQuery,
 } from "@/features/conversation/conversation-chat/conversation-messages.query"
+import { useConversationStore } from "@/features/conversation/conversation-chat/conversation.store-context"
 import {
-  getConversationQueryData,
-  updateConversationQueryData,
+  addConversationToAllowedConsentConversationsQuery,
+  invalidateAllowedConsentConversationsQuery,
+  removeConversationFromAllowedConsentConversationsQuery,
+} from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
+import {
+  invalidateConversationQuery,
+  setConversationQueryData,
 } from "@/features/conversation/queries/conversation.query"
 import { convertXmtpConversationToConvosConversation } from "@/features/conversation/utils/convert-xmtp-conversation-to-convos"
+import { setDmQueryData } from "@/features/dm/dm.query"
+import { IDm } from "@/features/dm/dm.types"
+import { setGroupQueryData } from "@/features/groups/group.query"
+import { IGroup } from "@/features/groups/group.types"
+import { getGroupNameForGroupMembers } from "@/features/groups/hooks/use-group-name"
 import { createXmtpDm } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-dm"
 import { createXmtpGroup } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-group"
-import { IConversationTopic } from "../../conversation.types"
-import { sendMessage } from "../../hooks/use-send-message"
+import { captureError } from "@/utils/capture-error"
+import { getTodayNs } from "@/utils/date"
+import { getRandomId } from "@/utils/general"
+import { IConversation, IConversationId, IConversationTopic } from "../../conversation.types"
+import { ISendMessageParams, sendMessage } from "../../hooks/use-send-message"
 
 // export async function sendMessage(
 //   args: ISendMessageParams
@@ -62,15 +78,28 @@ function getConversationTempTopic(args: { inboxIds: IXmtpInboxId[] }) {
   )}` as IConversationTopic
 }
 
+// Maybe keep alive the temp topic conversation and just update it as new data comes from stream?
+// And when we want to send a message we can use this map to get the real topic?
+// Maybe too complex, just a thought.
+// Let's try invalidating and causing a rerender first to see how the FE reacts
+// const tempConversationTopicToRealMap = new Map<IConversationTopic, IConversationTopic>()
+
 export function useCreateConversationAndSendFirstMessage() {
-  // const conversationStore = useConversationStore()
+  const conversationStore = useConversationStore()
 
   return useMutation({
-    mutationFn: async (args: { inboxIds: IXmtpInboxId[]; content: { text: string } }) => {
-      const { inboxIds, content } = args
+    mutationFn: async (args: {
+      inboxIds: IXmtpInboxId[]
+      contents: ISendMessageParams["contents"]
+    }) => {
+      const { inboxIds, contents } = args
 
       if (!inboxIds.length) {
         throw new Error("No inboxIds provided")
+      }
+
+      if (!contents.length) {
+        throw new Error(`No content provided`)
       }
 
       const currentSender = getSafeCurrentSender()
@@ -94,259 +123,209 @@ export function useCreateConversationAndSendFirstMessage() {
       // Send message
       const messageId = await sendMessage({
         topic: conversation.topic,
-        content,
+        contents,
       })
 
       return { conversation, messageId }
     },
-    // onMutate: ({ inboxIds, content }) => {
-    //   const currentAccountInboxId = getSafeCurrentSender().inboxId;
-    //   const currentAccount = getCurrentAccount()!;
+    onMutate: ({ inboxIds, contents }) => {
+      const currentSender = getSafeCurrentSender()
 
-    //   logger.debug(
-    //     `[useCreateConversationAndSendFirstMessage] Creating optimistic conversation with currentAccount: ${currentAccount} and currentAccountInboxId: ${currentAccountInboxId}`
-    //   );
+      const isGroup = inboxIds.length > 1
+      const tempTopic = getConversationTempTopic({
+        inboxIds: [currentSender.inboxId, ...inboxIds],
+      })
 
-    //   const isGroup = inboxIds.length > 1;
-    //   const tempTopic = getConversationTempTopic({
-    //     inboxIds: [currentAccountInboxId, ...inboxIds],
-    //   });
+      // Now create optimistic message
+      const generatedMessageId = getRandomId() as IConversationMessageId
 
-    //   logger.debug(
-    //     `[useCreateConversationAndSendFirstMessage] Generated tempTopic: ${tempTopic}, isGroup: ${isGroup}`
-    //   );
+      const optimisticMessage = getMessageWithType({
+        baseMessage: {
+          id: generatedMessageId,
+          topic: tempTopic,
+          senderInboxId: currentSender.inboxId,
+          sentNs: getTodayNs(),
+          status: "sending",
+        },
+        // TODO: Add support for multiple contents
+        content: contents[0],
+      })
 
-    //   // Create optimistic conversation
-    //   let tempConversation: GroupWithCodecsType | DmWithCodecsType;
+      // Create optimistic conversation
+      let tempConversation: IConversation
 
-    //   // Group
-    //   if (isGroup) {
-    //     logger.debug(
-    //       `[useCreateConversationAndSendFirstMessage] Creating optimistic group conversation`
-    //     );
-    //     const groupParams: GroupParams = {
-    //       id: "" as unknown as ConversationId,
-    //       createdAt: 0,
-    //       topic: tempTopic,
-    //       name: "",
-    //       isActive: true,
-    //       addedByInboxId: currentAccountInboxId,
-    //       groupImageUrl: "",
-    //       description: "",
-    //       consentState: "allowed",
-    //     };
+      if (isGroup) {
+        tempConversation = {
+          id: "" as IConversationId,
+          type: "group",
+          createdAt: new Date().getTime(),
+          topic: tempTopic,
+          name: getGroupNameForGroupMembers({ memberInboxIds: inboxIds }),
+          creatorInboxId: currentSender.inboxId,
+          description: "",
+          addedByInboxId: currentSender.inboxId,
+          consentState: "allowed",
+          members: inboxIds.map((inboxId) => ({
+            consentState: currentSender.inboxId === inboxId ? "allowed" : "unknown",
+            permission: currentSender.inboxId === inboxId ? "super_admin" : "member",
+            inboxId,
+          })),
+          lastMessage: optimisticMessage,
+        } satisfies IGroup
 
-    //     tempConversation = new Group(
-    //       "" as unknown as InstallationId,
-    //       groupParams,
-    //       undefined
-    //     );
+        setGroupQueryData({
+          clientInboxId: currentSender.inboxId,
+          topic: tempTopic,
+          group: tempConversation,
+        })
+      }
+      // DM
+      else {
+        tempConversation = {
+          id: "" as IConversationId,
+          type: "dm",
+          createdAt: new Date().getTime(),
+          topic: tempTopic,
+          peerInboxId: inboxIds[0],
+          consentState: "allowed",
+          lastMessage: optimisticMessage,
+        } satisfies IDm
 
-    //     logger.debug(
-    //       `[useCreateConversationAndSendFirstMessage] Setting group query data for topic: ${tempTopic}`
-    //     );
-    //     setGroupQueryData({
-    //       account: currentAccount,
-    //       topic: tempTopic,
-    //       group: tempConversation as GroupWithCodecsType,
-    //     });
-    //   }
-    //   // DM
-    //   else {
-    //     logger.debug(
-    //       `[useCreateConversationAndSendFirstMessage] Creating optimistic DM conversation with peer: ${inboxIds[0]}`
-    //     );
-    //     const dmParams: DmParams = {
-    //       id: "" as unknown as ConversationId,
-    //       createdAt: 0,
-    //       topic: tempTopic,
-    //       consentState: "allowed",
-    //     };
+        setDmQueryData({
+          clientInboxId: currentSender.inboxId,
+          topic: tempTopic,
+          dm: tempConversation,
+        })
+      }
 
-    //     tempConversation = new Dm(
-    //       "" as unknown as InstallationId,
-    //       dmParams,
-    //       undefined
-    //     );
+      // The conversation is in the query data so let's show it!
+      conversationStore.setState({
+        topic: tempTopic,
+      })
 
-    //     logger.debug(
-    //       `[useCreateConversationAndSendFirstMessage] Setting DM query data for topic: ${tempTopic}`
-    //     );
+      // Add to your conversations main list
+      addConversationToAllowedConsentConversationsQuery({
+        clientInboxId: currentSender.inboxId,
+        conversation: tempConversation,
+      })
 
-    //     setDmQueryData({
-    //       ethAccountAddress: currentAccount,
-    //       inboxId: inboxIds[0],
-    //       dm: tempConversation as Dm<SupportedCodecsType>,
-    //     });
-    //   }
+      addMessageToConversationMessagesQuery({
+        clientInboxId: currentSender.inboxId,
+        topic: tempTopic,
+        message: optimisticMessage,
+      })
 
-    //   conversationStore.setState({
-    //     topic: tempTopic,
-    //   });
+      return { generatedMessageId, tempTopic }
+    },
+    onSuccess: (result, variables, context) => {
+      const currentSender = getSafeCurrentSender()
 
-    //   // addConversationToAllowedConsentConversationsQuery({
-    //   //   account: currentAccount,
-    //   //   conversation: tempConversation,
-    //   // });
+      invalidateConversationQuery({
+        clientInboxId: currentSender.inboxId,
+        topic: result.conversation.topic,
+      }).catch(captureError)
 
-    //   // Create optimistic message
-    //   const generatedMessageId = getRandomId();
-    //   const optimisticMessage = DecodedMessage.fromObject({
-    //     id: generatedMessageId as MessageId,
-    //     topic: tempTopic as unknown as ConversationTopic,
-    //     contentTypeId: contentTypesPrefixes.text,
-    //     senderInboxId: currentAccountInboxId,
-    //     sentNs: getTodayNs(),
-    //     content: { text: content.text },
-    //     fallback: content.text,
-    //     deliveryStatus: "sending" as MessageDeliveryStatus,
-    //   });
+      invalidateAllowedConsentConversationsQuery({
+        clientInboxId: currentSender.inboxId,
+      }).catch(captureError)
 
-    //   addConversationMessageQuery({
-    //     account: currentAccount,
-    //     topic: tempTopic as unknown as ConversationTopic,
-    //     message: optimisticMessage,
-    //   });
+      invalidateConversationMessagesQuery({
+        clientInboxId: currentSender.inboxId,
+        topic: context.tempTopic,
+      }).catch(captureError)
 
-    //   return { generatedMessageId, tempTopic };
-    // },
-    // onSuccess: (result, variables, context) => {
-    //   const { inboxIds } = variables;
+      // Replace with the real conversation
+      conversationStore.setState({
+        topic: result.conversation.topic,
+      })
 
-    //   if (!context) return;
+      // maybeReplaceOptimisticConversationWithReal
+    },
+    onError: (error, variables, context) => {
+      if (!context) {
+        return
+      }
 
-    //   const currentAccount = getCurrentAccount()!;
-    //   const isGroup = inboxIds.length > 1;
-    //   const { conversation, messageId } = result;
+      const currentSender = getSafeCurrentSender()
 
-    //   // Update conversation
-    //   removeConversationFromAllowedConsentConversationsQuery({
-    //     account: currentAccount,
-    //     topic: context.tempTopic,
-    //   });
+      // Remove created Conversation
+      removeConversationFromAllowedConsentConversationsQuery({
+        clientInboxId: currentSender.inboxId,
+        topic: context.tempTopic,
+      })
 
-    //   addConversationToAllowedConsentConversationsQuery({
-    //     account: currentAccount,
-    //     conversation,
-    //   });
-
-    //   replaceOptimisticConversationWithReal({
-    //     account: currentAccount,
-    //     tempTopic: context.tempTopic!,
-    //     realTopic: conversation.topic,
-    //   });
-
-    //   if (!isGroup) {
-    //     setDmQueryData({
-    //       ethAccountAddress: currentAccount,
-    //       inboxId: inboxIds[0],
-    //       dm: conversation as Dm<SupportedCodecsType>,
-    //     });
-    //   }
-
-    //   // Update message
-    //   if (context.generatedMessageId) {
-    //     replaceOptimisticMessageWithReal({
-    //       tempId: context.generatedMessageId,
-    //       topic: context.tempTopic as unknown as ConversationTopic,
-    //       account: currentAccount,
-    //       realMessage: {
-    //         id: messageId,
-    //         content: () => variables.content.text,
-    //         contentTypeId: contentTypesPrefixes.text,
-    //         sentNs: getTodayNs(),
-    //         fallback: "new-message",
-    //         deliveryStatus: "sent" as MessageDeliveryStatus,
-    //         topic: context.tempTopic as unknown as ConversationTopic,
-    //         senderInboxId: currentAccount,
-    //         nativeContent: { text: variables.content.text },
-    //       } as DecodedMessage,
-    //     });
-    //   }
-    // },
-    // onError: (error, variables, context) => {
-    //   if (context?.tempTopic) {
-    //     const currentAccount = getCurrentAccount()!;
-    //     queryClient.removeQueries({
-    //       queryKey: conversationMessagesQueryKey(
-    //         currentAccount,
-    //         context.tempTopic as ConversationTopic
-    //       ),
-    //     });
-    //     queryClient.setQueryData(
-    //       allowedConsentConversationsQueryKey(currentAccount),
-    //       (previous: ConversationWithCodecsType[] = []) =>
-    //         previous.filter((conv) => conv.topic !== context.tempTopic)
-    //     );
-    //   }
-    //   sentryTrackError(error);
-    // },
+      setConversationQueryData({
+        clientInboxId: currentSender.inboxId,
+        topic: context.tempTopic,
+        conversation: null,
+      })
+    },
   })
 }
 
-export function maybeReplaceOptimisticConversationWithReal(args: {
-  clientInboxId: IXmtpInboxId
-  memberInboxIds: IXmtpInboxId[]
-  realTopic: IConversationTopic
-}) {
-  const { clientInboxId, memberInboxIds, realTopic } = args
+// export function maybeReplaceOptimisticConversationWithReal(args: {
+//   clientInboxId: IXmtpInboxId
+//   memberInboxIds: IXmtpInboxId[]
+//   realTopic: IConversationTopic
+// }) {
+//   const { clientInboxId, memberInboxIds, realTopic } = args
 
-  const tempTopic = getConversationTempTopic({
-    inboxIds: memberInboxIds,
-  })
+//   const tempTopic = getConversationTempTopic({
+//     inboxIds: memberInboxIds,
+//   })
 
-  const realConversation = getConversationQueryData({
-    inboxId: clientInboxId,
-    topic: realTopic,
-  })
+//   const realConversation = getConversationQueryData({
+//     clientInboxId,
+//     topic: realTopic,
+//   })
 
-  if (!realConversation) {
-    throw new Error("Real conversation not found")
-  }
+//   if (!realConversation) {
+//     throw new Error("Real conversation not found")
+//   }
 
-  updateConversationQueryData({
-    inboxId: clientInboxId,
-    topic: tempTopic,
-    conversationUpdate: realConversation,
-  })
+//   updateConversationQueryData({
+//     clientInboxId,
+//     topic: tempTopic,
+//     conversationUpdate: realConversation,
+//   })
 
-  // Now move the messages from the temp conversation to the real conversation
-  const messages = getConversationMessagesQueryData({
-    clientInboxId,
-    topic: tempTopic,
-  })
+//   // Now move the messages from the temp conversation to the real conversation
+//   const messages = getConversationMessagesQueryData({
+//     clientInboxId,
+//     topic: tempTopic,
+//   })
 
-  if (messages) {
-    setConversationMessagesQueryData({
-      clientInboxId,
-      topic: realTopic,
-      data: messages,
-    })
-  }
+//   if (messages) {
+//     setConversationMessagesQueryData({
+//       clientInboxId,
+//       topic: realTopic,
+//       data: messages,
+//     })
+//   }
 
-  // Get messages for the temporary conversation
-  // const messages: IMessageAccumulator | undefined =
-  //   getConversationMessagesQueryData({
-  //     account,
-  //     topic: tempTopic,
-  //   });
+// Get messages for the temporary conversation
+// const messages: IMessageAccumulator | undefined =
+//   getConversationMessagesQueryData({
+//     account,
+//     topic: tempTopic,
+//   });
 
-  // // If we found messages for the temp conversation, update them with the real topic
-  // if (messages?.ids?.length && messages.ids.length > 0) {
-  //   queryClient.setQueryData(
-  //     conversationMessagesQueryKey(account, realTopic),
-  //     messages.ids.map((messageId) => {
-  //       const message = messages.byId[messageId];
-  //       return {
-  //         ...message,
-  //         topic: realTopic,
-  //         // Preserve existing delivery status
-  //         deliveryStatus: message.deliveryStatus || "sent",
-  //       };
-  //     })
-  //   );
-  // }
-}
+// // If we found messages for the temp conversation, update them with the real topic
+// if (messages?.ids?.length && messages.ids.length > 0) {
+//   queryClient.setQueryData(
+//     conversationMessagesQueryKey(account, realTopic),
+//     messages.ids.map((messageId) => {
+//       const message = messages.byId[messageId];
+//       return {
+//         ...message,
+//         topic: realTopic,
+//         // Preserve existing delivery status
+//         deliveryStatus: message.deliveryStatus || "sent",
+//       };
+//     })
+//   );
+// }
+// }
 
 /**
  * Produce a 16-hex-digit hash (64-bit) from an array of member IDs,
@@ -368,16 +347,16 @@ export function maybeReplaceOptimisticConversationWithReal(args: {
  *
  * @throws {Error} If members array is empty
  */
-function generateGroupHashFromMemberIds(members: IXmtpInboxId[]) {
-  if (!members.length) {
+function generateGroupHashFromMemberIds(inboxIds: IXmtpInboxId[]) {
+  if (!inboxIds.length) {
     return undefined
   }
 
   // 1) Sort members (case-insensitive) and deduplicate
-  const sorted = [...new Set(members)].sort((a, b) =>
+  const sorted = [...new Set(inboxIds)].sort((a, b) =>
     a.localeCompare(b, undefined, { sensitivity: "base" }),
   )
-  // 2) Lowercase them
+  // 2) Lowercase them^
   const lowercased = sorted.map((m) => m.toLowerCase())
   // 3) Convert to a JSON string
   const input = JSON.stringify(lowercased)

@@ -1,23 +1,22 @@
 import {
   IXmtpConsentState,
   IXmtpConversationId,
+  IXmtpConversationSendPayload,
   IXmtpConversationWithCodecs,
   IXmtpDmWithCodecs,
   IXmtpGroupWithCodecs,
   IXmtpInboxId,
 } from "@features/xmtp/xmtp.types"
 import { ConversationVersion, sendMessage } from "@xmtp/react-native-sdk"
-import { ConversationSendPayload } from "@xmtp/react-native-sdk/build/lib/types"
 import { config } from "@/config"
 import { getXmtpClientByInboxId } from "@/features/xmtp/xmtp-client/xmtp-client.service"
-import { ISupportedXmtpCodecs } from "@/features/xmtp/xmtp-codecs/xmtp-codecs"
 import { captureError } from "@/utils/capture-error"
 import { XMTPError } from "@/utils/error"
 
 export async function sendXmtpConversationMessage(args: {
   clientInboxId: IXmtpInboxId
   conversationId: IXmtpConversationId
-  content: ConversationSendPayload<ISupportedXmtpCodecs>
+  content: IXmtpConversationSendPayload
 }) {
   const { content, clientInboxId, conversationId } = args
 

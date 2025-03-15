@@ -13,12 +13,7 @@ import { ConversationMessageRepliable } from "@/features/conversation/conversati
 import { ConversationMessageStatus } from "@/features/conversation/conversation-chat/conversation-message/conversation-message-status/conversation-message-status"
 import { ConversationMessageTimestamp } from "@/features/conversation/conversation-chat/conversation-message/conversation-message-timestamp"
 import { ConversationMessageContextStoreProvider } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.store-context"
-import {
-  getConversationNextMessage,
-  getConversationPreviousMessage,
-  isAnActualMessage,
-  useMessageHasReactions,
-} from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
+import { isAnActualMessage } from "@/features/conversation/conversation-chat/conversation-message/utils/conversation-message-assertions"
 import { ConversationMessagesList } from "@/features/conversation/conversation-chat/conversation-messages-list.component"
 import { useConversationMessagesQuery } from "@/features/conversation/conversation-chat/conversation-messages.query"
 import { useConversationIsUnread } from "@/features/conversation/conversation-list/hooks/use-conversation-is-unread"
@@ -34,6 +29,9 @@ import {
   IConversationMessage,
   IConversationMessageId,
 } from "./conversation-message/conversation-message.types"
+import { useMessageHasReactions } from "./conversation-message/hooks/use-message-has-reactions"
+import { getConversationNextMessage } from "./conversation-message/utils/get-conversation-next-message"
+import { getConversationPreviousMessage } from "./conversation-message/utils/get-conversation-previous-message"
 import { DmConversationEmpty, GroupConversationEmpty } from "./conversation.screen"
 import { useCurrentConversationTopic } from "./conversation.store-context"
 

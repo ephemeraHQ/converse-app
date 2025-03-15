@@ -12,7 +12,7 @@ import { useConversationStore } from "@/features/conversation/conversation-chat/
 import { getConversationQueryData } from "@/features/conversation/queries/conversation.query"
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm"
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group"
-import { useDmPeerInboxIdQuery } from "@/features/dm/use-dm-peer-inbox-id-query"
+import { useDmPeerInboxIdQuery } from "@/features/dm/dm-peer-inbox-id.query"
 import { useGroupMembersQuery } from "@/features/groups/group-members.query"
 import { useGroupName } from "@/features/groups/hooks/use-group-name"
 import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
@@ -28,7 +28,7 @@ export function useConversationScreenHeader() {
   const isCreatingNewConversation = conversationStore.getState().isCreatingNewConversation
   const currentSender = useSafeCurrentSender()
   const conversation = getConversationQueryData({
-    inboxId: currentSender.inboxId,
+    clientInboxId: currentSender.inboxId,
     topic: conversationStore.getState().topic!,
   })
 

@@ -34,7 +34,7 @@ export const useDenyGroupMutation = (args: {
       return "denied"
     },
     onMutate: async () => {
-      const previousGroup = getGroupQueryData({ inboxId: clientInboxId, topic })
+      const previousGroup = getGroupQueryData({ clientInboxId: clientInboxId, topic })
 
       if (!previousGroup) {
         throw new Error("Previous group not found")
@@ -44,11 +44,11 @@ export const useDenyGroupMutation = (args: {
         consentState: "denied",
       })
 
-      setGroupQueryData({ inboxId: clientInboxId, topic, group: updatedGroup })
+      setGroupQueryData({ clientInboxId: clientInboxId, topic, group: updatedGroup })
 
       // Remove from main conversations list
       removeConversationFromAllowedConsentConversationsQuery({
-        inboxId: clientInboxId,
+        clientInboxId,
         topic: topic!,
       })
 
@@ -65,11 +65,11 @@ export const useDenyGroupMutation = (args: {
         return
       }
 
-      setGroupQueryData({ inboxId: clientInboxId, topic, group: context.previousGroup })
+      setGroupQueryData({ clientInboxId: clientInboxId, topic, group: context.previousGroup })
 
       // Add back to main conversations list
       addConversationToAllowedConsentConversationsQuery({
-        inboxId: clientInboxId,
+        clientInboxId,
         conversation: context.previousGroup,
       })
 

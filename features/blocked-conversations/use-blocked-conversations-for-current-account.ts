@@ -9,7 +9,7 @@ export const useBlockedConversationsForCurrentAccount = () => {
   const currentSender = useSafeCurrentSender()
 
   const { data } = useAllowedConsentConversationsQuery({
-    inboxId: currentSender.inboxId,
+    clientInboxId: currentSender.inboxId,
     caller: "useBlockedConversationsForCurrentAccount",
   })
 

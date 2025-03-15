@@ -22,7 +22,7 @@ export function useGroupNameMutation(args: {
 }) {
   const { topic, clientInboxId } = args
 
-  const { data: group } = useGroupQuery({ inboxId: clientInboxId, topic })
+  const { data: group } = useGroupQuery({ clientInboxId: clientInboxId, topic })
 
   return useMutation({
     mutationFn: async (name: string) => {
@@ -39,15 +39,15 @@ export function useGroupNameMutation(args: {
       return name
     },
     onMutate: async (name: string) => {
-      const previousGroup = getGroupQueryData({ inboxId: clientInboxId, topic })
+      const previousGroup = getGroupQueryData({ clientInboxId: clientInboxId, topic })
       const updates: Partial<IGroup> = { name }
 
       if (previousGroup) {
-        updateGroupQueryData({ inboxId: clientInboxId, topic, updates })
+        updateGroupQueryData({ clientInboxId: clientInboxId, topic, updates })
       }
 
       updateConversationInAllowedConsentConversationsQueryData({
-        inboxId: clientInboxId,
+        clientInboxId,
         topic,
         conversationUpdate: updates,
       })
@@ -61,9 +61,9 @@ export function useGroupNameMutation(args: {
 
       const updates: Partial<IGroup> = { name: previousGroup?.name ?? "" }
 
-      updateGroupQueryData({ inboxId: clientInboxId, topic, updates })
+      updateGroupQueryData({ clientInboxId: clientInboxId, topic, updates })
       updateConversationInAllowedConsentConversationsQueryData({
-        inboxId: clientInboxId,
+        clientInboxId,
         topic,
         conversationUpdate: updates,
       })

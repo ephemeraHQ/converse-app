@@ -66,7 +66,7 @@ const Content = memo(function Content() {
   )
 
   const { data: conversation, isLoading: isLoadingConversation } = useConversationQuery({
-    inboxId: currentSender.inboxId,
+    clientInboxId: currentSender.inboxId,
     topic: topic!, // ! is okay because we have enabled in useQuery
     caller: "Conversation screen",
   })

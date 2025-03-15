@@ -64,10 +64,7 @@ const defaultRenderItem: ListRenderItem<IConversation> = ({ item }) => {
 }
 
 function keyExtractor(item: IConversation) {
-  if ("lastMessage" in item) {
-    return item.topic
-  }
-  return typeof item === "string" ? item : item.topic + "v2"
+  return item.topic
 }
 
 function useRefreshHandler(args: { onRefetch?: () => Promise<void> }) {

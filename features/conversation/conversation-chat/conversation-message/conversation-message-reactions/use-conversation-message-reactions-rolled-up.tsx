@@ -1,9 +1,9 @@
 import { useMemo } from "react"
 import { isCurrentSender } from "@/features/authentication/multi-inbox.store"
-import { useConversationMessageReactions } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
 import { usePreferredDisplayInfoBatch } from "@/features/preferred-display-info/use-preferred-display-info-batch"
 import { ObjectTyped } from "@/utils/object-typed"
 import { IConversationMessageId } from "../conversation-message.types"
+import { useConversationMessageReactions } from "../hooks/use-conversation-message-reactions"
 import { RolledUpReactions, SortedReaction } from "./conversation-message-reactions.types"
 
 export function useConversationMessageReactionsRolledUp(args: {

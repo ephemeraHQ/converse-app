@@ -14,7 +14,7 @@ import {
   isReplyMessage,
   isStaticAttachmentMessage,
   isTextMessage,
-} from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
+} from "@/features/conversation/conversation-chat/conversation-message/utils/conversation-message-assertions"
 import { IConversationMessage } from "./conversation-message.types"
 
 export const ConversationMessage = memo(

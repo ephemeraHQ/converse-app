@@ -1,10 +1,28 @@
 import { useQuery } from "@tanstack/react-query"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { IConversationTopic } from "@/features/conversation/conversation.types"
+import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group"
 import { getGroupMembersQueryOptions } from "@/features/groups/group-members.query"
 import { useGroupNameMutation } from "@/features/groups/group-name.mutation"
 import { getGroupQueryOptions } from "@/features/groups/group.query"
+import { getPreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
 import { usePreferredDisplayInfoBatch } from "@/features/preferred-display-info/use-preferred-display-info-batch"
+import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
+
+export function getGroupNameForGroupMembers(args: { memberInboxIds: IXmtpInboxId[] }) {
+  const { memberInboxIds } = args
+
+  const groupName = getGroupNameForMemberNames({
+    names: memberInboxIds.map(
+      (inboxId) =>
+        getPreferredDisplayInfo({
+          inboxId,
+        }).displayName ?? "",
+    ),
+  })
+
+  return groupName
+}
 
 export const useGroupName = (args: { conversationTopic: IConversationTopic }) => {
   const { conversationTopic } = args
@@ -16,8 +34,20 @@ export const useGroupName = (args: { conversationTopic: IConversationTopic }) =>
     isLoading: groupNameLoading,
     isError,
   } = useQuery({
-    ...getGroupQueryOptions({ inboxId: currentSenderInboxId, topic: conversationTopic }),
-    select: (group) => group?.name ?? null,
+    ...getGroupQueryOptions({
+      clientInboxId: currentSenderInboxId,
+      topic: conversationTopic,
+      caller: "useGroupName",
+    }),
+    select: (group) => {
+      if (!group) {
+        return null
+      }
+      if (!isConversationGroup(group)) {
+        throw new Error("Expected group conversation but received different type")
+      }
+      return group.name
+    },
   })
 
   const { data: groupMembers, isLoading: isLoadingGroupMembers } = useQuery({
@@ -32,7 +62,9 @@ export const useGroupName = (args: { conversationTopic: IConversationTopic }) =>
     xmtpInboxIds: groupMembers?.ids ?? [],
   })
 
-  const names = preferredDisplayData?.map((profile) => profile?.displayName)
+  const memberPreferedDisplayNames = preferredDisplayData?.map(
+    (profile) => profile?.displayName || "",
+  )
 
   const { mutateAsync } = useGroupNameMutation({
     clientInboxId: currentSenderInboxId,
@@ -40,7 +72,7 @@ export const useGroupName = (args: { conversationTopic: IConversationTopic }) =>
   })
 
   return {
-    groupName: groupName || names.join(", "),
+    groupName: groupName || getGroupNameForMemberNames({ names: memberPreferedDisplayNames }),
     isLoading:
       groupNameLoading ||
       isLoadingGroupMembers ||
@@ -48,4 +80,8 @@ export const useGroupName = (args: { conversationTopic: IConversationTopic }) =>
     isError,
     updateGroupName: mutateAsync,
   }
+}
+
+function getGroupNameForMemberNames(args: { names: string[] }) {
+  return args.names.join(", ")
 }

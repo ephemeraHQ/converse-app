@@ -2,61 +2,67 @@ import { IXmtpConversationId, IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { useMutation } from "@tanstack/react-query"
 import { IConversationTopic } from "@/features/conversation/conversation.types"
 import { useGroupQuery } from "@/features/groups/group.query"
-import { removeXmtpGroupMembers } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-group"
+import { removeSuperAdminFromXmtpGroup } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-group"
 import { captureError } from "@/utils/capture-error"
 import {
   cancelGroupMembersQuery,
   getGroupMembersQueryData,
   invalidateGroupMembersQuery,
-  removeMembersFromGroupQueryData,
   setGroupMembersQueryData,
-} from "../group-members.query"
+} from "../../group-members.query"
 
-export const useRemoveGroupMembersFromGroupMutation = (args: {
-  topic: IConversationTopic
+// import { refreshGroup } from "../utils/xmtpRN/conversations";
+
+export const useRevokeSuperAdminMutation = (args: {
   clientInboxId: IXmtpInboxId
+  topic: IConversationTopic
 }) => {
-  const { topic, clientInboxId } = args
+  const { clientInboxId, topic } = args
 
-  const { data: group } = useGroupQuery({ inboxId: clientInboxId, topic })
+  const { data: group } = useGroupQuery({ clientInboxId: clientInboxId, topic })
 
   return useMutation({
-    mutationFn: async (inboxIds: IXmtpInboxId[]) => {
+    mutationFn: async (inboxId: IXmtpInboxId) => {
       if (!group) {
-        throw new Error("No group found to remove members from")
+        throw new Error("No group found to revoke super admin from")
       }
-      return removeXmtpGroupMembers({
+      return removeSuperAdminFromXmtpGroup({
         clientInboxId,
         groupId: group.id as unknown as IXmtpConversationId,
-        inboxIds,
+        superAdminInboxId: inboxId,
       })
     },
-    onMutate: async (inboxIds: IXmtpInboxId[]) => {
+    onMutate: async (inboxId: IXmtpInboxId) => {
       if (!topic) {
         return
       }
 
-      cancelGroupMembersQuery({ clientInboxId, topic }).catch(captureError)
+      cancelGroupMembersQuery({ clientInboxId: inboxId, topic }).catch(captureError)
 
       const previousGroupMembers = getGroupMembersQueryData({
-        clientInboxId,
+        clientInboxId: inboxId,
         topic,
       })
-
       if (!previousGroupMembers) {
         return
       }
 
-      removeMembersFromGroupQueryData({
-        clientInboxId,
+      const newMembers = { ...previousGroupMembers }
+      if (!newMembers.byId[inboxId]) {
+        return
+      }
+
+      newMembers.byId[inboxId].permission = "member"
+      setGroupMembersQueryData({
+        clientInboxId: inboxId,
         topic,
-        memberInboxIds: inboxIds,
+        members: newMembers,
       })
 
       return { previousGroupMembers }
     },
-    onError: (error, _variables, context) => {
-      if (!context?.previousGroupMembers) {
+    onError: (_error, _variables, context) => {
+      if (!context?.previousGroupMembers || !topic) {
         return
       }
 

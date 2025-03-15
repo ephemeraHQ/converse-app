@@ -17,9 +17,9 @@ export type IConversationBase = {
   id: IConversationId
   createdAt: number
   type: IConversationType
-  lastMessage?: IConversationMessage
   topic: IConversationTopic
   consentState: IConsentState
+  lastMessage: IConversationMessage | undefined
 }
 
 export type IConversation = IGroup | IDm

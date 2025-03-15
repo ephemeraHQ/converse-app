@@ -19,13 +19,13 @@ type IGroupMembersArgsStrict = {
 
 type IGroupMembersArgsWithCaller = IGroupMembersArgsStrict & { caller: string }
 
-type IGroupMembersEntity = Awaited<ReturnType<typeof fetchGroupMembers>>
+type IGroupMembersEntity = Awaited<ReturnType<typeof getGroupMembers>>
 
-const fetchGroupMembers = async (args: IGroupMembersArgsWithCaller) => {
+const getGroupMembers = async (args: IGroupMembersArgsWithCaller) => {
   const { clientInboxId, topic, caller } = args
 
   const conversation = await getOrFetchConversationQuery({
-    inboxId: clientInboxId,
+    clientInboxId,
     topic,
     caller,
   })
@@ -53,7 +53,7 @@ export const getGroupMembersQueryOptions = (
     // eslint-disable-next-line @tanstack/query/exhaustive-deps
     queryKey: ["group-members", args.clientInboxId, args.topic],
     queryFn: enabled
-      ? () => fetchGroupMembers({ clientInboxId, topic, caller: caller ?? "unknown" })
+      ? () => getGroupMembers({ clientInboxId, topic, caller: caller ?? "unknown" })
       : skipToken,
     enabled,
     /**

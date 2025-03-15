@@ -1,13 +1,9 @@
 import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { keepPreviousData, queryOptions, useQuery } from "@tanstack/react-query"
-import {
-  getSafeCurrentSender,
-  useSafeCurrentSender,
-} from "@/features/authentication/multi-inbox.store"
+import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { getAllowedConsentConversationsQueryData } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm"
-import { ensureDmPeerInboxIdQueryData } from "@/features/dm/use-dm-peer-inbox-id-query"
-import { ensureGroupMembersQueryData } from "@/features/groups/group-members.query"
+import { ensureDmPeerInboxIdQueryData } from "@/features/dm/dm-peer-inbox-id.query"
 import { ensureProfileQueryData } from "@/features/profiles/profiles.query"
 import { doesSocialProfilesMatchTextQuery } from "@/features/profiles/utils/does-social-profiles-match-text-query"
 import { ensureSocialProfilesForAddressQuery } from "@/features/social-profiles/social-profiles.query"
@@ -40,7 +36,7 @@ async function searchExistingDms(args: { searchQuery: string; inboxId: IXmtpInbo
   const { searchQuery, inboxId } = args
   const currentSender = getSafeCurrentSender()
   const conversations = getAllowedConsentConversationsQueryData({
-    inboxId: currentSender.inboxId,
+    clientInboxId: currentSender.inboxId,
   })
   const normalizedSearchQuery = searchQuery.toLowerCase().trim()
 
@@ -60,31 +56,18 @@ async function searchExistingDms(args: { searchQuery: string; inboxId: IXmtpInbo
     dmConversations.map(async (conversation) => {
       try {
         // Get peer's inbox ID from either group members or DM peer data, using whichever returns first
-        const [peerInboxId, members] = await Promise.race([
-          ensureGroupMembersQueryData({
-            caller: "searchExistingDms",
-            clientInboxId: currentSender.inboxId,
-            topic: conversation.topic,
-          }).then((members) => {
-            const otherId = members.ids.find((id) => id !== inboxId)
-            return [otherId, members] as const
-          }),
+        const peerInboxId = await ensureDmPeerInboxIdQueryData({
+          inboxId: currentSender.inboxId,
+          topic: conversation.topic,
+          caller: "searchExistingDms",
+        })
 
-          ensureDmPeerInboxIdQueryData({
-            inboxId: currentSender.inboxId,
-            topic: conversation.topic,
-            caller: "searchExistingDms",
-          }).then((peerId) => [peerId, null] as const),
-        ])
-
-        const otherMemberInboxId = peerInboxId || members?.ids.find((id) => id !== inboxId)
-
-        if (!otherMemberInboxId) {
+        if (!peerInboxId) {
           throw new Error("No other member inbox Id found for conversation DM")
         }
 
         const profile = await ensureProfileQueryData({
-          xmtpId: otherMemberInboxId,
+          xmtpId: peerInboxId,
         })
 
         const hasProfileMatch = profile?.name?.toLowerCase().includes(normalizedSearchQuery)

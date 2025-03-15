@@ -18,7 +18,7 @@ type IArgs = {
 
 export function useGroupDescriptionMutation(args: IArgs) {
   const { inboxId, topic } = args
-  const { data: group } = useGroupQuery({ inboxId, topic })
+  const { data: group } = useGroupQuery({ clientInboxId: inboxId, topic })
 
   return useMutation({
     mutationFn: async (description: string) => {
@@ -34,15 +34,15 @@ export function useGroupDescriptionMutation(args: IArgs) {
       return description
     },
     onMutate: async (description: string) => {
-      const previousGroup = getGroupQueryData({ inboxId, topic })
+      const previousGroup = getGroupQueryData({ clientInboxId: inboxId, topic })
       const updates: Partial<IGroup> = { description }
 
       if (previousGroup) {
-        updateGroupQueryData({ inboxId, topic, updates })
+        updateGroupQueryData({ clientInboxId: inboxId, topic, updates })
       }
 
       updateConversationInAllowedConsentConversationsQueryData({
-        inboxId,
+        clientInboxId: inboxId,
         topic,
         conversationUpdate: updates,
       })
@@ -58,9 +58,9 @@ export function useGroupDescriptionMutation(args: IArgs) {
         description: previousGroup?.description ?? "",
       }
 
-      updateGroupQueryData({ inboxId, topic, updates })
+      updateGroupQueryData({ clientInboxId: inboxId, topic, updates })
       updateConversationInAllowedConsentConversationsQueryData({
-        inboxId,
+        clientInboxId: inboxId,
         topic,
         conversationUpdate: updates,
       })

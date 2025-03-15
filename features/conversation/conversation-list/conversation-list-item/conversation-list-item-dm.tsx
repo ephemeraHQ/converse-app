@@ -13,7 +13,7 @@ import { useMessagePlainText } from "@/features/conversation/conversation-list/h
 import { useRestoreConversation } from "@/features/conversation/conversation-list/hooks/use-restore-conversation"
 import { useToggleReadStatus } from "@/features/conversation/conversation-list/hooks/use-toggle-read-status"
 import { useConversationQuery } from "@/features/conversation/queries/conversation.query"
-import { useDmPeerInboxIdQuery } from "@/features/dm/use-dm-peer-inbox-id-query"
+import { useDmPeerInboxIdQuery } from "@/features/dm/dm-peer-inbox-id.query"
 import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
 import { useFocusRerender } from "@/hooks/use-focus-rerender"
 import { navigate } from "@/navigation/navigation.utils"
@@ -39,7 +39,7 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
 
   // Conversation related hooks
   const { data: conversation } = useConversationQuery({
-    inboxId: currentSender.inboxId,
+    clientInboxId: currentSender.inboxId,
     topic: conversationTopic,
     caller: "Conversation List Item Dm",
   })

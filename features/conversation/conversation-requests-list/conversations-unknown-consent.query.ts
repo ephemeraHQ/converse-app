@@ -1,6 +1,6 @@
 import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { queryOptions, skipToken } from "@tanstack/react-query"
-import { IConversation , IConversationTopic } from "@/features/conversation/conversation.types"
+import { IConversation, IConversationTopic } from "@/features/conversation/conversation.types"
 import { ensureConversationSyncAllQuery } from "@/features/conversation/queries/conversation-sync-all.query"
 import { setConversationQueryData } from "@/features/conversation/queries/conversation.query"
 import { convertXmtpConversationToConvosConversation } from "@/features/conversation/utils/convert-xmtp-conversation-to-convos"
@@ -48,7 +48,7 @@ async function getUnknownConversations(args: { inboxId: IXmtpInboxId }) {
   // For now conversations have all the same properties as one conversation
   for (const conversation of convosConversations) {
     setConversationQueryData({
-      inboxId,
+      clientInboxId: inboxId,
       topic: conversation.topic,
       conversation,
     })
