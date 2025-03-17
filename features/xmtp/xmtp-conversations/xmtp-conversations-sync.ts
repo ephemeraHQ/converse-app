@@ -3,7 +3,7 @@ import { config } from "@/config"
 import { IXmtpConversationId, IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
 import { XMTPError } from "@/utils/error"
-import { getXmtpClientByInboxId } from "../xmtp-client/xmtp-client.service"
+import { getXmtpClientByInboxId } from "../xmtp-client/xmtp-client"
 
 export async function syncAllXmtpConversations(args: {
   clientInboxId: IXmtpInboxId

@@ -58,13 +58,13 @@ export function ConversationList(props: IConversationListProps) {
 const defaultRenderItem: ListRenderItem<IConversation> = ({ item }) => {
   const conversation = item
   if (isConversationGroup(conversation)) {
-    return <ConversationListItemGroup conversationTopic={conversation.topic} />
+    return <ConversationListItemGroup xmtpConversationId={conversation.xmtpId} />
   }
-  return <ConversationListItemDm conversationTopic={conversation.topic} />
+  return <ConversationListItemDm xmtpConversationId={conversation.xmtpId} />
 }
 
 function keyExtractor(item: IConversation) {
-  return item.topic
+  return item.xmtpTopic
 }
 
 function useRefreshHandler(args: { onRefetch?: () => Promise<void> }) {

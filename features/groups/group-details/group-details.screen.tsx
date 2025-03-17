@@ -19,19 +19,19 @@ import { useGroupDetailsScreenHeader } from "./group-details.screen-header"
 export const GroupDetailsScreen = memo(function GroupDetailsScreen(
   props: NativeStackScreenProps<NavigationParamList, "GroupDetails">,
 ) {
-  const { groupTopic: conversationTopic } = props.route.params
+  const { xmtpConversationId } = props.route.params
 
   const { theme } = useAppTheme()
 
   const currentSender = useSafeCurrentSender()
 
   const { groupName } = useGroupName({
-    conversationTopic,
+    xmtpConversationId,
   })
 
   const { data: group } = useGroupQuery({
     clientInboxId: currentSender.inboxId,
-    topic: conversationTopic,
+    xmtpConversationId,
   })
 
   useGroupDetailsScreenHeader()
@@ -61,7 +61,7 @@ export const GroupDetailsScreen = memo(function GroupDetailsScreen(
           rowGap: theme.spacing.sm,
         }}
       >
-        <GroupAvatar groupTopic={conversationTopic} size="xxl" />
+        <GroupAvatar xmtpConversationId={xmtpConversationId} size="xxl" />
 
         <VStack style={{ alignItems: "center", rowGap: theme.spacing.xxs }}>
           <Text preset="bigBold" style={{ textAlign: "center" }}>
@@ -77,7 +77,7 @@ export const GroupDetailsScreen = memo(function GroupDetailsScreen(
       <Separator />
 
       {/* Members Section */}
-      <GroupDetailsMembersList topic={conversationTopic} />
+      <GroupDetailsMembersList xmtpConversationId={xmtpConversationId} />
 
       <Separator />
 

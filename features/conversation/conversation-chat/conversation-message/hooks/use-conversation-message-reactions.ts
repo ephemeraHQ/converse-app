@@ -1,21 +1,23 @@
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
-import { IConversationMessageId } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.types"
 import { useConversationMessagesQuery } from "@/features/conversation/conversation-chat/conversation-messages.query"
-import { useCurrentConversationTopicSafe } from "@/features/conversation/conversation-chat/conversation.store-context"
+import { useCurrentXmtpConversationIdSafe } from "@/features/conversation/conversation-chat/conversation.store-context"
+import { IXmtpMessageId } from "@/features/xmtp/xmtp.types"
 
-export function useConversationMessageReactions(messageId: IConversationMessageId) {
+export function useConversationMessageReactions(xmtpMessageId: IXmtpMessageId) {
   const currentSender = getSafeCurrentSender()
-  const topic = useCurrentConversationTopicSafe()
+  const xmtpConversationId = useCurrentXmtpConversationIdSafe()
 
   const { data: messages } = useConversationMessagesQuery({
     clientInboxId: currentSender.inboxId,
-    topic,
+    xmtpConversationId,
     caller: "useConversationMessageReactions",
   })
 
+  const reactions = messages?.reactions[xmtpMessageId]
+
   // TODO: Add another fallback query to fetch single message reactions. Coming in the SDK later
   return {
-    bySender: messages?.reactions[messageId]?.bySender,
-    byReactionContent: messages?.reactions[messageId]?.byReactionContent,
+    bySender: reactions?.bySender,
+    byReactionContent: reactions?.byReactionContent,
   }
 }

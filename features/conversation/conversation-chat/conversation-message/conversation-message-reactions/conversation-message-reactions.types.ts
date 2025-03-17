@@ -1,5 +1,5 @@
+import { IXmtpMessageId } from "@/features/xmtp/xmtp.types"
 import { Nullable } from "@/types/general"
-import { IConversationMessageId } from "../conversation-message.types"
 
 /**
  * Aggregated reaction data including top emojis, total count, and detailed breakdown.
@@ -9,7 +9,7 @@ export type RolledUpReactions = {
   userReacted: boolean
   preview: ReactionPreview[]
   detailed: SortedReaction[]
-  messageId: IConversationMessageId
+  messageId: IXmtpMessageId
 }
 
 /**

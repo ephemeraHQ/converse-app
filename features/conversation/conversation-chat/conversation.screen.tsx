@@ -27,13 +27,14 @@ import {
   ConversationStoreProvider,
   useConversationStore,
   useConversationStoreContext,
+  useCurrentXmtpConversationIdSafe,
 } from "./conversation.store-context"
 
 export const ConversationScreen = memo(function ConversationScreen(
   props: NativeStackScreenProps<NavigationParamList, "Conversation">,
 ) {
   const {
-    topic,
+    xmtpConversationId,
     composerTextPrefill = "",
     searchSelectedUserInboxIds = [],
     isNew = false,
@@ -42,7 +43,7 @@ export const ConversationScreen = memo(function ConversationScreen(
   return (
     <Screen contentContainerStyle={$globalStyles.flex1}>
       <ConversationStoreProvider
-        topic={topic ?? null}
+        xmtpConversationId={xmtpConversationId ?? null}
         isCreatingNewConversation={isNew}
         searchSelectedUserInboxIds={searchSelectedUserInboxIds}
       >
@@ -60,21 +61,23 @@ const Content = memo(function Content() {
   const { theme } = useAppTheme()
 
   const currentSender = useSafeCurrentSender()
-  const topic = useConversationStoreContext((state) => state.topic)
+  const xmtpConversationId = useCurrentXmtpConversationIdSafe()
   const isCreatingNewConversation = useConversationStoreContext(
     (state) => state.isCreatingNewConversation,
   )
 
   const { data: conversation, isLoading: isLoadingConversation } = useConversationQuery({
     clientInboxId: currentSender.inboxId,
-    topic: topic!, // ! is okay because we have enabled in useQuery
+    xmtpConversationId: xmtpConversationId,
     caller: "Conversation screen",
   })
 
   useRefetchQueryOnRefocus(
-    topic
-      ? getConversationMessagesQueryOptions({ clientInboxId: currentSender.inboxId, topic })
-          .queryKey
+    xmtpConversationId
+      ? getConversationMessagesQueryOptions({
+          clientInboxId: currentSender.inboxId,
+          xmtpConversationId,
+        }).queryKey
       : undefined,
   )
 

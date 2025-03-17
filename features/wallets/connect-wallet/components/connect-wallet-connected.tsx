@@ -31,7 +31,7 @@ export const WalletConnected = memo(function WalletConnected(props: IWalletConne
   // Check if the wallet is already linked to an inbox
   const { data: activeWalletInboxId, isLoading: isLoadingInboxId } =
     useXmtpInboxIdFromEthAddressQuery({
-      clientEthAddress: currentSender.ethereumAddress,
+      clientInboxId: currentSender.inboxId,
       targetEthAddress: walletAddress,
     })
 

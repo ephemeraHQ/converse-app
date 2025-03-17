@@ -17,26 +17,26 @@ import { conversationListDefaultProps } from "@/features/conversation/conversati
 import { useConversationMessagesQuery } from "@/features/conversation/conversation-chat/conversation-messages.query"
 import { ConversationStoreProvider } from "@/features/conversation/conversation-chat/conversation.store-context"
 import { useConversationQuery } from "@/features/conversation/queries/conversation.query"
+import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 import { $globalStyles } from "@/theme/styles"
 import { useMessageHasReactions } from "../conversation-chat/conversation-message/hooks/use-message-has-reactions"
-import { IConversationTopic } from "../conversation.types"
 
 type ConversationPreviewProps = {
-  topic: IConversationTopic
+  xmtpConversationId: IXmtpConversationId
 }
 
-export const ConversationPreview = ({ topic }: ConversationPreviewProps) => {
+export const ConversationPreview = ({ xmtpConversationId }: ConversationPreviewProps) => {
   const currentSender = getSafeCurrentSender()
 
   const { data: messages, isLoading: isLoadingMessages } = useConversationMessagesQuery({
     clientInboxId: currentSender.inboxId,
-    topic,
+    xmtpConversationId,
     caller: "Conversation Preview",
   })
 
   const { data: conversation, isLoading: isLoadingConversation } = useConversationQuery({
     clientInboxId: currentSender.inboxId,
-    topic,
+    xmtpConversationId,
     caller: "Conversation Preview",
   })
 
@@ -59,7 +59,7 @@ export const ConversationPreview = ({ topic }: ConversationPreviewProps) => {
       ) : (
         // Shouldn't need this provider here but for now we need it because we use ConversationMessageGestures inside ConversationMessage
         <ConversationMessageContextMenuStoreProvider>
-          <ConversationStoreProvider topic={topic}>
+          <ConversationStoreProvider xmtpConversationId={xmtpConversationId}>
             {/* Using basic Flatlist instead of the Animated one to try to fix the context menu crashes https://github.com/dominicstop/react-native-ios-context-menu/issues/70 */}
             <FlatList
               {...conversationListDefaultProps}
@@ -96,7 +96,7 @@ const MessageWrapper = memo(function MessageWrapper({
   nextMessage: IConversationMessage | undefined
 }) {
   const hasReactions = useMessageHasReactions({
-    messageId: message.id,
+    xmtpMessageId: message.xmtpId,
   })
 
   return (

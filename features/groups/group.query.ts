@@ -1,55 +1,34 @@
 /**
- * useGroupQuery is derived from useConversationQuery. Like useDmQuery, maybe worth considering if we should just use useConversationQuery instead.
+ * This is derived from conversation.query.ts.
  */
-import type { IXmtpInboxId } from "@features/xmtp/xmtp.types"
-import { queryOptions, useQuery } from "@tanstack/react-query"
+import type { IXmtpConversationId, IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import { queryOptions, useQuery, UseQueryOptions } from "@tanstack/react-query"
 import {
+  ensureConversationQueryData,
   getConversationQueryData,
   getConversationQueryOptions,
-  getOrFetchConversationQuery,
+  invalidateConversationQuery,
   setConversationQueryData,
   updateConversationQueryData,
 } from "@/features/conversation/queries/conversation.query"
-import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group"
 import { IGroup, IGroupMember } from "@/features/groups/group.types"
-import type { IConversationTopic } from "../conversation/conversation.types"
 
 type IArgs = {
   clientInboxId: IXmtpInboxId
-  topic: IConversationTopic
+  xmtpConversationId: IXmtpConversationId
 }
 
 type IArgsWithCaller = IArgs & {
   caller: string
 }
 
-// async function getGroup(args: IArgs) {
-//   const { clientInboxId, topic } = args
-
-//   const group = await getOrFetchConversationQuery({
-//     clientInboxId,
-//     topic,
-//     caller: "getGroup",
-//   })
-
-//   if (!group) {
-//     return null
-//   }
-
-//   if (!isConversationGroup(group)) {
-//     throw new Error("Expected group conversation but received different type")
-//   }
-
-//   return group
-// }
-
 export function useGroupQuery(args: IArgs) {
-  const { clientInboxId, topic } = args
+  const { clientInboxId, xmtpConversationId } = args
 
   return useQuery(
     getGroupQueryOptions({
       clientInboxId,
-      topic,
+      xmtpConversationId,
       caller: "useGroupQuery",
     }),
   )
@@ -58,68 +37,45 @@ export function useGroupQuery(args: IArgs) {
 export function getGroupQueryData(args: IArgs) {
   return getConversationQueryData({
     clientInboxId: args.clientInboxId,
-    topic: args.topic,
+    xmtpConversationId: args.xmtpConversationId,
   }) as IGroup | null
 }
 
 export function setGroupQueryData(args: IArgs & { group: IGroup }) {
-  const { clientInboxId, topic, group } = args
+  const { clientInboxId, xmtpConversationId, group } = args
   setConversationQueryData({
     clientInboxId,
-    topic,
+    xmtpConversationId,
     conversation: group,
   })
 }
 
 export function getGroupQueryOptions(args: IArgsWithCaller) {
-  const { clientInboxId, topic, caller } = args
+  const { clientInboxId, xmtpConversationId, caller } = args
 
   return queryOptions({
-    // queryKey: ["group", clientInboxId, topic],
-    // enabled: !!topic && !!clientInboxId,
-    // meta: {
-    //   caller,
-    // },
-    // queryFn: () =>
-    //   getGroup({
-    //     clientInboxId,
-    //     topic,
-    //   }),
-    ...getConversationQueryOptions({
+    ...(getConversationQueryOptions({
       clientInboxId,
-      topic,
+      xmtpConversationId,
       caller,
-    }),
-    select: (data) => {
-      if (!data) {
-        return null
-      }
-      if (!isConversationGroup(data)) {
-        throw new Error("Expected group conversation but received different type")
-      }
-      return data
-    },
+    }) as UseQueryOptions<IGroup | null, Error, IGroup | null, string[]>),
   })
 }
 
 export function updateGroupQueryData(args: IArgs & { updates: Partial<IGroup> }) {
   updateConversationQueryData({
     clientInboxId: args.clientInboxId,
-    topic: args.topic,
+    xmtpConversationId: args.xmtpConversationId,
     conversationUpdate: args.updates,
   })
 }
 
 export function getOrFetchGroupQuery(args: IArgsWithCaller) {
-  return getOrFetchConversationQuery({
-    clientInboxId: args.clientInboxId,
-    topic: args.topic,
-    caller: args.caller,
-  })
+  return ensureConversationQueryData(args)
 }
 
 export function addGroupMemberToGroupQuery(args: IArgs & { member: IGroupMember }) {
-  const { clientInboxId, topic, member } = args
+  const { clientInboxId, xmtpConversationId, member } = args
 
   const currentGroup = getGroupQueryData(args)
 
@@ -129,16 +85,23 @@ export function addGroupMemberToGroupQuery(args: IArgs & { member: IGroupMember 
 
   setGroupQueryData({
     clientInboxId,
-    topic,
+    xmtpConversationId,
     group: {
       ...currentGroup,
-      members: [...currentGroup.members, member],
+      members: {
+        ...currentGroup.members,
+        byId: {
+          ...currentGroup.members.byId,
+          [member.inboxId]: member,
+        },
+        ids: [...currentGroup.members.ids, member.inboxId],
+      },
     },
   })
 }
 
 export function removeGroupMemberToGroupQuery(args: IArgs & { memberInboxId: IXmtpInboxId }) {
-  const { clientInboxId, topic, memberInboxId } = args
+  const { clientInboxId, xmtpConversationId, memberInboxId } = args
 
   const currentGroup = getGroupQueryData(args)
 
@@ -148,10 +111,24 @@ export function removeGroupMemberToGroupQuery(args: IArgs & { memberInboxId: IXm
 
   setGroupQueryData({
     clientInboxId,
-    topic,
+    xmtpConversationId,
     group: {
       ...currentGroup,
-      members: currentGroup.members.filter(({ inboxId }) => inboxId !== memberInboxId),
+      members: {
+        ...currentGroup.members,
+        byId: {
+          ...currentGroup.members.byId,
+          [memberInboxId]: undefined,
+        },
+      },
     },
   })
+}
+
+export function invalidateGroupQuery(args: IArgs) {
+  return invalidateConversationQuery(args)
+}
+
+export function ensureGroupQueryData(args: IArgsWithCaller) {
+  return ensureConversationQueryData(args)
 }

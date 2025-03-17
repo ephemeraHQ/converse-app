@@ -5,10 +5,10 @@ import {
   getConversationMetadataQueryData,
   updateConversationMetadataQueryData,
 } from "@/features/conversation/conversation-metadata/conversation-metadata.query"
-import { IConversationTopic } from "../conversation.types"
+import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 
-export function useMarkConversationAsUnread(args: { topic: IConversationTopic }) {
-  const { topic } = args
+export function useMarkConversationAsUnread(args: { xmtpConversationId: IXmtpConversationId }) {
+  const { xmtpConversationId } = args
 
   const currentSender = useSafeCurrentSender()
 
@@ -16,18 +16,18 @@ export function useMarkConversationAsUnread(args: { topic: IConversationTopic })
     mutationFn: async () => {
       await markConversationMetadataAsUnread({
         clientInboxId: currentSender.inboxId,
-        topic,
+        xmtpConversationId,
       })
     },
     onMutate: () => {
       const previousData = getConversationMetadataQueryData({
         clientInboxId: currentSender.inboxId,
-        topic,
+        xmtpConversationId,
       })
 
       updateConversationMetadataQueryData({
         clientInboxId: currentSender.inboxId,
-        topic,
+        xmtpConversationId,
         updateData: {
           unread: true,
         },
@@ -35,11 +35,11 @@ export function useMarkConversationAsUnread(args: { topic: IConversationTopic })
 
       return { previousData }
     },
-    onError: (error, _, context) => {
+    onError: (__, _, context) => {
       if (context?.previousData) {
         updateConversationMetadataQueryData({
           clientInboxId: currentSender.inboxId,
-          topic,
+          xmtpConversationId,
           updateData: context.previousData,
         })
       }

@@ -17,50 +17,46 @@ import {
 } from "@/features/conversation/conversation-chat/conversation-message/utils/conversation-message-assertions"
 import { IConversationMessage } from "./conversation-message.types"
 
-export const ConversationMessage = memo(
-  function ConversationMessage(props: { message: IConversationMessage }) {
-    const { message } = props
+export const ConversationMessage = memo(function ConversationMessage(props: {
+  message: IConversationMessage
+}) {
+  const { message } = props
 
-    if (isTextMessage(message)) {
-      return <MessageSimpleText message={message} />
-    }
+  if (isTextMessage(message)) {
+    return <MessageSimpleText message={message} />
+  }
 
-    if (isGroupUpdatedMessage(message)) {
-      return <ConversationMessageGroupUpdate message={message} />
-    }
+  if (isGroupUpdatedMessage(message)) {
+    return <ConversationMessageGroupUpdate message={message} />
+  }
 
-    if (isReplyMessage(message)) {
-      return <MessageReply message={message} />
-    }
+  if (isReplyMessage(message)) {
+    return <MessageReply message={message} />
+  }
 
-    if (isRemoteAttachmentMessage(message)) {
-      return <ConversationMessageRemoteAttachment message={message} />
-    }
+  if (isRemoteAttachmentMessage(message)) {
+    return <ConversationMessageRemoteAttachment message={message} />
+  }
 
-    if (isStaticAttachmentMessage(message)) {
-      return <ConversationMessageStaticAttachment message={message} />
-    }
+  if (isStaticAttachmentMessage(message)) {
+    return <ConversationMessageStaticAttachment message={message} />
+  }
 
-    if (isReactionMessage(message)) {
-      // Handle in message
-      return null
-    }
-
-    if (isReadReceiptMessage(message)) {
-      // Not handled here
-      return null
-    }
-
-    if (isMultiRemoteAttachmentMessage(message)) {
-      return <MessageMultiRemoteAttachment message={message} />
-    }
-
-    const _ensureNever: never = message
-
+  if (isReactionMessage(message)) {
+    // Handle in message
     return null
-  },
-  // For now it's okay. For performance. A message shouldn't change
-  (prevProps, nextProps) => {
-    return prevProps.message.id === nextProps.message.id
-  },
-)
+  }
+
+  if (isReadReceiptMessage(message)) {
+    // Not handled here
+    return null
+  }
+
+  if (isMultiRemoteAttachmentMessage(message)) {
+    return <MessageMultiRemoteAttachment message={message} />
+  }
+
+  const _ensureNever: never = message
+
+  return null
+})

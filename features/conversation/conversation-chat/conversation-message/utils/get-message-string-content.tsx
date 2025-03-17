@@ -1,73 +1,44 @@
-import { IConversationMessage } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.types"
+import { IConversationMessageContent } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.types"
 import {
-  isGroupUpdatedMessage,
-  isReactionMessage,
-  isRemoteAttachmentMessage,
-  isReplyMessage,
-  isStaticAttachmentMessage,
-  isTextMessage,
   messageContentIsGroupUpdated,
   messageContentIsMultiRemoteAttachment,
+  messageContentIsReaction,
   messageContentIsRemoteAttachment,
+  messageContentIsReply,
   messageContentIsStaticAttachment,
   messageContentIsText,
 } from "@/features/conversation/conversation-chat/conversation-message/utils/conversation-message-assertions"
 
-export function getMessageStringContent(message: IConversationMessage) {
-  const content = message.content
-
-  if (typeof content === "string") {
-    return content
+export function getMessageContentStringValue(content: IConversationMessageContent) {
+  if (messageContentIsText(content)) {
+    return content.text
   }
 
-  if (isTextMessage(message)) {
-    return message.content.text
+  if (messageContentIsRemoteAttachment(content)) {
+    return content.url
   }
 
-  if (isRemoteAttachmentMessage(message)) {
-    return message.content.url
+  if (messageContentIsStaticAttachment(content)) {
+    content.filename
+    return content.filename
   }
 
-  if (isStaticAttachmentMessage(message)) {
-    return message.content.filename
+  if (messageContentIsReaction(content)) {
+    return `${content.action} "${content.content}"`
   }
 
-  if (isReactionMessage(message)) {
-    return message.content.content
-  }
-
-  if (isReplyMessage(message)) {
-    const replyContent = message.content
-    if (messageContentIsText(replyContent)) {
-      return replyContent.text
-    }
-
-    if (messageContentIsRemoteAttachment(replyContent)) {
-      return replyContent.url
-    }
-
-    if (messageContentIsStaticAttachment(replyContent)) {
-      return replyContent.filename
-    }
-
-    if (messageContentIsGroupUpdated(replyContent)) {
-      return "Group updated"
-    }
-
-    if (messageContentIsRemoteAttachment(replyContent)) {
-      return replyContent.url
-    }
-
-    if (messageContentIsMultiRemoteAttachment(replyContent)) {
-      return "Multi remote attachment"
-    }
-
-    return ""
-  }
-
-  if (isGroupUpdatedMessage(message)) {
+  if (messageContentIsGroupUpdated(content)) {
     return "Group updated"
   }
 
-  return ""
+  if (messageContentIsMultiRemoteAttachment(content)) {
+    return "Multi remote attachment"
+  }
+
+  if (messageContentIsReply(content)) {
+    return getMessageContentStringValue(content.content)
+  }
+
+  const _exhaustiveCheck: never = content
+  throw new Error(`Unhandled message content type: ${_exhaustiveCheck}`)
 }

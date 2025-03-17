@@ -1,6 +1,6 @@
-import { IXmtpInboxId , IXmtpConversationWithCodecs } from "@features/xmtp/xmtp.types"
+import { IXmtpConversationWithCodecs, IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { xmtpLogger } from "@utils/logger"
-import { getXmtpClientByInboxId } from "../xmtp-client/xmtp-client.service"
+import { getXmtpClientByInboxId } from "../xmtp-client/xmtp-client"
 
 export async function streamConversations(args: {
   inboxId: IXmtpInboxId

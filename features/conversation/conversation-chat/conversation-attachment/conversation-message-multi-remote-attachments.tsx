@@ -40,7 +40,7 @@ export const MessageMultiRemoteAttachment = memo(function MessageMultiRemoteAtta
           }}
         >
           <AttachmentRemoteImage
-            messageId={message.id}
+            xmtpMessageId={message.xmtpId}
             remoteMessageContent={attachment}
             fitAspectRatio
           />

@@ -20,7 +20,7 @@ import "expo-dev-client"
 import React, { useEffect } from "react"
 import { GestureHandlerRootView } from "react-native-gesture-handler"
 import { KeyboardProvider } from "react-native-keyboard-controller"
-import { DevToolsBubble } from "react-native-react-query-devtools"
+// import { DevToolsBubble } from "react-native-react-query-devtools"
 import { SafeAreaProvider } from "react-native-safe-area-context"
 import { ThirdwebProvider } from "thirdweb/react"
 import { base } from "viem/chains"
@@ -67,15 +67,16 @@ export function App() {
       persistOptions={{
         persister: reactQueryPersister,
         maxAge: DEFAULT_GC_TIME,
+        buster: "v2",
         dehydrateOptions: {
           shouldDehydrateQuery(query) {
-            // Don't persist queries that are explicitly marked as non-persistent
-            // or queries that are in a pending/fetching state
-            return (
+            const shouldHydrate =
               query.meta?.persist !== false &&
               query.state.status !== "pending" &&
-              query.state.fetchStatus !== "fetching"
-            )
+              query.state.fetchStatus !== "fetching" &&
+              query.state.data !== null
+
+            return shouldHydrate
           },
         },
       }}
@@ -101,7 +102,7 @@ export function App() {
                           {/* <AuthenticateWithPasskeyProvider> */}
                           <AppNavigator />
                           {/* </AuthenticateWithPasskeyProvider> */}
-                          {__DEV__ && <DevToolsBubble />}
+                          {/* {__DEV__ && <DevToolsBubble />} */}
                           <Snackbars />
                           <ActionSheet />
                         </BottomSheetModalProvider>

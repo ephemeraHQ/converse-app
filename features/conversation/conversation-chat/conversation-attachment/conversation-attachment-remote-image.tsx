@@ -7,16 +7,14 @@ import prettyBytes from "pretty-bytes"
 import { memo } from "react"
 import { Image } from "@/design-system/image"
 import { AttachmentLoading } from "@/features/conversation/conversation-chat/conversation-attachment/conversation-attachment-loading"
+import { IXmtpMessageId } from "@/features/xmtp/xmtp.types"
 import { useAppTheme } from "@/theme/use-app-theme"
-import {
-  IConversationMessageId,
-  IConversationMessageRemoteAttachmentContent,
-} from "../conversation-message/conversation-message.types"
+import { IConversationMessageRemoteAttachmentContent } from "../conversation-message/conversation-message.types"
 import { useRemoteAttachmentQuery } from "./conversation-attachment.query"
 import { ConversationMessageAttachmentContainer } from "./conversation-message-attachment-container"
 
 type IAttachmentRemoteImageProps = {
-  messageId: IConversationMessageId
+  xmtpMessageId: IXmtpMessageId
   remoteMessageContent: IConversationMessageRemoteAttachmentContent
   fitAspectRatio?: boolean
   containerProps?: IVStackProps
@@ -25,7 +23,7 @@ type IAttachmentRemoteImageProps = {
 export const AttachmentRemoteImage = memo(function AttachmentRemoteImage(
   props: IAttachmentRemoteImageProps,
 ) {
-  const { messageId, remoteMessageContent, fitAspectRatio, containerProps } = props
+  const { xmtpMessageId, remoteMessageContent, fitAspectRatio, containerProps } = props
 
   const { theme } = useAppTheme()
 
@@ -35,7 +33,7 @@ export const AttachmentRemoteImage = memo(function AttachmentRemoteImage(
     error: attachmentError,
     refetch: refetchAttachment,
   } = useRemoteAttachmentQuery({
-    messageId,
+    xmtpMessageId,
     content: remoteMessageContent,
   })
 

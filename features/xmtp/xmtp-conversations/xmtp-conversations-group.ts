@@ -14,7 +14,7 @@ import { PermissionPolicySet } from "@xmtp/react-native-sdk/build/lib/types/Perm
 import { config } from "@/config"
 import { captureError } from "@/utils/capture-error"
 import { XMTPError } from "@/utils/error"
-import { getXmtpClientByInboxId } from "../xmtp-client/xmtp-client.service"
+import { getXmtpClientByInboxId } from "../xmtp-client/xmtp-client"
 
 const defaultCreateGroupPermissionPolicySet: PermissionPolicySet = {
   addMemberPolicy: "allow",
@@ -158,10 +158,10 @@ export async function updateXmtpGroupDescription(args: {
 
 export async function updateXmtpGroupImage(args: {
   clientInboxId: IXmtpInboxId
-  groupId: IXmtpConversationId
+  xmtpConversationId: IXmtpConversationId
   imageUrl: string
 }) {
-  const { clientInboxId, groupId, imageUrl } = args
+  const { clientInboxId, xmtpConversationId, imageUrl } = args
 
   try {
     const client = await getXmtpClientByInboxId({
@@ -169,7 +169,7 @@ export async function updateXmtpGroupImage(args: {
     })
 
     const startTime = Date.now()
-    await updateGroupImageUrl(client.installationId, groupId, imageUrl)
+    await updateGroupImageUrl(client.installationId, xmtpConversationId, imageUrl)
     const duration = Date.now() - startTime
 
     if (duration > config.xmtp.maxMsUntilLogError) {

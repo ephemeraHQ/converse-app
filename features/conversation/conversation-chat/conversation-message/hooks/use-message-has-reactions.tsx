@@ -1,8 +1,8 @@
-import { IConversationMessageId } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.types"
+import { IXmtpMessageId } from "@/features/xmtp/xmtp.types"
 import { useConversationMessageReactions } from "./use-conversation-message-reactions"
 
-export function useMessageHasReactions(args: { messageId: IConversationMessageId }) {
-  const { messageId } = args
-  const reactions = useConversationMessageReactions(messageId)
+export function useMessageHasReactions(args: { xmtpMessageId: IXmtpMessageId }) {
+  const { xmtpMessageId } = args
+  const reactions = useConversationMessageReactions(xmtpMessageId)
   return Object.values(reactions.bySender || {}).some((reactions) => reactions.length > 0)
 }

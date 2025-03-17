@@ -20,7 +20,7 @@ export function useConversationComposerSend() {
   const send = useCallback(async () => {
     const { inputValue, replyingToMessageId, composerUploadedAttachments, composerMediaPreviews } =
       composerStore.getState()
-    const { topic, searchSelectedUserInboxIds } = conversationStore.getState()
+    const { xmtpConversationId, searchSelectedUserInboxIds } = conversationStore.getState()
 
     try {
       await waitUntilPromise({
@@ -48,12 +48,12 @@ export function useConversationComposerSend() {
       ...(composerUploadedAttachments.length === 1 ? [{ ...composerUploadedAttachments[0] }] : []),
     ]
 
-    if (topic) {
+    if (xmtpConversationId) {
       await sendMessage({
         contents: messageContents,
-        topic,
+        xmtpConversationId,
         ...(replyingToMessageId && {
-          replyMessageId: replyingToMessageId,
+          replyXmtpMessageId: replyingToMessageId,
         }),
       })
 
@@ -69,7 +69,7 @@ export function useConversationComposerSend() {
         })
 
       conversationStore.setState({
-        topic: createdConversation.topic,
+        xmtpConversationId: createdConversation.xmtpId,
         isCreatingNewConversation: false,
       })
     }

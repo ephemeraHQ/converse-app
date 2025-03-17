@@ -3,7 +3,6 @@ import { getAllowedConsentConversationsQueryOptions } from "@/features/conversat
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm"
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group"
 import { ensureDmPeerInboxIdQueryData } from "@/features/dm/dm-peer-inbox-id.query"
-import { ensureGroupMembersQueryData } from "@/features/groups/group-members.query"
 import { isSameInboxId } from "@/features/xmtp/xmtp-inbox-id/xmtp-inbox-id.utils"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
 
@@ -31,20 +30,9 @@ export async function findConversationByInboxIds(args: {
   const groups = conversations.filter(isConversationGroup)
   const dms = conversations.filter(isConversationDm)
 
-  // Make sure we have group members for all groups
-  const groupMembersData = await Promise.all(
-    groups.map((conversation) =>
-      ensureGroupMembersQueryData({
-        caller: "findConversationByMembers",
-        clientInboxId,
-        topic: conversation.topic,
-      }),
-    ),
-  )
-
   // Check if we have a group with all the selected inboxIds
-  const matchingGroup = groups.find((group, index) => {
-    const groupMembersInboxIds = groupMembersData[index]?.ids
+  const matchingGroup = groups.find((group) => {
+    const groupMembersInboxIds = group.members.ids
     if (!groupMembersInboxIds) return false
 
     // Need only groups with exactly the same number of members as inboxIds
@@ -66,7 +54,7 @@ export async function findConversationByInboxIds(args: {
     dms.map((dm) =>
       ensureDmPeerInboxIdQueryData({
         inboxId: clientInboxId,
-        topic: dm.topic,
+        xmtpConversationId: dm.xmtpId,
         caller: "findConversationByMembers",
       }),
     ),

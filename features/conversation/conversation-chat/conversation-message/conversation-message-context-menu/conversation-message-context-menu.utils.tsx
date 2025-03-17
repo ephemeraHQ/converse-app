@@ -9,22 +9,21 @@ import {
   isStaticAttachmentMessage,
 } from "@/features/conversation/conversation-chat/conversation-message/utils/conversation-message-assertions"
 import { getMessageFromConversationSafe } from "@/features/conversation/conversation-chat/conversation-message/utils/get-message-from-conversation"
-import { IConversationTopic } from "@/features/conversation/conversation.types"
+import { IXmtpConversationId, IXmtpMessageId } from "@/features/xmtp/xmtp.types"
 import { translate } from "@/i18n"
 import { captureErrorWithToast } from "@/utils/capture-error"
-import { IConversationMessageId } from "../conversation-message.types"
-import { getMessageStringContent } from "../utils/get-message-string-content"
+import { getMessageContentStringValue } from "../utils/get-message-string-content"
 
 export function useMessageContextMenuItems(args: {
-  messageId: IConversationMessageId
-  topic: IConversationTopic
+  messageId: IXmtpMessageId
+  xmtpConversationId: IXmtpConversationId
 }) {
-  const { messageId, topic } = args
+  const { messageId, xmtpConversationId } = args
 
   const currentSender = useSafeCurrentSender()
   const message = getMessageFromConversationSafe({
     messageId,
-    topic,
+    xmtpConversationId,
     clientInboxId: currentSender.inboxId,
   })
   const composerStore = useConversationComposerStore()
@@ -55,7 +54,7 @@ export function useMessageContextMenuItems(args: {
       label: translate("copy"),
       iconName: "doc.on.doc",
       onPress: () => {
-        const messageStringContent = getMessageStringContent(message)
+        const messageStringContent = getMessageContentStringValue(message.content)
         if (!!messageStringContent) {
           Clipboard.setString(messageStringContent)
         } else {

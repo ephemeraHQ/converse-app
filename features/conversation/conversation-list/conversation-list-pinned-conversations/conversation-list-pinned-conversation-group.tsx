@@ -18,26 +18,26 @@ type IConversationListPinnedConversationGroupProps = {
 export const ConversationListPinnedConversationGroup = ({
   group,
 }: IConversationListPinnedConversationGroupProps) => {
-  const groupConversationTopic = group.topic
+  const groupConversationTopic = group.xmtpId
 
   const { avatarSize } = useConversationListPinnedConversationsStyles()
 
   const { isUnread } = useConversationIsUnread({
-    topic: groupConversationTopic,
+    xmtpConversationId: groupConversationTopic,
   })
 
   const onPress = useCallback(() => {
-    navigate("Conversation", { topic: group.topic })
-  }, [group.topic])
+    navigate("Conversation", { xmtpConversationId: group.xmtpId })
+  }, [group.xmtpId])
 
   const { groupName } = useGroupName({
-    conversationTopic: groupConversationTopic,
+    xmtpConversationId: groupConversationTopic,
   })
 
   const displayMessagePreview = group.lastMessage && isTextMessage(group.lastMessage) && isUnread
 
   const contextMenuProps = useGroupConversationContextMenuViewProps({
-    groupConversationTopic: groupConversationTopic,
+    xmtpConversationId: groupConversationTopic,
   })
 
   return (
@@ -45,7 +45,7 @@ export const ConversationListPinnedConversationGroup = ({
       <ConversationListPinnedConversation
         contextMenuProps={contextMenuProps}
         avatarComponent={
-          <GroupAvatar groupTopic={groupConversationTopic} sizeNumber={avatarSize} />
+          <GroupAvatar xmtpConversationId={groupConversationTopic} sizeNumber={avatarSize} />
         }
         onPress={onPress}
         showUnread={isUnread}

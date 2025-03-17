@@ -25,30 +25,14 @@ function createMMKVPersister(storage: MMKV): ReactQueryPersister {
         // Create a deep clone of the client to avoid modifying the original
         const clientToStore = JSON.parse(JSON.stringify(client)) as ReactQueryPersistedClient
 
-        // Filter out any queries that are in a pending state to avoid errors on rehydration
-        if (clientToStore.clientState.queries) {
-          // Remove queries in pending state
-          clientToStore.clientState.queries = clientToStore.clientState.queries.filter(
-            (query) => query.state.status !== "pending",
-          )
-
-          // Also ensure that any query with fetchStatus === 'fetching' is not persisted
-          // as these can also cause issues on rehydration
-          clientToStore.clientState.queries = clientToStore.clientState.queries.filter(
-            (query) => query.state.fetchStatus !== "fetching",
-          )
-
-          // For queries with fetchMeta, ensure they're properly handled
-          clientToStore.clientState.queries.forEach((query) => {
-            // Reset fetchStatus to ensure clean rehydration
-            if (query.state.fetchStatus === "paused") {
-              query.state.fetchStatus = "idle"
-            }
-          })
-        }
-
         const clientString = JSON.stringify(clientToStore)
         storage.set("reactQuery", clientString)
+
+        // Debug persisted queries after successful persistence
+        if (__DEV__) {
+          // Uncomment to debug persisted queries
+          // debugPersistedQueries()
+        }
       } catch (error) {
         captureError(
           new GenericError({
@@ -57,7 +41,7 @@ function createMMKVPersister(storage: MMKV): ReactQueryPersister {
           }),
           {
             extras: {
-              queries: client.clientState.queries.map((q) => q.queryKey.toString).join(", "),
+              queries: client.clientState.queries.map((q) => q.queryKey.toString()).join(", "),
             },
           },
         )
@@ -99,10 +83,11 @@ export const secureQueryPersister = createMMKVPersister(secureQueryMMKV)
  * Utility function to help debug React Query issues in development
  * This can be called from anywhere to check the current state of the persisted queries
  */
-export function debugPersistedQueries() {
+function debugPersistedQueries() {
   if (__DEV__) {
     try {
       const clientString = reactQueryMMKV.getString("reactQuery")
+
       if (!clientString) {
         logger.debug("No persisted React Query client found")
         return
@@ -145,7 +130,7 @@ export function debugPersistedQueries() {
 }
 
 // Helper to have a consistent way to format query keys
-export function getQueryKey(args: { baseStr: string; [key: string]: string }) {
+export function getReactQueryKey(args: { baseStr: string; [key: string]: string | undefined }) {
   const { baseStr, ...rest } = args
   return [baseStr, ...Object.entries(rest).map(([key, value]) => `${key}: ${value}`)]
 }

@@ -5,38 +5,36 @@ import {
   storeRemoteAttachment,
 } from "@/features/conversation/conversation-chat/conversation-attachment/remote-attachment-local-storage"
 import { decryptAttachment } from "@/features/xmtp/xmtp-codecs/xmtp-codecs-attachments"
-import {
-  IConversationMessageId,
-  IConversationMessageRemoteAttachmentContent,
-} from "../conversation-message/conversation-message.types"
+import { IXmtpMessageId } from "@/features/xmtp/xmtp.types"
+import { IConversationMessageRemoteAttachmentContent } from "../conversation-message/conversation-message.types"
 
 export function useRemoteAttachmentQuery(args: {
-  messageId: IConversationMessageId
+  xmtpMessageId: IXmtpMessageId
   content: IConversationMessageRemoteAttachmentContent
 }) {
   return useQuery(getRemoteAttachmentQueryOptions(args))
 }
 
 export function getRemoteAttachmentQueryOptions(args: {
-  messageId: IConversationMessageId
+  xmtpMessageId: IXmtpMessageId
   content: IConversationMessageRemoteAttachmentContent
 }) {
   return queryOptions({
     // eslint-disable-next-line @tanstack/query/exhaustive-deps
-    queryKey: ["remote-attachment", args.messageId, args.content.url],
+    queryKey: ["remote-attachment", args.xmtpMessageId, args.content.url],
     queryFn: () => fetchRemoteAttachment(args),
-    enabled: !!args.messageId,
+    enabled: !!args.xmtpMessageId,
   })
 }
 
 async function fetchRemoteAttachment(args: {
-  messageId: IConversationMessageId
+  xmtpMessageId: IXmtpMessageId
   content: IConversationMessageRemoteAttachmentContent
 }) {
-  const { messageId, content } = args
+  const { xmtpMessageId, content } = args
 
   // Check local cache first
-  const storedAttachment = await getStoredRemoteAttachment(messageId)
+  const storedAttachment = await getStoredRemoteAttachment(xmtpMessageId)
 
   if (storedAttachment) {
     return storedAttachment
@@ -52,7 +50,7 @@ async function fetchRemoteAttachment(args: {
   })
 
   return storeRemoteAttachment({
-    messageId,
+    xmtpMessageId,
     decryptedAttachment,
   })
 }

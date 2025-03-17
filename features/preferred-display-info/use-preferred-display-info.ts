@@ -10,10 +10,7 @@ import {
   getPreferredEthAddress,
 } from "@/features/preferred-display-info/preferred-display-info.utils"
 import { getProfileQueryData, useProfileQuery } from "@/features/profiles/profiles.query"
-import {
-  getSocialProfilesForInboxId,
-  useSocialProfilesForInboxId,
-} from "@/features/social-profiles/hooks/use-social-profiles-for-inbox-id"
+import { useSocialProfilesForInboxId } from "@/features/social-profiles/hooks/use-social-profiles-for-inbox-id"
 import {
   getSocialProfilesForEthAddressQueryData,
   useSocialProfilesForAddressQuery,
@@ -47,7 +44,7 @@ export function usePreferredDisplayInfo(args: PreferredDisplayInfoArgs) {
 
   const { data: inboxIdFromEthAddress } = useQuery({
     ...getXmtpInboxIdFromEthAddressQueryOptions({
-      clientEthAddress: currentSender.ethereumAddress,
+      clientInboxId: currentSender.inboxId,
       targetEthAddress: ethAddressArg!, // ! because we check enabled
     }),
     enabled: !!ethAddressArg,
@@ -124,7 +121,7 @@ export function getPreferredDisplayInfo(args: PreferredDisplayInfoArgs) {
 
   if (ethAddress && !inboxId) {
     inboxId = getXmtpInboxIdFromEthAddressQueryData({
-      clientEthAddress: currentSender.ethereumAddress,
+      clientInboxId: currentSender.inboxId,
       targetEthAddress: ethAddressArg,
     })
   }

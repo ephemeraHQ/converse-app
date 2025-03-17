@@ -27,7 +27,7 @@ export const useConversationListConversations = () => {
       for (const conversation of conversations) {
         prefetchConversationMessages({
           clientInboxId: currentSender.inboxId,
-          topic: conversation.topic,
+          xmtpConversationId: conversation.xmtpId,
           caller: "useConversationListConversations",
         }).catch(captureError)
       }
@@ -38,7 +38,7 @@ export const useConversationListConversations = () => {
     queries: (conversations ?? []).map((conversation) =>
       getConversationMetadataQueryOptions({
         clientInboxId: currentSender.inboxId,
-        topic: conversation.topic,
+        xmtpConversationId: conversation.xmtpId,
       }),
     ),
     // note/todo(lustig): investigate combine to remove need for filteredConvresations (which utilizes conversationsDataQueries)

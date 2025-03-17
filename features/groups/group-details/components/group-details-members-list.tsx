@@ -6,26 +6,26 @@ import { Pressable } from "@/design-system/Pressable"
 import { Text } from "@/design-system/Text"
 import { VStack } from "@/design-system/VStack"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
-import { IConversationTopic } from "@/features/conversation/conversation.types"
 import { MemberDetailsBottomSheet } from "@/features/groups/group-details/components/group-details-member-details.bottom-sheet"
 import { GroupDetailsListItem } from "@/features/groups/group-details/components/group-details.ui"
-import { useGroupMembersQuery } from "@/features/groups/group-members.query"
+import { useGroupMembers } from "@/features/groups/hooks/use-group-members"
+import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 import { useRouter } from "@/navigation/use-navigation"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { MemberListItem } from "./group-details-members-list-item"
 
 export const GroupDetailsMembersList = memo(function GroupDetailsMembersList(props: {
-  topic: IConversationTopic
+  xmtpConversationId: IXmtpConversationId
 }) {
-  const { topic } = props
+  const { xmtpConversationId } = props
   const router = useRouter()
   const { theme } = useAppTheme()
   const currentSenderInboxId = useSafeCurrentSender().inboxId
 
-  const { data: members } = useGroupMembersQuery({
+  const { members } = useGroupMembers({
     caller: "GroupDetailsScreen",
     clientInboxId: currentSenderInboxId,
-    topic,
+    xmtpConversationId,
   })
 
   const sortedMembers = useMemo(() => {
@@ -34,12 +34,12 @@ export const GroupDetailsMembersList = memo(function GroupDetailsMembersList(pro
   }, [members])
 
   const handleAddMembersPress = useCallback(() => {
-    router.push("AddGroupMembers", { groupTopic: topic })
-  }, [topic, router])
+    router.push("AddGroupMembers", { xmtpConversationId })
+  }, [xmtpConversationId, router])
 
   const handleSeeAllPress = useCallback(() => {
-    router.push("GroupMembersList", { groupTopic: topic })
-  }, [topic, router])
+    router.push("GroupMembersList", { xmtpConversationId })
+  }, [xmtpConversationId, router])
 
   // For demo purposes, we'll show a limited number of members
   const visibleMembers = sortedMembers.slice(0, 6)

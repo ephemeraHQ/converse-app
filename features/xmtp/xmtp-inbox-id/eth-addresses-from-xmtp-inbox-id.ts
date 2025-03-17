@@ -1,6 +1,6 @@
 import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { IEthereumAddress } from "@/utils/evm/address"
-import { getXmtpClientByInboxId } from "../xmtp-client/xmtp-client.service"
+import { getXmtpClientByInboxId } from "../xmtp-client/xmtp-client"
 
 export async function getEthAddressesFromInboxIds(args: {
   clientInboxId: IXmtpInboxId

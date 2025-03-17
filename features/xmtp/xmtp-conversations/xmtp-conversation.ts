@@ -2,6 +2,7 @@ import {
   IXmtpConsentState,
   IXmtpConversationId,
   IXmtpConversationSendPayload,
+  IXmtpConversationTopic,
   IXmtpConversationWithCodecs,
   IXmtpDmWithCodecs,
   IXmtpGroupWithCodecs,
@@ -9,7 +10,7 @@ import {
 } from "@features/xmtp/xmtp.types"
 import { ConversationVersion, sendMessage } from "@xmtp/react-native-sdk"
 import { config } from "@/config"
-import { getXmtpClientByInboxId } from "@/features/xmtp/xmtp-client/xmtp-client.service"
+import { getXmtpClientByInboxId } from "@/features/xmtp/xmtp-client/xmtp-client"
 import { captureError } from "@/utils/capture-error"
 import { XMTPError } from "@/utils/error"
 
@@ -111,3 +112,15 @@ export function isXmtpConversationDm(
 ): conversation is IXmtpDmWithCodecs {
   return conversation.version === ConversationVersion.GROUP
 }
+
+export const getXmtpConversationIdFromXmtpTopic = (xmtpTopic: IXmtpConversationTopic) => {
+  return xmtpTopic
+    .replace(CONVERSATION_TOPIC_PREFIX, "")
+    .replace("/proto", "") as IXmtpConversationId
+}
+
+export function getXmtpConversationTopicFromXmtpId(xmtpId: IXmtpConversationId) {
+  return `${CONVERSATION_TOPIC_PREFIX}/${xmtpId}/proto` as IXmtpConversationTopic
+}
+
+export const CONVERSATION_TOPIC_PREFIX = "/xmtp/mls/1/g-"

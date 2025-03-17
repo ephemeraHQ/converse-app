@@ -13,14 +13,14 @@ import { getConversationQueryData } from "@/features/conversation/queries/conver
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm"
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group"
 import { useDmPeerInboxIdQuery } from "@/features/dm/dm-peer-inbox-id.query"
-import { useGroupMembersQuery } from "@/features/groups/group-members.query"
+import { useGroupMembers } from "@/features/groups/hooks/use-group-members"
 import { useGroupName } from "@/features/groups/hooks/use-group-name"
 import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
+import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 import { useHeader } from "@/navigation/use-header"
 import { useRouter } from "@/navigation/use-navigation"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { copyToClipboard } from "@/utils/clipboard"
-import { IConversationTopic } from "../conversation.types"
 
 export function useConversationScreenHeader() {
   const navigation = useRouter()
@@ -29,7 +29,7 @@ export function useConversationScreenHeader() {
   const currentSender = useSafeCurrentSender()
   const conversation = getConversationQueryData({
     clientInboxId: currentSender.inboxId,
-    topic: conversationStore.getState().topic!,
+    xmtpConversationId: conversationStore.getState().xmtpConversationId!,
   })
 
   useHeader(
@@ -40,13 +40,13 @@ export function useConversationScreenHeader() {
       ...(!isCreatingNewConversation &&
         conversation &&
         isConversationDm(conversation) && {
-          titleComponent: <DmConversationTitle topic={conversation.topic} />,
+          titleComponent: <DmConversationTitle xmtpConversationId={conversation.xmtpId} />,
         }),
       // Group params
       ...(!isCreatingNewConversation &&
         conversation &&
         isConversationGroup(conversation) && {
-          titleComponent: <GroupConversationTitle conversationTopic={conversation.topic} />,
+          titleComponent: <GroupConversationTitle xmtpConversationId={conversation.xmtpId} />,
         }),
       // New conversation params
       ...(isCreatingNewConversation && {
@@ -113,26 +113,26 @@ function ConversationHeaderTitle({
 }
 
 type GroupConversationTitleProps = {
-  conversationTopic: IConversationTopic
+  xmtpConversationId: IXmtpConversationId
 }
 
-const GroupConversationTitle = memo(({ conversationTopic }: GroupConversationTitleProps) => {
+const GroupConversationTitle = memo(({ xmtpConversationId }: GroupConversationTitleProps) => {
   const currentSender = useSafeCurrentSender()
   const router = useRouter()
 
-  const { data: members } = useGroupMembersQuery({
+  const { members } = useGroupMembers({
     caller: "GroupConversationTitle",
     clientInboxId: currentSender.inboxId,
-    topic: conversationTopic,
+    xmtpConversationId,
   })
 
   const { groupName, isLoading: groupNameLoading } = useGroupName({
-    conversationTopic,
+    xmtpConversationId,
   })
 
   const onPress = useCallback(() => {
-    router.navigate("GroupDetails", { groupTopic: conversationTopic })
-  }, [router, conversationTopic])
+    router.navigate("GroupDetails", { xmtpConversationId })
+  }, [router, xmtpConversationId])
 
   const requestsCount = 0 // TODO useGroupPendingRequests(conversationTopic).length;
 
@@ -165,23 +165,23 @@ const GroupConversationTitle = memo(({ conversationTopic }: GroupConversationTit
           </Text>
         ) : null
       }
-      avatarComponent={<GroupAvatar groupTopic={conversationTopic} size="md" />}
+      avatarComponent={<GroupAvatar xmtpConversationId={xmtpConversationId} size="md" />}
     />
   )
 })
 
 type DmConversationTitleProps = {
-  topic: IConversationTopic
+  xmtpConversationId: IXmtpConversationId
 }
 
-const DmConversationTitle = ({ topic }: DmConversationTitleProps) => {
+const DmConversationTitle = ({ xmtpConversationId }: DmConversationTitleProps) => {
   const currentSender = useSafeCurrentSender()
   const navigation = useRouter()
   const { theme } = useAppTheme()
 
   const { data: peerInboxId } = useDmPeerInboxIdQuery({
     inboxId: currentSender.inboxId,
-    topic,
+    xmtpConversationId,
     caller: "DmConversationTitle",
   })
 
@@ -196,8 +196,8 @@ const DmConversationTitle = ({ topic }: DmConversationTitleProps) => {
   }, [navigation, peerInboxId])
 
   const onLongPress = useCallback(() => {
-    copyToClipboard(JSON.stringify(topic))
-  }, [topic])
+    copyToClipboard(JSON.stringify(xmtpConversationId))
+  }, [xmtpConversationId])
 
   if (isLoading) {
     return null

@@ -1,6 +1,6 @@
 import { IXmtpConsentState, IXmtpConversationId, IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { config } from "@/config"
-import { getXmtpClientByInboxId } from "@/features/xmtp/xmtp-client/xmtp-client.service"
+import { getXmtpClientByInboxId } from "@/features/xmtp/xmtp-client/xmtp-client"
 import { captureError } from "@/utils/capture-error"
 import { XMTPError } from "@/utils/error"
 import { IEthereumAddress } from "@/utils/evm/address"
@@ -97,18 +97,18 @@ export const syncXmtpConsent = async (inboxId: IXmtpInboxId) => {
 }
 
 export async function setXmtpConsentStateForInboxId(args: {
-  inboxId: IXmtpInboxId
+  peerInboxId: IXmtpInboxId
   consent: IXmtpConsentState
 }) {
-  const { inboxId, consent } = args
+  const { peerInboxId, consent } = args
 
   try {
     const client = await getXmtpClientByInboxId({
-      inboxId,
+      inboxId: peerInboxId,
     })
 
     await client.preferences.setConsentState({
-      value: inboxId,
+      value: peerInboxId,
       entryType: "inbox_id",
       state: consent,
     })
@@ -120,7 +120,7 @@ export async function setXmtpConsentStateForInboxId(args: {
   }
 }
 
-export const updateConsentForGroupsForInbox = async (args: {
+export const updateXmtpConsentForGroupsForInbox = async (args: {
   groupIds: IXmtpConversationId[]
   consent: IXmtpConsentState
   clientInboxId: IXmtpInboxId

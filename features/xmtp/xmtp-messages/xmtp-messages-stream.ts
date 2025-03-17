@@ -2,7 +2,7 @@ import { IXmtpDecodedMessage, IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { xmtpLogger } from "@utils/logger"
 import { XMTPError } from "@/utils/error"
 import { isProd } from "@/utils/getEnv"
-import { getXmtpClientByInboxId } from "../xmtp-client/xmtp-client.service"
+import { getXmtpClientByInboxId } from "../xmtp-client/xmtp-client"
 
 export const streamAllMessages = async (args: {
   inboxId: IXmtpInboxId

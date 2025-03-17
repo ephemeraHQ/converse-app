@@ -1,17 +1,15 @@
 import { useMemo } from "react"
 import { isCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { usePreferredDisplayInfoBatch } from "@/features/preferred-display-info/use-preferred-display-info-batch"
+import { IXmtpMessageId } from "@/features/xmtp/xmtp.types"
 import { ObjectTyped } from "@/utils/object-typed"
-import { IConversationMessageId } from "../conversation-message.types"
 import { useConversationMessageReactions } from "../hooks/use-conversation-message-reactions"
 import { RolledUpReactions, SortedReaction } from "./conversation-message-reactions.types"
 
-export function useConversationMessageReactionsRolledUp(args: {
-  messageId: IConversationMessageId
-}) {
-  const { messageId } = args
+export function useConversationMessageReactionsRolledUp(args: { xmtpMessageId: IXmtpMessageId }) {
+  const { xmtpMessageId } = args
 
-  const { bySender: reactionsBySender } = useConversationMessageReactions(messageId)
+  const { bySender: reactionsBySender } = useConversationMessageReactions(xmtpMessageId)
 
   const inboxIds = ObjectTyped.keys(reactionsBySender ?? {})
 
@@ -69,11 +67,11 @@ export function useConversationMessageReactionsRolledUp(args: {
     }))
 
     return {
-      messageId,
+      messageId: xmtpMessageId,
       totalCount,
       userReacted,
       preview,
       detailed,
     }
-  }, [reactionsBySender, preferredDisplayData, messageId, inboxIds])
+  }, [reactionsBySender, preferredDisplayData, xmtpMessageId, inboxIds])
 }

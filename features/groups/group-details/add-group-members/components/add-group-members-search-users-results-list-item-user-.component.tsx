@@ -2,7 +2,7 @@ import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { memo, useCallback } from "react"
 import { Chip, ChipText } from "@/design-system/chip"
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
-import { useGroupMembersQuery } from "@/features/groups/group-members.query"
+import { useGroupMembers } from "@/features/groups/hooks/use-group-members"
 import { SearchUsersResultsListItemUser } from "@/features/search-users/search-users-results-list-item-user"
 import { useRouteParams } from "@/navigation/use-navigation"
 import { useAddGroupMembersStore } from "../stores/add-group-members.store"
@@ -12,11 +12,11 @@ export const AddGroupMembersSearchUsersResultsListItemUser = memo(
     const { inboxId } = props
 
     const { addSelectedInboxId } = useAddGroupMembersStore((state) => state.actions)
-    const { groupTopic } = useRouteParams<"AddGroupMembers">()
+    const { xmtpConversationId } = useRouteParams<"AddGroupMembers">()
 
-    const { data: members } = useGroupMembersQuery({
+    const { members } = useGroupMembers({
       clientInboxId: getSafeCurrentSender().inboxId,
-      topic: groupTopic!,
+      xmtpConversationId,
       caller: "add-group-members",
     })
 

@@ -26,7 +26,7 @@ export const ConversationMessageStaticAttachment = memo(
       return null
     }
 
-    return <Content messageId={message.id} staticAttachment={content} />
+    return <Content messageId={message.xmtpId} staticAttachment={content} />
   },
 )
 

@@ -17,7 +17,7 @@ export const useBlockedConversationsForCurrentAccount = () => {
     queries: (data ?? []).map((conversation) =>
       getConversationMetadataQueryOptions({
         clientInboxId: currentSender.inboxId,
-        topic: conversation.topic,
+        xmtpConversationId: conversation.xmtpId,
       }),
     ),
   })

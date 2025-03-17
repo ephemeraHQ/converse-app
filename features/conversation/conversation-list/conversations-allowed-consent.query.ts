@@ -1,6 +1,6 @@
-import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import { IXmtpConversationId, IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { QueryObserver, queryOptions, skipToken, useQuery } from "@tanstack/react-query"
-import { IConversation, IConversationTopic } from "@/features/conversation/conversation.types"
+import { IConversation } from "@/features/conversation/conversation.types"
 import { ensureConversationSyncAllQuery } from "@/features/conversation/queries/conversation-sync-all.query"
 import {
   getConversationQueryData,
@@ -38,45 +38,45 @@ export function addConversationToAllowedConsentConversationsQuery(
     conversation: IConversation
   },
 ) {
-  const { clientInboxId: inboxId, conversation } = args
+  const { clientInboxId, conversation } = args
 
   const previousConversationsData = getAllowedConsentConversationsQueryData({
-    clientInboxId: inboxId,
+    clientInboxId,
   })
 
   if (!previousConversationsData) {
     reactQueryClient.setQueryData(
-      getAllowedConsentConversationsQueryOptions({ clientInboxId: inboxId }).queryKey,
+      getAllowedConsentConversationsQueryOptions({ clientInboxId }).queryKey,
       [conversation],
     )
     return
   }
 
-  const conversationExists = previousConversationsData.some((c) => c.topic === conversation.topic)
+  const conversationExists = previousConversationsData.some((c) => c.xmtpId === conversation.xmtpId)
 
   if (conversationExists) {
     return updateConversationInAllowedConsentConversationsQueryData({
-      clientInboxId: inboxId,
-      topic: conversation.topic,
+      clientInboxId,
+      xmtpConversationId: conversation.xmtpId,
       conversationUpdate: conversation,
     })
   }
 
   reactQueryClient.setQueryData<IAllowedConsentConversationsQuery>(
-    getAllowedConsentConversationsQueryOptions({ clientInboxId: inboxId }).queryKey,
+    getAllowedConsentConversationsQueryOptions({ clientInboxId }).queryKey,
     [conversation, ...previousConversationsData],
   )
 }
 
 export const removeConversationFromAllowedConsentConversationsQuery = (
   args: IArgs & {
-    topic: IConversationTopic
+    xmtpConversationId: IXmtpConversationId
   },
 ) => {
-  const { clientInboxId: inboxId, topic } = args
+  const { clientInboxId, xmtpConversationId } = args
 
   const previousConversationsData = getAllowedConsentConversationsQueryData({
-    clientInboxId: inboxId,
+    clientInboxId,
   })
 
   if (!previousConversationsData) {
@@ -84,8 +84,8 @@ export const removeConversationFromAllowedConsentConversationsQuery = (
   }
 
   reactQueryClient.setQueryData(
-    getAllowedConsentConversationsQueryOptions({ clientInboxId: inboxId }).queryKey,
-    previousConversationsData.filter((c) => c.topic !== topic),
+    getAllowedConsentConversationsQueryOptions({ clientInboxId }).queryKey,
+    previousConversationsData.filter((c) => c.xmtpId !== xmtpConversationId),
   )
 }
 
@@ -94,15 +94,15 @@ export const getAllowedConsentConversationsQueryData = (args: IArgs) => {
 }
 
 const getAllowedConsentConversations = async (args: IArgs) => {
-  const { clientInboxId: inboxId } = args
+  const { clientInboxId } = args
 
   await ensureConversationSyncAllQuery({
-    clientInboxId: inboxId,
+    clientInboxId,
     consentStates: ["allowed"],
   })
 
   const conversations = await getXmtpConversations({
-    clientInboxId: inboxId,
+    clientInboxId,
     consentStates: ["allowed"],
   })
 
@@ -113,10 +113,15 @@ const getAllowedConsentConversations = async (args: IArgs) => {
   for (const convoConversation of convosConversations) {
     // Only set if the conversation is not already in the query cache
     // Because otherwise we might put a outdated conversation in the query cache.
-    if (!getConversationQueryData({ clientInboxId: inboxId, topic: convoConversation.topic })) {
+    if (
+      !getConversationQueryData({
+        clientInboxId,
+        xmtpConversationId: convoConversation.xmtpId,
+      })
+    ) {
       setConversationQueryData({
-        clientInboxId: inboxId,
-        topic: convoConversation.topic,
+        clientInboxId,
+        xmtpConversationId: convoConversation.xmtpId,
         conversation: convoConversation,
       })
     }
@@ -128,34 +133,34 @@ const getAllowedConsentConversations = async (args: IArgs) => {
 export const getAllowedConsentConversationsQueryOptions = (
   args: Optional<IArgsWithCaller, "caller">,
 ) => {
-  const { clientInboxId: inboxId, caller } = args
-  const enabled = !!inboxId
+  const { clientInboxId, caller } = args
+  const enabled = !!clientInboxId
   return queryOptions({
     meta: {
       caller,
     },
-    queryKey: ["allowed-consent-conversations", inboxId],
-    queryFn: enabled ? () => getAllowedConsentConversations({ clientInboxId: inboxId }) : skipToken,
+    queryKey: ["allowed-consent-conversations", clientInboxId],
+    queryFn: enabled ? () => getAllowedConsentConversations({ clientInboxId }) : skipToken,
     enabled,
   })
 }
 
 export const updateConversationInAllowedConsentConversationsQueryData = (
   args: IArgs & {
-    topic: IConversationTopic
+    xmtpConversationId: IXmtpConversationId
     conversationUpdate: Partial<IConversation>
   },
 ) => {
-  const { clientInboxId: inboxId, topic, conversationUpdate } = args
+  const { clientInboxId, xmtpConversationId, conversationUpdate } = args
 
   const previousConversationsData = getAllowedConsentConversationsQueryData({
-    clientInboxId: inboxId,
+    clientInboxId,
   })
 
   if (!previousConversationsData) {
     captureError(
       new Error(
-        `No previous conversations data found for account: ${inboxId} when updating conversation in allowed consent conversations query data: ${JSON.stringify(
+        `No previous conversations data found for account: ${clientInboxId} when updating conversation in allowed consent conversations query data: ${JSON.stringify(
           conversationUpdate,
         )}`,
       ),
@@ -164,15 +169,15 @@ export const updateConversationInAllowedConsentConversationsQueryData = (
   }
 
   const newConversations = previousConversationsData.map((c) => {
-    if (c.topic === topic) {
+    if (c.xmtpId === xmtpConversationId) {
       return updateObjectAndMethods(c, conversationUpdate)
     }
     return c
   })
 
-  reactQueryClient.setQueryData<IAllowedConsentConversationsQuery>(
+  return reactQueryClient.setQueryData<IAllowedConsentConversationsQuery>(
     getAllowedConsentConversationsQueryOptions({
-      clientInboxId: inboxId,
+      clientInboxId,
     }).queryKey,
     newConversations,
   )

@@ -5,7 +5,7 @@ import { captureError } from "@/utils/capture-error"
 import { XMTPError } from "@/utils/error"
 import { calculateFileDigest, fileExists } from "@/utils/file-system/file-system"
 import { tryCatchWithDuration } from "@/utils/try-catch"
-import { getXmtpClientByInboxId } from "../xmtp-client/xmtp-client.service"
+import { getXmtpClientByInboxId } from "../xmtp-client/xmtp-client"
 import { XMTP_MAX_MS_UNTIL_LOG_ERROR } from "../xmtp-logs"
 
 export const MAX_AUTOMATIC_DOWNLOAD_ATTACHMENT_SIZE = 10000000 // 10MB

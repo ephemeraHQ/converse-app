@@ -33,10 +33,6 @@ export const navigate = async <T extends keyof NavigationParamList>(
   navigationRef.navigate(screen, params)
 }
 
-export const navigateToTopic = async (topic: IConversationTopic) => {
-  navigate("Conversation", { topic })
-}
-
 export const getSchemedURLFromUniversalURL = (url: string) => {
   // Handling universal links by saving a schemed URI
   for (const prefix of config.universalLinks) {

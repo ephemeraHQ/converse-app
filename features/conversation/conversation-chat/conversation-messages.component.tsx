@@ -25,15 +25,12 @@ import { useAppTheme } from "@/theme/use-app-theme"
 import { captureError } from "@/utils/capture-error"
 import { CONVERSATION_LIST_REFRESH_THRESHOLD } from "../conversation-list/conversation-list.contstants"
 import { ConversationMessageHighlighted } from "./conversation-message/conversation-message-highlighted"
-import {
-  IConversationMessage,
-  IConversationMessageId,
-} from "./conversation-message/conversation-message.types"
+import { IConversationMessage } from "./conversation-message/conversation-message.types"
 import { useMessageHasReactions } from "./conversation-message/hooks/use-message-has-reactions"
 import { getConversationNextMessage } from "./conversation-message/utils/get-conversation-next-message"
 import { getConversationPreviousMessage } from "./conversation-message/utils/get-conversation-previous-message"
 import { DmConversationEmpty, GroupConversationEmpty } from "./conversation.screen"
-import { useCurrentConversationTopic } from "./conversation.store-context"
+import { useCurrentXmtpConversationId } from "./conversation.store-context"
 
 export const ConversationMessages = memo(function ConversationMessages(props: {
   conversation: IConversation
@@ -42,7 +39,7 @@ export const ConversationMessages = memo(function ConversationMessages(props: {
 
   const currentSender = useSafeCurrentSender()
 
-  const topic = useCurrentConversationTopic()!
+  const xmtpConversationId = useCurrentXmtpConversationId()!
 
   const refreshingRef = useRef(false)
 
@@ -53,7 +50,7 @@ export const ConversationMessages = memo(function ConversationMessages(props: {
     refetch: refetchMessages,
   } = useConversationMessagesQuery({
     clientInboxId: currentSender.inboxId,
-    topic,
+    xmtpConversationId,
     caller: "Conversation Messages",
   })
 
@@ -66,11 +63,11 @@ export const ConversationMessages = memo(function ConversationMessages(props: {
   }, [messages?.ids, messages?.byId, currentSender.inboxId])
 
   const { isUnread } = useConversationIsUnread({
-    topic,
+    xmtpConversationId,
   })
 
   const { markAsReadAsync } = useMarkConversationAsRead({
-    topic,
+    xmtpConversationId,
   })
 
   // TODO: Need improvment but okay for now
@@ -123,19 +120,19 @@ export const ConversationMessages = memo(function ConversationMessages(props: {
       }
       renderMessage={({ message, index }) => {
         const previousMessage = getConversationPreviousMessage({
-          messageId: message.id,
-          topic,
+          messageId: message.xmtpId,
+          xmtpConversationId,
         })
         const nextMessage = getConversationNextMessage({
-          messageId: message.id,
-          topic,
+          messageId: message.xmtpId,
+          xmtpConversationId,
         })
         return (
           <ConversationMessagesListItem
             message={message}
             previousMessage={previousMessage}
             nextMessage={nextMessage}
-            isLatestMessageSentByCurrentUser={latestMessageIdByCurrentUser === message.id}
+            isLatestMessageSentByCurrentUser={latestMessageIdByCurrentUser === message.xmtpId}
             animateEntering={
               index === 0 &&
               // Need this because otherwise because our optimistic updates, we first create a dummy message with a random id
@@ -170,11 +167,11 @@ const ConversationMessagesListItem = memo(function ConversationMessagesListItem(
   const composerStore = useConversationComposerStore()
 
   const handleReply = useCallback(() => {
-    composerStore.getState().setReplyToMessageId(message.id as IConversationMessageId)
+    composerStore.getState().setReplyToMessageId(message.xmtpId)
   }, [composerStore, message])
 
   const messageHasReactions = useMessageHasReactions({
-    messageId: message.id,
+    xmtpMessageId: message.xmtpId,
   })
 
   return (

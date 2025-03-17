@@ -1,4 +1,3 @@
-import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { memo, useCallback, useMemo } from "react"
 import { Alert, ListRenderItem } from "react-native"
 import { useAnimatedStyle, useDerivedValue, withSpring } from "react-native-reanimated"
@@ -20,6 +19,7 @@ import {
   useUnstoppableDomainNameResolution,
 } from "@/features/social-profiles/identity-resolution.query"
 import { useXmtpInboxIdFromEthAddressQuery } from "@/features/xmtp/xmtp-inbox-id/xmtp-inbox-id-from-eth-address.query"
+import { IXmtpConversationId, IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { useAnimatedKeyboard } from "@/hooks/use-animated-keyboard"
 import { $globalStyles } from "@/theme/styles"
 import { useAppTheme } from "@/theme/use-app-theme"
@@ -29,19 +29,18 @@ import { SearchUsersResultsListItemEthAddress } from "../../search-users/search-
 import { SearchUsersResultsListItemGroup } from "../../search-users/search-users-results-list-item-group"
 import { SearchUsersResultsListItemUser } from "../../search-users/search-users-results-list-item-user"
 import { SearchUsersResultsListItemUserDm } from "../../search-users/search-users-results-list-item-user-dm"
-import { IConversationTopic } from "../conversation.types"
 
 // Because we want a mix of DMs, groups, and profiles
 const MAX_INITIAL_RESULTS = 3
 
 type ISearchResultItemDm = {
   type: "dm"
-  conversationTopic: IConversationTopic
+  xmtpConversationId: IXmtpConversationId
 }
 
 type ISearchResultItemGroup = {
   type: "group"
-  conversationTopic: IConversationTopic
+  xmtpConversationId: IXmtpConversationId
 }
 
 type ISearchResultItemProfile = {
@@ -80,9 +79,9 @@ function searchResultIsExternalIdentity(
 
 const SearchUsersResultsListItemUserDmWrapper = memo(
   function SearchUsersResultsListItemUserDmWrapper(props: {
-    conversationTopic: IConversationTopic
+    xmtpConversationId: IXmtpConversationId
   }) {
-    const { conversationTopic } = props
+    const { xmtpConversationId } = props
 
     const conversationStore = useConversationStore()
 
@@ -90,7 +89,7 @@ const SearchUsersResultsListItemUserDmWrapper = memo(
 
     const { data: peerInboxId, isLoading: isLoadingPeerInboxId } = useDmPeerInboxIdQuery({
       inboxId: currentSender.inboxId,
-      topic: conversationTopic,
+      xmtpConversationId,
       caller: "SearchUsersResultsListItemUserDmWrapper",
     })
 
@@ -104,11 +103,11 @@ const SearchUsersResultsListItemUserDmWrapper = memo(
         conversationStore.setState({
           searchTextValue: "",
           searchSelectedUserInboxIds: [],
-          topic: conversationTopic,
+          xmtpConversationId,
           isCreatingNewConversation: false,
         })
       }
-    }, [conversationStore, peerInboxId, conversationTopic])
+    }, [conversationStore, peerInboxId, xmtpConversationId])
 
     if (isLoadingPeerInboxId) {
       return null
@@ -116,7 +115,7 @@ const SearchUsersResultsListItemUserDmWrapper = memo(
 
     return (
       <SearchUsersResultsListItemUserDm
-        conversationTopic={conversationTopic}
+        xmtpConversationId={xmtpConversationId}
         onPress={handlePress}
       />
     )
@@ -125,22 +124,24 @@ const SearchUsersResultsListItemUserDmWrapper = memo(
 
 const SearchUsersResultsListItemGroupWrapper = memo(
   function SearchUsersResultsListItemGroupWrapper(props: {
-    conversationTopic: IConversationTopic
+    xmtpConversationId: IXmtpConversationId
   }) {
+    const { xmtpConversationId } = props
+
     const conversationStore = useConversationStore()
 
     const handlePress = useCallback(() => {
       conversationStore.setState({
         searchTextValue: "",
         searchSelectedUserInboxIds: [],
-        topic: props.conversationTopic,
+        xmtpConversationId,
         isCreatingNewConversation: false,
       })
-    }, [conversationStore, props.conversationTopic])
+    }, [conversationStore, xmtpConversationId])
 
     return (
       <SearchUsersResultsListItemGroup
-        conversationTopic={props.conversationTopic}
+        xmtpConversationId={xmtpConversationId}
         onPress={handlePress}
       />
     )
@@ -174,7 +175,7 @@ const SearchUsersResultsListItemExternalIdentityWrapper = memo(
     const currentSender = useSafeCurrentSender()
 
     const { data: inboxId, isLoading: isLoadingInboxId } = useXmtpInboxIdFromEthAddressQuery({
-      clientEthAddress: currentSender.ethereumAddress,
+      clientInboxId: currentSender.inboxId,
       targetEthAddress: externalIdentity.address,
     })
 
@@ -213,25 +214,22 @@ export const ConversationCreateListResults = memo(function ConversationCreateLis
 
   const currentUserInboxId = useSafeCurrentSender().inboxId
 
-  const { data: existingGroupsByGroupNameTopics = [], isLoading: isLoadingExistingGroupsByName } =
+  const { data: existingGroupsByGroupName = [], isLoading: isLoadingExistingGroupsByName } =
     useSearchExistingGroupsByGroupNameQuery({
       searchQuery: searchTextValue,
       searcherInboxId: currentUserInboxId,
     })
 
-  const {
-    data: existingGroupsByMemberNameTopics = [],
-    isLoading: isLoadingExistingGroupsByMembers,
-  } = useSearchExistingGroupsByGroupMembersQuery({
-    searchQuery: searchTextValue,
-    searcherInboxId: currentUserInboxId,
-  })
-
-  const { data: existingDmTopics = [], isLoading: isLoadingExistingDmTopics } =
-    useSearchExistingDmsQuery({
+  const { data: existingGroupsByMemberName = [], isLoading: isLoadingExistingGroupsByMembers } =
+    useSearchExistingGroupsByGroupMembersQuery({
       searchQuery: searchTextValue,
-      inboxId: currentUserInboxId,
+      searcherInboxId: currentUserInboxId,
     })
+
+  const { data: existingDm = [], isLoading: isLoadingExistingDm } = useSearchExistingDmsQuery({
+    searchQuery: searchTextValue,
+    inboxId: currentUserInboxId,
+  })
 
   const { data: searchConvosUsersData, isLoading: isSearchingConvosUsers } =
     useSearchConvosUsersQuery({
@@ -252,10 +250,10 @@ export const ConversationCreateListResults = memo(function ConversationCreateLis
     // Because otherwise the user would have selected the existing DM already...
     if (selectedSearchUserInboxIds.length === 0) {
       items.push(
-        ...existingDmTopics
-          .map((conversationTopic) => ({
+        ...existingDm
+          .map((xmtpConversationId) => ({
             type: "dm" as const,
-            conversationTopic,
+            xmtpConversationId,
           }))
           .slice(0, MAX_INITIAL_RESULTS),
       )
@@ -263,26 +261,26 @@ export const ConversationCreateListResults = memo(function ConversationCreateLis
 
     // 2. Add groups where member names match the search query
     items.push(
-      ...existingGroupsByMemberNameTopics
-        .map((conversationTopic) => ({
+      ...existingGroupsByMemberName
+        .map((xmtpConversationId) => ({
           type: "group" as const,
-          conversationTopic,
+          xmtpConversationId,
         }))
         .slice(0, MAX_INITIAL_RESULTS),
     )
 
     // 3. Add groups where group names match the search query if not already in the list
     items.push(
-      ...existingGroupsByGroupNameTopics
+      ...existingGroupsByGroupName
         .filter(
-          (conversationTopic) =>
+          (xmtpConversationId) =>
             !items.some(
-              (item) => item.type === "group" && item.conversationTopic === conversationTopic,
+              (item) => item.type === "group" && item.xmtpConversationId === xmtpConversationId,
             ),
         )
-        .map((conversationTopic) => ({
+        .map((xmtpConversationId) => ({
           type: "group" as const,
-          conversationTopic,
+          xmtpConversationId,
         }))
         .slice(0, MAX_INITIAL_RESULTS),
     )
@@ -296,10 +294,10 @@ export const ConversationCreateListResults = memo(function ConversationCreateLis
       .filter(({ inboxId }) => {
         const addedDms = items.filter(searchResultIsDm)
         // Skip if the profile is already in a DM conversation
-        return !addedDms.some(({ conversationTopic }) => {
+        return !addedDms.some(({ xmtpConversationId }) => {
           return inboxIdIsPartOfConversationUsingCacheData({
             inboxId,
-            conversationTopic,
+            xmtpConversationId,
           })
         })
       })
@@ -337,9 +335,9 @@ export const ConversationCreateListResults = memo(function ConversationCreateLis
 
     return items
   }, [
-    existingDmTopics,
-    existingGroupsByMemberNameTopics,
-    existingGroupsByGroupNameTopics,
+    existingDm,
+    existingGroupsByMemberName,
+    existingGroupsByGroupName,
     searchConvosUsersData,
     selectedSearchUserInboxIds,
     searchTextValue,
@@ -349,17 +347,19 @@ export const ConversationCreateListResults = memo(function ConversationCreateLis
   ])
 
   const isStillLoadingSearchResults =
-    isLoadingExistingDmTopics ||
+    isLoadingExistingDm ||
     isLoadingExistingGroupsByName ||
     isLoadingExistingGroupsByMembers ||
     isSearchingConvosUsers
 
   const renderItem: ListRenderItem<SearchResultItem> = ({ item }) => {
     if (searchResultIsDm(item)) {
-      return <SearchUsersResultsListItemUserDmWrapper conversationTopic={item.conversationTopic} />
+      return (
+        <SearchUsersResultsListItemUserDmWrapper xmtpConversationId={item.xmtpConversationId} />
+      )
     }
     if (searchResultIsGroup(item)) {
-      return <SearchUsersResultsListItemGroupWrapper conversationTopic={item.conversationTopic} />
+      return <SearchUsersResultsListItemGroupWrapper xmtpConversationId={item.xmtpConversationId} />
     }
     if (searchResultIsProfile(item)) {
       return <SearchUsersResultsListItemUserWrapper inboxId={item.inboxId} />
@@ -371,12 +371,12 @@ export const ConversationCreateListResults = memo(function ConversationCreateLis
     return null
   }
 
-  const keyExtractor = (item: SearchResultItem, index: number): string => {
+  const keyExtractor = (item: SearchResultItem, index: number) => {
     if (searchResultIsDm(item)) {
-      return `dm-${item.conversationTopic}`
+      return `dm-${item.xmtpConversationId}`
     }
     if (searchResultIsGroup(item)) {
-      return `group-${item.conversationTopic}`
+      return `group-${item.xmtpConversationId}`
     }
     if (searchResultIsProfile(item)) {
       return `profile-${item.inboxId}`

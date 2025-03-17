@@ -1,23 +1,20 @@
 import { IXmtpConversationId, IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { useMutation } from "@tanstack/react-query"
-import { IConversationTopic } from "@/features/conversation/conversation.types"
-import { addSuperAdminToXmtpGroup } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-group"
-import { captureError } from "@/utils/capture-error"
 import {
-  cancelGroupMembersQuery,
-  getGroupMembersQueryData,
-  invalidateGroupMembersQuery,
-  setGroupMembersQueryData,
-} from "../../group-members.query"
-import { useGroupQuery } from "../../group.query"
+  getGroupQueryData,
+  invalidateGroupQuery,
+  setGroupQueryData,
+  useGroupQuery,
+} from "@/features/groups/group.query"
+import { addSuperAdminToXmtpGroup } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-group"
 
 export const usePromoteToSuperAdminMutation = (args: {
   clientInboxId: IXmtpInboxId
-  topic: IConversationTopic
+  xmtpConversationId: IXmtpConversationId
 }) => {
-  const { clientInboxId, topic } = args
+  const { clientInboxId, xmtpConversationId } = args
 
-  const { data: group } = useGroupQuery({ clientInboxId: clientInboxId, topic })
+  const { data: group } = useGroupQuery({ clientInboxId: clientInboxId, xmtpConversationId })
 
   return useMutation({
     mutationFn: async (inboxId: IXmtpInboxId) => {
@@ -26,53 +23,59 @@ export const usePromoteToSuperAdminMutation = (args: {
       }
       await addSuperAdminToXmtpGroup({
         clientInboxId,
-        groupId: group.id as unknown as IXmtpConversationId,
+        groupId: group.xmtpId,
         superAdminInboxId: inboxId,
       })
       return inboxId
     },
     onMutate: async (inboxId: IXmtpInboxId) => {
-      if (!topic) {
+      if (!xmtpConversationId) {
         return
       }
 
-      cancelGroupMembersQuery({ clientInboxId, topic }).catch(captureError)
-
-      const previousGroupMembers = getGroupMembersQueryData({
+      const previousGroup = getGroupQueryData({
         clientInboxId,
-        topic,
+        xmtpConversationId,
       })
-      if (!previousGroupMembers) {
+      if (!previousGroup) {
         return
       }
 
-      const newMembers = { ...previousGroupMembers }
-      if (!newMembers.byId[inboxId]) {
-        return
+      const updatedGroup = {
+        ...previousGroup,
+        members: {
+          ...previousGroup.members,
+          byId: {
+            ...previousGroup.members.byId,
+            [inboxId]: {
+              ...previousGroup.members.byId[inboxId],
+              permission: "super_admin",
+            },
+          },
+        },
       }
 
-      newMembers.byId[inboxId].permission = "super_admin"
-      setGroupMembersQueryData({
+      setGroupQueryData({
         clientInboxId,
-        topic,
-        members: newMembers,
+        xmtpConversationId,
+        group: updatedGroup,
       })
 
-      return { previousGroupMembers }
+      return { previousGroup }
     },
     onError: (_error, _variables, context) => {
-      if (!context?.previousGroupMembers || !topic) {
+      if (!context?.previousGroup || !xmtpConversationId) {
         return
       }
 
-      setGroupMembersQueryData({
+      setGroupQueryData({
         clientInboxId,
-        topic,
-        members: context.previousGroupMembers,
+        xmtpConversationId,
+        group: context.previousGroup,
       })
     },
     onSuccess: () => {
-      invalidateGroupMembersQuery({ clientInboxId, topic }).catch(captureError)
+      invalidateGroupQuery({ clientInboxId, xmtpConversationId })
     },
   })
 }

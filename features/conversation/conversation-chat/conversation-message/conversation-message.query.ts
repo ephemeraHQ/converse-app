@@ -2,19 +2,18 @@ import { IXmtpInboxId, IXmtpMessageId } from "@features/xmtp/xmtp.types"
 import { queryOptions } from "@tanstack/react-query"
 import { getXmtpConversationMessage } from "@/features/xmtp/xmtp-messages/xmtp-messages"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
-import { IConversationMessageId } from "./conversation-message.types"
 import { convertXmtpMessageToConvosMessage } from "./utils/convert-xmtp-message-to-convos-message"
 
 type IArgs = {
   clientInboxId: IXmtpInboxId
-  messageId: IConversationMessageId
+  xmtpMessageId: IXmtpMessageId
 }
 
 async function getConversationMessage(args: IArgs) {
-  const { clientInboxId, messageId } = args
+  const { clientInboxId, xmtpMessageId } = args
 
   const xmtpMessage = await getXmtpConversationMessage({
-    messageId: messageId as unknown as IXmtpMessageId,
+    messageId: xmtpMessageId,
     clientInboxId,
   })
 
@@ -25,10 +24,13 @@ async function getConversationMessage(args: IArgs) {
   return convertXmtpMessageToConvosMessage(xmtpMessage)
 }
 
-export function getConversationMessageQueryOptions({ clientInboxId, messageId }: IArgs) {
+export function getConversationMessageQueryOptions({
+  clientInboxId,
+  xmtpMessageId: messageId,
+}: IArgs) {
   return queryOptions({
     queryKey: ["conversation-message", clientInboxId, messageId],
-    queryFn: () => getConversationMessage({ clientInboxId, messageId }),
+    queryFn: () => getConversationMessage({ clientInboxId, xmtpMessageId: messageId }),
     enabled: !!messageId && !!clientInboxId,
   })
 }

@@ -9,10 +9,10 @@ import {
   getConversationMetadataQueryData,
   updateConversationMetadataQueryData,
 } from "@/features/conversation/conversation-metadata/conversation-metadata.query"
-import { IConversationTopic } from "../../conversation.types"
+import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 
-export function usePinOrUnpinConversation(args: { conversationTopic: IConversationTopic }) {
-  const { conversationTopic } = args
+export function usePinOrUnpinConversation(args: { xmtpConversationId: IXmtpConversationId }) {
+  const { xmtpConversationId } = args
 
   const currentSender = useSafeCurrentSender()
 
@@ -20,27 +20,27 @@ export function usePinOrUnpinConversation(args: { conversationTopic: IConversati
     mutationFn: () => {
       return pinConversationMetadata({
         clientInboxId: currentSender.inboxId,
-        topic: conversationTopic,
+        xmtpConversationId: xmtpConversationId,
       })
     },
     onMutate: () => {
       const previousPinned = getConversationMetadataQueryData({
         clientInboxId: currentSender.inboxId,
-        topic: conversationTopic,
+        xmtpConversationId: xmtpConversationId,
       })?.pinned
 
       updateConversationMetadataQueryData({
         clientInboxId: currentSender.inboxId,
-        topic: conversationTopic,
+        xmtpConversationId: xmtpConversationId,
         updateData: { pinned: true },
       })
 
       return { previousPinned }
     },
-    onError: (error, _, context) => {
+    onError: (__, _, context) => {
       updateConversationMetadataQueryData({
         clientInboxId: currentSender.inboxId,
-        topic: conversationTopic,
+        xmtpConversationId: xmtpConversationId,
         updateData: { pinned: context?.previousPinned },
       })
     },
@@ -50,18 +50,18 @@ export function usePinOrUnpinConversation(args: { conversationTopic: IConversati
     mutationFn: () => {
       return unpinConversationMetadata({
         clientInboxId: currentSender.inboxId,
-        topic: conversationTopic,
+        xmtpConversationId: xmtpConversationId,
       })
     },
     onMutate: () => {
       const previousPinned = getConversationMetadataQueryData({
         clientInboxId: currentSender.inboxId,
-        topic: conversationTopic,
+        xmtpConversationId: xmtpConversationId,
       })?.pinned
 
       updateConversationMetadataQueryData({
         clientInboxId: currentSender.inboxId,
-        topic: conversationTopic,
+        xmtpConversationId: xmtpConversationId,
         updateData: { pinned: false },
       })
 
@@ -70,7 +70,7 @@ export function usePinOrUnpinConversation(args: { conversationTopic: IConversati
     onError: (error, _, context) => {
       updateConversationMetadataQueryData({
         clientInboxId: currentSender.inboxId,
-        topic: conversationTopic,
+        xmtpConversationId: xmtpConversationId,
         updateData: { pinned: context?.previousPinned },
       })
     },
@@ -79,7 +79,7 @@ export function usePinOrUnpinConversation(args: { conversationTopic: IConversati
   const pinOrUnpinConversationAsync = useCallback(async () => {
     const isPinned = getConversationMetadataQueryData({
       clientInboxId: currentSender.inboxId,
-      topic: conversationTopic,
+      xmtpConversationId: xmtpConversationId,
     })?.pinned
 
     if (isPinned) {
@@ -87,7 +87,7 @@ export function usePinOrUnpinConversation(args: { conversationTopic: IConversati
     } else {
       return pinConversationAsync()
     }
-  }, [conversationTopic, currentSender, pinConversationAsync, unpinConversationAsync])
+  }, [xmtpConversationId, currentSender, pinConversationAsync, unpinConversationAsync])
 
   return {
     pinOrUnpinConversationAsync,

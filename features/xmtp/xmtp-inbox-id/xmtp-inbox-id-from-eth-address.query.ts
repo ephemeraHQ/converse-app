@@ -1,28 +1,29 @@
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query"
 import { getInboxIdFromEthAddress } from "@/features/xmtp/xmtp-inbox-id/xmtp-inbox-id-from-eth-address"
+import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { IEthereumAddress } from "@/utils/evm/address"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
 
 type IArgs = {
-  clientEthAddress: IEthereumAddress | undefined
+  clientInboxId: IXmtpInboxId | undefined
   targetEthAddress: IEthereumAddress | undefined
 }
 
 type IStrictArgs = {
-  clientEthAddress: IEthereumAddress
+  clientInboxId: IXmtpInboxId
   targetEthAddress: IEthereumAddress
 }
 
 export function getXmtpInboxIdFromEthAddressQueryOptions(args: IArgs) {
-  const { clientEthAddress, targetEthAddress } = args
+  const { clientInboxId, targetEthAddress } = args
 
   return queryOptions({
-    queryKey: ["xmtp-inbox-id-from-eth-address", clientEthAddress, targetEthAddress],
+    queryKey: ["xmtp-inbox-id-from-eth-address", clientInboxId, targetEthAddress],
     queryFn:
-      clientEthAddress && targetEthAddress
+      clientInboxId && targetEthAddress
         ? () => {
             return getInboxIdFromEthAddress({
-              clientEthAddress,
+              clientInboxId,
               targetEthAddress,
             })
           }

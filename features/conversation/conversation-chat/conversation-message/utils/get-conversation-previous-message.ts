@@ -1,17 +1,16 @@
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
-import { IConversationMessageId } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.types"
 import { getConversationMessagesQueryData } from "@/features/conversation/conversation-chat/conversation-messages.query"
-import { IConversationTopic } from "@/features/conversation/conversation.types"
+import { IXmtpConversationId, IXmtpMessageId } from "@/features/xmtp/xmtp.types"
 
 export function getConversationPreviousMessage(args: {
-  messageId: IConversationMessageId
-  topic: IConversationTopic
+  messageId: IXmtpMessageId
+  xmtpConversationId: IXmtpConversationId
 }) {
-  const { messageId, topic } = args
+  const { messageId, xmtpConversationId } = args
   const currentSender = getSafeCurrentSender()
   const messages = getConversationMessagesQueryData({
     clientInboxId: currentSender.inboxId,
-    topic,
+    xmtpConversationId,
   })
   if (!messages?.ids.includes(messageId)) {
     return undefined

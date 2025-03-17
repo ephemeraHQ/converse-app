@@ -1,13 +1,11 @@
-import { IXmtpConversationId, IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { useMutation } from "@tanstack/react-query"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import {
-  addGroupMembersToQueryData,
-  cancelGroupMembersQuery,
-  getGroupMembersQueryData,
-  invalidateGroupMembersQuery,
-  setGroupMembersQueryData,
-} from "@/features/groups/group-members.query"
+  getGroupQueryData,
+  invalidateGroupQuery,
+  setGroupQueryData,
+} from "@/features/groups/group.query"
 import { addXmtpGroupMembers } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-group"
 import { IGroup } from "../group.types"
 
@@ -24,49 +22,70 @@ export function useAddGroupMembersMutation() {
       const { group, inboxIds } = variables
       return addXmtpGroupMembers({
         clientInboxId: currentSender.inboxId,
-        groupId: group.id as unknown as IXmtpConversationId,
+        groupId: group.xmtpId,
         inboxIds,
       })
     },
     onMutate: async (variables: AddGroupMembersVariables) => {
       const { group, inboxIds } = variables
 
-      // Get current group members
-      const previousMembers = getGroupMembersQueryData({
+      // Get current group
+      const previousGroup = getGroupQueryData({
         clientInboxId: currentSender.inboxId,
-        topic: group.topic,
+        xmtpConversationId: group.xmtpId,
       })
 
-      for (const inboxId of inboxIds) {
-        // Create optimistic members
-        addGroupMembersToQueryData({
-          clientInboxId: currentSender.inboxId,
-          topic: group.topic,
-          member: {
-            inboxId,
-            permission: "member",
-            consentState: "unknown",
-          },
-        })
+      if (!previousGroup) {
+        return
       }
 
-      return { previousMembers }
+      // Create a new group object with the added members
+      const updatedGroup = {
+        ...previousGroup,
+        members: {
+          ...previousGroup.members,
+          byId: { ...previousGroup.members.byId },
+          ids: [...previousGroup.members.ids],
+        },
+      }
+
+      // Add the new members
+      for (const inboxId of inboxIds) {
+        if (!updatedGroup.members.ids.includes(inboxId)) {
+          updatedGroup.members.ids.push(inboxId)
+        }
+
+        updatedGroup.members.byId[inboxId] = {
+          inboxId,
+          permission: "member",
+          consentState: "unknown",
+        }
+      }
+
+      // Update the group data
+      setGroupQueryData({
+        clientInboxId: currentSender.inboxId,
+        xmtpConversationId: group.xmtpId,
+        group: updatedGroup,
+      })
+
+      return { previousGroup }
     },
     onError: (_error, variables, context) => {
-      // Roll back to previous members on error
-      if (context?.previousMembers) {
-        setGroupMembersQueryData({
+      // Roll back to previous group on error
+      if (context?.previousGroup) {
+        setGroupQueryData({
           clientInboxId: currentSender.inboxId,
-          topic: variables.group.topic,
-          members: context.previousMembers,
+          xmtpConversationId: variables.group.xmtpId,
+          group: context.previousGroup,
         })
       }
     },
     onSettled: (_data, _error, variables) => {
       // Invalidate and refetch after error or success
-      invalidateGroupMembersQuery({
+      invalidateGroupQuery({
         clientInboxId: currentSender.inboxId,
-        topic: variables.group.topic,
+        xmtpConversationId: variables.group.xmtpId,
       })
     },
   })

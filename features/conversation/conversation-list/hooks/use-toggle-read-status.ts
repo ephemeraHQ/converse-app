@@ -5,18 +5,18 @@ import { useMarkConversationAsRead } from "@/features/conversation/hooks/use-mar
 import { useMarkConversationAsUnread } from "@/features/conversation/hooks/use-mark-conversation-as-unread"
 import { getConversationQueryData } from "@/features/conversation/queries/conversation.query"
 import { conversationIsUnreadForInboxId } from "@/features/conversation/utils/conversation-is-unread-by-current-account"
-import { IConversationTopic } from "../../conversation.types"
+import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 
 type UseToggleReadStatusProps = {
-  topic: IConversationTopic
+  xmtpConversationId: IXmtpConversationId
 }
 
-export const useToggleReadStatus = ({ topic }: UseToggleReadStatusProps) => {
+export const useToggleReadStatus = ({ xmtpConversationId }: UseToggleReadStatusProps) => {
   const { markAsReadAsync } = useMarkConversationAsRead({
-    topic,
+    xmtpConversationId,
   })
   const { markAsUnreadAsync } = useMarkConversationAsUnread({
-    topic,
+    xmtpConversationId,
   })
 
   const toggleReadStatusAsync = useCallback(async () => {
@@ -24,11 +24,11 @@ export const useToggleReadStatus = ({ topic }: UseToggleReadStatusProps) => {
 
     const conversationData = getConversationMetadataQueryData({
       clientInboxId: currentSender.inboxId,
-      topic,
+      xmtpConversationId,
     })
     const conversation = getConversationQueryData({
       clientInboxId: currentSender.inboxId,
-      topic,
+      xmtpConversationId,
     })
 
     const conversationIsUnread = conversationIsUnreadForInboxId({
@@ -46,7 +46,7 @@ export const useToggleReadStatus = ({ topic }: UseToggleReadStatusProps) => {
     } else {
       await markAsUnreadAsync()
     }
-  }, [markAsReadAsync, markAsUnreadAsync, topic])
+  }, [markAsReadAsync, markAsUnreadAsync, xmtpConversationId])
 
   return { toggleReadStatusAsync }
 }

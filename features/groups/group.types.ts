@@ -1,6 +1,7 @@
 import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { IConsentState } from "@/features/consent/consent.types"
 import { IConversationBase } from "@/features/conversation/conversation.types"
+import { EntityObject } from "@/utils/entify"
 
 export type IGroupMember = {
   inboxId: IXmtpInboxId
@@ -33,5 +34,5 @@ export type IGroup = IConversationBase & {
   imageUrl?: string
   addedByInboxId: IXmtpInboxId
   creatorInboxId: IXmtpInboxId
-  members: IGroupMember[]
+  members: EntityObject<IGroupMember, IXmtpInboxId>
 }

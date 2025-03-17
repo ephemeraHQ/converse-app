@@ -33,7 +33,7 @@ export const ConversationMessageRemoteAttachment = memo(
       >
         <ConversationMessageGestures>
           <AttachmentRemoteImage
-            messageId={message.id}
+            xmtpMessageId={message.xmtpId}
             remoteMessageContent={content}
             fitAspectRatio
           />

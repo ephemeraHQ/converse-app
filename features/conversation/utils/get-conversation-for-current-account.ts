@@ -1,10 +1,10 @@
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { getConversationQueryData } from "@/features/conversation/queries/conversation.query"
-import { IConversationTopic } from "../conversation.types"
+import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 
-export function getConversationForCurrentAccount(topic: IConversationTopic) {
+export function getConversationForCurrentAccount(xmtpConversationId: IXmtpConversationId) {
   return getConversationQueryData({
     clientInboxId: getSafeCurrentSender().inboxId,
-    topic: topic,
+    xmtpConversationId,
   })
 }

@@ -1,4 +1,4 @@
-import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import { IXmtpConversationId, IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { keepPreviousData, queryOptions, useQuery } from "@tanstack/react-query"
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { getAllowedConsentConversationsQueryData } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
@@ -9,7 +9,6 @@ import { doesSocialProfilesMatchTextQuery } from "@/features/profiles/utils/does
 import { ensureSocialProfilesForAddressQuery } from "@/features/social-profiles/social-profiles.query"
 import { captureError } from "@/utils/capture-error"
 import { normalizeString } from "@/utils/str"
-import { IConversationTopic } from "../../conversation.types"
 
 export function getSearchExistingDmsQueryOptions(args: {
   searchQuery: string
@@ -33,7 +32,7 @@ export function getSearchExistingDmsQueryOptions(args: {
 }
 
 async function searchExistingDms(args: { searchQuery: string; inboxId: IXmtpInboxId }) {
-  const { searchQuery, inboxId } = args
+  const { searchQuery } = args
   const currentSender = getSafeCurrentSender()
   const conversations = getAllowedConsentConversationsQueryData({
     clientInboxId: currentSender.inboxId,
@@ -49,7 +48,7 @@ async function searchExistingDms(args: { searchQuery: string; inboxId: IXmtpInbo
     return []
   }
 
-  const matchingTopics: IConversationTopic[] = []
+  const matchingXmtpConversationIds: IXmtpConversationId[] = []
   const dmConversations = conversations.filter(isConversationDm)
 
   const results = await Promise.all(
@@ -58,7 +57,7 @@ async function searchExistingDms(args: { searchQuery: string; inboxId: IXmtpInbo
         // Get peer's inbox ID from either group members or DM peer data, using whichever returns first
         const peerInboxId = await ensureDmPeerInboxIdQueryData({
           inboxId: currentSender.inboxId,
-          topic: conversation.topic,
+          xmtpConversationId: conversation.xmtpId,
           caller: "searchExistingDms",
         })
 
@@ -81,7 +80,7 @@ async function searchExistingDms(args: { searchQuery: string; inboxId: IXmtpInbo
           normalizedQuery: normalizedSearchQuery,
         })
 
-        return hasProfileMatch || hasSocialProfileMatch ? conversation.topic : null
+        return hasProfileMatch || hasSocialProfileMatch ? conversation.xmtpId : null
       } catch (e) {
         captureError(e)
         return null
@@ -90,9 +89,9 @@ async function searchExistingDms(args: { searchQuery: string; inboxId: IXmtpInbo
   )
 
   // Filter out nulls and add matching topics to results
-  matchingTopics.push(...results.filter(Boolean))
+  matchingXmtpConversationIds.push(...results.filter(Boolean))
 
-  return matchingTopics
+  return matchingXmtpConversationIds
 }
 
 export function useSearchExistingDmsQuery(args: { searchQuery: string; inboxId: IXmtpInboxId }) {

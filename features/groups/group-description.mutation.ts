@@ -8,42 +8,42 @@ import {
 import { updateXmtpGroupDescription } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-group"
 import { IXmtpConversationId, IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
-import { IConversationTopic } from "../conversation/conversation.types"
 import { IGroup } from "./group.types"
 
 type IArgs = {
   inboxId: IXmtpInboxId
-  topic: IConversationTopic
+  xmtpConversationId: IXmtpConversationId
 }
 
 export function useGroupDescriptionMutation(args: IArgs) {
-  const { inboxId, topic } = args
-  const { data: group } = useGroupQuery({ clientInboxId: inboxId, topic })
+  const { inboxId, xmtpConversationId } = args
+  const { data: group } = useGroupQuery({ clientInboxId: inboxId, xmtpConversationId })
 
   return useMutation({
     mutationFn: async (description: string) => {
-      if (!group || !inboxId || !topic) {
+      if (!group || !inboxId || !xmtpConversationId) {
         throw new Error("Missing required data in useGroupDescriptionMutation")
       }
 
       await updateXmtpGroupDescription({
         clientInboxId: inboxId,
-        groupId: topic as unknown as IXmtpConversationId,
+        groupId: group.xmtpId,
         description,
       })
+
       return description
     },
     onMutate: async (description: string) => {
-      const previousGroup = getGroupQueryData({ clientInboxId: inboxId, topic })
+      const previousGroup = getGroupQueryData({ clientInboxId: inboxId, xmtpConversationId })
       const updates: Partial<IGroup> = { description }
 
       if (previousGroup) {
-        updateGroupQueryData({ clientInboxId: inboxId, topic, updates })
+        updateGroupQueryData({ clientInboxId: inboxId, xmtpConversationId, updates })
       }
 
       updateConversationInAllowedConsentConversationsQueryData({
         clientInboxId: inboxId,
-        topic,
+        xmtpConversationId,
         conversationUpdate: updates,
       })
 
@@ -54,14 +54,12 @@ export function useGroupDescriptionMutation(args: IArgs) {
 
       const { previousGroup } = context || {}
 
-      const updates: Partial<IGroup> = {
-        description: previousGroup?.description ?? "",
-      }
+      const updates: Partial<IGroup> = { description: previousGroup?.description ?? "" }
 
-      updateGroupQueryData({ clientInboxId: inboxId, topic, updates })
+      updateGroupQueryData({ clientInboxId: inboxId, xmtpConversationId, updates })
       updateConversationInAllowedConsentConversationsQueryData({
         clientInboxId: inboxId,
-        topic,
+        xmtpConversationId,
         conversationUpdate: updates,
       })
     },

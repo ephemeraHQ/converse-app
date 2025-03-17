@@ -1,19 +1,19 @@
-import { IConversationTopic } from "@/features/conversation/conversation.types"
 import { AddGroupMembersScreen } from "@/features/groups/group-details/add-group-members/add-group-members.screen"
+import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 import { translate } from "@/i18n"
 import { AppNativeStack } from "@/navigation/app-navigator"
 
 export type AddGroupMembersNavParams = {
-  groupTopic: IConversationTopic
+  xmtpConversationId: IXmtpConversationId
 }
 
 export const AddGroupMembersScreenConfig = {
   path: "/add-group-members",
   parse: {
-    groupTopic: decodeURIComponent,
+    xmtpConversationId: decodeURIComponent,
   },
   stringify: {
-    groupTopic: encodeURIComponent,
+    xmtpConversationId: encodeURIComponent,
   },
 }
 

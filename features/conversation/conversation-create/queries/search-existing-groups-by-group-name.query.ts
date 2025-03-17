@@ -21,7 +21,7 @@ export async function searchExistingGroupsByGroupName(args: { searchQuery: strin
 
   return groups
     .filter((group) => normalizeString(group.name).includes(searchQuery))
-    .map((group) => group.topic)
+    .map((group) => group.xmtpId)
 }
 
 export function getSearchExistingGroupsByGroupNameQueryOptions(args: {

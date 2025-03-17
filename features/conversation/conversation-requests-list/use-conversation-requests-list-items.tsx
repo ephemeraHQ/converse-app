@@ -3,7 +3,7 @@ import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.stor
 import { getUnknownConsentConversationsQueryOptions } from "@/features/conversation/conversation-requests-list/conversations-unknown-consent.query"
 import { getMessageSpamScore } from "@/features/conversation/conversation-requests-list/utils/get-message-spam-score"
 import { captureError } from "@/utils/capture-error"
-import { getMessageStringContent } from "../conversation-chat/conversation-message/utils/get-message-string-content"
+import { getMessageContentStringValue } from "../conversation-chat/conversation-message/utils/get-message-string-content"
 
 export function useConversationRequestsListItem() {
   const currentSenderInboxId = useSafeCurrentSender().inboxId
@@ -18,7 +18,7 @@ export function useConversationRequestsListItem() {
 
   const spamQueries = useQueries({
     queries: (unkownConsentConversations ?? []).map((conversation) => ({
-      queryKey: ["is-spam", conversation.topic],
+      queryKey: ["is-spam", conversation.xmtpTopic],
       queryFn: async () => {
         const lastMessage = conversation.lastMessage
 
@@ -26,7 +26,7 @@ export function useConversationRequestsListItem() {
           return true
         }
 
-        const messageText = getMessageStringContent(lastMessage)
+        const messageText = getMessageContentStringValue(lastMessage.content)
 
         if (!messageText) {
           return true

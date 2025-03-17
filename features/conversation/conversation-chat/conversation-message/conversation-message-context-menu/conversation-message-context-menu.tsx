@@ -19,7 +19,7 @@ import { useConversationMessageContextMenuStyles } from "@/features/conversation
 import { ConversationMessageContextStoreProvider } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.store-context"
 import { getMessageFromConversationSafe } from "@/features/conversation/conversation-chat/conversation-message/utils/get-message-from-conversation"
 import { getConversationMessagesQueryData } from "@/features/conversation/conversation-chat/conversation-messages.query"
-import { useCurrentConversationTopicSafe } from "@/features/conversation/conversation-chat/conversation.store-context"
+import { useCurrentXmtpConversationIdSafe } from "@/features/conversation/conversation-chat/conversation.store-context"
 import { useReactOnMessage } from "@/features/conversation/conversation-chat/use-react-on-message.mutation"
 import { useRemoveReactionOnMessage } from "@/features/conversation/conversation-chat/use-remove-reaction-on-message.mutation"
 import { messageIsFromCurrentSenderInboxId } from "@/features/conversation/utils/message-is-from-current-user"
@@ -50,7 +50,7 @@ const Content = memo(function Content(props: {
 
   const { messageId, itemRectX, itemRectY, itemRectHeight, itemRectWidth } = messageContextMenuData
 
-  const topic = useCurrentConversationTopicSafe()
+  const xmtpConversationId = useCurrentXmtpConversationIdSafe()
   const messageContextMenuStore = useConversationMessageContextMenuStore()
   const currentSender = useSafeCurrentSender()
 
@@ -59,13 +59,13 @@ const Content = memo(function Content(props: {
   const { message, previousMessage, nextMessage } = useMemo(() => {
     const message = getMessageFromConversationSafe({
       messageId,
-      topic,
+      xmtpConversationId,
       clientInboxId: currentSender.inboxId,
     })
 
     const messages = getConversationMessagesQueryData({
       clientInboxId: currentSender.inboxId,
-      topic,
+      xmtpConversationId,
     })
 
     const messageIndex = messages?.ids.findIndex((m) => m === messageId)
@@ -76,7 +76,7 @@ const Content = memo(function Content(props: {
     const nextMessage = nextMessageId
       ? getMessageFromConversationSafe({
           messageId: nextMessageId,
-          topic,
+          xmtpConversationId,
           clientInboxId: currentSender.inboxId,
         })
       : undefined
@@ -84,7 +84,7 @@ const Content = memo(function Content(props: {
     const previousMessage = previousMessageId
       ? getMessageFromConversationSafe({
           messageId: previousMessageId,
-          topic,
+          xmtpConversationId,
           clientInboxId: currentSender.inboxId,
         })
       : undefined
@@ -94,22 +94,22 @@ const Content = memo(function Content(props: {
       previousMessage,
       nextMessage,
     }
-  }, [messageId, topic, currentSender])
+  }, [messageId, xmtpConversationId, currentSender])
 
   const fromMe = messageIsFromCurrentSenderInboxId({ message })
   const menuItems = useMessageContextMenuItems({
     messageId: messageId,
-    topic,
+    xmtpConversationId,
   })
 
   const { itemHeight } = useDropdownMenuCustomStyles()
   const menuHeight = itemHeight * menuItems.length
 
   const { reactOnMessage } = useReactOnMessage({
-    topic,
+    xmtpConversationId,
   })
   const { removeReactionOnMessage } = useRemoveReactionOnMessage({
-    topic,
+    xmtpConversationId,
   })
 
   const handlePressBackdrop = useCallback(() => {
@@ -120,7 +120,7 @@ const Content = memo(function Content(props: {
     (emoji: string) => {
       const currentUserAlreadyReacted = getCurrentUserAlreadyReactedOnMessage({
         messageId,
-        topic,
+        xmtpConversationId,
         emoji,
       })
 
@@ -134,7 +134,13 @@ const Content = memo(function Content(props: {
       }
       messageContextMenuStore.getState().setMessageContextMenuData(null)
     },
-    [reactOnMessage, messageId, removeReactionOnMessage, messageContextMenuStore, topic],
+    [
+      reactOnMessage,
+      messageId,
+      removeReactionOnMessage,
+      messageContextMenuStore,
+      xmtpConversationId,
+    ],
   )
 
   const handleChooseMoreEmojis = useCallback(() => {
@@ -167,7 +173,7 @@ const Content = memo(function Content(props: {
                 hasReactions={hasReactions}
               >
                 <MessageContextMenuAboveMessageReactions
-                  topic={topic}
+                  xmtpConversationId={xmtpConversationId}
                   reactors={bySender ?? {}}
                   messageId={messageId}
                   onChooseMoreEmojis={handleChooseMoreEmojis}

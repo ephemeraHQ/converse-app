@@ -14,10 +14,14 @@ import {
 } from "@/features/conversation/conversation-chat/conversation-messages.query"
 import { updateConversationInAllowedConsentConversationsQueryData } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import {
-  getOrFetchConversationQuery,
+  ensureConversationQueryData,
+  getConversationQueryData,
   updateConversationQueryData,
 } from "@/features/conversation/queries/conversation.query"
-import { sendXmtpConversationMessage } from "@/features/xmtp/xmtp-conversations/xmtp-conversation"
+import {
+  getXmtpConversationTopicFromXmtpId,
+  sendXmtpConversationMessage,
+} from "@/features/xmtp/xmtp-conversations/xmtp-conversation"
 import { getXmtpConversationMessage } from "@/features/xmtp/xmtp-messages/xmtp-messages"
 import {
   IXmtpConversationId,
@@ -30,25 +34,23 @@ import { getTodayNs } from "@/utils/date"
 import { getRandomId } from "@/utils/general"
 import {
   IConversationMessageContent,
-  IConversationMessageId,
   IConversationMessageMultiRemoteAttachmentContent,
   IConversationMessageRemoteAttachmentContent,
 } from "../conversation-chat/conversation-message/conversation-message.types"
-import { IConversationTopic } from "../conversation.types"
 
 export type ISendMessageParams = {
-  topic: IConversationTopic
-  replyMessageId?: IConversationMessageId
+  xmtpConversationId: IXmtpConversationId
+  replyXmtpMessageId?: IXmtpMessageId
   contents: IConversationMessageContent[] // Array because we can send text at same time as attachments for example
 }
 
 export async function sendMessage(args: ISendMessageParams) {
-  const { replyMessageId, contents, topic } = args
+  const { replyXmtpMessageId, contents, xmtpConversationId } = args
 
   const currentSender = getSafeCurrentSender()
 
-  const conversation = await getOrFetchConversationQuery({
-    topic,
+  const conversation = await ensureConversationQueryData({
+    xmtpConversationId,
     clientInboxId: currentSender.inboxId,
     caller: "use-send-message",
   })
@@ -80,14 +82,14 @@ export async function sendMessage(args: ISendMessageParams) {
 
   let sentXmtpMessageId: IXmtpMessageId | null = null
 
-  if (replyMessageId) {
+  if (replyXmtpMessageId) {
     // Send as a reply
     sentXmtpMessageId = await sendXmtpConversationMessage({
       clientInboxId: currentSender.inboxId,
-      conversationId: conversation.id as unknown as IXmtpConversationId,
+      conversationId: conversation.xmtpId,
       content: {
         reply: {
-          reference: replyMessageId,
+          reference: replyXmtpMessageId,
           content: combinedContent as IXmtpDecodedMessageNativeContent,
         },
       },
@@ -96,7 +98,7 @@ export async function sendMessage(args: ISendMessageParams) {
     // Send as a regular message
     sentXmtpMessageId = await sendXmtpConversationMessage({
       clientInboxId: currentSender.inboxId,
-      conversationId: conversation.id as unknown as IXmtpConversationId,
+      conversationId: conversation.xmtpId,
       content: combinedContent,
     })
   }
@@ -127,12 +129,18 @@ export async function sendMessage(args: ISendMessageParams) {
 export function useSendMessage() {
   const mutation = useMutation({
     mutationFn: sendMessage,
-    onMutate: (variables) => {
-      const { topic, contents } = variables
+    onMutate: async (variables) => {
+      const { xmtpConversationId, contents } = variables
 
       const currentSender = getCurrentSender()!
 
-      const tempMessageId = getRandomId() as IConversationMessageId
+      // const deterministicMessageId = await generateDeterministicMessageId({
+      //   content: getMessageContentStringValue(contents[0]),
+      //   senderInboxId: currentSender.inboxId,
+      //   xmtpConversationId,
+      // })
+
+      const randomMessageId = getRandomId() as IXmtpMessageId
 
       // Create a properly typed content object for the optimistic update
       const combinedContent: {
@@ -153,24 +161,31 @@ export function useSendMessage() {
 
       const optimisticMessage = getMessageWithType({
         baseMessage: {
-          id: tempMessageId,
+          tempOptimisticId: randomMessageId,
+          xmtpId: "" as IXmtpMessageId, // Will be set once we send the message and replace with the real
+          xmtpTopic: getXmtpConversationTopicFromXmtpId(xmtpConversationId),
           sentNs: getTodayNs(),
           status: "sending",
-          topic,
+          xmtpConversationId,
           senderInboxId: currentSender.inboxId,
         },
         content: combinedContent as IConversationMessageContent,
       })
 
+      const previousConversation = getConversationQueryData({
+        clientInboxId: currentSender.inboxId,
+        xmtpConversationId,
+      })
+
       addMessageToConversationMessagesQuery({
         clientInboxId: currentSender.inboxId,
-        topic,
+        xmtpConversationId,
         message: optimisticMessage,
       })
 
       updateConversationQueryData({
         clientInboxId: currentSender.inboxId,
-        topic,
+        xmtpConversationId,
         conversationUpdate: {
           lastMessage: optimisticMessage,
         },
@@ -178,14 +193,15 @@ export function useSendMessage() {
 
       updateConversationInAllowedConsentConversationsQueryData({
         clientInboxId: currentSender.inboxId,
-        topic,
+        xmtpConversationId,
         conversationUpdate: {
           lastMessage: optimisticMessage,
         },
       })
 
       return {
-        tempMessageId,
+        tmpMessageId: randomMessageId,
+        previousConversation,
       }
     },
     onSuccess: async (result, variables, context) => {
@@ -193,14 +209,14 @@ export function useSendMessage() {
 
       if (result.message) {
         replaceOptimisticMessageWithReal({
-          tempId: context.tempMessageId,
-          topic: variables.topic,
+          tmpId: context.tmpMessageId,
+          xmtpConversationId: variables.xmtpConversationId,
           clientInboxId: currentSender.inboxId,
           realMessage: result.message,
         })
       }
     },
-    onError: (error, variables, context) => {
+    onError: (_, variables, context) => {
       if (!context) {
         return
       }
@@ -209,11 +225,29 @@ export function useSendMessage() {
 
       removeMessageToConversationMessages({
         clientInboxId: currentSender.inboxId,
-        topic: variables.topic,
-        messageId: context?.tempMessageId,
+        xmtpConversationId: variables.xmtpConversationId,
+        messageId: context?.tmpMessageId,
       })
 
-      // TODO: Revert last message of conversation and list
+      if (context.previousConversation) {
+        // Revert last message of conversation and list
+        updateConversationQueryData({
+          clientInboxId: currentSender.inboxId,
+          xmtpConversationId: variables.xmtpConversationId,
+          conversationUpdate: {
+            lastMessage: context.previousConversation?.lastMessage,
+          },
+        })
+
+        // Revert updated conversation
+        updateConversationInAllowedConsentConversationsQueryData({
+          clientInboxId: currentSender.inboxId,
+          xmtpConversationId: variables.xmtpConversationId,
+          conversationUpdate: {
+            lastMessage: context.previousConversation.lastMessage,
+          },
+        })
+      }
     },
   })
 

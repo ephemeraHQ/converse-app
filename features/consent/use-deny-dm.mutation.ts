@@ -8,15 +8,12 @@ import {
   addConversationToUnknownConsentConversationsQuery,
   removeConversationFromUnknownConsentConversationsQueryData,
 } from "@/features/conversation/conversation-requests-list/conversations-unknown-consent.query"
-import { getConversationQueryData } from "@/features/conversation/queries/conversation.query"
 import { getDmQueryData, setDmQueryData } from "@/features/dm/dm.query"
 import { IXmtpConversationId, IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
-import { IConversationId, IConversationTopic } from "../conversation/conversation.types"
-import { IDm } from "../dm/dm.types"
 import {
   setXmtpConsentStateForInboxId,
-  updateConsentForGroupsForInbox,
+  updateXmtpConsentForGroupsForInbox,
 } from "../xmtp/xmtp-consent/xmtp-consent"
 
 export function useDenyDmMutation() {
@@ -25,32 +22,28 @@ export function useDenyDmMutation() {
   return useMutation({
     mutationFn: async (args: {
       peerInboxId: IXmtpInboxId
-      conversationId: IConversationId
-      topic: IConversationTopic
+      xmtpConversationId: IXmtpConversationId
     }) => {
-      const { peerInboxId, conversationId } = args
-
-      if (!peerInboxId) {
-        throw new Error("Peer inbox id not found")
-      }
+      const { peerInboxId, xmtpConversationId } = args
 
       await Promise.all([
-        updateConsentForGroupsForInbox({
+        updateXmtpConsentForGroupsForInbox({
           clientInboxId: currentSenderInboxId,
-          groupIds: [conversationId as unknown as IXmtpConversationId],
+          groupIds: [xmtpConversationId],
           consent: "denied",
         }),
         setXmtpConsentStateForInboxId({
-          inboxId: currentSenderInboxId,
+          peerInboxId,
           consent: "denied",
         }),
       ])
     },
-    onMutate: ({ topic, peerInboxId }) => {
-      const conversation = getConversationQueryData({
+    onMutate: ({ xmtpConversationId }) => {
+      const conversation = getDmQueryData({
         clientInboxId: currentSenderInboxId,
-        topic,
+        xmtpConversationId,
       })
+
       if (conversation) {
         const updatedDm = updateObjectAndMethods(conversation, {
           consentState: "denied",
@@ -58,31 +51,32 @@ export function useDenyDmMutation() {
 
         setDmQueryData({
           clientInboxId: currentSenderInboxId,
-          topic,
-          dm: updatedDm as IDm,
+          xmtpConversationId,
+          dm: updatedDm,
         })
 
         // Remove from main conversations list
         removeConversationFromAllowedConsentConversationsQuery({
           clientInboxId: currentSenderInboxId,
-          topic,
+          xmtpConversationId,
         })
 
         // Remove from requests
         removeConversationFromUnknownConsentConversationsQueryData({
           inboxId: currentSenderInboxId,
-          topic,
+          xmtpConversationId,
         })
 
         return { previousDmConsent: conversation.consentState }
       }
     },
-    onError: (error, { topic, peerInboxId }, context) => {
+    onError: (error, { xmtpConversationId }, context) => {
       const { previousDmConsent } = context || {}
+
       if (previousDmConsent) {
         const dm = getDmQueryData({
           clientInboxId: currentSenderInboxId,
-          topic,
+          xmtpConversationId,
         })
 
         if (!dm) {
@@ -94,8 +88,8 @@ export function useDenyDmMutation() {
         })
 
         setDmQueryData({
-          topic,
-          clientInboxId: peerInboxId,
+          xmtpConversationId,
+          clientInboxId: currentSenderInboxId,
           dm: previousDm,
         })
 

@@ -1,10 +1,9 @@
-import { IConversationTopic } from "@/features/conversation/conversation.types"
-import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
-
-// Core type identifiers
-export type IConversationMessageId = string & {
-  readonly brand: unique symbol
-}
+import {
+  IXmtpConversationId,
+  IXmtpConversationTopic,
+  IXmtpInboxId,
+  IXmtpMessageId,
+} from "@/features/xmtp/xmtp.types"
 
 export type IConversationMessageStatus = "sending" | "sent" | "error"
 
@@ -19,11 +18,13 @@ export type IConversationMessageContentType =
 
 // Base message structure
 export type IConversationMessageBase = {
-  id: IConversationMessageId
   status: IConversationMessageStatus
   senderInboxId: IXmtpInboxId
   sentNs: number
-  topic: IConversationTopic
+  xmtpId: IXmtpMessageId
+  xmtpTopic: IXmtpConversationTopic
+  xmtpConversationId: IXmtpConversationId
+  tempOptimisticId?: string
 }
 
 // Message content types
@@ -32,14 +33,14 @@ export type IConversationMessageTextContent = {
 }
 
 export type IConversationMessageReactionContent = {
-  reference: IConversationMessageId
+  reference: IXmtpMessageId
   action: "added" | "removed" | "unknown"
   schema: "unicode" | "shortcode" | "custom" | "unknown"
   content: string
 }
 
 export type IConversationMessageReplyContent = {
-  reference: IConversationMessageId
+  reference: IXmtpMessageId
   content: IConversationMessageContent
 }
 
@@ -137,4 +138,4 @@ export type IConversationMessage =
   | IConversationMessageReply
   | IConversationMessageRemoteAttachment
   | IConversationMessageStaticAttachment
-  | IConversationMessageMultiRemoteAttachment
+  | IConversationMessageMultiRemoteAttachment // ===== Message Types =====

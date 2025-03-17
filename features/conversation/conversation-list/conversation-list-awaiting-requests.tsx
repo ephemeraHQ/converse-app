@@ -27,7 +27,7 @@ export const ConversationListAwaitingRequests = memo(function ConversationListAw
     queries: (likelyNotSpam ?? []).map((conversation) =>
       getConversationMetadataQueryOptions({
         clientInboxId: currentSender.inboxId,
-        topic: conversation.topic,
+        xmtpConversationId: conversation.xmtpId,
       }),
     ),
   })

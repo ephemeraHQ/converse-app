@@ -21,12 +21,12 @@ export const ConversationListPinnedConversationDm = ({
   conversation,
 }: IConversationListPinnedConversationDmProps) => {
   const currentSender = useSafeCurrentSender()
-  const conversationTopic = conversation.topic
+  const xmtpConversationId = conversation.xmtpId
   const { avatarSize } = useConversationListPinnedConversationsStyles()
 
   const { data: peerInboxId } = useDmPeerInboxIdQuery({
     inboxId: currentSender.inboxId,
-    topic: conversationTopic,
+    xmtpConversationId,
     caller: "ConversationListPinnedConversationDm",
   })
 
@@ -35,18 +35,18 @@ export const ConversationListPinnedConversationDm = ({
   })
 
   const { isUnread } = useConversationIsUnread({
-    topic: conversationTopic,
+    xmtpConversationId,
   })
 
   const onPress = useCallback(() => {
-    navigate("Conversation", { topic: conversation.topic })
-  }, [conversation.topic])
+    navigate("Conversation", { xmtpConversationId })
+  }, [xmtpConversationId])
 
   const displayMessagePreview =
     conversation.lastMessage && isTextMessage(conversation.lastMessage) && isUnread
 
   const contextMenuProps = useDmConversationContextMenuViewProps({
-    dmConversationTopic: conversationTopic,
+    xmtpConversationId,
   })
 
   return (

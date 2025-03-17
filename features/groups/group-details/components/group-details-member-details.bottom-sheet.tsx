@@ -38,16 +38,16 @@ export const MemberDetailsBottomSheet = memo(function MemberDetailsBottomSheet()
   })
   const router = useRouter()
   const currentSender = useSafeCurrentSender()
-  const { groupTopic } = useRouteParams<"GroupDetails">()
+  const { xmtpConversationId } = useRouteParams<"GroupDetails">()
 
   const { groupMember: currentSenderGroupMember } = useGroupMember({
     memberInboxId: currentSender.inboxId,
-    topic: groupTopic,
+    xmtpConversationId,
   })
 
   const { groupMember: targetGroupMember } = useGroupMember({
     memberInboxId: memberInboxId,
-    topic: groupTopic,
+    xmtpConversationId,
   })
 
   const { displayName: targetDisplayName } = usePreferredDisplayInfo({
@@ -80,23 +80,23 @@ export const MemberDetailsBottomSheet = memo(function MemberDetailsBottomSheet()
 
   const { mutateAsync: promoteToAdmin } = usePromoteToAdminMutation({
     clientInboxId: currentSender.inboxId,
-    topic: groupTopic,
+    xmtpConversationId,
   })
   const { mutateAsync: promoteToSuperAdmin } = usePromoteToSuperAdminMutation({
     clientInboxId: currentSender.inboxId,
-    topic: groupTopic,
+    xmtpConversationId,
   })
   const { mutateAsync: revokeSuperAdmin } = useRevokeSuperAdminMutation({
     clientInboxId: currentSender.inboxId,
-    topic: groupTopic,
+    xmtpConversationId,
   })
   const { mutateAsync: revokeAdmin } = useRevokeAdminMutation({
     clientInboxId: currentSender.inboxId,
-    topic: groupTopic,
+    xmtpConversationId,
   })
   const { mutateAsync: removeMember } = useRemoveGroupMembersFromGroupMutation({
     clientInboxId: currentSender.inboxId,
-    topic: groupTopic,
+    xmtpConversationId,
   })
 
   const handleViewProfilePress = useCallback(() => {

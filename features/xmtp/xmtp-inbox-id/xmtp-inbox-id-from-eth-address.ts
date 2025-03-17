@@ -1,27 +1,26 @@
-import { PublicIdentity } from "@xmtp/react-native-sdk"
+import { findInboxIdFromIdentity, PublicIdentity } from "@xmtp/react-native-sdk"
 import { config } from "@/config"
+import { ensureXmtpInstallationQueryData } from "@/features/xmtp/xmtp-installations/xmtp-installation.query"
 import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
 import { GenericError, XMTPError } from "@/utils/error"
 import { IEthereumAddress } from "@/utils/evm/address"
 import { xmtpLogger } from "@/utils/logger"
-import { tryCatch } from "@/utils/try-catch"
-import { getXmtpClientByEthAddress } from "../xmtp-client/xmtp-client.service"
 
 export async function getInboxIdFromEthAddress(args: {
-  clientEthAddress: IEthereumAddress
+  clientInboxId: IXmtpInboxId
   targetEthAddress: IEthereumAddress
 }) {
-  const { clientEthAddress, targetEthAddress } = args
+  const { clientInboxId, targetEthAddress } = args
 
   xmtpLogger.debug(
-    `[getInboxIdFromEthAddress] Getting inbox ID from Ethereum address: ${targetEthAddress} for client: ${clientEthAddress}`,
+    `[getInboxIdFromEthAddress] Getting inbox ID from Ethereum address: ${targetEthAddress} for client: ${clientInboxId}`,
   )
 
-  if (!clientEthAddress) {
+  if (!clientInboxId) {
     throw new GenericError({
-      error: new Error("Invalid client Ethereum address"),
-      additionalMessage: "Invalid client Ethereum address",
+      error: new Error("Invalid client inbox ID"),
+      additionalMessage: "Invalid client inbox ID",
     })
   }
 
@@ -32,24 +31,16 @@ export async function getInboxIdFromEthAddress(args: {
     })
   }
 
-  const { data: client, error } = await tryCatch(
-    getXmtpClientByEthAddress({
-      ethAddress: clientEthAddress,
-    }),
-  )
-
-  if (error) {
-    throw new XMTPError({
-      error,
-      additionalMessage: "failed to get XMTP client",
-    })
-  }
+  const installationId = await ensureXmtpInstallationQueryData({
+    inboxId: clientInboxId,
+  })
 
   try {
     const lookupStartTime = Date.now()
-    const inboxId = await client.findInboxIdFromIdentity(
+    const inboxId = (await findInboxIdFromIdentity(
+      installationId,
       new PublicIdentity(targetEthAddress, "ETHEREUM"),
-    )
+    )) as unknown as IXmtpInboxId
     const lookupEndTime = Date.now()
 
     const lookupDuration = lookupEndTime - lookupStartTime
@@ -64,7 +55,7 @@ export async function getInboxIdFromEthAddress(args: {
       )
     }
 
-    return inboxId as unknown as IXmtpInboxId
+    return inboxId
   } catch (error) {
     throw new XMTPError({
       error,

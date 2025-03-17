@@ -4,26 +4,26 @@ import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.stor
 import { getConversationMetadataQueryOptions } from "@/features/conversation/conversation-metadata/conversation-metadata.query"
 import { getConversationQueryOptions } from "@/features/conversation/queries/conversation.query"
 import { conversationIsUnreadForInboxId } from "@/features/conversation/utils/conversation-is-unread-by-current-account"
-import { IConversationTopic } from "../../conversation.types"
+import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 
 type UseConversationIsUnreadArgs = {
-  topic: IConversationTopic
+  xmtpConversationId: IXmtpConversationId
 }
 
-export const useConversationIsUnread = ({ topic }: UseConversationIsUnreadArgs) => {
+export const useConversationIsUnread = ({ xmtpConversationId }: UseConversationIsUnreadArgs) => {
   const currentSender = useSafeCurrentSender()
 
   const { data: conversationMetadata, isLoading: isLoadingConversationMetadata } = useQuery(
     getConversationMetadataQueryOptions({
       clientInboxId: currentSender.inboxId,
-      topic,
+      xmtpConversationId,
     }),
   )
 
   const { data: lastMessage, isLoading: isLoadingLastMessage } = useQuery({
     ...getConversationQueryOptions({
       clientInboxId: currentSender.inboxId,
-      topic,
+      xmtpConversationId,
     }),
     select: (data) => data?.lastMessage,
   })

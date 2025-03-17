@@ -1,6 +1,5 @@
 import { conversationMessages, findMessage } from "@xmtp/react-native-sdk"
 import { config } from "@/config"
-import { getXmtpClientByInboxId } from "@/features/xmtp/xmtp-client/xmtp-client.service"
 import {
   ISupportedXmtpCodecs,
   isXmtpGroupUpdatedContentType,
@@ -12,6 +11,7 @@ import {
   isXmtpStaticAttachmentContentType,
   isXmtpTextContentType,
 } from "@/features/xmtp/xmtp-codecs/xmtp-codecs"
+import { ensureXmtpInstallationQueryData } from "@/features/xmtp/xmtp-installations/xmtp-installation.query"
 import { captureError } from "@/utils/capture-error"
 import { XMTPError } from "@/utils/error"
 import {
@@ -44,13 +44,13 @@ export async function getXmtpConversationMessages(args: {
   const { clientInboxId, conversationId, limit = 30 } = args
 
   try {
-    const client = await getXmtpClientByInboxId({
+    const installationId = await ensureXmtpInstallationQueryData({
       inboxId: clientInboxId,
     })
 
     const beforeMs = new Date().getTime()
     const messages = await conversationMessages<ISupportedXmtpCodecs>(
-      client.installationId,
+      installationId,
       conversationId,
       limit,
     )
@@ -82,12 +82,12 @@ export async function getXmtpConversationMessage(args: {
 }) {
   const { messageId, clientInboxId } = args
   try {
-    const client = await getXmtpClientByInboxId({
+    const installationId = await ensureXmtpInstallationQueryData({
       inboxId: clientInboxId,
     })
 
     const beforeMs = new Date().getTime()
-    const message = await findMessage(client.installationId, messageId)
+    const message = await findMessage(installationId, messageId)
     const afterMs = new Date().getTime()
 
     const timeDiffMs = afterMs - beforeMs

@@ -1,15 +1,15 @@
 import { MessageDeliveryStatus } from "@xmtp/react-native-sdk"
 import {
   IConversationMessage,
+  IConversationMessageBase,
   IConversationMessageContent,
   IConversationMessageGroupUpdated,
-  IConversationMessageId,
   IConversationMessageReaction,
   IConversationMessageReply,
   IConversationMessageStatus,
   IConversationMessageText,
 } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.types"
-import { IConversationTopic } from "@/features/conversation/conversation.types"
+import { getXmtpConversationIdFromXmtpTopic } from "@/features/xmtp/xmtp-conversations/xmtp-conversation"
 import {
   getXmtpMessageIsGroupUpdatedMessage,
   getXmtpMessageIsMultiRemoteAttachmentMessage,
@@ -19,18 +19,19 @@ import {
   getXmtpMessageIsStaticAttachmentMessage,
   getXmtpMessageIsTextMessage,
 } from "@/features/xmtp/xmtp-messages/xmtp-messages"
-import { IXmtpDecodedMessage, IXmtpInboxId } from "@/features/xmtp/xmtp.types"
+import { IXmtpDecodedMessage, IXmtpInboxId, IXmtpMessageId } from "@/features/xmtp/xmtp.types"
 
 export function convertXmtpMessageToConvosMessage(
   message: IXmtpDecodedMessage,
 ): IConversationMessage {
   const baseMessage = {
-    id: message.id as unknown as IConversationMessageId,
-    topic: message.topic as unknown as IConversationTopic,
+    xmtpId: message.id,
+    xmtpTopic: message.topic,
+    xmtpConversationId: getXmtpConversationIdFromXmtpTopic(message.topic),
     status: getConvosMessageStatusForXmtpMessage(message),
     senderInboxId: message.senderInboxId as unknown as IXmtpInboxId,
     sentNs: message.sentNs,
-  }
+  } satisfies IConversationMessageBase
 
   // Handle fallback case
   if (!message.nativeContent) {
@@ -60,7 +61,7 @@ export function convertXmtpMessageToConvosMessage(
       ...baseMessage,
       type: "reaction",
       content: {
-        reference: reactionContent.reference as unknown as IConversationMessageId,
+        reference: reactionContent.reference as unknown as IXmtpMessageId,
         action: reactionContent.action ?? "unknown",
         schema: reactionContent.schema ?? "unknown",
         content: reactionContent.content ?? "",
@@ -74,7 +75,7 @@ export function convertXmtpMessageToConvosMessage(
       ...baseMessage,
       type: "reply",
       content: {
-        reference: replyContent.reference as unknown as IConversationMessageId,
+        reference: replyContent.reference as unknown as IXmtpMessageId,
         // Don't like doing the "as" but reply is complex... Let's fix this later
         content: replyContent.content as IConversationMessageContent,
       },

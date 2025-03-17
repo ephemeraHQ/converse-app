@@ -18,7 +18,6 @@ import {
   IConversationMessageGroupUpdated,
 } from "../conversation/conversation-chat/conversation-message/conversation-message.types"
 import { convertXmtpMessageToConvosMessage } from "../conversation/conversation-chat/conversation-message/utils/convert-xmtp-message-to-convos-message"
-import { IConversationTopic } from "../conversation/conversation.types"
 
 export async function startMessageStreaming(args: { clientInboxId: IXmtpInboxId }) {
   const { clientInboxId } = args
@@ -57,7 +56,6 @@ async function handleNewMessage(args: {
     try {
       handleNewGroupUpdatedMessage({
         inboxId: clientInboxId,
-        topic: message.topic,
         message,
       })
     } catch (error) {
@@ -68,7 +66,7 @@ async function handleNewMessage(args: {
   try {
     addMessageToConversationMessagesQuery({
       clientInboxId,
-      topic: message.topic,
+      xmtpConversationId: message.xmtpConversationId,
       message,
     })
   } catch (error) {
@@ -78,7 +76,7 @@ async function handleNewMessage(args: {
   try {
     updateConversationQueryData({
       clientInboxId,
-      topic: message.topic,
+      xmtpConversationId: message.xmtpConversationId,
       conversationUpdate: {
         lastMessage: message,
       },
@@ -90,7 +88,7 @@ async function handleNewMessage(args: {
   try {
     updateConversationInAllowedConsentConversationsQueryData({
       clientInboxId,
-      topic: message.topic,
+      xmtpConversationId: message.xmtpConversationId,
       conversationUpdate: {
         lastMessage: message,
       },
@@ -111,16 +109,15 @@ type MetadataField = keyof typeof METADATA_FIELD_MAP
 
 function handleNewGroupUpdatedMessage(args: {
   inboxId: IXmtpInboxId
-  topic: IConversationTopic
   message: IConversationMessageGroupUpdated
 }) {
-  const { inboxId, topic, message } = args
+  const { inboxId, message } = args
 
   for (const member of message.content.membersAdded) {
     try {
       addGroupMemberToGroupQuery({
         clientInboxId: inboxId,
-        topic,
+        xmtpConversationId: message.xmtpConversationId,
         member: {
           inboxId: member.inboxId,
           consentState: "unknown",
@@ -136,7 +133,7 @@ function handleNewGroupUpdatedMessage(args: {
     try {
       removeGroupMemberToGroupQuery({
         clientInboxId: inboxId,
-        topic,
+        xmtpConversationId: message.xmtpConversationId,
         memberInboxId: member.inboxId,
       })
     } catch (error) {
@@ -162,13 +159,13 @@ function handleNewGroupUpdatedMessage(args: {
 
         updateGroupQueryData({
           clientInboxId: inboxId,
-          topic,
+          xmtpConversationId: message.xmtpConversationId,
           updates: update,
         })
 
         updateConversationInAllowedConsentConversationsQueryData({
           clientInboxId: inboxId,
-          topic,
+          xmtpConversationId: message.xmtpConversationId,
           conversationUpdate: update,
         })
       }

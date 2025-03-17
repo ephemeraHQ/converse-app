@@ -11,7 +11,7 @@ import { getMessageFromConversationSafe } from "@/features/conversation/conversa
 import { useReactOnMessage } from "@/features/conversation/conversation-chat/use-react-on-message.mutation"
 import { useRemoveReactionOnMessage } from "@/features/conversation/conversation-chat/use-remove-reaction-on-message.mutation"
 import { captureErrorWithToast } from "@/utils/capture-error"
-import { useCurrentConversationTopic } from "../conversation.store-context"
+import { useCurrentXmtpConversationId } from "../conversation.store-context"
 import { getCurrentUserAlreadyReactedOnMessage } from "./utils/get-current-user-already-reacted-on-message"
 
 export const ConversationMessageGestures = memo(function ConversationMessageGestures(props: {
@@ -21,23 +21,23 @@ export const ConversationMessageGestures = memo(function ConversationMessageGest
   const { contextMenuExtra, children } = props
   const messageContextMenuStore = useConversationMessageContextMenuStore()
   const messageStore = useConversationMessageContextStore()
-  const topic = useCurrentConversationTopic()!
+  const xmtpConversationId = useCurrentXmtpConversationId()!
 
   const { reactOnMessage } = useReactOnMessage({
-    topic,
+    xmtpConversationId,
   })
   const { removeReactionOnMessage } = useRemoveReactionOnMessage({
-    topic,
+    xmtpConversationId,
   })
 
   const handleLongPress = useCallback(
     async (e: IMessageGesturesOnLongPressArgs) => {
       try {
         const currentSender = getSafeCurrentSender()
-        const messageId = messageStore.getState().messageId
+        const messageId = messageStore.getState().xmtpMessageId
         const message = getMessageFromConversationSafe({
           messageId,
-          topic,
+          xmtpConversationId,
           clientInboxId: currentSender.inboxId,
         })
         messageContextMenuStore.getState().setMessageContextMenuData({
@@ -56,7 +56,7 @@ export const ConversationMessageGestures = memo(function ConversationMessageGest
         captureErrorWithToast(error)
       }
     },
-    [messageContextMenuStore, messageStore, contextMenuExtra, topic],
+    [messageContextMenuStore, messageStore, contextMenuExtra, xmtpConversationId],
   )
 
   const handleTap = useCallback(() => {
@@ -67,10 +67,10 @@ export const ConversationMessageGestures = memo(function ConversationMessageGest
   }, [messageStore])
 
   const handleDoubleTap = useCallback(() => {
-    const messageId = messageStore.getState().messageId
+    const messageId = messageStore.getState().xmtpMessageId
     const alreadyReacted = getCurrentUserAlreadyReactedOnMessage({
       messageId,
-      topic,
+      xmtpConversationId,
       emoji: "❤️",
     })
     if (alreadyReacted) {
@@ -84,7 +84,7 @@ export const ConversationMessageGestures = memo(function ConversationMessageGest
         emoji: "❤️",
       })
     }
-  }, [reactOnMessage, removeReactionOnMessage, messageStore, topic])
+  }, [reactOnMessage, removeReactionOnMessage, messageStore, xmtpConversationId])
 
   return (
     <ConversationMessageGesturesDumb

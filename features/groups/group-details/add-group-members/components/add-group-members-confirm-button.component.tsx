@@ -17,7 +17,7 @@ export const AddGroupMembersConfirmButton = memo(function AddGroupMembersConfirm
   const { progress, height } = useReanimatedKeyboardAnimation()
   const { theme } = useAppTheme()
   const insets = useSafeAreaInsets()
-  const { groupTopic } = useRouteParams<"AddGroupMembers">()
+  const { xmtpConversationId } = useRouteParams<"AddGroupMembers">()
   const router = useRouter()
 
   const selectedInboxIds = useAddGroupMembersStore((state) => state.selectedInboxIds)
@@ -26,7 +26,7 @@ export const AddGroupMembersConfirmButton = memo(function AddGroupMembersConfirm
 
   const { data: group } = useGroupQuery({
     clientInboxId: getSafeCurrentSender().inboxId,
-    topic: groupTopic,
+    xmtpConversationId,
   })
 
   const handlePress = useCallback(async () => {

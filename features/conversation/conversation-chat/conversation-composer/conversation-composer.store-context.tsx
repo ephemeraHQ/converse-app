@@ -6,10 +6,9 @@ import {
   IUploadedRemoteAttachment,
   LocalAttachment,
 } from "@/features/conversation/conversation-chat/conversation-attachment/conversation-attachments.types"
-import { useCurrentConversationTopic } from "@/features/conversation/conversation-chat/conversation.store-context"
+import { useCurrentXmtpConversationId } from "@/features/conversation/conversation-chat/conversation.store-context"
+import { IXmtpConversationId, IXmtpMessageId } from "@/features/xmtp/xmtp.types"
 import { usePrevious } from "@/hooks/use-previous-value"
-import { IConversationTopic } from "../../conversation.types"
-import { IConversationMessageId } from "../conversation-message/conversation-message.types"
 
 export type IComposerMediaPreviewStatus = "picked" | "uploading" | "uploaded" | "error" | "sending"
 
@@ -26,7 +25,7 @@ type IConversationComposerStoreProps = {
 
 type IConversationComposerState = IConversationComposerStoreProps & {
   inputValue: string
-  replyingToMessageId: IConversationMessageId | null
+  replyingToMessageId: IXmtpMessageId | null
   composerMediaPreviews: IComposerMediaPreview[]
   composerUploadedAttachments: IUploadedRemoteAttachment[]
 }
@@ -34,7 +33,7 @@ type IConversationComposerState = IConversationComposerStoreProps & {
 type IConversationComposerActions = {
   reset: () => void
   setInputValue: (value: string) => void
-  setReplyToMessageId: (messageId: IConversationMessageId | null) => void
+  setReplyToMessageId: (messageId: IXmtpMessageId | null) => void
   addComposerMediaPreview: (mediaPreview: NonNullable<IComposerMediaPreview>) => string
   removeComposerMediaPreview: (mediaURI: string) => void
   addComposerUploadedAttachment: (args: {
@@ -54,14 +53,14 @@ type IConversationComposerStore = ReturnType<typeof createConversationComposerSt
 export const ConversationComposerStoreProvider = memo(
   ({ children, ...props }: IConversationComposerStoreProviderProps) => {
     const storeRef = useRef<IConversationComposerStore>()
-    const topic = useCurrentConversationTopic()
-    const previousTopic = usePrevious(topic)
+    const xmtpConversationId = useCurrentXmtpConversationId()
+    const previousTopic = usePrevious(xmtpConversationId)
 
     // Create a new store when topic changes
-    if (!storeRef.current || topic !== previousTopic) {
+    if (!storeRef.current || xmtpConversationId !== previousTopic) {
       storeRef.current = createConversationComposerStore({
         ...props,
-        storeName: getStoreName(topic),
+        storeName: getStoreName(xmtpConversationId),
       })
     }
 
@@ -136,8 +135,8 @@ const createConversationComposerStore = (
   )
 }
 
-function getStoreName(topic: IConversationTopic | null) {
-  return topic ? `composer-${topic}` : "new"
+function getStoreName(xmtpConversationId: IXmtpConversationId | null) {
+  return xmtpConversationId ? `composer-${xmtpConversationId}` : "new"
 }
 
 const ConversationComposerStoreContext = createContext<IConversationComposerStore | null>(null)

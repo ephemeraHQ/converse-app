@@ -9,7 +9,7 @@ import { useDmPeerInboxIdQuery } from "@/features/dm/dm-peer-inbox-id.query"
 import { useRouter } from "@/navigation/use-navigation"
 import { captureErrorWithToast } from "@/utils/capture-error"
 import { ensureError } from "@/utils/error"
-import { useCurrentConversationTopicSafe } from "../conversation.store-context"
+import { useCurrentXmtpConversationIdSafe } from "../conversation.store-context"
 import {
   ConsentPopupButtonsContainer,
   ConversationConsentPopupButton,
@@ -18,12 +18,12 @@ import {
 } from "./conversation-consent-popup.design-system"
 
 export function ConversationConsentPopupDm() {
-  const topic = useCurrentConversationTopicSafe()
+  const xmtpConversationId = useCurrentXmtpConversationIdSafe()
   const currentSenderInboxId = useSafeCurrentSender().inboxId
 
   const { data: peerInboxId } = useDmPeerInboxIdQuery({
     inboxId: currentSenderInboxId,
-    topic,
+    xmtpConversationId,
     caller: "ConversationConsentPopupDm",
   })
 
@@ -39,7 +39,7 @@ export function ConversationConsentPopupDm() {
 
     const conversation = getConversationQueryData({
       clientInboxId: currentSenderInboxId,
-      topic,
+      xmtpConversationId,
     })
 
     if (!conversation) {
@@ -57,9 +57,8 @@ export function ConversationConsentPopupDm() {
         if (selectedIndex === 0) {
           try {
             await denyDmConsentAsync({
-              topic,
+              xmtpConversationId,
               peerInboxId: peerInboxId,
-              conversationId: conversation.id,
             })
             navigation.pop()
           } catch (error) {
@@ -70,7 +69,7 @@ export function ConversationConsentPopupDm() {
         }
       },
     })
-  }, [navigation, denyDmConsentAsync, peerInboxId, topic, currentSenderInboxId])
+  }, [navigation, denyDmConsentAsync, peerInboxId, xmtpConversationId, currentSenderInboxId])
 
   const handleAccept = useCallback(async () => {
     try {
@@ -80,7 +79,7 @@ export function ConversationConsentPopupDm() {
 
       const conversation = getConversationQueryData({
         clientInboxId: currentSenderInboxId,
-        topic,
+        xmtpConversationId,
       })
 
       if (!conversation) {
@@ -88,16 +87,14 @@ export function ConversationConsentPopupDm() {
       }
 
       await allowDmConsentAsync({
-        peerInboxId,
-        conversationId: conversation.id,
-        topic,
+        xmtpConversationId,
       })
     } catch (error) {
       captureErrorWithToast(ensureError(error), {
         message: `Error consenting`,
       })
     }
-  }, [allowDmConsentAsync, peerInboxId, topic, currentSenderInboxId])
+  }, [allowDmConsentAsync, peerInboxId, xmtpConversationId, currentSenderInboxId])
 
   return (
     <ConversationConsentPopupContainer>

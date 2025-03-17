@@ -26,18 +26,25 @@ export const ConversationMessagesList = memo(function ConversationMessagesList(
 
   useEffect(() => {
     const unsub = conversationStore.subscribe(
-      (state) => state.scrollToMessageId,
-      (scrollToMessageId) => {
-        if (!scrollToMessageId) return
-        const index = messages.findIndex((message) => message.id === scrollToMessageId)
-        if (index === -1) return
+      (state) => state.scrollToXmtpMessageId,
+      (scrollToXmtpMessageId) => {
+        if (!scrollToXmtpMessageId) {
+          return
+        }
+
+        const index = messages.findIndex((message) => message.xmtpId === scrollToXmtpMessageId)
+        if (index === -1) {
+          return
+        }
+
         scrollRef.current?.scrollToIndex({
           index,
           animated: true,
           viewOffset: 100, // Random value just so that the message is not directly at the bottom
         })
+
         conversationStore.setState({
-          scrollToMessageId: undefined,
+          scrollToXmtpMessageId: undefined,
         })
       },
     )
@@ -96,11 +103,7 @@ export const ConversationMessagesList = memo(function ConversationMessagesList(
 })
 
 const keyExtractor = (message: IConversationMessage) => {
-  return (
-    // @ts-expect-error
-    message.tempOptimisticId || // Check use-send-message.ts
-    message.id
-  )
+  return message.xmtpId
 }
 
 export const conversationListDefaultProps = {

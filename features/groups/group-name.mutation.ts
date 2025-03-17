@@ -8,47 +8,41 @@ import {
 } from "@/features/groups/group.query"
 import { updateXmtpGroupName } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-group"
 import { captureError } from "@/utils/capture-error"
-import type { IConversationTopic } from "../conversation/conversation.types"
 import { IGroup } from "./group.types"
 
-type IArgs = {
-  topic: IConversationTopic
-  clientInboxId: IXmtpInboxId
-}
-
 export function useGroupNameMutation(args: {
-  topic: IConversationTopic
+  xmtpConversationId: IXmtpConversationId
   clientInboxId: IXmtpInboxId
 }) {
-  const { topic, clientInboxId } = args
+  const { xmtpConversationId, clientInboxId } = args
 
-  const { data: group } = useGroupQuery({ clientInboxId: clientInboxId, topic })
+  const { data: group } = useGroupQuery({ clientInboxId, xmtpConversationId })
 
   return useMutation({
     mutationFn: async (name: string) => {
-      if (!group || !topic) {
+      if (!group || !xmtpConversationId) {
         throw new Error("Missing required data in useGroupNameMutation")
       }
 
       await updateXmtpGroupName({
         clientInboxId,
-        groupId: group.id as unknown as IXmtpConversationId,
+        groupId: group.xmtpId,
         name,
       })
 
       return name
     },
     onMutate: async (name: string) => {
-      const previousGroup = getGroupQueryData({ clientInboxId: clientInboxId, topic })
+      const previousGroup = getGroupQueryData({ clientInboxId, xmtpConversationId })
       const updates: Partial<IGroup> = { name }
 
       if (previousGroup) {
-        updateGroupQueryData({ clientInboxId: clientInboxId, topic, updates })
+        updateGroupQueryData({ clientInboxId, xmtpConversationId, updates })
       }
 
       updateConversationInAllowedConsentConversationsQueryData({
         clientInboxId,
-        topic,
+        xmtpConversationId,
         conversationUpdate: updates,
       })
 
@@ -61,10 +55,10 @@ export function useGroupNameMutation(args: {
 
       const updates: Partial<IGroup> = { name: previousGroup?.name ?? "" }
 
-      updateGroupQueryData({ clientInboxId: clientInboxId, topic, updates })
+      updateGroupQueryData({ clientInboxId, xmtpConversationId, updates })
       updateConversationInAllowedConsentConversationsQueryData({
         clientInboxId,
-        topic,
+        xmtpConversationId,
         conversationUpdate: updates,
       })
     },

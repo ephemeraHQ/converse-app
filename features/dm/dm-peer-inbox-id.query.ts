@@ -3,29 +3,28 @@
  */
 import { queryOptions, useQuery } from "@tanstack/react-query"
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm"
-import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
+import { IXmtpConversationId, IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { Optional } from "@/types/general"
 import logger from "@/utils/logger"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
-import { IConversationTopic } from "../conversation/conversation.types"
-import { getOrFetchConversationQuery } from "../conversation/queries/conversation.query"
+import { ensureConversationQueryData } from "../conversation/queries/conversation.query"
 
 type IArgs = {
   inboxId: IXmtpInboxId
-  topic: IConversationTopic
+  xmtpConversationId: IXmtpConversationId
 }
 
 type IArgsWithCaller = IArgs & { caller: string }
 
 export function getDmPeerInboxIdQueryOptions(args: Optional<IArgsWithCaller, "caller">) {
-  const { inboxId, topic, caller } = args
+  const { inboxId, xmtpConversationId, caller } = args
 
   return queryOptions({
-    queryKey: ["dm-peer-inbox-id", inboxId, topic],
+    queryKey: ["dm-peer-inbox-id", inboxId, xmtpConversationId],
     queryFn: async function getPeerInboxId() {
-      const conversation = await getOrFetchConversationQuery({
+      const conversation = await ensureConversationQueryData({
         clientInboxId: inboxId,
-        topic,
+        xmtpConversationId,
         caller: "getPeerInboxId",
       })
 
@@ -38,7 +37,7 @@ export function getDmPeerInboxIdQueryOptions(args: Optional<IArgsWithCaller, "ca
       }
 
       logger.debug(
-        `[getPeerInboxId] getting peer inbox id for ${topic}, inboxId: ${inboxId} and caller ${caller}`,
+        `[getPeerInboxId] getting peer inbox id for ${xmtpConversationId}, inboxId: ${inboxId} and caller ${caller}`,
       )
 
       return conversation.peerInboxId
@@ -46,7 +45,7 @@ export function getDmPeerInboxIdQueryOptions(args: Optional<IArgsWithCaller, "ca
     meta: {
       caller,
     },
-    enabled: !!inboxId && !!topic,
+    enabled: !!inboxId && !!xmtpConversationId,
   })
 }
 

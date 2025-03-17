@@ -2,16 +2,14 @@ import { createContext, memo, useContext, useEffect, useRef } from "react"
 import { createStore, useStore } from "zustand"
 import { subscribeWithSelector } from "zustand/middleware"
 import { findConversationByInboxIds } from "@/features/conversation/utils/find-conversations-by-inbox-ids"
-import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
+import { IXmtpConversationId, IXmtpInboxId, IXmtpMessageId } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
 import { getSafeCurrentSender } from "../../authentication/multi-inbox.store"
-import { IConversationTopic } from "../conversation.types"
-import { IConversationMessageId } from "./conversation-message/conversation-message.types"
 
 type IConversationStoreProps = {
-  topic?: IConversationTopic | null
-  highlightedMessageId?: IConversationMessageId | null
-  scrollToMessageId?: IConversationMessageId | null
+  xmtpConversationId?: IXmtpConversationId | null
+  highlightedXmtpMessageId?: IXmtpMessageId | null
+  scrollToXmtpMessageId?: IXmtpMessageId | null
   searchSelectedUserInboxIds?: IXmtpInboxId[]
   isCreatingNewConversation?: boolean
 }
@@ -50,7 +48,7 @@ export const ConversationStoreProvider = memo(
           })
 
           storeRef.current?.setState({
-            topic: conversation?.topic ?? null,
+            xmtpConversationId: conversation?.xmtpId ?? null,
           })
         } catch (error) {
           captureError(error)
@@ -69,9 +67,9 @@ export const ConversationStoreProvider = memo(
 const createConversationStore = (initProps: IConversationStoreProps) => {
   return createStore<IConversationStoreState>()(
     subscribeWithSelector((set) => ({
-      topic: null,
-      highlightedMessageId: null,
-      scrollToMessageId: null,
+      xmtpConversationId: null,
+      highlightedXmtpMessageId: null,
+      scrollToXmtpMessageId: null,
       searchSelectedUserInboxIds: [],
       isCreatingNewConversation: false,
       searchTextValue: "",
@@ -94,10 +92,10 @@ export function useConversationStore() {
   return store
 }
 
-export function useCurrentConversationTopic() {
-  return useConversationStoreContext((state) => state.topic)
+export function useCurrentXmtpConversationId() {
+  return useConversationStoreContext((state) => state.xmtpConversationId)
 }
 
-export function useCurrentConversationTopicSafe() {
-  return useCurrentConversationTopic()! // ! Because at this point we must have a topic to show this
+export function useCurrentXmtpConversationIdSafe() {
+  return useCurrentXmtpConversationId()! // ! Because at this point we must have a xmtpConversationId to show this
 }

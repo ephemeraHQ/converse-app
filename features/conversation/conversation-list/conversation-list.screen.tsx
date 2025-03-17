@@ -98,7 +98,7 @@ const ConversationListItemDmWrapper = memo(function ConversationListItemDmWrappe
   const { dm } = props
 
   const contextMenuProps = useDmConversationContextMenuViewProps({
-    dmConversationTopic: dm.topic,
+    xmtpConversationId: dm.xmtpId,
   })
 
   return (
@@ -115,7 +115,7 @@ const ConversationListItemDmWrapper = memo(function ConversationListItemDmWrappe
         }}
         {...contextMenuProps}
       >
-        <ConversationListItemDm conversationTopic={dm.topic} />
+        <ConversationListItemDm xmtpConversationId={dm.xmtpId} />
       </ContextMenuView>
     </HStack>
   )
@@ -127,7 +127,7 @@ const ConversationListItemGroupWrapper = memo(function ConversationListItemGroup
   const { group } = props
 
   const contextMenuProps = useGroupConversationContextMenuViewProps({
-    groupConversationTopic: group.topic,
+    xmtpConversationId: group.xmtpId,
   })
 
   return (
@@ -144,7 +144,7 @@ const ConversationListItemGroupWrapper = memo(function ConversationListItemGroup
         }}
         {...contextMenuProps}
       >
-        <ConversationListItemGroup conversationTopic={group.topic} />
+        <ConversationListItemGroup xmtpConversationId={group.xmtpId} />
       </ContextMenuView>
     </HStack>
   )

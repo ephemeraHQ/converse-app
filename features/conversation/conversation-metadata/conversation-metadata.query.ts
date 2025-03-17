@@ -1,48 +1,47 @@
-import type { IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import type { IXmtpConversationId, IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { queryOptions, skipToken } from "@tanstack/react-query"
 import { getConversationMetadata } from "@/features/conversation/conversation-metadata/conversation-metadata.api"
 import { isTempConversation } from "@/features/conversation/utils/is-temp-conversation"
 import { reactQueryClient } from "../../../utils/react-query/react-query.client"
-import type { IConversationTopic } from "../conversation.types"
 
 export type IConversationMetadataQueryData = Awaited<ReturnType<typeof getConversationMetadata>>
 
 type IArgs = {
-  topic: IConversationTopic
+  xmtpConversationId: IXmtpConversationId
   clientInboxId: IXmtpInboxId
 }
 
-export function getConversationMetadataQueryOptions({ topic, clientInboxId }: IArgs) {
-  const enabled = !!topic && !isTempConversation(topic)
+export function getConversationMetadataQueryOptions({ xmtpConversationId, clientInboxId }: IArgs) {
+  const enabled = !!xmtpConversationId && !isTempConversation(xmtpConversationId)
   return queryOptions({
-    queryKey: ["conversation-metadata", topic, clientInboxId],
-    queryFn: enabled ? () => getConversationMetadata({ topic }) : skipToken,
+    queryKey: ["conversation-metadata", xmtpConversationId, clientInboxId],
+    queryFn: enabled ? () => getConversationMetadata({ xmtpConversationId }) : skipToken,
     enabled,
   })
 }
 
 export function prefetchConversationMetadataQuery(args: IArgs) {
-  const { topic, clientInboxId } = args
+  const { xmtpConversationId, clientInboxId } = args
   return reactQueryClient.prefetchQuery(
-    getConversationMetadataQueryOptions({ topic, clientInboxId }),
+    getConversationMetadataQueryOptions({ xmtpConversationId, clientInboxId }),
   )
 }
 
 export const getConversationMetadataQueryData = (args: IArgs) => {
-  const { topic, clientInboxId } = args
+  const { xmtpConversationId, clientInboxId } = args
   return reactQueryClient.getQueryData(
-    getConversationMetadataQueryOptions({ topic, clientInboxId }).queryKey,
+    getConversationMetadataQueryOptions({ xmtpConversationId, clientInboxId }).queryKey,
   )
 }
 
 export function updateConversationMetadataQueryData(
   args: IArgs & { updateData: Partial<IConversationMetadataQueryData> },
 ) {
-  const { updateData, topic, clientInboxId } = args
+  const { updateData, xmtpConversationId, clientInboxId } = args
   reactQueryClient.setQueryData(
-    getConversationMetadataQueryOptions({ topic, clientInboxId }).queryKey,
+    getConversationMetadataQueryOptions({ xmtpConversationId, clientInboxId }).queryKey,
     (previousData) => ({
-      topic: args.topic,
+      xmtpConversationId: args.xmtpConversationId,
       deleted: false,
       pinned: false,
       unread: false,
