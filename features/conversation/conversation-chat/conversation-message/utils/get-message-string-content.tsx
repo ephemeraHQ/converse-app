@@ -40,5 +40,5 @@ export function getMessageContentStringValue(content: IConversationMessageConten
   }
 
   const _exhaustiveCheck: never = content
-  throw new Error(`Unhandled message content type: ${_exhaustiveCheck}`)
+  throw new Error(`Unhandled message content type: ${JSON.stringify(content, null, 2)}`)
 }

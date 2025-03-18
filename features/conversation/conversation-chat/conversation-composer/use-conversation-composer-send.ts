@@ -1,6 +1,6 @@
 import { useCallback } from "react"
 import { useConversationStore } from "@/features/conversation/conversation-chat/conversation.store-context"
-import { useCreateConversationAndSendFirstMessage } from "@/features/conversation/conversation-create/mutations/create-conversation-and-send-first-message.mutation"
+import { useCreateConversationAndSendFirstMessageMutation } from "@/features/conversation/conversation-create/mutations/create-conversation-and-send-first-message.mutation"
 import { ISendMessageParams, useSendMessage } from "@/features/conversation/hooks/use-send-message"
 import { FeedbackError } from "@/utils/error"
 import { waitUntilPromise } from "@/utils/wait-until-promise"
@@ -14,8 +14,8 @@ export function useConversationComposerSend() {
   const composerStore = useConversationComposerStore()
   const conversationStore = useConversationStore()
   const { sendMessage } = useSendMessage()
-  const { mutateAsync: createConversationAndSendFirstMessageMutation } =
-    useCreateConversationAndSendFirstMessage()
+  const createConversationAndSendFirstMessageMutation =
+    useCreateConversationAndSendFirstMessageMutation()
 
   const send = useCallback(async () => {
     const { inputValue, replyingToMessageId, composerUploadedAttachments, composerMediaPreviews } =
@@ -61,9 +61,8 @@ export function useConversationComposerSend() {
       // Will need to fix later
       conversationStore.setState({ isCreatingNewConversation: false })
     } else {
-      // Extract text content safely using type assertion
       const { conversation: createdConversation } =
-        await createConversationAndSendFirstMessageMutation({
+        await createConversationAndSendFirstMessageMutation.mutateAsync({
           inboxIds: searchSelectedUserInboxIds,
           contents: messageContents,
         })

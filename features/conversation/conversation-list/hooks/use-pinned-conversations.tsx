@@ -1,5 +1,4 @@
 import { useQueries } from "@tanstack/react-query"
-import { useMemo } from "react"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { useAllowedConsentConversationsQuery } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import { getConversationMetadataQueryOptions } from "@/features/conversation/conversation-metadata/conversation-metadata.query"
@@ -7,30 +6,37 @@ import { getConversationMetadataQueryOptions } from "@/features/conversation/con
 export function usePinnedConversations() {
   const currentSender = useSafeCurrentSender()
 
-  const { isLoading: isLoadingConversations, data: conversations } =
+  const { isLoading: isLoadingConversations, data: conversationIds } =
     useAllowedConsentConversationsQuery({
       clientInboxId: currentSender.inboxId,
       caller: "usePinnedConversations",
     })
 
-  const conversationsDataQueries = useQueries({
-    queries: (conversations ?? []).map((conversation) =>
+  const conversationsMetadataQueries = useQueries({
+    queries: (conversationIds ?? []).map((conversationId) =>
       getConversationMetadataQueryOptions({
         clientInboxId: currentSender.inboxId,
-        xmtpConversationId: conversation.xmtpId,
+        xmtpConversationId: conversationId,
       }),
     ),
+    combine: (queries) => {
+      // Filter to just pinned conversations
+      const pinnedConversationsIds = (conversationIds ?? []).filter((_, index) => {
+        const query = queries[index]
+        return query.data?.pinned && !query.isLoading
+      })
+
+      const isLoading = isLoadingConversations || queries.some((query) => query.isLoading)
+
+      return {
+        pinnedConversationsIds,
+        isLoading,
+      }
+    },
   })
 
-  const pinnedConversations = useMemo(() => {
-    return conversations?.filter((conversation, index) => {
-      const query = conversationsDataQueries[index]
-      return query?.data?.pinned
-    })
-  }, [conversations, conversationsDataQueries])
-
   return {
-    pinnedConversations,
-    isLoading: isLoadingConversations || conversationsDataQueries.some((q) => q.isLoading),
+    pinnedConversationsIds: conversationsMetadataQueries.pinnedConversationsIds || [],
+    isLoading: conversationsMetadataQueries.isLoading,
   }
 }

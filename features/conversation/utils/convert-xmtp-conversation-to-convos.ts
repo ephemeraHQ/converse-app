@@ -50,7 +50,7 @@ export async function convertXmtpConversationToConvosConversation(
 
   return {
     type: "dm",
-    peerInboxId: peerInboxId,
+    peerInboxId,
     xmtpId: xmtpConversation.id,
     createdAt: xmtpConversation.createdAt,
     xmtpTopic: xmtpConversation.topic,

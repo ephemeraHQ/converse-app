@@ -21,7 +21,7 @@ export const ConversationListPinnedConversations = memo(
   function ConversationListPinnedConversations() {
     const { themed, theme } = useAppTheme()
 
-    const { pinnedConversations, isLoading: isLoadingPinnedConversations } =
+    const { pinnedConversationsIds, isLoading: isLoadingPinnedConversations } =
       usePinnedConversations()
 
     const { avatarSize } = useConversationListPinnedConversationsStyles()
@@ -41,7 +41,7 @@ export const ConversationListPinnedConversations = memo(
       return null
     }
 
-    const hasPinnedConversations = pinnedConversations && pinnedConversations?.length > 0
+    const hasPinnedConversations = pinnedConversationsIds && pinnedConversationsIds?.length > 0
 
     if (!hasPinnedConversations) {
       return null
@@ -53,7 +53,7 @@ export const ConversationListPinnedConversations = memo(
         layout={theme.animation.reanimatedLayoutSpringTransition}
         exiting={theme.animation.reanimatedFadeOutSpring}
       >
-        {chunk(pinnedConversations, 3).map((row, rowIndex) => (
+        {chunk(pinnedConversationsIds, 3).map((row, rowIndex) => (
           <AnimatedHStack
             key={`row-${rowIndex}`}
             style={[
@@ -64,13 +64,13 @@ export const ConversationListPinnedConversations = memo(
             ]}
             layout={theme.animation.reanimatedLayoutSpringTransition}
           >
-            {row.map((conversation) => (
+            {row.map((conversationXmtpId) => (
               <AnimatedCenter
-                key={conversation.xmtpTopic}
+                key={conversationXmtpId}
                 layout={theme.animation.reanimatedLayoutSpringTransition}
                 entering={theme.animation.reanimatedFadeInSpring}
               >
-                <PinnedConversationWrapper xmtpConversationId={conversation.xmtpId} />
+                <PinnedConversationWrapper xmtpConversationId={conversationXmtpId} />
               </AnimatedCenter>
             ))}
           </AnimatedHStack>

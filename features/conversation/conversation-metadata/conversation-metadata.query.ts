@@ -2,6 +2,7 @@ import type { IXmtpConversationId, IXmtpInboxId } from "@features/xmtp/xmtp.type
 import { queryOptions, skipToken } from "@tanstack/react-query"
 import { getConversationMetadata } from "@/features/conversation/conversation-metadata/conversation-metadata.api"
 import { isTempConversation } from "@/features/conversation/utils/is-temp-conversation"
+import { getReactQueryKey } from "@/utils/react-query/react-query.utils"
 import { reactQueryClient } from "../../../utils/react-query/react-query.client"
 
 export type IConversationMetadataQueryData = Awaited<ReturnType<typeof getConversationMetadata>>
@@ -14,7 +15,11 @@ type IArgs = {
 export function getConversationMetadataQueryOptions({ xmtpConversationId, clientInboxId }: IArgs) {
   const enabled = !!xmtpConversationId && !isTempConversation(xmtpConversationId)
   return queryOptions({
-    queryKey: ["conversation-metadata", xmtpConversationId, clientInboxId],
+    queryKey: getReactQueryKey({
+      baseStr: "conversation-metadata",
+      xmtpConversationId,
+      clientInboxId,
+    }),
     queryFn: enabled ? () => getConversationMetadata({ xmtpConversationId }) : skipToken,
     enabled,
   })

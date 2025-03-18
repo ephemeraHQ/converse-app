@@ -7,7 +7,7 @@ import {
 } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import {
   addConversationToUnknownConsentConversationsQuery,
-  removeConversationFromUnknownConsentConversationsQueryData,
+  removeConversationFromUnknownConsentConversationsQuery,
 } from "@/features/conversation/conversation-requests-list/conversations-unknown-consent.query"
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group"
 import {
@@ -22,7 +22,6 @@ import {
   setXmtpConsentStateForInboxId,
   updateXmtpConsentForGroupsForInbox,
 } from "../xmtp/xmtp-consent/xmtp-consent"
-import { getXmtpConversationIdFromXmtpTopic } from "../xmtp/xmtp-conversations/xmtp-conversation"
 
 type IAllowGroupMutationOptions = {
   clientInboxId: IXmtpInboxId
@@ -58,7 +57,6 @@ async function allowGroup({
     throw new Error("Group is not a valid group")
   }
 
-  const groupTopic = group.xmtpTopic
   const groupCreator = group.creatorInboxId
 
   const inboxIdsToAllow: IXmtpInboxId[] = []
@@ -73,7 +71,7 @@ async function allowGroup({
   await Promise.all([
     updateXmtpConsentForGroupsForInbox({
       clientInboxId,
-      groupIds: [getXmtpConversationIdFromXmtpTopic(groupTopic)],
+      groupIds: [xmtpConversationId],
       consent: "allowed",
     }),
     ...(inboxIdsToAllow.length > 0
@@ -121,15 +119,15 @@ export const getAllowGroupMutationOptions = (
       setGroupQueryData({ clientInboxId, xmtpConversationId, group: updatedGroup })
 
       // Remove from requests
-      removeConversationFromUnknownConsentConversationsQueryData({
-        inboxId: clientInboxId,
-        xmtpConversationId,
+      removeConversationFromUnknownConsentConversationsQuery({
+        clientInboxId,
+        conversationId: xmtpConversationId,
       })
 
       // Add to main conversations list
       addConversationToAllowedConsentConversationsQuery({
         clientInboxId,
-        conversation: updatedGroup,
+        conversationId: xmtpConversationId,
       })
 
       return { previousGroup }
@@ -149,14 +147,14 @@ export const getAllowGroupMutationOptions = (
 
       // Add back in requests
       addConversationToUnknownConsentConversationsQuery({
-        inboxId: clientInboxId,
-        conversation: context.previousGroup,
+        clientInboxId,
+        conversationId: xmtpConversationId,
       })
 
       // Remove from main conversations list
       removeConversationFromAllowedConsentConversationsQuery({
         clientInboxId,
-        xmtpConversationId,
+        conversationId: xmtpConversationId,
       })
     },
   }

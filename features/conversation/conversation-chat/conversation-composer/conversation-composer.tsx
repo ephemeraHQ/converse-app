@@ -2,7 +2,7 @@ import { HStack } from "@design-system/HStack"
 import { VStack } from "@design-system/VStack"
 import React, { memo, useCallback } from "react"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
-import { ReplyPreview } from "@/features/conversation/conversation-chat/conversation-composer/conversation-composer-reply-preview"
+import { ConversationComposerReplyPreview } from "@/features/conversation/conversation-chat/conversation-composer/conversation-composer-reply-preview"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { captureErrorWithToast } from "@/utils/capture-error"
 import { AddAttachmentButton } from "./conversation-composer-add-attachment-button"
@@ -35,7 +35,7 @@ export const ConversationComposer = memo(function ConversationComposer() {
         backgroundColor: theme.colors.background.surfaceless,
       }}
     >
-      <ReplyPreview />
+      <ConversationComposerReplyPreview />
       <VStack
         style={{
           margin: 6, // 6 in the Figma

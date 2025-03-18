@@ -1,5 +1,5 @@
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
-import { getDmPeerInboxIdQueryData } from "@/features/dm/dm-peer-inbox-id.query"
+import { getDmQueryData } from "@/features/dm/dm.query"
 import { getGroupQueryData } from "@/features/groups/group.query"
 import { IXmtpConversationId, IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 
@@ -14,10 +14,10 @@ export function inboxIdIsPartOfConversationUsingCacheData(args: {
     xmtpConversationId,
   })
 
-  const peerInboxId = getDmPeerInboxIdQueryData({
-    inboxId: getSafeCurrentSender().inboxId,
+  const dm = getDmQueryData({
+    clientInboxId: getSafeCurrentSender().inboxId,
     xmtpConversationId,
   })
 
-  return peerInboxId === inboxId || group?.members?.ids.some((_inboxId) => _inboxId === inboxId)
+  return dm?.peerInboxId === inboxId || group?.members?.ids.some((_inboxId) => _inboxId === inboxId)
 }

@@ -2,8 +2,8 @@ import { useMutation } from "@tanstack/react-query"
 import { useCallback } from "react"
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import {
-  addMessageToConversationMessagesQuery,
-  removeMessageToConversationMessages,
+  addMessageToConversationMessagesQueryData,
+  removeMessageToConversationMessagesQueryData,
 } from "@/features/conversation/conversation-chat/conversation-messages.query"
 import {
   getXmtpConversationTopicFromXmtpId,
@@ -37,7 +37,7 @@ export function useRemoveReactionOnMessage(props: { xmtpConversationId: IXmtpCon
       const tempOptimisticId = getRandomId()
 
       // Add the removal reaction message
-      addMessageToConversationMessagesQuery({
+      addMessageToConversationMessagesQueryData({
         clientInboxId: currentSender.inboxId,
         xmtpConversationId,
         message: {
@@ -49,7 +49,6 @@ export function useRemoveReactionOnMessage(props: { xmtpConversationId: IXmtpCon
           status: "sent",
           xmtpConversationId,
           content: variables.reaction,
-          tempOptimisticId,
         },
       })
 
@@ -63,7 +62,7 @@ export function useRemoveReactionOnMessage(props: { xmtpConversationId: IXmtpCon
       }
 
       // Remove the reaction message
-      removeMessageToConversationMessages({
+      removeMessageToConversationMessagesQueryData({
         clientInboxId: currentSender.inboxId,
         xmtpConversationId,
         messageId: variables.reaction.reference,

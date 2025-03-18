@@ -8,7 +8,7 @@ import {
   getConversationMetadataQueryData,
   updateConversationMetadataQueryData,
 } from "@/features/conversation/conversation-metadata/conversation-metadata.query"
-import { useDmPeerInboxIdQuery } from "@/features/dm/dm-peer-inbox-id.query"
+import { useDmQuery } from "@/features/dm/dm.query"
 import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
 import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 import { translate } from "@/i18n"
@@ -21,14 +21,13 @@ export const useDeleteDm = ({
 }) => {
   const currentSender = useSafeCurrentSender()!
 
-  const { data: peerInboxId } = useDmPeerInboxIdQuery({
-    inboxId: currentSender.inboxId,
+  const { data: dm } = useDmQuery({
+    clientInboxId: currentSender.inboxId,
     xmtpConversationId,
-    caller: "useDeleteDm",
   })
 
   const { displayName } = usePreferredDisplayInfo({
-    inboxId: peerInboxId!,
+    inboxId: dm?.peerInboxId!,
   })
 
   const { mutateAsync: denyDmConsentAsync } = useDenyDmMutation()
@@ -66,7 +65,7 @@ export const useDeleteDm = ({
       throw new Error("Conversation not found in useDeleteDm")
     }
 
-    if (!peerInboxId) {
+    if (!dm?.peerInboxId) {
       throw new Error("Peer inbox id not found in useDeleteDm")
     }
 
@@ -87,7 +86,7 @@ export const useDeleteDm = ({
           try {
             await deleteDmAsync()
             await denyDmConsentAsync({
-              peerInboxId: peerInboxId,
+              peerInboxId: dm.peerInboxId,
               xmtpConversationId,
             })
           } catch (error) {
@@ -114,5 +113,5 @@ export const useDeleteDm = ({
         }
       },
     })
-  }, [displayName, deleteDmAsync, denyDmConsentAsync, peerInboxId, xmtpConversationId])
+  }, [displayName, deleteDmAsync, denyDmConsentAsync, dm?.peerInboxId, xmtpConversationId])
 }

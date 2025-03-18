@@ -3,6 +3,7 @@ import { queryOptions, skipToken, useQuery } from "@tanstack/react-query"
 import { config } from "@/config"
 import { ensureConversationSyncAllQuery } from "@/features/conversation/queries/conversation-sync-all.query"
 import { convertXmtpConversationToConvosConversation } from "@/features/conversation/utils/convert-xmtp-conversation-to-convos"
+import { isTempConversation } from "@/features/conversation/utils/is-temp-conversation"
 import { getXmtpClientByInboxId } from "@/features/xmtp/xmtp-client/xmtp-client"
 import { Optional } from "@/types/general"
 import { captureError } from "@/utils/capture-error"
@@ -116,7 +117,7 @@ export function getConversationQueryOptions(
   args: Optional<IGetConversationArgsWithCaller, "caller">,
 ) {
   const { clientInboxId, xmtpConversationId, caller } = args
-  const enabled = !!xmtpConversationId && !!clientInboxId
+  const enabled = !!xmtpConversationId && !!clientInboxId && !isTempConversation(xmtpConversationId)
   return queryOptions({
     meta: {
       caller,
@@ -138,7 +139,27 @@ export const setConversationQueryData = (
       clientInboxId,
       xmtpConversationId,
     }).queryKey,
-    conversation,
+    (previousConversation) => {
+      if (!previousConversation) {
+        return conversation
+      }
+
+      if (!conversation) {
+        return null
+      }
+
+      // Keep existing lastMessage if new conversation has undefined lastMessage
+      const lastMessage =
+        conversation.lastMessage === undefined
+          ? previousConversation.lastMessage
+          : conversation.lastMessage
+
+      return {
+        ...previousConversation,
+        ...conversation,
+        lastMessage,
+      }
+    },
   )
 }
 

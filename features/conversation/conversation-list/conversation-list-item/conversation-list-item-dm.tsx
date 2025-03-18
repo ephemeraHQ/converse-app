@@ -12,8 +12,7 @@ import { useDeleteDm } from "@/features/conversation/conversation-list/hooks/use
 import { useMessagePlainText } from "@/features/conversation/conversation-list/hooks/use-message-plain-text"
 import { useRestoreConversation } from "@/features/conversation/conversation-list/hooks/use-restore-conversation"
 import { useToggleReadStatus } from "@/features/conversation/conversation-list/hooks/use-toggle-read-status"
-import { useConversationQuery } from "@/features/conversation/queries/conversation.query"
-import { useDmPeerInboxIdQuery } from "@/features/dm/dm-peer-inbox-id.query"
+import { useDmQuery } from "@/features/dm/dm.query"
 import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
 import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 import { useFocusRerender } from "@/hooks/use-focus-rerender"
@@ -38,26 +37,19 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
   useFocusRerender()
 
   // Conversation related hooks
-  const { data: conversation } = useConversationQuery({
+  const { data: dm } = useDmQuery({
     clientInboxId: currentSender.inboxId,
     xmtpConversationId,
-    caller: "Conversation List Item Dm",
-  })
-
-  const { data: peerInboxId } = useDmPeerInboxIdQuery({
-    inboxId: currentSender.inboxId,
-    xmtpConversationId,
-    caller: "ConversationListItemDm",
   })
 
   const { displayName, avatarUrl } = usePreferredDisplayInfo({
-    inboxId: peerInboxId,
+    inboxId: dm?.peerInboxId,
   })
 
   // Status hooks
   const { isUnread } = useConversationIsUnread({ xmtpConversationId })
   const { isDeleted } = useConversationIsDeleted({ xmtpConversationId })
-  const messageText = useMessagePlainText(conversation?.lastMessage)
+  const messageText = useMessagePlainText(dm?.lastMessage)
 
   // Action hooks
   const deleteDm = useDeleteDm({ xmtpConversationId })
@@ -68,7 +60,7 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
     xmtpConversationId,
   })
 
-  const timestamp = conversation?.lastMessage?.sentNs ?? 0
+  const timestamp = dm?.lastMessage?.sentNs ?? 0
 
   // No need for timeToShow variable anymore
   const subtitle = !messageText

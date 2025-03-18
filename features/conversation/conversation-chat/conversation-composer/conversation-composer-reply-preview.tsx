@@ -34,14 +34,18 @@ import {
   IConversationMessageStaticAttachment,
 } from "../conversation-message/conversation-message.types"
 import { useConversationMessageById } from "../conversation-message/use-conversation-message-by-id"
-import { useCurrentXmtpConversationIdSafe } from "../conversation.store-context"
+import { useCurrentXmtpConversationId } from "../conversation.store-context"
 import {
   useConversationComposerStore,
   useConversationComposerStoreContext,
 } from "./conversation-composer.store-context"
 
-export const ReplyPreview = memo(function ReplyPreview() {
-  const xmtpConversationId = useCurrentXmtpConversationIdSafe()
+export const ConversationComposerReplyPreview = memo(function ReplyPreview() {
+  const xmtpConversationId = useCurrentXmtpConversationId()
+
+  if (!xmtpConversationId) {
+    return null
+  }
 
   return <Content xmtpConversationId={xmtpConversationId} />
 })

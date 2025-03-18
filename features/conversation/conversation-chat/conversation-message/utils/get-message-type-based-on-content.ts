@@ -45,5 +45,6 @@ export function getMessageTypeBaseOnContent(args: {
     return "multiRemoteAttachment"
   }
 
+  const _exhaustiveCheck: never = content
   throw new Error(`Unhandled content type: ${content}`)
 }

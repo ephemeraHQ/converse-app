@@ -63,7 +63,7 @@ export function getGroupQueryOptions(args: IArgsWithCaller) {
 }
 
 export function updateGroupQueryData(args: IArgs & { updates: Partial<IGroup> }) {
-  updateConversationQueryData({
+  return updateConversationQueryData({
     clientInboxId: args.clientInboxId,
     xmtpConversationId: args.xmtpConversationId,
     conversationUpdate: args.updates,

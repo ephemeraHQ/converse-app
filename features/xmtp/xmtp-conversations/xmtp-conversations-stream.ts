@@ -15,7 +15,6 @@ export async function streamConversations(args: {
   xmtpLogger.debug(`Started streaming conversations for ${inboxId}`)
 
   await client.conversations.stream(async (conversation) => {
-    xmtpLogger.debug(`Received new conversation for ${inboxId}`)
     onNewConversation(conversation)
   })
 }

@@ -1,4 +1,4 @@
-import { queryOptions, useQuery } from "@tanstack/react-query"
+import { queryOptions, skipToken, useQuery } from "@tanstack/react-query"
 import { logger } from "@utils/logger"
 import { isReactionMessage } from "@/features/conversation/conversation-chat/conversation-message/utils/conversation-message-assertions"
 import { isTempConversation } from "@/features/conversation/utils/is-temp-conversation"
@@ -10,11 +10,7 @@ import {
 import { IXmtpConversationId, IXmtpInboxId, IXmtpMessageId } from "@/features/xmtp/xmtp.types"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
 import { getReactQueryKey } from "@/utils/react-query/react-query.utils"
-import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
-import {
-  ensureConversationQueryData,
-  getConversationQueryData,
-} from "../queries/conversation.query"
+import { ensureConversationQueryData } from "../queries/conversation.query"
 import {
   IConversationMessage,
   IConversationMessageReactionContent,
@@ -70,9 +66,7 @@ export const useConversationMessagesQuery = (args: {
   xmtpConversationId: IXmtpConversationId
   caller: string
 }) => {
-  return useQuery({
-    ...getConversationMessagesQueryOptions(args),
-  })
+  return useQuery(getConversationMessagesQueryOptions(args))
 }
 
 export const getConversationMessagesQueryData = (args: {
@@ -93,27 +87,24 @@ export function refetchConversationMessages(args: {
   })
 }
 
-export const addMessageToConversationMessagesQuery = (args: {
+export const addMessageToConversationMessagesQueryData = (args: {
   clientInboxId: IXmtpInboxId
   xmtpConversationId: IXmtpConversationId
   message: IConversationMessage
 }) => {
   const { clientInboxId, xmtpConversationId, message } = args
 
-  const existingData = reactQueryClient.getQueryData(
+  const existingMessageData = reactQueryClient.getQueryData(
     getConversationMessagesQueryOptions({
       clientInboxId,
       xmtpConversationId,
     }).queryKey,
   )
 
-  if (!existingData) {
-    return
-  }
-
   const updatedData = processMessages({
     newMessages: [message],
-    existingData,
+    existingData: existingMessageData,
+    prependNewMessages: true,
   })
 
   return reactQueryClient.setQueryData(
@@ -125,7 +116,7 @@ export const addMessageToConversationMessagesQuery = (args: {
   )
 }
 
-export function removeMessageToConversationMessages(args: {
+export function removeMessageToConversationMessagesQueryData(args: {
   clientInboxId: IXmtpInboxId
   xmtpConversationId: IXmtpConversationId
   messageId: IXmtpMessageId
@@ -179,10 +170,9 @@ export function getConversationMessagesQueryOptions(args: {
   caller?: string // Optional because we don't want functions that just get or set query data to have to pass caller
 }) {
   const { clientInboxId, xmtpConversationId, caller } = args
-  const conversation = getConversationQueryData({
-    clientInboxId,
-    xmtpConversationId,
-  })
+
+  const enabled = Boolean(xmtpConversationId) && !isTempConversation(xmtpConversationId)
+
   return queryOptions({
     meta: {
       caller,
@@ -192,13 +182,37 @@ export function getConversationMessagesQueryOptions(args: {
       clientInboxId,
       xmtpConversationId,
     }),
-    queryFn: () =>
-      conversationMessagesQueryFn({
-        clientInboxId,
-        xmtpConversationId,
-      }),
-    enabled: !!conversation && !isTempConversation(xmtpConversationId),
+    queryFn: enabled
+      ? () =>
+          conversationMessagesQueryFn({
+            clientInboxId,
+            xmtpConversationId,
+          })
+      : skipToken,
+    enabled,
   })
+}
+
+export function setConversationMessagesQueryData(args: {
+  clientInboxId: IXmtpInboxId
+  xmtpConversationId: IXmtpConversationId
+  data: IMessageAccumulator
+}) {
+  const { clientInboxId, xmtpConversationId, data } = args
+  return reactQueryClient.setQueryData(
+    getConversationMessagesQueryOptions({ clientInboxId, xmtpConversationId }).queryKey,
+    data,
+  )
+}
+
+export function invalidateConversationMessagesQuery(args: {
+  clientInboxId: IXmtpInboxId
+  xmtpConversationId: IXmtpConversationId
+}) {
+  const { clientInboxId, xmtpConversationId } = args
+  return reactQueryClient.invalidateQueries(
+    getConversationMessagesQueryOptions({ clientInboxId, xmtpConversationId }),
+  )
 }
 
 export type IMessageAccumulator = {
@@ -213,6 +227,9 @@ export type IMessageAccumulator = {
   >
 }
 
+/**
+ * Process messages and return an accumulator of messages and reactions
+ */
 function processMessages(args: {
   newMessages: IConversationMessage[]
   existingData?: IMessageAccumulator
@@ -308,113 +325,4 @@ function processMessages(args: {
   }
 
   return result
-}
-
-export function replaceOptimisticMessageWithReal(args: {
-  tmpId: IXmtpMessageId
-  xmtpConversationId: IXmtpConversationId
-  clientInboxId: IXmtpInboxId
-  realMessage: IConversationMessage
-}) {
-  const { tmpId, xmtpConversationId, clientInboxId, realMessage } = args
-
-  logger.debug("[linkOptimisticMessageToReal] linking optimistic message to real", {
-    tempId: tmpId,
-    messageId: realMessage.xmtpId,
-  })
-
-  const existingData = reactQueryClient.getQueryData(
-    getConversationMessagesQueryOptions({
-      clientInboxId,
-      xmtpConversationId,
-    }).queryKey,
-  )
-
-  if (!existingData) {
-    return
-  }
-
-  logger.debug("[replaceOptimisticMessageWithReal] Processing message update", {
-    previousMessagesExists: !!existingData,
-    realMessageId: realMessage.xmtpId,
-    tempId: tmpId,
-  })
-
-  if (!existingData) {
-    const newState = {
-      ids: [realMessage.xmtpId],
-      byId: {
-        [realMessage.xmtpId]: realMessage,
-      },
-      reactions: {},
-    } satisfies IMessageAccumulator
-
-    logger.debug("[replaceOptimisticMessageWithReal] No previous messages, creating new state", {
-      newState: JSON.stringify(newState, null, 2),
-    })
-
-    return
-  }
-
-  // Find the index of the temporary message
-  const tmpIndex = existingData.ids.indexOf(tmpId)
-
-  logger.debug("[replaceOptimisticMessageWithReal] Found temp message index", {
-    tempIndex: tmpIndex,
-    messageIds: existingData.ids,
-  })
-
-  if (tmpIndex === -1) {
-    logger.debug(
-      "[replaceOptimisticMessageWithReal] Temp message not found, returning previous state",
-    )
-    return
-  }
-
-  // Create new ids array with the real message id replacing the temp id
-  const newIds = [...existingData.ids]
-  newIds[tmpIndex] = realMessage.xmtpId
-
-  // Add new message first, then spread existing byId
-  const newById: IMessageAccumulator["byId"] = {
-    [realMessage.xmtpId]: updateObjectAndMethods(realMessage, {
-      tempOptimisticId: tmpId,
-    }),
-    ...existingData.byId,
-  }
-  // Remove the temporary message entry
-  delete newById[tmpId]
-
-  const updatedState = {
-    ...existingData,
-    ids: newIds,
-    byId: newById,
-  }
-
-  return reactQueryClient.setQueryData(
-    getConversationMessagesQueryOptions({ clientInboxId, xmtpConversationId }).queryKey,
-    updatedState,
-  )
-}
-
-export function setConversationMessagesQueryData(args: {
-  clientInboxId: IXmtpInboxId
-  xmtpConversationId: IXmtpConversationId
-  data: IMessageAccumulator
-}) {
-  const { clientInboxId, xmtpConversationId, data } = args
-  return reactQueryClient.setQueryData(
-    getConversationMessagesQueryOptions({ clientInboxId, xmtpConversationId }).queryKey,
-    data,
-  )
-}
-
-export function invalidateConversationMessagesQuery(args: {
-  clientInboxId: IXmtpInboxId
-  xmtpConversationId: IXmtpConversationId
-}) {
-  const { clientInboxId, xmtpConversationId } = args
-  return reactQueryClient.invalidateQueries(
-    getConversationMessagesQueryOptions({ clientInboxId, xmtpConversationId }),
-  )
 }

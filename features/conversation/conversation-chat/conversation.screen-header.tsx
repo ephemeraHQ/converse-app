@@ -12,7 +12,7 @@ import { useConversationStore } from "@/features/conversation/conversation-chat/
 import { getConversationQueryData } from "@/features/conversation/queries/conversation.query"
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm"
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group"
-import { useDmPeerInboxIdQuery } from "@/features/dm/dm-peer-inbox-id.query"
+import { useDmQuery } from "@/features/dm/dm.query"
 import { useGroupMembers } from "@/features/groups/hooks/use-group-members"
 import { useGroupName } from "@/features/groups/hooks/use-group-name"
 import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
@@ -179,21 +179,20 @@ const DmConversationTitle = ({ xmtpConversationId }: DmConversationTitleProps) =
   const navigation = useRouter()
   const { theme } = useAppTheme()
 
-  const { data: peerInboxId } = useDmPeerInboxIdQuery({
-    inboxId: currentSender.inboxId,
+  const { data: dm } = useDmQuery({
+    clientInboxId: currentSender.inboxId,
     xmtpConversationId,
-    caller: "DmConversationTitle",
   })
 
   const { displayName, avatarUrl, isLoading } = usePreferredDisplayInfo({
-    inboxId: peerInboxId,
+    inboxId: dm?.peerInboxId,
   })
 
   const onPress = useCallback(() => {
-    if (peerInboxId) {
-      navigation.push("Profile", { inboxId: peerInboxId })
+    if (dm?.peerInboxId) {
+      navigation.push("Profile", { inboxId: dm.peerInboxId })
     }
-  }, [navigation, peerInboxId])
+  }, [dm?.peerInboxId, navigation])
 
   const onLongPress = useCallback(() => {
     copyToClipboard(JSON.stringify(xmtpConversationId))

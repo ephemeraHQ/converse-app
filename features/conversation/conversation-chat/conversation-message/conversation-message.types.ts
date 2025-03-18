@@ -24,7 +24,6 @@ export type IConversationMessageBase = {
   xmtpId: IXmtpMessageId
   xmtpTopic: IXmtpConversationTopic
   xmtpConversationId: IXmtpConversationId
-  tempOptimisticId?: string
 }
 
 // Message content types

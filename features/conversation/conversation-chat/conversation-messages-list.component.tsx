@@ -3,9 +3,11 @@
 import { memo, ReactElement, useEffect } from "react"
 import { FlatList, FlatListProps, Platform } from "react-native"
 import Animated, { AnimatedProps, useAnimatedRef } from "react-native-reanimated"
+import { getMessageContentStringValue } from "@/features/conversation/conversation-chat/conversation-message/utils/get-message-string-content"
 import { useConversationStore } from "@/features/conversation/conversation-chat/conversation.store-context"
 import { $globalStyles } from "@/theme/styles"
 import { useAppTheme } from "@/theme/use-app-theme"
+import { convertNanosecondsToMilliseconds } from "@/utils/date"
 import { IConversationMessage } from "./conversation-message/conversation-message.types"
 
 type ConversationMessagesListProps = Omit<
@@ -103,7 +105,11 @@ export const ConversationMessagesList = memo(function ConversationMessagesList(
 })
 
 const keyExtractor = (message: IConversationMessage) => {
-  return message.xmtpId
+  const messageContentStr = getMessageContentStringValue(message.content)
+  // Round to nearest 10 seconds to avoid too many unique keys for messages sent close together
+  const messageSentMs = convertNanosecondsToMilliseconds(message.sentNs)
+  const roundedMs = Math.round(messageSentMs / 10) * 10
+  return `${messageContentStr}-${message.senderInboxId}-${roundedMs}`
 }
 
 export const conversationListDefaultProps = {

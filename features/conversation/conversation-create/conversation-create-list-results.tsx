@@ -11,7 +11,7 @@ import { useSearchExistingDmsQuery } from "@/features/conversation/conversation-
 import { useSearchExistingGroupsByGroupMembersQuery } from "@/features/conversation/conversation-create/queries/search-existing-groups-by-group-members.query"
 import { useSearchExistingGroupsByGroupNameQuery } from "@/features/conversation/conversation-create/queries/search-existing-groups-by-group-name.query"
 import { inboxIdIsPartOfConversationUsingCacheData } from "@/features/conversation/utils/inbox-id-is-part-of-converastion"
-import { useDmPeerInboxIdQuery } from "@/features/dm/dm-peer-inbox-id.query"
+import { useDmQuery } from "@/features/dm/dm.query"
 import { useSearchConvosUsersQuery } from "@/features/search-users/queries/search-convos-users.query"
 import {
   useBaseNameResolution,
@@ -87,17 +87,16 @@ const SearchUsersResultsListItemUserDmWrapper = memo(
 
     const currentSender = useSafeCurrentSender()
 
-    const { data: peerInboxId, isLoading: isLoadingPeerInboxId } = useDmPeerInboxIdQuery({
-      inboxId: currentSender.inboxId,
+    const { data: dm, isLoading: isLoadingDm } = useDmQuery({
+      clientInboxId: currentSender.inboxId,
       xmtpConversationId,
-      caller: "SearchUsersResultsListItemUserDmWrapper",
     })
 
     const handlePress = useCallback(() => {
-      if (peerInboxId) {
+      if (dm?.peerInboxId) {
         conversationStore.setState({
           searchTextValue: "",
-          searchSelectedUserInboxIds: [peerInboxId],
+          searchSelectedUserInboxIds: [dm.peerInboxId],
         })
       } else {
         conversationStore.setState({
@@ -107,9 +106,9 @@ const SearchUsersResultsListItemUserDmWrapper = memo(
           isCreatingNewConversation: false,
         })
       }
-    }, [conversationStore, peerInboxId, xmtpConversationId])
+    }, [conversationStore, dm?.peerInboxId, xmtpConversationId])
 
-    if (isLoadingPeerInboxId) {
+    if (isLoadingDm) {
       return null
     }
 

@@ -5,7 +5,7 @@ import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.stor
 import { useAllowDmMutation } from "@/features/consent/use-allow-dm.mutation"
 import { useDenyDmMutation } from "@/features/consent/use-deny-dm.mutation"
 import { getConversationQueryData } from "@/features/conversation/queries/conversation.query"
-import { useDmPeerInboxIdQuery } from "@/features/dm/dm-peer-inbox-id.query"
+import { useDmQuery } from "@/features/dm/dm.query"
 import { useRouter } from "@/navigation/use-navigation"
 import { captureErrorWithToast } from "@/utils/capture-error"
 import { ensureError } from "@/utils/error"
@@ -21,10 +21,9 @@ export function ConversationConsentPopupDm() {
   const xmtpConversationId = useCurrentXmtpConversationIdSafe()
   const currentSenderInboxId = useSafeCurrentSender().inboxId
 
-  const { data: peerInboxId } = useDmPeerInboxIdQuery({
-    inboxId: currentSenderInboxId,
+  const { data: dm } = useDmQuery({
+    clientInboxId: currentSenderInboxId,
     xmtpConversationId,
-    caller: "ConversationConsentPopupDm",
   })
 
   const navigation = useRouter()
@@ -33,8 +32,8 @@ export function ConversationConsentPopupDm() {
   const { mutateAsync: allowDmConsentAsync } = useAllowDmMutation()
 
   const handleBlock = useCallback(async () => {
-    if (!peerInboxId) {
-      throw new Error("Peer inbox id not found")
+    if (!dm) {
+      throw new Error("Dm not found")
     }
 
     const conversation = getConversationQueryData({
@@ -58,7 +57,7 @@ export function ConversationConsentPopupDm() {
           try {
             await denyDmConsentAsync({
               xmtpConversationId,
-              peerInboxId: peerInboxId,
+              peerInboxId: dm.peerInboxId,
             })
             navigation.pop()
           } catch (error) {
@@ -69,12 +68,12 @@ export function ConversationConsentPopupDm() {
         }
       },
     })
-  }, [navigation, denyDmConsentAsync, peerInboxId, xmtpConversationId, currentSenderInboxId])
+  }, [navigation, denyDmConsentAsync, dm, xmtpConversationId, currentSenderInboxId])
 
   const handleAccept = useCallback(async () => {
     try {
-      if (!peerInboxId) {
-        throw new Error("Peer inbox id not found")
+      if (!dm) {
+        throw new Error("Dm not found")
       }
 
       const conversation = getConversationQueryData({
@@ -94,7 +93,7 @@ export function ConversationConsentPopupDm() {
         message: `Error consenting`,
       })
     }
-  }, [allowDmConsentAsync, peerInboxId, xmtpConversationId, currentSenderInboxId])
+  }, [allowDmConsentAsync, dm, xmtpConversationId, currentSenderInboxId])
 
   return (
     <ConversationConsentPopupContainer>

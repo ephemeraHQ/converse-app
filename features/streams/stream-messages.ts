@@ -1,6 +1,5 @@
 import { isGroupUpdatedMessage } from "@/features/conversation/conversation-chat/conversation-message/utils/conversation-message-assertions"
-import { addMessageToConversationMessagesQuery } from "@/features/conversation/conversation-chat/conversation-messages.query"
-import { updateConversationInAllowedConsentConversationsQueryData } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
+import { addMessageToConversationMessagesQueryData } from "@/features/conversation/conversation-chat/conversation-messages.query"
 import { updateConversationQueryData } from "@/features/conversation/queries/conversation.query"
 import {
   addGroupMemberToGroupQuery,
@@ -44,13 +43,7 @@ async function handleNewMessage(args: {
 
   streamLogger.debug(`[handleNewMessage] message: ${JSON.stringify(message)}`)
 
-  // We're already handling message sent by current user with optimistic update
-  if (message.senderInboxId === clientInboxId) {
-    streamLogger.debug(
-      `[handleNewMessage] message sent by current user, skipping updating query caches`,
-    )
-    return
-  }
+  const messageWasSentByCurrentUser = message.senderInboxId === clientInboxId
 
   if (isGroupUpdatedMessage(message)) {
     try {
@@ -64,29 +57,20 @@ async function handleNewMessage(args: {
   }
 
   try {
-    addMessageToConversationMessagesQuery({
-      clientInboxId,
-      xmtpConversationId: message.xmtpConversationId,
-      message,
-    })
+    // Because we handle the message sent by current user with optimistic update, we don't need to update the query cache
+    if (!messageWasSentByCurrentUser) {
+      addMessageToConversationMessagesQueryData({
+        clientInboxId,
+        xmtpConversationId: message.xmtpConversationId,
+        message,
+      })
+    }
   } catch (error) {
     captureError(error)
   }
 
   try {
     updateConversationQueryData({
-      clientInboxId,
-      xmtpConversationId: message.xmtpConversationId,
-      conversationUpdate: {
-        lastMessage: message,
-      },
-    })
-  } catch (error) {
-    captureError(error)
-  }
-
-  try {
-    updateConversationInAllowedConsentConversationsQueryData({
       clientInboxId,
       xmtpConversationId: message.xmtpConversationId,
       conversationUpdate: {
@@ -161,12 +145,6 @@ function handleNewGroupUpdatedMessage(args: {
           clientInboxId: inboxId,
           xmtpConversationId: message.xmtpConversationId,
           updates: update,
-        })
-
-        updateConversationInAllowedConsentConversationsQueryData({
-          clientInboxId: inboxId,
-          xmtpConversationId: message.xmtpConversationId,
-          conversationUpdate: update,
         })
       }
     })

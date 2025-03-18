@@ -6,7 +6,7 @@ import {
 } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import {
   addConversationToUnknownConsentConversationsQuery,
-  removeConversationFromUnknownConsentConversationsQueryData,
+  removeConversationFromUnknownConsentConversationsQuery,
 } from "@/features/conversation/conversation-requests-list/conversations-unknown-consent.query"
 import { getGroupQueryData, setGroupQueryData } from "@/features/groups/group.query"
 import { IXmtpConversationId, IXmtpInboxId } from "@/features/xmtp/xmtp.types"
@@ -44,13 +44,13 @@ export const useDenyGroupMutation = (args: {
       // Remove from main conversations list
       removeConversationFromAllowedConsentConversationsQuery({
         clientInboxId,
-        xmtpConversationId,
+        conversationId: xmtpConversationId,
       })
 
       // Remove from requests
-      removeConversationFromUnknownConsentConversationsQueryData({
-        inboxId: clientInboxId,
-        xmtpConversationId,
+      removeConversationFromUnknownConsentConversationsQuery({
+        clientInboxId,
+        conversationId: xmtpConversationId,
       })
 
       return { previousGroup }
@@ -69,13 +69,13 @@ export const useDenyGroupMutation = (args: {
       // Add back to main conversations list
       addConversationToAllowedConsentConversationsQuery({
         clientInboxId,
-        conversation: context.previousGroup,
+        conversationId: xmtpConversationId,
       })
 
       // Add back to requests
       addConversationToUnknownConsentConversationsQuery({
-        inboxId: clientInboxId,
-        conversation: context.previousGroup,
+        clientInboxId,
+        conversationId: xmtpConversationId,
       })
     },
     onSuccess: () => {

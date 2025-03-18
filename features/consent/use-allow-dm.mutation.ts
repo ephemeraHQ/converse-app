@@ -6,7 +6,7 @@ import {
 } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import {
   addConversationToUnknownConsentConversationsQuery,
-  removeConversationFromUnknownConsentConversationsQueryData,
+  removeConversationFromUnknownConsentConversationsQuery,
 } from "@/features/conversation/conversation-requests-list/conversations-unknown-consent.query"
 import { getDmQueryData, setDmQueryData } from "@/features/dm/dm.query"
 import { IDm } from "@/features/dm/dm.types"
@@ -56,13 +56,13 @@ export function useAllowDmMutation() {
         // Add to main conversations list
         addConversationToAllowedConsentConversationsQuery({
           clientInboxId: currentSenderInboxId,
-          conversation: updatedDm,
+          conversationId: xmtpConversationId,
         })
 
         // Remove from requests
-        removeConversationFromUnknownConsentConversationsQueryData({
-          inboxId: currentSenderInboxId,
-          xmtpConversationId,
+        removeConversationFromUnknownConsentConversationsQuery({
+          clientInboxId: currentSenderInboxId,
+          conversationId: xmtpConversationId,
         })
 
         return { previousDmConsent: existingDm.consentState }
@@ -92,14 +92,14 @@ export function useAllowDmMutation() {
 
         // Add back in requests
         addConversationToUnknownConsentConversationsQuery({
-          inboxId: currentSenderInboxId,
-          conversation: previousDm,
+          clientInboxId: currentSenderInboxId,
+          conversationId: xmtpConversationId,
         })
 
         // Remove from main conversations list
         removeConversationFromAllowedConsentConversationsQuery({
           clientInboxId: currentSenderInboxId,
-          xmtpConversationId,
+          conversationId: xmtpConversationId,
         })
       }
     },

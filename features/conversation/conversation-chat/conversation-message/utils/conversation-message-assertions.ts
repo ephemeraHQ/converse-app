@@ -76,41 +76,41 @@ export function isMultiRemoteAttachmentMessage(
 export function messageContentIsStaticAttachment(
   content: IConversationMessageContent,
 ): content is IConversationMessageStaticAttachmentContent {
-  return "attachment" in content
+  return content && typeof content === "object" && "attachment" in content
 }
 
 export function messageContentIsText(
   content: IConversationMessageContent,
 ): content is IConversationMessageTextContent {
-  return "text" in content
+  return content && typeof content === "object" && "text" in content
 }
 
 export function messageContentIsRemoteAttachment(
   content: IConversationMessageContent,
 ): content is IConversationMessageRemoteAttachmentContent {
-  return "secret" in content && "url" in content
+  return content && typeof content === "object" && "secret" in content && "url" in content
 }
 
 export function messageContentIsMultiRemoteAttachment(
   content: IConversationMessageContent,
 ): content is IConversationMessageMultiRemoteAttachmentContent {
-  return "multiRemoteAttachment" in content
+  return content && typeof content === "object" && "multiRemoteAttachment" in content
 }
 
 export function messageContentIsReaction(
   content: IConversationMessageContent,
 ): content is IConversationMessageReactionContent {
-  return "reaction" in content
+  return content && typeof content === "object" && "reaction" in content
 }
 
 export function messageContentIsGroupUpdated(
   content: IConversationMessageContent,
 ): content is IConversationMessageGroupUpdatedContent {
-  return "groupUpdated" in content
+  return content && typeof content === "object" && "membersAdded" in content
 }
 
 export function messageContentIsReply(
   content: IConversationMessageContent,
 ): content is IConversationMessageReplyContent {
-  return "reply" in content
+  return content && typeof content === "object" && "reply" in content
 }
