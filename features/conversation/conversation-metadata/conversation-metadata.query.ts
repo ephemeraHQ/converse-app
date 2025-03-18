@@ -1,5 +1,6 @@
 import type { IXmtpConversationId, IXmtpInboxId } from "@features/xmtp/xmtp.types"
-import { queryOptions, skipToken } from "@tanstack/react-query"
+import { queryOptions } from "@tanstack/react-query"
+import { AxiosError } from "axios"
 import { getConversationMetadata } from "@/features/conversation/conversation-metadata/conversation-metadata.api"
 import { isTempConversation } from "@/features/conversation/utils/is-temp-conversation"
 import { getReactQueryKey } from "@/utils/react-query/react-query.utils"
@@ -12,6 +13,10 @@ type IArgs = {
   clientInboxId: IXmtpInboxId
 }
 
+function getConversationMetadataQueryFn({ xmtpConversationId, clientInboxId }: IArgs) {
+  return getConversationMetadata({ xmtpConversationId })
+}
+
 export function getConversationMetadataQueryOptions({ xmtpConversationId, clientInboxId }: IArgs) {
   const enabled = !!xmtpConversationId && !isTempConversation(xmtpConversationId)
   return queryOptions({
@@ -20,8 +25,18 @@ export function getConversationMetadataQueryOptions({ xmtpConversationId, client
       xmtpConversationId,
       clientInboxId,
     }),
-    queryFn: enabled ? () => getConversationMetadata({ xmtpConversationId }) : skipToken,
+    queryFn: () => getConversationMetadataQueryFn({ xmtpConversationId, clientInboxId }),
     enabled,
+    // Retry only for specific types of errors, not for 404 which is handled by our API layer
+    retry: (failureCount, error) => {
+      // Don't retry 404 errors as they're handled by getConversationMetadata
+      if (error instanceof AxiosError && error.response?.status === 404) {
+        return false
+      }
+
+      // Retry other errors up to 3 times
+      return failureCount < 3
+    },
   })
 }
 

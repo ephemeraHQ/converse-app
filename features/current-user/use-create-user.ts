@@ -1,5 +1,4 @@
 import { useMutation } from "@tanstack/react-query"
-import { useCallback } from "react"
 import { z } from "zod"
 import { setCurrentUserQueryData } from "@/features/current-user/curent-user.query"
 import { invalidateProfileQuery, setProfileQueryData } from "@/features/profiles/profiles.query"
@@ -20,13 +19,16 @@ const createUserRequestSchema = z.object({
   }),
 })
 
-type ICreateUserArgs = z.infer<typeof createUserRequestSchema>
+export type ICreateUserArgs = z.infer<typeof createUserRequestSchema>
 
-export function useCreateUser() {
+export function useCreateUserMutation() {
   // const { logout } = useLogout();
 
-  const { mutateAsync, isPending: isCreatingUser } = useMutation({
+  return useMutation({
     mutationFn: async (args: ICreateUserArgs) => {
+      // Validate the payload against our schema
+      createUserRequestSchema.parse(args)
+
       return createUser(args)
     },
 
@@ -89,18 +91,4 @@ export function useCreateUser() {
       invalidateProfileQuery({ xmtpId: data.identity.xmtpId })
     },
   })
-
-  const handleCreateUser = useCallback(
-    async (args: ICreateUserArgs) => {
-      // Validate the payload against our schema
-      const validationResult = createUserRequestSchema.parse(args)
-      await mutateAsync(validationResult)
-    },
-    [mutateAsync],
-  )
-
-  return {
-    createUserAsync: handleCreateUser,
-    isCreatingUser,
-  }
 }

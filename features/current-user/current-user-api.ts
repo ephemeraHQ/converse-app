@@ -16,7 +16,7 @@ export const CurrentUserSchema = z.object({
 export type ICurrentUser = z.infer<typeof CurrentUserSchema>
 
 export async function fetchCurrentUser(): Promise<ICurrentUser> {
-  const { data } = await api.get("/api/v1/users/me")
+  const { data } = await api.get<ICurrentUser>("/api/v1/users/me")
 
   const parseResult = CurrentUserSchema.safeParse(data)
   if (!parseResult.success) {
@@ -25,5 +25,5 @@ export async function fetchCurrentUser(): Promise<ICurrentUser> {
     )
   }
 
-  return data as ICurrentUser
+  return data
 }

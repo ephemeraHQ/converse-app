@@ -8,7 +8,7 @@ import { OnboardingFooter } from "@/features/auth-onboarding/components/onboardi
 import { useAuthOnboardingStore } from "@/features/auth-onboarding/stores/auth-onboarding.store"
 import { hydrateAuth } from "@/features/authentication/hydrate-auth"
 import { useMultiInboxStore } from "@/features/authentication/multi-inbox.store"
-import { useCreateUser } from "@/features/current-user/use-create-user"
+import { useCreateUserMutation } from "@/features/current-user/use-create-user"
 import { captureErrorWithToast } from "@/utils/capture-error"
 import { waitUntilPromise } from "@/utils/wait-until-promise"
 import { getFirstZodValidationError, isZodValidationError } from "@/utils/zod"
@@ -18,7 +18,7 @@ export const AuthOnboardingContactCardFooter = memo(function AuthOnboardingConta
 }: {
   footerContainerHeightAV: SharedValue<number>
 }) {
-  const { createUserAsync, isCreatingUser } = useCreateUser()
+  const { mutateAsync: createUserAsync, isPending: isCreatingUser } = useCreateUserMutation()
 
   const isAvatarUploading = useAuthOnboardingStore((state) => state.isAvatarUploading)
   const isProcessingWeb3Stuff = useAuthOnboardingStore((s) => s.isProcessingWeb3Stuff)

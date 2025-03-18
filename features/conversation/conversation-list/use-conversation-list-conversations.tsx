@@ -4,6 +4,7 @@ import { useAllowedConsentConversationsQuery } from "@/features/conversation/con
 import { getConversationMetadataQueryOptions } from "@/features/conversation/conversation-metadata/conversation-metadata.query"
 import { getConversationQueryData } from "@/features/conversation/queries/conversation.query"
 import { isConversationAllowed } from "@/features/conversation/utils/is-conversation-allowed"
+import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 
 export const useConversationListConversations = () => {
   const currentSender = useSafeCurrentSender()
@@ -25,52 +26,55 @@ export const useConversationListConversations = () => {
       }),
     ),
     combine: (queries) => {
-      // Extract stable values from queries
-      // Get metadata results and conversation data in one pass
-      const conversationsWithMetadata = (conversationIds ?? []).map((conversationId, index) => {
-        const query = queries[index]
-        const conversation = getConversationQueryData({
-          clientInboxId: currentSender.inboxId,
-          xmtpConversationId: conversationId,
-        })
+      // Process everything in a single reduce operation for efficiency
+      const filteredAndSortedConversations = (conversationIds ?? []).reduce(
+        (validConversations, conversationId, index) => {
+          const metadataQuery = queries[index]
+          const conversation = getConversationQueryData({
+            clientInboxId: currentSender.inboxId,
+            xmtpConversationId: conversationId,
+          })
+          const metadata = metadataQuery.data
 
-        return {
-          conversationId,
-          conversation,
-          metadata: query.data,
-          isLoading: query.isLoading,
-        }
-      })
+          // If Metadata have failed we don't really care and still want to show the conversations.
+          // We only care if we HAVEN'T even tried to fetch the metadata yet.
+          const isMetadataLoading =
+            metadataQuery.isLoading && !metadataQuery.data && !metadataQuery.isFetched
 
-      // Filter and sort conversations
-      const filteredAndSortedConversations = conversationsWithMetadata
-        .filter(({ conversation, metadata, isLoading }) => {
-          if (!conversation) {
-            return false
-          }
-
-          return (
+          // Check if this conversation passes all our filters
+          if (
+            conversation &&
             isConversationAllowed(conversation) &&
             !metadata?.pinned &&
             !metadata?.deleted &&
-            !isLoading
-          )
-        })
-        .sort((a, b) => {
-          const timestampA = a.conversation?.lastMessage?.sentNs ?? 0
-          const timestampB = b.conversation?.lastMessage?.sentNs ?? 0
-          return timestampB - timestampA
-        })
-        .map(({ conversationId }) => conversationId)
+            !isMetadataLoading
+          ) {
+            // Add to valid conversations with its timestamp for sorting
+            validConversations.push({
+              conversationId,
+              timestamp: conversation.lastMessage?.sentNs ?? 0,
+            })
+          }
 
-      const isLoading = isLoadingConversations || queries.some((query) => query.isLoading)
+          return validConversations
+        },
+        [] as Array<{ conversationId: IXmtpConversationId; timestamp: number }>,
+      )
+
+      // Sort by timestamp (newest first)
+      filteredAndSortedConversations.sort((a, b) => b.timestamp - a.timestamp)
+
+      // Extract just the IDs for the final result
+      const sortedIds = filteredAndSortedConversations.map((item) => item.conversationId)
+
+      // Only consider it loading if:
+      // 1. We're loading conversation IDs for the first time, OR
+      // 2. Any metadata query is truly loading (no existing data)
+      const hasAnyMetadataLoading = queries.some((query) => query.isLoading && !query.data)
+      const isLoading = isLoadingConversations || hasAnyMetadataLoading
 
       return {
-        metadataResults: queries.map((query) => ({
-          data: query.data,
-          isLoading: query.isLoading,
-        })),
-        filteredAndSortedConversations,
+        filteredAndSortedConversations: sortedIds,
         isLoading,
       }
     },

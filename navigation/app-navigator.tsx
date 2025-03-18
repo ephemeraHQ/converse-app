@@ -18,6 +18,7 @@ import {
 } from "@/features/conversation/conversation-chat/conversation.nav"
 import { ConversationListScreen } from "@/features/conversation/conversation-list/conversation-list.screen"
 import { ConversationRequestsListNav } from "@/features/conversation/conversation-requests-list/conversation-requests-list.nav"
+import { useCreateUserIfNoExist } from "@/features/current-user/use-create-user-if-no-exist"
 import {
   AddGroupMembersNav,
   AddGroupMembersScreenConfig,
@@ -37,7 +38,7 @@ import { navigationRef } from "@/navigation/navigation.utils"
 import { WebviewPreviewNav } from "@/screens/WebviewPreviewNav"
 import { useAppTheme, useThemeProvider } from "@/theme/use-app-theme"
 import { captureError } from "@/utils/capture-error"
-import { useUpdateSentry } from "@/utils/sentry"
+import { useUpdateSentryUser } from "@/utils/sentry"
 import { hideSplashScreen } from "@/utils/splash/splash"
 import { ShareProfileNav, ShareProfileScreenConfig } from "../screens/ShareProfileNav"
 
@@ -67,10 +68,11 @@ export function AppNavigator() {
   const { themeScheme, navigationTheme, setThemeContextOverride, ThemeProvider } =
     useThemeProvider()
 
-  useUpdateSentry()
+  useUpdateSentryUser()
   useIsCurrentVersionEnough()
   useRefreshJwtAxiosInterceptor()
   useSignoutIfNoPrivyUser()
+  useCreateUserIfNoExist()
 
   // Hydrate auth when the app is loaded
   useEffect(() => {

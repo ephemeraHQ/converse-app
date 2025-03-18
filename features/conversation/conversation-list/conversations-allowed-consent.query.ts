@@ -3,7 +3,7 @@ import { QueryObserver, queryOptions, skipToken, useQuery } from "@tanstack/reac
 import { refetchConversationSyncAllQuery } from "@/features/conversation/queries/conversation-sync-all.query"
 import { setConversationQueryData } from "@/features/conversation/queries/conversation.query"
 import { convertXmtpConversationToConvosConversation } from "@/features/conversation/utils/convert-xmtp-conversation-to-convos"
-import { getXmtpConversations } from "@/features/xmtp/xmtp-conversations/xmtp-conversation"
+import { getXmtpConversations } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-list"
 import { Optional } from "@/types/general"
 import { reactQueryClient } from "../../../utils/react-query/react-query.client"
 

@@ -1,10 +1,10 @@
 import type { IXmtpConversationId, IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query"
 import { config } from "@/config"
-import { ensureConversationSyncAllQuery } from "@/features/conversation/queries/conversation-sync-all.query"
+import { refetchConversationSyncAllQuery } from "@/features/conversation/queries/conversation-sync-all.query"
 import { convertXmtpConversationToConvosConversation } from "@/features/conversation/utils/convert-xmtp-conversation-to-convos"
 import { isTempConversation } from "@/features/conversation/utils/is-temp-conversation"
-import { getXmtpClientByInboxId } from "@/features/xmtp/xmtp-client/xmtp-client"
+import { getXmtpConversations } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-list"
 import { Optional } from "@/types/general"
 import { captureError } from "@/utils/capture-error"
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
@@ -30,68 +30,43 @@ async function getConversation(args: IGetConversationArgs) {
     throw new Error("Inbox ID is required")
   }
 
+  /**
+   * This doesn't really work. It's slow
+   */
+  // await syncXmtpConversation({
+  //   clientInboxId,
+  //   conversationId: xmtpConversationId,
+  // })
+  // const xmtpConversation = await getXmtpConversation({
+  //   clientInboxId,
+  //   conversationId: xmtpConversationId,
+  // })
+  // if (!xmtpConversation) {
+  //   throw new Error("XMTP Conversation not found")
+  // }
+  // const convosConversation = await convertXmtpConversationToConvosConversation(xmtpConversation)
+
   const totalStart = new Date().getTime()
 
-  /**
-   * (START) TMP until we can fetch a single conversation and get ALL the properties for it (lastMessage, etc)
-   */
   await Promise.all([
-    ensureConversationSyncAllQuery({
+    refetchConversationSyncAllQuery({
       clientInboxId,
       consentStates: ["allowed"],
     }),
-    ensureConversationSyncAllQuery({
+    refetchConversationSyncAllQuery({
       clientInboxId,
       consentStates: ["unknown"],
     }),
-    ensureConversationSyncAllQuery({
+    refetchConversationSyncAllQuery({
       clientInboxId,
       consentStates: ["denied"],
     }),
   ])
 
-  const client = await getXmtpClientByInboxId({
-    inboxId: clientInboxId,
+  const xmtpConversations = await getXmtpConversations({
+    clientInboxId,
+    consentStates: ["allowed", "unknown", "denied"],
   })
-
-  const xmtpConversations = (
-    await client.conversations.list({
-      isActive: true,
-      addedByInboxId: true,
-      name: true,
-      imageUrl: true,
-      consentState: true,
-      lastMessage: true,
-      description: true,
-    })
-  ).find((xmtpConversation) => xmtpConversation.id === xmtpConversationId)
-
-  if (!xmtpConversations) {
-    return null
-  }
-  /**
-   * (END) TMP until we can fetch a single conversation and get ALL the properties for it (lastMessage, etc)
-   */
-
-  // Try to find conversation in local DB first
-  // let conversation = await client.conversations.findConversationByTopic(topic);
-
-  // If not found locally, sync and try again
-  // if (!conversation) {
-  //   logger.warn(
-  //     `[useConversationQuery] Conversation not found in local DB, syncing conversations`
-  //   );
-
-  //   await client.conversations.sync();
-  //   conversation = await client.conversations.findConversationByTopic(topic);
-
-  //   if (!conversation) {
-  //     // Throwing here because if we have a topic, we should have a conversation
-  //     throw new Error(`Conversation ${topic} not found`);
-  //   }
-  // }
-
-  // await conversation.sync();
 
   const totalEnd = new Date().getTime()
   const totalTimeDiff = totalEnd - totalStart
@@ -99,12 +74,19 @@ async function getConversation(args: IGetConversationArgs) {
   if (totalTimeDiff > config.xmtp.maxMsUntilLogError) {
     captureError(
       new Error(
-        `[useConversationQuery] Fetched conversation for ${xmtpConversationId} in ${totalTimeDiff}ms`,
+        `[useConversationQuery] Fetched conversation (${xmtpConversationId}) in ${totalTimeDiff}ms`,
       ),
     )
   }
 
-  const convosConversation = await convertXmtpConversationToConvosConversation(xmtpConversations)
+  const xmtpConversation = xmtpConversations.find((c) => c.id === xmtpConversationId)
+
+  // If we have the xmtpConversationId the conversation must exist otherwise we did something wrong
+  if (!xmtpConversation) {
+    throw new Error("XMTP Conversation not found")
+  }
+
+  const convosConversation = await convertXmtpConversationToConvosConversation(xmtpConversation)
 
   return convosConversation
 }
@@ -145,7 +127,7 @@ export const setConversationQueryData = (
       }
 
       if (!conversation) {
-        return null
+        return undefined
       }
 
       // Keep existing lastMessage if new conversation has undefined lastMessage

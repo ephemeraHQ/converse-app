@@ -92,7 +92,7 @@ export function sentryIdentifyUser(args: { userId?: string; username?: string })
   })
 }
 
-export function useUpdateSentry() {
+export function useUpdateSentryUser() {
   const currentSender = useCurrentSender()
 
   useEffect(() => {
@@ -103,7 +103,7 @@ export function useUpdateSentry() {
     // Track user changes with QueryObserver
     const userQueryObserver = new QueryObserver(
       reactQueryClient,
-      getCurrentUserQueryOptions({ caller: "useUpdateSentry" }),
+      getCurrentUserQueryOptions({ caller: "useUpdateSentryUser" }),
     )
 
     // Track profile changes with QueryObserver

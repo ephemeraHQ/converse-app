@@ -1,8 +1,8 @@
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query"
 import { logger } from "@utils/logger"
 import { isReactionMessage } from "@/features/conversation/conversation-chat/conversation-message/utils/conversation-message-assertions"
+import { ensureConversationSyncAllQuery } from "@/features/conversation/queries/conversation-sync-all.query"
 import { isTempConversation } from "@/features/conversation/utils/is-temp-conversation"
-import { syncXmtpConversation } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-sync"
 import {
   getXmtpConversationMessages,
   isSupportedMessage,
@@ -43,10 +43,17 @@ const conversationMessagesQueryFn = async (args: {
     throw new Error("Conversation not found")
   }
 
-  await syncXmtpConversation({
+  // Do this instead
+  await ensureConversationSyncAllQuery({
     clientInboxId,
-    conversationId: conversation.xmtpId,
+    consentStates: ["allowed", "unknown", "denied"],
   })
+
+  // This seems slow
+  // await syncXmtpConversation({
+  //   clientInboxId,
+  //   conversationId: conversation.xmtpId,
+  // })
 
   const xmtpMessages = await getXmtpConversationMessages({
     clientInboxId,

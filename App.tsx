@@ -77,8 +77,7 @@ export function App() {
             const shouldHydrate =
               query.meta?.persist !== false &&
               query.state.status !== "pending" &&
-              query.state.fetchStatus !== "fetching" &&
-              query.state.data !== null
+              query.state.fetchStatus !== "fetching"
 
             return shouldHydrate
           },

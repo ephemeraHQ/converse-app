@@ -6,9 +6,9 @@ import { api } from "@/utils/api/api"
 import { captureError } from "@/utils/capture-error"
 
 const ConversationMetadataSchema = z.object({
-  deleted: z.boolean(),
-  pinned: z.boolean(),
-  unread: z.boolean(),
+  deleted: z.boolean().optional(),
+  pinned: z.boolean().optional(),
+  unread: z.boolean().optional(),
   readUntil: z.string().datetime().optional(),
   updatedAt: z.string().datetime(),
 })
@@ -18,22 +18,64 @@ export type IConversationMetadata = z.infer<typeof ConversationMetadataSchema>
 export async function getConversationMetadata(args: { xmtpConversationId: IXmtpConversationId }) {
   const { xmtpConversationId } = args
 
-  const { data } = await api.get<IConversationMetadata>(
-    `/api/v1/metadata/conversation/${xmtpConversationId}`,
-  )
-
-  const parseResult = ConversationMetadataSchema.safeParse(data)
-
-  if (!parseResult.success) {
-    captureError(
-      new Error(
-        `Failed to parse conversation metadata response: ${JSON.stringify(parseResult.error)}`,
-      ),
+  try {
+    const { data } = await api.get<IConversationMetadata>(
+      `/api/v1/metadata/conversation/${xmtpConversationId}`,
     )
-  }
 
-  return data
+    const parseResult = ConversationMetadataSchema.safeParse(data)
+
+    if (!parseResult.success) {
+      captureError(
+        new Error(
+          `Failed to parse conversation metadata response: ${JSON.stringify(parseResult.error)}`,
+        ),
+      )
+    }
+
+    return data
+  } catch (error) {
+    // Check if error is a 404 Not Found error
+    // if (error instanceof AxiosError && error.response?.status === 404) {
+    //   // If metadata doesn't exist (404), create it with default values
+    //   return createDefaultConversationMetadata({ xmtpConversationId })
+    // }
+
+    // For other errors, rethrow
+    throw error
+  }
 }
+
+/**
+ * Creates default metadata for a conversation when none exists (404 error case)
+ */
+// async function createDefaultConversationMetadata(args: {
+//   xmtpConversationId: IXmtpConversationId
+//   clientInboxId?: IXmtpInboxId
+// }) {
+//   const { xmtpConversationId, clientInboxId } = args
+
+//   // If clientInboxId is provided, use it. Otherwise, try to get the current inbox ID.
+//   let inboxId = clientInboxId
+//   if (!inboxId) {
+//     const currentSender = useMultiInboxStore.getState().currentSender
+//     if (!currentSender) {
+//       throw new Error("No current sender found to create conversation metadata")
+//     }
+//     inboxId = currentSender.inboxId
+//   }
+
+//   // Create metadata with default values
+//   return updateConversationMetadata({
+//     xmtpConversationId,
+//     clientInboxId: inboxId,
+//     updates: {
+//       deleted: false,
+//       pinned: false,
+//       unread: true,
+//     },
+//   })
+// }
 
 export async function markConversationMetadataAsRead(args: {
   clientInboxId: IXmtpInboxId

@@ -26,9 +26,8 @@ export async function syncAllXmtpConversations(args: {
       captureError(
         new XMTPError({
           error: new Error(
-            `Syncing conversations from network took ${duration}ms for inbox ${clientInboxId}`,
+            `Syncing conversations (${consentStates.join(", ")}) from network took ${duration}ms for inbox ${clientInboxId}`,
           ),
-          additionalMessage: "XMTP sync performance warning",
         }),
       )
     }

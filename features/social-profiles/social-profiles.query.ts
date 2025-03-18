@@ -1,6 +1,6 @@
-import { queryOptions, skipToken, useQueries, useQuery } from "@tanstack/react-query"
 import { IEthereumAddress, isEthereumAddress } from "@/utils/evm/address"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
+import { queryOptions, skipToken, useQueries, useQuery } from "@tanstack/react-query"
 import { fetchSocialProfilesForAddress } from "./social-profiles.api"
 
 type IArgs = {
@@ -23,7 +23,7 @@ const getSocialProfilesForAddressQueryOptions = (args: IArgs) => {
             })
           }
         : skipToken,
-    staleTime: 0,
+    staleTime: 30 * 24 * 60 * 60 * 1000, // 30 days, it's very rare that we need to refetch this
   })
 }
 
