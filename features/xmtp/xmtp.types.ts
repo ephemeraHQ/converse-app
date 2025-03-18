@@ -15,10 +15,8 @@ import {
   InboxId,
   Member,
   MessageDeliveryStatus,
-  MessageId,
   MultiRemoteAttachmentCodec,
   NativeMessageContent,
-  PublicIdentity,
   ReactionCodec,
   ReactionContent,
   RemoteAttachmentCodec,
@@ -32,6 +30,7 @@ import {
   StaticAttachmentContent,
   TextCodec,
 } from "@xmtp/react-native-sdk"
+import { ConversationSendPayload, MessageId } from "@xmtp/react-native-sdk/build/lib/types"
 import { ISupportedXmtpCodecs } from "./xmtp-codecs/xmtp-codecs"
 
 // ===== Inbox Types =====
@@ -49,9 +48,6 @@ export type IXmtpConversationVersion = ConversationVersion
 export type IXmtpGroupMember = Member
 
 export type IXmtpConsentState = ConsentState
-
-// ===== Message Types =====
-export type IXmtpMessageId = MessageId
 
 // Base message types for different content types
 export type IXmtpDecodedTextMessage = DecodedMessage<TextCodec>
@@ -105,3 +101,7 @@ export type IXmtpMessageDeliveryStatus =
   | MessageDeliveryStatus.ALL
 
 export const IXmtpMessageDeliveryStatusValues = MessageDeliveryStatus
+
+export type IXmtpConversationSendPayload = ConversationSendPayload<ISupportedXmtpCodecs>
+
+export type IXmtpMessageId = MessageId

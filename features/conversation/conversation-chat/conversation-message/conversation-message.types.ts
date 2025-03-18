@@ -1,10 +1,9 @@
-import { IConversationTopic } from "@/features/conversation/conversation.types"
-import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
-
-// Core type identifiers
-export type IConversationMessageId = string & {
-  readonly brand: unique symbol
-}
+import {
+  IXmtpConversationId,
+  IXmtpConversationTopic,
+  IXmtpInboxId,
+  IXmtpMessageId,
+} from "@/features/xmtp/xmtp.types"
 
 export type IConversationMessageStatus = "sending" | "sent" | "error"
 
@@ -19,11 +18,12 @@ export type IConversationMessageContentType =
 
 // Base message structure
 export type IConversationMessageBase = {
-  id: IConversationMessageId
   status: IConversationMessageStatus
   senderInboxId: IXmtpInboxId
   sentNs: number
-  topic: IConversationTopic
+  xmtpId: IXmtpMessageId
+  xmtpTopic: IXmtpConversationTopic
+  xmtpConversationId: IXmtpConversationId
 }
 
 // Message content types
@@ -32,22 +32,22 @@ export type IConversationMessageTextContent = {
 }
 
 export type IConversationMessageReactionContent = {
-  reference: IConversationMessageId
+  reference: IXmtpMessageId
   action: "added" | "removed" | "unknown"
   schema: "unicode" | "shortcode" | "custom" | "unknown"
   content: string
 }
 
 export type IConversationMessageReplyContent = {
-  reference: IConversationMessageId
+  reference: IXmtpMessageId
   content: IConversationMessageContent
 }
 
 export type IConversationMessageGroupUpdatedContent = {
   initiatedByInboxId: IXmtpInboxId
-  membersAdded: Array<{ inboxId: IXmtpInboxId }>
-  membersRemoved: Array<{ inboxId: IXmtpInboxId }>
-  metadataFieldsChanged: Array<IGroupUpdatedMetadataEntry>
+  membersAdded: { inboxId: IXmtpInboxId }[]
+  membersRemoved: { inboxId: IXmtpInboxId }[]
+  metadataFieldsChanged: IGroupUpdatedMetadataEntry[]
 }
 
 export type IGroupUpdatedMetadataEntry = {
@@ -56,21 +56,21 @@ export type IGroupUpdatedMetadataEntry = {
   fieldName: string
 }
 
-export type IRemoteAttachmentInfo = {
+export type IConversationAttachment = {
   filename?: string
   secret: string
   salt: string
   nonce: string
   contentDigest: string
-  contentLength?: string
   scheme: "https://"
   url: string
+  contentLength: string
 }
 
-export type IConversationMessageRemoteAttachmentContent = IRemoteAttachmentInfo
+export type IConversationMessageRemoteAttachmentContent = IConversationAttachment
 
 export type IConversationMessageMultiRemoteAttachmentContent = {
-  attachments: Array<IRemoteAttachmentInfo & { contentLength: string }>
+  attachments: IConversationAttachment[]
 }
 
 export type IConversationMessageStaticAttachmentContent = {
@@ -80,7 +80,7 @@ export type IConversationMessageStaticAttachmentContent = {
 }
 
 export type IConversationMessageReadReceiptContent = {
-  readByInboxIds: Array<IXmtpInboxId>
+  readByInboxIds: IXmtpInboxId[]
 }
 
 // Union type for all content types
@@ -137,4 +137,4 @@ export type IConversationMessage =
   | IConversationMessageReply
   | IConversationMessageRemoteAttachment
   | IConversationMessageStaticAttachment
-  | IConversationMessageMultiRemoteAttachment
+  | IConversationMessageMultiRemoteAttachment // ===== Message Types =====

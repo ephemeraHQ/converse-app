@@ -96,6 +96,9 @@ export const reactQueryClient = new QueryClient({
 
       // Offers better performance by avoiding deep equality checks
       structuralSharing: false,
+
+      // Handle errors during rehydration more gracefully
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     },
   },
 })

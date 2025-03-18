@@ -11,19 +11,19 @@ import { useMessagePlainText } from "@/features/conversation/conversation-list/h
 import { useToggleReadStatus } from "@/features/conversation/conversation-list/hooks/use-toggle-read-status"
 import { useGroupQuery } from "@/features/groups/group.query"
 import { useGroupName } from "@/features/groups/hooks/use-group-name"
+import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 import { useFocusRerender } from "@/hooks/use-focus-rerender"
 import { useRouter } from "@/navigation/use-navigation"
-import { IConversationTopic } from "../../conversation.types"
 import { ConversationListItem } from "./conversation-list-item"
 import { DeleteSwipeableAction } from "./conversation-list-item-swipeable/conversation-list-item-swipeable-delete-action"
 import { ToggleUnreadSwipeableAction } from "./conversation-list-item-swipeable/conversation-list-item-swipeable-toggle-read-action"
 
 type IConversationListItemGroupProps = {
-  conversationTopic: IConversationTopic
+  xmtpConversationId: IXmtpConversationId
 }
 
 export const ConversationListItemGroup = memo(function ConversationListItemGroup({
-  conversationTopic,
+  xmtpConversationId,
 }: IConversationListItemGroupProps) {
   const currentSender = useSafeCurrentSender()
   const router = useRouter()
@@ -32,23 +32,23 @@ export const ConversationListItemGroup = memo(function ConversationListItemGroup
   useFocusRerender()
 
   const { data: group } = useGroupQuery({
-    inboxId: currentSender.inboxId,
-    topic: conversationTopic,
+    clientInboxId: currentSender.inboxId,
+    xmtpConversationId,
   })
 
   const { isUnread } = useConversationIsUnread({
-    topic: conversationTopic,
+    xmtpConversationId,
   })
 
   const { groupName } = useGroupName({
-    conversationTopic,
+    xmtpConversationId,
   })
 
   const onPress = useCallback(() => {
     router.navigate("Conversation", {
-      topic: conversationTopic,
+      xmtpConversationId,
     })
-  }, [conversationTopic, router])
+  }, [xmtpConversationId, router])
 
   // Title
   const title = groupName
@@ -60,7 +60,7 @@ export const ConversationListItemGroup = memo(function ConversationListItemGroup
   const subtitle = timeToShow && messageText ? `${timeToShow} ${MIDDLE_DOT} ${messageText}` : ""
 
   const { toggleReadStatusAsync } = useToggleReadStatus({
-    topic: conversationTopic,
+    xmtpConversationId,
   })
 
   const renderLeftActions = useCallback((args: ISwipeableRenderActionsArgs) => {
@@ -69,13 +69,13 @@ export const ConversationListItemGroup = memo(function ConversationListItemGroup
 
   const renderRightActions = useCallback(
     (args: ISwipeableRenderActionsArgs) => {
-      return <ToggleUnreadSwipeableAction {...args} topic={conversationTopic} />
+      return <ToggleUnreadSwipeableAction {...args} xmtpConversationId={xmtpConversationId} />
     },
-    [conversationTopic],
+    [xmtpConversationId],
   )
 
   const onDeleteGroup = useDeleteGroup({
-    groupTopic: conversationTopic,
+    xmtpConversationId,
   })
 
   return (
@@ -88,7 +88,7 @@ export const ConversationListItemGroup = memo(function ConversationListItemGroup
       <ConversationListItem
         onPress={onPress}
         showError={false}
-        avatarComponent={<GroupAvatar size="lg" groupTopic={conversationTopic} />}
+        avatarComponent={<GroupAvatar size="lg" xmtpConversationId={xmtpConversationId} />}
         title={title}
         subtitle={subtitle}
         isUnread={isUnread}

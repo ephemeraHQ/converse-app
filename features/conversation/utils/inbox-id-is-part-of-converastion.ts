@@ -1,24 +1,23 @@
-import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
-import { getDmPeerInboxIdQueryData } from "@/features/dm/use-dm-peer-inbox-id-query"
-import { getGroupMembersQueryData } from "@/features/groups/group-members.query"
-import { IConversationTopic } from "../conversation.types"
+import { getDmQueryData } from "@/features/dm/dm.query"
+import { getGroupQueryData } from "@/features/groups/group.query"
+import { IXmtpConversationId, IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 
 export function inboxIdIsPartOfConversationUsingCacheData(args: {
   inboxId: IXmtpInboxId
-  conversationTopic: IConversationTopic
+  xmtpConversationId: IXmtpConversationId
 }) {
-  const { inboxId, conversationTopic } = args
+  const { inboxId, xmtpConversationId } = args
 
-  const members = getGroupMembersQueryData({
+  const group = getGroupQueryData({
     clientInboxId: getSafeCurrentSender().inboxId,
-    topic: conversationTopic,
+    xmtpConversationId,
   })
 
-  const peerInboxId = getDmPeerInboxIdQueryData({
-    inboxId: getSafeCurrentSender().inboxId,
-    topic: conversationTopic,
+  const dm = getDmQueryData({
+    clientInboxId: getSafeCurrentSender().inboxId,
+    xmtpConversationId,
   })
 
-  return peerInboxId === inboxId || members?.ids.some((_inboxId) => _inboxId === inboxId)
+  return dm?.peerInboxId === inboxId || group?.members?.ids.some((_inboxId) => _inboxId === inboxId)
 }

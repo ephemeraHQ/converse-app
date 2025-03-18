@@ -1,7 +1,7 @@
+import { signWithInstallationKey } from "@xmtp/react-native-sdk"
 import { toHex } from "thirdweb"
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
-import { AuthenticationError } from "@/utils/error"
-import { getXmtpClientByEthAddress } from "../xmtp/xmtp-client/xmtp-client.service"
+import { ensureXmtpInstallationQueryData } from "@/features/xmtp/xmtp-installations/xmtp-installation.query"
 import { ensureJwtQueryData } from "./jwt.query"
 
 // used for requests that are creating an authentication token
@@ -21,7 +21,7 @@ export type XmtpApiHeaders = {
 }
 
 export async function getConvosAuthenticationHeaders(): Promise<XmtpApiHeaders> {
-  const currentEthereumAddress = getSafeCurrentSender().ethereumAddress
+  const currentSender = getSafeCurrentSender()
 
   // Disabled for now until we go live and it works with bun
   const appCheckToken = "123"
@@ -35,23 +35,16 @@ export async function getConvosAuthenticationHeaders(): Promise<XmtpApiHeaders> 
   //   );
   // }
 
-  const inboxClient = await getXmtpClientByEthAddress({
-    ethAddress: currentEthereumAddress,
+  const installationId = await ensureXmtpInstallationQueryData({
+    inboxId: currentSender.inboxId,
   })
 
-  if (!inboxClient) {
-    throw new AuthenticationError({
-      error: new Error("[getConvosAuthenticationHeaders] No inbox client found for account"),
-      additionalMessage: "failed to generate headers",
-    })
-  }
-
-  const rawAppCheckTokenSignature = await inboxClient.signWithInstallationKey(appCheckToken)
+  const rawAppCheckTokenSignature = await signWithInstallationKey(installationId, appCheckToken)
   const appCheckTokenSignatureHexString = toHex(rawAppCheckTokenSignature)
 
   return {
-    [XMTP_INSTALLATION_ID_HEADER_KEY]: inboxClient.installationId,
-    [XMTP_INBOX_ID_HEADER_KEY]: inboxClient.inboxId,
+    [XMTP_INSTALLATION_ID_HEADER_KEY]: installationId,
+    [XMTP_INBOX_ID_HEADER_KEY]: currentSender.inboxId,
     [XMTP_SIGNATURE_HEADER_KEY]: appCheckTokenSignatureHexString,
     [FIREBASE_APP_CHECK_HEADER_KEY]: appCheckToken, // Disabled for now until we go live and it works with bun
   }

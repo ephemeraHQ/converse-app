@@ -5,8 +5,8 @@ import {
   getConversationMetadataQueryData,
   updateConversationMetadataQueryData,
 } from "@/features/conversation/conversation-metadata/conversation-metadata.query"
+import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 import { formatDateForApi } from "@/utils/api/api.utils"
-import { IConversationTopic } from "../conversation.types"
 
 // Define the type for the mutation context
 type MarkAsReadContext = {
@@ -17,20 +17,20 @@ type MarkAsReadContext = {
 }
 
 export function getMarkConversationAsReadMutationOptions(args: {
-  topic: IConversationTopic
+  xmtpConversationId: IXmtpConversationId
 }): MutationOptions<void, Error, void, MarkAsReadContext> {
-  const { topic } = args
+  const { xmtpConversationId } = args
 
   const currentSender = getSafeCurrentSender()
 
   return {
-    mutationKey: ["markConversationAsRead", topic],
+    mutationKey: ["markConversationAsRead", xmtpConversationId],
     mutationFn: async () => {
       const readUntil = formatDateForApi(new Date())
 
       await markConversationMetadataAsRead({
         clientInboxId: currentSender.inboxId,
-        topic,
+        xmtpConversationId,
         readUntil,
       })
     },
@@ -38,12 +38,12 @@ export function getMarkConversationAsReadMutationOptions(args: {
       const readUntil = formatDateForApi(new Date())
       const previousData = getConversationMetadataQueryData({
         clientInboxId: currentSender.inboxId,
-        topic,
+        xmtpConversationId,
       })
 
       updateConversationMetadataQueryData({
         clientInboxId: currentSender.inboxId,
-        topic,
+        xmtpConversationId,
         updateData: {
           readUntil,
           unread: false,
@@ -63,14 +63,14 @@ export function getMarkConversationAsReadMutationOptions(args: {
     onError: (error, _, context) => {
       updateConversationMetadataQueryData({
         clientInboxId: currentSender.inboxId,
-        topic,
+        xmtpConversationId,
         updateData: context?.previousData ?? {},
       })
     },
   }
 }
 
-export function useMarkConversationAsRead(args: { topic: IConversationTopic }) {
+export function useMarkConversationAsRead(args: { xmtpConversationId: IXmtpConversationId }) {
   const { mutateAsync: markAsReadAsync } = useMutation(
     getMarkConversationAsReadMutationOptions(args),
   )

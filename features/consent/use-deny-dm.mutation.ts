@@ -6,17 +6,14 @@ import {
 } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import {
   addConversationToUnknownConsentConversationsQuery,
-  removeConversationFromUnknownConsentConversationsQueryData,
+  removeConversationFromUnknownConsentConversationsQuery,
 } from "@/features/conversation/conversation-requests-list/conversations-unknown-consent.query"
-import { getConversationQueryData } from "@/features/conversation/queries/conversation.query"
-import { getDmQueryData, setDmQueryData } from "@/features/dm/use-dm-query"
+import { getDmQueryData, setDmQueryData } from "@/features/dm/dm.query"
 import { IXmtpConversationId, IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
-import { IConversationId, IConversationTopic } from "../conversation/conversation.types"
-import { IDm } from "../dm/dm.types"
 import {
   setXmtpConsentStateForInboxId,
-  updateConsentForGroupsForInbox,
+  updateXmtpConsentForGroupsForInbox,
 } from "../xmtp/xmtp-consent/xmtp-consent"
 
 export function useDenyDmMutation() {
@@ -25,64 +22,61 @@ export function useDenyDmMutation() {
   return useMutation({
     mutationFn: async (args: {
       peerInboxId: IXmtpInboxId
-      conversationId: IConversationId
-      topic: IConversationTopic
+      xmtpConversationId: IXmtpConversationId
     }) => {
-      const { peerInboxId, conversationId } = args
-
-      if (!peerInboxId) {
-        throw new Error("Peer inbox id not found")
-      }
+      const { peerInboxId, xmtpConversationId } = args
 
       await Promise.all([
-        updateConsentForGroupsForInbox({
+        updateXmtpConsentForGroupsForInbox({
           clientInboxId: currentSenderInboxId,
-          groupIds: [conversationId as unknown as IXmtpConversationId],
+          groupIds: [xmtpConversationId],
           consent: "denied",
         }),
         setXmtpConsentStateForInboxId({
-          inboxId: currentSenderInboxId,
+          peerInboxId,
           consent: "denied",
         }),
       ])
     },
-    onMutate: ({ topic, peerInboxId }) => {
-      const conversation = getConversationQueryData({
-        inboxId: currentSenderInboxId,
-        topic,
+    onMutate: ({ xmtpConversationId }) => {
+      const conversation = getDmQueryData({
+        clientInboxId: currentSenderInboxId,
+        xmtpConversationId,
       })
+
       if (conversation) {
         const updatedDm = updateObjectAndMethods(conversation, {
           consentState: "denied",
         })
 
         setDmQueryData({
-          targetInboxId: currentSenderInboxId,
-          clientInboxId: peerInboxId,
-          dm: updatedDm as IDm,
+          clientInboxId: currentSenderInboxId,
+          xmtpConversationId,
+          dm: updatedDm,
         })
 
         // Remove from main conversations list
         removeConversationFromAllowedConsentConversationsQuery({
-          inboxId: currentSenderInboxId,
-          topic,
+          clientInboxId: currentSenderInboxId,
+          conversationId: xmtpConversationId,
         })
 
         // Remove from requests
-        removeConversationFromUnknownConsentConversationsQueryData({
-          inboxId: currentSenderInboxId,
-          topic,
+        removeConversationFromUnknownConsentConversationsQuery({
+          clientInboxId: currentSenderInboxId,
+          conversationId: xmtpConversationId,
         })
 
         return { previousDmConsent: conversation.consentState }
       }
     },
-    onError: (error, { topic, peerInboxId }, context) => {
+    onError: (error, { xmtpConversationId }, context) => {
       const { previousDmConsent } = context || {}
+
       if (previousDmConsent) {
         const dm = getDmQueryData({
-          targetInboxId: currentSenderInboxId,
-          clientInboxId: peerInboxId,
+          clientInboxId: currentSenderInboxId,
+          xmtpConversationId,
         })
 
         if (!dm) {
@@ -94,21 +88,21 @@ export function useDenyDmMutation() {
         })
 
         setDmQueryData({
-          targetInboxId: currentSenderInboxId,
-          clientInboxId: peerInboxId,
+          xmtpConversationId,
+          clientInboxId: currentSenderInboxId,
           dm: previousDm,
         })
 
         // Add back to main conversations list
         addConversationToAllowedConsentConversationsQuery({
-          inboxId: currentSenderInboxId,
-          conversation: previousDm,
+          clientInboxId: currentSenderInboxId,
+          conversationId: xmtpConversationId,
         })
 
         // Add back to requests
         addConversationToUnknownConsentConversationsQuery({
-          inboxId: currentSenderInboxId,
-          conversation: previousDm,
+          clientInboxId: currentSenderInboxId,
+          conversationId: xmtpConversationId,
         })
       }
     },

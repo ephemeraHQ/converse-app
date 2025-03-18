@@ -17,8 +17,8 @@ export const ConversationMessageHighlighted = memo(function ConversationMessageH
   children: React.ReactNode
 }) {
   const { children } = props
-  const { messageId } = useConversationMessageContextStoreContext(useSelect(["messageId"]))
-  const { animatedStyle } = useHighlightAnimation({ messageId })
+  const { xmtpMessageId } = useConversationMessageContextStoreContext(useSelect(["xmtpMessageId"]))
+  const { animatedStyle } = useHighlightAnimation({ messageId: xmtpMessageId })
 
   return (
     <AnimatedVStack
@@ -46,7 +46,7 @@ function useHighlightAnimation(args: IUseHighlightAnimationArgs) {
 
   useEffect(() => {
     const unsubscribe = conversationStore.subscribe(
-      (state) => state.highlightedMessageId,
+      (state) => state.highlightedXmtpMessageId,
       (highlightedMessageId) => {
         cancelAnimation(isHighlightedAV)
 
@@ -70,7 +70,7 @@ function useHighlightAnimation(args: IUseHighlightAnimationArgs) {
           },
           () => {
             runOnJS(conversationStore.setState)({
-              highlightedMessageId: undefined,
+              highlightedXmtpMessageId: undefined,
             })
           },
         )

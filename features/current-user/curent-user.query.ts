@@ -1,12 +1,18 @@
 import { queryOptions } from "@tanstack/react-query"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
+import { getReactQueryKey } from "@/utils/react-query/react-query.utils"
 import { fetchCurrentUser, ICurrentUser } from "./current-user-api"
 
-const currentUserQueryKey = () => ["current-user"] as const
+export function getCurrentUserQueryOptions(args?: { caller?: string }) {
+  const { caller } = args ?? {}
 
-export function getCurrentUserQueryOptions() {
   return queryOptions({
-    queryKey: ["current-user"],
+    meta: {
+      caller,
+    },
+    queryKey: getReactQueryKey({
+      baseStr: "current-user",
+    }),
     queryFn: fetchCurrentUser,
   })
 }
@@ -24,8 +30,4 @@ export function invalidateCurrentUserQuery() {
 
 export function getCurrentUserQueryData() {
   return reactQueryClient.getQueryData(getCurrentUserQueryOptions().queryKey)
-}
-
-export function ensureCurrentUserQueryData() {
-  return reactQueryClient.ensureQueryData(getCurrentUserQueryOptions())
 }

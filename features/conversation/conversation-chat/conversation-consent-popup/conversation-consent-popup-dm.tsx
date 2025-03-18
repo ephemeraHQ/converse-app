@@ -5,11 +5,11 @@ import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.stor
 import { useAllowDmMutation } from "@/features/consent/use-allow-dm.mutation"
 import { useDenyDmMutation } from "@/features/consent/use-deny-dm.mutation"
 import { getConversationQueryData } from "@/features/conversation/queries/conversation.query"
-import { useDmPeerInboxIdQuery } from "@/features/dm/use-dm-peer-inbox-id-query"
+import { useDmQuery } from "@/features/dm/dm.query"
 import { useRouter } from "@/navigation/use-navigation"
 import { captureErrorWithToast } from "@/utils/capture-error"
 import { ensureError } from "@/utils/error"
-import { useCurrentConversationTopicSafe } from "../conversation.store-context"
+import { useCurrentXmtpConversationIdSafe } from "../conversation.store-context"
 import {
   ConsentPopupButtonsContainer,
   ConversationConsentPopupButton,
@@ -18,13 +18,12 @@ import {
 } from "./conversation-consent-popup.design-system"
 
 export function ConversationConsentPopupDm() {
-  const topic = useCurrentConversationTopicSafe()
+  const xmtpConversationId = useCurrentXmtpConversationIdSafe()
   const currentSenderInboxId = useSafeCurrentSender().inboxId
 
-  const { data: peerInboxId } = useDmPeerInboxIdQuery({
-    inboxId: currentSenderInboxId,
-    topic,
-    caller: "ConversationConsentPopupDm",
+  const { data: dm } = useDmQuery({
+    clientInboxId: currentSenderInboxId,
+    xmtpConversationId,
   })
 
   const navigation = useRouter()
@@ -33,13 +32,13 @@ export function ConversationConsentPopupDm() {
   const { mutateAsync: allowDmConsentAsync } = useAllowDmMutation()
 
   const handleBlock = useCallback(async () => {
-    if (!peerInboxId) {
-      throw new Error("Peer inbox id not found")
+    if (!dm) {
+      throw new Error("Dm not found")
     }
 
     const conversation = getConversationQueryData({
-      inboxId: currentSenderInboxId,
-      topic,
+      clientInboxId: currentSenderInboxId,
+      xmtpConversationId,
     })
 
     if (!conversation) {
@@ -57,9 +56,8 @@ export function ConversationConsentPopupDm() {
         if (selectedIndex === 0) {
           try {
             await denyDmConsentAsync({
-              topic,
-              peerInboxId: peerInboxId,
-              conversationId: conversation.id,
+              xmtpConversationId,
+              peerInboxId: dm.peerInboxId,
             })
             navigation.pop()
           } catch (error) {
@@ -70,17 +68,17 @@ export function ConversationConsentPopupDm() {
         }
       },
     })
-  }, [navigation, denyDmConsentAsync, peerInboxId, topic, currentSenderInboxId])
+  }, [navigation, denyDmConsentAsync, dm, xmtpConversationId, currentSenderInboxId])
 
   const handleAccept = useCallback(async () => {
     try {
-      if (!peerInboxId) {
-        throw new Error("Peer inbox id not found")
+      if (!dm) {
+        throw new Error("Dm not found")
       }
 
       const conversation = getConversationQueryData({
-        inboxId: currentSenderInboxId,
-        topic,
+        clientInboxId: currentSenderInboxId,
+        xmtpConversationId,
       })
 
       if (!conversation) {
@@ -88,16 +86,14 @@ export function ConversationConsentPopupDm() {
       }
 
       await allowDmConsentAsync({
-        peerInboxId,
-        conversationId: conversation.id,
-        topic,
+        xmtpConversationId,
       })
     } catch (error) {
       captureErrorWithToast(ensureError(error), {
         message: `Error consenting`,
       })
     }
-  }, [allowDmConsentAsync, peerInboxId, topic, currentSenderInboxId])
+  }, [allowDmConsentAsync, dm, xmtpConversationId, currentSenderInboxId])
 
   return (
     <ConversationConsentPopupContainer>

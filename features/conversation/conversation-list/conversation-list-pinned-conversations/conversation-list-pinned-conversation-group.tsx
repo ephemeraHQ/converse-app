@@ -1,7 +1,7 @@
 import { useCallback } from "react"
 import { GroupAvatar } from "@/components/group-avatar"
 import { VStack } from "@/design-system/VStack"
-import { isTextMessage } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
+import { isTextMessage } from "@/features/conversation/conversation-chat/conversation-message/utils/conversation-message-assertions"
 import { useConversationListPinnedConversationsStyles } from "@/features/conversation/conversation-list/conversation-list-pinned-conversations/conversation-list-pinned-conversations.styles"
 import { useConversationIsUnread } from "@/features/conversation/conversation-list/hooks/use-conversation-is-unread"
 import { useGroupConversationContextMenuViewProps } from "@/features/conversation/conversation-list/hooks/use-conversation-list-item-context-menu-props"
@@ -18,26 +18,26 @@ type IConversationListPinnedConversationGroupProps = {
 export const ConversationListPinnedConversationGroup = ({
   group,
 }: IConversationListPinnedConversationGroupProps) => {
-  const groupConversationTopic = group.topic
+  const groupConversationTopic = group.xmtpId
 
   const { avatarSize } = useConversationListPinnedConversationsStyles()
 
   const { isUnread } = useConversationIsUnread({
-    topic: groupConversationTopic,
+    xmtpConversationId: groupConversationTopic,
   })
 
   const onPress = useCallback(() => {
-    navigate("Conversation", { topic: group.topic })
-  }, [group.topic])
+    navigate("Conversation", { xmtpConversationId: group.xmtpId })
+  }, [group.xmtpId])
 
   const { groupName } = useGroupName({
-    conversationTopic: groupConversationTopic,
+    xmtpConversationId: groupConversationTopic,
   })
 
   const displayMessagePreview = group.lastMessage && isTextMessage(group.lastMessage) && isUnread
 
   const contextMenuProps = useGroupConversationContextMenuViewProps({
-    groupConversationTopic: groupConversationTopic,
+    xmtpConversationId: groupConversationTopic,
   })
 
   return (
@@ -45,7 +45,7 @@ export const ConversationListPinnedConversationGroup = ({
       <ConversationListPinnedConversation
         contextMenuProps={contextMenuProps}
         avatarComponent={
-          <GroupAvatar groupTopic={groupConversationTopic} sizeNumber={avatarSize} />
+          <GroupAvatar xmtpConversationId={groupConversationTopic} sizeNumber={avatarSize} />
         }
         onPress={onPress}
         showUnread={isUnread}

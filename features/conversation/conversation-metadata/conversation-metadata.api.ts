@@ -1,10 +1,9 @@
 import type { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { z } from "zod"
-import { getConversationIdFromTopic } from "@/features/conversation/utils/get-conversation-id-from-topic"
 import { getCurrentUserQueryData } from "@/features/current-user/curent-user.query"
+import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 import { api } from "@/utils/api/api"
 import { captureError } from "@/utils/capture-error"
-import type { IConversationTopic } from "../conversation.types"
 
 const ConversationMetadataSchema = z.object({
   deleted: z.boolean(),
@@ -16,41 +15,11 @@ const ConversationMetadataSchema = z.object({
 
 export type IConversationMetadata = z.infer<typeof ConversationMetadataSchema>
 
-// export async function getConversationMetadatas(args: {
-//   account: string;
-//   topics: IXmtpConversationTopic[];
-// }) {
-//   const { account, topics } = args;
-
-//   const conversationIds = await Promise.all(
-//     topics.map((topic) => getConversationId({ account, topic }))
-//   );
-
-//   const { data } = await api.post(`/api/v1/metadata/conversations`, {
-//     conversationIds,
-//   });
-
-//   const parseResult = z.record(ConversationMetadataSchema).safeParse(data);
-//   if (!parseResult.success) {
-//     captureError(
-//       new Error(
-//         `Failed to parse conversation metadatas response: ${JSON.stringify(
-//           parseResult.error
-//         )}`
-//       )
-//     );
-//   }
-
-//   return data as Record<string, IConversationMetadata>;
-// }
-
-export async function getConversationMetadata(args: { topic: IConversationTopic }) {
-  const { topic } = args
-
-  const conversationId = await getConversationId({ topic })
+export async function getConversationMetadata(args: { xmtpConversationId: IXmtpConversationId }) {
+  const { xmtpConversationId } = args
 
   const { data } = await api.get<IConversationMetadata>(
-    `/api/v1/metadata/conversation/${conversationId}`,
+    `/api/v1/metadata/conversation/${xmtpConversationId}`,
   )
 
   const parseResult = ConversationMetadataSchema.safeParse(data)
@@ -68,12 +37,12 @@ export async function getConversationMetadata(args: { topic: IConversationTopic 
 
 export async function markConversationMetadataAsRead(args: {
   clientInboxId: IXmtpInboxId
-  topic: IConversationTopic
+  xmtpConversationId: IXmtpConversationId
   readUntil: string
 }) {
   return updateConversationMetadata({
     clientInboxId: args.clientInboxId,
-    topic: args.topic,
+    xmtpConversationId: args.xmtpConversationId,
     updates: {
       unread: false,
       readUntil: args.readUntil,
@@ -83,11 +52,11 @@ export async function markConversationMetadataAsRead(args: {
 
 export async function markConversationMetadataAsUnread(args: {
   clientInboxId: IXmtpInboxId
-  topic: IConversationTopic
+  xmtpConversationId: IXmtpConversationId
 }) {
   return updateConversationMetadata({
     clientInboxId: args.clientInboxId,
-    topic: args.topic,
+    xmtpConversationId: args.xmtpConversationId,
     updates: {
       unread: true,
     },
@@ -96,11 +65,11 @@ export async function markConversationMetadataAsUnread(args: {
 
 export async function pinConversationMetadata(args: {
   clientInboxId: IXmtpInboxId
-  topic: IConversationTopic
+  xmtpConversationId: IXmtpConversationId
 }) {
   return updateConversationMetadata({
     clientInboxId: args.clientInboxId,
-    topic: args.topic,
+    xmtpConversationId: args.xmtpConversationId,
     updates: {
       pinned: true,
     },
@@ -109,11 +78,11 @@ export async function pinConversationMetadata(args: {
 
 export async function unpinConversationMetadata(args: {
   clientInboxId: IXmtpInboxId
-  topic: IConversationTopic
+  xmtpConversationId: IXmtpConversationId
 }) {
   return updateConversationMetadata({
     clientInboxId: args.clientInboxId,
-    topic: args.topic,
+    xmtpConversationId: args.xmtpConversationId,
     updates: {
       pinned: false,
     },
@@ -122,11 +91,11 @@ export async function unpinConversationMetadata(args: {
 
 export async function restoreConversationMetadata(args: {
   clientInboxId: IXmtpInboxId
-  topic: IConversationTopic
+  xmtpConversationId: IXmtpConversationId
 }) {
   return updateConversationMetadata({
     clientInboxId: args.clientInboxId,
-    topic: args.topic,
+    xmtpConversationId: args.xmtpConversationId,
     updates: {
       deleted: false,
     },
@@ -135,34 +104,19 @@ export async function restoreConversationMetadata(args: {
 
 export async function deleteConversationMetadata(args: {
   clientInboxId: IXmtpInboxId
-  topic: IConversationTopic
+  xmtpConversationId: IXmtpConversationId
 }) {
   return updateConversationMetadata({
     clientInboxId: args.clientInboxId,
-    topic: args.topic,
+    xmtpConversationId: args.xmtpConversationId,
     updates: {
       deleted: true,
     },
   })
 }
 
-/**
- * Helper functions
- */
-async function getConversationId(args: { topic: IConversationTopic }) {
-  const { topic } = args
-
-  const conversationId = getConversationIdFromTopic(topic)
-
-  if (!conversationId) {
-    throw new Error(`Conversation ID not found for topic: ${topic}`)
-  }
-
-  return conversationId
-}
-
 async function updateConversationMetadata(args: {
-  topic: IConversationTopic
+  xmtpConversationId: IXmtpConversationId
   clientInboxId: IXmtpInboxId
   updates: {
     pinned?: boolean
@@ -171,9 +125,7 @@ async function updateConversationMetadata(args: {
     readUntil?: string
   }
 }) {
-  const { topic, clientInboxId, updates } = args
-
-  const conversationId = await getConversationId({ topic })
+  const { xmtpConversationId, clientInboxId, updates } = args
 
   const currentUser = getCurrentUserQueryData()
 
@@ -182,7 +134,7 @@ async function updateConversationMetadata(args: {
   }
 
   const { data } = await api.post<IConversationMetadata>(`/api/v1/metadata/conversation`, {
-    conversationId,
+    conversationId: xmtpConversationId,
     deviceIdentityId: currentUser.identities.find((identity) => identity.xmtpId === clientInboxId)
       ?.id,
     ...updates,

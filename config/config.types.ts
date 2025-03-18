@@ -38,6 +38,7 @@ export type IConfig = {
   scheme: string
   websiteDomain: string
   usernameSuffix: string
+  reactQueryPersistCacheIsEnabled: boolean
   universalLinks: string[]
   privy: IPrivyConfig
   evm: IEvmConfig

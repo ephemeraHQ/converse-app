@@ -1,16 +1,15 @@
-import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import { IXmtpConversationId, IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { keepPreviousData, queryOptions, useQuery } from "@tanstack/react-query"
 import { matchSorter } from "match-sorter"
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { getAllowedConsentConversationsQueryData } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
+import { getConversationsFromIds } from "@/features/conversation/utils/get-conversations"
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group"
-import { ensureGroupMembersQueryData } from "@/features/groups/group-members.query"
 import { ensureProfileQueryData } from "@/features/profiles/profiles.query"
 import { doesSocialProfilesMatchTextQuery } from "@/features/profiles/utils/does-social-profiles-match-text-query"
 import { ensureSocialProfilesForAddressQuery } from "@/features/social-profiles/social-profiles.query"
 import { captureError } from "@/utils/capture-error"
 import { normalizeString } from "@/utils/str"
-import { IConversationTopic } from "../../conversation.types"
 
 export async function searchExistingGroupsByGroupMembers(args: {
   searchQuery: string
@@ -20,26 +19,25 @@ export async function searchExistingGroupsByGroupMembers(args: {
 
   const currentSender = getSafeCurrentSender()
 
-  const conversations = getAllowedConsentConversationsQueryData({
-    inboxId: currentSender.inboxId,
+  const conversationIds = getAllowedConsentConversationsQueryData({
+    clientInboxId: currentSender.inboxId,
+  })
+
+  const conversations = getConversationsFromIds({
+    clientInboxId: currentSender.inboxId,
+    conversationIds: conversationIds ?? [],
   })
 
   if (!conversations || !searchQuery) {
     return []
   }
 
-  const matchingTopics: IConversationTopic[] = []
+  const matchingXmtpConversationIds: IXmtpConversationId[] = []
 
   await Promise.all(
     conversations.filter(isConversationGroup).map(async (group) => {
       try {
-        const members = await ensureGroupMembersQueryData({
-          caller: "searchExistingGroupsByGroupMembers",
-          clientInboxId: currentSender.inboxId,
-          topic: group.topic,
-        })
-
-        const otherMembersInboxIds = members.ids.filter((id) => id !== searcherInboxId)
+        const otherMembersInboxIds = group.members.ids.filter((id) => id !== searcherInboxId)
 
         // Use Promise.race to get the first matching member
         const result = await Promise.race([
@@ -68,7 +66,7 @@ export async function searchExistingGroupsByGroupMembers(args: {
         ])
 
         if (result) {
-          matchingTopics.push(group.topic)
+          matchingXmtpConversationIds.push(group.xmtpId)
         }
       } catch (error) {
         captureError(error)
@@ -76,7 +74,7 @@ export async function searchExistingGroupsByGroupMembers(args: {
     }),
   )
 
-  return matchingTopics
+  return matchingXmtpConversationIds
 }
 
 export function getSearchExistingGroupsByGroupMembersQueryOptions(args: {

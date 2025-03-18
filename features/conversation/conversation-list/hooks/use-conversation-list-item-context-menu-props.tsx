@@ -8,50 +8,50 @@ import { useDeleteDm } from "@/features/conversation/conversation-list/hooks/use
 import { useDeleteGroup } from "@/features/conversation/conversation-list/hooks/use-delete-group"
 import { useToggleReadStatus } from "@/features/conversation/conversation-list/hooks/use-toggle-read-status"
 import { ConversationPreview } from "@/features/conversation/conversation-preview/conversation-preview"
+import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 import { translate } from "@/i18n"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { captureErrorWithToast } from "@/utils/capture-error"
 import { Haptics } from "@/utils/haptics"
-import { IConversationTopic } from "../../conversation.types"
 import { usePinOrUnpinConversation } from "./use-pin-or-unpin-conversation"
 
 // Specific hook for DM conversations
 export function useDmConversationContextMenuViewProps(args: {
-  dmConversationTopic: IConversationTopic
+  xmtpConversationId: IXmtpConversationId
 }) {
-  const { dmConversationTopic: conversationTopic } = args
-  const deleteMenuItem = useDmDeleteMenuItem({ conversationTopic })
+  const { xmtpConversationId } = args
+  const deleteMenuItem = useDmDeleteMenuItem({ xmtpConversationId })
 
   return useBaseConversationContextMenuViewProps({
-    conversationTopic,
+    xmtpConversationId,
     deleteMenuItem,
   })
 }
 
 // Specific hook for Group conversations
 export function useGroupConversationContextMenuViewProps(args: {
-  groupConversationTopic: IConversationTopic
+  xmtpConversationId: IXmtpConversationId
 }) {
-  const { groupConversationTopic: conversationTopic } = args
-  const deleteMenuItem = useGroupDeleteMenuItem({ conversationTopic })
+  const { xmtpConversationId } = args
+  const deleteMenuItem = useGroupDeleteMenuItem({ xmtpConversationId })
 
   return useBaseConversationContextMenuViewProps({
-    conversationTopic,
+    xmtpConversationId,
     deleteMenuItem,
   })
 }
 
 // Base hook with shared functionality
 function useBaseConversationContextMenuViewProps(args: {
-  conversationTopic: IConversationTopic
+  xmtpConversationId: IXmtpConversationId
   deleteMenuItem: IUseContextMenuItemArgs
 }) {
-  const { conversationTopic, deleteMenuItem } = args
+  const { xmtpConversationId, deleteMenuItem } = args
   const { theme } = useAppTheme()
 
-  const pinMenuItem = useConversationContextMenuPinItem({ conversationTopic })
+  const pinMenuItem = useConversationContextMenuPinItem({ xmtpConversationId })
   const readMenuItem = useConversationContextMenuReadItem({
-    conversationTopic,
+    xmtpConversationId,
   })
 
   const menuItems = [pinMenuItem, readMenuItem, deleteMenuItem]
@@ -75,7 +75,7 @@ function useBaseConversationContextMenuViewProps(args: {
             paddingBottom: theme.spacing.xs,
           }}
         >
-          <ConversationPreview topic={conversationTopic} />
+          <ConversationPreview xmtpConversationId={xmtpConversationId} />
         </VStack>
       )
     },
@@ -97,16 +97,16 @@ function useBaseConversationContextMenuViewProps(args: {
 type IUseContextMenuItemArgs = IMenuActionConfig & { onPress: () => void }
 
 function useConversationContextMenuPinItem(args: {
-  conversationTopic: IConversationTopic
+  xmtpConversationId: IXmtpConversationId
 }): IUseContextMenuItemArgs {
-  const { conversationTopic } = args
+  const { xmtpConversationId } = args
 
   const { isPinned } = useConversationIsPinned({
-    conversationTopic,
+    xmtpConversationId,
   })
 
   const { pinOrUnpinConversationAsync } = usePinOrUnpinConversation({
-    conversationTopic,
+    xmtpConversationId,
   })
 
   return {
@@ -127,16 +127,16 @@ function useConversationContextMenuPinItem(args: {
 }
 
 function useConversationContextMenuReadItem(args: {
-  conversationTopic: IConversationTopic
+  xmtpConversationId: IXmtpConversationId
 }): IUseContextMenuItemArgs {
-  const { conversationTopic } = args
+  const { xmtpConversationId } = args
 
   const { isUnread } = useConversationIsUnread({
-    topic: conversationTopic,
+    xmtpConversationId,
   })
 
   const { toggleReadStatusAsync } = useToggleReadStatus({
-    topic: conversationTopic,
+    xmtpConversationId,
   })
 
   return {
@@ -165,8 +165,12 @@ function useBaseDeleteMenuItem({ onDelete }: { onDelete: () => Promise<void> }) 
   } satisfies Omit<IUseContextMenuItemArgs, "onPress">
 }
 
-function useGroupDeleteMenuItem({ conversationTopic }: { conversationTopic: IConversationTopic }) {
-  const deleteGroup = useDeleteGroup({ groupTopic: conversationTopic })
+function useGroupDeleteMenuItem({
+  xmtpConversationId,
+}: {
+  xmtpConversationId: IXmtpConversationId
+}) {
+  const deleteGroup = useDeleteGroup({ xmtpConversationId })
 
   const handleDelete = useCallback(async () => {
     try {
@@ -184,8 +188,8 @@ function useGroupDeleteMenuItem({ conversationTopic }: { conversationTopic: ICon
   } satisfies IUseContextMenuItemArgs
 }
 
-function useDmDeleteMenuItem({ conversationTopic }: { conversationTopic: IConversationTopic }) {
-  const deleteDm = useDeleteDm({ topic: conversationTopic })
+function useDmDeleteMenuItem({ xmtpConversationId }: { xmtpConversationId: IXmtpConversationId }) {
+  const deleteDm = useDeleteDm({ xmtpConversationId })
 
   const handleDelete = useCallback(async () => {
     try {

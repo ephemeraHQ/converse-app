@@ -2,31 +2,33 @@ import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { memo, useCallback } from "react"
 import { Chip, ChipText } from "@/design-system/chip"
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
-import { useGroupMembersQuery } from "@/features/groups/group-members.query"
+import { useGroupMembers } from "@/features/groups/hooks/use-group-members"
 import { SearchUsersResultsListItemUser } from "@/features/search-users/search-users-results-list-item-user"
 import { useRouteParams } from "@/navigation/use-navigation"
 import { useAddGroupMembersStore } from "../stores/add-group-members.store"
 
 export const AddGroupMembersSearchUsersResultsListItemUser = memo(
   function AddGroupMembersSearchUsersResultsListItemUser(props: { inboxId: IXmtpInboxId }) {
-    const { addSelectedInboxId } = useAddGroupMembersStore((state) => state.actions)
-    const { groupTopic } = useRouteParams<"AddGroupMembers">()
+    const { inboxId } = props
 
-    const { data: members } = useGroupMembersQuery({
+    const { addSelectedInboxId } = useAddGroupMembersStore((state) => state.actions)
+    const { xmtpConversationId } = useRouteParams<"AddGroupMembers">()
+
+    const { members } = useGroupMembers({
       clientInboxId: getSafeCurrentSender().inboxId,
-      topic: groupTopic!,
+      xmtpConversationId,
       caller: "add-group-members",
     })
 
     const handlePress = useCallback(() => {
-      addSelectedInboxId(props.inboxId)
-    }, [addSelectedInboxId, props.inboxId])
+      addSelectedInboxId(inboxId)
+    }, [addSelectedInboxId, inboxId])
 
-    const isAlreadyAMember = members?.byId[props.inboxId]
+    const isAlreadyAMember = members?.byId[inboxId]
 
     return (
       <SearchUsersResultsListItemUser
-        inboxId={props.inboxId}
+        inboxId={inboxId}
         onPress={handlePress}
         {...(isAlreadyAMember
           ? {

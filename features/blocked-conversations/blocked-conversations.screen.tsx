@@ -3,13 +3,13 @@ import React from "react"
 import { Screen } from "@/components/screen/screen"
 import { EmptyState } from "@/design-system/empty-state"
 import { useBlockedConversationsForCurrentAccount } from "@/features/blocked-conversations/use-blocked-conversations-for-current-account"
-import { ConversationList } from "@/features/conversation/conversation-list/conversation-list"
+import { ConversationList } from "@/features/conversation/conversation-list/conversation-list.component"
 import { useHeader } from "@/navigation/use-header"
 import { useRouter } from "@/navigation/use-navigation"
 import { $globalStyles } from "@/theme/styles"
 
 export function BlockedConversationsScreen() {
-  const { data: allBlockedChats = [] } = useBlockedConversationsForCurrentAccount()
+  const { data: blockedConversationsIds = [] } = useBlockedConversationsForCurrentAccount()
 
   const router = useRouter()
 
@@ -21,8 +21,8 @@ export function BlockedConversationsScreen() {
 
   return (
     <Screen contentContainerStyle={$globalStyles.flex1}>
-      {allBlockedChats.length > 0 ? (
-        <ConversationList conversations={allBlockedChats} />
+      {blockedConversationsIds.length > 0 ? (
+        <ConversationList conversationsIds={blockedConversationsIds} />
       ) : (
         <EmptyState
           title={translate("removed_chats.eyes")}

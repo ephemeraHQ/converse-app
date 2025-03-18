@@ -12,16 +12,16 @@ import { useAllowedConversationsCount } from "@/features/conversation/conversati
 import { usePinnedConversations } from "@/features/conversation/conversation-list/hooks/use-pinned-conversations"
 import { useConversationQuery } from "@/features/conversation/queries/conversation.query"
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group"
+import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme"
 import { captureError } from "@/utils/capture-error"
 import { chunk } from "@/utils/general"
-import { IConversationTopic } from "../../conversation.types"
 
 export const ConversationListPinnedConversations = memo(
   function ConversationListPinnedConversations() {
     const { themed, theme } = useAppTheme()
 
-    const { pinnedConversations, isLoading: isLoadingPinnedConversations } =
+    const { pinnedConversationsIds, isLoading: isLoadingPinnedConversations } =
       usePinnedConversations()
 
     const { avatarSize } = useConversationListPinnedConversationsStyles()
@@ -41,7 +41,7 @@ export const ConversationListPinnedConversations = memo(
       return null
     }
 
-    const hasPinnedConversations = pinnedConversations && pinnedConversations?.length > 0
+    const hasPinnedConversations = pinnedConversationsIds && pinnedConversationsIds?.length > 0
 
     if (!hasPinnedConversations) {
       return null
@@ -53,7 +53,7 @@ export const ConversationListPinnedConversations = memo(
         layout={theme.animation.reanimatedLayoutSpringTransition}
         exiting={theme.animation.reanimatedFadeOutSpring}
       >
-        {chunk(pinnedConversations, 3).map((row, rowIndex) => (
+        {chunk(pinnedConversationsIds, 3).map((row, rowIndex) => (
           <AnimatedHStack
             key={`row-${rowIndex}`}
             style={[
@@ -64,13 +64,13 @@ export const ConversationListPinnedConversations = memo(
             ]}
             layout={theme.animation.reanimatedLayoutSpringTransition}
           >
-            {row.map((conversation) => (
+            {row.map((conversationXmtpId) => (
               <AnimatedCenter
-                key={conversation.topic}
+                key={conversationXmtpId}
                 layout={theme.animation.reanimatedLayoutSpringTransition}
                 entering={theme.animation.reanimatedFadeInSpring}
               >
-                <PinnedConversationWrapper topic={conversation.topic} />
+                <PinnedConversationWrapper xmtpConversationId={conversationXmtpId} />
               </AnimatedCenter>
             ))}
           </AnimatedHStack>
@@ -81,20 +81,22 @@ export const ConversationListPinnedConversations = memo(
 )
 
 const PinnedConversationWrapper = memo(function PinnedConversationWrapper(props: {
-  topic: IConversationTopic
+  xmtpConversationId: IXmtpConversationId
 }) {
-  const { topic } = props
+  const { xmtpConversationId } = props
 
   const currentSender = useSafeCurrentSender()
 
   const { data: conversation } = useConversationQuery({
-    topic,
-    inboxId: currentSender.inboxId,
+    xmtpConversationId,
+    clientInboxId: currentSender.inboxId,
     caller: "Conversation List Pinned Conversations",
   })
 
   if (!conversation) {
-    captureError(new Error(`Couldn't find conversation ${topic} in PinnedConversationWrapper`))
+    captureError(
+      new Error(`Couldn't find conversation ${xmtpConversationId} in PinnedConversationWrapper`),
+    )
     return null
   }
 

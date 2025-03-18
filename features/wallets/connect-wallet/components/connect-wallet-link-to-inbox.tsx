@@ -62,7 +62,7 @@ export const ConnectWalletLinkToInbox = memo(function ConnectWalletLinkToInbox(
       })
 
       invalidateXmtpInboxIdFromEthAddressQuery({
-        clientEthAddress: currentSender.ethereumAddress,
+        clientInboxId: currentSender.inboxId,
         targetEthAddress: walletAccount.address as IEthereumAddress,
       }).catch(captureError)
     } catch (error) {

@@ -4,7 +4,7 @@ import { IXmtpInboxId, IXmtpSigner } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
 import { XMTPError } from "@/utils/error"
 import { xmtpLogger } from "@/utils/logger"
-import { getXmtpClientByInboxId } from "../xmtp-client/xmtp-client.service"
+import { getXmtpClientByInboxId } from "../xmtp-client/xmtp-client"
 
 export async function removeWalletFromInboxId(args: {
   inboxId: IXmtpInboxId

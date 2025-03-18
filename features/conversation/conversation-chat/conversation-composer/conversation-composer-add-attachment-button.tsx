@@ -82,8 +82,8 @@ export function AddAttachmentButton() {
             nonce: encryptedAttachment.metadata.nonce,
             filename:
               encryptedAttachment.metadata.filename || asset.uri.split("/").pop() || "attachment",
-            mimeType,
-            contentLength: Number(encryptedAttachment.metadata.contentLength) || 0,
+            contentLength: String(encryptedAttachment.metadata.contentLength) || "0",
+            scheme: "https://",
           },
         })
 

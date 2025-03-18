@@ -1,16 +1,28 @@
 import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { useQuery } from "@tanstack/react-query"
-import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
+import {
+  getSafeCurrentSender,
+  useSafeCurrentSender,
+} from "@/features/authentication/multi-inbox.store"
 import {
   getPreferredAvatarUrl,
   getPreferredDisplayName,
   getPreferredEthAddress,
 } from "@/features/preferred-display-info/preferred-display-info.utils"
-import { useProfileQuery } from "@/features/profiles/profiles.query"
+import { getProfileQueryData, useProfileQuery } from "@/features/profiles/profiles.query"
 import { useSocialProfilesForInboxId } from "@/features/social-profiles/hooks/use-social-profiles-for-inbox-id"
-import { useSocialProfilesForAddressQuery } from "@/features/social-profiles/social-profiles.query"
-import { useEthAddressesForXmtpInboxId } from "@/features/xmtp/xmtp-inbox-id/eth-addresses-for-xmtp-inbox-id.query"
-import { getXmtpInboxIdFromEthAddressQueryOptions } from "@/features/xmtp/xmtp-inbox-id/xmtp-inbox-id-from-eth-address.query"
+import {
+  getSocialProfilesForEthAddressQueryData,
+  useSocialProfilesForAddressQuery,
+} from "@/features/social-profiles/social-profiles.query"
+import {
+  getEthAddressesForXmtpInboxIdQueryData,
+  useEthAddressesForXmtpInboxId,
+} from "@/features/xmtp/xmtp-inbox-id/eth-addresses-for-xmtp-inbox-id.query"
+import {
+  getXmtpInboxIdFromEthAddressQueryData,
+  getXmtpInboxIdFromEthAddressQueryOptions,
+} from "@/features/xmtp/xmtp-inbox-id/xmtp-inbox-id-from-eth-address.query"
 import { mergeArraysObjects } from "@/utils/array"
 import { IEthereumAddress } from "@/utils/evm/address"
 
@@ -32,7 +44,7 @@ export function usePreferredDisplayInfo(args: PreferredDisplayInfoArgs) {
 
   const { data: inboxIdFromEthAddress } = useQuery({
     ...getXmtpInboxIdFromEthAddressQueryOptions({
-      clientEthAddress: currentSender.ethereumAddress,
+      clientInboxId: currentSender.inboxId,
       targetEthAddress: ethAddressArg!, // ! because we check enabled
     }),
     enabled: !!ethAddressArg,
@@ -96,5 +108,80 @@ export function usePreferredDisplayInfo(args: PreferredDisplayInfoArgs) {
     ethAddress: preferredEthAddress,
     isLoading:
       isLoadingProfile || isLoadingSocialProfilesForInboxId || isLoadingSocialProfilesForEthAddress,
+  }
+}
+
+export function getPreferredDisplayInfo(args: PreferredDisplayInfoArgs) {
+  let { inboxId: inboxIdArg, ethAddress: ethAddressArg } = args
+
+  const currentSender = getSafeCurrentSender()
+
+  let inboxId = inboxIdArg
+  let ethAddress = ethAddressArg
+
+  if (ethAddress && !inboxId) {
+    inboxId = getXmtpInboxIdFromEthAddressQueryData({
+      clientInboxId: currentSender.inboxId,
+      targetEthAddress: ethAddressArg,
+    })
+  }
+
+  if (!ethAddress && inboxId) {
+    ethAddress = getEthAddressesForXmtpInboxIdQueryData({
+      clientInboxId: currentSender.inboxId,
+      inboxId: inboxId,
+    })?.[0]
+  }
+
+  const profile =
+    inboxId &&
+    getProfileQueryData({
+      xmtpId: inboxId,
+    })
+
+  // Can't for now because it's a promise and we don't want promise in this function
+  // const socialProfilesForInboxId =
+  //   inboxId &&
+  //   getSocialProfilesForInboxId({
+  //     inboxId,
+  //   })
+
+  const socialProfilesForEthAddress =
+    ethAddress &&
+    getSocialProfilesForEthAddressQueryData({
+      ethAddress,
+    })
+
+  const socialProfiles = mergeArraysObjects({
+    arr1: [],
+    arr2: socialProfilesForEthAddress ?? [],
+    compareObjects: (obj1, obj2) => obj1.type === obj2.type,
+  })
+
+  const displayName = getPreferredDisplayName({
+    profile,
+    socialProfiles,
+    ethAddress,
+    inboxId,
+  })
+
+  const avatarUrl = getPreferredAvatarUrl({
+    profile,
+    socialProfiles,
+  })
+
+  const preferredEthAddress = getPreferredEthAddress({
+    profile,
+    socialProfiles,
+    ethAddress,
+  })
+
+  const preferredUsername = profile?.username
+
+  return {
+    displayName,
+    avatarUrl,
+    username: preferredUsername,
+    ethAddress: preferredEthAddress,
   }
 }

@@ -26,6 +26,7 @@ export const SendButton = memo(function SendButton(props: { onPress: () => void 
       }}
     >
       <IconButton
+        preventDoubleTap
         hitSlop={theme.spacing.xs}
         size="sm"
         onPress={onPress}

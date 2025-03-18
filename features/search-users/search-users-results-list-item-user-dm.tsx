@@ -1,25 +1,28 @@
 import { memo } from "react"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
-import { useDmPeerInboxIdQuery } from "@/features/dm/use-dm-peer-inbox-id-query"
+import { useDmQuery } from "@/features/dm/dm.query"
 import { SearchUsersResultsListItemUser } from "@/features/search-users/search-users-results-list-item-user"
-import { IConversationTopic } from "../conversation/conversation.types"
+import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 
 export const SearchUsersResultsListItemUserDm = memo(
   function SearchUsersResultsListItemUserDm(props: {
-    conversationTopic: IConversationTopic
+    xmtpConversationId: IXmtpConversationId
     onPress: () => void
   }) {
-    const { conversationTopic, onPress } = props
+    const { xmtpConversationId, onPress } = props
 
     const currentSenderInboxId = useSafeCurrentSender().inboxId
 
-    const { data: inboxId } = useDmPeerInboxIdQuery({
-      inboxId: currentSenderInboxId,
-      topic: conversationTopic,
-      caller: `DmSearchResult-${conversationTopic}`,
+    const { data: dm } = useDmQuery({
+      clientInboxId: currentSenderInboxId,
+      xmtpConversationId,
     })
 
+    if (!dm) {
+      return null
+    }
+
     // For now logic of both User and DM is the same
-    return <SearchUsersResultsListItemUser inboxId={inboxId!} onPress={onPress} />
+    return <SearchUsersResultsListItemUser inboxId={dm.peerInboxId} onPress={onPress} />
   },
 )

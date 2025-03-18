@@ -26,7 +26,7 @@ export const SearchUsersResultsListItemEthAddress = memo(
     const currentSender = useSafeCurrentSender()
 
     const { data: inboxId } = useXmtpInboxIdFromEthAddressQuery({
-      clientEthAddress: currentSender.ethereumAddress,
+      clientInboxId: currentSender.inboxId,
       targetEthAddress: ethAddress,
     })
 

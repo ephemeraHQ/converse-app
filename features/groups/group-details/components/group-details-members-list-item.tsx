@@ -14,7 +14,7 @@ import { useRouteParams } from "@/navigation/use-navigation"
 export const MemberListItem = memo(function MemberListItem(props: { memberInboxId: IXmtpInboxId }) {
   const { memberInboxId } = props
 
-  const { groupTopic } = useRouteParams<"GroupDetails">()
+  const { xmtpConversationId } = useRouteParams<"GroupDetails">()
 
   const { displayName, avatarUrl } = usePreferredDisplayInfo({
     inboxId: memberInboxId,
@@ -26,7 +26,7 @@ export const MemberListItem = memo(function MemberListItem(props: { memberInboxI
 
   const { groupMember } = useGroupMember({
     memberInboxId,
-    topic: groupTopic,
+    xmtpConversationId,
   })
 
   const subtitle = useMemo(() => {

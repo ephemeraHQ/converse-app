@@ -1,6 +1,7 @@
-import { TEMP_CONVERSATION_PREFIX } from "@/features/conversation/conversation-create/mutations/create-conversation-and-send-first-message.mutation"
-import { IConversationTopic } from "../conversation.types"
+import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 
-export function isTempConversation(topic: IConversationTopic) {
-  return topic?.startsWith(TEMP_CONVERSATION_PREFIX)
+export const TEMP_CONVERSATION_PREFIX = "tmp-"
+
+export function isTempConversation(xmtpConversationId: IXmtpConversationId) {
+  return xmtpConversationId?.startsWith(TEMP_CONVERSATION_PREFIX)
 }

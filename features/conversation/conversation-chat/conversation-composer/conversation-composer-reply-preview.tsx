@@ -16,41 +16,42 @@ import {
   isReplyMessage,
   isStaticAttachmentMessage,
   messageContentIsGroupUpdated,
-  messageContentisMultiRemoteAttachment,
+  messageContentIsMultiRemoteAttachment,
   messageContentIsRemoteAttachment,
   messageContentIsReply,
   messageContentIsStaticAttachment,
   messageContentIsText,
-} from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
+} from "@/features/conversation/conversation-chat/conversation-message/utils/conversation-message-assertions"
 import { useMessagePlainText } from "@/features/conversation/conversation-list/hooks/use-message-plain-text"
 import { messageIsFromCurrentSenderInboxId } from "@/features/conversation/utils/message-is-from-current-user"
 import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
+import { IXmtpConversationId, IXmtpMessageId } from "@/features/xmtp/xmtp.types"
 import { useAppTheme } from "@/theme/use-app-theme"
-import { IConversationTopic } from "../../conversation.types"
 import {
   IConversationMessage,
-  IConversationMessageId,
   IConversationMessageRemoteAttachment,
   IConversationMessageReply,
   IConversationMessageStaticAttachment,
 } from "../conversation-message/conversation-message.types"
 import { useConversationMessageById } from "../conversation-message/use-conversation-message-by-id"
-import { useCurrentConversationTopic } from "../conversation.store-context"
+import { useCurrentXmtpConversationId } from "../conversation.store-context"
 import {
   useConversationComposerStore,
   useConversationComposerStoreContext,
 } from "./conversation-composer.store-context"
 
-export const ReplyPreview = memo(function ReplyPreview() {
-  const topic = useCurrentConversationTopic()
+export const ConversationComposerReplyPreview = memo(function ReplyPreview() {
+  const xmtpConversationId = useCurrentXmtpConversationId()
 
-  if (!topic) return null
+  if (!xmtpConversationId) {
+    return null
+  }
 
-  return <Content conversationTopic={topic} />
+  return <Content xmtpConversationId={xmtpConversationId} />
 })
 
-const Content = memo(function Content(props: { conversationTopic: IConversationTopic }) {
-  const { conversationTopic } = props
+const Content = memo(function Content(props: { xmtpConversationId: IXmtpConversationId }) {
+  const { xmtpConversationId } = props
 
   const replyingToMessageId = useConversationComposerStoreContext(
     (state) => state.replyingToMessageId,
@@ -62,7 +63,7 @@ const Content = memo(function Content(props: { conversationTopic: IConversationT
 
   const { message: replyMessage } = useConversationMessageById({
     messageId: replyingToMessageId!, // ! because we have enabled in the query
-    conversationTopic,
+    xmtpConversationId,
   })
 
   const { displayName } = usePreferredDisplayInfo({
@@ -184,7 +185,7 @@ const ReplyPreviewEndContent = memo(function ReplyPreviewEndContent(props: {
     if (messageContentIsRemoteAttachment(content.content)) {
       return (
         <AttachmentRemoteImage
-          messageId={content.reference as IConversationMessageId}
+          xmtpMessageId={content.reference as IXmtpMessageId}
           remoteMessageContent={content.content}
           containerProps={{
             style: {
@@ -209,7 +210,7 @@ const ReplyPreviewEndContent = memo(function ReplyPreviewEndContent(props: {
 
     return (
       <AttachmentRemoteImage
-        messageId={messageTyped.id}
+        xmtpMessageId={messageTyped.xmtpId}
         remoteMessageContent={content}
         containerProps={{
           style: {
@@ -229,8 +230,6 @@ const ReplyPreviewMessageContent = memo(function ReplyPreviewMessageContent(prop
   replyMessage: IConversationMessage
 }) {
   const { replyMessage } = props
-
-  const { theme } = useAppTheme()
 
   const messageText = useMessagePlainText(replyMessage)
   const clearedMessage = messageText?.replace(/(\n)/gm, " ")
@@ -281,7 +280,7 @@ const ReplyPreviewMessageContent = memo(function ReplyPreviewMessageContent(prop
       return <Text>{content.content.filename}</Text>
     }
 
-    if (messageContentisMultiRemoteAttachment(content.content)) {
+    if (messageContentIsMultiRemoteAttachment(content.content)) {
       return <Text>Multi remote attachment</Text>
     }
 

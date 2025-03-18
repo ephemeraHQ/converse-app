@@ -32,3 +32,9 @@ export function getConversationSyncAllQueryOptions(args: IArgs) {
 export function ensureConversationSyncAllQuery(args: IArgs) {
   return reactQueryClient.ensureQueryData(getConversationSyncAllQueryOptions(args))
 }
+
+export async function refetchConversationSyncAllQuery(args: IArgs) {
+  return reactQueryClient.invalidateQueries({
+    queryKey: getConversationSyncAllQueryOptions(args).queryKey,
+  })
+}

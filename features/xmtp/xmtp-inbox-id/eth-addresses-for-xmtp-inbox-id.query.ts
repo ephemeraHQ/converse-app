@@ -4,6 +4,7 @@
 import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
+import { getReactQueryKey } from "@/utils/react-query/react-query.utils"
 import { getEthAddressesFromInboxIds } from "./eth-addresses-from-xmtp-inbox-id"
 
 type IArgs = {
@@ -20,7 +21,11 @@ export function getEthAddressesForXmtpInboxIdQueryOptions(args: IArgs) {
   const { clientInboxId, inboxId } = args
 
   return queryOptions({
-    queryKey: ["eth-addresses-for-xmtp-inbox-id", clientInboxId, inboxId],
+    queryKey: getReactQueryKey({
+      baseStr: "eth-addresses-for-xmtp-inbox-id",
+      clientInboxId,
+      inboxId,
+    }),
     queryFn:
       clientInboxId && inboxId
         ? () => {
@@ -34,32 +39,16 @@ export function getEthAddressesForXmtpInboxIdQueryOptions(args: IArgs) {
 }
 
 export function useEthAddressesForXmtpInboxId(args: IArgs) {
-  const { clientInboxId, inboxId } = args
-
-  return useQuery(
-    getEthAddressesForXmtpInboxIdQueryOptions({
-      clientInboxId,
-      inboxId,
-    }),
-  )
+  return useQuery(getEthAddressesForXmtpInboxIdQueryOptions(args))
 }
 
 export function ensureEthAddressForXmtpInboxId(args: IStrictArgs) {
-  const { clientInboxId, inboxId } = args
-  return reactQueryClient.ensureQueryData(
-    getEthAddressesForXmtpInboxIdQueryOptions({
-      clientInboxId,
-      inboxId,
-    }),
-  )
+  return reactQueryClient.ensureQueryData(getEthAddressesForXmtpInboxIdQueryOptions(args))
 }
 
 export function invalidateEthAddressesForXmtpInboxId(args: IStrictArgs) {
-  const { clientInboxId, inboxId } = args
-  return reactQueryClient.invalidateQueries(
-    getEthAddressesForXmtpInboxIdQueryOptions({
-      clientInboxId,
-      inboxId,
-    }),
-  )
+  return reactQueryClient.invalidateQueries(getEthAddressesForXmtpInboxIdQueryOptions(args))
+}
+export function getEthAddressesForXmtpInboxIdQueryData(args: IStrictArgs) {
+  return reactQueryClient.getQueryData(getEthAddressesForXmtpInboxIdQueryOptions(args).queryKey)
 }

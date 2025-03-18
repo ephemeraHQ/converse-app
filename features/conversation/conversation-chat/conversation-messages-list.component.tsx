@@ -3,9 +3,11 @@
 import { memo, ReactElement, useEffect } from "react"
 import { FlatList, FlatListProps, Platform } from "react-native"
 import Animated, { AnimatedProps, useAnimatedRef } from "react-native-reanimated"
+import { getMessageContentStringValue } from "@/features/conversation/conversation-chat/conversation-message/utils/get-message-string-content"
 import { useConversationStore } from "@/features/conversation/conversation-chat/conversation.store-context"
 import { $globalStyles } from "@/theme/styles"
 import { useAppTheme } from "@/theme/use-app-theme"
+import { convertNanosecondsToMilliseconds } from "@/utils/date"
 import { IConversationMessage } from "./conversation-message/conversation-message.types"
 
 type ConversationMessagesListProps = Omit<
@@ -26,18 +28,25 @@ export const ConversationMessagesList = memo(function ConversationMessagesList(
 
   useEffect(() => {
     const unsub = conversationStore.subscribe(
-      (state) => state.scrollToMessageId,
-      (scrollToMessageId) => {
-        if (!scrollToMessageId) return
-        const index = messages.findIndex((message) => message.id === scrollToMessageId)
-        if (index === -1) return
+      (state) => state.scrollToXmtpMessageId,
+      (scrollToXmtpMessageId) => {
+        if (!scrollToXmtpMessageId) {
+          return
+        }
+
+        const index = messages.findIndex((message) => message.xmtpId === scrollToXmtpMessageId)
+        if (index === -1) {
+          return
+        }
+
         scrollRef.current?.scrollToIndex({
           index,
           animated: true,
           viewOffset: 100, // Random value just so that the message is not directly at the bottom
         })
+
         conversationStore.setState({
-          scrollToMessageId: undefined,
+          scrollToXmtpMessageId: undefined,
         })
       },
     )
@@ -96,11 +105,11 @@ export const ConversationMessagesList = memo(function ConversationMessagesList(
 })
 
 const keyExtractor = (message: IConversationMessage) => {
-  return (
-    // @ts-expect-error
-    message.tempOptimisticId || // Check use-send-message.ts
-    message.id
-  )
+  const messageContentStr = getMessageContentStringValue(message.content)
+  // Round to nearest 10 seconds to avoid too many unique keys for messages sent close together
+  const messageSentMs = convertNanosecondsToMilliseconds(message.sentNs)
+  const roundedMs = Math.round(messageSentMs / 10) * 10
+  return `${messageContentStr}-${message.senderInboxId}-${roundedMs}`
 }
 
 export const conversationListDefaultProps = {

@@ -4,10 +4,10 @@ import {
   getConversationMetadataQueryData,
   updateConversationMetadataQueryData,
 } from "@/features/conversation/conversation-metadata/conversation-metadata.query"
-import { IConversationTopic } from "../../conversation.types"
+import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 
-export function useRestoreConversation(args: { topic: IConversationTopic }) {
-  const { topic } = args
+export function useRestoreConversation(args: { xmtpConversationId: IXmtpConversationId }) {
+  const { xmtpConversationId } = args
 
   const currentSender = useSafeCurrentSender()
 
@@ -15,7 +15,7 @@ export function useRestoreConversation(args: { topic: IConversationTopic }) {
     mutationFn: () => {
       updateConversationMetadataQueryData({
         clientInboxId: currentSender.inboxId,
-        topic,
+        xmtpConversationId,
         updateData: { deleted: false },
       })
       return Promise.resolve()
@@ -23,7 +23,7 @@ export function useRestoreConversation(args: { topic: IConversationTopic }) {
     onMutate: () => {
       const previousDeleted = getConversationMetadataQueryData({
         clientInboxId: currentSender.inboxId,
-        topic,
+        xmtpConversationId,
       })?.deleted
 
       return { previousDeleted }
@@ -31,7 +31,7 @@ export function useRestoreConversation(args: { topic: IConversationTopic }) {
     onError: (error, _, context) => {
       updateConversationMetadataQueryData({
         clientInboxId: currentSender.inboxId,
-        topic,
+        xmtpConversationId,
         updateData: { deleted: context?.previousDeleted },
       })
     },

@@ -12,24 +12,23 @@ import { useDeleteDm } from "@/features/conversation/conversation-list/hooks/use
 import { useMessagePlainText } from "@/features/conversation/conversation-list/hooks/use-message-plain-text"
 import { useRestoreConversation } from "@/features/conversation/conversation-list/hooks/use-restore-conversation"
 import { useToggleReadStatus } from "@/features/conversation/conversation-list/hooks/use-toggle-read-status"
-import { useConversationQuery } from "@/features/conversation/queries/conversation.query"
-import { useDmPeerInboxIdQuery } from "@/features/dm/use-dm-peer-inbox-id-query"
+import { useDmQuery } from "@/features/dm/dm.query"
 import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
+import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 import { useFocusRerender } from "@/hooks/use-focus-rerender"
 import { navigate } from "@/navigation/navigation.utils"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { captureErrorWithToast } from "@/utils/capture-error"
-import { IConversationTopic } from "../../conversation.types"
 import { ConversationListItem } from "./conversation-list-item"
 import { DeleteSwipeableAction } from "./conversation-list-item-swipeable/conversation-list-item-swipeable-delete-action"
 import { ToggleUnreadSwipeableAction } from "./conversation-list-item-swipeable/conversation-list-item-swipeable-toggle-read-action"
 
 type IConversationListItemDmProps = {
-  conversationTopic: IConversationTopic
+  xmtpConversationId: IXmtpConversationId
 }
 
 export const ConversationListItemDm = memo(function ConversationListItemDm({
-  conversationTopic,
+  xmtpConversationId,
 }: IConversationListItemDmProps) {
   const currentSender = useSafeCurrentSender()
   const { theme } = useAppTheme()
@@ -38,37 +37,30 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
   useFocusRerender()
 
   // Conversation related hooks
-  const { data: conversation } = useConversationQuery({
-    inboxId: currentSender.inboxId,
-    topic: conversationTopic,
-    caller: "Conversation List Item Dm",
-  })
-
-  const { data: peerInboxId } = useDmPeerInboxIdQuery({
-    inboxId: currentSender.inboxId,
-    topic: conversationTopic,
-    caller: "ConversationListItemDm",
+  const { data: dm } = useDmQuery({
+    clientInboxId: currentSender.inboxId,
+    xmtpConversationId,
   })
 
   const { displayName, avatarUrl } = usePreferredDisplayInfo({
-    inboxId: peerInboxId,
+    inboxId: dm?.peerInboxId,
   })
 
   // Status hooks
-  const { isUnread } = useConversationIsUnread({ topic: conversationTopic })
-  const { isDeleted } = useConversationIsDeleted({ conversationTopic })
-  const messageText = useMessagePlainText(conversation?.lastMessage)
+  const { isUnread } = useConversationIsUnread({ xmtpConversationId })
+  const { isDeleted } = useConversationIsDeleted({ xmtpConversationId })
+  const messageText = useMessagePlainText(dm?.lastMessage)
 
   // Action hooks
-  const deleteDm = useDeleteDm({ topic: conversationTopic })
+  const deleteDm = useDeleteDm({ xmtpConversationId })
   const { restoreConversationAsync } = useRestoreConversation({
-    topic: conversationTopic,
+    xmtpConversationId,
   })
   const { toggleReadStatusAsync } = useToggleReadStatus({
-    topic: conversationTopic,
+    xmtpConversationId,
   })
 
-  const timestamp = conversation?.lastMessage?.sentNs ?? 0
+  const timestamp = dm?.lastMessage?.sentNs ?? 0
 
   // No need for timeToShow variable anymore
   const subtitle = !messageText
@@ -82,8 +74,8 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
 
   // Handlers
   const onPress = useCallback(() => {
-    navigate("Conversation", { topic: conversationTopic })
-  }, [conversationTopic])
+    navigate("Conversation", { xmtpConversationId })
+  }, [xmtpConversationId])
 
   const onLeftSwipe = useCallback(async () => {
     try {
@@ -110,9 +102,9 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
 
   const renderRightActions = useCallback(
     (args: ISwipeableRenderActionsArgs) => (
-      <ToggleUnreadSwipeableAction {...args} topic={conversationTopic} />
+      <ToggleUnreadSwipeableAction {...args} xmtpConversationId={xmtpConversationId} />
     ),
-    [conversationTopic],
+    [xmtpConversationId],
   )
 
   return (

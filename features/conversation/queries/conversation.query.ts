@@ -1,32 +1,32 @@
-import type { IXmtpConversationTopic, IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import type { IXmtpConversationId, IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query"
 import { config } from "@/config"
 import { ensureConversationSyncAllQuery } from "@/features/conversation/queries/conversation-sync-all.query"
 import { convertXmtpConversationToConvosConversation } from "@/features/conversation/utils/convert-xmtp-conversation-to-convos"
-import { getXmtpClientByInboxId } from "@/features/xmtp/xmtp-client/xmtp-client.service"
+import { isTempConversation } from "@/features/conversation/utils/is-temp-conversation"
+import { getXmtpClientByInboxId } from "@/features/xmtp/xmtp-client/xmtp-client"
 import { Optional } from "@/types/general"
 import { captureError } from "@/utils/capture-error"
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
 import { reactQueryClient } from "../../../utils/react-query/react-query.client"
-import type { IConversationTopic } from "../conversation.types"
 
 export type IConversationQueryData = Awaited<ReturnType<typeof getConversation>>
 
 type IGetConversationArgs = {
-  inboxId: IXmtpInboxId
-  topic: IConversationTopic
+  clientInboxId: IXmtpInboxId
+  xmtpConversationId: IXmtpConversationId
 }
 
 type IGetConversationArgsWithCaller = IGetConversationArgs & { caller: string }
 
 async function getConversation(args: IGetConversationArgs) {
-  const { inboxId, topic } = args
+  const { clientInboxId, xmtpConversationId } = args
 
-  if (!topic) {
-    throw new Error("Topic is required")
+  if (!xmtpConversationId) {
+    throw new Error("Xmtp conversation ID is required")
   }
 
-  if (!inboxId) {
+  if (!clientInboxId) {
     throw new Error("Inbox ID is required")
   }
 
@@ -37,21 +37,21 @@ async function getConversation(args: IGetConversationArgs) {
    */
   await Promise.all([
     ensureConversationSyncAllQuery({
-      clientInboxId: inboxId,
+      clientInboxId,
       consentStates: ["allowed"],
     }),
     ensureConversationSyncAllQuery({
-      clientInboxId: inboxId,
+      clientInboxId,
       consentStates: ["unknown"],
     }),
     ensureConversationSyncAllQuery({
-      clientInboxId: inboxId,
+      clientInboxId,
       consentStates: ["denied"],
     }),
   ])
 
   const client = await getXmtpClientByInboxId({
-    inboxId,
+    inboxId: clientInboxId,
   })
 
   const xmtpConversations = (
@@ -64,7 +64,7 @@ async function getConversation(args: IGetConversationArgs) {
       lastMessage: true,
       description: true,
     })
-  ).find((c) => c.topic === (topic as unknown as IXmtpConversationTopic))
+  ).find((xmtpConversation) => xmtpConversation.id === xmtpConversationId)
 
   if (!xmtpConversations) {
     return null
@@ -98,7 +98,9 @@ async function getConversation(args: IGetConversationArgs) {
 
   if (totalTimeDiff > config.xmtp.maxMsUntilLogError) {
     captureError(
-      new Error(`[useConversationQuery] Fetched conversation for ${topic} in ${totalTimeDiff}ms`),
+      new Error(
+        `[useConversationQuery] Fetched conversation for ${xmtpConversationId} in ${totalTimeDiff}ms`,
+      ),
     )
   }
 
@@ -114,14 +116,14 @@ export const useConversationQuery = (args: IGetConversationArgsWithCaller) => {
 export function getConversationQueryOptions(
   args: Optional<IGetConversationArgsWithCaller, "caller">,
 ) {
-  const { inboxId, topic, caller } = args
-  const enabled = !!topic && !!inboxId
+  const { clientInboxId, xmtpConversationId, caller } = args
+  const enabled = !!xmtpConversationId && !!clientInboxId && !isTempConversation(xmtpConversationId)
   return queryOptions({
     meta: {
       caller,
     },
-    queryKey: ["conversation", inboxId, topic],
-    queryFn: enabled ? () => getConversation({ inboxId, topic }) : skipToken,
+    queryKey: ["conversation", clientInboxId, xmtpConversationId],
+    queryFn: enabled ? () => getConversation({ clientInboxId, xmtpConversationId }) : skipToken,
     enabled,
   })
 }
@@ -131,13 +133,33 @@ export const setConversationQueryData = (
     conversation: IConversationQueryData
   },
 ) => {
-  const { inboxId, topic, conversation } = args
+  const { clientInboxId, xmtpConversationId, conversation } = args
   reactQueryClient.setQueryData(
     getConversationQueryOptions({
-      inboxId,
-      topic,
+      clientInboxId,
+      xmtpConversationId,
     }).queryKey,
-    conversation,
+    (previousConversation) => {
+      if (!previousConversation) {
+        return conversation
+      }
+
+      if (!conversation) {
+        return null
+      }
+
+      // Keep existing lastMessage if new conversation has undefined lastMessage
+      const lastMessage =
+        conversation.lastMessage === undefined
+          ? previousConversation.lastMessage
+          : conversation.lastMessage
+
+      return {
+        ...previousConversation,
+        ...conversation,
+        lastMessage,
+      }
+    },
   )
 }
 
@@ -162,6 +184,10 @@ export const getConversationQueryData = (args: IGetConversationArgs) => {
   return reactQueryClient.getQueryData(getConversationQueryOptions(args).queryKey)
 }
 
-export function getOrFetchConversationQuery(args: IGetConversationArgsWithCaller) {
+export function ensureConversationQueryData(args: IGetConversationArgsWithCaller) {
   return reactQueryClient.ensureQueryData(getConversationQueryOptions(args))
+}
+
+export function invalidateConversationQuery(args: IGetConversationArgs) {
+  return reactQueryClient.invalidateQueries(getConversationQueryOptions(args))
 }

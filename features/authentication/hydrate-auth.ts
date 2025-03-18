@@ -1,7 +1,7 @@
 import { useAuthenticationStore } from "@/features/authentication/authentication.store"
 import { getCurrentSender } from "@/features/authentication/multi-inbox.store"
-import { getXmtpClientByEthAddress } from "@/features/xmtp/xmtp-client/xmtp-client.service"
-import { validateClientInstallation } from "@/features/xmtp/xmtp-installations/xmtp-installations"
+import { ensureXmtpInstallationQueryData } from "@/features/xmtp/xmtp-installations/xmtp-installation.query"
+import { validateXmtpInstallation } from "@/features/xmtp/xmtp-installations/xmtp-installations"
 import { captureError } from "@/utils/capture-error"
 import { authLogger } from "@/utils/logger"
 
@@ -17,21 +17,20 @@ export async function hydrateAuth() {
   }
 
   try {
-    const xmtpClient = await getXmtpClientByEthAddress({
-      ethAddress: currentSender.ethereumAddress,
+    await ensureXmtpInstallationQueryData({
+      inboxId: currentSender.inboxId,
     })
 
-    if (!xmtpClient) {
-      throw new Error("Failed to ensure XMTP client")
-    }
-
-    const isValid = await validateClientInstallation({
-      client: xmtpClient,
+    // Don't do it with await because we prefer doing it in the background and letting user continue
+    validateXmtpInstallation({
+      inboxId: currentSender.inboxId,
     })
-
-    if (!isValid) {
-      throw new Error("Invalid client installation")
-    }
+      .catch(function (error) {
+        captureError(error)
+        useAuthenticationStore.getState().actions.setStatus("signedOut")
+        return
+      })
+      .catch(captureError)
   } catch (error) {
     captureError(error)
     useAuthenticationStore.getState().actions.setStatus("signedOut")

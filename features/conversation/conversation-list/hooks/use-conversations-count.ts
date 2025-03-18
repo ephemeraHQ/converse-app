@@ -7,7 +7,7 @@ export const useAllowedConversationsCount = () => {
 
   const { data: count, isLoading } = useQuery({
     ...getAllowedConsentConversationsQueryOptions({
-      inboxId: currentSender.inboxId,
+      clientInboxId: currentSender.inboxId,
       caller: "useConversationsCount",
     }),
     select: (data) => data?.length ?? 0,

@@ -17,7 +17,7 @@ export const AddGroupMembersSearchUsersResultsListItemEthAddress = memo(
     const { addSelectedInboxId } = useAddGroupMembersStore((state) => state.actions)
 
     const { data: inboxId, isLoading: isLoadingInboxId } = useXmtpInboxIdFromEthAddressQuery({
-      clientEthAddress: currentSender.ethereumAddress,
+      clientInboxId: currentSender.inboxId,
       targetEthAddress: ethAddress,
     })
 

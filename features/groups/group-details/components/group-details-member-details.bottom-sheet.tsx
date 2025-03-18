@@ -15,11 +15,11 @@ import { HStack } from "@/design-system/HStack"
 import { ListItem, ListItemEndRightChevron, ListItemTitle } from "@/design-system/list-item"
 import { VStack } from "@/design-system/VStack"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
-import { useRemoveGroupMembersFromGroupMutation } from "@/features/groups/group-members/use-remove-group-members-from-group.mutation"
-import { usePromoteToAdminMutation } from "@/features/groups/group-permissions/mutations/use-promote-group-member-to-admin.mutation"
-import { usePromoteToSuperAdminMutation } from "@/features/groups/group-permissions/mutations/use-promote-group-member-to-super-admin.mutation"
-import { useRevokeAdminMutation } from "@/features/groups/group-permissions/mutations/use-revoke-group-member-from-admin.mutation"
-import { useRevokeSuperAdminMutation } from "@/features/groups/group-permissions/mutations/use-revoke-group-member-from-super-admin.mutation"
+import { useRemoveGroupMembersFromGroupMutation } from "@/features/groups/group-members/remove-group-members-from-group.mutation"
+import { usePromoteToAdminMutation } from "@/features/groups/group-permissions/mutations/promote-group-member-to-admin.mutation"
+import { usePromoteToSuperAdminMutation } from "@/features/groups/group-permissions/mutations/promote-group-member-to-super-admin.mutation"
+import { useRevokeAdminMutation } from "@/features/groups/group-permissions/mutations/revoke-group-member-from-admin.mutation"
+import { useRevokeSuperAdminMutation } from "@/features/groups/group-permissions/mutations/revoke-group-member-from-super-admin.mutation"
 import { useGroupMember } from "@/features/groups/hooks/use-group-member"
 import {
   getGroupMemberIsAdmin,
@@ -38,16 +38,16 @@ export const MemberDetailsBottomSheet = memo(function MemberDetailsBottomSheet()
   })
   const router = useRouter()
   const currentSender = useSafeCurrentSender()
-  const { groupTopic } = useRouteParams<"GroupDetails">()
+  const { xmtpConversationId } = useRouteParams<"GroupDetails">()
 
   const { groupMember: currentSenderGroupMember } = useGroupMember({
     memberInboxId: currentSender.inboxId,
-    topic: groupTopic,
+    xmtpConversationId,
   })
 
   const { groupMember: targetGroupMember } = useGroupMember({
     memberInboxId: memberInboxId,
-    topic: groupTopic,
+    xmtpConversationId,
   })
 
   const { displayName: targetDisplayName } = usePreferredDisplayInfo({
@@ -80,23 +80,23 @@ export const MemberDetailsBottomSheet = memo(function MemberDetailsBottomSheet()
 
   const { mutateAsync: promoteToAdmin } = usePromoteToAdminMutation({
     clientInboxId: currentSender.inboxId,
-    topic: groupTopic,
+    xmtpConversationId,
   })
   const { mutateAsync: promoteToSuperAdmin } = usePromoteToSuperAdminMutation({
     clientInboxId: currentSender.inboxId,
-    topic: groupTopic,
+    xmtpConversationId,
   })
   const { mutateAsync: revokeSuperAdmin } = useRevokeSuperAdminMutation({
     clientInboxId: currentSender.inboxId,
-    topic: groupTopic,
+    xmtpConversationId,
   })
   const { mutateAsync: revokeAdmin } = useRevokeAdminMutation({
     clientInboxId: currentSender.inboxId,
-    topic: groupTopic,
+    xmtpConversationId,
   })
   const { mutateAsync: removeMember } = useRemoveGroupMembersFromGroupMutation({
     clientInboxId: currentSender.inboxId,
-    topic: groupTopic,
+    xmtpConversationId,
   })
 
   const handleViewProfilePress = useCallback(() => {

@@ -3,23 +3,23 @@ import { config } from "@/config"
 import { getAllowedConsentConversationsQueryData } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import { XMTPError } from "@/utils/error"
 import { xmtpLogger } from "@/utils/logger"
-import { getXmtpClientByInboxId } from "../xmtp-client/xmtp-client.service"
+import { getXmtpClientByInboxId } from "../xmtp-client/xmtp-client"
 
-export const streamConsent = async (args: { inboxId: IXmtpInboxId }) => {
+export const streamXmtpConsent = async (args: { inboxId: IXmtpInboxId }) => {
   const { inboxId } = args
+
+  xmtpLogger.debug(`Streaming consent for ${inboxId}`)
 
   const client = await getXmtpClientByInboxId({
     inboxId,
   })
-
-  xmtpLogger.debug(`Streaming consent for ${inboxId}`)
 
   try {
     await client.preferences.streamConsent(async () => {
       xmtpLogger.debug(`Consent has been updated for ${inboxId}`)
 
       const conversations = getAllowedConsentConversationsQueryData({
-        inboxId,
+        clientInboxId: inboxId,
       })
 
       // TODO: Consent Has Been Updated, resubscribe to notifications

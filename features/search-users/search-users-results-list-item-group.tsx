@@ -1,29 +1,29 @@
 import { memo } from "react"
 import { GroupAvatar } from "@/components/group-avatar"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
-import { useGroupMembersQuery } from "@/features/groups/group-members.query"
+import { useGroupMembers } from "@/features/groups/hooks/use-group-members"
 import { useGroupName } from "@/features/groups/hooks/use-group-name"
 import { usePreferredDisplayInfoBatch } from "@/features/preferred-display-info/use-preferred-display-info-batch"
 import { SearchUsersResultListItem } from "@/features/search-users/search-users-result-list-item"
-import { IConversationTopic } from "../conversation/conversation.types"
+import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 
 export const SearchUsersResultsListItemGroup = memo(
   function SearchUsersResultsListItemGroup(props: {
-    conversationTopic: IConversationTopic
+    xmtpConversationId: IXmtpConversationId
     onPress: () => void
   }) {
-    const { conversationTopic, onPress } = props
+    const { xmtpConversationId, onPress } = props
 
     const currentSender = useSafeCurrentSender()
 
-    const { data: members } = useGroupMembersQuery({
+    const { members } = useGroupMembers({
       caller: "SearchUsersResultsListItemGroup",
       clientInboxId: currentSender.inboxId,
-      topic: conversationTopic,
+      xmtpConversationId,
     })
 
     const { groupName } = useGroupName({
-      conversationTopic,
+      xmtpConversationId,
     })
 
     const preferredDisplayData = usePreferredDisplayInfoBatch({
@@ -32,7 +32,7 @@ export const SearchUsersResultsListItemGroup = memo(
 
     return (
       <SearchUsersResultListItem
-        avatar={<GroupAvatar groupTopic={conversationTopic} />}
+        avatar={<GroupAvatar xmtpConversationId={xmtpConversationId} />}
         title={groupName}
         subtitle={
           preferredDisplayData

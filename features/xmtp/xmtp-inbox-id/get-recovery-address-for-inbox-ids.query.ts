@@ -1,29 +1,28 @@
 import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query"
 import { getRecoveryAddressesForInboxIds } from "@/features/xmtp/xmtp-inbox-id/get-recovery-address-for-inbox-ids"
-import { IEthereumAddress } from "@/utils/evm/address"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
 
 type IArgs = {
-  clientEthAddress: IEthereumAddress | undefined
+  clientInboxId: IXmtpInboxId | undefined
   inboxIds: IXmtpInboxId[] | undefined
 }
 
 type IStrictArgs = {
-  clientEthAddress: IEthereumAddress
+  clientInboxId: IXmtpInboxId
   inboxIds: IXmtpInboxId[]
 }
 
 export function getRecoveryAddressesForInboxIdsQueryOptions(args: IArgs) {
-  const { clientEthAddress, inboxIds } = args
+  const { clientInboxId, inboxIds } = args
 
   return queryOptions({
-    queryKey: ["recovery-addresses-for-inbox-ids", clientEthAddress, inboxIds],
+    queryKey: ["recovery-addresses-for-inbox-ids", clientInboxId, inboxIds],
     queryFn:
-      clientEthAddress && inboxIds?.length
+      clientInboxId && inboxIds?.length
         ? () => {
             return getRecoveryAddressesForInboxIds({
-              clientEthAddress,
+              clientInboxId,
               inboxIds,
             })
           }

@@ -9,7 +9,7 @@ import { useAppTheme } from "@/theme/use-app-theme"
 import { hexToRGBA } from "@/utils/colors"
 
 export const ConversationListEmpty = memo(function ConversationListEmpty() {
-  const { pinnedConversations = [] } = usePinnedConversations()
+  const { pinnedConversationsIds: pinnedConversations = [] } = usePinnedConversations()
 
   const { theme } = useAppTheme()
 

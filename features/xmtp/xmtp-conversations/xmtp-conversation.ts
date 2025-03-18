@@ -1,23 +1,23 @@
 import {
   IXmtpConsentState,
   IXmtpConversationId,
+  IXmtpConversationSendPayload,
+  IXmtpConversationTopic,
   IXmtpConversationWithCodecs,
   IXmtpDmWithCodecs,
   IXmtpGroupWithCodecs,
   IXmtpInboxId,
 } from "@features/xmtp/xmtp.types"
 import { ConversationVersion, sendMessage } from "@xmtp/react-native-sdk"
-import { ConversationSendPayload } from "@xmtp/react-native-sdk/build/lib/types"
 import { config } from "@/config"
-import { getXmtpClientByInboxId } from "@/features/xmtp/xmtp-client/xmtp-client.service"
-import { ISupportedXmtpCodecs } from "@/features/xmtp/xmtp-codecs/xmtp-codecs"
+import { getXmtpClientByInboxId } from "@/features/xmtp/xmtp-client/xmtp-client"
 import { captureError } from "@/utils/capture-error"
 import { XMTPError } from "@/utils/error"
 
 export async function sendXmtpConversationMessage(args: {
   clientInboxId: IXmtpInboxId
   conversationId: IXmtpConversationId
-  content: ConversationSendPayload<ISupportedXmtpCodecs>
+  content: IXmtpConversationSendPayload
 }) {
   const { content, clientInboxId, conversationId } = args
 
@@ -112,3 +112,15 @@ export function isXmtpConversationDm(
 ): conversation is IXmtpDmWithCodecs {
   return conversation.version === ConversationVersion.GROUP
 }
+
+export const getXmtpConversationIdFromXmtpTopic = (xmtpTopic: IXmtpConversationTopic) => {
+  return xmtpTopic
+    .replace(CONVERSATION_TOPIC_PREFIX, "")
+    .replace("/proto", "") as IXmtpConversationId
+}
+
+export function getXmtpConversationTopicFromXmtpId(xmtpId: IXmtpConversationId) {
+  return `${CONVERSATION_TOPIC_PREFIX}/${xmtpId}/proto` as IXmtpConversationTopic
+}
+
+export const CONVERSATION_TOPIC_PREFIX = "/xmtp/mls/1/g-"

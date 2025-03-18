@@ -21,20 +21,17 @@ import {
   messageContentIsRemoteAttachment,
   messageContentIsStaticAttachment,
   messageContentIsText,
-} from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
+} from "@/features/conversation/conversation-chat/conversation-message/utils/conversation-message-assertions"
 import {
   useConversationStore,
-  useCurrentConversationTopicSafe,
+  useCurrentXmtpConversationIdSafe,
 } from "@/features/conversation/conversation-chat/conversation.store-context"
 import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
+import { IXmtpMessageId } from "@/features/xmtp/xmtp.types"
 import { useSelect } from "@/stores/stores.utils"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { captureError } from "@/utils/capture-error"
-import {
-  IConversationMessage,
-  IConversationMessageId,
-  IConversationMessageReply,
-} from "./conversation-message.types"
+import { IConversationMessage, IConversationMessageReply } from "./conversation-message.types"
 import { useConversationMessageById } from "./use-conversation-message-by-id"
 
 export const MessageReply = memo(function MessageReply(props: {
@@ -82,7 +79,7 @@ export const MessageReply = memo(function MessageReply(props: {
               >
                 <AttachmentRemoteImage
                   fitAspectRatio
-                  messageId={replyMessageContent.reference}
+                  xmtpMessageId={replyMessageContent.reference}
                   remoteMessageContent={replyMessageContent.content}
                   containerProps={{
                     style: {
@@ -107,7 +104,7 @@ export const MessageReply = memo(function MessageReply(props: {
 })
 
 const MessageReplyReference = memo(function MessageReplyReference(props: {
-  referenceMessageId: IConversationMessageId
+  referenceMessageId: IXmtpMessageId
 }) {
   const { referenceMessageId } = props
 
@@ -117,11 +114,11 @@ const MessageReplyReference = memo(function MessageReplyReference(props: {
 
   const conversationStore = useConversationStore()
 
-  const topic = useCurrentConversationTopicSafe()
+  const xmtpConversationId = useCurrentXmtpConversationIdSafe()
 
   const { message: referencedMessage } = useConversationMessageById({
     messageId: referenceMessageId,
-    conversationTopic: topic,
+    xmtpConversationId,
   })
 
   const { displayName } = usePreferredDisplayInfo({
@@ -131,8 +128,8 @@ const MessageReplyReference = memo(function MessageReplyReference(props: {
   const tapGesture = Gesture.Tap()
     .onBegin(() => {
       conversationStore.setState({
-        highlightedMessageId: referenceMessageId,
-        scrollToMessageId: referenceMessageId,
+        highlightedXmtpMessageId: referenceMessageId,
+        scrollToXmtpMessageId: referenceMessageId,
       })
     })
     .runOnJS(true)
@@ -198,7 +195,7 @@ const MessageReplyReferenceContent = memo(function ReplyMessageReferenceMessageC
       const content = message.content
       return (
         <AttachmentRemoteImage
-          messageId={message.id}
+          xmtpMessageId={message.xmtpId}
           remoteMessageContent={content}
           containerProps={{ style: attachmentStyle }}
         />
@@ -220,7 +217,7 @@ const MessageReplyReferenceContent = memo(function ReplyMessageReferenceMessageC
       if (messageContentIsRemoteAttachment(content)) {
         return (
           <AttachmentRemoteImage
-            messageId={message.id}
+            xmtpMessageId={message.xmtpId}
             remoteMessageContent={content}
             containerProps={{ style: attachmentStyle }}
           />

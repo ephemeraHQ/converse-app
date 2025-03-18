@@ -1,4 +1,4 @@
-import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import { IXmtpConversationId, IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import React, { memo, useMemo } from "react"
 import { StyleProp, TextStyle, ViewStyle } from "react-native"
 import { Center } from "@/design-system/Center"
@@ -6,7 +6,6 @@ import { Text } from "@/design-system/Text"
 import { VStack } from "@/design-system/VStack"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { IConversationTopic } from "@/features/conversation/conversation.types"
-import { useGroupMembersQuery } from "@/features/groups/group-members.query"
 import { useGroupQuery } from "@/features/groups/group.query"
 import { usePreferredDisplayInfoBatch } from "@/features/preferred-display-info/use-preferred-display-info-batch"
 import { $globalStyles } from "@/theme/styles"
@@ -82,35 +81,28 @@ export const GroupAvatarInboxIds = memo(function GroupAvatarInboxIds(props: {
  * Will render the group image if available, otherwise shows member avatars
  */
 export const GroupAvatar = memo(function GroupAvatar(props: {
-  groupTopic: IConversationTopic
+  xmtpConversationId: IXmtpConversationId
   size?: IGroupAvatarSize
   sizeNumber?: number
 }) {
-  const { groupTopic, size = "md", sizeNumber: sizeNumberProp } = props
+  const { xmtpConversationId, size = "md", sizeNumber: sizeNumberProp } = props
   const { theme } = useAppTheme()
   const currentSender = useSafeCurrentSender()
 
   // Fetch group data
   const { data: group } = useGroupQuery({
-    inboxId: currentSender.inboxId,
-    topic: groupTopic,
-  })
-
-  // Fetch group members
-  const { data: members } = useGroupMembersQuery({
-    caller: "GroupAvatar",
     clientInboxId: currentSender.inboxId,
-    topic: groupTopic,
+    xmtpConversationId,
   })
 
   // Extract member inbox IDs excluding current sender
   const memberInboxIds = useMemo(() => {
-    if (!members?.ids) {
+    if (!group?.members?.ids) {
       return []
     }
 
-    return members.ids.reduce<IXmtpInboxId[]>((inboxIds, memberId) => {
-      const memberInboxId = members.byId[memberId].inboxId
+    return group.members.ids.reduce<IXmtpInboxId[]>((inboxIds, memberId) => {
+      const memberInboxId = group.members.byId[memberId].inboxId
 
       if (memberInboxId) {
         inboxIds.push(memberInboxId)
@@ -118,7 +110,7 @@ export const GroupAvatar = memo(function GroupAvatar(props: {
 
       return inboxIds
     }, [])
-  }, [members])
+  }, [group])
 
   // Get display info for all members
   const preferredDisplayData = usePreferredDisplayInfoBatch({

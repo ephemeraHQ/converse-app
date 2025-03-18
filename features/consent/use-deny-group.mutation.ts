@@ -6,35 +6,30 @@ import {
 } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import {
   addConversationToUnknownConsentConversationsQuery,
-  removeConversationFromUnknownConsentConversationsQueryData,
+  removeConversationFromUnknownConsentConversationsQuery,
 } from "@/features/conversation/conversation-requests-list/conversations-unknown-consent.query"
-import { getConversationIdFromTopic } from "@/features/conversation/utils/get-conversation-id-from-topic"
 import { getGroupQueryData, setGroupQueryData } from "@/features/groups/group.query"
 import { IXmtpConversationId, IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
-import { IConversationTopic } from "../conversation/conversation.types"
-import { updateConsentForGroupsForInbox } from "../xmtp/xmtp-consent/xmtp-consent"
+import { updateXmtpConsentForGroupsForInbox } from "../xmtp/xmtp-consent/xmtp-consent"
 
 export const useDenyGroupMutation = (args: {
   clientInboxId: IXmtpInboxId
-  topic: IConversationTopic
+  xmtpConversationId: IXmtpConversationId
 }) => {
-  const { clientInboxId, topic } = args
+  const { clientInboxId, xmtpConversationId } = args
 
   return useMutation({
     mutationFn: async () => {
-      if (!topic || !clientInboxId) {
-        return
-      }
-      await updateConsentForGroupsForInbox({
+      await updateXmtpConsentForGroupsForInbox({
         clientInboxId,
-        groupIds: [getConversationIdFromTopic(topic) as unknown as IXmtpConversationId],
+        groupIds: [xmtpConversationId],
         consent: "denied",
       })
       return "denied"
     },
     onMutate: async () => {
-      const previousGroup = getGroupQueryData({ inboxId: clientInboxId, topic })
+      const previousGroup = getGroupQueryData({ clientInboxId, xmtpConversationId })
 
       if (!previousGroup) {
         throw new Error("Previous group not found")
@@ -44,18 +39,18 @@ export const useDenyGroupMutation = (args: {
         consentState: "denied",
       })
 
-      setGroupQueryData({ inboxId: clientInboxId, topic, group: updatedGroup })
+      setGroupQueryData({ clientInboxId, xmtpConversationId, group: updatedGroup })
 
       // Remove from main conversations list
       removeConversationFromAllowedConsentConversationsQuery({
-        inboxId: clientInboxId,
-        topic: topic!,
+        clientInboxId,
+        conversationId: xmtpConversationId,
       })
 
       // Remove from requests
-      removeConversationFromUnknownConsentConversationsQueryData({
-        inboxId: clientInboxId,
-        topic,
+      removeConversationFromUnknownConsentConversationsQuery({
+        clientInboxId,
+        conversationId: xmtpConversationId,
       })
 
       return { previousGroup }
@@ -65,18 +60,22 @@ export const useDenyGroupMutation = (args: {
         return
       }
 
-      setGroupQueryData({ inboxId: clientInboxId, topic, group: context.previousGroup })
+      setGroupQueryData({
+        clientInboxId,
+        xmtpConversationId,
+        group: context.previousGroup,
+      })
 
       // Add back to main conversations list
       addConversationToAllowedConsentConversationsQuery({
-        inboxId: clientInboxId,
-        conversation: context.previousGroup,
+        clientInboxId,
+        conversationId: xmtpConversationId,
       })
 
       // Add back to requests
       addConversationToUnknownConsentConversationsQuery({
-        inboxId: clientInboxId,
-        conversation: context.previousGroup,
+        clientInboxId,
+        conversationId: xmtpConversationId,
       })
     },
     onSuccess: () => {

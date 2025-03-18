@@ -2,17 +2,17 @@
  * This store/context is to avoid prop drilling in message components.
  */
 
-import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import { IXmtpInboxId , IXmtpMessageId } from "@features/xmtp/xmtp.types"
 import { createContext, memo, useContext, useEffect, useRef } from "react"
 import { createStore, useStore } from "zustand"
 import { subscribeWithSelector } from "zustand/middleware"
-import { isGroupUpdatedMessage } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
+import { isGroupUpdatedMessage } from "@/features/conversation/conversation-chat/conversation-message/utils/conversation-message-assertions"
 import { hasNextMessageInSeries } from "@/features/conversation/utils/has-next-message-in-serie"
 import { hasPreviousMessageInSeries } from "@/features/conversation/utils/has-previous-message-in-serie"
 import { messageIsFromCurrentSenderInboxId } from "@/features/conversation/utils/message-is-from-current-user"
 import { messageShouldShowDateChange } from "@/features/conversation/utils/message-should-show-date-change"
 import { convertNanosecondsToMilliseconds } from "@/utils/date"
-import { IConversationMessage, IConversationMessageId } from "./conversation-message.types"
+import { IConversationMessage } from "./conversation-message.types"
 
 type IMessageContextStoreProps = {
   message: IConversationMessage
@@ -21,7 +21,7 @@ type IMessageContextStoreProps = {
 }
 
 type IMessageContextStoreState = IMessageContextStoreProps & {
-  messageId: IConversationMessageId
+  xmtpMessageId: IXmtpMessageId
   hasNextMessageInSeries: boolean
   hasPreviousMessageInSeries: boolean
   fromMe: boolean
@@ -62,7 +62,7 @@ export const ConversationMessageContextStoreProvider = memo(
 function getStoreStateBasedOnProps(props: IMessageContextStoreProps) {
   return {
     ...props,
-    messageId: props.message.id,
+    xmtpMessageId: props.message.xmtpId,
     hasNextMessageInSeries: hasNextMessageInSeries({
       currentMessage: props.message,
       nextMessage: props.nextMessage,

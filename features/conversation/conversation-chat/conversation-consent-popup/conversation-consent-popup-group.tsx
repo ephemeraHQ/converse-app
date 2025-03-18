@@ -1,7 +1,7 @@
 import { translate } from "@i18n"
 import React, { useCallback } from "react"
 import { useColorScheme } from "react-native"
-import { useGroupConsentForCurrentAccount } from "@/features/consent/use-group-consent-for-current-account"
+import { useGroupConsentForCurrentSender } from "@/features/consent/use-group-consent-for-current-sender"
 import {
   ConsentPopupButtonsContainer,
   ConversationConsentPopupButton,
@@ -12,18 +12,18 @@ import { useGroupName } from "@/features/groups/hooks/use-group-name"
 import { groupRemoveRestoreHandler } from "@/features/groups/utils/groupActionHandlers"
 import { useRouter } from "@/navigation/use-navigation"
 import { captureErrorWithToast } from "@/utils/capture-error"
-import { useCurrentConversationTopicSafe } from "../conversation.store-context"
+import { useCurrentXmtpConversationIdSafe } from "../conversation.store-context"
 
 export function ConversationConsentPopupGroup() {
-  const topic = useCurrentConversationTopicSafe()
+  const xmtpConversationId = useCurrentXmtpConversationIdSafe()
 
   const navigation = useRouter()
 
   const colorScheme = useColorScheme()
 
-  const { denyGroup, allowGroup } = useGroupConsentForCurrentAccount(topic)
+  const { denyGroup, allowGroup } = useGroupConsentForCurrentSender({ xmtpConversationId })
 
-  const { groupName } = useGroupName({ conversationTopic: topic })
+  const { groupName } = useGroupName({ xmtpConversationId })
 
   const handleDeclineGroup = useCallback(async () => {
     groupRemoveRestoreHandler(

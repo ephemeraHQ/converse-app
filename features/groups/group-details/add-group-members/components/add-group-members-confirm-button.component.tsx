@@ -7,7 +7,7 @@ import { Button } from "@/design-system/Button/Button"
 import { AnimatedVStack } from "@/design-system/VStack"
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { useAddGroupMembersStore } from "@/features/groups/group-details/add-group-members/stores/add-group-members.store"
-import { useAddGroupMembersMutation } from "@/features/groups/group-members/use-add-group-members.mutation"
+import { useAddGroupMembersMutation } from "@/features/groups/group-members/add-group-members.mutation"
 import { useGroupQuery } from "@/features/groups/group.query"
 import { useRouteParams, useRouter } from "@/navigation/use-navigation"
 import { useAppTheme } from "@/theme/use-app-theme"
@@ -17,7 +17,7 @@ export const AddGroupMembersConfirmButton = memo(function AddGroupMembersConfirm
   const { progress, height } = useReanimatedKeyboardAnimation()
   const { theme } = useAppTheme()
   const insets = useSafeAreaInsets()
-  const { groupTopic } = useRouteParams<"AddGroupMembers">()
+  const { xmtpConversationId } = useRouteParams<"AddGroupMembers">()
   const router = useRouter()
 
   const selectedInboxIds = useAddGroupMembersStore((state) => state.selectedInboxIds)
@@ -25,8 +25,8 @@ export const AddGroupMembersConfirmButton = memo(function AddGroupMembersConfirm
   const { mutateAsync: addGroupMembers } = useAddGroupMembersMutation()
 
   const { data: group } = useGroupQuery({
-    inboxId: getSafeCurrentSender().inboxId,
-    topic: groupTopic,
+    clientInboxId: getSafeCurrentSender().inboxId,
+    xmtpConversationId,
   })
 
   const handlePress = useCallback(async () => {

@@ -13,42 +13,60 @@ import {
 } from "@/features/conversation/conversation-list/conversation-list-item/conversation-list-item"
 import { getConversationMetadataQueryOptions } from "@/features/conversation/conversation-metadata/conversation-metadata.query"
 import { useConversationRequestsListItem } from "@/features/conversation/conversation-requests-list/use-conversation-requests-list-items"
+import { getConversationQueryData } from "@/features/conversation/queries/conversation.query"
 import { conversationIsUnreadForInboxId } from "@/features/conversation/utils/conversation-is-unread-by-current-account"
 import { useAppTheme } from "@/theme/use-app-theme"
 
 export const ConversationListAwaitingRequests = memo(function ConversationListAwaitingRequests() {
   const { theme } = useAppTheme()
   const navigation = useNavigation()
-  const { likelyNotSpam, isLoading: isLoadingUknownConversations } =
-    useConversationRequestsListItem()
   const currentSender = useSafeCurrentSender()
 
-  const conversationsMetadataQueries = useQueries({
-    queries: (likelyNotSpam ?? []).map((conversation) =>
+  const { likelyNotSpamConversationIds, isLoading: isLoadingUknownConversations } =
+    useConversationRequestsListItem()
+
+  const conversationsQueryResult = useQueries({
+    queries: (likelyNotSpamConversationIds ?? []).map((conversationId) =>
       getConversationMetadataQueryOptions({
         clientInboxId: currentSender.inboxId,
-        topic: conversation.topic,
+        xmtpConversationId: conversationId,
       }),
     ),
-  })
+    combine: (queries) => {
+      const numberOfRequestsLikelyNotSpam = likelyNotSpamConversationIds.length
 
-  const numberOfRequestsLikelyNotSpam = useMemo(() => likelyNotSpam.length, [likelyNotSpam])
+      const hasUnreadMessages = queries.some((query, index) => {
+        if (!query.data) {
+          return false
+        }
 
-  const hasUnreadMessages = useMemo(
-    () =>
-      conversationsMetadataQueries.some((query, index) => {
-        if (!query.data) return false
-        const conversation = likelyNotSpam[index]
+        const conversationId = likelyNotSpamConversationIds[index]
+        const conversation = getConversationQueryData({
+          clientInboxId: currentSender.inboxId,
+          xmtpConversationId: conversationId,
+        })
+
+        if (!conversation) {
+          return false
+        }
+
         return conversationIsUnreadForInboxId({
-          lastMessageSent: conversation.lastMessage?.sentNs ?? null,
-          lastMessageSenderInboxId: conversation.lastMessage?.senderInboxId ?? null,
+          lastMessageSent: conversation?.lastMessage?.sentNs ?? null,
+          lastMessageSenderInboxId: conversation?.lastMessage?.senderInboxId ?? null,
           consumerInboxId: currentSender.inboxId,
           markedAsUnread: query.data?.unread ?? false,
           readUntil: query.data?.readUntil ? new Date(query.data.readUntil).getTime() : null,
         })
-      }),
-    [conversationsMetadataQueries, likelyNotSpam, currentSender],
-  )
+      })
+
+      return {
+        numberOfRequestsLikelyNotSpam,
+        hasUnreadMessages,
+      }
+    },
+  })
+
+  const { numberOfRequestsLikelyNotSpam, hasUnreadMessages } = conversationsQueryResult
 
   const title = useMemo(() => {
     return (

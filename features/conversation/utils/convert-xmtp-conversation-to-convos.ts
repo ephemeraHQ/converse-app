@@ -1,59 +1,62 @@
 import { convertConsentStateToXmtpConsentState } from "@/features/consent/consent.utils"
-import { convertXmtpMessageToConvosMessage } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.utils"
-import {
-  IConversation,
-  IConversationId,
-  IConversationTopic,
-} from "@/features/conversation/conversation.types"
+import { IConversation } from "@/features/conversation/conversation.types"
 import { IDm } from "@/features/dm/dm.types"
 import { IGroup } from "@/features/groups/group.types"
 import { convertXmtpGroupMemberToConvosMember } from "@/features/groups/utils/convert-xmtp-group-member-to-convos-member"
 import { isXmtpConversationGroup } from "@/features/xmtp/xmtp-conversations/xmtp-conversation"
 import { IXmtpConversationWithCodecs, IXmtpInboxId } from "@/features/xmtp/xmtp.types"
+import { entify } from "@/utils/entify"
+import { convertXmtpMessageToConvosMessage } from "../conversation-chat/conversation-message/utils/convert-xmtp-message-to-convos-message"
 
 export async function convertXmtpConversationToConvosConversation(
   xmtpConversation: IXmtpConversationWithCodecs,
 ): Promise<IConversation> {
+  // Group conversation
   if (isXmtpConversationGroup(xmtpConversation)) {
     const [members, creatorInboxId, consentState] = await Promise.all([
       xmtpConversation.members(),
-      xmtpConversation.creatorInboxId(),
+      xmtpConversation.creatorInboxId() as unknown as IXmtpInboxId,
       xmtpConversation.consentState(),
     ])
 
+    const addedByInboxId = xmtpConversation.addedByInboxId as unknown as IXmtpInboxId
+
     return {
       type: "group",
-      id: xmtpConversation.id as unknown as IConversationId,
-      topic: xmtpConversation.topic as unknown as IConversationTopic,
+      xmtpId: xmtpConversation.id,
+      xmtpTopic: xmtpConversation.topic,
       consentState: convertConsentStateToXmtpConsentState(consentState),
       name: xmtpConversation.groupName,
       description: xmtpConversation.groupDescription,
       imageUrl: xmtpConversation.groupImageUrl,
-      members: members.map(convertXmtpGroupMemberToConvosMember),
-      creatorInboxId: creatorInboxId as unknown as IXmtpInboxId,
-      addedByInboxId: xmtpConversation.addedByInboxId as unknown as IXmtpInboxId,
+      members: entify(
+        members.map(convertXmtpGroupMemberToConvosMember),
+        (member) => member.inboxId,
+      ),
+      creatorInboxId: creatorInboxId,
+      addedByInboxId,
       createdAt: xmtpConversation.createdAt,
       lastMessage: xmtpConversation.lastMessage
         ? convertXmtpMessageToConvosMessage(xmtpConversation.lastMessage)
         : undefined,
-    } as IGroup
+    } satisfies IGroup
   }
 
-  // For DM conversations
+  // DM conversations
   const [peerInboxId, consentState] = await Promise.all([
-    xmtpConversation.peerInboxId(),
+    xmtpConversation.peerInboxId() as unknown as IXmtpInboxId,
     xmtpConversation.consentState(),
   ])
 
   return {
-    id: xmtpConversation.id as unknown as IConversationId,
     type: "dm",
     peerInboxId,
+    xmtpId: xmtpConversation.id,
     createdAt: xmtpConversation.createdAt,
-    topic: xmtpConversation.topic as unknown as IConversationTopic,
+    xmtpTopic: xmtpConversation.topic,
     consentState: convertConsentStateToXmtpConsentState(consentState),
     lastMessage: xmtpConversation.lastMessage
       ? convertXmtpMessageToConvosMessage(xmtpConversation.lastMessage)
       : undefined,
-  } as IDm
+  } satisfies IDm
 }

@@ -1,6 +1,6 @@
 import { memo, useCallback, useState } from "react"
 import { Screen } from "@/components/screen/screen"
-import { ConversationList } from "@/features/conversation/conversation-list/conversation-list"
+import { ConversationList } from "@/features/conversation/conversation-list/conversation-list.component"
 import { ConversationRequestsToggle } from "@/features/conversation/conversation-requests-list/conversation-requests-list-toggle"
 import { useConversationRequestsListScreenHeader } from "@/features/conversation/conversation-requests-list/conversation-requests-list.screen-header"
 import { translate } from "@/i18n"
@@ -34,7 +34,14 @@ const ConversationListWrapper = memo(function ConversationListWrapper({
 }: {
   selectedIndex: number
 }) {
-  const { likelyNotSpam, likelySpam } = useConversationRequestsListItem()
+  const { likelyNotSpamConversationIds, likelySpamConversationIds } =
+    useConversationRequestsListItem()
 
-  return <ConversationList conversations={selectedIndex === 0 ? likelyNotSpam : likelySpam} />
+  return (
+    <ConversationList
+      conversationsIds={
+        selectedIndex === 0 ? likelyNotSpamConversationIds : likelySpamConversationIds
+      }
+    />
+  )
 })

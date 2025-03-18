@@ -8,31 +8,30 @@ import {
   updateConversationMetadataQueryData,
 } from "@/features/conversation/conversation-metadata/conversation-metadata.query"
 import { getGroupQueryData } from "@/features/groups/group.query"
-import { updateConsentForGroupsForInbox } from "@/features/xmtp/xmtp-consent/xmtp-consent"
+import { updateXmtpConsentForGroupsForInbox } from "@/features/xmtp/xmtp-consent/xmtp-consent"
 import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 import { translate } from "@/i18n"
 import { captureErrorWithToast } from "@/utils/capture-error"
-import { IConversationTopic } from "../../conversation.types"
 
-export const useDeleteGroup = (args: { groupTopic: IConversationTopic }) => {
-  const { groupTopic } = args
+export const useDeleteGroup = (args: { xmtpConversationId: IXmtpConversationId }) => {
+  const { xmtpConversationId } = args
   const currentSender = useSafeCurrentSender()
 
   const { mutateAsync: deleteGroupAsync } = useMutation({
     mutationFn: () =>
       deleteConversationMetadata({
         clientInboxId: currentSender.inboxId,
-        topic: groupTopic,
+        xmtpConversationId,
       }),
     onMutate: () => {
       const previousDeleted = getConversationMetadataQueryData({
         clientInboxId: currentSender.inboxId,
-        topic: groupTopic,
+        xmtpConversationId,
       })?.deleted
 
       updateConversationMetadataQueryData({
         clientInboxId: currentSender.inboxId,
-        topic: groupTopic,
+        xmtpConversationId,
         updateData: { deleted: true },
       })
 
@@ -41,7 +40,7 @@ export const useDeleteGroup = (args: { groupTopic: IConversationTopic }) => {
     onError: (error, _, context) => {
       updateConversationMetadataQueryData({
         clientInboxId: currentSender.inboxId,
-        topic: groupTopic,
+        xmtpConversationId,
         updateData: { deleted: context?.previousDeleted },
       })
     },
@@ -49,8 +48,8 @@ export const useDeleteGroup = (args: { groupTopic: IConversationTopic }) => {
 
   return useCallback(() => {
     const group = getGroupQueryData({
-      inboxId: currentSender.inboxId,
-      topic: groupTopic,
+      clientInboxId: currentSender.inboxId,
+      xmtpConversationId,
     })
 
     if (!group) {
@@ -75,9 +74,9 @@ export const useDeleteGroup = (args: { groupTopic: IConversationTopic }) => {
         action: async () => {
           try {
             await deleteGroupAsync()
-            await updateConsentForGroupsForInbox({
+            await updateXmtpConsentForGroupsForInbox({
               clientInboxId: currentSender.inboxId,
-              groupIds: [group.id as unknown as IXmtpConversationId],
+              groupIds: [group.xmtpId],
               consent: "denied",
             })
           } catch (error) {
@@ -104,5 +103,5 @@ export const useDeleteGroup = (args: { groupTopic: IConversationTopic }) => {
         }
       },
     })
-  }, [currentSender, groupTopic, deleteGroupAsync])
+  }, [currentSender, xmtpConversationId, deleteGroupAsync])
 }

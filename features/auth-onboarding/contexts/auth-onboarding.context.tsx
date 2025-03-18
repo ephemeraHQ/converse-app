@@ -15,8 +15,8 @@ import { useMultiInboxStore } from "@/features/authentication/multi-inbox.store"
 import { useLogout } from "@/features/authentication/use-logout"
 import { useSmartWalletClient } from "@/features/wallets/smart-wallet"
 import { createXmtpSignerFromSwc } from "@/features/wallets/utils/create-xmtp-signer-from-swc"
-import { createXmtpClient } from "@/features/xmtp/xmtp-client/xmtp-client.service"
-import { validateClientInstallation } from "@/features/xmtp/xmtp-installations/xmtp-installations"
+import { createXmtpClient } from "@/features/xmtp/xmtp-client/xmtp-client"
+import { validateXmtpInstallation } from "@/features/xmtp/xmtp-installations/xmtp-installations"
 import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { captureError, captureErrorWithToast } from "@/utils/capture-error"
 import { IEthereumAddress } from "@/utils/evm/address"
@@ -125,8 +125,8 @@ export const AuthOnboardingContextProvider = (props: IAuthOnboardingContextProps
         throw new Error("XMTP client creation failed")
       }
 
-      const isValid = await validateClientInstallation({
-        client: xmtpClient,
+      const isValid = await validateXmtpInstallation({
+        inboxId: xmtpClient.inboxId,
       })
 
       if (!isValid) {

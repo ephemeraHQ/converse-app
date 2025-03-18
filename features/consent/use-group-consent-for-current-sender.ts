@@ -1,4 +1,4 @@
-import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import { IXmtpConversationId, IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { useQuery } from "@tanstack/react-query"
 import { useCallback } from "react"
 import { showSnackbar } from "@/components/snackbar/snackbar.service"
@@ -15,12 +15,16 @@ export type IGroupConsentOptions = {
   includeAddedBy?: boolean
 }
 
-export const useGroupConsentForCurrentAccount = (topic: IConversationTopic) => {
+export const useGroupConsentForCurrentSender = (args: {
+  xmtpConversationId: IXmtpConversationId
+}) => {
+  const { xmtpConversationId } = args
+
   const currentSender = useSafeCurrentSender()
 
   const { data: group, isLoading: isGroupLoading } = useGroupQuery({
-    inboxId: currentSender.inboxId,
-    topic,
+    clientInboxId: currentSender.inboxId,
+    xmtpConversationId,
   })
 
   const {
@@ -28,18 +32,22 @@ export const useGroupConsentForCurrentAccount = (topic: IConversationTopic) => {
     isLoading: isGroupConsentLoading,
     isError,
   } = useQuery({
-    ...getGroupQueryOptions({ inboxId: currentSender.inboxId, topic }),
+    ...getGroupQueryOptions({
+      clientInboxId: currentSender.inboxId,
+      xmtpConversationId,
+      caller: "useGroupConsentForCurrentAccount",
+    }),
     select: (group) => group?.consentState,
   })
 
   const { mutateAsync: allowGroupMutation, isPending: isAllowingGroup } = useAllowGroupMutation({
     clientInboxId: currentSender.inboxId,
-    topic,
+    xmtpConversationId,
   })
 
   const { mutateAsync: denyGroupMutation, isPending: isDenyingGroup } = useDenyGroupMutation({
     clientInboxId: currentSender.inboxId,
-    topic,
+    xmtpConversationId,
   })
 
   const allowGroup = useCallback(
@@ -52,12 +60,12 @@ export const useGroupConsentForCurrentAccount = (topic: IConversationTopic) => {
 
       await allowGroupMutation({
         clientInboxId: currentSender.inboxId,
-        topic,
+        xmtpConversationId,
         includeAddedBy,
         includeCreator,
       })
     },
-    [allowGroupMutation, group, currentSender, topic],
+    [allowGroupMutation, group, currentSender, xmtpConversationId],
   )
 
   const denyGroup = useCallback(
@@ -88,7 +96,7 @@ export const useGroupConsentForCurrentAccount = (topic: IConversationTopic) => {
         await Promise.all(
           inboxIdsToDeny.map((inboxId) =>
             setXmtpConsentStateForInboxId({
-              inboxId,
+              peerInboxId: inboxId,
               consent: "denied",
             }),
           ),

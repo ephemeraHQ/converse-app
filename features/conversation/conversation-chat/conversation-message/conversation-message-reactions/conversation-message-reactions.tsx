@@ -7,7 +7,6 @@ import { useConversationMessageContextStoreContext } from "@/features/conversati
 import { useSelect } from "@/stores/stores.utils"
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme"
 import { openMessageReactionsDrawer } from "./conversation-message-reaction-drawer/conversation-message-reaction-drawer.service"
-import { RolledUpReactions, SortedReaction } from "./conversation-message-reactions.types"
 import { useConversationMessageReactionsRolledUp } from "./use-conversation-message-reactions-rolled-up"
 
 const MAX_REACTION_EMOJIS_SHOWN = 3
@@ -15,12 +14,12 @@ const MAX_REACTION_EMOJIS_SHOWN = 3
 export const ConversationMessageReactions = memo(function ConversationMessageReactions() {
   const { themed, theme } = useAppTheme()
 
-  const { fromMe, messageId } = useConversationMessageContextStoreContext(
-    useSelect(["fromMe", "messageId"]),
+  const { fromMe, xmtpMessageId: messageId } = useConversationMessageContextStoreContext(
+    useSelect(["fromMe", "xmtpMessageId"]),
   )
 
   const rolledUpReactions = useConversationMessageReactionsRolledUp({
-    messageId: messageId,
+    xmtpMessageId: messageId,
   })
 
   const handlePressContainer = useCallback(() => {

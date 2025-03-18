@@ -71,4 +71,9 @@ export type IIconButtonProps = {
    * Haptic or not
    */
   withHaptics?: boolean
+
+  /**
+   * Prevent double tap
+   */
+  preventDoubleTap?: boolean
 } & RNPressableProps

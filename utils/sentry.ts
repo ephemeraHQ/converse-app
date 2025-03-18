@@ -100,58 +100,58 @@ export function useUpdateSentry() {
       return
     }
 
-    // Identify user on mount
-    const currentUser = getCurrentUserQueryData()
-    const currentProfile = getProfileQueryData({
-      xmtpId: currentSender.inboxId,
-    })
-    sentryIdentifyUser({
-      userId: currentUser?.id,
-      username: currentProfile?.username,
-    })
+    // Track user changes with QueryObserver
+    const userQueryObserver = new QueryObserver(
+      reactQueryClient,
+      getCurrentUserQueryOptions({ caller: "useUpdateSentry" }),
+    )
 
-    // Track user changes
-    const userQueryObserver = new QueryObserver(reactQueryClient, getCurrentUserQueryOptions())
-
-    const unsubscribeFromUserQueryObserver = userQueryObserver.subscribe((result) => {
-      if (result.data) {
-        sentryIdentifyUser({
-          userId: result.data.id,
-        })
-      }
-    })
-
-    // Track profile changes
+    // Track profile changes with QueryObserver
     const profileQueryObserver = new QueryObserver(
       reactQueryClient,
       getProfileQueryConfig({
-        xmtpId: useMultiInboxStore.getState().currentSender?.inboxId,
+        xmtpId: currentSender.inboxId,
       }),
     )
 
-    const unsubscribeFromProfileQueryObserver = profileQueryObserver.subscribe((result) => {
-      if (result.data?.name) {
-        sentryIdentifyUser({
-          userId: getCurrentUserQueryData()?.id,
-          username: result.data.name,
-        })
+    // Function to update Sentry user identity with latest data
+    const updateSentryIdentity = () => {
+      const currentUser = getCurrentUserQueryData()
+
+      if (!currentUser?.id) {
+        return
+      }
+
+      const currentProfile = getProfileQueryData({
+        xmtpId: currentSender.inboxId,
+      })
+
+      sentryIdentifyUser({
+        userId: currentUser.id,
+        username: currentProfile?.username,
+      })
+    }
+
+    // Initial identity update if data is available
+    updateSentryIdentity()
+
+    // Subscribe to user query changes
+    const unsubscribeFromUserQueryObserver = userQueryObserver.subscribe((result) => {
+      if (result.data) {
+        updateSentryIdentity()
       }
     })
 
-    // Watch for inbox changes to update profile query
-    const unsubscribeFromStore = useMultiInboxStore.subscribe(
-      (state) => state.currentSender?.inboxId,
-      (inboxId) => {
-        if (inboxId) {
-          profileQueryObserver.setOptions(getProfileQueryConfig({ xmtpId: inboxId }))
-        }
-      },
-    )
+    // Subscribe to profile query changes
+    const unsubscribeFromProfileQueryObserver = profileQueryObserver.subscribe((result) => {
+      if (result.data) {
+        updateSentryIdentity()
+      }
+    })
 
     return () => {
       unsubscribeFromUserQueryObserver()
       unsubscribeFromProfileQueryObserver()
-      unsubscribeFromStore()
     }
   }, [currentSender])
 }

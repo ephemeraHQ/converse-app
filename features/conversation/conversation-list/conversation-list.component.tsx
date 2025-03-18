@@ -8,23 +8,30 @@ import {
 } from "react-native"
 import Animated, { AnimatedProps } from "react-native-reanimated"
 import { AnimatedVStack } from "@/design-system/VStack"
+import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { ConversationListItemDm } from "@/features/conversation/conversation-list/conversation-list-item/conversation-list-item-dm"
 import { ConversationListItemGroup } from "@/features/conversation/conversation-list/conversation-list-item/conversation-list-item-group"
-import { IConversation } from "@/features/conversation/conversation.types"
+import { getConversationQueryData } from "@/features/conversation/queries/conversation.query"
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group"
+import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 import { useAppTheme } from "@/theme/use-app-theme"
 
 type IConversationListProps = Omit<
-  AnimatedProps<FlatListProps<IConversation>>,
+  AnimatedProps<FlatListProps<IXmtpConversationId>>,
   "data" | "renderItem"
 > & {
-  conversations: IConversation[]
-  renderConversation?: ListRenderItem<IConversation>
+  conversationsIds: IXmtpConversationId[]
+  renderConversation?: ListRenderItem<IXmtpConversationId>
   onRefetch?: () => Promise<void>
 }
 
 export function ConversationList(props: IConversationListProps) {
-  const { conversations, renderConversation = defaultRenderItem, onRefetch, ...rest } = props
+  const {
+    conversationsIds: conversationsIds,
+    renderConversation = defaultRenderItem,
+    onRefetch,
+    ...rest
+  } = props
 
   const { theme } = useAppTheme()
 
@@ -37,10 +44,10 @@ export function ConversationList(props: IConversationListProps) {
     <Animated.FlatList
       onScroll={onScroll}
       keyboardShouldPersistTaps="handled"
-      alwaysBounceVertical={conversations?.length > 0}
+      alwaysBounceVertical={conversationsIds?.length > 0}
       layout={theme.animation.reanimatedLayoutSpringTransition}
       itemLayoutAnimation={theme.animation.reanimatedLayoutSpringTransition}
-      data={conversations}
+      data={conversationsIds}
       keyExtractor={keyExtractor}
       renderItem={(args) => (
         <AnimatedVStack
@@ -55,19 +62,27 @@ export function ConversationList(props: IConversationListProps) {
   )
 }
 
-const defaultRenderItem: ListRenderItem<IConversation> = ({ item }) => {
-  const conversation = item
-  if (isConversationGroup(conversation)) {
-    return <ConversationListItemGroup conversationTopic={conversation.topic} />
+const defaultRenderItem: ListRenderItem<IXmtpConversationId> = ({ item }) => {
+  const currentSender = getSafeCurrentSender()
+
+  const conversation = getConversationQueryData({
+    clientInboxId: currentSender.inboxId,
+    xmtpConversationId: item,
+  })
+
+  if (!conversation) {
+    return null
   }
-  return <ConversationListItemDm conversationTopic={conversation.topic} />
+
+  if (isConversationGroup(conversation)) {
+    return <ConversationListItemGroup xmtpConversationId={item} />
+  }
+
+  return <ConversationListItemDm xmtpConversationId={item} />
 }
 
-function keyExtractor(item: IConversation) {
-  if ("lastMessage" in item) {
-    return item.topic
-  }
-  return typeof item === "string" ? item : item.topic + "v2"
+function keyExtractor(id: IXmtpConversationId) {
+  return id
 }
 
 function useRefreshHandler(args: { onRefetch?: () => Promise<void> }) {

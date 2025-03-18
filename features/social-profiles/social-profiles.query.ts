@@ -65,3 +65,7 @@ export async function ensureSocialProfilesForAddressesQuery(args: {
 export function prefetchSocialProfilesForAddress(args: { ethAddress: IEthereumAddress }) {
   return reactQueryClient.prefetchQuery(getSocialProfilesForAddressQueryOptions(args))
 }
+
+export function getSocialProfilesForEthAddressQueryData(args: IStrictArgs) {
+  return reactQueryClient.getQueryData(getSocialProfilesForAddressQueryOptions(args).queryKey)
+}
