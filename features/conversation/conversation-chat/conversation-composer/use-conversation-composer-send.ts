@@ -6,6 +6,7 @@ import {
   useSendMessage,
 } from "@/features/conversation/hooks/use-send-message.mutation"
 import { FeedbackError } from "@/utils/error"
+import { logJson } from "@/utils/logger"
 import { waitUntilPromise } from "@/utils/wait-until-promise"
 import { useConversationComposerStore } from "./conversation-composer.store-context"
 
@@ -84,7 +85,7 @@ export function useConversationComposerSend() {
             : []),
         ]
 
-    console.log("messageContents:", messageContents)
+    logJson("messageContents", messageContents)
 
     if (xmtpConversationId) {
       await sendMessageMutation.mutateAsync({

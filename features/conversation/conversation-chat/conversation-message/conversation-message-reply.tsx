@@ -79,38 +79,76 @@ export const MessageReply = memo(function MessageReply(props: {
             }}
           >
             <MessageReplyReference referenceMessageId={replyMessageContent.reference} />
-
-            {messageContentIsRemoteAttachment(replyMessageContent.content) && (
-              <VStack
-                style={{
-                  marginTop: theme.spacing.xxxs,
-                  marginBottom: theme.spacing.xxxs,
-                }}
-              >
-                <AttachmentRemoteImage
-                  fitAspectRatio
-                  xmtpMessageId={replyMessageContent.reference}
-                  remoteMessageContent={replyMessageContent.content}
-                  containerProps={{
-                    style: {
-                      width: "100%",
-                      borderRadius:
-                        theme.borderRadius.message.attachment -
-                        theme.spacing.message.replyMessage.horizontalPadding / 2,
-                    },
-                  }}
-                />
-              </VStack>
-            )}
-
-            {messageContentIsText(replyMessageContent.content) && (
-              <MessageText inverted={fromMe}>{replyMessageContent.content.text}</MessageText>
-            )}
+            <MessageReplyContent replyMessageContent={replyMessageContent} />
           </VStack>
         </BubbleContentContainer>
       </ConversationMessageGestures>
     </BubbleContainer>
   )
+})
+
+const MessageReplyContent = memo(function MessageReplyContent(props: {
+  replyMessageContent: IConversationMessageReplyContent
+}) {
+  const { replyMessageContent } = props
+  const { theme } = useAppTheme()
+  const { fromMe } = useConversationMessageContextStoreContext(useSelect(["fromMe"]))
+
+  if (messageContentIsRemoteAttachment(replyMessageContent.content)) {
+    return (
+      <VStack
+        style={{
+          marginTop: theme.spacing.xxxs,
+          marginBottom: theme.spacing.xxxs,
+        }}
+      >
+        <AttachmentRemoteImage
+          fitAspectRatio
+          xmtpMessageId={replyMessageContent.reference}
+          remoteMessageContent={replyMessageContent.content}
+          containerProps={{
+            style: {
+              width: "100%",
+              borderRadius:
+                theme.borderRadius.message.attachment -
+                theme.spacing.message.replyMessage.horizontalPadding / 2,
+            },
+          }}
+        />
+      </VStack>
+    )
+  }
+
+  if (messageContentIsMultiRemoteAttachment(replyMessageContent.content)) {
+    return (
+      <VStack>
+        <Text inverted={fromMe}>Multiple attachments</Text>
+      </VStack>
+    )
+  }
+
+  if (messageContentIsText(replyMessageContent.content)) {
+    return <MessageText inverted={fromMe}>{replyMessageContent.content.text}</MessageText>
+  }
+
+  if (messageContentIsReply(replyMessageContent.content)) {
+    return <RenderNestedReplyContent content={replyMessageContent.content} />
+  }
+
+  if (messageContentIsStaticAttachment(replyMessageContent.content)) {
+    return <Text inverted={fromMe}>{replyMessageContent.content.filename}</Text>
+  }
+
+  // We can't reply to these
+  if (
+    messageContentIsReaction(replyMessageContent.content) ||
+    messageContentIsGroupUpdated(replyMessageContent.content)
+  ) {
+    return null
+  }
+
+  const _exhaustiveCheck: never = replyMessageContent.content
+  return <Text inverted={fromMe}>Unknown message content</Text>
 })
 
 const MessageReplyReference = memo(function MessageReplyReference(props: {
