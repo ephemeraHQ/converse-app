@@ -35,15 +35,15 @@ export function useCreateConversationAndSendFirstMessageMutation() {
   return useMutation({
     mutationFn: async (args: {
       inboxIds: IXmtpInboxId[]
-      contents: ISendMessageParams["contents"]
+      content: ISendMessageParams["content"]
     }) => {
-      const { inboxIds, contents } = args
+      const { inboxIds, content } = args
 
       if (!inboxIds.length) {
         throw new Error("No inboxIds provided")
       }
 
-      if (!contents.length) {
+      if (!content) {
         throw new Error(`No content provided`)
       }
 
@@ -68,12 +68,12 @@ export function useCreateConversationAndSendFirstMessageMutation() {
       // Send message
       const result = await sendMessage({
         xmtpConversationId: conversation.xmtpId,
-        contents,
+        content,
       })
 
       return { conversation, sentMessage: result.message, sentMessageId: result.xmtpMessageId }
     },
-    onMutate: ({ inboxIds, contents }) => {
+    onMutate: ({ inboxIds, content }) => {
       const currentSender = getSafeCurrentSender()
 
       const isGroup = inboxIds.length > 1
@@ -92,8 +92,7 @@ export function useCreateConversationAndSendFirstMessageMutation() {
           sentNs: getTodayNs(),
           status: "sending",
         },
-        // TODO: Add support for multiple contents
-        content: contents[0],
+        content,
       })
 
       // Create optimistic conversation

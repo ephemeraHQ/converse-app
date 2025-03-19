@@ -1,10 +1,6 @@
 import { useMutation } from "@tanstack/react-query"
 import { getCurrentSender, getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
-import {
-  messageContentIsMultiRemoteAttachment,
-  messageContentIsRemoteAttachment,
-  messageContentIsText,
-} from "@/features/conversation/conversation-chat/conversation-message/utils/conversation-message-assertions"
+import { messageContentIsReply } from "@/features/conversation/conversation-chat/conversation-message/utils/conversation-message-assertions"
 import { convertXmtpMessageToConvosMessage } from "@/features/conversation/conversation-chat/conversation-message/utils/convert-xmtp-message-to-convos-message"
 import { getMessageWithType } from "@/features/conversation/conversation-chat/conversation-message/utils/get-message-with-type"
 import {
@@ -18,18 +14,13 @@ import {
   getConversationQueryData,
   updateConversationQueryData,
 } from "@/features/conversation/queries/conversation.query"
+import { convertConvosMessageContentToXmtpMessageContent } from "@/features/conversation/utils/convert-convos-message-content-to-xmtp-message-content"
 import {
   getXmtpConversationTopicFromXmtpId,
   sendXmtpConversationMessage,
 } from "@/features/xmtp/xmtp-conversations/xmtp-conversation"
 import { getXmtpConversationMessage } from "@/features/xmtp/xmtp-messages/xmtp-messages"
-import {
-  IXmtpConversationId,
-  IXmtpConversationSendPayload,
-  IXmtpDecodedMessageNativeContent,
-  IXmtpInboxId,
-  IXmtpMessageId,
-} from "@/features/xmtp/xmtp.types"
+import { IXmtpConversationId, IXmtpInboxId, IXmtpMessageId } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
 import { getTodayNs } from "@/utils/date"
 import { getRandomId } from "@/utils/general"
@@ -38,8 +29,6 @@ import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
 import {
   IConversationMessage,
   IConversationMessageContent,
-  IConversationMessageMultiRemoteAttachmentContent,
-  IConversationMessageRemoteAttachmentContent,
 } from "../conversation-chat/conversation-message/conversation-message.types"
 
 export type ISendMessageParams = {
@@ -48,7 +37,12 @@ export type ISendMessageParams = {
   contents: IConversationMessageContent[] // Array because we can send text at same time as attachments for example
 }
 
-export async function sendMessage(args: ISendMessageParams) {
+export type ISendMessageResult = {
+  xmtpMessageIds: IXmtpMessageId[]
+  messages: IConversationMessage[]
+}
+
+export async function sendMessage(args: ISendMessageParams): Promise<ISendMessageResult> {
   const { replyXmtpMessageId, contents, xmtpConversationId } = args
 
   const currentSender = getSafeCurrentSender()
@@ -63,68 +57,79 @@ export async function sendMessage(args: ISendMessageParams) {
     throw new Error("Conversation not found when sending message")
   }
 
-  // TODO: we need to make this cleaner...
-  const combinedContentObj: {
-    text?: string
-    remoteAttachment?: IConversationMessageRemoteAttachmentContent
-    multiRemoteAttachment?: IConversationMessageMultiRemoteAttachmentContent
-  } = {}
+  const results: {
+    xmtpMessageIds: IXmtpMessageId[]
+    messages: IConversationMessage[]
+  } = {
+    xmtpMessageIds: [],
+    messages: [],
+  }
 
-  // TODO: we need to make this cleaner...
+  // Send each content as a separate message
   for (const content of contents) {
-    if (messageContentIsText(content)) {
-      combinedContentObj.text = content.text
-    } else if (messageContentIsRemoteAttachment(content)) {
-      combinedContentObj.remoteAttachment = content
-    } else if (messageContentIsMultiRemoteAttachment(content)) {
-      combinedContentObj.multiRemoteAttachment = content
-    }
-  }
+    let sentXmtpMessageId: IXmtpMessageId | null = null
 
-  // TODO: we need to make this cleaner...
-  const combinedContent = combinedContentObj as IXmtpConversationSendPayload
+    const payload = convertConvosMessageContentToXmtpMessageContent(content)
 
-  let sentXmtpMessageId: IXmtpMessageId | null = null
-
-  if (replyXmtpMessageId) {
-    // Send as a reply
-    sentXmtpMessageId = await sendXmtpConversationMessage({
-      clientInboxId: currentSender.inboxId,
-      conversationId: conversation.xmtpId,
-      content: {
-        reply: {
-          reference: replyXmtpMessageId,
-          content: combinedContent as IXmtpDecodedMessageNativeContent,
+    if (replyXmtpMessageId && !messageContentIsReply(content)) {
+      // Send as a reply
+      sentXmtpMessageId = await sendXmtpConversationMessage({
+        clientInboxId: currentSender.inboxId,
+        conversationId: conversation.xmtpId,
+        content: {
+          reply: {
+            reference: replyXmtpMessageId,
+            content: payload,
+          },
         },
-      },
-    })
-  } else {
-    // Send as a regular message
-    sentXmtpMessageId = await sendXmtpConversationMessage({
+      })
+    } else if (messageContentIsReply(content)) {
+      // Content is already a reply, send it with the inner content properly converted
+      const innerPayload = convertConvosMessageContentToXmtpMessageContent(content.content)
+
+      sentXmtpMessageId = await sendXmtpConversationMessage({
+        clientInboxId: currentSender.inboxId,
+        conversationId: conversation.xmtpId,
+        content: {
+          reply: {
+            reference: content.reference,
+            content: innerPayload,
+          },
+        },
+      })
+    } else {
+      // Send as a regular message
+      sentXmtpMessageId = await sendXmtpConversationMessage({
+        clientInboxId: currentSender.inboxId,
+        conversationId: conversation.xmtpId,
+        content: payload,
+      })
+    }
+
+    if (!sentXmtpMessageId) {
+      continue // Skip if we couldn't send this message
+    }
+
+    const sentXmtpMessage = await getXmtpConversationMessage({
+      messageId: sentXmtpMessageId,
       clientInboxId: currentSender.inboxId,
-      conversationId: conversation.xmtpId,
-      content: combinedContent,
     })
+
+    // Not supposed to happen but just in case
+    if (!sentXmtpMessage) {
+      captureError(new Error(`Couldn't get the full xmtp message after sending`))
+      continue
+    }
+
+    results.xmtpMessageIds.push(sentXmtpMessageId)
+    results.messages.push(convertXmtpMessageToConvosMessage(sentXmtpMessage))
   }
 
-  if (!sentXmtpMessageId) {
-    throw new Error(`Couldn't send message`)
+  if (results.xmtpMessageIds.length === 0) {
+    throw new Error("Couldn't send any messages")
   }
 
-  const sentXmtpMessage = (await getXmtpConversationMessage({
-    messageId: sentXmtpMessageId,
-    clientInboxId: currentSender.inboxId,
-  }))! // We just sent the message if we can't get it it's a protocol error
-
-  // Not supposed to happen but just in case
-  if (!sentXmtpMessage) {
-    captureError(new Error(`Couldn't get the full xmtp message after sending`))
-  }
-
-  return {
-    xmtpMessageId: sentXmtpMessageId,
-    message: convertXmtpMessageToConvosMessage(sentXmtpMessage),
-  }
+  return results
 }
 
 export function useSendMessage() {
@@ -135,77 +140,77 @@ export function useSendMessage() {
 
       const currentSender = getCurrentSender()!
 
-      // const deterministicMessageId = await generateDeterministicMessageId({
-      //   content: getMessageContentStringValue(contents[0]),
-      //   senderInboxId: currentSender.inboxId,
-      //   xmtpConversationId,
-      // })
-
-      const tmpXmtpMessageId = getRandomId() as IXmtpMessageId
-
-      // Create a properly typed content object for the optimistic update
-      const combinedContent: {
-        text?: string
-        remoteAttachment?: IConversationMessageRemoteAttachmentContent
-        multiRemoteAttachment?: IConversationMessageMultiRemoteAttachmentContent
-      } = {}
+      const tmpXmtpMessageIds: IXmtpMessageId[] = []
+      const optimisticMessages: IConversationMessage[] = []
 
       for (const content of contents) {
-        if (messageContentIsText(content)) {
-          combinedContent.text = content.text
-        } else if (messageContentIsRemoteAttachment(content)) {
-          combinedContent.remoteAttachment = content
-        } else if (messageContentIsMultiRemoteAttachment(content)) {
-          combinedContent.multiRemoteAttachment = content
-        }
-      }
+        const tmpXmtpMessageId = getRandomId() as IXmtpMessageId
+        tmpXmtpMessageIds.push(tmpXmtpMessageId)
 
-      const optimisticMessage = getMessageWithType({
-        baseMessage: {
-          xmtpId: tmpXmtpMessageId, // Will be set once we send the message and replace with the real
-          xmtpTopic: getXmtpConversationTopicFromXmtpId(xmtpConversationId),
-          sentNs: getTodayNs(),
-          status: "sending",
+        // No need to do conditional assignment as both branches assign the same value
+        const messageContent = content
+
+        const optimisticMessage = getMessageWithType({
+          baseMessage: {
+            xmtpId: tmpXmtpMessageId, // Will be set once we send the message and replace with the real
+            xmtpTopic: getXmtpConversationTopicFromXmtpId(xmtpConversationId),
+            sentNs: getTodayNs(),
+            status: "sending",
+            xmtpConversationId,
+            senderInboxId: currentSender.inboxId,
+          },
+          content: messageContent,
+        })
+
+        optimisticMessages.push(optimisticMessage)
+
+        addMessageToConversationMessagesQueryData({
+          clientInboxId: currentSender.inboxId,
           xmtpConversationId,
-          senderInboxId: currentSender.inboxId,
-        },
-        content: combinedContent as IConversationMessageContent,
-      })
+          message: optimisticMessage,
+        })
+      }
 
       const previousConversation = getConversationQueryData({
         clientInboxId: currentSender.inboxId,
         xmtpConversationId,
       })
 
-      addMessageToConversationMessagesQueryData({
-        clientInboxId: currentSender.inboxId,
-        xmtpConversationId,
-        message: optimisticMessage,
-      })
-
-      updateConversationQueryData({
-        clientInboxId: currentSender.inboxId,
-        xmtpConversationId,
-        conversationUpdate: {
-          lastMessage: optimisticMessage,
-        },
-      })
+      // Use the last optimistic message to update the conversation
+      const lastOptimisticMessage = optimisticMessages[optimisticMessages.length - 1]
+      if (lastOptimisticMessage) {
+        updateConversationQueryData({
+          clientInboxId: currentSender.inboxId,
+          xmtpConversationId,
+          conversationUpdate: {
+            lastMessage: lastOptimisticMessage,
+          },
+        })
+      }
 
       return {
-        tmpXmtpMessageId,
+        tmpXmtpMessageIds,
+        optimisticMessages,
         previousConversation,
       }
     },
     onSuccess: async (result, variables, context) => {
       const currentSender = getSafeCurrentSender()
 
-      if (result.message) {
-        replaceOptimisticMessageWithReal({
-          tmpXmtpMessageId: context.tmpXmtpMessageId,
-          xmtpConversationId: variables.xmtpConversationId,
-          clientInboxId: currentSender.inboxId,
-          realMessage: result.message,
-        })
+      // Replace each optimistic message with the real one
+      if (result.messages && result.messages.length > 0) {
+        for (
+          let i = 0;
+          i < Math.min(context.tmpXmtpMessageIds.length, result.messages.length);
+          i++
+        ) {
+          replaceOptimisticMessageWithReal({
+            tmpXmtpMessageId: context.tmpXmtpMessageIds[i],
+            xmtpConversationId: variables.xmtpConversationId,
+            clientInboxId: currentSender.inboxId,
+            realMessage: result.messages[i],
+          })
+        }
       }
     },
     onError: (_, variables, context) => {
@@ -215,11 +220,14 @@ export function useSendMessage() {
 
       const currentSender = getSafeCurrentSender()
 
-      removeMessageToConversationMessagesQueryData({
-        clientInboxId: currentSender.inboxId,
-        xmtpConversationId: variables.xmtpConversationId,
-        messageId: context?.tmpXmtpMessageId,
-      })
+      // Remove all optimistic messages
+      for (const tmpMessageId of context.tmpXmtpMessageIds) {
+        removeMessageToConversationMessagesQueryData({
+          clientInboxId: currentSender.inboxId,
+          xmtpConversationId: variables.xmtpConversationId,
+          messageId: tmpMessageId,
+        })
+      }
 
       if (context.previousConversation) {
         // Revert last message of conversation and list

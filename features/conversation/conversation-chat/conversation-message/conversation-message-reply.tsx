@@ -13,12 +13,19 @@ import { ConversationMessageGestures } from "@/features/conversation/conversatio
 import { MessageText } from "@/features/conversation/conversation-chat/conversation-message/conversation-message-text"
 import { useConversationMessageContextStoreContext } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.store-context"
 import {
+  isGroupUpdatedMessage,
+  isMultiRemoteAttachmentMessage,
+  isReactionMessage,
   isReadReceiptMessage,
   isRemoteAttachmentMessage,
   isReplyMessage,
+  isStaticAttachmentMessage,
   isTextMessage,
   messageContentIsGroupUpdated,
+  messageContentIsMultiRemoteAttachment,
+  messageContentIsReaction,
   messageContentIsRemoteAttachment,
+  messageContentIsReply,
   messageContentIsStaticAttachment,
   messageContentIsText,
 } from "@/features/conversation/conversation-chat/conversation-message/utils/conversation-message-assertions"
@@ -30,8 +37,11 @@ import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-p
 import { IXmtpMessageId } from "@/features/xmtp/xmtp.types"
 import { useSelect } from "@/stores/stores.utils"
 import { useAppTheme } from "@/theme/use-app-theme"
-import { captureError } from "@/utils/capture-error"
-import { IConversationMessage, IConversationMessageReply } from "./conversation-message.types"
+import {
+  IConversationMessage,
+  IConversationMessageReply,
+  IConversationMessageReplyContent,
+} from "./conversation-message.types"
 import { useConversationMessageById } from "./use-conversation-message-by-id"
 
 export const MessageReply = memo(function MessageReply(props: {
@@ -186,79 +196,199 @@ const MessageReplyReferenceContent = memo(function ReplyMessageReferenceMessageC
       theme.borderRadius.message.attachment - theme.spacing.message.replyMessage.horizontalPadding,
   }
 
-  function renderMessageContent(message: IConversationMessage) {
-    if (isReadReceiptMessage(message)) {
-      return null
-    }
+  // Handle read receipt messages
+  if (isReadReceiptMessage(replyMessage)) {
+    return null
+  }
 
-    if (isRemoteAttachmentMessage(message)) {
-      const content = message.content
+  // Handle remote attachment messages
+  if (isRemoteAttachmentMessage(replyMessage)) {
+    const content = replyMessage.content
+    return (
+      <AttachmentRemoteImage
+        xmtpMessageId={replyMessage.xmtpId}
+        remoteMessageContent={content}
+        containerProps={{ style: attachmentStyle }}
+      />
+    )
+  }
+
+  // Handle text messages
+  if (isTextMessage(replyMessage)) {
+    return (
+      <Text numberOfLines={1} inverted={fromMe}>
+        {replyMessage.content.text}
+      </Text>
+    )
+  }
+
+  // Handle reaction messages
+  if (isReactionMessage(replyMessage)) {
+    return (
+      <Text numberOfLines={1} inverted={fromMe}>
+        Reaction
+      </Text>
+    )
+  }
+
+  // Handle group updated messages
+  if (isGroupUpdatedMessage(replyMessage)) {
+    return (
+      <Text numberOfLines={1} inverted={fromMe}>
+        Group updated
+      </Text>
+    )
+  }
+
+  // Handle static attachment messages
+  if (isStaticAttachmentMessage(replyMessage)) {
+    return (
+      <Text numberOfLines={1} inverted={fromMe}>
+        {replyMessage.content.filename}
+      </Text>
+    )
+  }
+
+  // Handle multi-remote attachment messages
+  if (isMultiRemoteAttachmentMessage(replyMessage)) {
+    return (
+      <Text numberOfLines={1} inverted={fromMe}>
+        Multiple attachments
+      </Text>
+    )
+  }
+
+  // Handle reply messages
+  if (isReplyMessage(replyMessage)) {
+    const content = replyMessage.content
+
+    // Handle remote attachment in the reply
+    if (messageContentIsRemoteAttachment(content)) {
       return (
         <AttachmentRemoteImage
-          xmtpMessageId={message.xmtpId}
+          xmtpMessageId={replyMessage.xmtpId}
           remoteMessageContent={content}
           containerProps={{ style: attachmentStyle }}
         />
       )
     }
 
-    if (isTextMessage(message)) {
+    // Handle text in the reply
+    if (messageContentIsText(content)) {
       return (
         <Text numberOfLines={1} inverted={fromMe}>
-          {message.content.text}
+          {content.text}
         </Text>
       )
     }
 
-    if (isReplyMessage(message)) {
-      const content = message.content
-
-      // Handle remote attachment in the reply
-      if (messageContentIsRemoteAttachment(content)) {
-        return (
-          <AttachmentRemoteImage
-            xmtpMessageId={message.xmtpId}
-            remoteMessageContent={content}
-            containerProps={{ style: attachmentStyle }}
-          />
-        )
-      }
-
-      // Handle text in the reply
-      if (messageContentIsText(content)) {
-        return (
-          <Text numberOfLines={1} inverted={fromMe}>
-            {content.text}
-          </Text>
-        )
-      }
-
-      // Handle static attachment in the reply
-      if (messageContentIsStaticAttachment(content)) {
-        return (
-          <Text numberOfLines={1} inverted={fromMe}>
-            {content.filename}
-          </Text>
-        )
-      }
-
-      // Handle group updates in the reply
-      if (messageContentIsGroupUpdated(content)) {
-        return (
-          <Text numberOfLines={1} inverted={fromMe}>
-            Group updated
-          </Text>
-        )
-      }
+    // Handle static attachment in the reply
+    if (messageContentIsStaticAttachment(content)) {
+      return (
+        <Text numberOfLines={1} inverted={fromMe}>
+          {content.filename}
+        </Text>
+      )
     }
 
-    captureError(
-      new Error(
-        `Reply message reference message content is not handled with message type ${message.type}`,
-      ),
-    )
-    return null
+    // Handle group updates in the reply
+    if (messageContentIsGroupUpdated(content)) {
+      return (
+        <Text numberOfLines={1} inverted={fromMe}>
+          Group updated
+        </Text>
+      )
+    }
+
+    // Handle nested replies
+    if (messageContentIsReply(content)) {
+      return <RenderNestedReplyContent content={content} />
+    }
+
+    const _exhaustiveCheck: never = content
+    throw new Error(`Unhandled message content type: ${JSON.stringify(content, null, 2)}`)
   }
 
-  return renderMessageContent(replyMessage)
+  const _exhaustiveCheck: never = replyMessage
+  throw new Error(`Unhandled message type: ${JSON.stringify(replyMessage, null, 2)}`)
+})
+
+const RenderNestedReplyContent = memo(function RenderNestedReplyContent(props: {
+  content: IConversationMessageReplyContent
+}) {
+  const { content } = props
+  const { theme } = useAppTheme()
+  const fromMe = useConversationMessageContextStoreContext((s) => s.fromMe)
+
+  const nestedContent = content.content
+
+  // Handle remote attachment in nested reply
+  if (messageContentIsRemoteAttachment(nestedContent)) {
+    return (
+      <Text numberOfLines={1} inverted={fromMe}>
+        Image
+      </Text>
+    )
+  }
+
+  // Handle text in nested reply
+  if (messageContentIsText(nestedContent)) {
+    return (
+      <Text numberOfLines={1} inverted={fromMe}>
+        {nestedContent.text}
+      </Text>
+    )
+  }
+
+  // Handle static attachment in nested reply
+  if (messageContentIsStaticAttachment(nestedContent)) {
+    return (
+      <Text numberOfLines={1} inverted={fromMe}>
+        {nestedContent.filename}
+      </Text>
+    )
+  }
+
+  // Handle group updates in nested reply
+  if (messageContentIsGroupUpdated(nestedContent)) {
+    return (
+      <Text numberOfLines={1} inverted={fromMe}>
+        Group updated
+      </Text>
+    )
+  }
+
+  // Handle another nested reply (deeper nesting)
+  if (messageContentIsReply(nestedContent)) {
+    return (
+      <Text numberOfLines={1} inverted={fromMe}>
+        Replied message
+      </Text>
+    )
+  }
+
+  if (messageContentIsReaction(nestedContent)) {
+    return (
+      <Text numberOfLines={1} inverted={fromMe}>
+        Reaction
+      </Text>
+    )
+  }
+
+  if (messageContentIsMultiRemoteAttachment(nestedContent)) {
+    return (
+      <Text numberOfLines={1} inverted={fromMe}>
+        Multiple attachments
+      </Text>
+    )
+  }
+
+  const _exhaustiveCheck: never = nestedContent
+
+  // Default case for other content types
+  return (
+    <Text numberOfLines={1} inverted={fromMe}>
+      Message
+    </Text>
+  )
 })
