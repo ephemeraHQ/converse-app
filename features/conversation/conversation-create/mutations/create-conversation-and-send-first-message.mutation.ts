@@ -1,6 +1,7 @@
 import { IXmtpConversationId, IXmtpInboxId, IXmtpMessageId } from "@features/xmtp/xmtp.types"
 import { useMutation } from "@tanstack/react-query"
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
+import { IConversationMessage } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.types"
 import { getMessageWithType } from "@/features/conversation/conversation-chat/conversation-message/utils/get-message-with-type"
 import {
   addMessageToConversationMessagesQueryData,
@@ -27,7 +28,7 @@ import { captureError } from "@/utils/capture-error"
 import { getTodayNs } from "@/utils/date"
 import { entify } from "@/utils/entify"
 import { getRandomId } from "@/utils/general"
-import { ISendMessageParams, sendMessage } from "../../hooks/use-send-message"
+import { ISendMessageParams, sendMessage } from "../../hooks/use-send-message.mutation"
 
 export function useCreateConversationAndSendFirstMessageMutation() {
   const conversationStore = useConversationStore()
@@ -68,10 +69,14 @@ export function useCreateConversationAndSendFirstMessageMutation() {
       // Send message
       const result = await sendMessage({
         xmtpConversationId: conversation.xmtpId,
-        contents,
+        contents: contents,
       })
 
-      return { conversation, sentMessage: result.message, sentMessageId: result.xmtpMessageId }
+      return {
+        conversation,
+        sentMessages: result.messages,
+        sentMessageIds: result.xmtpMessageIds,
+      }
     },
     onMutate: ({ inboxIds, contents }) => {
       const currentSender = getSafeCurrentSender()
@@ -81,20 +86,26 @@ export function useCreateConversationAndSendFirstMessageMutation() {
         `${TEMP_CONVERSATION_PREFIX}${getRandomId()}` as IXmtpConversationId
       const tmpXmtpConversationTopic =
         `${TEMP_CONVERSATION_PREFIX}${getRandomId()}` as IConversationTopic
-      const tmpXmtpMessageId = getRandomId() as IXmtpMessageId
 
-      const optimisticMessage = getMessageWithType({
-        baseMessage: {
-          xmtpTopic: tmpXmtpConversationTopic,
-          xmtpConversationId: tmpXmtpConversationId,
-          xmtpId: tmpXmtpMessageId,
-          senderInboxId: currentSender.inboxId,
-          sentNs: getTodayNs(),
-          status: "sending",
-        },
-        // TODO: Add support for multiple contents
-        content: contents[0],
+      // Create optimistic messages for each content item
+      const optimisticMessages = contents.map((content) => {
+        const tmpXmtpMessageId = getRandomId() as IXmtpMessageId
+
+        return getMessageWithType({
+          baseMessage: {
+            xmtpTopic: tmpXmtpConversationTopic,
+            xmtpConversationId: tmpXmtpConversationId,
+            xmtpId: tmpXmtpMessageId,
+            senderInboxId: currentSender.inboxId,
+            sentNs: getTodayNs(),
+            status: "sending",
+          },
+          content,
+        })
       })
+
+      // Use the first message as the last message for the conversation
+      const firstOptimisticMessage = optimisticMessages[0]
 
       // Create optimistic conversation
       let tempConversation: IConversation
@@ -117,7 +128,7 @@ export function useCreateConversationAndSendFirstMessageMutation() {
             })),
             (member) => member.inboxId,
           ),
-          lastMessage: optimisticMessage,
+          lastMessage: firstOptimisticMessage,
           xmtpTopic: tmpXmtpConversationTopic,
         } satisfies IGroup
 
@@ -135,7 +146,7 @@ export function useCreateConversationAndSendFirstMessageMutation() {
           xmtpId: tmpXmtpConversationId,
           peerInboxId: inboxIds[0],
           consentState: "allowed",
-          lastMessage: optimisticMessage,
+          lastMessage: firstOptimisticMessage,
           xmtpTopic: tmpXmtpConversationTopic,
         } satisfies IDm
 
@@ -152,11 +163,14 @@ export function useCreateConversationAndSendFirstMessageMutation() {
         conversationId: tempConversation.xmtpId,
       })
 
-      addMessageToConversationMessagesQueryData({
-        clientInboxId: currentSender.inboxId,
-        xmtpConversationId: tmpXmtpConversationId,
-        message: optimisticMessage,
-      })
+      // Add all optimistic messages to the conversation
+      for (const message of optimisticMessages) {
+        addMessageToConversationMessagesQueryData({
+          clientInboxId: currentSender.inboxId,
+          xmtpConversationId: tmpXmtpConversationId,
+          message,
+        })
+      }
 
       // Not sure of doing this here but didn't work in the parent because even if we use .mutate we con't have access to the context...
       conversationStore.setState({
@@ -171,27 +185,31 @@ export function useCreateConversationAndSendFirstMessageMutation() {
     onSuccess: (result, variables, context) => {
       const currentSender = getSafeCurrentSender()
 
-      // Add the message to the real conversation messages query
-      // Set first because we want to already have the message in the query
+      // Add the messages to the real conversation messages query
+      // Set first because we want to already have the messages in the query
       setConversationMessagesQueryData({
         clientInboxId: currentSender.inboxId,
         xmtpConversationId: result.conversation.xmtpId,
         data: {
-          ids: [result.sentMessageId],
-          byId: {
-            [result.sentMessageId]: result.sentMessage,
-          },
+          ids: result.sentMessageIds,
+          byId: result.sentMessageIds.reduce(
+            (acc: Record<IXmtpMessageId, IConversationMessage>, messageId, index) => {
+              acc[messageId] = result.sentMessages[index]
+              return acc
+            },
+            {},
+          ),
           reactions: {},
         },
       })
 
-      // Set the real conversation query data
+      // Set the real conversation query data with the last message
       setConversationQueryData({
         clientInboxId: currentSender.inboxId,
         xmtpConversationId: result.conversation.xmtpId,
         conversation: {
           ...result.conversation,
-          lastMessage: result.sentMessage,
+          lastMessage: result.sentMessages[0], // Use the first message as the last message
         },
       })
 

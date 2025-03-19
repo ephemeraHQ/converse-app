@@ -1,8 +1,12 @@
 import { useCallback } from "react"
 import { useConversationStore } from "@/features/conversation/conversation-chat/conversation.store-context"
 import { useCreateConversationAndSendFirstMessageMutation } from "@/features/conversation/conversation-create/mutations/create-conversation-and-send-first-message.mutation"
-import { ISendMessageParams, useSendMessage } from "@/features/conversation/hooks/use-send-message"
+import {
+  ISendMessageParams,
+  useSendMessage,
+} from "@/features/conversation/hooks/use-send-message.mutation"
 import { FeedbackError } from "@/utils/error"
+import { logJson } from "@/utils/logger"
 import { waitUntilPromise } from "@/utils/wait-until-promise"
 import { useConversationComposerStore } from "./conversation-composer.store-context"
 
@@ -13,7 +17,7 @@ import { useConversationComposerStore } from "./conversation-composer.store-cont
 export function useConversationComposerSend() {
   const composerStore = useConversationComposerStore()
   const conversationStore = useConversationStore()
-  const { sendMessage } = useSendMessage()
+  const sendMessageMutation = useSendMessage()
   const createConversationAndSendFirstMessageMutation =
     useCreateConversationAndSendFirstMessageMutation()
 
@@ -37,24 +41,56 @@ export function useConversationComposerSend() {
     // Reset composer state before sending to prevent duplicate sends
     composerStore.getState().reset()
 
-    const messageContents: ISendMessageParams["contents"] = [
-      // Text content
-      ...(inputValue.length > 0 ? [{ text: inputValue }] : []),
-      // Multiple remote attachments
-      ...(composerUploadedAttachments.length > 1
-        ? [{ attachments: composerUploadedAttachments }]
-        : []),
-      // Single remote attachment
-      ...(composerUploadedAttachments.length === 1 ? [{ ...composerUploadedAttachments[0] }] : []),
-    ]
+    // Create separate content arrays for normal messages and replies
+    const messageContents: ISendMessageParams["contents"] = replyingToMessageId
+      ? // Handling reply message - we need to create a proper reply structure for each content type
+        [
+          // Add text content as a reply if we have text
+          ...(inputValue.length > 0
+            ? [
+                {
+                  reference: replyingToMessageId,
+                  content: { text: inputValue },
+                },
+              ]
+            : []),
+
+          // Add attachment content as replies
+          ...(composerUploadedAttachments.length > 0
+            ? composerUploadedAttachments.length === 1
+              ? [
+                  {
+                    reference: replyingToMessageId,
+                    content: { ...composerUploadedAttachments[0] },
+                  },
+                ]
+              : [
+                  {
+                    reference: replyingToMessageId,
+                    content: { attachments: composerUploadedAttachments },
+                  },
+                ]
+            : []),
+        ]
+      : // Regular message structure - simpler case
+        [
+          // Text content if present
+          ...(inputValue.length > 0 ? [{ text: inputValue }] : []),
+
+          // Attachments if present
+          ...(composerUploadedAttachments.length > 0
+            ? composerUploadedAttachments.length === 1
+              ? [{ ...composerUploadedAttachments[0] }]
+              : [{ attachments: composerUploadedAttachments }]
+            : []),
+        ]
+
+    logJson("messageContents", messageContents)
 
     if (xmtpConversationId) {
-      await sendMessage({
+      await sendMessageMutation.mutateAsync({
         contents: messageContents,
         xmtpConversationId,
-        ...(replyingToMessageId && {
-          replyXmtpMessageId: replyingToMessageId,
-        }),
       })
 
       // For now this creates a small glitch because the whole conversation dissmount the new convo search bar and rerender messages.
@@ -72,7 +108,12 @@ export function useConversationComposerSend() {
         isCreatingNewConversation: false,
       })
     }
-  }, [composerStore, conversationStore, createConversationAndSendFirstMessageMutation, sendMessage])
+  }, [
+    composerStore,
+    conversationStore,
+    createConversationAndSendFirstMessageMutation,
+    sendMessageMutation,
+  ])
 
   return { send }
 }
