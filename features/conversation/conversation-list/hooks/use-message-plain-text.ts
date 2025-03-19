@@ -79,7 +79,7 @@ export function useMessagePlainText(message: IConversationMessage | undefined) {
       // Handle reply messages
       if (isReplyMessage(message)) {
         // TODO
-        return "Reply"
+        return "Replied to message"
       }
 
       // Handle attachment messages

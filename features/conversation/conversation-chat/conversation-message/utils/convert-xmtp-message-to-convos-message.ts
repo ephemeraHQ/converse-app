@@ -2,7 +2,6 @@ import { MessageDeliveryStatus } from "@xmtp/react-native-sdk"
 import {
   IConversationMessage,
   IConversationMessageBase,
-  IConversationMessageContent,
   IConversationMessageGroupUpdated,
   IConversationMessageReaction,
   IConversationMessageReply,
@@ -20,6 +19,7 @@ import {
   getXmtpMessageIsTextMessage,
 } from "@/features/xmtp/xmtp-messages/xmtp-messages"
 import { IXmtpDecodedMessage, IXmtpInboxId, IXmtpMessageId } from "@/features/xmtp/xmtp.types"
+import { convertXmtpReplyContentToConvosContent } from "./convert-xmtp-reply-content-to-convos-content"
 
 export function convertXmtpMessageToConvosMessage(
   message: IXmtpDecodedMessage,
@@ -76,8 +76,7 @@ export function convertXmtpMessageToConvosMessage(
       type: "reply",
       content: {
         reference: replyContent.reference as unknown as IXmtpMessageId,
-        // Don't like doing the "as" but reply is complex... Let's fix this later
-        content: replyContent.content as IConversationMessageContent,
+        content: convertXmtpReplyContentToConvosContent(replyContent.content),
       },
     } satisfies IConversationMessageReply
   }

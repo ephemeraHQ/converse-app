@@ -306,11 +306,11 @@ const MessageReplyReferenceContent = memo(function ReplyMessageReferenceMessageC
     }
 
     const _exhaustiveCheck: never = content
-    throw new Error(`Unhandled message content type: ${JSON.stringify(content, null, 2)}`)
+    throw new Error(`Unhandled message content type in reply: ${JSON.stringify(content, null, 2)}`)
   }
 
   const _exhaustiveCheck: never = replyMessage
-  throw new Error(`Unhandled message type: ${JSON.stringify(replyMessage, null, 2)}`)
+  throw new Error(`Unhandled message type in reply: ${JSON.stringify(replyMessage, null, 2)}`)
 })
 
 const RenderNestedReplyContent = memo(function RenderNestedReplyContent(props: {

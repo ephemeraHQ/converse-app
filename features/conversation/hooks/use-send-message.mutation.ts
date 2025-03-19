@@ -10,7 +10,6 @@ import {
   removeMessageToConversationMessagesQueryData,
 } from "@/features/conversation/conversation-chat/conversation-messages.query"
 import {
-  ensureConversationQueryData,
   getConversationQueryData,
   updateConversationQueryData,
 } from "@/features/conversation/queries/conversation.query"
@@ -33,7 +32,6 @@ import {
 
 export type ISendMessageParams = {
   xmtpConversationId: IXmtpConversationId
-  replyXmtpMessageId?: IXmtpMessageId
   contents: IConversationMessageContent[] // Array because we can send text at same time as attachments for example
 }
 
@@ -43,19 +41,9 @@ export type ISendMessageResult = {
 }
 
 export async function sendMessage(args: ISendMessageParams): Promise<ISendMessageResult> {
-  const { replyXmtpMessageId, contents, xmtpConversationId } = args
+  const { contents, xmtpConversationId } = args
 
   const currentSender = getSafeCurrentSender()
-
-  const conversation = await ensureConversationQueryData({
-    xmtpConversationId,
-    clientInboxId: currentSender.inboxId,
-    caller: "use-send-message",
-  })
-
-  if (!conversation) {
-    throw new Error("Conversation not found when sending message")
-  }
 
   const results: {
     xmtpMessageIds: IXmtpMessageId[]
@@ -71,25 +59,13 @@ export async function sendMessage(args: ISendMessageParams): Promise<ISendMessag
 
     const payload = convertConvosMessageContentToXmtpMessageContent(content)
 
-    if (replyXmtpMessageId && !messageContentIsReply(content)) {
-      // Send as a reply
-      sentXmtpMessageId = await sendXmtpConversationMessage({
-        clientInboxId: currentSender.inboxId,
-        conversationId: conversation.xmtpId,
-        content: {
-          reply: {
-            reference: replyXmtpMessageId,
-            content: payload,
-          },
-        },
-      })
-    } else if (messageContentIsReply(content)) {
+    if (messageContentIsReply(content)) {
       // Content is already a reply, send it with the inner content properly converted
       const innerPayload = convertConvosMessageContentToXmtpMessageContent(content.content)
 
       sentXmtpMessageId = await sendXmtpConversationMessage({
         clientInboxId: currentSender.inboxId,
-        conversationId: conversation.xmtpId,
+        conversationId: xmtpConversationId,
         content: {
           reply: {
             reference: content.reference,
@@ -101,12 +77,13 @@ export async function sendMessage(args: ISendMessageParams): Promise<ISendMessag
       // Send as a regular message
       sentXmtpMessageId = await sendXmtpConversationMessage({
         clientInboxId: currentSender.inboxId,
-        conversationId: conversation.xmtpId,
+        conversationId: xmtpConversationId,
         content: payload,
       })
     }
 
     if (!sentXmtpMessageId) {
+      captureError(new Error(`Couldn't send message?`))
       continue // Skip if we couldn't send this message
     }
 
@@ -133,7 +110,7 @@ export async function sendMessage(args: ISendMessageParams): Promise<ISendMessag
 }
 
 export function useSendMessage() {
-  const mutation = useMutation({
+  return useMutation({
     mutationFn: sendMessage,
     onMutate: async (variables) => {
       const { xmtpConversationId, contents } = variables
@@ -199,18 +176,17 @@ export function useSendMessage() {
 
       // Replace each optimistic message with the real one
       if (result.messages && result.messages.length > 0) {
-        for (
-          let i = 0;
-          i < Math.min(context.tmpXmtpMessageIds.length, result.messages.length);
-          i++
-        ) {
-          replaceOptimisticMessageWithReal({
-            tmpXmtpMessageId: context.tmpXmtpMessageIds[i],
-            xmtpConversationId: variables.xmtpConversationId,
-            clientInboxId: currentSender.inboxId,
-            realMessage: result.messages[i],
+        // Replace optimistic messages with real ones, up to the number of messages we have
+        context.tmpXmtpMessageIds
+          .slice(0, result.messages.length)
+          .forEach((tmpXmtpMessageId, index) => {
+            replaceOptimisticMessageWithReal({
+              tmpXmtpMessageId,
+              xmtpConversationId: variables.xmtpConversationId,
+              clientInboxId: currentSender.inboxId,
+              realMessage: result.messages[index],
+            })
           })
-        }
       }
     },
     onError: (_, variables, context) => {
@@ -241,12 +217,6 @@ export function useSendMessage() {
       }
     },
   })
-
-  return {
-    sendMessage: mutation.mutateAsync,
-    isSending: mutation.isPending,
-    error: mutation.error,
-  }
 }
 
 function replaceOptimisticMessageWithReal(args: {

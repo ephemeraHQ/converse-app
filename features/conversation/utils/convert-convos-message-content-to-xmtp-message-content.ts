@@ -58,6 +58,8 @@ export function convertConvosMessageContentToXmtpMessageContent(
     }
   } else if (messageContentIsReply(content)) {
     // Handle reply messages by recursively converting the nested content
+    // With our modified IXmtpConversationSendPayload type (object-only),
+    // this works correctly with the reply.content requirements
     return {
       reply: {
         reference: content.reference,
@@ -66,7 +68,7 @@ export function convertConvosMessageContentToXmtpMessageContent(
     }
   } else if (messageContentIsStaticAttachment(content)) {
     return {
-      staticAttachment: {
+      attachment: {
         filename: content.filename,
         mimeType: content.mimeType,
         data: content.data,
