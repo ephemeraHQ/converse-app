@@ -9,6 +9,7 @@ import { AuthOnboardingContactCardImportInfoScreen } from "@/features/auth-onboa
 import { AuthScreen } from "@/features/auth-onboarding/screens/auth-onboarding.screen"
 import { useAuthenticationStore } from "@/features/authentication/authentication.store"
 import { hydrateAuth } from "@/features/authentication/hydrate-auth"
+import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { useSignoutIfNoPrivyUser } from "@/features/authentication/use-logout-if-no-privy-user"
 import { useRefreshJwtAxiosInterceptor } from "@/features/authentication/use-refresh-jwt.axios-interceptor"
 import { BlockedConversationsScreen } from "@/features/blocked-conversations/blocked-conversations.screen"
@@ -31,8 +32,14 @@ import {
   GroupMembersListNav,
   GroupMembersListScreenConfig,
 } from "@/features/groups/group-details/members-list/group-members-list.nav"
+import { registerNotificationInstallation } from "@/features/notifications/notifications.api"
+import {
+  registerForPushNotificationsAsync,
+  requestNotificationsPermissions,
+} from "@/features/notifications/notifications.service"
 import { ProfileImportInfoScreen } from "@/features/profiles/profile-import-info.screen"
 import { ProfileNav, ProfileScreenConfig } from "@/features/profiles/profile.nav"
+import { ensureXmtpInstallationQueryData } from "@/features/xmtp/xmtp-installations/xmtp-installation.query"
 import { NavigationParamList } from "@/navigation/navigation.types"
 import { navigationRef } from "@/navigation/navigation.utils"
 import { WebviewPreviewNav } from "@/screens/WebviewPreviewNav"
@@ -73,6 +80,35 @@ export function AppNavigator() {
   useRefreshJwtAxiosInterceptor()
   useSignoutIfNoPrivyUser()
   useCreateUserIfNoExist()
+
+  useEffect(() => {
+    requestNotificationsPermissions()
+      .then((result) => {
+        if (result?.granted) {
+          // Get device token when notifications permission is granted
+          return registerForPushNotificationsAsync()
+            .then(async (token) => {
+              console.log("Device Push Token:", token)
+
+              const currentSender = getSafeCurrentSender()
+
+              return registerNotificationInstallation({
+                installationId: await ensureXmtpInstallationQueryData({
+                  inboxId: currentSender.inboxId,
+                }),
+                deliveryMechanism: {
+                  deliveryMechanismType: {
+                    case: "apnsDeviceToken",
+                    value: token,
+                  },
+                },
+              }).catch(captureError)
+            })
+            .catch(captureError)
+        }
+      })
+      .catch(captureError)
+  }, [])
 
   // Hydrate auth when the app is loaded
   useEffect(() => {
