@@ -13,7 +13,7 @@ export const previewConfig: IConfig = {
   scheme: "converse-preview",
   websiteDomain: "preview.convos.org",
   usernameSuffix: ".conversedev.eth",
-  universalLinks: ["preview.convers.org/"].flatMap((domain) => [
+  universalLinks: ["preview.convos.org/"].flatMap((domain) => [
     `https://${domain}`,
     `http://${domain}`,
     domain,
