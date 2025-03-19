@@ -24,17 +24,20 @@ export function ShareProfileScreen({ route, navigation }: IShareProfileScreenPro
   const headerHeight = useHeaderHeight()
   const [copiedLink, setCopiedLink] = useState(false)
 
-  const { displayName, avatarUrl } = usePreferredDisplayInfo({
+  const { username,displayName, avatarUrl } = usePreferredDisplayInfo({
     inboxId,
   })
 
-  const profileUrl = `https://${config.websiteDomain}/dm/${displayName || shortAddress(inboxId)}`
+  // TODO: Use the new share profile URL
+  const profileUrl = `https://${inboxId}.${config.websiteDomain}`
+  // const profileUrl = inboxId;
+  // converse-dev://louis16pro0505
 
   const shareDict = Platform.OS === "ios" ? { url: profileUrl } : { message: profileUrl }
 
   const shareButtonText = copiedLink
-    ? translate("share_profile.link_copied")
-    : translate("share_profile.copy_link")
+    ? translate("Link copied")
+    : translate("Copy link")
 
   useHeader({
     title: "Share Profile",

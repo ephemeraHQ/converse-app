@@ -11,9 +11,9 @@ export const previewConfig: IConfig = {
   }),
   bundleId: "com.converse.preview",
   scheme: "converse-preview",
-  websiteDomain: "preview.converse.xyz",
+  websiteDomain: "preview.convos.org",
   usernameSuffix: ".conversedev.eth",
-  universalLinks: ["preview.converse.xyz/", "preview.getconverse.app/"].flatMap((domain) => [
+  universalLinks: ["preview.convers.org/"].flatMap((domain) => [
     `https://${domain}`,
     `http://${domain}`,
     domain,

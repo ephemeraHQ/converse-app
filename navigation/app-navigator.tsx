@@ -19,6 +19,7 @@ import {
 import { ConversationListScreen } from "@/features/conversation/conversation-list/conversation-list.screen"
 import { ConversationRequestsListNav } from "@/features/conversation/conversation-requests-list/conversation-requests-list.nav"
 import { useCreateUserIfNoExist } from "@/features/current-user/use-create-user-if-no-exist"
+import { DeepLinkHandler } from "@/features/deep-linking/deep-link-handler.component"
 import {
   AddGroupMembersNav,
   AddGroupMembersScreenConfig,
@@ -41,11 +42,18 @@ import { captureError } from "@/utils/capture-error"
 import { useUpdateSentryUser } from "@/utils/sentry"
 import { hideSplashScreen } from "@/utils/splash/splash"
 import { ShareProfileNav, ShareProfileScreenConfig } from "../screens/ShareProfileNav"
+import { getStateFromPath } from "@/features/deep-linking/navigation-handlers"
 
 const prefix = Linking.createURL("/")
+const schemes = [prefix, ...config.universalLinks]
+
+// Add custom app URL schemes for each environment
+if (config.scheme) {
+  schemes.push(`${config.scheme}://`)
+}
 
 const linking: LinkingOptions<NavigationParamList> = {
-  prefixes: [prefix, ...config.universalLinks],
+  prefixes: schemes,
   config: {
     initialRouteName: "Chats",
     screens: {
@@ -58,10 +66,7 @@ const linking: LinkingOptions<NavigationParamList> = {
       GroupMembersList: GroupMembersListScreenConfig,
     },
   },
-  // TODO: Fix this
-  // getStateFromPath: getConverseStateFromPath("fullStackNavigation"),
-  // TODO: Fix this
-  // getInitialURL: () => null,
+  getStateFromPath,
 }
 
 export function AppNavigator() {
@@ -92,6 +97,7 @@ export function AppNavigator() {
             // is not meant for this one
           }}
         >
+          <DeepLinkHandler />
           <AppStacks />
         </NavigationContainer>
       </ThemeProvider>
