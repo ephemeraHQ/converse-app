@@ -35,22 +35,17 @@ export type ISendMessageParams = {
   contents: IConversationMessageContent[] // Array because we can send text at same time as attachments for example
 }
 
-export type ISendMessageResult = {
-  xmtpMessageIds: IXmtpMessageId[]
-  messages: IConversationMessage[]
-}
-
 export async function sendMessage(args: ISendMessageParams): Promise<ISendMessageResult> {
   const { contents, xmtpConversationId } = args
 
   const currentSender = getSafeCurrentSender()
 
   const results: {
-    xmtpMessageIds: IXmtpMessageId[]
-    messages: IConversationMessage[]
+    sentXmtpMessageIds: IXmtpMessageId[]
+    sentXmtpMessages: IConversationMessage[]
   } = {
-    xmtpMessageIds: [],
-    messages: [],
+    sentXmtpMessageIds: [],
+    sentXmtpMessages: [],
   }
 
   // Send each content as a separate message
@@ -98,11 +93,11 @@ export async function sendMessage(args: ISendMessageParams): Promise<ISendMessag
       continue
     }
 
-    results.xmtpMessageIds.push(sentXmtpMessageId)
-    results.messages.push(convertXmtpMessageToConvosMessage(sentXmtpMessage))
+    results.sentXmtpMessageIds.push(sentXmtpMessageId)
+    results.sentXmtpMessages.push(convertXmtpMessageToConvosMessage(sentXmtpMessage))
   }
 
-  if (results.xmtpMessageIds.length === 0) {
+  if (results.sentXmtpMessageIds.length === 0) {
     throw new Error("Couldn't send any messages")
   }
 

@@ -88,25 +88,33 @@ export function useConversationComposerSend() {
     logJson("messageContents", messageContents)
 
     if (xmtpConversationId) {
-      await sendMessageMutation.mutateAsync({
+      const { sentMessageIds, sentMessages } = await sendMessageMutation.mutateAsync({
         contents: messageContents,
         xmtpConversationId,
       })
 
-      // For now this creates a small glitch because the whole conversation dissmount the new convo search bar and rerender messages.
-      // Will need to fix later
-      conversationStore.setState({ isCreatingNewConversation: false })
+      return {
+        sentMessageIds,
+        sentMessages,
+        errorSendingMessage: undefined,
+      }
     } else {
-      const { conversation: createdConversation } =
-        await createConversationAndSendFirstMessageMutation.mutateAsync({
-          inboxIds: searchSelectedUserInboxIds,
-          contents: messageContents,
-        })
-
-      conversationStore.setState({
-        xmtpConversationId: createdConversation.xmtpId,
-        isCreatingNewConversation: false,
+      const {
+        conversation: createdConversation,
+        errorSendingMessage,
+        sentMessageIds,
+        sentMessages,
+      } = await createConversationAndSendFirstMessageMutation.mutateAsync({
+        inboxIds: searchSelectedUserInboxIds,
+        contents: messageContents,
       })
+
+      return {
+        createdConversation,
+        sentMessageIds,
+        sentMessages,
+        errorSendingMessage,
+      }
     }
   }, [
     composerStore,

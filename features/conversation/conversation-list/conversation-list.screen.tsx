@@ -36,7 +36,7 @@ import { ConversationListAwaitingRequests } from "./conversation-list-awaiting-r
 import { ConversationListEmpty } from "./conversation-list-empty"
 import { ConversationListStartNewConvoBanner } from "./conversation-list-start-new-convo-banner"
 import { useConversationListScreenHeader } from "./conversation-list.screen-header"
-import { useConversationListConversations } from "./use-conversation-list-conversations"
+import { useConversationListConversations } from "./hooks/use-conversation-list-conversations"
 
 type IConversationListProps = NativeStackScreenProps<NavigationParamList, "Chats">
 

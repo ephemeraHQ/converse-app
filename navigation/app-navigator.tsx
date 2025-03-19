@@ -32,6 +32,7 @@ import {
   GroupMembersListNav,
   GroupMembersListScreenConfig,
 } from "@/features/groups/group-details/members-list/group-members-list.nav"
+import { useNotificationListenersWhileRunning } from "@/features/notifications/notifications-listeners"
 import { registerNotificationInstallation } from "@/features/notifications/notifications.api"
 import {
   registerForPushNotificationsAsync,
@@ -81,6 +82,7 @@ export function AppNavigator() {
   useRefreshJwtAxiosInterceptor()
   useSignoutIfNoPrivyUser()
   useCreateUserIfNoExist()
+  useNotificationListenersWhileRunning()
 
   useEffect(() => {
     requestNotificationsPermissions()
@@ -112,23 +114,14 @@ export function AppNavigator() {
                     value: token,
                   },
                 },
-              }).catch((error) => {
-                logger.error("[AppNavigator] Failed to register notification installation:", error)
-                captureError(error)
               })
             })
-            .catch((error) => {
-              logger.error("[AppNavigator] Failed to register for push notifications:", error)
-              captureError(error)
-            })
+            .catch(captureError)
         } else {
           logger.debug("[AppNavigator] Notification permissions not granted")
         }
       })
-      .catch((error) => {
-        logger.error("[AppNavigator] Failed to request notification permissions:", error)
-        captureError(error)
-      })
+      .catch(captureError)
   }, [])
 
   // Hydrate auth when the app is loaded

@@ -3,8 +3,10 @@ import { VStack } from "@design-system/VStack"
 import React, { memo, useCallback } from "react"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { ConversationComposerReplyPreview } from "@/features/conversation/conversation-chat/conversation-composer/conversation-composer-reply-preview"
+import { useConversationStore } from "@/features/conversation/conversation-chat/conversation.store-context"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { captureErrorWithToast } from "@/utils/capture-error"
+import { FeedbackError } from "@/utils/error"
 import { AddAttachmentButton } from "./conversation-composer-add-attachment-button"
 import { ConversationComposerAttachmentPreview } from "./conversation-composer-attachment-preview"
 import { SendButton } from "./conversation-composer-send-button"
@@ -17,13 +19,29 @@ export const ConversationComposer = memo(function ConversationComposer() {
 
   const { send } = useConversationComposerSend()
 
+  const conversationStore = useConversationStore()
+
   const handleSend = useCallback(async () => {
     try {
-      await send()
+      const { createdConversation, errorSendingMessage } = await send()
+
+      conversationStore.setState({
+        ...(createdConversation && {
+          xmtpConversationId: createdConversation.xmtpId,
+        }),
+        isCreatingNewConversation: false,
+      })
+
+      if (errorSendingMessage) {
+        throw new FeedbackError({
+          error: errorSendingMessage,
+          additionalMessage: "Failed to send message",
+        })
+      }
     } catch (error) {
       captureErrorWithToast(error, { message: "Failed to send message" })
     }
-  }, [send])
+  }, [conversationStore, send])
 
   return (
     <VStack

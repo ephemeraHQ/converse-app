@@ -48,18 +48,18 @@ export async function registerForPushNotificationsAsync() {
     })
   }
 
-  if (Device.isDevice) {
-    // Get the token using getDevicePushTokenAsync
-    try {
-      token = (await Notifications.getDevicePushTokenAsync()).data
-      console.log("Device Push Token:", token)
-      return token
-    } catch (error) {
-      captureError(error)
-      console.log("Error getting device push token:", error)
-    }
-  } else {
-    console.log("Must use physical device for push notifications")
+  if (!Device.isDevice) {
+    throw new Error("Must use physical device for push notifications")
+  }
+
+  // Get the token using getDevicePushTokenAsync
+  try {
+    token = (await Notifications.getDevicePushTokenAsync()).data
+    console.log("Device Push Token:", token)
+    return token
+  } catch (error) {
+    captureError(error)
+    console.log("Error getting device push token:", error)
   }
 
   return token
@@ -72,7 +72,7 @@ export async function requestNotificationsPermissions() {
   }
 
   if (Platform.OS === "android") {
-    await Notifications.setNotificationChannelAsync("default", {
+    return Notifications.setNotificationChannelAsync("default", {
       name: "Default",
       importance: Notifications.AndroidImportance.MAX,
       enableVibrate: true,
