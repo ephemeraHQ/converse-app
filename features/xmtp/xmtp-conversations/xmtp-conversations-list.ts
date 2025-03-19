@@ -15,44 +15,87 @@ type IGetXmtpConversationsArgs = {
   limit?: number
 }
 
+/**
+ * Gets XMTP conversations, batching identical requests within 100ms.
+ */
 export async function getXmtpConversations(args: IGetXmtpConversationsArgs) {
   return getXmtpConversationsBatcher.fetch(args)
 }
 
+/**
+ * Creates a unique key to identify identical requests
+ */
+function createCacheKey(args: IGetXmtpConversationsArgs): string {
+  return JSON.stringify({
+    clientInboxId: args.clientInboxId,
+    consentStates: args.consentStates,
+    limit: args.limit,
+  })
+}
+
+/**
+ * Batcher that deduplicates identical requests within a 100ms window
+ */
 const getXmtpConversationsBatcher = create<
   IXmtpConversationWithCodecs[],
   IGetXmtpConversationsArgs
 >({
   name: "get-xmtp-conversations",
-  fetcher: async (batchedArgs: IGetXmtpConversationsArgs[]) => {
+  fetcher: async (batchedArgs) => {
     if (batchedArgs.length === 0) {
       return []
     }
 
-    // Create a map to deduplicate requests with the same parameters
-    const uniqueRequests = new Map<string, IGetXmtpConversationsArgs>()
+    // Deduplicate identical requests
+    const uniqueArgsMap = new Map<string, IGetXmtpConversationsArgs>()
+    const argsToIndexMap = new Map<string, number[]>()
 
-    for (const args of batchedArgs) {
-      const key = JSON.stringify({
-        clientInboxId: args.clientInboxId,
-        consentStates: args.consentStates,
-        limit: args.limit,
-      })
+    // Group identical requests by their key
+    batchedArgs.forEach((args, index) => {
+      const key = createCacheKey(args)
 
-      if (!uniqueRequests.has(key)) {
-        uniqueRequests.set(key, args)
+      // Store unique args
+      if (!uniqueArgsMap.has(key)) {
+        uniqueArgsMap.set(key, args)
+      }
+
+      // Track which indices in the result array should get this response
+      if (!argsToIndexMap.has(key)) {
+        argsToIndexMap.set(key, [])
+      }
+      argsToIndexMap.get(key)!.push(index)
+    })
+
+    console.log(
+      `Making ${uniqueArgsMap.size} unique XMTP requests out of ${batchedArgs.length} total`,
+    )
+
+    // Make only one API call per unique request
+    const uniqueResults = new Map<string, IXmtpConversationWithCodecs[]>()
+    await Promise.all(
+      Array.from(uniqueArgsMap.entries()).map(async ([key, args]) => {
+        const result = await getXmtpConversationsUnbatched(args)
+        uniqueResults.set(key, result)
+      }),
+    )
+
+    // Create a results array with one entry per original request
+    const results: IXmtpConversationWithCodecs[][] = new Array(batchedArgs.length)
+
+    // Fill in the results
+    for (const [key, indices] of argsToIndexMap.entries()) {
+      const conversations = uniqueResults.get(key) || []
+      for (const index of indices) {
+        results[index] = conversations
       }
     }
 
-    // Only fetch once for each unique set of arguments
-    const results = await Promise.all(
-      Array.from(uniqueRequests.values()).map(async (args) => getXmtpConversationsUnbatched(args)),
-    )
-
-    return results.flat()
+    return results
   },
   scheduler: windowScheduler(100),
-  resolver: (results) => results,
+  resolver: (results, _query, index) => {
+    return results[index] || []
+  },
 })
 
 async function getXmtpConversationsUnbatched(args: IGetXmtpConversationsArgs) {
@@ -82,6 +125,8 @@ async function getXmtpConversationsUnbatched(args: IGetXmtpConversationsArgs) {
       limit,
       consentStates,
     )
+
+    console.log("conversations1:", conversations.length)
 
     const duration = Date.now() - startTime
 

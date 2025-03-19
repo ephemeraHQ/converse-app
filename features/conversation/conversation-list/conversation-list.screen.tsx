@@ -22,11 +22,16 @@ import { isConversationGroup } from "@/features/conversation/utils/is-conversati
 import { isTempConversation } from "@/features/conversation/utils/is-temp-conversation"
 import { IDm } from "@/features/dm/dm.types"
 import { IGroup } from "@/features/groups/group.types"
+import { subscribeToNotificationTopicsWithMetadata } from "@/features/notifications/notifications.api"
+import { getXmtpConversationHmacKeys } from "@/features/xmtp/xmtp-hmac-keys/xmtp-hmac-keys"
+import { ensureXmtpInstallationQueryData } from "@/features/xmtp/xmtp-installations/xmtp-installation.query"
+import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 import { useMinimumLoadingTime } from "@/hooks/use-minimum-loading-time"
 import { NavigationParamList } from "@/navigation/navigation.types"
 import { $globalStyles } from "@/theme/styles"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { captureError } from "@/utils/capture-error"
+import logger from "@/utils/logger"
 import { ConversationListAwaitingRequests } from "./conversation-list-awaiting-requests"
 import { ConversationListEmpty } from "./conversation-list-empty"
 import { ConversationListStartNewConvoBanner } from "./conversation-list-start-new-convo-banner"
@@ -49,6 +54,65 @@ export function ConversationListScreen(props: IConversationListProps) {
   const insets = useSafeAreaInsets()
 
   useConversationListScreenHeader()
+
+  // Subscribe to notifications
+  useEffect(() => {
+    // https://docs.xmtp.org/inboxes/push-notifs/push-notifs
+    async function subscribeToConversation(conversationId: IXmtpConversationId) {
+      logger.debug("[ConversationList] Subscribing to conversation", {
+        conversationId,
+        inboxId: currentSender.inboxId,
+      })
+
+      const conversation = getConversationQueryData({
+        clientInboxId: currentSender.inboxId,
+        xmtpConversationId: conversationId,
+      })
+
+      if (!conversation) {
+        logger.debug("[ConversationList] No conversation found, skipping subscription", {
+          conversationId,
+        })
+        return
+      }
+
+      logger.debug("[ConversationList] Getting installation ID")
+      const installationId = await ensureXmtpInstallationQueryData({
+        inboxId: currentSender.inboxId,
+      })
+
+      logger.debug("[ConversationList] Getting HMAC keys", {
+        conversationId,
+      })
+      const hmacKeys = await getXmtpConversationHmacKeys({
+        clientInboxId: currentSender.inboxId,
+        conversationId,
+      })
+
+      logger.debug("[ConversationList] Subscribing to notification topics", {
+        installationId,
+        topic: hmacKeys.topic,
+      })
+      subscribeToNotificationTopicsWithMetadata({
+        installationId,
+        subscriptions: [
+          {
+            topic: hmacKeys.topic,
+            isSilent: false,
+            hmacKeys: hmacKeys.hmacKeys,
+          },
+        ],
+      })
+
+      logger.debug("[ConversationList] Successfully subscribed to conversation", {
+        conversationId,
+      })
+    }
+
+    for (const conversationId of conversationsIds) {
+      subscribeToConversation(conversationId).catch(captureError)
+    }
+  }, [conversationsIds, currentSender.inboxId])
 
   // Let's prefetch the messages for all the conversations
   useEffect(() => {

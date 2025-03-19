@@ -96,17 +96,6 @@ export const registerNotificationInstallation = async (args: IRegistrationReques
 }
 
 /**
- * Subscribes an installation to notification topics
- */
-export const subscribeToNotificationTopics = async (args: ISubscribeRequest) => {
-  try {
-    await api.post("/api/v1/notifications/subscribe", args)
-  } catch (error) {
-    throw error
-  }
-}
-
-/**
  * Subscribes an installation to notification topics with metadata
  */
 export const subscribeToNotificationTopicsWithMetadata = async (

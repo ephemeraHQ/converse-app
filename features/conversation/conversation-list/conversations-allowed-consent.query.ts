@@ -119,6 +119,8 @@ const getAllowedConsentConversationsQueryFn = async (args: IArgs) => {
     consentStates: ["allowed"],
   })
 
+  console.log("xmtpConversations.length:", xmtpConversations.length)
+
   const convosConversations = await Promise.all(
     xmtpConversations.map(convertXmtpConversationToConvosConversation),
   )

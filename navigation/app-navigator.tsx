@@ -45,6 +45,7 @@ import { navigationRef } from "@/navigation/navigation.utils"
 import { WebviewPreviewNav } from "@/screens/WebviewPreviewNav"
 import { useAppTheme, useThemeProvider } from "@/theme/use-app-theme"
 import { captureError } from "@/utils/capture-error"
+import logger from "@/utils/logger"
 import { useUpdateSentryUser } from "@/utils/sentry"
 import { hideSplashScreen } from "@/utils/splash/splash"
 import { ShareProfileNav, ShareProfileScreenConfig } from "../screens/ShareProfileNav"
@@ -84,30 +85,50 @@ export function AppNavigator() {
   useEffect(() => {
     requestNotificationsPermissions()
       .then((result) => {
+        logger.debug("[AppNavigator] Notification permissions result:", result)
+
         if (result?.granted) {
-          // Get device token when notifications permission is granted
+          logger.debug(
+            "[AppNavigator] Notification permissions granted, registering for push notifications",
+          )
+
           return registerForPushNotificationsAsync()
             .then(async (token) => {
-              console.log("Device Push Token:", token)
+              logger.debug("[AppNavigator] Device push token received:", token)
 
               const currentSender = getSafeCurrentSender()
+              logger.debug("[AppNavigator] Current sender:", currentSender)
+
+              const installationId = await ensureXmtpInstallationQueryData({
+                inboxId: currentSender.inboxId,
+              })
+              logger.debug("[AppNavigator] XMTP installation ID:", installationId)
 
               return registerNotificationInstallation({
-                installationId: await ensureXmtpInstallationQueryData({
-                  inboxId: currentSender.inboxId,
-                }),
+                installationId,
                 deliveryMechanism: {
                   deliveryMechanismType: {
                     case: "apnsDeviceToken",
                     value: token,
                   },
                 },
-              }).catch(captureError)
+              }).catch((error) => {
+                logger.error("[AppNavigator] Failed to register notification installation:", error)
+                captureError(error)
+              })
             })
-            .catch(captureError)
+            .catch((error) => {
+              logger.error("[AppNavigator] Failed to register for push notifications:", error)
+              captureError(error)
+            })
+        } else {
+          logger.debug("[AppNavigator] Notification permissions not granted")
         }
       })
-      .catch(captureError)
+      .catch((error) => {
+        logger.error("[AppNavigator] Failed to request notification permissions:", error)
+        captureError(error)
+      })
   }, [])
 
   // Hydrate auth when the app is loaded
