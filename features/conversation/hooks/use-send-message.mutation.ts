@@ -35,17 +35,17 @@ export type ISendMessageParams = {
   contents: IConversationMessageContent[] // Array because we can send text at same time as attachments for example
 }
 
-export async function sendMessage(args: ISendMessageParams): Promise<ISendMessageResult> {
+export async function sendMessage(args: ISendMessageParams) {
   const { contents, xmtpConversationId } = args
 
   const currentSender = getSafeCurrentSender()
 
   const results: {
     sentXmtpMessageIds: IXmtpMessageId[]
-    sentXmtpMessages: IConversationMessage[]
+    sentMessages: IConversationMessage[]
   } = {
     sentXmtpMessageIds: [],
-    sentXmtpMessages: [],
+    sentMessages: [],
   }
 
   // Send each content as a separate message
@@ -94,7 +94,7 @@ export async function sendMessage(args: ISendMessageParams): Promise<ISendMessag
     }
 
     results.sentXmtpMessageIds.push(sentXmtpMessageId)
-    results.sentXmtpMessages.push(convertXmtpMessageToConvosMessage(sentXmtpMessage))
+    results.sentMessages.push(convertXmtpMessageToConvosMessage(sentXmtpMessage))
   }
 
   if (results.sentXmtpMessageIds.length === 0) {
@@ -170,16 +170,16 @@ export function useSendMessage() {
       const currentSender = getSafeCurrentSender()
 
       // Replace each optimistic message with the real one
-      if (result.messages && result.messages.length > 0) {
+      if (result.sentMessages && result.sentMessages.length > 0) {
         // Replace optimistic messages with real ones, up to the number of messages we have
         context.tmpXmtpMessageIds
-          .slice(0, result.messages.length)
+          .slice(0, result.sentMessages.length)
           .forEach((tmpXmtpMessageId, index) => {
             replaceOptimisticMessageWithReal({
               tmpXmtpMessageId,
               xmtpConversationId: variables.xmtpConversationId,
               clientInboxId: currentSender.inboxId,
-              realMessage: result.messages[index],
+              realMessage: result.sentMessages[index],
             })
           })
       }

@@ -127,8 +127,6 @@ async function getXmtpConversationsUnbatched(args: IGetXmtpConversationsArgs) {
       consentStates,
     )
 
-    console.log("conversations1:", conversations.length)
-
     const duration = Date.now() - startTime
 
     if (duration > config.xmtp.maxMsUntilLogError) {

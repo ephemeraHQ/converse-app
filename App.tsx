@@ -26,15 +26,17 @@ import { ThirdwebProvider } from "thirdweb/react"
 import { base } from "viem/chains"
 import { config } from "./config"
 import { useMonitorNetworkConnectivity } from "./dependencies/NetworkMonitor/use-monitor-network-connectivity"
+import { setupConversationsNotificationsSubscriptions } from "./features/notifications/notifications-conversations-subscriptions"
+import { configureForegroundNotificationBehavior } from "./features/notifications/notifications-init"
 import { AppNavigator } from "./navigation/app-navigator"
 import "./utils/ignore-logs"
-import { configureForegroundNotificationBehavior } from "@/features/notifications/notifications-listeners"
 import { sentryInit } from "./utils/sentry"
 import { preventSplashScreenAutoHide } from "./utils/splash/splash"
 
 preventSplashScreenAutoHide()
 sentryInit()
 configureForegroundNotificationBehavior()
+setupConversationsNotificationsSubscriptions()
 
 const baseMainnetOverride: Chain = {
   ...base,

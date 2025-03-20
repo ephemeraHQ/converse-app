@@ -32,10 +32,10 @@ import {
   GroupMembersListNav,
   GroupMembersListScreenConfig,
 } from "@/features/groups/group-details/members-list/group-members-list.nav"
-import { useNotificationListenersWhileRunning } from "@/features/notifications/notifications-listeners"
+import { useNotificationListeners } from "@/features/notifications/notifications-listeners"
 import { registerNotificationInstallation } from "@/features/notifications/notifications.api"
 import {
-  registerForPushNotificationsAsync,
+  getPushNotificationsToken,
   requestNotificationsPermissions,
 } from "@/features/notifications/notifications.service"
 import { ProfileImportInfoScreen } from "@/features/profiles/profile-import-info.screen"
@@ -46,7 +46,7 @@ import { navigationRef } from "@/navigation/navigation.utils"
 import { WebviewPreviewNav } from "@/screens/WebviewPreviewNav"
 import { useAppTheme, useThemeProvider } from "@/theme/use-app-theme"
 import { captureError } from "@/utils/capture-error"
-import logger from "@/utils/logger"
+import logger, { notificationsLogger } from "@/utils/logger"
 import { useUpdateSentryUser } from "@/utils/sentry"
 import { hideSplashScreen } from "@/utils/splash/splash"
 import { ShareProfileNav, ShareProfileScreenConfig } from "../screens/ShareProfileNav"
@@ -82,47 +82,7 @@ export function AppNavigator() {
   useRefreshJwtAxiosInterceptor()
   useSignoutIfNoPrivyUser()
   useCreateUserIfNoExist()
-  useNotificationListenersWhileRunning()
-
-  useEffect(() => {
-    requestNotificationsPermissions()
-      .then((result) => {
-        logger.debug("[AppNavigator] Notification permissions result:", result)
-
-        if (result?.granted) {
-          logger.debug(
-            "[AppNavigator] Notification permissions granted, registering for push notifications",
-          )
-
-          return registerForPushNotificationsAsync()
-            .then(async (token) => {
-              logger.debug("[AppNavigator] Device push token received:", token)
-
-              const currentSender = getSafeCurrentSender()
-              logger.debug("[AppNavigator] Current sender:", currentSender)
-
-              const installationId = await ensureXmtpInstallationQueryData({
-                inboxId: currentSender.inboxId,
-              })
-              logger.debug("[AppNavigator] XMTP installation ID:", installationId)
-
-              return registerNotificationInstallation({
-                installationId,
-                deliveryMechanism: {
-                  deliveryMechanismType: {
-                    case: "apnsDeviceToken",
-                    value: token,
-                  },
-                },
-              })
-            })
-            .catch(captureError)
-        } else {
-          logger.debug("[AppNavigator] Notification permissions not granted")
-        }
-      })
-      .catch(captureError)
-  }, [])
+  useNotificationListeners()
 
   // Hydrate auth when the app is loaded
   useEffect(() => {

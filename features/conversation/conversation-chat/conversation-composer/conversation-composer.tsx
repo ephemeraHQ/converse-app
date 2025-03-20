@@ -6,42 +6,36 @@ import { ConversationComposerReplyPreview } from "@/features/conversation/conver
 import { useConversationStore } from "@/features/conversation/conversation-chat/conversation.store-context"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { captureErrorWithToast } from "@/utils/capture-error"
-import { FeedbackError } from "@/utils/error"
 import { AddAttachmentButton } from "./conversation-composer-add-attachment-button"
 import { ConversationComposerAttachmentPreview } from "./conversation-composer-attachment-preview"
 import { SendButton } from "./conversation-composer-send-button"
 import { ConversationComposerTextInput } from "./conversation-composer-text-input"
-import { useConversationComposerSend } from "./use-conversation-composer-send"
+import {
+  useCreateConversationAndSend,
+  useSendToExistingConversation,
+} from "./use-conversation-composer-send"
 
 export const ConversationComposer = memo(function ConversationComposer() {
   const { theme } = useAppTheme()
   const insets = useSafeAreaInsets()
 
-  const { send } = useConversationComposerSend()
-
   const conversationStore = useConversationStore()
 
+  const sendToExistingConversation = useSendToExistingConversation()
+  const createConversationAndSend = useCreateConversationAndSend()
+
   const handleSend = useCallback(async () => {
+    const { xmtpConversationId } = conversationStore.getState()
     try {
-      const { createdConversation, errorSendingMessage } = await send()
-
-      conversationStore.setState({
-        ...(createdConversation && {
-          xmtpConversationId: createdConversation.xmtpId,
-        }),
-        isCreatingNewConversation: false,
-      })
-
-      if (errorSendingMessage) {
-        throw new FeedbackError({
-          error: errorSendingMessage,
-          additionalMessage: "Failed to send message",
-        })
+      if (xmtpConversationId) {
+        await sendToExistingConversation()
+      } else {
+        await createConversationAndSend()
       }
     } catch (error) {
       captureErrorWithToast(error, { message: "Failed to send message" })
     }
-  }, [conversationStore, send])
+  }, [sendToExistingConversation, createConversationAndSend, conversationStore])
 
   return (
     <VStack

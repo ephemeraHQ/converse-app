@@ -1,85 +1,107 @@
-import { queryOptions } from "@tanstack/react-query"
 import * as Device from "expo-device"
 import * as Notifications from "expo-notifications"
-import { Linking, Platform } from "react-native"
+import { Platform } from "react-native"
+import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
+import { ensureNotificationsPermissions } from "@/features/notifications/notifications-permissions.query"
+import { registerNotificationInstallation } from "@/features/notifications/notifications.api"
+import { ensureXmtpInstallationQueryData } from "@/features/xmtp/xmtp-installations/xmtp-installation.query"
 import { captureError } from "@/utils/capture-error"
-import { reactQueryClient } from "@/utils/react-query/react-query.client"
+import { GenericError, PushNotificationError } from "@/utils/error"
+import logger, { notificationsLogger } from "@/utils/logger"
 
-const getNotificationsPermissionsQueryConfig = () => {
-  return queryOptions({
-    queryKey: ["notifications-permissions"],
-    queryFn: () => {
-      return Notifications.getPermissionsAsync()
-    },
-    refetchOnWindowFocus: true,
-    refetchOnMount: true,
-    staleTime: Infinity,
-  })
-}
+// Full flow
+export async function registerPushNotifications() {
+  try {
+    const result = await requestNotificationsPermissions()
 
-export function getOrFetchNotificationsPermissions() {
-  return reactQueryClient.ensureQueryData(getNotificationsPermissionsQueryConfig())
-}
+    notificationsLogger.debug("[AppNavigator] Notification permissions result:", result)
 
-export async function userHasGrantedNotificationsPermissions() {
-  const permission = await getOrFetchNotificationsPermissions()
-  return permission.status === Notifications.PermissionStatus.GRANTED
-}
+    if (result.granted) {
+      logger.debug(
+        "[AppNavigator] Notification permissions granted, registering for push notifications",
+      )
 
-export async function canAskForNotificationsPermissions() {
-  const permission = await getOrFetchNotificationsPermissions()
-  return permission.canAskAgain
-}
+      try {
+        const token = await getPushNotificationsToken()
+        logger.debug("[AppNavigator] Device push token received:", token)
 
-/**
- * Registers device for push notifications and returns the device token
- */
-export async function registerForPushNotificationsAsync() {
-  let token
+        const currentSender = getSafeCurrentSender()
+        logger.debug("[AppNavigator] Current sender:", currentSender)
 
-  // For Android, create a notification channel
-  if (Platform.OS === "android") {
-    await Notifications.setNotificationChannelAsync("default", {
-      name: "Default",
-      importance: Notifications.AndroidImportance.MAX,
-      vibrationPattern: [0, 250, 250, 250],
-      lightColor: "#FF231F7C",
-      enableVibrate: true,
+        const installationId = await ensureXmtpInstallationQueryData({
+          inboxId: currentSender.inboxId,
+        })
+
+        logger.debug("[AppNavigator] XMTP installation ID:", installationId)
+
+        await registerNotificationInstallation({
+          installationId,
+          deliveryMechanism: {
+            deliveryMechanismType: {
+              case: "apnsDeviceToken",
+              value: token,
+            },
+          },
+        })
+      } catch (error) {
+        captureError(error)
+      }
+    } else {
+      logger.debug("[AppNavigator] Notification permissions not granted")
+    }
+  } catch (error) {
+    throw new PushNotificationError({
+      error,
+      additionalMessage: "Error registering notification installation",
     })
   }
+}
 
-  if (!Device.isDevice) {
-    throw new Error("Must use physical device for push notifications")
-  }
-
-  // Get the token using getDevicePushTokenAsync
+export async function getPushNotificationsToken() {
   try {
-    token = (await Notifications.getDevicePushTokenAsync()).data
-    console.log("Device Push Token:", token)
+    if (!Device.isDevice) {
+      throw new Error("Must use physical")
+    }
+
+    let token
+
+    // Check if permissions are granted
+    const hasPermissions = await userHasGrantedNotificationsPermissions()
+
+    if (!hasPermissions) {
+      throw new Error("Notifications permissions not granted")
+    }
+
+    const data = await Notifications.getDevicePushTokenAsync()
+
+    // data.data is string for native platforms per DevicePushToken type
+    // https://docs.expo.dev/versions/latest/sdk/notifications/#devicepushtoken
+    token = data.data as string
+
+    notificationsLogger.debug("Device Push Token:", token)
     return token
   } catch (error) {
-    captureError(error)
-    console.log("Error getting device push token:", error)
+    throw new GenericError({
+      error,
+      additionalMessage: "Error getting device push token",
+    })
   }
-
-  return token
 }
 
-export async function requestNotificationsPermissions() {
-  if (!(await canAskForNotificationsPermissions())) {
-    Linking.openSettings()
-    return
+export async function requestNotificationsPermissions(): Promise<{ granted: boolean }> {
+  const hasGranted = await userHasGrantedNotificationsPermissions()
+
+  if (hasGranted) {
+    return { granted: true }
   }
 
   if (Platform.OS === "android") {
-    return Notifications.setNotificationChannelAsync("default", {
-      name: "Default",
-      importance: Notifications.AndroidImportance.MAX,
-      enableVibrate: true,
-    })
+    // Android doesn't require explicit permission for notifications
+    // Notification channels are set up in configureForegroundNotificationBehavior
+    return { granted: true }
   }
 
-  return Notifications.requestPermissionsAsync({
+  const result = await Notifications.requestPermissionsAsync({
     ios: {
       allowAlert: true,
       allowBadge: true,
@@ -87,4 +109,16 @@ export async function requestNotificationsPermissions() {
       allowCriticalAlerts: true,
     },
   })
+
+  return { granted: result.status === Notifications.PermissionStatus.GRANTED }
+}
+
+export async function userHasGrantedNotificationsPermissions() {
+  const permission = await ensureNotificationsPermissions()
+  return permission.status === Notifications.PermissionStatus.GRANTED
+}
+
+export async function canAskForNotificationsPermissions() {
+  const permission = await ensureNotificationsPermissions()
+  return permission.canAskAgain
 }

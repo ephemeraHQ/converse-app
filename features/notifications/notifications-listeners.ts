@@ -14,7 +14,7 @@ type INotificationListenerCallbacks = {
  * - User tapping notifications while app is running
  * - System dropping notifications due to limits
  */
-export function useNotificationListenersWhileRunning({
+export function useNotificationListeners({
   onNotificationDisplayedInForeground,
   onNotificationTappedWhileRunning,
   // onSystemDroppedNotifications,
@@ -85,20 +85,4 @@ export function useNotificationTappedWhileKilled() {
       }
     })
   }, [])
-}
-
-export function configureForegroundNotificationBehavior() {
-  Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-      shouldShowAlert: true,
-      shouldPlaySound: true,
-      shouldSetBadge: true,
-    }),
-    handleSuccess: (notificationId) => {
-      notificationsLogger.debug(`Successfully displayed notification: ${notificationId}`)
-    },
-    handleError: (notificationId, error) => {
-      notificationsLogger.error(`Failed to display notification ${notificationId}: ${error}`)
-    },
-  })
 }

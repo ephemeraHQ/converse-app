@@ -36,6 +36,55 @@ if (isValid) {
 }
 ```
 
+## Function Decomposition
+
+- When I ask to decompose a complex function, break it down into smaller, well-named functions that:
+  - Have a clear, single responsibility
+  - Use descriptive names that explain what they do, not how they do it
+  - Have well-defined inputs and outputs
+  - Can be understood independently
+  - Are testable in isolation
+- Avoid excessive decomposition - don't create tiny functions (1-2 lines) unless they significantly improve readability
+- Place helper functions directly below the main function that uses them
+- Keep related functions together in the same file unless otherwise specified
+- The parent function should read like a story by calling these well-named functions in sequence
+
+```typescript
+// ❌ Bad: Complex monolithic function
+function processOrder(order: IOrder) {
+  // 50+ lines of complex logic with multiple responsibilities
+  // validation, calculation, database operations, notifications, etc.
+}
+
+// ✅ Good: Parent function with clear steps using helper functions
+function processOrder(args: { order: IOrder }) {
+  const { order } = args
+
+  const validatedOrder = validateOrder(order)
+  const calculatedTotals = calculateOrderTotals(validatedOrder)
+  const savedOrder = saveOrderToDatabase(calculatedTotals)
+  sendOrderConfirmationEmail(savedOrder)
+
+  return savedOrder
+}
+
+function validateOrder(order: IOrder) {
+  // Validation logic
+}
+
+function calculateOrderTotals(order: IOrder) {
+  // Calculation logic
+}
+
+function saveOrderToDatabase(order: IOrder) {
+  // Database logic
+}
+
+function sendOrderConfirmationEmail(order: IOrder) {
+  // Email sending logic
+}
+```
+
 ## Imports
 
 - When importing types or functions from external libraries, rename them to clearly indicate their source.

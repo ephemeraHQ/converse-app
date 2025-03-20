@@ -75,8 +75,8 @@ export function useCreateConversationAndSendFirstMessageMutation() {
 
         return {
           conversation,
-          sentMessages: result.messages,
-          sentMessageIds: result.xmtpMessageIds,
+          sentMessages: result.sentMessages,
+          sentXmtpMessageIds: result.sentXmtpMessageIds,
           errorSendingMessage: undefined,
         }
       } catch (error) {
@@ -197,18 +197,18 @@ export function useCreateConversationAndSendFirstMessageMutation() {
 
       // Add the messages to the real conversation messages query
       // Set first because we want to already have the messages in the query
-      if (result.sentMessageIds) {
+      if (result.sentXmtpMessageIds) {
         setConversationMessagesQueryData({
           clientInboxId: currentSender.inboxId,
           xmtpConversationId: result.conversation.xmtpId,
           data: {
-            ids: result.sentMessageIds,
-            byId: result.sentMessageIds.reduce(
-              (acc: Record<IXmtpMessageId, IConversationMessage>, messageId, index) => {
+            ids: result.sentXmtpMessageIds,
+            byId: result.sentXmtpMessageIds.reduce(
+              (acc, messageId, index) => {
                 acc[messageId] = result.sentMessages[index]
                 return acc
               },
-              {},
+              {} as Record<IXmtpMessageId, IConversationMessage>,
             ),
             reactions: {},
           },
