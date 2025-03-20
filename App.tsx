@@ -71,7 +71,7 @@ export function App() {
       persistOptions={{
         persister: reactQueryPersister,
         maxAge: DEFAULT_GC_TIME,
-        buster: "v4",
+        buster: config.reactQueryPersistCacheIsEnabled ? "v4" : undefined,
         dehydrateOptions: {
           shouldDehydrateQuery(query) {
             if (!config.reactQueryPersistCacheIsEnabled) {
@@ -83,7 +83,15 @@ export function App() {
               query.state.status !== "pending" &&
               query.state.fetchStatus !== "fetching"
 
-            return shouldHydrate
+            if (!shouldHydrate) {
+              logger.debug("Not hydrating query", {
+                queryKey: query.queryKey,
+                queryState: query.state,
+              })
+              return false
+            }
+
+            return true
           },
         },
       }}

@@ -5,7 +5,6 @@ import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.stor
 import { ensureNotificationsPermissions } from "@/features/notifications/notifications-permissions.query"
 import { registerNotificationInstallation } from "@/features/notifications/notifications.api"
 import { ensureXmtpInstallationQueryData } from "@/features/xmtp/xmtp-installations/xmtp-installation.query"
-import { captureError } from "@/utils/capture-error"
 import { GenericError, PushNotificationError } from "@/utils/error"
 import logger, { notificationsLogger } from "@/utils/logger"
 
@@ -16,39 +15,35 @@ export async function registerPushNotifications() {
 
     notificationsLogger.debug("[AppNavigator] Notification permissions result:", result)
 
-    if (result.granted) {
-      logger.debug(
-        "[AppNavigator] Notification permissions granted, registering for push notifications",
-      )
-
-      try {
-        const token = await getPushNotificationsToken()
-        logger.debug("[AppNavigator] Device push token received:", token)
-
-        const currentSender = getSafeCurrentSender()
-        logger.debug("[AppNavigator] Current sender:", currentSender)
-
-        const installationId = await ensureXmtpInstallationQueryData({
-          inboxId: currentSender.inboxId,
-        })
-
-        logger.debug("[AppNavigator] XMTP installation ID:", installationId)
-
-        await registerNotificationInstallation({
-          installationId,
-          deliveryMechanism: {
-            deliveryMechanismType: {
-              case: "apnsDeviceToken",
-              value: token,
-            },
-          },
-        })
-      } catch (error) {
-        captureError(error)
-      }
-    } else {
-      logger.debug("[AppNavigator] Notification permissions not granted")
+    if (!result.granted) {
+      throw new Error("Notifications permissions not granted")
     }
+
+    logger.debug(
+      "[AppNavigator] Notification permissions granted, registering for push notifications",
+    )
+
+    const token = await getPushNotificationsToken()
+    logger.debug("[AppNavigator] Device push token received:", token)
+
+    const currentSender = getSafeCurrentSender()
+    logger.debug("[AppNavigator] Current sender:", currentSender)
+
+    const installationId = await ensureXmtpInstallationQueryData({
+      inboxId: currentSender.inboxId,
+    })
+
+    logger.debug("[AppNavigator] XMTP installation ID:", installationId)
+
+    await registerNotificationInstallation({
+      installationId,
+      deliveryMechanism: {
+        deliveryMechanismType: {
+          case: "apnsDeviceToken",
+          value: token,
+        },
+      },
+    })
   } catch (error) {
     throw new PushNotificationError({
       error,

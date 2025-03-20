@@ -43,13 +43,12 @@ const conversationMessagesQueryFn = async (args: {
     throw new Error("Conversation not found")
   }
 
-  // Do this instead
   await ensureConversationSyncAllQuery({
     clientInboxId,
-    consentStates: ["allowed", "unknown", "denied"],
+    // consentStates: ["allowed", "unknown", "denied"],
   })
 
-  // This seems slow
+  // This seems slow?
   // await syncXmtpConversation({
   //   clientInboxId,
   //   conversationId: conversation.xmtpId,

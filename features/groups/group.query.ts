@@ -74,12 +74,15 @@ export function getOrFetchGroupQuery(args: IArgsWithCaller) {
   return ensureConversationQueryData(args)
 }
 
-export function addGroupMemberToGroupQuery(args: IArgs & { member: IGroupMember }) {
+export async function addGroupMemberToGroupQueryData(args: IArgs & { member: IGroupMember }) {
   const { clientInboxId, xmtpConversationId, member } = args
 
-  const currentGroup = getGroupQueryData(args)
+  const group = await ensureGroupQueryData({
+    ...args,
+    caller: "addGroupMemberToGroupQuery",
+  })
 
-  if (!currentGroup) {
+  if (!group) {
     throw new Error(`Couldn't add member because the group doesn't exist`)
   }
 
@@ -87,25 +90,28 @@ export function addGroupMemberToGroupQuery(args: IArgs & { member: IGroupMember 
     clientInboxId,
     xmtpConversationId,
     group: {
-      ...currentGroup,
+      ...group,
       members: {
-        ...currentGroup.members,
+        ...group.members,
         byId: {
-          ...currentGroup.members.byId,
+          ...group.members.byId,
           [member.inboxId]: member,
         },
-        ids: [...currentGroup.members.ids, member.inboxId],
+        ids: [...group.members.ids, member.inboxId],
       },
     },
   })
 }
 
-export function removeGroupMemberToGroupQuery(args: IArgs & { memberInboxId: IXmtpInboxId }) {
+export async function removeGroupMemberToGroupQuery(args: IArgs & { memberInboxId: IXmtpInboxId }) {
   const { clientInboxId, xmtpConversationId, memberInboxId } = args
 
-  const currentGroup = getGroupQueryData(args)
+  const group = await ensureGroupQueryData({
+    ...args,
+    caller: "removeGroupMemberToGroupQuery",
+  })
 
-  if (!currentGroup) {
+  if (!group) {
     throw new Error(`Couldn't remove member because the group doesn't exist`)
   }
 
@@ -113,11 +119,11 @@ export function removeGroupMemberToGroupQuery(args: IArgs & { memberInboxId: IXm
     clientInboxId,
     xmtpConversationId,
     group: {
-      ...currentGroup,
+      ...group,
       members: {
-        ...currentGroup.members,
+        ...group.members,
         byId: {
-          ...currentGroup.members.byId,
+          ...group.members.byId,
           [memberInboxId]: undefined,
         },
       },
@@ -129,6 +135,6 @@ export function invalidateGroupQuery(args: IArgs) {
   return invalidateConversationQuery(args)
 }
 
-export function ensureGroupQueryData(args: IArgsWithCaller) {
-  return ensureConversationQueryData(args)
+export async function ensureGroupQueryData(args: IArgsWithCaller) {
+  return (await ensureConversationQueryData(args)) as IGroup | null
 }

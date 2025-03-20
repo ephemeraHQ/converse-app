@@ -19,7 +19,7 @@ async function getUnknownConversationsQueryFn(args: { inboxId: IXmtpInboxId }) {
 
   await ensureConversationSyncAllQuery({
     clientInboxId: inboxId,
-    consentStates: ["unknown"],
+    // consentStates: ["unknown"],
   })
 
   const client = await getXmtpClientByInboxId({

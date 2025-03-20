@@ -1,6 +1,6 @@
 import { IXmtpConversationId, IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { QueryObserver, queryOptions, skipToken, useQuery } from "@tanstack/react-query"
-import { refetchConversationSyncAllQuery } from "@/features/conversation/queries/conversation-sync-all.query"
+import { ensureConversationSyncAllQuery } from "@/features/conversation/queries/conversation-sync-all.query"
 import { setConversationQueryData } from "@/features/conversation/queries/conversation.query"
 import { convertXmtpConversationToConvosConversation } from "@/features/conversation/utils/convert-xmtp-conversation-to-convos"
 import { getXmtpConversations } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-list"
@@ -113,9 +113,9 @@ export function removeConversationFromAllowedConsentConversationsQuery(args: {
 const getAllowedConsentConversationsQueryFn = async (args: IArgs) => {
   const { clientInboxId } = args
 
-  await refetchConversationSyncAllQuery({
+  await ensureConversationSyncAllQuery({
     clientInboxId,
-    consentStates: ["allowed"],
+    // consentStates: ["allowed"],
   })
 
   const xmtpConversations = await getXmtpConversations({

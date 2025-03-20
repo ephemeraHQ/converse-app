@@ -7,9 +7,9 @@ import { XMTPError } from "@/utils/error"
 
 export async function syncAllXmtpConversations(args: {
   clientInboxId: IXmtpInboxId
-  consentStates: ConsentState[]
+  consentStates?: ConsentState[]
 }) {
-  const { clientInboxId, consentStates } = args
+  const { clientInboxId, consentStates = ["allowed", "unknown", "denied"] } = args
 
   try {
     const installationId = await ensureXmtpInstallationQueryData({

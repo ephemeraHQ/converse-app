@@ -8073,13 +8073,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-native-shared-group-preferences@npm:^1.1.1":
-  version: 1.1.4
-  resolution: "@types/react-native-shared-group-preferences@npm:1.1.4"
-  checksum: 10c0/7b7d1c67f16ee80a03b300959dc6ec041de7234015fdff915860707717a08da0b7b24dec695657b613a50bc283e64ef9c402024370ff2a9841bdf7d169625647
-  languageName: node
-  linkType: hard
-
 "@types/react@npm:*":
   version: 19.0.10
   resolution: "@types/react@npm:19.0.10"
@@ -10603,7 +10596,6 @@ __metadata:
     "@types/i18n-js": "npm:^3.8.9"
     "@types/jest": "npm:^29.5.14"
     "@types/react": "npm:~18.3.12"
-    "@types/react-native-shared-group-preferences": "npm:^1.1.1"
     "@types/uuid": "npm:^9.0.8"
     "@typescript-eslint/parser": "npm:^8.24.1"
     "@walletconnect/react-native-compat": "npm:^2.19.0"
@@ -10712,7 +10704,6 @@ __metadata:
     react-native-reanimated: "npm:~3.16.1"
     react-native-safe-area-context: "npm:4.12.0"
     react-native-screens: "npm:~4.4.0"
-    react-native-share: "npm:^10.2.1"
     react-native-svg: "npm:15.8.0"
     react-native-url-polyfill: "npm:^1.3.0"
     react-native-webview: "npm:13.12.5"
@@ -19426,13 +19417,6 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: 10c0/63eff2f7761109ed05b0656c28bf34c83d5d7ebbcd92931202a250cab0e54109c764fac3471db7ae52f5c6c782bfca5caf5d8f1dc9a4a27a4b9889aeec7a4dcc
-  languageName: node
-  linkType: hard
-
-"react-native-share@npm:^10.2.1":
-  version: 10.2.1
-  resolution: "react-native-share@npm:10.2.1"
-  checksum: 10c0/534e6930d337d7e48de5572d8d6afac865bdad027a5d1c7fa843c7adba702d594b82cf2bb8124f82ffb1b4171f78754744c97a88b2fa5e5fda479f486768d42e
   languageName: node
   linkType: hard
 

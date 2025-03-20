@@ -1,7 +1,7 @@
 import type { IXmtpConversationId, IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query"
 import { config } from "@/config"
-import { refetchConversationSyncAllQuery } from "@/features/conversation/queries/conversation-sync-all.query"
+import { ensureConversationSyncAllQuery } from "@/features/conversation/queries/conversation-sync-all.query"
 import { convertXmtpConversationToConvosConversation } from "@/features/conversation/utils/convert-xmtp-conversation-to-convos"
 import { isTempConversation } from "@/features/conversation/utils/is-temp-conversation"
 import { getXmtpConversations } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-list"
@@ -49,18 +49,21 @@ async function getConversation(args: IGetConversationArgs) {
   const totalStart = new Date().getTime()
 
   await Promise.all([
-    refetchConversationSyncAllQuery({
+    ensureConversationSyncAllQuery({
       clientInboxId,
-      consentStates: ["allowed"],
     }),
-    refetchConversationSyncAllQuery({
-      clientInboxId,
-      consentStates: ["unknown"],
-    }),
-    refetchConversationSyncAllQuery({
-      clientInboxId,
-      consentStates: ["denied"],
-    }),
+    // refetchConversationSyncAllQuery({
+    //   clientInboxId,
+    //   consentStates: ["allowed"],
+    // }),
+    // refetchConversationSyncAllQuery({
+    //   clientInboxId,
+    //   consentStates: ["unknown"],
+    // }),
+    // refetchConversationSyncAllQuery({
+    //   clientInboxId,
+    //   consentStates: ["denied"],
+    // }),
   ])
 
   const xmtpConversations = await getXmtpConversations({
@@ -83,7 +86,7 @@ async function getConversation(args: IGetConversationArgs) {
 
   // If we have the xmtpConversationId the conversation must exist otherwise we did something wrong
   if (!xmtpConversation) {
-    throw new Error("XMTP Conversation not found")
+    throw new Error(`Couldn't find XMTP conversation with id ${xmtpConversationId}`)
   }
 
   const convosConversation = await convertXmtpConversationToConvosConversation(xmtpConversation)

@@ -1,6 +1,5 @@
 import Clipboard from "@react-native-clipboard/clipboard"
 import { getPreviousSessionLoggingFile, loggingFilePath, rotateLoggingFile } from "@utils/logger"
-import Share from "@utils/share"
 import Constants from "expo-constants"
 import { Image } from "expo-image"
 import * as Notifications from "expo-notifications"
@@ -33,6 +32,7 @@ import { captureError } from "@/utils/capture-error"
 import { GenericError } from "@/utils/error"
 import { getEnv } from "@/utils/getEnv"
 import { ObjectTyped } from "@/utils/object-typed"
+import { shareContent } from "@/utils/share"
 import { showActionSheet } from "./action-sheet"
 
 export function DebugProvider(props: { children: React.ReactNode }) {
@@ -88,11 +88,11 @@ function useShowDebugMenu() {
     const logsMethods = {
       "Start new log session": rotateLoggingFile,
       "Share current session logs": async () => {
-        Share.open({
+        shareContent({
           title: translate("debug.converse_log_session"),
           url: `file://${loggingFilePath}`,
           type: "text/plain",
-        })
+        }).catch(captureError)
       },
       "Display current session logs": async () => {
         navigate("WebviewPreview", { uri: loggingFilePath })
@@ -109,11 +109,11 @@ function useShowDebugMenu() {
         if (!previousLoggingFile) {
           return Alert.alert("No previous session logging file found")
         }
-        Share.open({
+        shareContent({
           title: translate("debug.converse_log_session"),
           url: `file://${previousLoggingFile}`,
           type: "text/plain",
-        })
+        }).catch(captureError)
       },
       "-": () => Promise.resolve(), // Separator
       [`${isXmtpLoggingActive() ? "Stop" : "Start"} recording XMTP logs`]: async () => {
@@ -128,11 +128,11 @@ function useShowDebugMenu() {
       },
       "Share current XMTP logs": async () => {
         const logFilePath = await getXmtpLogFile()
-        Share.open({
+        shareContent({
           title: translate("debug.xmtp_log_session"),
           url: `file://${logFilePath}`,
           type: "text/plain",
-        })
+        }).catch(captureError)
       },
       "Display current XMTP logs": async () => {
         const logFilePath = await getXmtpLogFile()
@@ -143,11 +143,11 @@ function useShowDebugMenu() {
         if (!previousLogFile) {
           return Alert.alert("No previous XMTP logging file found")
         }
-        Share.open({
+        shareContent({
           title: translate("debug.xmtp_log_session"),
           url: `file://${previousLogFile}`,
           type: "text/plain",
-        })
+        }).catch(captureError)
       },
       "Display previous XMTP logs": async () => {
         const previousLogFile = await getPreviousXmtpLogFile()

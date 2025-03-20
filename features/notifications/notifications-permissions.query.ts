@@ -2,7 +2,7 @@ import { queryOptions } from "@tanstack/react-query"
 import * as Notifications from "expo-notifications"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
 
-const getNotificationsPermissionsQueryConfig = () => {
+export const getNotificationsPermissionsQueryConfig = () => {
   return queryOptions({
     queryKey: ["notifications-permissions"],
     queryFn: () => {

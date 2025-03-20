@@ -40,7 +40,7 @@ const initialState: IMultiInboxStoreState = {
 
 // Changing this will break existing users as the store won't be able to hydrate
 // So users will be logged out on new app load
-const STORE_NAME = "multi-inbox-store"
+const STORE_NAME = "multi-inbox-store-v1"
 
 // Helper to check if two senders are the same
 function isSameSender(a: CurrentSender, b: CurrentSender): boolean {

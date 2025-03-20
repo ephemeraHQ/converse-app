@@ -1,15 +1,45 @@
+import { QueryObserver } from "@tanstack/react-query"
 import { useMultiInboxStore } from "@/features/authentication/multi-inbox.store"
 import { getAllowedConsentConversationsQueryObserver } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import { getConversationQueryData } from "@/features/conversation/queries/conversation.query"
+import { isTempConversation } from "@/features/conversation/utils/is-temp-conversation"
+import { getNotificationsPermissionsQueryConfig } from "@/features/notifications/notifications-permissions.query"
+import { userHasGrantedNotificationsPermissions } from "@/features/notifications/notifications.service"
 import { getXmtpConversationHmacKeys } from "@/features/xmtp/xmtp-hmac-keys/xmtp-hmac-keys"
 import { ensureXmtpInstallationQueryData } from "@/features/xmtp/xmtp-installations/xmtp-installation.query"
 import { IXmtpConversationId, IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
 import { logger, notificationsLogger } from "@/utils/logger"
+import { reactQueryClient } from "@/utils/react-query/react-query.client"
 import {
   subscribeToNotificationTopicsWithMetadata,
   unsubscribeFromNotificationTopics,
 } from "./notifications.api"
+
+export function setupConversationsNotificationsSubscriptions() {
+  // Set up subscription for notifications permissions changes
+  const permissionsObserver = new QueryObserver(
+    reactQueryClient,
+    getNotificationsPermissionsQueryConfig(),
+  )
+
+  permissionsObserver.subscribe(() => {
+    logger.debug("[setupConversationsNotificationsSubscriptions] Notification permissions changed")
+    updateConversationSubscriptions()
+  })
+
+  // Set up subscription for multi-inbox store changes
+  useMultiInboxStore.subscribe(
+    (state) => state.senders,
+    () => {
+      logger.debug("[setupConversationsNotificationsSubscriptions] Multi-inbox senders changed")
+      updateConversationSubscriptions()
+    },
+    {
+      fireImmediately: true,
+    },
+  )
+}
 
 /**
  * Subscribes to notifications for a specific XMTP conversation
@@ -19,6 +49,16 @@ async function subscribeToConversationsNotifications(args: {
   clientInboxId: IXmtpInboxId
 }) {
   const { conversationIds, clientInboxId } = args
+
+  // Check if notifications permissions are granted
+  const hasPermissions = await userHasGrantedNotificationsPermissions()
+
+  if (!hasPermissions) {
+    logger.debug(
+      "[subscribeToConversationsNotifications] Skipped notifications subscription - permissions not granted",
+    )
+    return
+  }
 
   logger.debug(
     `[subscribeToConversationsNotifications] Subscribing to ${conversationIds.length} conversations`,
@@ -162,48 +202,66 @@ const observersMap = new Map<
   ReturnType<typeof getAllowedConsentConversationsQueryObserver>
 >()
 
-export function setupConversationsNotificationsSubscriptions() {
-  useMultiInboxStore.subscribe(
-    (state) => state.senders,
-    (previousSenders, currentSenders) => {
-      const currentInboxIds = currentSenders.map((sender) => sender.inboxId)
-      const previousInboxIds = previousSenders.map((sender) => sender.inboxId)
+// Global variable to track previous senders
+let previousSendersInboxIds: IXmtpInboxId[] = []
 
-      // Find inbox IDs to unsubscribe (present in previous but not in current)
-      const inboxIdsToUnsubscribe = previousInboxIds.filter((id) => !currentInboxIds.includes(id))
+/**
+ * Updates conversation notification subscriptions based on current permissions and senders
+ */
+async function updateConversationSubscriptions() {
+  // Check if notifications permissions are granted
+  const hasPermissions = await userHasGrantedNotificationsPermissions()
 
-      // Find inbox IDs to subscribe (present in current but not in previous)
-      const inboxIdsToSubscribe = currentInboxIds.filter((id) => !previousInboxIds.includes(id))
+  if (!hasPermissions) {
+    logger.debug(
+      "[updateConversationSubscriptions] Skipped subscription setup - notification permissions not granted",
+    )
+    // Clean up any existing observers if permissions were revoked
+    for (const [inboxId, observer] of observersMap.entries()) {
+      logger.debug(
+        `[updateConversationSubscriptions] Cleaning up observer for inbox ${inboxId} due to revoked permissions`,
+      )
+      observer.destroy()
+      observersMap.delete(inboxId)
+    }
+    previousSendersInboxIds = []
+    return
+  }
 
-      notificationsLogger.debug(`Updating subscriptions for ${currentInboxIds.length} senders`, {
-        inboxIdsToUnsubscribe,
-        inboxIdsToSubscribe,
-      })
+  // Get current senders from the store
+  const currentSenders = useMultiInboxStore.getState().senders
+  const currentInboxIds = currentSenders.map((sender) => sender.inboxId)
+  const previousInboxIds = previousSendersInboxIds
 
-      // Unsubscribe removed senders
-      for (const inboxId of inboxIdsToUnsubscribe) {
-        const observer = observersMap.get(inboxId)
-        if (observer) {
-          logger.debug(
-            `[setupConversationNotificationsObserver] Unsubscribing observer for inbox ${inboxId}`,
-          )
-          observer.destroy()
-          observersMap.delete(inboxId)
-        }
-      }
+  // Find inbox IDs to unsubscribe (present in previous but not in current)
+  const inboxIdsToUnsubscribe = previousInboxIds.filter((id) => !currentInboxIds.includes(id))
 
-      // Subscribe new senders
-      for (const inboxId of inboxIdsToSubscribe) {
-        logger.debug(
-          `[setupConversationNotificationsObserver] Setting up observer for inbox ${inboxId}`,
-        )
-        setupObserverForInbox(inboxId)
-      }
-    },
-    {
-      fireImmediately: true,
-    },
-  )
+  // Find inbox IDs to subscribe (present in current but not in previous)
+  const inboxIdsToSubscribe = currentInboxIds.filter((id) => !previousInboxIds.includes(id))
+
+  notificationsLogger.debug(`Updating subscriptions for ${currentInboxIds.length} senders`, {
+    inboxIdsToUnsubscribe,
+    inboxIdsToSubscribe,
+  })
+
+  // Unsubscribe removed senders
+  for (const inboxId of inboxIdsToUnsubscribe) {
+    const observer = observersMap.get(inboxId)
+    if (observer) {
+      logger.debug(`[updateConversationSubscriptions] Unsubscribing observer for inbox ${inboxId}`)
+      observer.destroy()
+      observersMap.delete(inboxId)
+    }
+  }
+
+  // Subscribe new senders
+  for (const inboxId of inboxIdsToSubscribe) {
+    logger.debug(`[updateConversationSubscriptions] Setting up observer for inbox ${inboxId}`)
+    setupObserverForInbox(inboxId)
+  }
+
+  // Update our tracking of previous senders
+  previousSendersInboxIds = [...currentInboxIds]
 }
 
 /**
@@ -222,16 +280,15 @@ function setupObserverForInbox(clientInboxId: IXmtpInboxId) {
       return
     }
 
-    // Extract conversation IDs from the query data
-    const currentConversationIds = query.data
+    const validConversationsIds = query.data.filter((id) => !isTempConversation(id))
 
     // Find conversations to unsubscribe from
     const conversationsToUnsubscribe = previousConversationIds.filter(
-      (id) => !currentConversationIds.includes(id),
+      (id) => !validConversationsIds.includes(id),
     )
 
     // Find conversations to subscribe to
-    const conversationsToSubscribe = currentConversationIds.filter(
+    const conversationsToSubscribe = validConversationsIds.filter(
       (id) => !previousConversationIds.includes(id),
     )
 
@@ -258,7 +315,7 @@ function setupObserverForInbox(clientInboxId: IXmtpInboxId) {
     }
 
     // Update previous conversation IDs for next comparison
-    previousConversationIds = currentConversationIds
+    previousConversationIds = validConversationsIds
   })
 
   // Store the observer in our map for tracking

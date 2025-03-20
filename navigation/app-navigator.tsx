@@ -9,7 +9,6 @@ import { AuthOnboardingContactCardImportInfoScreen } from "@/features/auth-onboa
 import { AuthScreen } from "@/features/auth-onboarding/screens/auth-onboarding.screen"
 import { useAuthenticationStore } from "@/features/authentication/authentication.store"
 import { hydrateAuth } from "@/features/authentication/hydrate-auth"
-import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { useSignoutIfNoPrivyUser } from "@/features/authentication/use-logout-if-no-privy-user"
 import { useRefreshJwtAxiosInterceptor } from "@/features/authentication/use-refresh-jwt.axios-interceptor"
 import { BlockedConversationsScreen } from "@/features/blocked-conversations/blocked-conversations.screen"
@@ -33,20 +32,13 @@ import {
   GroupMembersListScreenConfig,
 } from "@/features/groups/group-details/members-list/group-members-list.nav"
 import { useNotificationListeners } from "@/features/notifications/notifications-listeners"
-import { registerNotificationInstallation } from "@/features/notifications/notifications.api"
-import {
-  getPushNotificationsToken,
-  requestNotificationsPermissions,
-} from "@/features/notifications/notifications.service"
 import { ProfileImportInfoScreen } from "@/features/profiles/profile-import-info.screen"
 import { ProfileNav, ProfileScreenConfig } from "@/features/profiles/profile.nav"
-import { ensureXmtpInstallationQueryData } from "@/features/xmtp/xmtp-installations/xmtp-installation.query"
 import { NavigationParamList } from "@/navigation/navigation.types"
 import { navigationRef } from "@/navigation/navigation.utils"
 import { WebviewPreviewNav } from "@/screens/WebviewPreviewNav"
 import { useAppTheme, useThemeProvider } from "@/theme/use-app-theme"
 import { captureError } from "@/utils/capture-error"
-import logger, { notificationsLogger } from "@/utils/logger"
 import { useUpdateSentryUser } from "@/utils/sentry"
 import { hideSplashScreen } from "@/utils/splash/splash"
 import { ShareProfileNav, ShareProfileScreenConfig } from "../screens/ShareProfileNav"
