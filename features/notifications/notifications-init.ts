@@ -6,8 +6,11 @@ import { notificationsLogger } from "@/utils/logger"
 export function configureForegroundNotificationBehavior() {
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
+      // Show alert even when app is in foreground
       shouldShowAlert: true,
+      // Play sound when receiving notification
       shouldPlaySound: true,
+      // Update badge count on app icon
       shouldSetBadge: true,
     }),
     handleSuccess: (notificationId) => {
@@ -18,6 +21,7 @@ export function configureForegroundNotificationBehavior() {
     },
   })
 
+  // Create notification channel for Android
   if (Platform.OS === "android") {
     Notifications.setNotificationChannelAsync("default", {
       name: "Default",
