@@ -67,15 +67,25 @@ export function useCreateConversationAndSendFirstMessageMutation() {
             )
 
       // Send message
-      const result = await sendMessage({
-        xmtpConversationId: conversation.xmtpId,
-        contents: contents,
-      })
+      try {
+        const result = await sendMessage({
+          xmtpConversationId: conversation.xmtpId,
+          contents,
+        })
 
-      return {
-        conversation,
-        sentMessages: result.messages,
-        sentMessageIds: result.xmtpMessageIds,
+        return {
+          conversation,
+          sentMessages: result.sentMessages,
+          sentXmtpMessageIds: result.sentXmtpMessageIds,
+          errorSendingMessage: undefined,
+        }
+      } catch (error) {
+        return {
+          conversation,
+          sentMessages: undefined,
+          sentMessageIds: undefined,
+          errorSendingMessage: error,
+        }
       }
     },
     onMutate: ({ inboxIds, contents }) => {
@@ -187,21 +197,23 @@ export function useCreateConversationAndSendFirstMessageMutation() {
 
       // Add the messages to the real conversation messages query
       // Set first because we want to already have the messages in the query
-      setConversationMessagesQueryData({
-        clientInboxId: currentSender.inboxId,
-        xmtpConversationId: result.conversation.xmtpId,
-        data: {
-          ids: result.sentMessageIds,
-          byId: result.sentMessageIds.reduce(
-            (acc: Record<IXmtpMessageId, IConversationMessage>, messageId, index) => {
-              acc[messageId] = result.sentMessages[index]
-              return acc
-            },
-            {},
-          ),
-          reactions: {},
-        },
-      })
+      if (result.sentXmtpMessageIds) {
+        setConversationMessagesQueryData({
+          clientInboxId: currentSender.inboxId,
+          xmtpConversationId: result.conversation.xmtpId,
+          data: {
+            ids: result.sentXmtpMessageIds,
+            byId: result.sentXmtpMessageIds.reduce(
+              (acc, messageId, index) => {
+                acc[messageId] = result.sentMessages[index]
+                return acc
+              },
+              {} as Record<IXmtpMessageId, IConversationMessage>,
+            ),
+            reactions: {},
+          },
+        })
+      }
 
       // Set the real conversation query data with the last message
       setConversationQueryData({
@@ -209,7 +221,7 @@ export function useCreateConversationAndSendFirstMessageMutation() {
         xmtpConversationId: result.conversation.xmtpId,
         conversation: {
           ...result.conversation,
-          lastMessage: result.sentMessages[0], // Use the first message as the last message
+          lastMessage: result.sentMessages?.[0], // Use the first message as the last message
         },
       })
 

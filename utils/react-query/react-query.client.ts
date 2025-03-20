@@ -70,7 +70,7 @@ export const reactQueryClient = new QueryClient({
       // Wrap the error in ReactQueryError
       const wrappedError = new ReactQueryError({
         error,
-        additionalMessage: `Query failed: ${JSON.stringify(query.queryKey)}`,
+        additionalMessage: `Query failed`,
       })
 
       captureError(wrappedError, { extras })

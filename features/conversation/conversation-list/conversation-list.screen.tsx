@@ -22,16 +22,22 @@ import { isConversationGroup } from "@/features/conversation/utils/is-conversati
 import { isTempConversation } from "@/features/conversation/utils/is-temp-conversation"
 import { IDm } from "@/features/dm/dm.types"
 import { IGroup } from "@/features/groups/group.types"
+import { subscribeToNotificationTopicsWithMetadata } from "@/features/notifications/notifications.api"
+import { registerPushNotifications } from "@/features/notifications/notifications.service"
+import { getXmtpConversationHmacKeys } from "@/features/xmtp/xmtp-hmac-keys/xmtp-hmac-keys"
+import { ensureXmtpInstallationQueryData } from "@/features/xmtp/xmtp-installations/xmtp-installation.query"
+import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 import { useMinimumLoadingTime } from "@/hooks/use-minimum-loading-time"
 import { NavigationParamList } from "@/navigation/navigation.types"
 import { $globalStyles } from "@/theme/styles"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { captureError } from "@/utils/capture-error"
+import logger from "@/utils/logger"
 import { ConversationListAwaitingRequests } from "./conversation-list-awaiting-requests"
 import { ConversationListEmpty } from "./conversation-list-empty"
 import { ConversationListStartNewConvoBanner } from "./conversation-list-start-new-convo-banner"
 import { useConversationListScreenHeader } from "./conversation-list.screen-header"
-import { useConversationListConversations } from "./use-conversation-list-conversations"
+import { useConversationListConversations } from "./hooks/use-conversation-list-conversations"
 
 type IConversationListProps = NativeStackScreenProps<NavigationParamList, "Chats">
 
@@ -49,6 +55,11 @@ export function ConversationListScreen(props: IConversationListProps) {
   const insets = useSafeAreaInsets()
 
   useConversationListScreenHeader()
+
+  // TODO, only request if we haven't yet.
+  useEffect(() => {
+    registerPushNotifications().catch(captureError)
+  }, [])
 
   // Let's prefetch the messages for all the conversations
   useEffect(() => {

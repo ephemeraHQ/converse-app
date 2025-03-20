@@ -121,6 +121,7 @@ export const authLogger = createPrefixedLogger("AUTH")
 export const streamLogger = createPrefixedLogger("STREAM")
 export const apiLogger = createPrefixedLogger("API")
 export const xmtpLogger = createPrefixedLogger("XMTP")
+export const notificationsLogger = createPrefixedLogger("NOTIFICATIONS")
 
 /**
  * @deprecated Use { logger } instead

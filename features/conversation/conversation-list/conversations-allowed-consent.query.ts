@@ -46,6 +46,10 @@ export const getAllowedConsentConversationsQueryOptions = (
   })
 }
 
+export function getAllowedConsentConversationsQueryObserver(args: IArgs) {
+  return new QueryObserver(reactQueryClient, getAllowedConsentConversationsQueryOptions(args))
+}
+
 export function fetchAllowedConsentConversationsQuery(args: IArgsWithCaller) {
   return reactQueryClient.fetchQuery(getAllowedConsentConversationsQueryOptions(args))
 }

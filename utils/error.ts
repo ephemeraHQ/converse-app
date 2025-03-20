@@ -99,3 +99,9 @@ export class FeedbackError extends BaseError {
     super("", args)
   }
 }
+
+export class PushNotificationError extends BaseError {
+  constructor(args: ErrorArgs) {
+    super("[Push Notification]", args)
+  }
+}

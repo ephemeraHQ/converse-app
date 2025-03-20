@@ -112,7 +112,7 @@ export function getConversationQueryOptions(
 
 export const setConversationQueryData = (
   args: IGetConversationArgs & {
-    conversation: IConversationQueryData
+    conversation: IConversationQueryData | undefined
   },
 ) => {
   const { clientInboxId, xmtpConversationId, conversation } = args

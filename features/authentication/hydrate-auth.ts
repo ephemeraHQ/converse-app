@@ -25,10 +25,10 @@ export async function hydrateAuth() {
     validateXmtpInstallation({
       inboxId: currentSender.inboxId,
     })
-      .catch(function (error) {
-        captureError(error)
-        useAuthenticationStore.getState().actions.setStatus("signedOut")
-        return
+      .then((isValid) => {
+        if (!isValid) {
+          useAuthenticationStore.getState().actions.setStatus("signedOut")
+        }
       })
       .catch(captureError)
   } catch (error) {
