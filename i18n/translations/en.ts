@@ -538,7 +538,7 @@ export const en = {
     section_title: "RECOMMENDED PROFILES",
     loading: "Loading your recommendations",
     no_recommendations:
-      "We didn not find people to match you with. We're still early and we're not using that many signals. You can ",
+      "We did not find people to match you with. We're still early and we're not using that many signals. You can ",
     signal_list: "find the current list here",
     please_feel_free_to: ", please feel free to ",
     contact_pol: "contact our co-founder Pol",
