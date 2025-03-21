@@ -15,6 +15,7 @@ declare global {
       EXPO_PUBLIC_SENTRY_DSN: string
       EXPO_PUBLIC_ALCHEMY_API_KEY: string
       EXPO_PUBLIC_SECURE_REACT_QUERY_ENCRYPTION_KEY: string
+      EXPO_PUBLIC_ENABLE_REACT_QUERY_PERSIST_CACHE: string
     }
   }
 }

@@ -18,6 +18,7 @@
 - Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError).
 - Don't create functions inside other functions unless specified.
 - Add clear, concise comments to explain non-obvious logic.
+- Keep comments minimal and focused on complex logic only. Don't add comments for obvious code or document parameters and return types that are already clear from the function signature.
 - Handle errors at the caller level unless logging is needed.
 - Minimize using external hooks inside custom hooks to prevent unnecessary rerenders.
 - Use Zod for external API response validation.
@@ -33,6 +34,36 @@ if (isValid) return
 // ✅ Good: Block-style if statement
 if (isValid) {
   return
+}
+```
+
+## Code Comments
+
+- Keep comments minimal and focused on complex logic only.
+- Don't add comments for obvious code or document parameters and return types that are already clear from the function signature.
+- Add clear, concise comments to explain non-obvious logic or implementation decisions.
+- Use comments to explain "why" rather than "what" when the code itself clearly shows what it's doing.
+- Avoid verbose JSDoc-style documentation with @param and @returns when TypeScript types already provide this information.
+- Place comments directly above the specific line or block they explain, not at the function level unless explaining the function's overall purpose.
+
+```typescript
+// ❌ Bad: Excessive commenting with redundant information
+/**
+ * Check if a conversation exists with the given inboxId
+ * @param inboxId The inbox ID to check
+ * @returns Promise with { exists, conversationId } - where conversationId is set if exists is true
+ */
+async function doesConversationExist(inboxId: string) {
+  // Generic comment about implementation
+  const result = await db.query(...)
+  return result
+}
+
+// ✅ Good: Comments only where needed, directly above relevant code
+async function doesConversationExist(inboxId: string) {
+  // Using lightweight query that only checks existence for performance
+  const result = await db.query(`SELECT EXISTS(SELECT 1 FROM conversations WHERE inbox_id = $1)`, [inboxId])
+  return result
 }
 ```
 

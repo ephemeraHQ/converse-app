@@ -42,11 +42,11 @@ function handleGroupMetadataChange(args: {
 }
 
 export function useMessagePlainText(message: IConversationMessage | undefined) {
-  // Get initiator profile for group updates
   const initiatorInboxId =
-    message && isGroupUpdatedMessage(message) ? message.content.initiatedByInboxId : undefined
+    message?.senderInboxId ??
+    (message && isGroupUpdatedMessage(message) ? message.content.initiatedByInboxId : undefined)
 
-  const { displayName: initiatorDisplayName } = usePreferredDisplayInfo({
+  const { displayName: initiatorDisplayName = "Someone" } = usePreferredDisplayInfo({
     inboxId: initiatorInboxId,
   })
 
@@ -90,12 +90,11 @@ export function useMessagePlainText(message: IConversationMessage | undefined) {
       // Handle group update messages
       if (isGroupUpdatedMessage(message)) {
         const content = message.content
-        const initiatorName = initiatorDisplayName ?? "Someone"
 
         // Handle metadata changes
         if (content.metadataFieldsChanged.length > 0) {
           return handleGroupMetadataChange({
-            initiatorName,
+            initiatorName: initiatorDisplayName,
             content,
           })
         }
@@ -104,15 +103,15 @@ export function useMessagePlainText(message: IConversationMessage | undefined) {
         if (content.membersAdded.length > 0) {
           const memberName = addedMemberDisplayInfos?.[0]?.displayName ?? "someone"
           return content.membersAdded.length === 1
-            ? `${initiatorName} added ${memberName}`
-            : `${initiatorName} added ${content.membersAdded.length} members`
+            ? `${initiatorDisplayName} added ${memberName}`
+            : `${initiatorDisplayName} added ${content.membersAdded.length} members`
         }
 
         if (content.membersRemoved.length > 0) {
           const memberName = removedMemberDisplayInfos?.[0]?.displayName ?? "someone"
           return content.membersRemoved.length === 1
-            ? `${initiatorName} removed ${memberName}`
-            : `${initiatorName} removed ${content.membersRemoved.length} members`
+            ? `${initiatorDisplayName} removed ${memberName}`
+            : `${initiatorDisplayName} removed ${content.membersRemoved.length} members`
         }
 
         return "Group updated"
@@ -127,7 +126,7 @@ export function useMessagePlainText(message: IConversationMessage | undefined) {
       }
 
       if (isReactionMessage(message)) {
-        return "Reaction"
+        return `${initiatorDisplayName} reacted with ${message.content.content}`
       }
 
       const _ensureNever: never = message

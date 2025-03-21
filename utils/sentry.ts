@@ -3,13 +3,14 @@ import type { ErrorEvent, EventHint } from "@sentry/types"
 import { QueryObserver } from "@tanstack/react-query"
 import * as Updates from "expo-updates"
 import { useEffect } from "react"
-import { useCurrentSender, useMultiInboxStore } from "@/features/authentication/multi-inbox.store"
+import { useCurrentSender } from "@/features/authentication/multi-inbox.store"
 import {
   getCurrentUserQueryData,
   getCurrentUserQueryOptions,
 } from "@/features/current-user/curent-user.query"
 import { getProfileQueryConfig, getProfileQueryData } from "@/features/profiles/profiles.query"
 import { getEnv, isDev } from "@/utils/getEnv"
+import { sentryLogger } from "@/utils/logger"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
 import { config } from "../config"
 
@@ -86,6 +87,11 @@ export function sentryTrackError({ error, extras, tags }: ISentryTrackErrorArgs)
 }
 
 export function sentryIdentifyUser(args: { userId?: string; username?: string }) {
+  sentryLogger.debug("Identifying user", {
+    userId: args.userId,
+    username: args.username,
+  })
+
   Sentry.setUser({
     ...(args.userId && { id: args.userId }),
     ...(args.username && { username: args.username }),

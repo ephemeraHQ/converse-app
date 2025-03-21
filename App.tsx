@@ -73,8 +73,10 @@ export function App() {
         maxAge: DEFAULT_GC_TIME,
         buster: config.reactQueryPersistCacheIsEnabled ? "v4" : undefined,
         dehydrateOptions: {
+          // Determines which queries should be persisted to storage
           shouldDehydrateQuery(query) {
             if (!config.reactQueryPersistCacheIsEnabled) {
+              logger.debug("Not dehydrating query because persist cache is disabled")
               return false
             }
 
@@ -83,15 +85,7 @@ export function App() {
               query.state.status !== "pending" &&
               query.state.fetchStatus !== "fetching"
 
-            if (!shouldHydrate) {
-              logger.debug("Not hydrating query", {
-                queryKey: query.queryKey,
-                queryState: query.state,
-              })
-              return false
-            }
-
-            return true
+            return shouldHydrate
           },
         },
       }}

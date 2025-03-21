@@ -77,7 +77,7 @@ function createMMKVPersister(storage: MMKV): ReactQueryPersister {
 }
 
 export const reactQueryPersister = createMMKVPersister(reactQueryMMKV)
-export const secureQueryPersister = createMMKVPersister(secureQueryMMKV)
+// export const secureQueryPersister = createMMKVPersister(secureQueryMMKV)
 
 /**
  * Utility function to help debug React Query issues in development
