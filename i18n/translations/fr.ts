@@ -587,6 +587,9 @@ export const fr = {
     copy_link: "Copier le lien",
   },
 
+  "Copy link": "Copier le lien",
+  "Link copied": "Lien copié",
+
   // Profile strings
   Cancel: "Annuler",
   Edit: "Modifier",

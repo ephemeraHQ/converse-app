@@ -570,13 +570,7 @@ export const en = {
     member_removed_unknown: "{{username}} removed a member from the group",
     members_removed: "{{username}} removed {{count}} members from the group",
   },
-
   file_preview: "File preview",
-
-  share_profile: {
-    link_copied: "Link copied",
-    copy_link: "Copy link",
-  },
 }
 
 export type Translations = typeof en

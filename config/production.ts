@@ -10,7 +10,7 @@ export const productionConfig: IConfig = {
   }),
   bundleId: Platform.OS === "android" ? "com.converse.prod" : "com.converse.native",
   scheme: "converse",
-  websiteDomain: "converse.xyz",
+  websiteDomain: "convos.org",
   usernameSuffix: ".converse.xyz",
   universalLinks: ["converse.xyz/", "getconverse.app/"].flatMap((domain) => [
     `https://${domain}`,
