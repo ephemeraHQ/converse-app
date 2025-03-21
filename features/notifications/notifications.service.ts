@@ -5,7 +5,7 @@ import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.stor
 import { ensureNotificationsPermissions } from "@/features/notifications/notifications-permissions.query"
 import { registerNotificationInstallation } from "@/features/notifications/notifications.api"
 import { ensureXmtpInstallationQueryData } from "@/features/xmtp/xmtp-installations/xmtp-installation.query"
-import { GenericError, PushNotificationError } from "@/utils/error"
+import { GenericError, NotificationError } from "@/utils/error"
 import logger, { notificationsLogger } from "@/utils/logger"
 
 // Full flow
@@ -45,7 +45,7 @@ export async function registerPushNotifications() {
       },
     })
   } catch (error) {
-    throw new PushNotificationError({
+    throw new NotificationError({
       error,
       additionalMessage: "Error registering notification installation",
     })

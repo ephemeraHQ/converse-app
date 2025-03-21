@@ -1,6 +1,6 @@
 import * as Notifications from "expo-notifications"
 import { useEffect, useRef } from "react"
-import logger, { notificationsLogger } from "@/utils/logger"
+import { notificationsLogger } from "@/utils/logger"
 
 type INotificationListenerCallbacks = {
   onNotificationDisplayedInForeground?: (notification: Notifications.Notification) => void
@@ -37,6 +37,10 @@ export function useNotificationListeners({
     // Listen for notification taps while app is running
     notificationTapListener.current = Notifications.addNotificationResponseReceivedListener(
       (response) => {
+        notificationsLogger.debug(
+          `[useNotificationListenersWhileRunning] Notification tapped:`,
+          response.notification,
+        )
         onNotificationTappedWhileRunning?.(response)
       },
     )

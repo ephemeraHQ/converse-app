@@ -222,7 +222,12 @@ export default (): ExpoConfig => {
       ],
     },
     plugins: [
-      ["expo-notifications"],
+      [
+        "expo-notifications",
+        {
+          enableBackgroundRemoteNotifications: true,
+        },
+      ],
       ["expo-secure-store"],
       [
         "expo-local-authentication",

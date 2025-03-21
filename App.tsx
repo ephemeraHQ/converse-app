@@ -17,7 +17,7 @@ import { reactQueryClient } from "@/utils/react-query/react-query.client"
 import { DEFAULT_GC_TIME } from "@/utils/react-query/react-query.constants"
 import { reactQueryPersister } from "@/utils/react-query/react-query.utils"
 import "expo-dev-client"
-import React, { useEffect } from "react"
+import React from "react"
 import { GestureHandlerRootView } from "react-native-gesture-handler"
 import { KeyboardProvider } from "react-native-keyboard-controller"
 // import { DevToolsBubble } from "react-native-react-query-devtools"
@@ -26,6 +26,7 @@ import { ThirdwebProvider } from "thirdweb/react"
 import { base } from "viem/chains"
 import { config } from "./config"
 import { useMonitorNetworkConnectivity } from "./dependencies/NetworkMonitor/use-monitor-network-connectivity"
+import { registerBackgroundNotificationTask } from "./features/notifications/background-notification-handler"
 import { setupConversationsNotificationsSubscriptions } from "./features/notifications/notifications-conversations-subscriptions"
 import { configureForegroundNotificationBehavior } from "./features/notifications/notifications-init"
 import { AppNavigator } from "./navigation/app-navigator"
@@ -37,6 +38,7 @@ preventSplashScreenAutoHide()
 sentryInit()
 configureForegroundNotificationBehavior()
 setupConversationsNotificationsSubscriptions()
+registerBackgroundNotificationTask()
 
 const baseMainnetOverride: Chain = {
   ...base,
@@ -59,11 +61,6 @@ export function App() {
   useCoinbaseWalletListener()
 
   const { themeScheme, setThemeContextOverride, ThemeProvider } = useThemeProvider()
-
-  useEffect(() => {
-    // Disabled for now until we go live and it works with bun
-    // setupAppAttest();
-  }, [])
 
   return (
     <PersistQueryClientProvider
