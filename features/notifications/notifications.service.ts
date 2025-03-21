@@ -6,35 +6,33 @@ import { ensureNotificationsPermissions } from "@/features/notifications/notific
 import { registerNotificationInstallation } from "@/features/notifications/notifications.api"
 import { ensureXmtpInstallationQueryData } from "@/features/xmtp/xmtp-installations/xmtp-installation.query"
 import { GenericError, NotificationError } from "@/utils/error"
-import logger, { notificationsLogger } from "@/utils/logger"
+import { notificationsLogger } from "@/utils/logger"
 
 // Full flow
 export async function registerPushNotifications() {
   try {
     const result = await requestNotificationsPermissions()
 
-    notificationsLogger.debug("[AppNavigator] Notification permissions result:", result)
+    notificationsLogger.debug("Notification permissions result:", result)
 
     if (!result.granted) {
       throw new Error("Notifications permissions not granted")
     }
 
-    logger.debug(
-      "[AppNavigator] Notification permissions granted, registering for push notifications",
+    notificationsLogger.debug(
+      "Notification permissions granted, registering for push notifications",
     )
-
     const token = await getPushNotificationsToken()
-    logger.debug("[AppNavigator] Device push token received:", token)
+    notificationsLogger.debug("Device push token received:", token)
 
     const currentSender = getSafeCurrentSender()
-    logger.debug("[AppNavigator] Current sender:", currentSender)
 
+    notificationsLogger.debug(`Getting XMTP installation ID for sender: ${currentSender.inboxId}`)
     const installationId = await ensureXmtpInstallationQueryData({
       inboxId: currentSender.inboxId,
     })
 
-    logger.debug("[AppNavigator] XMTP installation ID:", installationId)
-
+    notificationsLogger.debug("Registering notification installation")
     await registerNotificationInstallation({
       installationId,
       deliveryMechanism: {
@@ -44,6 +42,7 @@ export async function registerPushNotifications() {
         },
       },
     })
+    notificationsLogger.debug("Notification installation registered")
   } catch (error) {
     throw new NotificationError({
       error,

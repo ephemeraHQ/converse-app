@@ -4,7 +4,10 @@ import { getAppConfig } from "@/features/app-settings/app-settings.api"
 export function getAppSettingsQueryOptions() {
   return queryOptions({
     queryKey: ["app-settings"],
-    queryFn: () => getAppConfig(),
+    queryFn: getAppConfig,
+    meta: {
+      persist: false,
+    },
   })
 }
 

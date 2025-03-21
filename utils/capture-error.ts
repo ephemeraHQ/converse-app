@@ -12,12 +12,10 @@ export async function captureError(
   try {
     const { extras } = options
 
-    if (__DEV__) {
-      if (extras) {
-        logger.error(error, extras)
-      } else {
-        logger.error(error)
-      }
+    if (extras) {
+      logger.error(error, extras)
+    } else {
+      logger.error(error)
     }
 
     if (error instanceof FeedbackError) {

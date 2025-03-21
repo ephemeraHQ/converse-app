@@ -40,7 +40,9 @@ export const useLogout = () => {
         )
       }
     },
-    [privyLogout],
+    // Don't add privyLogout to the dependencies array. It's useless and cause lots of re-renders of callers
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
   )
 
   return { logout }

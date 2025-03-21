@@ -81,6 +81,7 @@ export const AuthOnboardingContextProvider = (props: IAuthOnboardingContextProps
 
       // Step 1: Passkey login
       authLogger.debug(`[Passkey Login] Starting passkey authentication`)
+
       const { data: user, error: loginError } = await tryCatch(
         privyLoginWithPasskey({
           relyingParty: RELYING_PARTY,
@@ -88,10 +89,13 @@ export const AuthOnboardingContextProvider = (props: IAuthOnboardingContextProps
       )
 
       if (loginError) {
-        if (
-          loginError.message.includes("AuthenticationServices.AuthorizationError error 1001") ||
-          loginError.message.includes("UserCancelled")
-        ) {
+        if (loginError.message.includes("UserCancelled")) {
+          authLogger.debug(`[Passkey Login] User cancelled passkey login`)
+          return
+        }
+
+        if (loginError.message.includes("AuthenticationServices.AuthorizationError error 1001")) {
+          authLogger.debug(`[Passkey Login] User cancelled passkey login`)
           return
         }
 

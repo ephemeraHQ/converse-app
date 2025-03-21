@@ -151,6 +151,7 @@ export default (): ExpoConfig => {
         NSAppTransportSecurity: {
           NSAllowsLocalNetworking: true, // Not sure why
         },
+        UIBackgroundModes: ["remote-notification"],
       },
     },
     android: {

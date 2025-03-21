@@ -8,42 +8,60 @@ import { apiLogger } from "@/utils/logger"
 import { api } from "../../utils/api/api"
 import { ApiError, AuthenticationError } from "../../utils/error"
 
+/**
+ * Hook that sets up an axios interceptor to refresh JWT tokens when requests fail with 401
+ * Must be used high in the component tree to ensure proper authentication handling
+ */
 export const useRefreshJwtAxiosInterceptor = () => {
   const { logout } = useLogout()
 
   useEffect(() => {
-    // Store interceptors so we can remove them later
+    // Create a function that handles JWT refresh failures by logging out the user
+    const handleRefreshFailure = async () => {
+      apiLogger.debug("[useRefreshJwtAxiosInterceptor] Logging out due to JWT refresh failure")
+      try {
+        await logout({ caller: "useRefreshJwtAxiosInterceptor" })
+      } catch (error) {
+        captureError(error)
+      }
+    }
+
+    // Add the response interceptor
     const responseInterceptor = api.interceptors.response.use(
-      (response) => response,
-      axiosRefreshJwtInterceptor(api, () => {
-        apiLogger.debug("[useLogoutOnJwtRefreshError] Logging out")
-        // Now we can use hook-based functions here
-        logout({ caller: "useLogoutOnJwtRefreshError" })
-      }),
+      (response) => response, // Pass through successful responses
+      createRefreshTokenInterceptor(api, handleRefreshFailure),
     )
 
-    // Cleanup function to remove interceptors when the component unmounts
-    // or when logout changes
+    // Cleanup function removes the interceptor when the component unmounts
     return () => {
       api.interceptors.response.eject(responseInterceptor)
     }
-  }, [logout]) // Only reconfigure if logout changes
+  }, [logout])
 
   return api
 }
 
+// Extended type for tracking retry attempts
 type ExtendedAxiosRequestConfig = AxiosRequestConfig & {
   _retry?: boolean
 }
 
-const axiosRefreshJwtInterceptor = (api: AxiosInstance, handleRefreshJwtFailure: () => void) => {
+/**
+ * Creates an interceptor function that handles 401 errors by refreshing the JWT token
+ * and retrying the original request with the new token
+ */
+const createRefreshTokenInterceptor = (
+  api: AxiosInstance,
+  onRefreshFailure: () => Promise<void>,
+) => {
   return async (error: AxiosError): Promise<AxiosResponse> => {
+    // If there's no response, we can't handle this error
     if (!error.response) {
       return Promise.reject(error)
     }
 
-    const isUnauthorizedError = error.response.status === 401
-    if (!isUnauthorizedError) {
+    // Only handle 401 Unauthorized errors
+    if (error.response.status !== 401) {
       return Promise.reject(error)
     }
 
@@ -52,44 +70,44 @@ const axiosRefreshJwtInterceptor = (api: AxiosInstance, handleRefreshJwtFailure:
       captureError(
         new ApiError({
           error,
-          additionalMessage: `Skipping refreshing JWT because original request is missing`,
+          additionalMessage: "Cannot retry request: original request config is missing",
         }),
       )
       return Promise.reject(error)
     }
 
-    const hasTriedTokenRefresh = originalRequest._retry
-
-    // If we already tried refreshing and still got 401,
-    // this means our refresh token is invalid/expired
-    if (hasTriedTokenRefresh) {
+    // If we've already tried to refresh the token for this request, don't try again
+    // This prevents infinite refresh loops
+    if (originalRequest._retry) {
+      apiLogger.debug("Token refresh failed: already attempted refresh for this request")
       captureError(
         new ApiError({
           error,
-          additionalMessage: `Skipping refreshing JWT because we already tried and failed. Maybe logout?`,
+          additionalMessage: "JWT refresh failed: token refresh already attempted",
         }),
       )
-      // handleRefreshJwtFailure();
+
+      // Logout and reject - we can't recover from this
+      await onRefreshFailure()
       return Promise.reject(error)
     }
 
     try {
-      // Mark this request as retried to prevent infinite refresh loops
+      // Mark this request as retried
       originalRequest._retry = true
 
-      // 1. Attempt to get a fresh JWT token
+      // Get a fresh JWT token
       const jwtToken = await refreshAndGetNewJwtQuery()
-
       if (!jwtToken) {
         throw new AuthenticationError({
-          error: new Error("Failed to refresh token"),
+          error: new Error("Failed to obtain a new JWT token"),
         })
       }
 
-      // 2. Get new headers with the fresh token
+      // Get headers with the new token
       const updatedHeaders = await getConvosAuthenticatedHeaders()
 
-      // 3. Update and retry the original request with new token
+      // Retry the original request with the new token
       return api({
         ...originalRequest,
         headers: {
@@ -97,9 +115,10 @@ const axiosRefreshJwtInterceptor = (api: AxiosInstance, handleRefreshJwtFailure:
           ...updatedHeaders,
         },
       })
-    } catch (error) {
-      handleRefreshJwtFailure()
-      return Promise.reject(error)
+    } catch (refreshError) {
+      // If token refresh fails, logout the user and reject the promise
+      await onRefreshFailure()
+      return Promise.reject(refreshError)
     }
   }
 }

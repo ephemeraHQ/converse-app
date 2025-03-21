@@ -13,7 +13,7 @@ const BACKGROUND_NOTIFICATION_TASK = "BACKGROUND_NOTIFICATION_TASK"
 export async function registerBackgroundNotificationTask() {
   // First, define the task handler
   TaskManager.defineTask(BACKGROUND_NOTIFICATION_TASK, async ({ data, error }) => {
-    console.log("data:", data)
+    notificationsLogger.debug("Background notification task executed", { data })
 
     if (error) {
       captureError(error)
@@ -32,6 +32,8 @@ export async function registerBackgroundNotificationTask() {
       // https://docs.expo.dev/versions/latest/sdk/notifications/#registertaskasync
       const receivedData = data as { notification: Notifications.Notification }
 
+      notificationsLogger.debug("Received data in background task:", receivedData)
+
       if (!receivedData.notification) {
         notificationsLogger.warn("No notification data in background task")
         return
@@ -39,7 +41,6 @@ export async function registerBackgroundNotificationTask() {
 
       const notification = receivedData.notification
 
-      // Here we can process the notification before it's shown to the user
       notificationsLogger.debug(
         "Processing background notification with title:",
         notification.request.content.title,
@@ -73,6 +74,16 @@ export async function registerBackgroundNotificationTask() {
   // Then register the task
   try {
     notificationsLogger.debug("Registering background notification task...")
+
+    // First check if task is already registered
+    const isTaskRegistered = await TaskManager.isTaskRegisteredAsync(BACKGROUND_NOTIFICATION_TASK)
+    notificationsLogger.debug("Is background task already registered:", isTaskRegistered)
+
+    if (isTaskRegistered) {
+      notificationsLogger.debug("Background task already registered, unregistering first")
+      await Notifications.unregisterTaskAsync(BACKGROUND_NOTIFICATION_TASK)
+    }
+
     await Notifications.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK)
     notificationsLogger.debug("Background notification task registered successfully")
   } catch (error) {
@@ -82,6 +93,37 @@ export async function registerBackgroundNotificationTask() {
         additionalMessage: "Failed to register background notification task",
       }),
     )
+  }
+}
+
+/**
+ * Tests the background notification handling by sending a test notification
+ * Call this function to verify if your background notification task is working properly
+ */
+export async function testBackgroundNotificationTask() {
+  try {
+    notificationsLogger.debug("Scheduling test notification to verify background task...")
+
+    const notificationId = await Notifications.scheduleNotificationAsync({
+      content: {
+        title: "Test Background Task",
+        body: "This notification should be intercepted and modified",
+        data: { test: true },
+      },
+      trigger: { seconds: 5 },
+    })
+
+    notificationsLogger.debug("Test notification scheduled with ID:", notificationId)
+
+    return notificationId
+  } catch (error) {
+    captureError(
+      new NotificationError({
+        error,
+        additionalMessage: "Failed to schedule test notification",
+      }),
+    )
+    throw error
   }
 }
 
