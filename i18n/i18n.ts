@@ -4,6 +4,7 @@ import i18n from "i18n-js"
 import { I18nManager } from "react-native"
 import { en, Translations } from "./translations/en"
 import { fr } from "./translations/fr"
+import { tr } from "./translations/tr"
 
 export { i18n }
 
@@ -14,6 +15,7 @@ i18n.translations = {
   en,
   "en-US": en,
   fr,
+  tr,
 }
 
 const fallbackLocale = "en-US"
