@@ -7,6 +7,7 @@ import {
   addMessageToConversationMessagesQueryData,
   getConversationMessagesQueryOptions,
   IMessageAccumulator,
+  invalidateConversationMessagesQuery,
   removeMessageToConversationMessagesQueryData,
 } from "@/features/conversation/conversation-chat/conversation-messages.query"
 import {
@@ -171,17 +172,32 @@ export function useSendMessage() {
 
       // Replace each optimistic message with the real one
       if (result.sentMessages && result.sentMessages.length > 0) {
+        let hasError = false
+
         // Replace optimistic messages with real ones, up to the number of messages we have
         context.tmpXmtpMessageIds
           .slice(0, result.sentMessages.length)
           .forEach((tmpXmtpMessageId, index) => {
-            replaceOptimisticMessageWithReal({
-              tmpXmtpMessageId,
-              xmtpConversationId: variables.xmtpConversationId,
-              clientInboxId: currentSender.inboxId,
-              realMessage: result.sentMessages[index],
-            })
+            try {
+              replaceOptimisticMessageWithReal({
+                tmpXmtpMessageId,
+                xmtpConversationId: variables.xmtpConversationId,
+                clientInboxId: currentSender.inboxId,
+                realMessage: result.sentMessages[index],
+              })
+            } catch (error) {
+              captureError(error)
+              hasError = true
+            }
           })
+
+        // If any replacement failed, invalidate the conversation messages query
+        if (hasError) {
+          invalidateConversationMessagesQuery({
+            clientInboxId: currentSender.inboxId,
+            xmtpConversationId: variables.xmtpConversationId,
+          })
+        }
       }
     },
     onError: (_, variables, context) => {
@@ -237,8 +253,7 @@ function replaceOptimisticMessageWithReal(args: {
   const tempOptimisticMessageIndex = existingMessages.ids.indexOf(tmpXmtpMessageId)
 
   if (tempOptimisticMessageIndex === -1) {
-    captureError(new Error("[replaceOptimisticMessageWithReal] Temp message not found"))
-    return
+    throw new Error("[replaceOptimisticMessageWithReal] Temp message not found")
   }
 
   // Create new ids array with the real message id replacing the temp id

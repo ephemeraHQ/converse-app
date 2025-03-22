@@ -1,10 +1,13 @@
 import { useNavigation } from "@react-navigation/native"
 import React, { useCallback } from "react"
 import { Alert } from "react-native"
+import { ViewStyle } from "react-native/Libraries/StyleSheet/StyleSheetTypes"
+import { Avatar } from "@/components/avatar"
 import { Center } from "@/design-system/Center"
 import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu"
 import { HStack } from "@/design-system/HStack"
 import { Icon, iconRegistry } from "@/design-system/Icon/Icon"
+import { Pressable } from "@/design-system/Pressable"
 import { Text } from "@/design-system/Text"
 import {
   useMultiInboxStore,
@@ -14,15 +17,8 @@ import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-p
 import { usePreferredDisplayInfoBatch } from "@/features/preferred-display-info/use-preferred-display-info-batch"
 import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { translate } from "@/i18n"
-import { useAppTheme } from "@/theme/use-app-theme"
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme"
 import { shortAddress } from "@/utils/strings/shortAddress"
-import {
-  $dropDownMenu,
-  $iconContainer,
-  $rowContainer,
-  $titleContainer,
-  ProfileAvatar,
-} from "../../conversation/conversation-list/conversation-list.screen-header"
 
 export function AccountSwitcher(props: { noAvatar?: boolean }) {
   const { noAvatar } = props
@@ -96,3 +92,47 @@ export function AccountSwitcher(props: { noAvatar?: boolean }) {
     </HStack>
   )
 }
+
+const $titleContainer: ViewStyle = {
+  alignItems: "center",
+}
+
+const $rowContainer: ThemedStyle<ViewStyle> = (theme) => ({
+  alignItems: "center",
+  columnGap: theme.spacing.xxxs,
+})
+
+const $iconContainer: ThemedStyle<ViewStyle> = (theme) => ({
+  width: theme.spacing.container.small,
+  height: theme.spacing.container.small,
+})
+
+const $dropDownMenu: ThemedStyle<ViewStyle> = (theme) => ({
+  paddingVertical: theme.spacing.sm,
+  paddingRight: theme.spacing.sm,
+})
+
+export function ProfileAvatar() {
+  const { theme, themed } = useAppTheme()
+  const navigation = useNavigation()
+  const { inboxId } = useSafeCurrentSender()
+  const { displayName, avatarUrl } = usePreferredDisplayInfo({ inboxId })
+
+  return (
+    <Pressable
+      onPress={() => {
+        navigation.navigate("Profile", {
+          inboxId,
+        })
+      }}
+      hitSlop={theme.spacing.sm}
+    >
+      <Center style={themed($avatarContainer)}>
+        <Avatar uri={avatarUrl} name={displayName} sizeNumber={theme.avatarSize.sm} />
+      </Center>
+    </Pressable>
+  )
+}
+const $avatarContainer: ThemedStyle<ViewStyle> = (theme) => ({
+  padding: theme.spacing.xxs,
+})

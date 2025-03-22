@@ -156,13 +156,3 @@ const ConversationCreateSearchInputWrapper = memo(function ConversationCreateSea
     />
   )
 })
-
-export const DmConversationEmpty = memo(function DmConversationEmpty() {
-  // Will never really be empty anyway because to create the DM conversation the user has to send a first message
-  return null
-})
-
-export const GroupConversationEmpty = memo(() => {
-  // Will never really be empty anyway becaue we have group updates
-  return null
-})

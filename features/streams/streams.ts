@@ -1,5 +1,5 @@
 import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
-import { logger, streamLogger } from "@utils/logger"
+import { streamLogger } from "@utils/logger"
 import { useEffect } from "react"
 import { useMultiInboxStore } from "@/features/authentication/multi-inbox.store"
 import { stopStreamingConversations } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-stream"
@@ -19,7 +19,7 @@ export function useSetupStreamingSubscriptions() {
   // useAppStore.subscribe(
   //   (state) => state.isInternetReachable,
   //   (isInternetReachable) => {
-  //     logger.debug(
+  //     streamLogger.debug(
   //       `[Streaming] Internet reachability changed: ${isInternetReachable}`
   //     );
   //     if (!isInternetReachable) {
@@ -105,7 +105,7 @@ async function startStreaming(inboxIdsToStream: IXmtpInboxId[]) {
     const streamingState = store.accountStreamingStates[inboxId]
 
     if (!streamingState?.isStreamingConversations) {
-      logger.debug(`[Streaming] Starting conversation stream for ${inboxId}`)
+      streamLogger.debug(`[Streaming] Starting conversation stream for ${inboxId}...`)
       try {
         await startConversationStreaming({ clientInboxId: inboxId })
         store.actions.updateStreamingState(inboxId, {
@@ -120,7 +120,7 @@ async function startStreaming(inboxIdsToStream: IXmtpInboxId[]) {
     }
 
     if (!streamingState?.isStreamingMessages) {
-      logger.debug(`[Streaming] Starting messages stream for ${inboxId}`)
+      streamLogger.debug(`[Streaming] Starting messages stream for ${inboxId}`)
       try {
         await startMessageStreaming({ clientInboxId: inboxId })
         store.actions.updateStreamingState(inboxId, {
@@ -136,7 +136,7 @@ async function startStreaming(inboxIdsToStream: IXmtpInboxId[]) {
 
     // TODO: Fix and handle the consent stream. I think needed for notifications
     // if (!streamingState?.isStreamingConsent) {
-    //   logger.debug(`[Streaming] Starting consent stream for ${account}`);
+    //   streamLogger.debug(`[Streaming] Starting consent stream for ${account}`);
     //   try {
     //     store.actions.updateStreamingState(account, {
     //       isStreamingConsent: true,
@@ -158,13 +158,13 @@ async function stopStreaming(inboxIds: IXmtpInboxId[]) {
   await Promise.all(
     inboxIds.map(async (inboxId) => {
       try {
-        logger.debug(`[Streaming] Stopping streams for ${inboxId}`)
+        streamLogger.debug(`[Streaming] Stopping streams for ${inboxId}`)
         await Promise.all([
           stopStreamingAllMessage({ inboxId }),
           stopStreamingConversations({ inboxId }),
           stopStreamingConsent({ inboxId }),
         ])
-        logger.debug(`[Streaming] Stopped streams for ${inboxId}`)
+        streamLogger.debug(`[Streaming] Stopped streams for ${inboxId}`)
       } catch (error) {
         captureError(
           new StreamError({

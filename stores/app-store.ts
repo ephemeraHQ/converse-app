@@ -1,6 +1,6 @@
 import { create } from "zustand"
 import { createJSONStorage, persist, subscribeWithSelector } from "zustand/middleware"
-import { zustandMMKVStorage } from "../utils/mmkv"
+import { zustandMMKVStorage } from "@/utils/zustand/zustand"
 
 type AppStoreType = {
   isInternetReachable: boolean

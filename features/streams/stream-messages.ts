@@ -41,7 +41,7 @@ async function handleNewMessage(args: {
 }) {
   const { clientInboxId, message } = args
 
-  streamLogger.debug(`[handleNewMessage] message: ${JSON.stringify(message)}`)
+  streamLogger.debug(`New message:`, message)
 
   const messageWasSentByCurrentUser = message.senderInboxId === clientInboxId
 

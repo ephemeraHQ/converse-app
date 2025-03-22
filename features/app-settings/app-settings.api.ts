@@ -1,6 +1,6 @@
 import { z } from "zod"
-import { api } from "@/utils/api/api"
 import { captureError } from "@/utils/capture-error"
+import { convosApi } from "@/utils/convos-api/convos-api-instance"
 
 export const AppConfigSchema = z.object({
   minimumAppVersion: z.object({
@@ -12,7 +12,7 @@ export const AppConfigSchema = z.object({
 export type IAppConfig = z.infer<typeof AppConfigSchema>
 
 export async function getAppConfig() {
-  const { data } = await api.get<IAppConfig>("/api/v1/app-config")
+  const { data } = await convosApi.get<IAppConfig>("/api/v1/app-config")
 
   const result = AppConfigSchema.safeParse(data)
 

@@ -2,8 +2,8 @@ import type { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { z } from "zod"
 import { getCurrentUserQueryData } from "@/features/current-user/curent-user.query"
 import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
-import { api } from "@/utils/api/api"
 import { captureError } from "@/utils/capture-error"
+import { convosApi } from "@/utils/convos-api/convos-api-instance"
 
 const ConversationMetadataSchema = z.object({
   deleted: z.boolean().optional(),
@@ -19,7 +19,7 @@ export async function getConversationMetadata(args: { xmtpConversationId: IXmtpC
   const { xmtpConversationId } = args
 
   try {
-    const { data } = await api.get<IConversationMetadata>(
+    const { data } = await convosApi.get<IConversationMetadata>(
       `/api/v1/metadata/conversation/${xmtpConversationId}`,
     )
 
@@ -175,7 +175,7 @@ async function updateConversationMetadata(args: {
     throw new Error("No current user found")
   }
 
-  const { data } = await api.post<IConversationMetadata>(`/api/v1/metadata/conversation`, {
+  const { data } = await convosApi.post<IConversationMetadata>(`/api/v1/metadata/conversation`, {
     conversationId: xmtpConversationId,
     deviceIdentityId: currentUser.identities.find((identity) => identity.xmtpId === clientInboxId)
       ?.id,

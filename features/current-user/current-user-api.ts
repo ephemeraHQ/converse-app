@@ -1,6 +1,6 @@
 import { z } from "zod"
-import { api } from "@/utils/api/api"
 import { captureError } from "@/utils/capture-error"
+import { convosApi } from "@/utils/convos-api/convos-api-instance"
 
 export const CurrentUserSchema = z.object({
   id: z.string(),
@@ -16,7 +16,7 @@ export const CurrentUserSchema = z.object({
 export type ICurrentUser = z.infer<typeof CurrentUserSchema>
 
 export async function fetchCurrentUser(): Promise<ICurrentUser> {
-  const { data } = await api.get<ICurrentUser>("/api/v1/users/me")
+  const { data } = await convosApi.get<ICurrentUser>("/api/v1/users/me")
 
   const parseResult = CurrentUserSchema.safeParse(data)
   if (!parseResult.success) {

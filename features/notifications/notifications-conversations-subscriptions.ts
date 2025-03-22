@@ -1,7 +1,10 @@
 import { QueryObserver } from "@tanstack/react-query"
 import { useMultiInboxStore } from "@/features/authentication/multi-inbox.store"
 import { getAllowedConsentConversationsQueryObserver } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
-import { getConversationQueryData } from "@/features/conversation/queries/conversation.query"
+import {
+  ensureConversationQueryData,
+  getConversationQueryData,
+} from "@/features/conversation/queries/conversation.query"
 import { isTempConversation } from "@/features/conversation/utils/is-temp-conversation"
 import { getNotificationsPermissionsQueryConfig } from "@/features/notifications/notifications-permissions.query"
 import { userHasGrantedNotificationsPermissions } from "@/features/notifications/notifications.service"
@@ -9,7 +12,7 @@ import { getXmtpConversationHmacKeys } from "@/features/xmtp/xmtp-hmac-keys/xmtp
 import { ensureXmtpInstallationQueryData } from "@/features/xmtp/xmtp-installations/xmtp-installation.query"
 import { IXmtpConversationId, IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
-import { logger, notificationsLogger } from "@/utils/logger"
+import { notificationsLogger } from "@/utils/logger"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
 import {
   subscribeToNotificationTopicsWithMetadata,
@@ -23,8 +26,8 @@ export function setupConversationsNotificationsSubscriptions() {
     getNotificationsPermissionsQueryConfig(),
   )
 
-  permissionsObserver.subscribe(() => {
-    logger.debug("[setupConversationsNotificationsSubscriptions] Notification permissions changed")
+  permissionsObserver.subscribe(({ data }) => {
+    notificationsLogger.debug("Notification permissions query observer triggered")
     updateConversationSubscriptions()
   })
 
@@ -32,7 +35,7 @@ export function setupConversationsNotificationsSubscriptions() {
   useMultiInboxStore.subscribe(
     (state) => state.senders,
     () => {
-      logger.debug("[setupConversationsNotificationsSubscriptions] Multi-inbox senders changed")
+      notificationsLogger.debug("Multi-inbox senders store subscription triggered")
       updateConversationSubscriptions()
     },
     {
@@ -50,48 +53,41 @@ async function subscribeToConversationsNotifications(args: {
 }) {
   const { conversationIds, clientInboxId } = args
 
-  // Check if notifications permissions are granted
-  const hasPermissions = await userHasGrantedNotificationsPermissions()
+  const hasPushNotificationPermissions = await userHasGrantedNotificationsPermissions()
 
-  if (!hasPermissions) {
-    logger.debug(
-      "[subscribeToConversationsNotifications] Skipped notifications subscription - permissions not granted",
+  if (!hasPushNotificationPermissions) {
+    throw new Error(
+      "Notifications permissions not granted to subscribe to conversations notifications",
     )
-    return
   }
 
-  logger.debug(
+  notificationsLogger.debug(
     `[subscribeToConversationsNotifications] Subscribing to ${conversationIds.length} conversations`,
   )
 
   for (const conversationId of conversationIds) {
     try {
-      logger.debug("[subscribeToConversationsNotifications] Subscribing to conversation", {
+      notificationsLogger.debug("Subscribing to conversation", {
         conversationId,
         inboxId: clientInboxId,
       })
 
-      const conversation = getConversationQueryData({
+      const conversation = await ensureConversationQueryData({
         clientInboxId,
         xmtpConversationId: conversationId,
+        caller: "subscribeToConversationsNotifications",
       })
 
       if (!conversation) {
-        logger.debug(
-          "[subscribeToConversationsNotifications] No conversation found, skipping subscription",
-          {
-            conversationId,
-          },
-        )
-        continue
+        throw new Error("Conversation not found")
       }
 
-      logger.debug("[subscribeToConversationsNotifications] Getting installation ID")
+      notificationsLogger.debug("Getting installation ID")
       const installationId = await ensureXmtpInstallationQueryData({
         inboxId: clientInboxId,
       })
 
-      logger.debug("[subscribeToConversationsNotifications] Getting HMAC keys", {
+      notificationsLogger.debug("Getting HMAC keys", {
         conversationId,
       })
       const hmacKeys = await getXmtpConversationHmacKeys({
@@ -99,7 +95,7 @@ async function subscribeToConversationsNotifications(args: {
         conversationId,
       })
 
-      logger.debug("[subscribeToConversationsNotifications] Subscribing to notification topics", {
+      notificationsLogger.debug("Subscribing to notification topics", {
         installationId,
         topic: hmacKeys.topic,
       })
@@ -114,12 +110,9 @@ async function subscribeToConversationsNotifications(args: {
         ],
       })
 
-      logger.debug(
-        "[subscribeToConversationsNotifications] Successfully subscribed to conversation",
-        {
-          conversationId,
-        },
-      )
+      notificationsLogger.debug("Successfully subscribed to conversation", {
+        conversationId,
+      })
     } catch (error) {
       captureError(error)
     }
@@ -135,7 +128,7 @@ async function unsubscribeFromConversationsNotifications(args: {
 }) {
   const { conversationIds, clientInboxId } = args
 
-  logger.debug(
+  notificationsLogger.debug(
     `[unsubscribeFromConversationsNotifications] Unsubscribing from ${conversationIds.length} conversations`,
   )
 
@@ -155,10 +148,9 @@ async function unsubscribeFromConversationsNotifications(args: {
         })
 
         if (!conversation) {
-          logger.debug(
-            "[unsubscribeFromConversationsNotifications] No conversation found, skipping unsubscription",
-            { conversationId },
-          )
+          notificationsLogger.debug("No conversation found, skipping unsubscription", {
+            conversationId,
+          })
           continue
         }
 
@@ -169,23 +161,17 @@ async function unsubscribeFromConversationsNotifications(args: {
         })
 
         // Unsubscribe from the topic
-        logger.debug(
-          "[unsubscribeFromConversationsNotifications] Unsubscribing from notification topic",
-          {
-            installationId,
-            topic: hmacKeys.topic,
-          },
-        )
+        notificationsLogger.debug("Unsubscribing from notification topic", {
+          installationId,
+          topic: hmacKeys.topic,
+        })
 
         await unsubscribeFromNotificationTopics({
           installationId,
           topics: [hmacKeys.topic],
         })
 
-        logger.debug(
-          "[unsubscribeFromConversationsNotifications] Successfully unsubscribed from conversation",
-          { conversationId },
-        )
+        notificationsLogger.debug("Successfully unsubscribed from conversation", { conversationId })
       } catch (error) {
         // Log but continue with other conversations
         captureError(error)
@@ -210,15 +196,14 @@ let previousSendersInboxIds: IXmtpInboxId[] = []
  */
 async function updateConversationSubscriptions() {
   // Check if notifications permissions are granted
-  const hasPermissions = await userHasGrantedNotificationsPermissions()
+  const hasPushNotificationPermissions = await userHasGrantedNotificationsPermissions()
 
-  if (!hasPermissions) {
-    logger.debug(
-      "[updateConversationSubscriptions] Skipped subscription setup - notification permissions not granted",
-    )
+  if (!hasPushNotificationPermissions) {
+    notificationsLogger.debug("Skipped subscription setup - notification permissions not granted")
+
     // Clean up any existing observers if permissions were revoked
     for (const [inboxId, observer] of observersMap.entries()) {
-      logger.debug(
+      notificationsLogger.debug(
         `[updateConversationSubscriptions] Cleaning up observer for inbox ${inboxId} due to revoked permissions`,
       )
       observer.destroy()
@@ -239,16 +224,13 @@ async function updateConversationSubscriptions() {
   // Find inbox IDs to subscribe (present in current but not in previous)
   const inboxIdsToSubscribe = currentInboxIds.filter((id) => !previousInboxIds.includes(id))
 
-  notificationsLogger.debug(`Updating subscriptions for ${currentInboxIds.length} senders`, {
-    inboxIdsToUnsubscribe,
-    inboxIdsToSubscribe,
-  })
-
   // Unsubscribe removed senders
   for (const inboxId of inboxIdsToUnsubscribe) {
     const observer = observersMap.get(inboxId)
     if (observer) {
-      logger.debug(`[updateConversationSubscriptions] Unsubscribing observer for inbox ${inboxId}`)
+      notificationsLogger.debug(
+        `[updateConversationSubscriptions] Unsubscribing observer for inbox ${inboxId}`,
+      )
       observer.destroy()
       observersMap.delete(inboxId)
     }
@@ -256,7 +238,9 @@ async function updateConversationSubscriptions() {
 
   // Subscribe new senders
   for (const inboxId of inboxIdsToSubscribe) {
-    logger.debug(`[updateConversationSubscriptions] Setting up observer for inbox ${inboxId}`)
+    notificationsLogger.debug(
+      `[updateConversationSubscriptions] Setting up observer for inbox ${inboxId}`,
+    )
     setupObserverForInbox(inboxId)
   }
 
@@ -294,7 +278,7 @@ function setupObserverForInbox(clientInboxId: IXmtpInboxId) {
 
     // Handle unsubscriptions
     if (conversationsToUnsubscribe.length > 0) {
-      logger.debug(
+      notificationsLogger.debug(
         `[setupObserverForInbox] Unsubscribing from ${conversationsToUnsubscribe.length} conversations for inbox ${clientInboxId}`,
       )
       unsubscribeFromConversationsNotifications({
@@ -305,7 +289,7 @@ function setupObserverForInbox(clientInboxId: IXmtpInboxId) {
 
     // Handle new subscriptions
     if (conversationsToSubscribe.length > 0) {
-      logger.debug(
+      notificationsLogger.debug(
         `[setupObserverForInbox] Subscribing to ${conversationsToSubscribe.length} conversations for inbox ${clientInboxId}`,
       )
       subscribeToConversationsNotifications({

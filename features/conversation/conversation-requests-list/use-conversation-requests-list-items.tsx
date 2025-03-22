@@ -2,48 +2,48 @@ import { useQueries, useQuery } from "@tanstack/react-query"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { getUnknownConsentConversationsQueryOptions } from "@/features/conversation/conversation-requests-list/conversations-unknown-consent.query"
 import { getMessageSpamScore } from "@/features/conversation/conversation-requests-list/utils/get-message-spam-score"
-import { getConversationQueryData } from "@/features/conversation/queries/conversation.query"
+import { ensureConversationQueryData } from "@/features/conversation/queries/conversation.query"
 import { captureError } from "@/utils/capture-error"
 import { getMessageContentStringValue } from "../conversation-chat/conversation-message/utils/get-message-string-content"
 
 export function useConversationRequestsListItem() {
   const currentSender = useSafeCurrentSender()
 
-  // 1. First get the conversation IDs for unknown consent conversations
-  const { data: conversationIds, isLoading: isLoadingConversationIds } = useQuery({
-    ...getUnknownConsentConversationsQueryOptions({
-      inboxId: currentSender.inboxId,
-      caller: "useConversationRequestsListItem",
-    }),
-  })
+  const { data: unknownConsentConversationIds, isLoading: isLoadingUnknownConsentConversationIds } =
+    useQuery({
+      ...getUnknownConsentConversationsQueryOptions({
+        inboxId: currentSender.inboxId,
+        caller: "useConversationRequestsListItem",
+      }),
+    })
 
-  // 3. Check for spam scores based on conversation contents
   const spamQueries = useQueries({
-    queries: (conversationIds ?? []).map((conversationId) => ({
+    queries: (unknownConsentConversationIds ?? []).map((conversationId) => ({
       queryKey: ["is-spam", conversationId, currentSender.inboxId],
       queryFn: async () => {
-        const conversation = getConversationQueryData({
-          clientInboxId: currentSender.inboxId,
-          xmtpConversationId: conversationId,
-        })
-
-        if (!conversation) {
-          return true
-        }
-
-        const lastMessage = conversation.lastMessage
-
-        if (!lastMessage) {
-          return true
-        }
-
-        const messageText = getMessageContentStringValue(lastMessage.content)
-
-        if (!messageText) {
-          return true
-        }
-
         try {
+          const conversation = await ensureConversationQueryData({
+            clientInboxId: currentSender.inboxId,
+            xmtpConversationId: conversationId,
+            caller: "useConversationRequestsListItem",
+          })
+
+          if (!conversation) {
+            throw new Error("Conversation not found")
+          }
+
+          const lastMessage = conversation.lastMessage
+
+          if (!lastMessage) {
+            throw new Error("No last message found")
+          }
+
+          const messageText = getMessageContentStringValue(lastMessage.content)
+
+          if (!messageText) {
+            throw new Error("No message text found")
+          }
+
           const spamScore = await getMessageSpamScore({
             message: lastMessage,
           })
@@ -57,10 +57,10 @@ export function useConversationRequestsListItem() {
     })),
   })
 
-  const isLoading = isLoadingConversationIds || spamQueries.some((q) => q.isLoading)
+  const isLoading = isLoadingUnknownConsentConversationIds || spamQueries.some((q) => q.isLoading)
 
   const spamResults =
-    conversationIds?.map((conversationId, i) => ({
+    unknownConsentConversationIds?.map((conversationId, i) => ({
       conversationId,
       isSpam: spamQueries[i].data ?? true,
     })) ?? []

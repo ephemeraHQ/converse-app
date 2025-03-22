@@ -1,4 +1,3 @@
-import { zustandMMKVStorage } from "@utils/mmkv"
 import { createContext, memo, useContext, useRef } from "react"
 import { createStore, useStore } from "zustand"
 import { createJSONStorage, persist, subscribeWithSelector } from "zustand/middleware"
@@ -9,6 +8,7 @@ import {
 import { useCurrentXmtpConversationId } from "@/features/conversation/conversation-chat/conversation.store-context"
 import { IXmtpConversationId, IXmtpMessageId } from "@/features/xmtp/xmtp.types"
 import { usePrevious } from "@/hooks/use-previous-value"
+import { zustandMMKVStorage } from "@/utils/zustand/zustand"
 
 export type IComposerMediaPreviewStatus = "picked" | "uploading" | "uploaded" | "error" | "sending"
 

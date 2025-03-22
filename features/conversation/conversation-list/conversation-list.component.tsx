@@ -1,4 +1,4 @@
-import { useCallback, useRef } from "react"
+import { useCallback, useEffect, useRef } from "react"
 import {
   FlatListProps,
   ListRenderItem,
@@ -8,10 +8,10 @@ import {
 } from "react-native"
 import Animated, { AnimatedProps } from "react-native-reanimated"
 import { AnimatedVStack } from "@/design-system/VStack"
-import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
+import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { ConversationListItemDm } from "@/features/conversation/conversation-list/conversation-list-item/conversation-list-item-dm"
 import { ConversationListItemGroup } from "@/features/conversation/conversation-list/conversation-list-item/conversation-list-item-group"
-import { getConversationQueryData } from "@/features/conversation/queries/conversation.query"
+import { useConversationQuery } from "@/features/conversation/queries/conversation.query"
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group"
 import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 import { useAppTheme } from "@/theme/use-app-theme"
@@ -26,12 +26,7 @@ type IConversationListProps = Omit<
 }
 
 export function ConversationList(props: IConversationListProps) {
-  const {
-    conversationsIds: conversationsIds,
-    renderConversation = defaultRenderItem,
-    onRefetch,
-    ...rest
-  } = props
+  const { conversationsIds, renderConversation, onRefetch, ...rest } = props
 
   const { theme } = useAppTheme()
 
@@ -49,25 +44,34 @@ export function ConversationList(props: IConversationListProps) {
       itemLayoutAnimation={theme.animation.reanimatedLayoutSpringTransition}
       data={conversationsIds}
       keyExtractor={keyExtractor}
-      renderItem={(args) => (
-        <AnimatedVStack
-          entering={theme.animation.reanimatedFadeInSpring}
-          exiting={theme.animation.reanimatedFadeOutSpring}
-        >
-          {renderConversation(args)}
-        </AnimatedVStack>
-      )}
+      renderItem={(args) => {
+        return (
+          <AnimatedVStack
+            entering={theme.animation.reanimatedFadeInSpring}
+            exiting={theme.animation.reanimatedFadeOutSpring}
+          >
+            {renderConversation ? (
+              renderConversation(args)
+            ) : (
+              <DefaultConversationItem xmtpConversationId={args.item} />
+            )}
+          </AnimatedVStack>
+        )
+      }}
       {...rest}
     />
   )
 }
 
-const defaultRenderItem: ListRenderItem<IXmtpConversationId> = ({ item }) => {
-  const currentSender = getSafeCurrentSender()
+function DefaultConversationItem(props: { xmtpConversationId: IXmtpConversationId }) {
+  const { xmtpConversationId } = props
 
-  const conversation = getConversationQueryData({
+  const currentSender = useSafeCurrentSender()
+
+  const { data: conversation } = useConversationQuery({
     clientInboxId: currentSender.inboxId,
-    xmtpConversationId: item,
+    xmtpConversationId,
+    caller: "useDefaultRenderItem",
   })
 
   if (!conversation) {
@@ -75,10 +79,10 @@ const defaultRenderItem: ListRenderItem<IXmtpConversationId> = ({ item }) => {
   }
 
   if (isConversationGroup(conversation)) {
-    return <ConversationListItemGroup xmtpConversationId={item} />
+    return <ConversationListItemGroup xmtpConversationId={xmtpConversationId} />
   }
 
-  return <ConversationListItemDm xmtpConversationId={item} />
+  return <ConversationListItemDm xmtpConversationId={xmtpConversationId} />
 }
 
 function keyExtractor(id: IXmtpConversationId) {

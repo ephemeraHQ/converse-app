@@ -1,7 +1,7 @@
 import RNFetchBlob from "rn-fetch-blob"
 import { z } from "zod"
-import { api } from "@/utils/api/api"
 import { captureError } from "@/utils/capture-error"
+import { convosApi } from "@/utils/convos-api/convos-api-instance"
 import { normalizeFilePath } from "@/utils/file-system/file-system"
 
 const PresignedUrlResponseSchema = z.object({
@@ -19,7 +19,7 @@ export type IPresignedUrlResponse = z.infer<typeof PresignedUrlResponseSchema>
 async function getPresignedUploadUrl(args: { contentType?: string }) {
   const { contentType } = args
 
-  const { data } = await api.get<IPresignedUrlResponse>("/api/v1/attachments/presigned", {
+  const { data } = await convosApi.get<IPresignedUrlResponse>("/api/v1/attachments/presigned", {
     params: { contentType },
   })
 

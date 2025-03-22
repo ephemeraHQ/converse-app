@@ -29,7 +29,6 @@ import { IConversationMessage } from "./conversation-message/conversation-messag
 import { useMessageHasReactions } from "./conversation-message/hooks/use-message-has-reactions"
 import { getConversationNextMessage } from "./conversation-message/utils/get-conversation-next-message"
 import { getConversationPreviousMessage } from "./conversation-message/utils/get-conversation-previous-message"
-import { DmConversationEmpty, GroupConversationEmpty } from "./conversation.screen"
 import { useCurrentXmtpConversationId } from "./conversation.store-context"
 
 export const ConversationMessages = memo(function ConversationMessages(props: {
@@ -213,4 +212,14 @@ const ConversationMessagesListItem = memo(function ConversationMessagesListItem(
       </AnimatedVStack>
     </ConversationMessageContextStoreProvider>
   )
+})
+
+export const DmConversationEmpty = memo(function DmConversationEmpty() {
+  // Will never really be empty anyway because to create the DM conversation the user has to send a first message
+  return null
+})
+
+export const GroupConversationEmpty = memo(() => {
+  // Will never really be empty anyway becaue we have group updates
+  return null
 })

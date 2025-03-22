@@ -7,6 +7,8 @@ import { notificationsLogger } from "@/utils/logger"
 export function configureForegroundNotificationBehavior() {
   Notifications.setNotificationHandler({
     handleNotification: async (notification) => {
+      notificationsLogger.debug("Handling notification:", notification)
+
       // Intercept and modify the notification before displaying it
       // Not sure if this works
       const modifiedNotification = interceptAndModifyNotification(notification)

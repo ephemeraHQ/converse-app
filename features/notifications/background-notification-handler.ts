@@ -1,4 +1,5 @@
 import * as Notifications from "expo-notifications"
+import { SchedulableTriggerInputTypes } from "expo-notifications"
 import * as TaskManager from "expo-task-manager"
 import { captureError } from "@/utils/capture-error"
 import { NotificationError } from "@/utils/error"
@@ -77,15 +78,14 @@ export async function registerBackgroundNotificationTask() {
 
     // First check if task is already registered
     const isTaskRegistered = await TaskManager.isTaskRegisteredAsync(BACKGROUND_NOTIFICATION_TASK)
-    notificationsLogger.debug("Is background task already registered:", isTaskRegistered)
 
-    if (isTaskRegistered) {
-      notificationsLogger.debug("Background task already registered, unregistering first")
-      await Notifications.unregisterTaskAsync(BACKGROUND_NOTIFICATION_TASK)
+    // Only register if not already registered
+    if (!isTaskRegistered) {
+      await Notifications.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK)
+      notificationsLogger.debug("Background notification task registered successfully")
+    } else {
+      notificationsLogger.debug("Background task already registered, skipping registration")
     }
-
-    await Notifications.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK)
-    notificationsLogger.debug("Background notification task registered successfully")
   } catch (error) {
     captureError(
       new NotificationError({
@@ -110,7 +110,10 @@ export async function testBackgroundNotificationTask() {
         body: "This notification should be intercepted and modified",
         data: { test: true },
       },
-      trigger: { seconds: 5 },
+      trigger: {
+        type: SchedulableTriggerInputTypes.TIME_INTERVAL,
+        seconds: 5,
+      },
     })
 
     notificationsLogger.debug("Test notification scheduled with ID:", notificationId)

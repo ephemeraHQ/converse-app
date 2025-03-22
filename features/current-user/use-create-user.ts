@@ -4,6 +4,7 @@ import { setCurrentUserQueryData } from "@/features/current-user/curent-user.que
 import { invalidateProfileQuery, setProfileQueryData } from "@/features/profiles/profiles.query"
 import { profileValidationSchema } from "@/features/profiles/schemas/profile-validation.schema"
 import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
+import { captureError } from "@/utils/capture-error"
 import { IEthereumAddress } from "@/utils/evm/address"
 import { createUser } from "../authentication/create-user.api"
 
@@ -88,7 +89,10 @@ export function useCreateUserMutation() {
 
       // Explicitly refetch the profile data to ensure
       // we have the latest data including the newly uploaded avatar
-      invalidateProfileQuery({ xmtpId: data.identity.xmtpId })
+      invalidateProfileQuery({
+        xmtpId: data.identity.xmtpId,
+        caller: "useCreateUserMutation",
+      }).catch(captureError)
     },
   })
 }

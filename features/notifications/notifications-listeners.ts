@@ -28,7 +28,8 @@ export function useNotificationListeners({
     foregroundNotificationListener.current = Notifications.addNotificationReceivedListener(
       (notification) => {
         notificationsLogger.debug(
-          `[useNotificationListenersWhileRunning] Foreground notification displayed: ${notification.request.identifier}`,
+          `[useNotificationListenersWhileRunning] Foreground notification displayed:`,
+          notification,
         )
         onNotificationDisplayedInForeground?.(notification)
       },

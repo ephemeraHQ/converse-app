@@ -15,6 +15,7 @@ import { useLogout } from "@/features/authentication/use-logout"
 import { useHeader } from "@/navigation/use-header"
 import { $globalStyles } from "@/theme/styles"
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme"
+import { captureError } from "@/utils/capture-error"
 import { openLink } from "@/utils/linking"
 import { AuthOnboardingWelcomeFooter } from "./auth-onboarding-welcome-footer"
 
@@ -25,7 +26,7 @@ export const AuthOnboardingWelcome = memo(function AuthOnboardingWelcome() {
 
   // Makes sense to make sure we're fully logged out when we are at this welcome screen
   useEffect(() => {
-    logout({ caller: "AuthWelcomeContent onMount" })
+    logout({ caller: "AuthWelcomeContent onMount" }).catch(captureError)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 

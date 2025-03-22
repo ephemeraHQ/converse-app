@@ -52,6 +52,7 @@ async function searchExistingDms(args: { searchQuery: string; inboxId: IXmtpInbo
       try {
         const profile = await ensureProfileQueryData({
           xmtpId: dm.peerInboxId,
+          caller: "SearchExistingDms",
         })
 
         const hasProfileMatch = profile?.name?.toLowerCase().includes(normalizedSearchQuery)

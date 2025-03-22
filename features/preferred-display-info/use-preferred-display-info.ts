@@ -60,6 +60,7 @@ export function usePreferredDisplayInfo(args: PreferredDisplayInfoArgs) {
   // Get Convos profile data
   const { data: profile, isLoading: isLoadingProfile } = useProfileQuery({
     xmtpId: inboxId,
+    caller: "usePreferredDisplayInfo",
   })
 
   // Get social profiles data

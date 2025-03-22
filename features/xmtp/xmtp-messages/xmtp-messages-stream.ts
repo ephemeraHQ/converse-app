@@ -1,12 +1,11 @@
 import { IXmtpDecodedMessage, IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { xmtpLogger } from "@utils/logger"
 import { XMTPError } from "@/utils/error"
-import { isProd } from "@/utils/getEnv"
 import { getXmtpClientByInboxId } from "../xmtp-client/xmtp-client"
 
 export const streamAllMessages = async (args: {
   inboxId: IXmtpInboxId
-  onNewMessage: (message: IXmtpDecodedMessage) => void | Promise<void>
+  onNewMessage: (message: IXmtpDecodedMessage) => Promise<void>
 }) => {
   const { inboxId, onNewMessage } = args
 
@@ -17,15 +16,7 @@ export const streamAllMessages = async (args: {
   xmtpLogger.debug(`Streaming messages for ${inboxId}`)
 
   try {
-    await client.conversations.streamAllMessages(async (message) => {
-      xmtpLogger.debug(
-        `Received message for ${inboxId} with id: ${message.id}, text: ${
-          isProd ? "Redacted" : message.nativeContent.text
-        }, topic: ${message.topic}`,
-      )
-
-      await onNewMessage(message)
-    })
+    await client.conversations.streamAllMessages(onNewMessage)
   } catch (error) {
     throw new XMTPError({
       error,

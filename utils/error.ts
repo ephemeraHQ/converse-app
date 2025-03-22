@@ -13,12 +13,6 @@ export function ensureError(error: unknown): Error {
   return new Error("Unknown error occurred")
 }
 
-export function enhanceError(error: unknown, context: string): Error {
-  const originalError = ensureError(error)
-  originalError.message = `${context} - ${originalError.message}`
-  return originalError
-}
-
 export function ensureErrorHandler<T>(handler: (error: Error) => T): (error: unknown) => T {
   return (error: unknown) => handler(ensureError(error))
 }
@@ -103,5 +97,11 @@ export class FeedbackError extends BaseError {
 export class NotificationError extends BaseError {
   constructor(args: ErrorArgs) {
     super("[Push Notification]", args)
+  }
+}
+
+export class ReactQueryPersistError extends BaseError {
+  constructor(args: ErrorArgs) {
+    super("[React Query Persist]", args)
   }
 }

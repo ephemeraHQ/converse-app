@@ -3,7 +3,6 @@ import { useReactQueryDevTools } from "@dev-plugins/react-query"
 import { ActionSheetProvider } from "@expo/react-native-action-sheet"
 import { Chain, PrivyProvider } from "@privy-io/expo"
 import { SmartWalletsProvider } from "@privy-io/expo/smart-wallets"
-import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client"
 import { ActionSheet } from "@/components/action-sheet"
 import { DebugProvider } from "@/components/debug-provider"
 import { Snackbars } from "@/components/snackbar/snackbars"
@@ -12,18 +11,17 @@ import { useCoinbaseWalletListener } from "@/features/wallets/utils/coinbase-wal
 import { $globalStyles } from "@/theme/styles"
 import { useThemeProvider } from "@/theme/use-app-theme"
 import { useCachedResources } from "@/utils/cache-resources"
-import logger from "@/utils/logger"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
-import { DEFAULT_GC_TIME } from "@/utils/react-query/react-query.constants"
-import { reactQueryPersister } from "@/utils/react-query/react-query.utils"
 import "expo-dev-client"
 import React from "react"
 import { GestureHandlerRootView } from "react-native-gesture-handler"
 import { KeyboardProvider } from "react-native-keyboard-controller"
-// import { DevToolsBubble } from "react-native-react-query-devtools"
 import { SafeAreaProvider } from "react-native-safe-area-context"
 import { ThirdwebProvider } from "thirdweb/react"
 import { base } from "viem/chains"
+// import { DevToolsBubble } from "react-native-react-query-devtools"
+import { setupConvosApi } from "@/utils/convos-api/convos-api-init"
+import { ReactQueryPersistProvider } from "@/utils/react-query/react-query-persist-provider"
 import { config } from "./config"
 import { useMonitorNetworkConnectivity } from "./dependencies/NetworkMonitor/use-monitor-network-connectivity"
 import { registerBackgroundNotificationTask } from "./features/notifications/background-notification-handler"
@@ -31,11 +29,12 @@ import { setupConversationsNotificationsSubscriptions } from "./features/notific
 import { configureForegroundNotificationBehavior } from "./features/notifications/notifications-init"
 import { AppNavigator } from "./navigation/app-navigator"
 import "./utils/ignore-logs"
-import { sentryInit } from "./utils/sentry"
+import { sentryInit } from "./utils/sentry/sentry-init"
 import { preventSplashScreenAutoHide } from "./utils/splash/splash"
 
 preventSplashScreenAutoHide()
 sentryInit()
+setupConvosApi()
 configureForegroundNotificationBehavior()
 setupConversationsNotificationsSubscriptions()
 registerBackgroundNotificationTask()
@@ -63,33 +62,7 @@ export function App() {
   const { themeScheme, setThemeContextOverride, ThemeProvider } = useThemeProvider()
 
   return (
-    <PersistQueryClientProvider
-      client={reactQueryClient}
-      persistOptions={{
-        persister: reactQueryPersister,
-        maxAge: DEFAULT_GC_TIME,
-        buster: config.reactQueryPersistCacheIsEnabled ? "v4" : undefined,
-        dehydrateOptions: {
-          // Determines which queries should be persisted to storage
-          shouldDehydrateQuery(query) {
-            if (!config.reactQueryPersistCacheIsEnabled) {
-              logger.debug("Not dehydrating query because persist cache is disabled")
-              return false
-            }
-
-            const shouldHydrate =
-              query.meta?.persist !== false &&
-              query.state.status !== "pending" &&
-              query.state.fetchStatus !== "fetching"
-
-            return shouldHydrate
-          },
-        },
-      }}
-      onSuccess={() => {
-        logger.debug("React Query client hydrated")
-      }}
-    >
+    <ReactQueryPersistProvider>
       {/* <QueryClientProvider client={reactQueryClient}> */}
       <PrivyProvider
         appId={config.privy.appId}
@@ -121,7 +94,6 @@ export function App() {
           </ThirdwebProvider>
         </SmartWalletsProvider>
       </PrivyProvider>
-      {/* </QueryClientProvider> */}
-    </PersistQueryClientProvider>
+    </ReactQueryPersistProvider>
   )
 }

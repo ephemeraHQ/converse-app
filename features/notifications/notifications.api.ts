@@ -1,6 +1,6 @@
 import { z } from "zod"
-import { api } from "@/utils/api/api"
 import { captureError } from "@/utils/capture-error"
+import { convosApi } from "@/utils/convos-api/convos-api-instance"
 
 // Schemas for response validation
 const RegisterInstallationResponseSchema = z.object({
@@ -79,7 +79,7 @@ export type IUnsubscribeRequest = z.infer<typeof UnsubscribeRequestSchema>
  */
 export const registerNotificationInstallation = async (args: IRegistrationRequest) => {
   try {
-    const { data } = await api.post<IRegisterInstallationResponse>(
+    const { data } = await convosApi.post<IRegisterInstallationResponse>(
       "/api/v1/notifications/register",
       args,
     )
@@ -102,7 +102,7 @@ export const subscribeToNotificationTopicsWithMetadata = async (
   args: ISubscribeWithMetadataRequest,
 ) => {
   try {
-    await api.post("/api/v1/notifications/subscribe", args)
+    await convosApi.post("/api/v1/notifications/subscribe", args)
   } catch (error) {
     throw error
   }
@@ -113,7 +113,7 @@ export const subscribeToNotificationTopicsWithMetadata = async (
  */
 export const unsubscribeFromNotificationTopics = async (args: IUnsubscribeRequest) => {
   try {
-    await api.post("/api/v1/notifications/unsubscribe", args)
+    await convosApi.post("/api/v1/notifications/unsubscribe", args)
   } catch (error) {
     throw error
   }
@@ -126,7 +126,7 @@ export const unregisterNotificationInstallation = async (args: { installationId:
   const { installationId } = args
 
   try {
-    await api.delete(`/api/v1/notifications/unregister/${installationId}`)
+    await convosApi.delete(`/api/v1/notifications/unregister/${installationId}`)
   } catch (error) {
     throw error
   }

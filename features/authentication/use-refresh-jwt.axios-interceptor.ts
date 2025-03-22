@@ -5,7 +5,7 @@ import { refreshAndGetNewJwtQuery } from "@/features/authentication/jwt.query"
 import { useLogout } from "@/features/authentication/use-logout"
 import { captureError } from "@/utils/capture-error"
 import { apiLogger } from "@/utils/logger"
-import { api } from "../../utils/api/api"
+import { convosApi } from "../../utils/convos-api/convos-api-instance"
 import { ApiError, AuthenticationError } from "../../utils/error"
 
 /**
@@ -27,18 +27,18 @@ export const useRefreshJwtAxiosInterceptor = () => {
     }
 
     // Add the response interceptor
-    const responseInterceptor = api.interceptors.response.use(
+    const responseInterceptor = convosApi.interceptors.response.use(
       (response) => response, // Pass through successful responses
-      createRefreshTokenInterceptor(api, handleRefreshFailure),
+      createRefreshTokenInterceptor(convosApi, handleRefreshFailure),
     )
 
     // Cleanup function removes the interceptor when the component unmounts
     return () => {
-      api.interceptors.response.eject(responseInterceptor)
+      convosApi.interceptors.response.eject(responseInterceptor)
     }
   }, [logout])
 
-  return api
+  return convosApi
 }
 
 // Extended type for tracking retry attempts

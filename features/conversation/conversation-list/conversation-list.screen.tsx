@@ -17,22 +17,18 @@ import {
   useGroupConversationContextMenuViewProps,
 } from "@/features/conversation/conversation-list/hooks/use-conversation-list-item-context-menu-props"
 import { usePinnedConversations } from "@/features/conversation/conversation-list/hooks/use-pinned-conversations"
-import { getConversationQueryData } from "@/features/conversation/queries/conversation.query"
+import { useConversationQuery } from "@/features/conversation/queries/conversation.query"
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group"
 import { isTempConversation } from "@/features/conversation/utils/is-temp-conversation"
 import { IDm } from "@/features/dm/dm.types"
 import { IGroup } from "@/features/groups/group.types"
-import { subscribeToNotificationTopicsWithMetadata } from "@/features/notifications/notifications.api"
 import { registerPushNotifications } from "@/features/notifications/notifications.service"
-import { getXmtpConversationHmacKeys } from "@/features/xmtp/xmtp-hmac-keys/xmtp-hmac-keys"
-import { ensureXmtpInstallationQueryData } from "@/features/xmtp/xmtp-installations/xmtp-installation.query"
 import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 import { useMinimumLoadingTime } from "@/hooks/use-minimum-loading-time"
 import { NavigationParamList } from "@/navigation/navigation.types"
 import { $globalStyles } from "@/theme/styles"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { captureError } from "@/utils/capture-error"
-import logger from "@/utils/logger"
 import { ConversationListAwaitingRequests } from "./conversation-list-awaiting-requests"
 import { ConversationListEmpty } from "./conversation-list-empty"
 import { ConversationListStartNewConvoBanner } from "./conversation-list-start-new-convo-banner"
@@ -112,27 +108,36 @@ export function ConversationListScreen(props: IConversationListProps) {
             // Little hack because we want ConversationListEmpty to be full screen when we have no conversations
             paddingBottom: conversationsIds && conversationsIds.length > 0 ? insets.bottom : 0,
           }}
-          renderConversation={({ item }) => {
-            const conversation = getConversationQueryData({
-              clientInboxId: currentSender.inboxId,
-              xmtpConversationId: item,
-            })
-
-            if (!conversation) {
-              return null
-            }
-
-            return isConversationGroup(conversation) ? (
-              <ConversationListItemGroupWrapper group={conversation} />
-            ) : (
-              <ConversationListItemDmWrapper dm={conversation} />
-            )
-          }}
+          renderConversation={({ item }) => <ConversationListItem xmtpConversationId={item} />}
         />
       )}
     </Screen>
   )
 }
+
+const ConversationListItem = memo(function ConversationListItem(props: {
+  xmtpConversationId: IXmtpConversationId
+}) {
+  const { xmtpConversationId } = props
+
+  const currentSender = useSafeCurrentSender()
+
+  const { data: conversation } = useConversationQuery({
+    clientInboxId: currentSender.inboxId,
+    xmtpConversationId,
+    caller: "ConversationListItem",
+  })
+
+  if (!conversation) {
+    return null
+  }
+
+  if (isConversationGroup(conversation)) {
+    return <ConversationListItemGroupWrapper group={conversation} />
+  }
+
+  return <ConversationListItemDmWrapper dm={conversation} />
+})
 
 const ConversationListItemDmWrapper = memo(function ConversationListItemDmWrapper(props: {
   dm: IDm

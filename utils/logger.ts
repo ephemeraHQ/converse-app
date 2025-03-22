@@ -123,6 +123,8 @@ export const apiLogger = createPrefixedLogger("API")
 export const xmtpLogger = createPrefixedLogger("XMTP")
 export const notificationsLogger = createPrefixedLogger("NOTIFICATIONS")
 export const sentryLogger = createPrefixedLogger("SENTRY")
+export const persistLogger = createPrefixedLogger("PERSIST")
+
 /**
  * @deprecated Use { logger } instead
  */

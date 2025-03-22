@@ -1,45 +1,44 @@
 import * as ExpoHaptics from "expo-haptics"
 import { runOnJS } from "react-native-reanimated"
-import { captureError } from "@/utils/capture-error"
 
 const impactFeedbackStyle = ExpoHaptics.ImpactFeedbackStyle
 
 const notificationFeedbackStyles = ExpoHaptics.NotificationFeedbackType
 
 const selectionAsync = () => {
-  ExpoHaptics.impactAsync(impactFeedbackStyle.Light).catch(captureError) // Selection doens't seem to work? So use light impact for now
+  ExpoHaptics.impactAsync(impactFeedbackStyle.Light).catch(console.error) // Selection doens't seem to work? So use light impact for now
 }
 
 const successNotificationAsync = () => {
-  ExpoHaptics.notificationAsync(notificationFeedbackStyles.Success).catch(captureError)
+  ExpoHaptics.notificationAsync(notificationFeedbackStyles.Success).catch(console.error)
 }
 
 const warningNotificationAsync = () => {
-  ExpoHaptics.notificationAsync(notificationFeedbackStyles.Warning).catch(captureError)
+  ExpoHaptics.notificationAsync(notificationFeedbackStyles.Warning).catch(console.error)
 }
 
 const errorNotificationAsync = () => {
-  ExpoHaptics.notificationAsync(notificationFeedbackStyles.Error).catch(captureError)
+  ExpoHaptics.notificationAsync(notificationFeedbackStyles.Error).catch(console.error)
 }
 
 const lightImpactAsync = () => {
-  ExpoHaptics.impactAsync(impactFeedbackStyle.Light).catch(captureError)
+  ExpoHaptics.impactAsync(impactFeedbackStyle.Light).catch(console.error)
 }
 
 const mediumImpactAsync = () => {
-  ExpoHaptics.impactAsync(impactFeedbackStyle.Medium).catch(captureError)
+  ExpoHaptics.impactAsync(impactFeedbackStyle.Medium).catch(console.error)
 }
 
 const heavyImpactAsync = () => {
-  ExpoHaptics.impactAsync(impactFeedbackStyle.Heavy).catch(captureError)
+  ExpoHaptics.impactAsync(impactFeedbackStyle.Heavy).catch(console.error)
 }
 
 const softImpactAsync = () => {
-  ExpoHaptics.impactAsync(impactFeedbackStyle.Soft).catch(captureError)
+  ExpoHaptics.impactAsync(impactFeedbackStyle.Soft).catch(console.error)
 }
 
 const rigidImpactAsync = () => {
-  ExpoHaptics.impactAsync(impactFeedbackStyle.Rigid).catch(captureError)
+  ExpoHaptics.impactAsync(impactFeedbackStyle.Rigid).catch(console.error)
 }
 
 export const Haptics = {

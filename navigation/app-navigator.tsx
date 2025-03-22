@@ -12,36 +12,25 @@ import { hydrateAuth } from "@/features/authentication/hydrate-auth"
 import { useSignoutIfNoPrivyUser } from "@/features/authentication/use-logout-if-no-privy-user"
 import { useRefreshJwtAxiosInterceptor } from "@/features/authentication/use-refresh-jwt.axios-interceptor"
 import { BlockedConversationsScreen } from "@/features/blocked-conversations/blocked-conversations.screen"
-import {
-  ConversationNav,
-  ConversationScreenConfig,
-} from "@/features/conversation/conversation-chat/conversation.nav"
+import { ConversationScreen } from "@/features/conversation/conversation-chat/conversation.screen"
 import { ConversationListScreen } from "@/features/conversation/conversation-list/conversation-list.screen"
-import { ConversationRequestsListNav } from "@/features/conversation/conversation-requests-list/conversation-requests-list.nav"
+import { ConversationRequestsListScreen } from "@/features/conversation/conversation-requests-list/conversation-requests-list.screen"
 import { useCreateUserIfNoExist } from "@/features/current-user/use-create-user-if-no-exist"
-import {
-  AddGroupMembersNav,
-  AddGroupMembersScreenConfig,
-} from "@/features/groups/group-details/add-group-members/add-group-members.nav"
-import {
-  GroupDetailsNav,
-  GroupDetailsScreenConfig,
-} from "@/features/groups/group-details/group-details.nav"
-import {
-  GroupMembersListNav,
-  GroupMembersListScreenConfig,
-} from "@/features/groups/group-details/members-list/group-members-list.nav"
+import { AddGroupMembersScreen } from "@/features/groups/group-details/add-group-members/add-group-members.screen"
+import { GroupDetailsScreen } from "@/features/groups/group-details/group-details.screen"
+import { GroupMembersListScreen } from "@/features/groups/group-details/members-list/group-members-list.screen"
 import { useNotificationListeners } from "@/features/notifications/notifications-listeners"
 import { ProfileImportInfoScreen } from "@/features/profiles/profile-import-info.screen"
-import { ProfileNav, ProfileScreenConfig } from "@/features/profiles/profile.nav"
+import { ProfileScreen } from "@/features/profiles/profile.screen"
+import { translate } from "@/i18n"
 import { NavigationParamList } from "@/navigation/navigation.types"
 import { navigationRef } from "@/navigation/navigation.utils"
-import { WebviewPreviewNav } from "@/screens/WebviewPreviewNav"
+import { ShareProfileScreen } from "@/screens/ShareProfile"
+import { WebviewPreview } from "@/screens/WebviewPreview"
 import { useAppTheme, useThemeProvider } from "@/theme/use-app-theme"
 import { captureError } from "@/utils/capture-error"
-import { useUpdateSentryUser } from "@/utils/sentry"
+import { useUpdateSentryUser } from "@/utils/sentry/sentry-identity"
 import { hideSplashScreen } from "@/utils/splash/splash"
-import { ShareProfileNav, ShareProfileScreenConfig } from "../screens/ShareProfileNav"
 
 const prefix = Linking.createURL("/")
 
@@ -51,12 +40,48 @@ const linking: LinkingOptions<NavigationParamList> = {
     initialRouteName: "Chats",
     screens: {
       Chats: "/",
-      Conversation: ConversationScreenConfig,
-      Profile: ProfileScreenConfig,
-      ShareProfile: ShareProfileScreenConfig,
-      GroupDetails: GroupDetailsScreenConfig,
-      AddGroupMembers: AddGroupMembersScreenConfig,
-      GroupMembersList: GroupMembersListScreenConfig,
+      Conversation: {
+        path: "/conversation",
+        parse: {
+          topic: decodeURIComponent,
+        },
+        stringify: {
+          topic: encodeURIComponent,
+        },
+      },
+      Profile: {
+        path: "/profile",
+      },
+      ShareProfile: {
+        path: "/shareProfile",
+      },
+      GroupDetails: {
+        path: "/group-details",
+        parse: {
+          xmtpConversationId: decodeURIComponent,
+        },
+        stringify: {
+          xmtpConversationId: encodeURIComponent,
+        },
+      },
+      AddGroupMembers: {
+        path: "/add-group-members",
+        parse: {
+          xmtpConversationId: decodeURIComponent,
+        },
+        stringify: {
+          xmtpConversationId: encodeURIComponent,
+        },
+      },
+      GroupMembersList: {
+        path: "/group-members-list",
+        parse: {
+          xmtpConversationId: decodeURIComponent,
+        },
+        stringify: {
+          xmtpConversationId: encodeURIComponent,
+        },
+      },
     },
   },
   // TODO: Fix this
@@ -179,14 +204,41 @@ const AppStacks = memo(function AppStacks() {
             options={{ animation: "fade" }}
           />
           <AppNativeStack.Screen name="Blocked" component={BlockedConversationsScreen} />
-          {ConversationRequestsListNav()}
-          {ConversationNav()}
-          {ShareProfileNav()}
-          {WebviewPreviewNav()}
-          {ProfileNav()}
-          {GroupDetailsNav()}
-          {AddGroupMembersNav()}
-          {GroupMembersListNav()}
+          <AppNativeStack.Screen name="ChatsRequests" component={ConversationRequestsListScreen} />
+          <AppNativeStack.Screen
+            options={{
+              title: "",
+              headerTitle: translate("chat"),
+            }}
+            name="Conversation"
+            component={ConversationScreen}
+          />
+          <AppNativeStack.Screen
+            options={{ presentation: "modal" }}
+            name="ShareProfile"
+            component={ShareProfileScreen}
+          />
+          <AppNativeStack.Screen
+            options={{ presentation: "modal" }}
+            name="WebviewPreview"
+            component={WebviewPreview}
+          />
+          <AppNativeStack.Screen name="Profile" component={ProfileScreen} />
+          <AppNativeStack.Screen name="GroupDetails" component={GroupDetailsScreen} />
+          <AppNativeStack.Screen
+            options={{
+              title: translate("add_members"),
+            }}
+            name="AddGroupMembers"
+            component={AddGroupMembersScreen}
+          />
+          <AppNativeStack.Screen
+            options={{
+              title: translate("group_members"),
+            }}
+            name="GroupMembersList"
+            component={GroupMembersListScreen}
+          />
           <AppNativeStack.Screen
             name="ProfileImportInfo"
             component={ProfileImportInfoScreen}

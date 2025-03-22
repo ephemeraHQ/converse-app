@@ -1,8 +1,8 @@
 import { z } from "zod"
 import { profileValidationSchema } from "@/features/profiles/schemas/profile-validation.schema"
 import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
-import { api } from "@/utils/api/api"
 import { captureError } from "@/utils/capture-error"
+import { convosApi } from "@/utils/convos-api/convos-api-instance"
 import { buildDeviceMetadata } from "@/utils/device-metadata"
 import { ApiError } from "@/utils/error"
 import { IEthereumAddress } from "@/utils/evm/address"
@@ -80,7 +80,10 @@ export const createUser = async (args: {
       throw new Error(`Invalid request body: ${validationResult.error.message}`)
     }
 
-    const apiResponse = await api.post<CreateUserResponse>("/api/v1/users", validationResult.data)
+    const apiResponse = await convosApi.post<CreateUserResponse>(
+      "/api/v1/users",
+      validationResult.data,
+    )
 
     const responseValidation = createUserApiResponseSchema.safeParse(apiResponse.data)
 

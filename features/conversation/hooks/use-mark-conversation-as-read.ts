@@ -6,7 +6,7 @@ import {
   updateConversationMetadataQueryData,
 } from "@/features/conversation/conversation-metadata/conversation-metadata.query"
 import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
-import { formatDateForApi } from "@/utils/api/api.utils"
+import { formatDateForApi } from "@/utils/convos-api/convos-api.utils"
 
 // Define the type for the mutation context
 type MarkAsReadContext = {
