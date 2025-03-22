@@ -38,7 +38,7 @@ export async function getOrCreateXmtpDbEncryptionKey(args: {
     xmtpLogger.debug(
       `No existing DB encryption key found for ${ethAddress}, checking old storage...`,
     )
-    const oldExistingKey = await getSecureItemAsync(DB_ENCRYPTION_KEY_STORAGE_KEY)
+    const oldExistingKey = await getSecureItemAsync(DB_ENCRYPTION_KEY_STORAGE_KEY_STRING)
     if (oldExistingKey) {
       xmtpLogger.debug(`Found old DB encryption key for ${ethAddress}`)
       await setSecureItemAsync(DB_ENCRYPTION_KEY_STORAGE_KEY, oldExistingKey)
