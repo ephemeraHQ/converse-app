@@ -29,6 +29,7 @@ import { setupConversationsNotificationsSubscriptions } from "./features/notific
 import { configureForegroundNotificationBehavior } from "./features/notifications/notifications-init"
 import { AppNavigator } from "./navigation/app-navigator"
 import "./utils/ignore-logs"
+import { captureError } from "@/utils/capture-error"
 import { sentryInit } from "./utils/sentry/sentry-init"
 import { preventSplashScreenAutoHide } from "./utils/splash/splash"
 
@@ -37,7 +38,7 @@ sentryInit()
 setupConvosApi()
 configureForegroundNotificationBehavior()
 setupConversationsNotificationsSubscriptions()
-registerBackgroundNotificationTask()
+registerBackgroundNotificationTask().catch(captureError)
 
 const baseMainnetOverride: Chain = {
   ...base,

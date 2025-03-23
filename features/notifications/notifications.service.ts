@@ -2,9 +2,21 @@ import * as Device from "expo-device"
 import * as Notifications from "expo-notifications"
 import { Platform } from "react-native"
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
+import {
+  messageContentIsMultiRemoteAttachment,
+  messageContentIsRemoteAttachment,
+} from "@/features/conversation/conversation-chat/conversation-message/utils/conversation-message-assertions"
+import { convertXmtpMessageToConvosMessage } from "@/features/conversation/conversation-chat/conversation-message/utils/convert-xmtp-message-to-convos-message"
+import { getMessageContentStringValue } from "@/features/conversation/conversation-chat/conversation-message/utils/get-message-string-content"
+import { ensureConversationQueryData } from "@/features/conversation/queries/conversation.query"
 import { ensureNotificationsPermissions } from "@/features/notifications/notifications-permissions.query"
 import { registerNotificationInstallation } from "@/features/notifications/notifications.api"
+import { INotificationMessageDataConverted } from "@/features/notifications/notifications.types"
+import { ensurePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
+import { getXmtpConversationIdFromXmtpTopic } from "@/features/xmtp/xmtp-conversations/xmtp-conversation"
 import { ensureXmtpInstallationQueryData } from "@/features/xmtp/xmtp-installations/xmtp-installation.query"
+import { decryptXmtpMessage } from "@/features/xmtp/xmtp-messages/xmtp-messages"
+import { IXmtpConversationTopic } from "@/features/xmtp/xmtp.types"
 import { GenericError, NotificationError } from "@/utils/error"
 import { notificationsLogger } from "@/utils/logger"
 
@@ -13,26 +25,19 @@ export async function registerPushNotifications() {
   try {
     const result = await requestNotificationsPermissions()
 
-    notificationsLogger.debug("Notification permissions result:", result)
-
     if (!result.granted) {
       throw new Error("Notifications permissions not granted")
     }
 
-    notificationsLogger.debug(
-      "Notification permissions granted, registering for push notifications",
-    )
     const token = await getPushNotificationsToken()
-    notificationsLogger.debug("Device push token received:", token)
 
     const currentSender = getSafeCurrentSender()
 
-    notificationsLogger.debug(`Getting XMTP installation ID for sender: ${currentSender.inboxId}`)
     const installationId = await ensureXmtpInstallationQueryData({
       inboxId: currentSender.inboxId,
     })
 
-    notificationsLogger.debug("Registering notification installation")
+    notificationsLogger.debug("Registering notification installation...")
     await registerNotificationInstallation({
       installationId,
       deliveryMechanism: {
@@ -71,8 +76,6 @@ export async function getPushNotificationsToken() {
     // data.data is string for native platforms per DevicePushToken type
     // https://docs.expo.dev/versions/latest/sdk/notifications/#devicepushtoken
     token = data.data as string
-
-    notificationsLogger.debug("Device Push Token:", token)
     return token
   } catch (error) {
     throw new GenericError({
@@ -115,4 +118,81 @@ export async function userHasGrantedNotificationsPermissions() {
 export async function canAskForNotificationsPermissions() {
   const permission = await ensureNotificationsPermissions()
   return permission.canAskAgain
+}
+
+export function displayLocalNotification(args: Notifications.NotificationRequestInput) {
+  return Notifications.scheduleNotificationAsync(args)
+}
+
+export async function displayLocalNewMessageNotification(args: {
+  encryptedMessage: string
+  topic: IXmtpConversationTopic
+}) {
+  try {
+    const { encryptedMessage, topic } = args
+
+    const xmtpConversationId = getXmtpConversationIdFromXmtpTopic(topic)
+
+    const conversation = await ensureConversationQueryData({
+      clientInboxId: getSafeCurrentSender().inboxId,
+      xmtpConversationId,
+      caller: "notifications-foreground-handler",
+    })
+
+    if (!conversation) {
+      throw new NotificationError({
+        error: `Conversation (${xmtpConversationId}) not found`,
+      })
+    }
+
+    const xmtpDecryptedMessage = await decryptXmtpMessage({
+      encryptedMessage,
+      xmtpConversationId: conversation.xmtpId,
+      clientInboxId: getSafeCurrentSender().inboxId,
+    })
+
+    const convoMessage = convertXmtpMessageToConvosMessage(xmtpDecryptedMessage)
+
+    const messageContentString = getMessageContentStringValue(convoMessage.content)
+
+    const { displayName: senderDisplayName } = await ensurePreferredDisplayInfo({
+      inboxId: convoMessage.senderInboxId,
+    })
+
+    return displayLocalNotification({
+      content: {
+        title: senderDisplayName,
+        body: messageContentString,
+        data: {
+          message: convoMessage,
+          isProcessedByConvo: true,
+        } satisfies INotificationMessageDataConverted,
+        ...(messageContentIsRemoteAttachment(convoMessage.content)
+          ? {
+              attachments: [
+                {
+                  identifier: convoMessage.content.url,
+                  type: "image",
+                  url: convoMessage.content.url,
+                },
+              ],
+            }
+          : messageContentIsMultiRemoteAttachment(convoMessage.content)
+            ? {
+                attachments: convoMessage.content.attachments.map((attachment) => ({
+                  identifier: attachment.url,
+                  type: "image",
+                  url: attachment.url,
+                })),
+              }
+            : {}),
+      },
+      trigger: null, // Show immediately
+    })
+  } catch (error) {
+    throw new NotificationError({
+      error,
+      additionalMessage: "Error displaying local new message notification",
+    })
+  }
 }

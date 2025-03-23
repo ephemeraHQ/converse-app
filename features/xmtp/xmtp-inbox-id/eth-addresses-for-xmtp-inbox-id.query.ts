@@ -38,15 +38,15 @@ export function getEthAddressesForXmtpInboxIdQueryOptions(args: IArgs) {
   })
 }
 
-export function useEthAddressesForXmtpInboxId(args: IArgs) {
+export function useEthAddressesForXmtpInboxIdQuery(args: IArgs) {
   return useQuery(getEthAddressesForXmtpInboxIdQueryOptions(args))
 }
 
-export function ensureEthAddressForXmtpInboxId(args: IStrictArgs) {
+export function ensureEthAddressesForXmtpInboxIdQueryData(args: IStrictArgs) {
   return reactQueryClient.ensureQueryData(getEthAddressesForXmtpInboxIdQueryOptions(args))
 }
 
-export function invalidateEthAddressesForXmtpInboxId(args: IStrictArgs) {
+export function invalidateEthAddressesForXmtpInboxIdQuery(args: IStrictArgs) {
   return reactQueryClient.invalidateQueries(getEthAddressesForXmtpInboxIdQueryOptions(args))
 }
 export function getEthAddressesForXmtpInboxIdQueryData(args: IStrictArgs) {

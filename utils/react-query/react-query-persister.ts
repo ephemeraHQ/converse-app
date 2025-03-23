@@ -121,7 +121,12 @@ function debugPersistedQueries() {
         })
       }
     } catch (error) {
-      persistLogger.error("Error debugging persisted React Query client", error)
+      captureError(
+        new ReactQueryPersistError({
+          error,
+          additionalMessage: "Error debugging persisted React Query client",
+        }),
+      )
     }
   }
 }

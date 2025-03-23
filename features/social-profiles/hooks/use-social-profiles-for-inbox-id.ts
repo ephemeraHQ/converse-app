@@ -8,8 +8,8 @@ import {
   useSocialProfilesForEthAddressQueries,
 } from "@/features/social-profiles/social-profiles.query"
 import {
-  ensureEthAddressForXmtpInboxId,
-  useEthAddressesForXmtpInboxId,
+  ensureEthAddressesForXmtpInboxIdQueryData,
+  useEthAddressesForXmtpInboxIdQuery,
 } from "@/features/xmtp/xmtp-inbox-id/eth-addresses-for-xmtp-inbox-id.query"
 
 export function useSocialProfilesForInboxId(args: { inboxId: IXmtpInboxId | undefined }) {
@@ -17,10 +17,11 @@ export function useSocialProfilesForInboxId(args: { inboxId: IXmtpInboxId | unde
 
   const currentSender = useSafeCurrentSender()
 
-  const { data: ethAddresses, isLoading: isLoadingEthAddresses } = useEthAddressesForXmtpInboxId({
-    inboxId,
-    clientInboxId: currentSender.inboxId,
-  })
+  const { data: ethAddresses, isLoading: isLoadingEthAddresses } =
+    useEthAddressesForXmtpInboxIdQuery({
+      inboxId,
+      clientInboxId: currentSender.inboxId,
+    })
 
   const { data: socialProfiles, isLoading: isLoadingSocialProfiles } =
     useSocialProfilesForEthAddressQueries({
@@ -38,7 +39,7 @@ export async function getSocialProfilesForInboxId(args: { inboxId: IXmtpInboxId 
 
   const currentSender = getSafeCurrentSender()
 
-  const ethAddresses = await ensureEthAddressForXmtpInboxId({
+  const ethAddresses = await ensureEthAddressesForXmtpInboxIdQueryData({
     inboxId,
     clientInboxId: currentSender.inboxId,
   })

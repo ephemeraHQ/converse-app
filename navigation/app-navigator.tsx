@@ -19,16 +19,23 @@ import { useCreateUserIfNoExist } from "@/features/current-user/use-create-user-
 import { AddGroupMembersScreen } from "@/features/groups/group-details/add-group-members/add-group-members.screen"
 import { GroupDetailsScreen } from "@/features/groups/group-details/group-details.screen"
 import { GroupMembersListScreen } from "@/features/groups/group-details/members-list/group-members-list.screen"
+import {
+  isConvosModifiedNotification,
+  isNotificationXmtpNewMessageNotification,
+} from "@/features/notifications/notification-assertions"
 import { useNotificationListeners } from "@/features/notifications/notifications-listeners"
 import { ProfileImportInfoScreen } from "@/features/profiles/profile-import-info.screen"
 import { ProfileScreen } from "@/features/profiles/profile.screen"
+import { getXmtpConversationIdFromXmtpTopic } from "@/features/xmtp/xmtp-conversations/xmtp-conversation"
 import { translate } from "@/i18n"
 import { NavigationParamList } from "@/navigation/navigation.types"
-import { navigationRef } from "@/navigation/navigation.utils"
+import { navigate, navigationRef } from "@/navigation/navigation.utils"
 import { ShareProfileScreen } from "@/screens/ShareProfile"
 import { WebviewPreview } from "@/screens/WebviewPreview"
 import { useAppTheme, useThemeProvider } from "@/theme/use-app-theme"
 import { captureError } from "@/utils/capture-error"
+import { NotificationError } from "@/utils/error"
+import { notificationsLogger } from "@/utils/logger"
 import { useUpdateSentryUser } from "@/utils/sentry/sentry-identity"
 import { hideSplashScreen } from "@/utils/splash/splash"
 

@@ -18,7 +18,7 @@ import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 import { useFocusRerender } from "@/hooks/use-focus-rerender"
 import { navigate } from "@/navigation/navigation.utils"
 import { useAppTheme } from "@/theme/use-app-theme"
-import { captureErrorWithToast } from "@/utils/capture-error"
+import { captureError, captureErrorWithToast } from "@/utils/capture-error"
 import { ConversationListItem } from "./conversation-list-item"
 import { DeleteSwipeableAction } from "./conversation-list-item-swipeable/conversation-list-item-swipeable-delete-action"
 import { ToggleUnreadSwipeableAction } from "./conversation-list-item-swipeable/conversation-list-item-swipeable-toggle-read-action"
@@ -74,7 +74,7 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
 
   // Handlers
   const onPress = useCallback(() => {
-    navigate("Conversation", { xmtpConversationId })
+    navigate("Conversation", { xmtpConversationId }).catch(captureError)
   }, [xmtpConversationId])
 
   const onLeftSwipe = useCallback(async () => {

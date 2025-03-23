@@ -1,24 +1,16 @@
 import * as Notifications from "expo-notifications"
 import { useEffect, useRef } from "react"
+import {
+  isConvosModifiedNotification,
+  isNotificationXmtpNewMessageNotification,
+} from "@/features/notifications/notification-assertions"
+import { getXmtpConversationIdFromXmtpTopic } from "@/features/xmtp/xmtp-conversations/xmtp-conversation"
+import { navigate } from "@/navigation/navigation.utils"
+import { captureError } from "@/utils/capture-error"
+import { NotificationError } from "@/utils/error"
 import { notificationsLogger } from "@/utils/logger"
 
-type INotificationListenerCallbacks = {
-  onNotificationDisplayedInForeground?: (notification: Notifications.Notification) => void
-  onNotificationTappedWhileRunning?: (response: Notifications.NotificationResponse) => void
-  onSystemDroppedNotifications?: () => void
-}
-
-/**
- * Hook to handle notification events while app is running (foreground or background):
- * - Notifications displayed while app is in foreground
- * - User tapping notifications while app is running
- * - System dropping notifications due to limits
- */
-export function useNotificationListeners({
-  onNotificationDisplayedInForeground,
-  onNotificationTappedWhileRunning,
-  // onSystemDroppedNotifications,
-}: INotificationListenerCallbacks = {}) {
+export function useNotificationListeners() {
   const foregroundNotificationListener = useRef<Notifications.Subscription>()
   const notificationTapListener = useRef<Notifications.Subscription>()
   // const systemDropListener = useRef<Notifications.Subscription>()
@@ -27,22 +19,37 @@ export function useNotificationListeners({
     // Listen for notifications while app is in foreground
     foregroundNotificationListener.current = Notifications.addNotificationReceivedListener(
       (notification) => {
-        notificationsLogger.debug(
-          `[useNotificationListenersWhileRunning] Foreground notification displayed:`,
-          notification,
-        )
-        onNotificationDisplayedInForeground?.(notification)
+        notificationsLogger.debug(`Foreground notification displayed:`, notification)
       },
     )
 
     // Listen for notification taps while app is running
     notificationTapListener.current = Notifications.addNotificationResponseReceivedListener(
-      (response) => {
-        notificationsLogger.debug(
-          `[useNotificationListenersWhileRunning] Notification tapped:`,
-          response.notification,
-        )
-        onNotificationTappedWhileRunning?.(response)
+      async (response) => {
+        try {
+          notificationsLogger.debug(`Notification tapped: ${JSON.stringify(response)}`)
+
+          if (isConvosModifiedNotification(response.notification)) {
+            navigate("Conversation", {
+              xmtpConversationId:
+                response.notification.request.content.data.message.xmtpConversationId,
+            }).catch(captureError)
+          } else if (isNotificationXmtpNewMessageNotification(response.notification)) {
+            navigate("Conversation", {
+              xmtpConversationId: getXmtpConversationIdFromXmtpTopic(
+                response.notification.request.trigger.payload.topic,
+              ),
+            }).catch(captureError)
+          } else {
+            captureError(
+              new NotificationError({
+                error: `Unknown notification type: ${JSON.stringify(response.notification)}`,
+              }),
+            )
+          }
+        } catch (error) {
+          captureError(error)
+        }
       },
     )
 
@@ -69,11 +76,7 @@ export function useNotificationListeners({
       //   Notifications.removeNotificationSubscription(systemDropListener.current)
       // }
     }
-  }, [
-    onNotificationDisplayedInForeground,
-    onNotificationTappedWhileRunning,
-    // onSystemDroppedNotifications,
-  ])
+  }, [])
 }
 
 /**

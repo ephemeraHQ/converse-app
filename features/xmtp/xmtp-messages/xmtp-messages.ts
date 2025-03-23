@@ -1,4 +1,4 @@
-import { conversationMessages, findMessage } from "@xmtp/react-native-sdk"
+import { conversationMessages, findMessage, processMessage } from "@xmtp/react-native-sdk"
 import { config } from "@/config"
 import {
   ISupportedXmtpCodecs,
@@ -104,6 +104,40 @@ export async function getXmtpConversationMessage(args: {
     throw new XMTPError({
       error,
       additionalMessage: `Error finding message ${messageId}`,
+    })
+  }
+}
+
+export async function decryptXmtpMessage(args: {
+  encryptedMessage: string
+  xmtpConversationId: IXmtpConversationId
+  clientInboxId: IXmtpInboxId
+}) {
+  const { encryptedMessage, xmtpConversationId, clientInboxId } = args
+
+  try {
+    const installationId = await ensureXmtpInstallationQueryData({
+      inboxId: clientInboxId,
+    })
+
+    const beforeMs = new Date().getTime()
+    const message = await processMessage(installationId, xmtpConversationId, encryptedMessage)
+    const afterMs = new Date().getTime()
+
+    const timeDiffMs = afterMs - beforeMs
+    if (timeDiffMs > config.xmtp.maxMsUntilLogError) {
+      captureError(
+        new XMTPError({
+          error: new Error(`Decrypting message took ${timeDiffMs}ms`),
+        }),
+      )
+    }
+
+    return message
+  } catch (error) {
+    throw new XMTPError({
+      error,
+      additionalMessage: `Error decrypting message for conversation ${xmtpConversationId}`,
     })
   }
 }

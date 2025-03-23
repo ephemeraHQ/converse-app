@@ -105,3 +105,9 @@ export class ReactQueryPersistError extends BaseError {
     super("[React Query Persist]", args)
   }
 }
+
+export class NavigationError extends BaseError {
+  constructor(args: ErrorArgs) {
+    super("[Navigation]", args)
+  }
+}
