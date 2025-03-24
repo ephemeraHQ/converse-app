@@ -1,6 +1,6 @@
-import { useNavigation } from "@react-navigation/native"
+import { useFocusEffect, useNavigation } from "@react-navigation/native"
 import { useQueries } from "@tanstack/react-query"
-import React, { memo, useMemo } from "react"
+import React, { memo, useCallback, useMemo } from "react"
 import { Center } from "@/design-system/Center"
 import { AnimatedHStack, HStack } from "@/design-system/HStack"
 import { Image } from "@/design-system/image"
@@ -22,8 +22,17 @@ export const ConversationListAwaitingRequests = memo(function ConversationListAw
   const navigation = useNavigation()
   const currentSender = useSafeCurrentSender()
 
-  const { likelyNotSpamConversationIds, isLoading: isLoadingUknownConversations } =
-    useConversationRequestsListItem()
+  const {
+    likelyNotSpamConversationIds,
+    isLoading: isLoadingUknownConversations,
+    refetch,
+  } = useConversationRequestsListItem()
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch()
+    }, [refetch]),
+  )
 
   // Fetch metadata queries
   const conversationsMetadataQueryResult = useQueries({

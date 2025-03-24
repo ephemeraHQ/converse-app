@@ -192,50 +192,73 @@ async function subscribeToConversationsNotifications(args: {
 
   notificationsLogger.debug(`Subscribing to ${conversationIds.length} conversations`)
 
-  await Promise.all(
-    conversationIds.map(async (conversationId) => {
-      try {
-        const conversation = await ensureConversationQueryData({
-          clientInboxId,
-          xmtpConversationId: conversationId,
-          caller: "subscribeToConversationsNotifications",
-        })
+  try {
+    // Get installation ID once for all conversations
+    const installationId = await ensureXmtpInstallationQueryData({
+      inboxId: clientInboxId,
+    })
 
-        if (!conversation) {
-          throw new Error("Conversation not found")
+    // Collect subscription data for all conversations
+    const subscriptionsData = await Promise.all(
+      conversationIds.map(async (conversationId) => {
+        try {
+          const conversation = await ensureConversationQueryData({
+            clientInboxId,
+            xmtpConversationId: conversationId,
+            caller: "subscribeToConversationsNotifications",
+          })
+
+          if (!conversation) {
+            throw new Error(`Conversation not found: ${conversationId}`)
+          }
+
+          const hmacKeys = await getXmtpConversationHmacKeys({
+            clientInboxId,
+            conversationId,
+          })
+
+          return {
+            topic: hmacKeys.topic,
+            isSilent: true,
+            hmacKeys: hmacKeys.hmacKeys,
+          }
+        } catch (error) {
+          captureError(
+            new NotificationError({
+              error,
+              additionalMessage: `Failed to prepare subscription data for conversation ${conversationId}`,
+            }),
+          )
+          return null
         }
+      }),
+    )
 
-        const installationId = await ensureXmtpInstallationQueryData({
-          inboxId: clientInboxId,
-        })
+    // Filter out nulls
+    const validSubscriptions = subscriptionsData.filter(Boolean)
 
-        const hmacKeys = await getXmtpConversationHmacKeys({
-          clientInboxId,
-          conversationId,
-        })
+    if (validSubscriptions.length === 0) {
+      notificationsLogger.debug("No valid subscriptions to process")
+      return
+    }
 
-        const subscription = {
-          topic: hmacKeys.topic,
-          isSilent: true,
-          hmacKeys: hmacKeys.hmacKeys,
-        }
+    // Make a single API call with all subscriptions
+    await subscribeToNotificationTopicsWithMetadata({
+      installationId,
+      subscriptions: validSubscriptions,
+    })
 
-        await subscribeToNotificationTopicsWithMetadata({
-          installationId,
-          subscriptions: [subscription],
-        })
-
-        notificationsLogger.debug(`Successfully subscribed to conversation ${conversationId}`)
-      } catch (error) {
-        captureError(
-          new NotificationError({
-            error,
-            additionalMessage: `Failed to subscribe to conversation ${conversationId}`,
-          }),
-        )
-      }
-    }),
-  )
+    notificationsLogger.debug(
+      `Successfully subscribed to ${validSubscriptions.length} conversations`,
+    )
+  } catch (error) {
+    captureError(
+      new NotificationError({
+        error,
+        additionalMessage: `Failed to subscribe to conversations batch for inbox ${clientInboxId}`,
+      }),
+    )
+  }
 }
 
 async function unsubscribeFromConversationsNotifications(args: {
@@ -249,15 +272,15 @@ async function unsubscribeFromConversationsNotifications(args: {
   )
 
   try {
-    // Get installation ID
+    // Get installation ID once for all conversations
     const installationId = await ensureXmtpInstallationQueryData({
       inboxId: clientInboxId,
     })
 
-    await Promise.all(
+    // Collect topics for all conversations
+    const topicsData = await Promise.all(
       conversationIds.map(async (conversationId) => {
         try {
-          // Get the conversation
           const conversation = await ensureConversationQueryData({
             clientInboxId,
             xmtpConversationId: conversationId,
@@ -265,7 +288,7 @@ async function unsubscribeFromConversationsNotifications(args: {
           })
 
           if (!conversation) {
-            throw new Error("Conversation not found")
+            throw new Error(`Conversation not found: ${conversationId}`)
           }
 
           const hmacKeys = await getXmtpConversationHmacKeys({
@@ -273,24 +296,42 @@ async function unsubscribeFromConversationsNotifications(args: {
             conversationId,
           })
 
-          await unsubscribeFromNotificationTopics({
-            installationId,
-            topics: [hmacKeys.topic],
-          })
-
-          notificationsLogger.debug(`Successfully unsubscribed from conversation ${conversationId}`)
+          return hmacKeys.topic
         } catch (error) {
-          // Log but continue with other conversations
           captureError(
             new NotificationError({
               error,
-              additionalMessage: `Failed to unsubscribe from conversation ${conversationId}`,
+              additionalMessage: `Failed to get topic for conversation ${conversationId}`,
             }),
           )
+          return null
         }
       }),
     )
+
+    // Filter out nulls
+    const validTopics = topicsData.filter(Boolean)
+
+    if (validTopics.length === 0) {
+      notificationsLogger.debug("No valid topics to unsubscribe from")
+      return
+    }
+
+    // Make a single API call to unsubscribe from all topics
+    await unsubscribeFromNotificationTopics({
+      installationId,
+      topics: validTopics,
+    })
+
+    notificationsLogger.debug(
+      `Successfully unsubscribed from ${validTopics.length} conversations in batch`,
+    )
   } catch (error) {
-    captureError(error)
+    captureError(
+      new NotificationError({
+        error,
+        additionalMessage: `Failed to unsubscribe from conversations batch for inbox ${clientInboxId}`,
+      }),
+    )
   }
 }

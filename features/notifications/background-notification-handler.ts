@@ -1,5 +1,4 @@
 import * as Notifications from "expo-notifications"
-import { SchedulableTriggerInputTypes } from "expo-notifications"
 import * as TaskManager from "expo-task-manager"
 import { IXmtpNewMessageBackgroundNotificationData } from "@/features/notifications/notifications.types"
 import { IXmtpConversationTopic } from "@/features/xmtp/xmtp.types"
@@ -71,6 +70,9 @@ TaskManager.defineTask(BACKGROUND_NOTIFICATION_TASK, async ({ data, error }) => 
  */
 export async function registerBackgroundNotificationTask() {
   try {
+    // Doing this for now to prevent duplicate registrations since we're still testing this feature
+    await unregisterAllBackgroundTasks()
+
     notificationsLogger.debug("Registering background notification task...")
     await Notifications.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK)
     notificationsLogger.debug("Background notification task registered successfully")
@@ -82,67 +84,40 @@ export async function registerBackgroundNotificationTask() {
   }
 }
 
+// /**
+//  * Unregisters the background notification task
+//  * Use this to clean up the task or when you need to restart fresh
+//  */
+// async function unregisterBackgroundNotificationTask() {
+//   try {
+//     notificationsLogger.debug("Unregistering background notification task...")
+//     await Notifications.unregisterTaskAsync(BACKGROUND_NOTIFICATION_TASK)
+//     notificationsLogger.debug("Background notification task unregistered successfully")
+//   } catch (error) {
+//     captureError(
+//       new NotificationError({
+//         error,
+//         additionalMessage: "Failed to unregister background notification task",
+//       }),
+//     )
+//   }
+// }
+
 /**
- * Tests the background notification handling by sending a test notification
- * Call this function to verify if your background notification task is working properly
+ * Unregisters all tasks associated with the application
+ * Use this to completely clean up and start fresh
  */
-export async function testBackgroundNotificationTask() {
+async function unregisterAllBackgroundTasks() {
   try {
-    notificationsLogger.debug("Scheduling test notification to verify background task...")
-
-    const notificationId = await Notifications.scheduleNotificationAsync({
-      content: {
-        title: "Test Background Task",
-        body: "This notification should be intercepted and modified",
-        data: { test: true },
-      },
-      trigger: {
-        type: SchedulableTriggerInputTypes.TIME_INTERVAL,
-        seconds: 5,
-      },
-    })
-
-    notificationsLogger.debug("Test notification scheduled with ID:", notificationId)
-
-    return notificationId
+    notificationsLogger.debug("Unregistering all background tasks...")
+    await TaskManager.unregisterAllTasksAsync()
+    notificationsLogger.debug("All background tasks unregistered successfully")
   } catch (error) {
     captureError(
       new NotificationError({
         error,
-        additionalMessage: "Failed to schedule test notification",
+        additionalMessage: "Failed to unregister all background tasks",
       }),
     )
-    throw error
   }
 }
-
-/**
- * Set up notification categories with custom actions
- * These define how notifications behave when received in the background
- */
-// async function setupNotificationCategories() {
-//   try {
-//     // Create a default notification category with custom actions
-//     await Notifications.setNotificationCategoryAsync("default", [
-//       {
-//         identifier: "view",
-//         buttonTitle: "View",
-//         options: {
-//           opensAppToForeground: true,
-//         },
-//       },
-//       {
-//         identifier: "dismiss",
-//         buttonTitle: "Dismiss",
-//         options: {
-//           opensAppToForeground: false,
-//         },
-//       },
-//     ])
-
-//     notificationsLogger.debug("Notification categories set up successfully")
-//   } catch (error) {
-//     captureError(error)
-//     notificationsLogger.error("Error setting up notification categories:", error)
-//   }
-// }

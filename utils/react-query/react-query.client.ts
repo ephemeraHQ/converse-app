@@ -47,7 +47,7 @@ export const reactQueryClient = new QueryClient({
     // Carefull, this is also triggered when the query gets its data from the persister.
     onSuccess: (_, query) => {
       queryLogger.debug(
-        `[Query] success fetching ${JSON.stringify(query.queryKey)}${
+        `Success fetching ${JSON.stringify(query.queryKey)}${
           query.meta?.caller ? ` (caller: ${query.meta.caller})` : ""
         }`,
       )

@@ -36,7 +36,6 @@ export async function getXmtpClientByInboxId(args: { inboxId: IXmtpInboxId }) {
     // Check if client already exists in map
     const existingClient = xmtpClientsMap.get(inboxId)
     if (existingClient) {
-      xmtpLogger.debug(`Found existing XMTP client for inboxId: ${inboxId}`)
       return existingClient
     }
 

@@ -127,7 +127,11 @@ async function getXmtpConversationsUnbatched(args: IGetXmtpConversationsArgs) {
     if (duration > config.xmtp.maxMsUntilLogError) {
       captureError(
         new XMTPError({
-          error: new Error(`Getting conversations took ${duration}ms for inbox: ${clientInboxId}`),
+          error: new Error(
+            `Getting conversations took ${duration}ms for inbox: ${clientInboxId}, consentStates: ${consentStates?.join(
+              ", ",
+            )} and limit: ${limit}`,
+          ),
         }),
       )
     }

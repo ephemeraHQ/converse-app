@@ -100,11 +100,7 @@ export function ConversationListScreen(props: IConversationListProps) {
           ListEmptyComponent={<ConversationListEmpty />}
           ListHeaderComponent={<ListHeader />}
           onRefetch={handleRefresh}
-          onLayout={() => {}}
-          initialNumToRender={10} // 10 should be enough to cover the screen
-          layout={theme.animation.reanimatedLayoutSpringTransition}
           contentContainerStyle={{
-            flexGrow: 1, // For the empty state to be full screen
             // Little hack because we want ConversationListEmpty to be full screen when we have no conversations
             paddingBottom: conversationsIds && conversationsIds.length > 0 ? insets.bottom : 0,
           }}
