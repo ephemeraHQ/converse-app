@@ -3,7 +3,7 @@ import { useCallback } from "react"
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import {
   addMessageToConversationMessagesQueryData,
-  refetchConversationMessages,
+  refetchConversationMessagesQuery,
 } from "@/features/conversation/conversation-chat/conversation-messages.query"
 import { getConversationForCurrentAccount } from "@/features/conversation/utils/get-conversation-for-current-account"
 import { sendXmtpConversationMessage } from "@/features/xmtp/xmtp-conversations/xmtp-conversation"
@@ -60,7 +60,7 @@ export function useReactOnMessage(props: { xmtpConversationId: IXmtpConversation
     },
     onError: (error) => {
       const currentSender = getSafeCurrentSender()
-      refetchConversationMessages({
+      refetchConversationMessagesQuery({
         clientInboxId: currentSender.inboxId,
         xmtpConversationId,
         caller: "useReactOnMessage mutation onError",

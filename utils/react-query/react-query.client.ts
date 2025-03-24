@@ -2,7 +2,7 @@ import { Mutation, MutationCache, QueryCache, QueryClient } from "@tanstack/reac
 import { AxiosError } from "axios"
 import { captureError } from "@/utils/capture-error"
 import { ReactQueryError } from "@/utils/error"
-import { logger } from "@/utils/logger"
+import { queryLogger } from "@/utils/logger"
 import { DEFAULT_GC_TIME, DEFAULT_STALE_TIME } from "./react-query.constants"
 
 export const reactQueryClient = new QueryClient({
@@ -46,7 +46,7 @@ export const reactQueryClient = new QueryClient({
     // Used to track which queries execute the queryFn which means will do a network request.
     // Carefull, this is also triggered when the query gets its data from the persister.
     onSuccess: (_, query) => {
-      logger.debug(
+      queryLogger.debug(
         `[Query] success fetching ${JSON.stringify(query.queryKey)}${
           query.meta?.caller ? ` (caller: ${query.meta.caller})` : ""
         }`,

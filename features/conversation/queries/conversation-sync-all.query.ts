@@ -1,8 +1,9 @@
 import { queryOptions, skipToken } from "@tanstack/react-query"
-import { syncAllXmtpConversations } from "@/features/xmtp/xmtp-sync/xmtp-sync"
+import { syncAllXmtpConversations } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-sync"
 import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
 import { getReactQueryKey } from "@/utils/react-query/react-query.utils"
+import { DateUtils } from "@/utils/time.utils"
 
 type IArgs = {
   clientInboxId: IXmtpInboxId
@@ -45,24 +46,16 @@ export function getConversationSyncAllQueryOptions(args: IArgs) {
           await syncAllXmtpConversations({
             clientInboxId: clientInboxId,
           })
-          return true
 
-          // return syncConversationsBatcher.fetch({
-          //   clientInboxId: clientInboxId,
-          //   // consentStates: consentStates,
-          // })
+          return true
         }
       : skipToken,
-    staleTime: 10000, // 10 seconds because we want to do this often to make sure the data we have is up to date
+    refetchIntervalInBackground: true,
+    refetchInterval: DateUtils.minutes(10).toMilliseconds(), // Sync every 10 minutes
+    staleTime: DateUtils.seconds(10).toMilliseconds(), // Consider data stale after 10 seconds
   })
-}
-
-export function ensureConversationSyncAllQuery(args: IArgs) {
-  return reactQueryClient.ensureQueryData(getConversationSyncAllQueryOptions(args))
 }
 
 export async function refetchConversationSyncAllQuery(args: IArgs) {
-  return reactQueryClient.invalidateQueries({
-    queryKey: getConversationSyncAllQueryOptions(args).queryKey,
-  })
+  return reactQueryClient.fetchQuery(getConversationSyncAllQueryOptions(args))
 }

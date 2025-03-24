@@ -9,13 +9,16 @@ import { ensureMessageContentStringValue } from "../conversation-list/hooks/use-
 export function useConversationRequestsListItem() {
   const currentSender = useSafeCurrentSender()
 
-  const { data: unknownConsentConversationIds, isLoading: isLoadingUnknownConsentConversationIds } =
-    useQuery({
-      ...getUnknownConsentConversationsQueryOptions({
-        inboxId: currentSender.inboxId,
-        caller: "useConversationRequestsListItem",
-      }),
-    })
+  const {
+    data: unknownConsentConversationIds,
+    isLoading: isLoadingUnknownConsentConversationIds,
+    refetch: refetchUnknownConsentConversationIds,
+  } = useQuery({
+    ...getUnknownConsentConversationsQueryOptions({
+      inboxId: currentSender.inboxId,
+      caller: "useConversationRequestsListItem",
+    }),
+  })
 
   const spamQueries = useQueries({
     queries: (unknownConsentConversationIds ?? []).map((conversationId) => ({
@@ -71,5 +74,6 @@ export function useConversationRequestsListItem() {
     likelySpamConversationIds:
       spamResults.filter((r) => r.isSpam).map((r) => r.conversationId) ?? [],
     isLoading,
+    refetch: refetchUnknownConsentConversationIds,
   }
 }

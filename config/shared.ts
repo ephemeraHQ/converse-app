@@ -6,18 +6,20 @@ import { IConfig, ILoggerColorScheme } from "@/config/config.types"
 function maybeReplaceLocalhost(uri: string) {
   try {
     if (uri?.includes("localhost")) {
-      console.info("Replacing localhost with device-accessible IP")
+      console.debug("Trying to replace localhost with device-accessible IP")
+
       // Try Expo host info first
       const hostIp = Constants.expoConfig?.hostUri?.split(":")[0]
-      console.info("Host IP", { hostIp })
 
-      if (hostIp) {
-        console.info("Replacing localhost with device-accessible IP", {
-          uri,
-          hostIp,
-        })
-        return uri.replace("localhost", hostIp)
+      if (!hostIp) {
+        throw new Error("No expo host IP found")
       }
+
+      const newUri = uri.replace("localhost", hostIp)
+
+      console.debug(`New uri: ${newUri}`)
+
+      return newUri
     }
   } catch (error) {
     console.error("Error replacing localhost with device-accessible IP", error)

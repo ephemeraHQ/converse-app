@@ -1,8 +1,10 @@
 import { IXmtpConversationId, IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { getHmacKeys } from "@xmtp/react-native-sdk"
+import { config } from "@/config"
 import { IHmacKey } from "@/features/notifications/notifications.api"
 import { getXmtpConversation } from "@/features/xmtp/xmtp-conversations/xmtp-conversation"
 import { ensureXmtpInstallationQueryData } from "@/features/xmtp/xmtp-installations/xmtp-installation.query"
+import { captureError } from "@/utils/capture-error"
 import { XMTPError } from "@/utils/error"
 import logger from "@/utils/logger"
 
@@ -20,22 +22,33 @@ export async function getXmtpConversationHmacKeys(args: {
   const { clientInboxId, conversationId } = args
 
   try {
-    logger.debug("[getXmtpConversationHmacKeys] Getting installation ID", {
-      clientInboxId,
-      conversationId,
-    })
+    // logger.debug("[getXmtpConversationHmacKeys] Getting installation ID", {
+    //   clientInboxId,
+    //   conversationId,
+    // })
 
     // First get the client installation ID
     const installationId = await ensureXmtpInstallationQueryData({
       inboxId: clientInboxId,
     })
 
-    logger.debug("[getXmtpConversationHmacKeys] Getting HMAC keys", { installationId })
+    // logger.debug("[getXmtpConversationHmacKeys] Getting HMAC keys", { installationId })
 
     // Get all HMAC keys
+    const startMs = Date.now()
     const hmacKeysResponse = await getHmacKeys(installationId)
+    const endMs = Date.now()
+    const durationMs = endMs - startMs
 
-    logger.debug("[getXmtpConversationHmacKeys] Getting conversation", { conversationId })
+    if (durationMs > config.xmtp.maxMsUntilLogError) {
+      captureError(
+        new XMTPError({
+          error: new Error(`Getting HMAC keys took ${durationMs}ms`),
+        }),
+      )
+    }
+
+    // logger.debug("[getXmtpConversationHmacKeys] Getting conversation", { conversationId })
 
     // Get the conversation topic
     const conversation = await getXmtpConversation({
@@ -51,11 +64,11 @@ export async function getXmtpConversationHmacKeys(args: {
     const conversationTopic = conversation.topic
     const topicHmacKeys = hmacKeysResponse.hmacKeys[conversationTopic]
 
-    logger.debug("[getXmtpConversationHmacKeys] Converting HMAC keys", {
-      conversationTopic,
-      hasKeys: !!topicHmacKeys,
-      keyCount: topicHmacKeys?.values?.length ?? 0,
-    })
+    // logger.debug("[getXmtpConversationHmacKeys] Converting HMAC keys", {
+    //   conversationTopic,
+    //   hasKeys: !!topicHmacKeys,
+    //   keyCount: topicHmacKeys?.values?.length ?? 0,
+    // })
 
     // Convert HMAC keys to the format expected by the backend
     const hmacKeysArray: IHmacKey[] = []

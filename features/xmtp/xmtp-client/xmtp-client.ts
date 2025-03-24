@@ -1,5 +1,11 @@
-import { IXmtpClientWithCodecs, IXmtpInboxId, IXmtpSigner } from "@features/xmtp/xmtp.types"
+import {
+  IXmtpClientWithCodecs,
+  IXmtpEnv,
+  IXmtpInboxId,
+  IXmtpSigner,
+} from "@features/xmtp/xmtp.types"
 import { PublicIdentity, Client as XmtpClient } from "@xmtp/react-native-sdk"
+import Constants from "expo-constants"
 import { config } from "@/config"
 import { useMultiInboxStore } from "@/features/authentication/multi-inbox.store"
 import {
@@ -42,8 +48,6 @@ export async function getXmtpClientByInboxId(args: { inboxId: IXmtpInboxId }) {
       })
     }
 
-    // Create client using the ethereum address
-    xmtpLogger.debug(`Couldn't get XMTP client for inboxId: ${inboxId}, so building it...`)
     const client = await buildXmtpClientInstance({
       ethereumAddress: sender.ethereumAddress,
       inboxId,
@@ -51,7 +55,6 @@ export async function getXmtpClientByInboxId(args: { inboxId: IXmtpInboxId }) {
 
     // Store in map
     xmtpClientsMap.set(inboxId, client)
-    xmtpLogger.debug(`Created and stored XMTP client for inboxId: ${inboxId}`)
 
     return client
   } catch (error) {
@@ -83,7 +86,7 @@ export async function createXmtpClient(args: { inboxSigner: IXmtpSigner }) {
   xmtpLogger.debug(`Creating XMTP client instance...`)
   const { data, error, durationMs } = await tryCatchWithDuration(
     XmtpClient.create<ISupportedXmtpCodecs>(inboxSigner, {
-      env: config.xmtpEnv,
+      env: getXmtpEnv(),
       dbEncryptionKey,
       codecs: supportedXmtpCodecs,
     }),
@@ -125,13 +128,10 @@ async function buildXmtpClientInstance(args: {
 }) {
   const { ethereumAddress, inboxId } = args
 
-  xmtpLogger.debug(`Building XMTP client for address: ${ethereumAddress}`)
-
   try {
     // Check if there's already a build in progress for this address
     const existingBuildPromise = buildPromisesCache.get(ethereumAddress)
     if (existingBuildPromise) {
-      xmtpLogger.debug(`Using cached build promise for address: ${ethereumAddress}`)
       return existingBuildPromise
     }
 
@@ -147,7 +147,7 @@ async function buildXmtpClientInstance(args: {
         const client = await XmtpClient.build<ISupportedXmtpCodecs>(
           new PublicIdentity(ethereumAddress, "ETHEREUM"),
           {
-            env: config.xmtpEnv,
+            env: getXmtpEnv(),
             codecs: supportedXmtpCodecs,
             dbEncryptionKey,
           },
@@ -174,6 +174,8 @@ async function buildXmtpClientInstance(args: {
 
     // Store the promise in cache
     buildPromisesCache.set(ethereumAddress, buildPromise)
+
+    xmtpLogger.debug(`Building XMTP client for address: ${ethereumAddress}`)
 
     return buildPromise
   } catch (error) {
@@ -230,4 +232,36 @@ export async function logoutXmtpClient(args: { inboxId: IXmtpInboxId; deleteData
       additionalMessage: `Failed to properly logout XMTP client for inboxId: ${inboxId}`,
     })
   }
+}
+
+// Useful for debugging on physical devices
+function getXmtpEnv() {
+  let xmtpEnv = config.xmtpEnv
+
+  try {
+    if (config.xmtpEnv === "local") {
+      xmtpLogger.debug("Replacing localhost with device-accessible IP")
+
+      const hostIp = Constants.expoConfig?.hostUri?.split(":")[0]
+
+      if (!hostIp) {
+        throw new XMTPError({
+          error: new Error("No host IP found"),
+        })
+      }
+
+      xmtpEnv = `${hostIp}:caca` as IXmtpEnv
+    }
+  } catch (error) {
+    captureError(
+      new XMTPError({
+        error,
+        additionalMessage: "Failed to get XMTP environment",
+      }),
+    )
+  }
+
+  xmtpLogger.debug(`Using XMTP environment: ${xmtpEnv}`)
+
+  return xmtpEnv
 }

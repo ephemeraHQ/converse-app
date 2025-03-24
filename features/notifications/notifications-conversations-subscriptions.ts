@@ -1,10 +1,10 @@
 import { QueryObserver } from "@tanstack/react-query"
 import { useMultiInboxStore } from "@/features/authentication/multi-inbox.store"
-import { getAllowedConsentConversationsQueryObserver } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import {
-  ensureConversationQueryData,
-  getConversationQueryData,
-} from "@/features/conversation/queries/conversation.query"
+  ensureAllowedConsentConversationsQueryData,
+  getAllowedConsentConversationsQueryObserver,
+} from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
+import { ensureConversationQueryData } from "@/features/conversation/queries/conversation.query"
 import { isTempConversation } from "@/features/conversation/utils/is-temp-conversation"
 import { getNotificationsPermissionsQueryConfig } from "@/features/notifications/notifications-permissions.query"
 import { userHasGrantedNotificationsPermissions } from "@/features/notifications/notifications.service"
@@ -12,6 +12,7 @@ import { getXmtpConversationHmacKeys } from "@/features/xmtp/xmtp-hmac-keys/xmtp
 import { ensureXmtpInstallationQueryData } from "@/features/xmtp/xmtp-installations/xmtp-installation.query"
 import { IXmtpConversationId, IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
+import { NotificationError } from "@/utils/error"
 import { notificationsLogger } from "@/utils/logger"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
 import {
@@ -44,144 +45,6 @@ export function setupConversationsNotificationsSubscriptions() {
   )
 }
 
-/**
- * Subscribes to notifications for a specific XMTP conversation
- */
-async function subscribeToConversationsNotifications(args: {
-  conversationIds: IXmtpConversationId[]
-  clientInboxId: IXmtpInboxId
-}) {
-  const { conversationIds, clientInboxId } = args
-
-  const hasPushNotificationPermissions = await userHasGrantedNotificationsPermissions()
-
-  if (!hasPushNotificationPermissions) {
-    throw new Error(
-      "Notifications permissions not granted to subscribe to conversations notifications",
-    )
-  }
-
-  notificationsLogger.debug(
-    `[subscribeToConversationsNotifications] Subscribing to ${conversationIds.length} conversations`,
-  )
-
-  for (const conversationId of conversationIds) {
-    try {
-      notificationsLogger.debug("Subscribing to conversation", {
-        conversationId,
-        inboxId: clientInboxId,
-      })
-
-      const conversation = await ensureConversationQueryData({
-        clientInboxId,
-        xmtpConversationId: conversationId,
-        caller: "subscribeToConversationsNotifications",
-      })
-
-      if (!conversation) {
-        throw new Error("Conversation not found")
-      }
-
-      notificationsLogger.debug("Getting installation ID")
-      const installationId = await ensureXmtpInstallationQueryData({
-        inboxId: clientInboxId,
-      })
-
-      notificationsLogger.debug("Getting HMAC keys", {
-        conversationId,
-      })
-      const hmacKeys = await getXmtpConversationHmacKeys({
-        clientInboxId,
-        conversationId,
-      })
-
-      notificationsLogger.debug("Subscribing to notification topics", {
-        installationId,
-        topic: hmacKeys.topic,
-      })
-      await subscribeToNotificationTopicsWithMetadata({
-        installationId,
-        subscriptions: [
-          {
-            topic: hmacKeys.topic,
-            isSilent: false,
-            hmacKeys: hmacKeys.hmacKeys,
-          },
-        ],
-      })
-
-      notificationsLogger.debug("Successfully subscribed to conversation", {
-        conversationId,
-      })
-    } catch (error) {
-      captureError(error)
-    }
-  }
-}
-
-/**
- * Unsubscribes from notifications for specified XMTP conversations
- */
-async function unsubscribeFromConversationsNotifications(args: {
-  conversationIds: IXmtpConversationId[]
-  clientInboxId: IXmtpInboxId
-}) {
-  const { conversationIds, clientInboxId } = args
-
-  notificationsLogger.debug(
-    `[unsubscribeFromConversationsNotifications] Unsubscribing from ${conversationIds.length} conversations`,
-  )
-
-  try {
-    // Get installation ID
-    const installationId = await ensureXmtpInstallationQueryData({
-      inboxId: clientInboxId,
-    })
-
-    // Process each conversation
-    for (const conversationId of conversationIds) {
-      try {
-        // Get the conversation
-        const conversation = getConversationQueryData({
-          clientInboxId,
-          xmtpConversationId: conversationId,
-        })
-
-        if (!conversation) {
-          notificationsLogger.debug("No conversation found, skipping unsubscription", {
-            conversationId,
-          })
-          continue
-        }
-
-        // Get the conversation HMAC keys to find the topic
-        const hmacKeys = await getXmtpConversationHmacKeys({
-          clientInboxId,
-          conversationId,
-        })
-
-        // Unsubscribe from the topic
-        notificationsLogger.debug("Unsubscribing from notification topic", {
-          installationId,
-          topic: hmacKeys.topic,
-        })
-
-        await unsubscribeFromNotificationTopics({
-          installationId,
-          topics: [hmacKeys.topic],
-        })
-
-        notificationsLogger.debug("Successfully unsubscribed from conversation", { conversationId })
-      } catch (error) {
-        // Log but continue with other conversations
-        captureError(error)
-      }
-    }
-  } catch (error) {
-    captureError(error)
-  }
-}
-
 // Global map to track observers by inbox ID
 const observersMap = new Map<
   IXmtpInboxId,
@@ -191,26 +54,20 @@ const observersMap = new Map<
 // Global variable to track previous senders
 let previousSendersInboxIds: IXmtpInboxId[] = []
 
-/**
- * Updates conversation notification subscriptions based on current permissions and senders
- */
 async function updateConversationSubscriptions() {
   // Check if notifications permissions are granted
   const hasPushNotificationPermissions = await userHasGrantedNotificationsPermissions()
 
+  // Permissions revoked or not granted, reset everything
   if (!hasPushNotificationPermissions) {
-    notificationsLogger.debug("Skipped subscription setup - notification permissions not granted")
-
-    // Clean up any existing observers if permissions were revoked
-    for (const [inboxId, observer] of observersMap.entries()) {
-      notificationsLogger.debug(
-        `[updateConversationSubscriptions] Cleaning up observer for inbox ${inboxId} due to revoked permissions`,
-      )
-      observer.destroy()
-      observersMap.delete(inboxId)
-    }
-    previousSendersInboxIds = []
-    return
+    return unsubscribeFromAllConversationsNotifications().catch((error) =>
+      captureError(
+        new NotificationError({
+          error,
+          additionalMessage: "Failed to unsubscribe from all conversations notifications",
+        }),
+      ),
+    )
   }
 
   // Get current senders from the store
@@ -228,9 +85,6 @@ async function updateConversationSubscriptions() {
   for (const inboxId of inboxIdsToUnsubscribe) {
     const observer = observersMap.get(inboxId)
     if (observer) {
-      notificationsLogger.debug(
-        `[updateConversationSubscriptions] Unsubscribing observer for inbox ${inboxId}`,
-      )
       observer.destroy()
       observersMap.delete(inboxId)
     }
@@ -238,9 +92,6 @@ async function updateConversationSubscriptions() {
 
   // Subscribe new senders
   for (const inboxId of inboxIdsToSubscribe) {
-    notificationsLogger.debug(
-      `[updateConversationSubscriptions] Setting up observer for inbox ${inboxId}`,
-    )
     setupObserverForInbox(inboxId)
   }
 
@@ -249,7 +100,7 @@ async function updateConversationSubscriptions() {
 }
 
 /**
- * Sets up a query observer for a specific inbox ID
+ * Sets up a query observer for a each client inbox ID
  */
 function setupObserverForInbox(clientInboxId: IXmtpInboxId) {
   // Store conversation IDs for comparison
@@ -278,9 +129,6 @@ function setupObserverForInbox(clientInboxId: IXmtpInboxId) {
 
     // Handle unsubscriptions
     if (conversationsToUnsubscribe.length > 0) {
-      notificationsLogger.debug(
-        `[setupObserverForInbox] Unsubscribing from ${conversationsToUnsubscribe.length} conversations for inbox ${clientInboxId}`,
-      )
       unsubscribeFromConversationsNotifications({
         conversationIds: conversationsToUnsubscribe,
         clientInboxId,
@@ -289,9 +137,6 @@ function setupObserverForInbox(clientInboxId: IXmtpInboxId) {
 
     // Handle new subscriptions
     if (conversationsToSubscribe.length > 0) {
-      notificationsLogger.debug(
-        `[setupObserverForInbox] Subscribing to ${conversationsToSubscribe.length} conversations for inbox ${clientInboxId}`,
-      )
       subscribeToConversationsNotifications({
         conversationIds: conversationsToSubscribe,
         clientInboxId,
@@ -302,6 +147,150 @@ function setupObserverForInbox(clientInboxId: IXmtpInboxId) {
     previousConversationIds = validConversationsIds
   })
 
+  notificationsLogger.debug(
+    `Successfully setup allowed consent conversations observer for inbox: ${clientInboxId}`,
+  )
+
   // Store the observer in our map for tracking
   observersMap.set(clientInboxId, observer)
+}
+
+async function unsubscribeFromAllConversationsNotifications() {
+  notificationsLogger.debug("Notifications not granted, clearing observers and unsubscribing")
+
+  const senders = useMultiInboxStore.getState().senders
+
+  await Promise.all(
+    senders.map(async (sender) => {
+      const conversationIds = await ensureAllowedConsentConversationsQueryData({
+        clientInboxId: sender.inboxId,
+        caller: "updateConversationSubscriptions",
+      })
+
+      await unsubscribeFromConversationsNotifications({
+        conversationIds,
+        clientInboxId: sender.inboxId,
+      })
+    }),
+  )
+
+  previousSendersInboxIds = []
+
+  observersMap.forEach((observer) => {
+    observer.destroy()
+  })
+  observersMap.clear()
+
+  notificationsLogger.debug("Unsubscribed from all conversations notifications")
+}
+
+async function subscribeToConversationsNotifications(args: {
+  conversationIds: IXmtpConversationId[]
+  clientInboxId: IXmtpInboxId
+}) {
+  const { conversationIds, clientInboxId } = args
+
+  notificationsLogger.debug(`Subscribing to ${conversationIds.length} conversations`)
+
+  await Promise.all(
+    conversationIds.map(async (conversationId) => {
+      try {
+        const conversation = await ensureConversationQueryData({
+          clientInboxId,
+          xmtpConversationId: conversationId,
+          caller: "subscribeToConversationsNotifications",
+        })
+
+        if (!conversation) {
+          throw new Error("Conversation not found")
+        }
+
+        const installationId = await ensureXmtpInstallationQueryData({
+          inboxId: clientInboxId,
+        })
+
+        const hmacKeys = await getXmtpConversationHmacKeys({
+          clientInboxId,
+          conversationId,
+        })
+
+        const subscription = {
+          topic: hmacKeys.topic,
+          isSilent: true,
+          hmacKeys: hmacKeys.hmacKeys,
+        }
+
+        await subscribeToNotificationTopicsWithMetadata({
+          installationId,
+          subscriptions: [subscription],
+        })
+
+        notificationsLogger.debug(`Successfully subscribed to conversation ${conversationId}`)
+      } catch (error) {
+        captureError(
+          new NotificationError({
+            error,
+            additionalMessage: `Failed to subscribe to conversation ${conversationId}`,
+          }),
+        )
+      }
+    }),
+  )
+}
+
+async function unsubscribeFromConversationsNotifications(args: {
+  conversationIds: IXmtpConversationId[]
+  clientInboxId: IXmtpInboxId
+}) {
+  const { conversationIds, clientInboxId } = args
+
+  notificationsLogger.debug(
+    `[unsubscribeFromConversationsNotifications] Unsubscribing from ${conversationIds.length} conversations`,
+  )
+
+  try {
+    // Get installation ID
+    const installationId = await ensureXmtpInstallationQueryData({
+      inboxId: clientInboxId,
+    })
+
+    await Promise.all(
+      conversationIds.map(async (conversationId) => {
+        try {
+          // Get the conversation
+          const conversation = await ensureConversationQueryData({
+            clientInboxId,
+            xmtpConversationId: conversationId,
+            caller: "unsubscribeFromConversationsNotifications",
+          })
+
+          if (!conversation) {
+            throw new Error("Conversation not found")
+          }
+
+          const hmacKeys = await getXmtpConversationHmacKeys({
+            clientInboxId,
+            conversationId,
+          })
+
+          await unsubscribeFromNotificationTopics({
+            installationId,
+            topics: [hmacKeys.topic],
+          })
+
+          notificationsLogger.debug(`Successfully unsubscribed from conversation ${conversationId}`)
+        } catch (error) {
+          // Log but continue with other conversations
+          captureError(
+            new NotificationError({
+              error,
+              additionalMessage: `Failed to unsubscribe from conversation ${conversationId}`,
+            }),
+          )
+        }
+      }),
+    )
+  } catch (error) {
+    captureError(error)
+  }
 }

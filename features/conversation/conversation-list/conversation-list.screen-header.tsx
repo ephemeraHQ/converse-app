@@ -29,12 +29,12 @@ function HeaderRightActions() {
 
   return (
     <HStack style={themed($rightContainer)}>
-      <HeaderAction
+      {/* <HeaderAction
         icon="qrcode"
         onPress={() => {
           navigation.navigate("ShareProfile")
         }}
-      />
+      /> */}
       <HeaderAction
         style={$newConversationContainer}
         icon="square.and.pencil"

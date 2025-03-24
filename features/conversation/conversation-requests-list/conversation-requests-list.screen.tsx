@@ -1,3 +1,4 @@
+import { useFocusEffect } from "@react-navigation/native"
 import { memo, useCallback, useState } from "react"
 import { Screen } from "@/components/screen/screen"
 import { ConversationList } from "@/features/conversation/conversation-list/conversation-list.component"
@@ -5,6 +6,7 @@ import { ConversationRequestsToggle } from "@/features/conversation/conversation
 import { useConversationRequestsListScreenHeader } from "@/features/conversation/conversation-requests-list/conversation-requests-list.screen-header"
 import { translate } from "@/i18n"
 import { $globalStyles } from "@/theme/styles"
+import { captureError } from "@/utils/capture-error"
 import { useConversationRequestsListItem } from "./use-conversation-requests-list-items"
 
 export const ConversationRequestsListScreen = memo(function () {
@@ -34,8 +36,14 @@ const ConversationListWrapper = memo(function ConversationListWrapper({
 }: {
   selectedIndex: number
 }) {
-  const { likelyNotSpamConversationIds, likelySpamConversationIds } =
+  const { likelyNotSpamConversationIds, likelySpamConversationIds, refetch } =
     useConversationRequestsListItem()
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch().catch(captureError)
+    }, [refetch]),
+  )
 
   return (
     <ConversationList

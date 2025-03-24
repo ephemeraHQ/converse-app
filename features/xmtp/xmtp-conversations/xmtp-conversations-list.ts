@@ -1,17 +1,12 @@
-import { create, windowScheduler } from "@yornaath/batshit"
 import { config } from "@/config"
 import { getXmtpClientByInboxId } from "@/features/xmtp/xmtp-client/xmtp-client"
-import {
-  IXmtpConsentState,
-  IXmtpConversationWithCodecs,
-  IXmtpInboxId,
-} from "@/features/xmtp/xmtp.types"
+import { IXmtpConsentState, IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
 import { XMTPError } from "@/utils/error"
 
 type IGetXmtpConversationsArgs = {
   clientInboxId: IXmtpInboxId
-  consentStates: IXmtpConsentState[]
+  consentStates?: IXmtpConsentState[]
   limit?: number
 }
 
