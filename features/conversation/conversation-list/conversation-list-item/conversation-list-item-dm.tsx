@@ -9,7 +9,7 @@ import { RestoreSwipeableAction } from "@/features/conversation/conversation-lis
 import { useConversationIsDeleted } from "@/features/conversation/conversation-list/hooks/use-conversation-is-deleted"
 import { useConversationIsUnread } from "@/features/conversation/conversation-list/hooks/use-conversation-is-unread"
 import { useDeleteDm } from "@/features/conversation/conversation-list/hooks/use-delete-dm"
-import { useMessagePlainText } from "@/features/conversation/conversation-list/hooks/use-message-plain-text"
+import { useMessageContentStringValue } from "@/features/conversation/conversation-list/hooks/use-message-content-string-value"
 import { useRestoreConversation } from "@/features/conversation/conversation-list/hooks/use-restore-conversation"
 import { useToggleReadStatus } from "@/features/conversation/conversation-list/hooks/use-toggle-read-status"
 import { useDmQuery } from "@/features/dm/dm.query"
@@ -49,7 +49,7 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
   // Status hooks
   const { isUnread } = useConversationIsUnread({ xmtpConversationId })
   const { isDeleted } = useConversationIsDeleted({ xmtpConversationId })
-  const messageText = useMessagePlainText(dm?.lastMessage)
+  const messageText = useMessageContentStringValue(dm?.lastMessage)
 
   // Action hooks
   const deleteDm = useDeleteDm({ xmtpConversationId })

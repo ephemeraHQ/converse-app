@@ -11,10 +11,11 @@ import { NavigationParamList } from "./navigation.types"
 // https://reactnavigation.org/docs/navigating-without-navigation-prop/#usage
 export const navigationRef = createNavigationContainerRef()
 
-export function waitUntilNavigationReady() {
+export function waitUntilNavigationReady(args: { timeoutMs?: number } = {}) {
   return waitUntilPromise({
     checkFn: () => navigationRef.isReady(),
     intervalMs: 100,
+    timeoutMs: args.timeoutMs,
   })
 }
 
@@ -38,7 +39,10 @@ export async function navigate<T extends keyof NavigationParamList>(
           error: "Navigation navigator is not ready, so we're waiting...",
         }),
       )
-      await waitUntilNavigationReady()
+      await waitUntilNavigationReady({
+        // After 10 seconds, the UX will feel very broken from a user perspective...
+        timeoutMs: 10000,
+      })
     }
 
     logger.debug(`[Navigation] Navigating to ${screen} ${params ? JSON.stringify(params) : ""}`)

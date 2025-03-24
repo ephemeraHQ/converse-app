@@ -6,7 +6,7 @@ import { IXmtpConversationTopic } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
 import { NotificationError } from "@/utils/error"
 import { notificationsLogger } from "@/utils/logger"
-import { displayLocalNewMessageNotification } from "./notifications.service"
+import { maybeDisplayLocalNewMessageNotification } from "./notifications.service"
 
 const BACKGROUND_NOTIFICATION_TASK = "BACKGROUND_NOTIFICATION_TASK"
 
@@ -36,7 +36,7 @@ TaskManager.defineTask(BACKGROUND_NOTIFICATION_TASK, async ({ data, error }) => 
       })
     }
 
-    await displayLocalNewMessageNotification({
+    await maybeDisplayLocalNewMessageNotification({
       encryptedMessage:
         backgroundNotificationData.UIApplicationLaunchOptionsRemoteNotificationKey.encryptedMessage,
       topic: backgroundNotificationData.UIApplicationLaunchOptionsRemoteNotificationKey

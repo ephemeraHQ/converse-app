@@ -1,6 +1,8 @@
-import React, { memo, useCallback, useEffect, useMemo, useRef } from "react"
-import { NativeScrollEvent, NativeSyntheticEvent, Platform } from "react-native"
-import { FadeInDown } from "react-native-reanimated"
+import { useFocusEffect } from "@react-navigation/native"
+import React, { memo, ReactElement, useCallback, useEffect, useMemo, useRef } from "react"
+import { FlatList, NativeScrollEvent, NativeSyntheticEvent, Platform } from "react-native"
+import Animated, { AnimatedProps, FadeInDown, useAnimatedRef } from "react-native-reanimated"
+import { FlatListProps } from "react-native/Libraries/Lists/FlatList"
 import { AnimatedVStack } from "@/design-system/VStack"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { useConversationComposerStore } from "@/features/conversation/conversation-chat/conversation-composer/conversation-composer.store-context"
@@ -14,22 +16,24 @@ import { ConversationMessageStatus } from "@/features/conversation/conversation-
 import { ConversationMessageTimestamp } from "@/features/conversation/conversation-chat/conversation-message/conversation-message-timestamp"
 import { ConversationMessageContextStoreProvider } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.store-context"
 import { isAnActualMessage } from "@/features/conversation/conversation-chat/conversation-message/utils/conversation-message-assertions"
-import { ConversationMessagesList } from "@/features/conversation/conversation-chat/conversation-messages-list.component"
 import { useConversationMessagesQuery } from "@/features/conversation/conversation-chat/conversation-messages.query"
 import { useConversationIsUnread } from "@/features/conversation/conversation-list/hooks/use-conversation-is-unread"
+import { getMessageContentStringValue } from "@/features/conversation/conversation-list/hooks/use-message-content-string-value"
 import { IConversation } from "@/features/conversation/conversation.types"
 import { useMarkConversationAsRead } from "@/features/conversation/hooks/use-mark-conversation-as-read"
 import { isConversationAllowed } from "@/features/conversation/utils/is-conversation-allowed"
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm"
+import { $globalStyles } from "@/theme/styles"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { captureError } from "@/utils/capture-error"
+import { convertNanosecondsToMilliseconds } from "@/utils/date"
 import { CONVERSATION_LIST_REFRESH_THRESHOLD } from "../conversation-list/conversation-list.contstants"
 import { ConversationMessageHighlighted } from "./conversation-message/conversation-message-highlighted"
 import { IConversationMessage } from "./conversation-message/conversation-message.types"
 import { useMessageHasReactions } from "./conversation-message/hooks/use-message-has-reactions"
 import { getConversationNextMessage } from "./conversation-message/utils/get-conversation-next-message"
 import { getConversationPreviousMessage } from "./conversation-message/utils/get-conversation-previous-message"
-import { useCurrentXmtpConversationId } from "./conversation.store-context"
+import { useConversationStore, useCurrentXmtpConversationId } from "./conversation.store-context"
 
 export const ConversationMessages = memo(function ConversationMessages(props: {
   conversation: IConversation
@@ -52,6 +56,12 @@ export const ConversationMessages = memo(function ConversationMessages(props: {
     xmtpConversationId,
     caller: "Conversation Messages",
   })
+
+  useFocusEffect(
+    useCallback(() => {
+      refetchMessages().catch(captureError)
+    }, [refetchMessages]),
+  )
 
   const latestMessageIdByCurrentUser = useMemo(() => {
     return messages?.ids?.find(
@@ -214,12 +224,124 @@ const ConversationMessagesListItem = memo(function ConversationMessagesListItem(
   )
 })
 
-export const DmConversationEmpty = memo(function DmConversationEmpty() {
+const DmConversationEmpty = memo(function DmConversationEmpty() {
   // Will never really be empty anyway because to create the DM conversation the user has to send a first message
   return null
 })
 
-export const GroupConversationEmpty = memo(() => {
+const GroupConversationEmpty = memo(() => {
   // Will never really be empty anyway becaue we have group updates
   return null
 })
+
+type ConversationMessagesListProps = Omit<
+  AnimatedProps<FlatListProps<IConversationMessage>>,
+  "renderItem" | "data"
+> & {
+  messages: IConversationMessage[]
+  renderMessage: (args: { message: IConversationMessage; index: number }) => ReactElement
+}
+
+export const ConversationMessagesList = memo(function ConversationMessagesList(
+  props: ConversationMessagesListProps,
+) {
+  const { messages, renderMessage, ...rest } = props
+  const { theme } = useAppTheme()
+  const scrollRef = useAnimatedRef<FlatList>()
+  const conversationStore = useConversationStore()
+
+  useEffect(() => {
+    const unsub = conversationStore.subscribe(
+      (state) => state.scrollToXmtpMessageId,
+      (scrollToXmtpMessageId) => {
+        if (!scrollToXmtpMessageId) {
+          return
+        }
+
+        const index = messages.findIndex((message) => message.xmtpId === scrollToXmtpMessageId)
+        if (index === -1) {
+          return
+        }
+
+        scrollRef.current?.scrollToIndex({
+          index,
+          animated: true,
+          viewOffset: 100, // Random value just so that the message is not directly at the bottom
+        })
+
+        conversationStore.setState({
+          scrollToXmtpMessageId: undefined,
+        })
+      },
+    )
+
+    return () => {
+      unsub()
+    }
+  }, [conversationStore, messages, scrollRef])
+
+  // return (
+  //   <AnimatedLegendList
+  //     // ref={scrollRef}
+  //     data={messages}
+  //     renderItem={({ item, index }) =>
+  //       renderMessage({
+  //         message: item,
+  //         index,
+  //       })
+  //     }
+  //     maintainScrollAtEnd
+  //     maintainVisibleContentPosition
+  //     initialScrollIndex={messages.length - 1}
+  //     alignItemsAtEnd
+  //     recycleItems={false} // Disable recycling since messages likely have local state
+  //     // estimatedItemSize={176} // Random value that feels right
+  //     // keyExtractor={keyExtractor}
+  //     layout={theme.animation.reanimatedLayoutSpringTransition}
+  //     waitForInitialLayout
+  //     keyboardDismissMode="interactive"
+  //     keyboardShouldPersistTaps="handled"
+  //     showsVerticalScrollIndicator={Platform.OS === "ios"} // Size glitch on Android
+  //     style={$globalStyles.flex1}
+  //     drawDistance={100} // Increase draw distance for better performance when scrolling
+  //     {...rest}
+  //   />
+  // )
+  // Slow but works
+  return (
+    // @ts-expect-error
+    <Animated.FlatList
+      {...conversationMessagesListDefaultProps}
+      ref={scrollRef}
+      data={messages}
+      layout={theme.animation.reanimatedLayoutSpringTransition}
+      itemLayoutAnimation={theme.animation.reanimatedLayoutSpringTransition}
+      renderItem={({ item, index }) =>
+        renderMessage({
+          message: item,
+          index,
+        })
+      }
+      {...rest}
+    />
+  )
+})
+
+const keyExtractor = (message: IConversationMessage) => {
+  const messageContentStr = getMessageContentStringValue({
+    message,
+  })
+  // Round to nearest 10 seconds to avoid too many unique keys for messages sent close together
+  const messageSentMs = convertNanosecondsToMilliseconds(message.sentNs)
+  const roundedMs = Math.round(messageSentMs / 10) * 10
+  return `${messageContentStr}-${message.senderInboxId}-${roundedMs}`
+}
+
+export const conversationMessagesListDefaultProps = {
+  style: $globalStyles.flex1,
+  inverted: true,
+  keyboardDismissMode: "interactive" as const,
+  keyboardShouldPersistTaps: "handled" as const,
+  showsVerticalScrollIndicator: Platform.OS === "ios", // Size glitch on Android
+  keyExtractor,
+} satisfies Partial<FlatListProps<IConversationMessage>>

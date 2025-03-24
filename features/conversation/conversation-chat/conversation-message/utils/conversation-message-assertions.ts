@@ -135,3 +135,13 @@ export function messageContentIsReply(
 ): content is IConversationMessageReplyContent {
   return hasProperty<IConversationMessageReplyContent>(content, "reference")
 }
+
+export function messageGroupUpdatedContentIsEmpty(
+  content: IConversationMessageGroupUpdatedContent,
+) {
+  return (
+    content.membersAdded.length === 0 &&
+    content.membersRemoved.length === 0 &&
+    content.metadataFieldsChanged.length === 0
+  )
+}

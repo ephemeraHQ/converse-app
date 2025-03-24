@@ -7,7 +7,6 @@ import {
   messageContentIsRemoteAttachment,
 } from "@/features/conversation/conversation-chat/conversation-message/utils/conversation-message-assertions"
 import { convertXmtpMessageToConvosMessage } from "@/features/conversation/conversation-chat/conversation-message/utils/convert-xmtp-message-to-convos-message"
-import { getMessageContentStringValue } from "@/features/conversation/conversation-chat/conversation-message/utils/get-message-string-content"
 import { ensureConversationQueryData } from "@/features/conversation/queries/conversation.query"
 import { ensureNotificationsPermissions } from "@/features/notifications/notifications-permissions.query"
 import { registerNotificationInstallation } from "@/features/notifications/notifications.api"
@@ -17,8 +16,10 @@ import { getXmtpConversationIdFromXmtpTopic } from "@/features/xmtp/xmtp-convers
 import { ensureXmtpInstallationQueryData } from "@/features/xmtp/xmtp-installations/xmtp-installation.query"
 import { decryptXmtpMessage } from "@/features/xmtp/xmtp-messages/xmtp-messages"
 import { IXmtpConversationTopic } from "@/features/xmtp/xmtp.types"
+import { getCurrentRoute } from "@/navigation/navigation.utils"
 import { GenericError, NotificationError } from "@/utils/error"
 import { notificationsLogger } from "@/utils/logger"
+import { ensureMessageContentStringValue } from "../conversation/conversation-list/hooks/use-message-content-string-value"
 
 // Full flow
 export async function registerPushNotifications() {
@@ -124,7 +125,7 @@ export function displayLocalNotification(args: Notifications.NotificationRequest
   return Notifications.scheduleNotificationAsync(args)
 }
 
-export async function displayLocalNewMessageNotification(args: {
+export async function maybeDisplayLocalNewMessageNotification(args: {
   encryptedMessage: string
   topic: IXmtpConversationTopic
 }) {
@@ -132,6 +133,16 @@ export async function displayLocalNewMessageNotification(args: {
     const { encryptedMessage, topic } = args
 
     const xmtpConversationId = getXmtpConversationIdFromXmtpTopic(topic)
+
+    // Check if the user is already in this conversation
+    const currentRoute = getCurrentRoute()
+    if (
+      currentRoute?.name === "Conversation" &&
+      currentRoute.params.xmtpConversationId === xmtpConversationId
+    ) {
+      notificationsLogger.debug("User is already in this conversation, don't show notification")
+      return
+    }
 
     const conversation = await ensureConversationQueryData({
       clientInboxId: getSafeCurrentSender().inboxId,
@@ -153,7 +164,7 @@ export async function displayLocalNewMessageNotification(args: {
 
     const convoMessage = convertXmtpMessageToConvosMessage(xmtpDecryptedMessage)
 
-    const messageContentString = getMessageContentStringValue(convoMessage.content)
+    const messageContentString = await ensureMessageContentStringValue(convoMessage)
 
     const { displayName: senderDisplayName } = await ensurePreferredDisplayInfo({
       inboxId: convoMessage.senderInboxId,

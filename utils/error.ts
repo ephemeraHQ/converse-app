@@ -96,7 +96,7 @@ export class FeedbackError extends BaseError {
 
 export class NotificationError extends BaseError {
   constructor(args: ErrorArgs) {
-    super("[Push Notification]", args)
+    super("[Notification]", args)
   }
 }
 

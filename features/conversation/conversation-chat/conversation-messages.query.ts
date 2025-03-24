@@ -3,10 +3,7 @@ import { logger } from "@utils/logger"
 import { isReactionMessage } from "@/features/conversation/conversation-chat/conversation-message/utils/conversation-message-assertions"
 import { ensureConversationSyncAllQuery } from "@/features/conversation/queries/conversation-sync-all.query"
 import { isTempConversation } from "@/features/conversation/utils/is-temp-conversation"
-import {
-  getXmtpConversationMessages,
-  isSupportedMessage,
-} from "@/features/xmtp/xmtp-messages/xmtp-messages"
+import { getXmtpConversationMessages } from "@/features/xmtp/xmtp-messages/xmtp-messages"
 import { IXmtpConversationId, IXmtpInboxId, IXmtpMessageId } from "@/features/xmtp/xmtp.types"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
 import { getReactQueryKey } from "@/utils/react-query/react-query.utils"
@@ -60,9 +57,7 @@ const conversationMessagesQueryFn = async (args: {
     limit: 30, // Fetch limited messages for better performance until pagination is implemented
   })
 
-  const validMessages = xmtpMessages.filter(isSupportedMessage)
-
-  const convosMessages = validMessages.map(convertXmtpMessageToConvosMessage)
+  const convosMessages = xmtpMessages.map(convertXmtpMessageToConvosMessage)
 
   return processMessages({ newMessages: convosMessages })
 }

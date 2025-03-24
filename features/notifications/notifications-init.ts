@@ -4,7 +4,7 @@ import { isNotificationXmtpNewMessageNotification } from "@/features/notificatio
 import { captureError } from "@/utils/capture-error"
 import { NotificationError } from "@/utils/error"
 import { notificationsLogger } from "@/utils/logger"
-import { displayLocalNewMessageNotification } from "./notifications.service"
+import { maybeDisplayLocalNewMessageNotification } from "./notifications.service"
 
 // Track processed notification IDs to prevent duplicate handling
 
@@ -70,7 +70,7 @@ async function handleNotification(notification: Notifications.Notification) {
     }
   }
 
-  await displayLocalNewMessageNotification({
+  await maybeDisplayLocalNewMessageNotification({
     encryptedMessage: notification.request.trigger.payload.encryptedMessage,
     topic: notification.request.trigger.payload.topic,
   })

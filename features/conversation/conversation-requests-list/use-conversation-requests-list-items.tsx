@@ -4,7 +4,7 @@ import { getUnknownConsentConversationsQueryOptions } from "@/features/conversat
 import { getMessageSpamScore } from "@/features/conversation/conversation-requests-list/utils/get-message-spam-score"
 import { ensureConversationQueryData } from "@/features/conversation/queries/conversation.query"
 import { captureError } from "@/utils/capture-error"
-import { getMessageContentStringValue } from "../conversation-chat/conversation-message/utils/get-message-string-content"
+import { ensureMessageContentStringValue } from "../conversation-list/hooks/use-message-content-string-value"
 
 export function useConversationRequestsListItem() {
   const currentSender = useSafeCurrentSender()
@@ -38,7 +38,7 @@ export function useConversationRequestsListItem() {
             throw new Error("No last message found")
           }
 
-          const messageText = getMessageContentStringValue(lastMessage.content)
+          const messageText = await ensureMessageContentStringValue(lastMessage)
 
           if (!messageText) {
             throw new Error("No message text found")

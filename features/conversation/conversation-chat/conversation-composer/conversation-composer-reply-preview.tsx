@@ -22,7 +22,7 @@ import {
   messageContentIsStaticAttachment,
   messageContentIsText,
 } from "@/features/conversation/conversation-chat/conversation-message/utils/conversation-message-assertions"
-import { useMessagePlainText } from "@/features/conversation/conversation-list/hooks/use-message-plain-text"
+import { useMessageContentStringValue } from "@/features/conversation/conversation-list/hooks/use-message-content-string-value"
 import { messageIsFromCurrentSenderInboxId } from "@/features/conversation/utils/message-is-from-current-user"
 import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
 import { IXmtpConversationId, IXmtpMessageId } from "@/features/xmtp/xmtp.types"
@@ -231,7 +231,7 @@ const ReplyPreviewMessageContent = memo(function ReplyPreviewMessageContent(prop
 }) {
   const { replyMessage } = props
 
-  const messageText = useMessagePlainText(replyMessage)
+  const messageText = useMessageContentStringValue(replyMessage)
   const clearedMessage = messageText?.replace(/(\n)/gm, " ")
 
   if (isStaticAttachmentMessage(replyMessage)) {
