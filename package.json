@@ -74,7 +74,7 @@
     "@thirdweb-dev/react-native-adapter": "^1.5.3",
     "@walletconnect/react-native-compat": "^2.19.0",
     "@xmtp/content-type-primitives": "^2.0.0",
-    "@xmtp/react-native-sdk": "^4.0.0",
+    "@xmtp/react-native-sdk": "^4.0.1",
     "@xstate/react": "^5.0.0",
     "@yornaath/batshit": "^0.10.1",
     "alchemy-sdk": "^3.4.4",
