@@ -23,6 +23,7 @@ import { IConversation } from "@/features/conversation/conversation.types"
 import { useMarkConversationAsRead } from "@/features/conversation/hooks/use-mark-conversation-as-read"
 import { isConversationAllowed } from "@/features/conversation/utils/is-conversation-allowed"
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm"
+import { useBetterFocusEffect } from "@/hooks/use-better-focus-effect"
 import { $globalStyles } from "@/theme/styles"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { captureError } from "@/utils/capture-error"
@@ -57,7 +58,7 @@ export const ConversationMessages = memo(function ConversationMessages(props: {
     caller: "Conversation Messages",
   })
 
-  useFocusEffect(
+  useBetterFocusEffect(
     useCallback(() => {
       refetchMessages().catch(captureError)
     }, [refetchMessages]),

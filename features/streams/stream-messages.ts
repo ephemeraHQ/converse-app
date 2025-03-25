@@ -1,12 +1,12 @@
 import { isGroupUpdatedMessage } from "@/features/conversation/conversation-chat/conversation-message/utils/conversation-message-assertions"
 import { addMessageToConversationMessagesQueryData } from "@/features/conversation/conversation-chat/conversation-messages.query"
 import { updateConversationQueryData } from "@/features/conversation/queries/conversation.query"
+import { IGroup } from "@/features/groups/group.types"
 import {
   addGroupMemberToGroupQueryData,
   removeGroupMemberToGroupQuery,
   updateGroupQueryData,
-} from "@/features/groups/group.query"
-import { IGroup } from "@/features/groups/group.types"
+} from "@/features/groups/queries/group.query"
 import { streamAllMessages } from "@/features/xmtp/xmtp-messages/xmtp-messages-stream"
 import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"

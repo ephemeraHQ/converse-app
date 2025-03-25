@@ -11,7 +11,7 @@ import { VStack } from "@/design-system/VStack"
 import { useLogout } from "@/features/authentication/use-logout"
 import {
   canAskForNotificationsPermissions,
-  getPushNotificationsToken,
+  getDevicePushNotificationsToken,
   registerPushNotifications,
   requestNotificationsPermissions,
   userHasGrantedNotificationsPermissions,
@@ -320,7 +320,7 @@ function useShowDebugMenu() {
       },
       "Get Device Token": async () => {
         try {
-          const token = await getPushNotificationsToken()
+          const token = await getDevicePushNotificationsToken()
           Alert.alert("Device Token", token || "No token available", [
             {
               text: "Copy",

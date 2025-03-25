@@ -31,3 +31,7 @@ export function invalidateCurrentUserQuery() {
 export function getCurrentUserQueryData() {
   return reactQueryClient.getQueryData(getCurrentUserQueryOptions().queryKey)
 }
+
+export function ensureCurrentUserQueryData() {
+  return reactQueryClient.ensureQueryData(getCurrentUserQueryOptions())
+}

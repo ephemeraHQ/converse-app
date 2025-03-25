@@ -132,17 +132,17 @@ export async function removeXmtpGroupMembers(args: {
 
 export async function updateXmtpGroupDescription(args: {
   clientInboxId: IXmtpInboxId
-  groupId: IXmtpConversationId
-  description: string
+  xmtpConversationId: IXmtpConversationId
+  description: string | undefined
 }) {
-  const { clientInboxId, groupId, description } = args
+  const { clientInboxId, xmtpConversationId, description } = args
   try {
     const client = await getXmtpClientByInboxId({
       inboxId: clientInboxId,
     })
 
     const startTime = Date.now()
-    await updateGroupDescription(client.installationId, groupId, description)
+    await updateGroupDescription(client.installationId, xmtpConversationId, description)
     const duration = Date.now() - startTime
 
     if (duration > config.xmtp.maxMsUntilLogError) {
@@ -159,7 +159,7 @@ export async function updateXmtpGroupDescription(args: {
 export async function updateXmtpGroupImage(args: {
   clientInboxId: IXmtpInboxId
   xmtpConversationId: IXmtpConversationId
-  imageUrl: string
+  imageUrl: string | undefined
 }) {
   const { clientInboxId, xmtpConversationId, imageUrl } = args
 
@@ -185,10 +185,10 @@ export async function updateXmtpGroupImage(args: {
 
 export async function updateXmtpGroupName(args: {
   clientInboxId: IXmtpInboxId
-  groupId: IXmtpConversationId
-  name: string
+  xmtpConversationId: IXmtpConversationId
+  name: string | undefined
 }) {
-  const { clientInboxId, groupId, name } = args
+  const { clientInboxId, xmtpConversationId, name } = args
 
   try {
     const client = await getXmtpClientByInboxId({
@@ -196,7 +196,7 @@ export async function updateXmtpGroupName(args: {
     })
 
     const startTime = Date.now()
-    await updateGroupName(client.installationId, groupId, name)
+    await updateGroupName(client.installationId, xmtpConversationId, name)
     const duration = Date.now() - startTime
 
     if (duration > config.xmtp.maxMsUntilLogError) {

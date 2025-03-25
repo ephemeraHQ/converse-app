@@ -1,6 +1,7 @@
 import * as Notifications from "expo-notifications"
 import {
   IConvosModifiedNotification,
+  IExpoNewMessageNotification,
   IXmtpNewMessageNotification,
   IXmtpNotificationNewMessageTrigger,
 } from "@/features/notifications/notifications.types"
@@ -24,4 +25,10 @@ export function isNotificationXmtpNewMessageNotification(
     return trigger.payload.messageKind === "v3-conversation"
   }
   return false
+}
+
+export function isNotificationExpoNewMessageNotification(
+  notification: Notifications.Notification,
+): notification is IExpoNewMessageNotification {
+  return notification.request.content.data?.messageType === "v3-conversation"
 }

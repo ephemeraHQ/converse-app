@@ -219,7 +219,7 @@ async function subscribeToConversationsNotifications(args: {
 
           return {
             topic: hmacKeys.topic,
-            isSilent: false,
+            isSilent: true,
             hmacKeys: hmacKeys.hmacKeys,
           }
         } catch (error) {

@@ -19,7 +19,7 @@ export function useNotificationListeners() {
     // Listen for notifications while app is in foreground
     foregroundNotificationListener.current = Notifications.addNotificationReceivedListener(
       (notification) => {
-        notificationsLogger.debug(`Foreground notification displayed:`, notification)
+        // notificationsLogger.debug(`Handling foreground notification:`, notification)
       },
     )
 

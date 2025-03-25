@@ -14,7 +14,7 @@ import {
   getGroupQueryData,
   getOrFetchGroupQuery,
   setGroupQueryData,
-} from "@/features/groups/group.query"
+} from "@/features/groups/queries/group.query"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
 import { IGroup } from "../groups/group.types"

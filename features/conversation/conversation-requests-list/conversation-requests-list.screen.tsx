@@ -4,6 +4,7 @@ import { Screen } from "@/components/screen/screen"
 import { ConversationList } from "@/features/conversation/conversation-list/conversation-list.component"
 import { ConversationRequestsToggle } from "@/features/conversation/conversation-requests-list/conversation-requests-list-toggle"
 import { useConversationRequestsListScreenHeader } from "@/features/conversation/conversation-requests-list/conversation-requests-list.screen-header"
+import { useBetterFocusEffect } from "@/hooks/use-better-focus-effect"
 import { translate } from "@/i18n"
 import { $globalStyles } from "@/theme/styles"
 import { captureError } from "@/utils/capture-error"
@@ -39,7 +40,7 @@ const ConversationListWrapper = memo(function ConversationListWrapper({
   const { likelyNotSpamConversationIds, likelySpamConversationIds, refetch } =
     useConversationRequestsListItem()
 
-  useFocusEffect(
+  useBetterFocusEffect(
     useCallback(() => {
       refetch().catch(captureError)
     }, [refetch]),

@@ -16,26 +16,20 @@ import { ConversationScreen } from "@/features/conversation/conversation-chat/co
 import { ConversationListScreen } from "@/features/conversation/conversation-list/conversation-list.screen"
 import { ConversationRequestsListScreen } from "@/features/conversation/conversation-requests-list/conversation-requests-list.screen"
 import { useCreateUserIfNoExist } from "@/features/current-user/use-create-user-if-no-exist"
-import { AddGroupMembersScreen } from "@/features/groups/group-details/add-group-members/add-group-members.screen"
-import { GroupDetailsScreen } from "@/features/groups/group-details/group-details.screen"
-import { GroupMembersListScreen } from "@/features/groups/group-details/members-list/group-members-list.screen"
-import {
-  isConvosModifiedNotification,
-  isNotificationXmtpNewMessageNotification,
-} from "@/features/notifications/notification-assertions"
+import { AddGroupMembersScreen } from "@/features/groups/screens/add-group-members.screen"
+import { EditGroupScreen } from "@/features/groups/screens/edit-group.screen"
+import { GroupDetailsScreen } from "@/features/groups/screens/group-details.screen"
+import { GroupMembersListScreen } from "@/features/groups/screens/group-members-list.screen"
 import { useNotificationListeners } from "@/features/notifications/notifications-listeners"
 import { ProfileImportInfoScreen } from "@/features/profiles/profile-import-info.screen"
 import { ProfileScreen } from "@/features/profiles/profile.screen"
-import { getXmtpConversationIdFromXmtpTopic } from "@/features/xmtp/xmtp-conversations/xmtp-conversation"
 import { translate } from "@/i18n"
 import { NavigationParamList } from "@/navigation/navigation.types"
-import { navigate, navigationRef } from "@/navigation/navigation.utils"
+import { navigationRef } from "@/navigation/navigation.utils"
 import { ShareProfileScreen } from "@/screens/ShareProfile"
 import { WebviewPreview } from "@/screens/WebviewPreview"
 import { useAppTheme, useThemeProvider } from "@/theme/use-app-theme"
 import { captureError } from "@/utils/capture-error"
-import { NotificationError } from "@/utils/error"
-import { notificationsLogger } from "@/utils/logger"
 import { useUpdateSentryUser } from "@/utils/sentry/sentry-identity"
 import { hideSplashScreen } from "@/utils/splash/splash"
 
@@ -238,6 +232,13 @@ const AppStacks = memo(function AppStacks() {
             }}
             name="AddGroupMembers"
             component={AddGroupMembersScreen}
+          />
+          <AppNativeStack.Screen
+            options={{
+              title: translate("edit_group"),
+            }}
+            name="EditGroup"
+            component={EditGroupScreen}
           />
           <AppNativeStack.Screen
             options={{

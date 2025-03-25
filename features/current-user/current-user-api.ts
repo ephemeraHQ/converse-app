@@ -2,8 +2,10 @@ import { z } from "zod"
 import { captureError } from "@/utils/capture-error"
 import { convosApi } from "@/utils/convos-api/convos-api-instance"
 
+export type ICurrentUserId = string & { readonly __brand: unique symbol }
+
 export const CurrentUserSchema = z.object({
-  id: z.string(),
+  id: z.custom<ICurrentUserId>(),
   identities: z.array(
     z.object({
       id: z.string(),

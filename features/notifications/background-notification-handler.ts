@@ -1,6 +1,9 @@
 import * as Notifications from "expo-notifications"
 import * as TaskManager from "expo-task-manager"
-import { IXmtpNewMessageBackgroundNotificationData } from "@/features/notifications/notifications.types"
+import {
+  IExpoBackgroundNotificationData,
+  IXmtpNewMessageBackgroundNotificationData,
+} from "@/features/notifications/notifications.types"
 import { IXmtpConversationTopic } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
 import { NotificationError } from "@/utils/error"
@@ -23,29 +26,22 @@ TaskManager.defineTask(BACKGROUND_NOTIFICATION_TASK, async ({ data, error }) => 
       })
     }
 
-    const backgroundNotificationData = data as IXmtpNewMessageBackgroundNotificationData
+    const backgroundNotificationData = data as IExpoBackgroundNotificationData
 
     notificationsLogger.debug("Background notification task executed", {
       backgroundNotificationData,
     })
 
-    if (!backgroundNotificationData.UIApplicationLaunchOptionsRemoteNotificationKey) {
+    if (!backgroundNotificationData.body?.contentTopic) {
       throw new NotificationError({
         error: `Wrong background notification data? ${JSON.stringify(backgroundNotificationData)}`,
       })
     }
 
     await maybeDisplayLocalNewMessageNotification({
-      encryptedMessage:
-        backgroundNotificationData.UIApplicationLaunchOptionsRemoteNotificationKey.encryptedMessage,
-      topic: backgroundNotificationData.UIApplicationLaunchOptionsRemoteNotificationKey
-        .topic as IXmtpConversationTopic,
+      encryptedMessage: backgroundNotificationData.body.encryptedMessage,
+      topic: backgroundNotificationData.body.contentTopic as IXmtpConversationTopic,
     })
-
-    // Not sure? to verify...
-    // Returning true will prevent the original notification from being displayed
-    // This effectively replaces the original notification with our modified one
-    return true
   } catch (error) {
     captureError(
       new NotificationError({
@@ -58,9 +54,6 @@ TaskManager.defineTask(BACKGROUND_NOTIFICATION_TASK, async ({ data, error }) => 
         },
       },
     )
-    // Not sure? to verify...
-    // Returning false or nothing will allow the original notification to be displayed
-    return false
   }
 })
 
@@ -70,6 +63,8 @@ TaskManager.defineTask(BACKGROUND_NOTIFICATION_TASK, async ({ data, error }) => 
  */
 export async function registerBackgroundNotificationTask() {
   try {
+    await logRegisteredTasks()
+
     // Doing this for now to prevent duplicate registrations since we're still testing this feature
     await unregisterAllBackgroundTasks()
 
@@ -119,5 +114,32 @@ async function unregisterAllBackgroundTasks() {
         additionalMessage: "Failed to unregister all background tasks",
       }),
     )
+  }
+}
+
+/**
+ * Gets and logs information about all registered background tasks
+ * Useful for debugging and monitoring task registration status
+ */
+async function logRegisteredTasks() {
+  try {
+    notificationsLogger.debug("Fetching registered tasks...")
+    const tasks = await TaskManager.getRegisteredTasksAsync()
+    notificationsLogger.debug("Currently registered tasks:", {
+      count: tasks.length,
+      tasks: tasks.map((task) => ({
+        name: task.taskName,
+        type: task.taskType,
+      })),
+    })
+    return tasks
+  } catch (error) {
+    captureError(
+      new NotificationError({
+        error,
+        additionalMessage: "Failed to fetch registered tasks",
+      }),
+    )
+    return []
   }
 }

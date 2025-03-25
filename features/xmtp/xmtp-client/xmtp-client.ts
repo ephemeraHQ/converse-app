@@ -85,9 +85,12 @@ export async function createXmtpClient(args: { inboxSigner: IXmtpSigner }) {
   xmtpLogger.debug(`Creating XMTP client instance...`)
   const { data, error, durationMs } = await tryCatchWithDuration(
     XmtpClient.create<ISupportedXmtpCodecs>(inboxSigner, {
-      env: getXmtpEnv(),
+      env: config.xmtpEnv,
       dbEncryptionKey,
       codecs: supportedXmtpCodecs,
+      ...(config.xmtpEnv === "local" && {
+        customLocalUrl: getXmtpLocalUrl(),
+      }),
     }),
   )
 
@@ -146,9 +149,12 @@ async function buildXmtpClientInstance(args: {
         const client = await XmtpClient.build<ISupportedXmtpCodecs>(
           new PublicIdentity(ethereumAddress, "ETHEREUM"),
           {
-            env: getXmtpEnv(),
+            env: config.xmtpEnv,
             codecs: supportedXmtpCodecs,
             dbEncryptionKey,
+            ...(config.xmtpEnv === "local" && {
+              customLocalUrl: getXmtpLocalUrl(),
+            }),
           },
           inboxId,
         )
@@ -234,33 +240,26 @@ export async function logoutXmtpClient(args: { inboxId: IXmtpInboxId; deleteData
 }
 
 // Useful for debugging on physical devices
-function getXmtpEnv() {
-  let xmtpEnv = config.xmtpEnv
+function getXmtpLocalUrl() {
+  if (config.xmtpEnv !== "local") {
+    throw new XMTPError({
+      error: new Error("XMTP environment is not local"),
+    })
+  }
+  const hostIp = Constants.expoConfig?.hostUri?.split(":")[0]
 
-  try {
-    if (config.xmtpEnv === "local") {
-      xmtpLogger.debug("Replacing localhost with device-accessible IP")
-
-      const hostIp = Constants.expoConfig?.hostUri?.split(":")[0]
-
-      if (!hostIp) {
-        throw new XMTPError({
-          error: new Error("No host IP found"),
-        })
-      }
-
-      xmtpEnv = `${hostIp}:caca` as IXmtpEnv
-    }
-  } catch (error) {
-    captureError(
-      new XMTPError({
-        error,
-        additionalMessage: "Failed to get XMTP environment",
-      }),
-    )
+  if (!hostIp) {
+    throw new XMTPError({
+      error: new Error("No host IP found"),
+      additionalMessage: "Failed to get device IP for local XMTP environment",
+    })
   }
 
-  xmtpLogger.debug(`Using XMTP environment: ${xmtpEnv}`)
+  return hostIp
 
-  return xmtpEnv
+  const localUrl = `http://${hostIp}:5555` as IXmtpEnv
+
+  xmtpLogger.debug(`Using XMTP custom local url: ${localUrl}`)
+
+  return localUrl
 }

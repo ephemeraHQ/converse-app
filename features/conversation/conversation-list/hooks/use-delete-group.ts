@@ -7,7 +7,7 @@ import {
   getConversationMetadataQueryData,
   updateConversationMetadataQueryData,
 } from "@/features/conversation/conversation-metadata/conversation-metadata.query"
-import { getGroupQueryData } from "@/features/groups/group.query"
+import { getGroupQueryData } from "@/features/groups/queries/group.query"
 import { updateXmtpConsentForGroupsForInbox } from "@/features/xmtp/xmtp-consent/xmtp-consent"
 import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 import { translate } from "@/i18n"

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { getGroupQueryOptions } from "@/features/groups/group.query"
+import { getGroupQueryOptions } from "@/features/groups/queries/group.query"
 import { IXmtpConversationId, IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 
 export function useGroupMembers(args: {
