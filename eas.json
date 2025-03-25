@@ -36,7 +36,8 @@
         "track": "internal"
       },
       "ios": {
-        "ascAppId": "6478027666"
+        "ascAppId": "6478027666",
+        "appleTeamId": "FY4NZR34Z3"
       }
     },
     "production": {
@@ -44,7 +45,8 @@
         "track": "internal"
       },
       "ios": {
-        "ascAppId": "1658819514"
+        "ascAppId": "1658819514",
+        "appleTeamId": "FY4NZR34Z3"
       }
     }
   }

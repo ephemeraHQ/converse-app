@@ -6,8 +6,7 @@ type Environment = "development" | "preview" | "production"
 type EnvironmentConfig = {
   scheme: string
   androidPackage: string
-  appDomainConverse: string
-  appDomainGetConverse: string
+  domain: string
   appName: string
   icon: string
   ios: {
@@ -30,68 +29,53 @@ const env = process.env as {
 
 const settings: Record<Environment, EnvironmentConfig> = {
   development: {
-    scheme: "converse-dev",
+    scheme: "convos-dev",
     ios: {
-      bundleIdentifier: "com.converse.dev",
-      associatedDomains: [
-        "applinks:dev.converse.xyz",
-        "applinks:dev.getconverse.app",
-        "webcredentials:dev.converse.xyz",
-      ],
+      bundleIdentifier: "com.convos.dev",
+      associatedDomains: ["applinks:dev.convos.org", "webcredentials:dev.convos.org"],
       googleServicesFile: "./google-services/ios/development.plist",
     },
     android: {
-      package: "com.converse.dev",
+      package: "com.convos.dev",
       googleServicesFile: "./google-services/android/development.json",
     },
-    androidPackage: "com.converse.dev",
-    appDomainConverse: "dev.converse.xyz",
-    appDomainGetConverse: "dev.getconverse.app",
-    appName: "Converse DEV",
+    androidPackage: "com.convos.dev",
+    domain: "dev.convos.org",
+    appName: "Convos DEV",
     icon: "./assets/icon-preview.png",
     alchemyApiKey: env.EXPO_PUBLIC_ALCHEMY_API_KEY || "",
   },
   preview: {
-    scheme: "converse-preview",
+    scheme: "convos-preview",
     ios: {
-      bundleIdentifier: "com.converse.preview",
-      associatedDomains: [
-        "applinks:preview.converse.xyz",
-        "applinks:preview.getconverse.app",
-        "webcredentials:preview.converse.xyz",
-      ],
+      bundleIdentifier: "com.convos.preview",
+      associatedDomains: ["applinks:preview.convos.org", "webcredentials:preview.convos.org"],
       googleServicesFile: "./google-services/ios/preview.plist",
     },
     android: {
-      package: "com.converse.preview",
+      package: "com.convos.preview",
       googleServicesFile: "./google-services/android/preview.json",
     },
-    androidPackage: "com.converse.preview",
-    appDomainConverse: "preview.converse.xyz",
-    appDomainGetConverse: "preview.getconverse.app",
-    appName: "Converse PREVIEW",
+    androidPackage: "com.convos.preview",
+    domain: "preview.convos.org",
+    appName: "Convos PREVIEW",
     icon: "./assets/icon-preview.png",
     alchemyApiKey: env.EXPO_PUBLIC_ALCHEMY_API_KEY || "",
   },
   production: {
-    scheme: "converse",
+    scheme: "convos",
     ios: {
-      bundleIdentifier: "com.converse.native",
-      associatedDomains: [
-        "applinks:converse.xyz",
-        "applinks:getconverse.app",
-        "webcredentials:converse.xyz",
-      ],
+      bundleIdentifier: "com.convos.prod",
+      associatedDomains: ["applinks:convos.org", "webcredentials:convos.org"],
       googleServicesFile: "./google-services/ios/production.plist",
     },
     android: {
-      package: "com.converse.prod",
+      package: "com.convos.prod",
       googleServicesFile: "./google-services/android/production.json",
     },
-    androidPackage: "com.converse.prod",
-    appDomainConverse: "converse.xyz",
-    appDomainGetConverse: "getconverse.app",
-    appName: "Converse",
+    androidPackage: "com.convos.prod",
+    domain: "convos.org",
+    appName: "Convos",
     icon: "./assets/icon.png",
     alchemyApiKey: env.EXPO_PUBLIC_ALCHEMY_API_KEY || "",
   },
@@ -104,8 +88,8 @@ export default (): ExpoConfig => {
   return {
     name: config.appName,
     scheme: config.scheme,
-    owner: "converse",
-    slug: "converse",
+    owner: "ephemera",
+    slug: "convos",
     orientation: "portrait",
     icon: config.icon,
     userInterfaceStyle: "automatic",
@@ -115,12 +99,12 @@ export default (): ExpoConfig => {
       policy: "appVersion",
     },
     updates: {
-      url: "https://u.expo.dev/49a65fae-3895-4487-8e8a-5bd8bee3a401",
+      url: "https://u.expo.dev/f9089dfa-8871-4aff-93ea-da08af0370d2",
     },
     extra: {
       expoEnv,
       eas: {
-        projectId: "49a65fae-3895-4487-8e8a-5bd8bee3a401",
+        projectId: "f9089dfa-8871-4aff-93ea-da08af0370d2",
       },
     },
     ios: {
@@ -170,53 +154,23 @@ export default (): ExpoConfig => {
           data: [
             {
               scheme: "https",
-              host: config.appDomainGetConverse,
+              host: config.domain,
+              pathPrefix: "/",
+            },
+            {
+              scheme: "https",
+              host: config.domain,
               pathPrefix: "/dm",
             },
             {
               scheme: "https",
-              host: config.appDomainConverse,
-              pathPrefix: "/dm",
-            },
-            {
-              scheme: "https",
-              host: config.appDomainGetConverse,
+              host: config.domain,
               pathPrefix: "/group-invite",
             },
             {
               scheme: "https",
-              host: config.appDomainConverse,
-              pathPrefix: "/group-invite",
-            },
-            {
-              scheme: "https",
-              host: config.appDomainGetConverse,
+              host: config.domain,
               pathPrefix: "/group",
-            },
-            {
-              scheme: "https",
-              host: config.appDomainConverse,
-              pathPrefix: "/group",
-            },
-            {
-              scheme: "https",
-              host: config.appDomainGetConverse,
-              pathPrefix: "/coinbase",
-            },
-            {
-              scheme: "https",
-              host: config.appDomainConverse,
-              pathPrefix: "/coinbase",
-            },
-            {
-              scheme: "https",
-              host: config.appDomainGetConverse,
-              pathPrefix: "/desktopconnect",
-            },
-            {
-              scheme: "https",
-              host: config.appDomainConverse,
-              pathPrefix: "/desktopconnect",
             },
           ],
         },
@@ -348,8 +302,8 @@ export default (): ExpoConfig => {
       [
         "@sentry/react-native/expo",
         {
-          organization: "converse-app",
-          project: "convos-mobile-app",
+          organization: "ephemera",
+          project: "convos-react-native",
           url: "https://sentry.io/",
         },
       ],
