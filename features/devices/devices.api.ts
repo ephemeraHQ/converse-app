@@ -1,22 +1,9 @@
 import { z } from "zod"
+import { DeviceOSSchema, deviceSchema, IDevice } from "@/features/devices/devices.types"
 import { captureError } from "@/utils/capture-error"
 import { convosApi } from "@/utils/convos-api/convos-api-instance"
 
 // Schema for device data validation
-const DeviceOSSchema = z.enum(["IOS", "ANDROID", "WEB"])
-
-const DeviceSchema = z.object({
-  id: z.string(),
-  userId: z.string(),
-  name: z.string().optional(),
-  os: DeviceOSSchema,
-  pushToken: z.string().optional(),
-  expoToken: z.string().optional(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
-})
-
-export type IDevice = z.infer<typeof DeviceSchema>
 
 // Schema for device creation/update requests
 const DeviceInputSchema = z.object({
@@ -37,7 +24,7 @@ export async function fetchDevice(args: { userId: string; deviceId: string }) {
   try {
     const { data } = await convosApi.get<IDevice>(`/api/v1/devices/${userId}/${deviceId}`)
 
-    const result = DeviceSchema.safeParse(data)
+    const result = deviceSchema.safeParse(data)
     if (!result.success) {
       captureError(result.error)
     }
@@ -57,7 +44,7 @@ export async function fetchUserDevices(args: { userId: string }) {
   try {
     const { data } = await convosApi.get<IDevice[]>(`/api/v1/devices/${userId}`)
 
-    const result = z.array(DeviceSchema).safeParse(data)
+    const result = z.array(deviceSchema).safeParse(data)
     if (!result.success) {
       captureError(result.error)
     }
@@ -80,7 +67,7 @@ export async function createDevice(args: { userId: string; device: IDeviceInput 
 
     const { data } = await convosApi.post<IDevice>(`/api/v1/devices/${userId}`, validatedData)
 
-    const result = DeviceSchema.safeParse(data)
+    const result = deviceSchema.safeParse(data)
     if (!result.success) {
       captureError(result.error)
     }
@@ -110,7 +97,7 @@ export async function updateDevice(args: {
       validatedData,
     )
 
-    const result = DeviceSchema.safeParse(data)
+    const result = deviceSchema.safeParse(data)
     if (!result.success) {
       captureError(result.error)
     }

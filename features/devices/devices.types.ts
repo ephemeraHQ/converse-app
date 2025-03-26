@@ -1,26 +1,22 @@
 import { z } from "zod"
 
-export const DeviceOSSchema = z.enum(["ios", "android", "web"])
+export const DeviceOSSchema = z.enum(["ios", "android", "web", "macos"])
 export type IDeviceOS = z.infer<typeof DeviceOSSchema>
 
-export const DeviceSchema = z.object({
-  id: z.string(),
+export type IDeviceId = string & { readonly __brand: unique symbol }
+
+export const deviceSchema = z.object({
+  id: z.custom<IDeviceId>(),
   userId: z.string(),
-  name: z.string().optional(),
   os: DeviceOSSchema,
-  pushToken: z.string().optional(),
-  expoToken: z.string().optional(),
+  name: z.string().nullable(),
+  pushToken: z.string().nullable(),
+  expoToken: z.string().nullable(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
-  identities: z.array(
-    z.object({
-      deviceId: z.string(),
-      identityId: z.string(),
-    }),
-  ),
 })
 
-export type IDevice = z.infer<typeof DeviceSchema>
+export type IDevice = z.infer<typeof deviceSchema>
 
 export const DeviceInputSchema = z.object({
   name: z.string().optional(),

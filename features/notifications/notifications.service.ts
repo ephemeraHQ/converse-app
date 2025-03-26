@@ -8,7 +8,7 @@ import {
 } from "@/features/conversation/conversation-chat/conversation-message/utils/conversation-message-assertions"
 import { convertXmtpMessageToConvosMessage } from "@/features/conversation/conversation-chat/conversation-message/utils/convert-xmtp-message-to-convos-message"
 import { ensureConversationQueryData } from "@/features/conversation/queries/conversation.query"
-import { ensureCurrentUserQueryData } from "@/features/current-user/curent-user.query"
+import { ensureCurrentUserQueryData } from "@/features/current-user/current-user.query"
 import { fetchDevice } from "@/features/devices/devices.api"
 import { ensureUserDeviceQueryData } from "@/features/devices/devices.query"
 import { ensureNotificationsPermissions } from "@/features/notifications/notifications-permissions.query"

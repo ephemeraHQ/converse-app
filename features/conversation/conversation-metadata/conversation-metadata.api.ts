@@ -1,6 +1,6 @@
 import type { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { z } from "zod"
-import { getCurrentUserQueryData } from "@/features/current-user/curent-user.query"
+import { getCurrentUserQueryData } from "@/features/current-user/current-user.query"
 import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
 import { convosApi } from "@/utils/convos-api/convos-api-instance"

@@ -141,7 +141,7 @@ const DoneAction = memo(function DoneAction({ inboxId }: { inboxId: IXmtpInboxId
     try {
       // Use the saveProfile function from the hook
       await saveProfile({
-        profile: profileUpdate,
+        profileUpdates: profileUpdate,
         inboxId,
       })
 

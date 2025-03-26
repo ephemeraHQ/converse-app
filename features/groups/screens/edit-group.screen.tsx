@@ -54,21 +54,33 @@ export const EditGroupScreen = memo(function EditGroupScreen(
 
   const handleDonePress = useCallback(async () => {
     try {
-      await updateGroupAsync({
-        name: useEditGroupStore.getState().name,
-        description: useEditGroupStore.getState().description,
-        imageUrl: useEditGroupStore.getState().imageUrl,
-      })
-      showSnackbar({
-        message: "Group updated",
-      })
+      const storeState = useEditGroupStore.getState()
+      const updatedFields: Partial<IEditGroupState> = {}
+
+      if (storeState.name !== undefined && storeState.name !== group?.name) {
+        updatedFields.name = storeState.name
+      }
+      if (storeState.description !== undefined && storeState.description !== group?.description) {
+        updatedFields.description = storeState.description
+      }
+      if (storeState.imageUrl !== undefined && storeState.imageUrl !== group?.imageUrl) {
+        updatedFields.imageUrl = storeState.imageUrl
+      }
+
+      if (Object.keys(updatedFields).length > 0) {
+        await updateGroupAsync(updatedFields)
+        showSnackbar({
+          message: "Group updated",
+        })
+      }
+
       router.goBack()
     } catch (error) {
       captureErrorWithToast(error, {
         message: "Error updating group",
       })
     }
-  }, [router, updateGroupAsync])
+  }, [router, updateGroupAsync, group])
 
   useHeader({
     safeAreaEdges: ["top"],
@@ -206,9 +218,9 @@ const GroupDescriptionCharacterCounter = memo(function GroupDescriptionCharacter
 })
 
 type IEditGroupState = {
-  name: string
-  description: string
-  imageUrl: string
+  name?: string
+  description?: string
+  imageUrl?: string
 }
 
 type IEditGroupActions = {
@@ -223,12 +235,12 @@ type IEditGroupStore = IEditGroupState & {
 }
 
 const initialState: IEditGroupState = {
-  name: "",
-  description: "",
-  imageUrl: "",
+  name: undefined,
+  description: undefined,
+  imageUrl: undefined,
 }
 
-export const useEditGroupStore = create<IEditGroupStore>((set, get) => ({
+export const useEditGroupStore = create<IEditGroupStore>((set) => ({
   ...initialState,
   actions: {
     setName: (name) => set({ name }),

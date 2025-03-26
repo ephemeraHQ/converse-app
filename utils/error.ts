@@ -111,3 +111,15 @@ export class NavigationError extends BaseError {
     super("[Navigation]", args)
   }
 }
+
+export class ValidationError extends BaseError {
+  constructor(args: ErrorArgs) {
+    super("[Validation]", args)
+  }
+}
+
+export class StorageError extends BaseError {
+  constructor(args: ErrorArgs) {
+    super("[Storage]", args)
+  }
+}

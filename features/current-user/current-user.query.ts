@@ -1,7 +1,8 @@
 import { queryOptions } from "@tanstack/react-query"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
 import { getReactQueryKey } from "@/utils/react-query/react-query.utils"
-import { fetchCurrentUser, ICurrentUser } from "./current-user-api"
+import { fetchCurrentUser } from "./current-user.api"
+import { IConvosCurrentUser } from "./current-user.types"
 
 export function getCurrentUserQueryOptions(args?: { caller?: string }) {
   const { caller } = args ?? {}
@@ -17,7 +18,7 @@ export function getCurrentUserQueryOptions(args?: { caller?: string }) {
   })
 }
 
-export function setCurrentUserQueryData(args: { user: ICurrentUser }) {
+export function setCurrentUserQueryData(args: { user: IConvosCurrentUser }) {
   const { user } = args
   return reactQueryClient.setQueryData(getCurrentUserQueryOptions().queryKey, user)
 }

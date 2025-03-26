@@ -2,7 +2,7 @@ import { useMutation, type UseMutationOptions } from "@tanstack/react-query"
 import * as Device from "expo-device"
 import * as Notifications from "expo-notifications"
 import { Platform } from "react-native"
-import { getStoredDeviceId, storeDeviceId } from "./device-storage"
+import { getStoredDeviceId, storeDeviceId } from "./device.storage"
 import { createDevice, fetchDeviceById, linkDeviceIdentity, updateDevice } from "./devices.api"
 import type { IDevice, IDeviceInput } from "./devices.types"
 

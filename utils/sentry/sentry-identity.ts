@@ -5,7 +5,7 @@ import { useCurrentSender } from "@/features/authentication/multi-inbox.store"
 import {
   getCurrentUserQueryData,
   getCurrentUserQueryOptions,
-} from "@/features/current-user/curent-user.query"
+} from "@/features/current-user/current-user.query"
 import { getProfileQueryConfig, getProfileQueryData } from "@/features/profiles/profiles.query"
 import { sentryLogger } from "@/utils/logger"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
@@ -47,6 +47,7 @@ export function useUpdateSentryUser() {
       sentryIdentifyUser({
         userId: currentUser.id,
         username: currentProfile?.username,
+        privyUserId: currentProfile?.privyAddress,
       })
     }
 
@@ -74,14 +75,21 @@ export function useUpdateSentryUser() {
   }, [currentSender])
 }
 
-export function sentryIdentifyUser(args: { userId?: string; username?: string }) {
+export function sentryIdentifyUser(args: {
+  userId?: string
+  username?: string
+  privyUserId?: string
+}) {
   sentryLogger.debug("Identifying user", {
     userId: args.userId,
     username: args.username,
+    privyUserId: args.privyUserId,
   })
 
   Sentry.setUser({
-    ...(args.userId && { id: args.userId }),
-    ...(args.username && { username: args.username }),
+    id: args.userId, // Main user ID
+    username: args.username,
+    // Add custom attributes
+    privyUserId: args.privyUserId, // Custom attribute for Privy user ID
   })
 }

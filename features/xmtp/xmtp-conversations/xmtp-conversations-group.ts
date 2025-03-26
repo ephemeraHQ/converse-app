@@ -142,7 +142,12 @@ export async function updateXmtpGroupDescription(args: {
     })
 
     const startTime = Date.now()
-    await updateGroupDescription(client.installationId, xmtpConversationId, description)
+    await updateGroupDescription(
+      client.installationId,
+      xmtpConversationId,
+      // @ts-ignore because we can actually pass undefined
+      description,
+    )
     const duration = Date.now() - startTime
 
     if (duration > config.xmtp.maxMsUntilLogError) {
@@ -169,7 +174,12 @@ export async function updateXmtpGroupImage(args: {
     })
 
     const startTime = Date.now()
-    await updateGroupImageUrl(client.installationId, xmtpConversationId, imageUrl)
+    await updateGroupImageUrl(
+      client.installationId,
+      xmtpConversationId,
+      // @ts-ignore because we can actually pass undefined
+      imageUrl,
+    )
     const duration = Date.now() - startTime
 
     if (duration > config.xmtp.maxMsUntilLogError) {
@@ -196,7 +206,12 @@ export async function updateXmtpGroupName(args: {
     })
 
     const startTime = Date.now()
-    await updateGroupName(client.installationId, xmtpConversationId, name)
+    await updateGroupName(
+      client.installationId,
+      xmtpConversationId,
+      // @ts-ignore because we can actually pass undefined
+      name,
+    )
     const duration = Date.now() - startTime
 
     if (duration > config.xmtp.maxMsUntilLogError) {

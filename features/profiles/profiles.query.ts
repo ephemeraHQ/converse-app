@@ -31,9 +31,9 @@ export const useProfileQuery = (args: IArgsWithCaller) => {
   return useQuery(getProfileQueryConfig(args))
 }
 
-export const setProfileQueryData = (args: IArgs & { data: IProfileQueryData }) => {
-  const { data } = args
-  return reactQueryClient.setQueryData(getProfileQueryConfig(args).queryKey, data)
+export const setProfileQueryData = (args: IArgs & { profile: IProfileQueryData }) => {
+  const { profile } = args
+  return reactQueryClient.setQueryData(getProfileQueryConfig(args).queryKey, profile)
 }
 
 export function updateProfileQueryData(args: IArgs & { data: Partial<IProfileQueryData> }) {

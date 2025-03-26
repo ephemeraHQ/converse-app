@@ -3,13 +3,17 @@ import { AxiosError } from "axios"
 import { useEffect, useRef } from "react"
 import { formatRandomUsername } from "@/features/auth-onboarding/utils/format-random-user-name"
 import { useAuthenticationStore } from "@/features/authentication/authentication.store"
+import { IPrivyUserId } from "@/features/authentication/authentication.types"
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
-import { ICreateUserArgs, useCreateUserMutation } from "@/features/current-user/use-create-user"
+import {
+  ICreateUserMutationArgs,
+  useCreateUserMutation,
+} from "@/features/current-user/create-user.mutation"
 import { useSmartWalletClient } from "@/features/wallets/smart-wallet"
 import { captureError } from "@/utils/capture-error"
 import { IEthereumAddress } from "@/utils/evm/address"
 import logger from "@/utils/logger"
-import { fetchCurrentUser } from "./current-user-api"
+import { fetchCurrentUser } from "./current-user.api"
 
 /**
  * Ensures user profile exists in backend after Privy signup, creating it if missing
@@ -78,7 +82,7 @@ export function useCreateUserIfNoExist() {
               // User doesn't exist in the backend, let's create it!
               await createUserAsync({
                 inboxId: currentUser.inboxId,
-                privyUserId: privyUser.id,
+                privyUserId: privyUser.id as IPrivyUserId,
                 smartContractWalletAddress: smartWalletClient.account.address as IEthereumAddress,
                 profile: getRandomProfile(),
               })
@@ -126,7 +130,7 @@ const lastNames = [
   "Martinez",
 ]
 
-function getRandomProfile(): ICreateUserArgs["profile"] {
+function getRandomProfile(): ICreateUserMutationArgs["profile"] {
   const randomFirstName = firstNames[Math.floor(Math.random() * firstNames.length)]
   const randomLastName = lastNames[Math.floor(Math.random() * lastNames.length)]
   const name = `${randomFirstName} ${randomLastName}`
@@ -135,7 +139,7 @@ function getRandomProfile(): ICreateUserArgs["profile"] {
   return {
     name,
     username,
-    avatar: undefined,
-    description: undefined,
+    avatar: null,
+    description: null,
   }
 }

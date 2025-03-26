@@ -1,12 +1,12 @@
 import { queryOptions } from "@tanstack/react-query"
-import { ICurrentUserId } from "@/features/current-user/current-user-api"
-import { getStoredDeviceId } from "@/features/devices/device-storage"
+import { getStoredDeviceId } from "@/features/devices/device.storage"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
 import { getReactQueryKey } from "@/utils/react-query/react-query.utils"
+import { IConvosCurrentUserId } from "../current-user/current-user.types"
 import { fetchDevice } from "./devices.api"
 
 type IDeviceQueryArgs = {
-  userId: ICurrentUserId
+  userId: IConvosCurrentUserId
   deviceId: string
 }
 
@@ -24,7 +24,7 @@ export function getDeviceQueryOptions({ userId, deviceId }: IDeviceQueryArgs) {
   })
 }
 
-export async function ensureUserDeviceQueryData({ userId }: { userId: ICurrentUserId }) {
+export async function ensureUserDeviceQueryData({ userId }: { userId: IConvosCurrentUserId }) {
   const deviceId = await getStoredDeviceId()
 
   if (!deviceId) {

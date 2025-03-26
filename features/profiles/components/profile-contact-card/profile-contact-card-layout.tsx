@@ -1,8 +1,13 @@
-import React, { memo } from "react"
+import React, { memo, ReactNode } from "react"
 import { HStack } from "@/design-system/HStack"
 import { VStack } from "@/design-system/VStack"
-import { ICardLayoutProps } from "../../profile.types"
 import { ProfileContactCardContainer } from "./profile-contact-card-container"
+
+type ICardLayoutProps = {
+  avatar: ReactNode
+  name: ReactNode
+  additionalOptions?: ReactNode
+}
 
 export const ProfileContactCardLayout = memo(function CardLayout({
   avatar,
