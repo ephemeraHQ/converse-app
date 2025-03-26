@@ -39,9 +39,7 @@ export type NavigationParamList = {
   }
 
   NewGroupSummary: undefined
-  ConverseMatchMaker: undefined
   ShareProfile: undefined
-  TopUp: undefined
   Profile: {
     inboxId: IXmtpInboxId
   }

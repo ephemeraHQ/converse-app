@@ -21,6 +21,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context"
 import { ThirdwebProvider } from "thirdweb/react"
 import { base } from "viem/chains"
 // import { DevToolsBubble } from "react-native-react-query-devtools"
+import { ConditionalWrapper } from "@/components/conditional-wrapper"
 import { captureError } from "@/utils/capture-error"
 import { setupConvosApi } from "@/utils/convos-api/convos-api-init"
 import { ReactQueryPersistProvider } from "@/utils/react-query/react-query-persist-provider"
@@ -81,7 +82,10 @@ export function App() {
                 <ActionSheetProvider>
                   <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
                     <GestureHandlerRootView style={$globalStyles.flex1}>
-                      <DebugProvider>
+                      <ConditionalWrapper
+                        condition={config.debugMenu}
+                        wrapper={(children) => <DebugProvider>{children}</DebugProvider>}
+                      >
                         <BottomSheetModalProvider>
                           {/* <AuthenticateWithPasskeyProvider> */}
                           <AppNavigator />
@@ -90,7 +94,7 @@ export function App() {
                           <Snackbars />
                           <ActionSheet />
                         </BottomSheetModalProvider>
-                      </DebugProvider>
+                      </ConditionalWrapper>
                     </GestureHandlerRootView>
                   </ThemeProvider>
                 </ActionSheetProvider>

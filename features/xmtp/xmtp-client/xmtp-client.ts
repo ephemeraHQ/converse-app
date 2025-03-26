@@ -1,9 +1,4 @@
-import {
-  IXmtpClientWithCodecs,
-  IXmtpEnv,
-  IXmtpInboxId,
-  IXmtpSigner,
-} from "@features/xmtp/xmtp.types"
+import { IXmtpClientWithCodecs, IXmtpInboxId, IXmtpSigner } from "@features/xmtp/xmtp.types"
 import { PublicIdentity, Client as XmtpClient } from "@xmtp/react-native-sdk"
 import Constants from "expo-constants"
 import { config } from "@/config"
@@ -85,10 +80,10 @@ export async function createXmtpClient(args: { inboxSigner: IXmtpSigner }) {
   xmtpLogger.debug(`Creating XMTP client instance...`)
   const { data, error, durationMs } = await tryCatchWithDuration(
     XmtpClient.create<ISupportedXmtpCodecs>(inboxSigner, {
-      env: config.xmtpEnv,
+      env: config.xmtp.env,
       dbEncryptionKey,
       codecs: supportedXmtpCodecs,
-      ...(config.xmtpEnv === "local" && {
+      ...(config.xmtp.env === "local" && {
         customLocalUrl: getXmtpLocalUrl(),
       }),
     }),
@@ -148,10 +143,10 @@ async function buildXmtpClientInstance(args: {
         const client = await XmtpClient.build<ISupportedXmtpCodecs>(
           new PublicIdentity(ethereumAddress, "ETHEREUM"),
           {
-            env: config.xmtpEnv,
+            env: config.xmtp.env,
             codecs: supportedXmtpCodecs,
             dbEncryptionKey,
-            ...(config.xmtpEnv === "local" && {
+            ...(config.xmtp.env === "local" && {
               customLocalUrl: getXmtpLocalUrl(),
             }),
           },
@@ -250,11 +245,6 @@ export async function logoutXmtpClient(
 
 // Useful for debugging on physical devices
 function getXmtpLocalUrl() {
-  if (config.xmtpEnv !== "local") {
-    throw new XMTPError({
-      error: new Error("XMTP environment is not local"),
-    })
-  }
   const hostIp = Constants.expoConfig?.hostUri?.split(":")[0]
 
   if (!hostIp) {
@@ -264,11 +254,6 @@ function getXmtpLocalUrl() {
     })
   }
 
+  // XMTP SDK actually wants the host IP and not the full url
   return hostIp
-
-  const localUrl = `http://${hostIp}:5555` as IXmtpEnv
-
-  xmtpLogger.debug(`Using XMTP custom local url: ${localUrl}`)
-
-  return localUrl
 }

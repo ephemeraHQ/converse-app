@@ -46,11 +46,11 @@ export async function setupAppAttest() {
   rnfbProvider.configure({
     android: {
       provider: __DEV__ ? ("debug" as const) : ("playIntegrity" as const),
-      debugToken: config.appCheckDebugToken,
+      debugToken: config.firebase.appCheckDebugToken,
     },
     apple: {
       provider: __DEV__ ? ("debug" as const) : ("appAttestWithDeviceCheckFallback" as const),
-      debugToken: config.appCheckDebugToken, // Undefined in non-dev environments
+      debugToken: config.firebase.appCheckDebugToken, // Undefined in non-dev environments
     },
   })
   logger.debug(

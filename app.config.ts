@@ -4,10 +4,9 @@ import { version } from "./package.json"
 type Environment = "development" | "preview" | "production"
 
 type EnvironmentConfig = {
-  scheme: string
-  androidPackage: string
-  domain: string
   appName: string
+  scheme: string
+  webDomain: string
   icon: string
   ios: {
     bundleIdentifier: string
@@ -18,13 +17,18 @@ type EnvironmentConfig = {
     package: string
     googleServicesFile: string
   }
-  alchemyApiKey: string
 }
 
-// Type assertion for process.env to include our Expo public variables
-const env = process.env as {
-  EXPO_PUBLIC_ALCHEMY_API_KEY?: string
-  EXPO_ENV?: string
+export type IExpoAppConfigExtra = {
+  webDomain: string
+  expoEnv: Environment
+  eas: {
+    projectId: string
+  }
+}
+
+type ICustomExpoConfig = ExpoConfig & {
+  extra: IExpoAppConfigExtra
 }
 
 const settings: Record<Environment, EnvironmentConfig> = {
@@ -39,11 +43,9 @@ const settings: Record<Environment, EnvironmentConfig> = {
       package: "com.convos.dev",
       googleServicesFile: "./google-services/android/development.json",
     },
-    androidPackage: "com.convos.dev",
-    domain: "dev.convos.org",
-    appName: "Convos DEV",
+    webDomain: "dev.convos.org",
+    appName: "Convos Dev",
     icon: "./assets/icon-preview.png",
-    alchemyApiKey: env.EXPO_PUBLIC_ALCHEMY_API_KEY || "",
   },
   preview: {
     scheme: "convos-preview",
@@ -56,11 +58,9 @@ const settings: Record<Environment, EnvironmentConfig> = {
       package: "com.convos.preview",
       googleServicesFile: "./google-services/android/preview.json",
     },
-    androidPackage: "com.convos.preview",
-    domain: "preview.convos.org",
-    appName: "Convos PREVIEW",
+    webDomain: "preview.convos.org",
+    appName: "Convos Preview",
     icon: "./assets/icon-preview.png",
-    alchemyApiKey: env.EXPO_PUBLIC_ALCHEMY_API_KEY || "",
   },
   production: {
     scheme: "convos",
@@ -73,18 +73,17 @@ const settings: Record<Environment, EnvironmentConfig> = {
       package: "com.convos.prod",
       googleServicesFile: "./google-services/android/production.json",
     },
-    androidPackage: "com.convos.prod",
-    domain: "convos.org",
+    webDomain: "convos.org",
     appName: "Convos",
     icon: "./assets/icon.png",
-    alchemyApiKey: env.EXPO_PUBLIC_ALCHEMY_API_KEY || "",
   },
 }
 
-export default (): ExpoConfig => {
+export default () => {
   const expoEnv = (process.env.EXPO_ENV || "development") as Environment
   const config = settings[expoEnv]
 
+  // Add "as CustomExpoConfig" here to type the entire config object
   return {
     name: config.appName,
     scheme: config.scheme,
@@ -102,6 +101,7 @@ export default (): ExpoConfig => {
       url: "https://u.expo.dev/f9089dfa-8871-4aff-93ea-da08af0370d2",
     },
     extra: {
+      webDomain: config.webDomain,
       expoEnv,
       eas: {
         projectId: "f9089dfa-8871-4aff-93ea-da08af0370d2",
@@ -145,7 +145,7 @@ export default (): ExpoConfig => {
         {
           action: "VIEW",
           category: ["DEFAULT", "BROWSABLE"],
-          data: [{ scheme: config.scheme }, { scheme: config.androidPackage }],
+          data: [{ scheme: config.scheme }, { scheme: config.android.package }],
         },
         {
           autoVerify: true,
@@ -154,22 +154,27 @@ export default (): ExpoConfig => {
           data: [
             {
               scheme: "https",
-              host: config.domain,
+              host: config.webDomain,
+              pathPrefix: "/coinbase",
+            },
+            {
+              scheme: "https",
+              host: config.webDomain,
               pathPrefix: "/",
             },
             {
               scheme: "https",
-              host: config.domain,
+              host: config.webDomain,
               pathPrefix: "/dm",
             },
             {
               scheme: "https",
-              host: config.domain,
+              host: config.webDomain,
               pathPrefix: "/group-invite",
             },
             {
               scheme: "https",
-              host: config.domain,
+              host: config.webDomain,
               pathPrefix: "/group",
             },
           ],
@@ -311,5 +316,5 @@ export default (): ExpoConfig => {
       ["@react-native-firebase/app-check"],
       "./scripts/android/build/android-deps-expo-plugin.js",
     ],
-  }
+  } as ICustomExpoConfig
 }

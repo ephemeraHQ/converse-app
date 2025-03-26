@@ -36,7 +36,7 @@
         "track": "internal"
       },
       "ios": {
-        "ascAppId": "6478027666",
+        "ascAppId": "6743806056",
         "appleTeamId": "FY4NZR34Z3"
       }
     },
@@ -45,7 +45,7 @@
         "track": "internal"
       },
       "ios": {
-        "ascAppId": "1658819514",
+        // "ascAppId": "1658819514", // TODO: Replace with the new app ID
         "appleTeamId": "FY4NZR34Z3"
       }
     }

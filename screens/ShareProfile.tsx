@@ -28,7 +28,7 @@ export function ShareProfileScreen({ route, navigation }: IShareProfileScreenPro
     inboxId,
   })
 
-  const profileUrl = `https://${config.websiteDomain}/dm/${displayName || shortAddress(inboxId)}`
+  const profileUrl = `https://${config.app.webDomain}/dm/${displayName || shortAddress(inboxId)}`
 
   const shareDict = Platform.OS === "ios" ? { url: profileUrl } : { message: profileUrl }
 

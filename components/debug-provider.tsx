@@ -566,7 +566,7 @@ function useShowDebugMenu() {
 
     showActionSheet({
       options: {
-        title: `Convos v${config.appVersion}`,
+        title: `Convos v${config.app.version}`,
         options,
         cancelButtonIndex: options.indexOf("Cancel"),
       },

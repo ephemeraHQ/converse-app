@@ -1,7 +1,8 @@
-// @ts-nocheck note(lustig) env types aren't working for me OOTB
-
 import Constants from "expo-constants"
+import { Platform } from "react-native"
+import { IExpoAppConfigExtra } from "@/app.config"
 import { IConfig, ILoggerColorScheme } from "@/config/config.types"
+import { IXmtpEnv } from "@/features/xmtp/xmtp.types"
 
 function maybeReplaceLocalhost(uri: string) {
   try {
@@ -28,32 +29,52 @@ function maybeReplaceLocalhost(uri: string) {
   return uri
 }
 
+const appConfigExtra = Constants.expoConfig?.extra as IExpoAppConfigExtra
+
 // Base configuration shared across all environments
 export const shared = {
-  appName: Constants.expoConfig?.name || "Converse",
-  appVersion: Constants.expoConfig?.version || "0.0.0",
+  debugMenu: true,
   loggerColorScheme: (process.env.EXPO_PUBLIC_LOGGER_COLOR_SCHEME as ILoggerColorScheme) || "light",
-  debugMenu: false,
-  xmtpEnv: (process.env.EXPO_PUBLIC_XMTP_ENV || "dev") as IConfig["xmtpEnv"],
-  apiURI: maybeReplaceLocalhost(process.env.EXPO_PUBLIC_CONVOS_API_URI),
-  debugAddresses: process.env.EXPO_PUBLIC_DEBUG_ADDRESSES?.toLowerCase().split(",") || [],
-  lensApiDomain: "api.lens.dev",
-  lensSuffix: ".lens",
-  sentryDSN: process.env.EXPO_PUBLIC_SENTRY_DSN,
-  framesAllowedSchemes: ["http", "https", "ethereum"],
+  reactQueryPersistCacheIsEnabled:
+    process.env.EXPO_PUBLIC_ENABLE_REACT_QUERY_PERSIST_CACHE !== "false",
+  app: {
+    scheme: Constants.expoConfig?.scheme as string,
+    name: Constants.expoConfig?.name as string,
+    version: Constants.expoConfig?.version as string,
+    storeUrl: "",
+    bundleId:
+      Platform.OS === "android"
+        ? (Constants.expoConfig?.android?.package as string)
+        : (Constants.expoConfig?.ios?.bundleIdentifier as string),
+    universalLinks: [appConfigExtra.webDomain].flatMap((domain) => [
+      `https://${domain}`,
+      `http://${domain}`,
+      domain,
+    ]),
+    apiUrl: maybeReplaceLocalhost(process.env.EXPO_PUBLIC_CONVOS_API_URI),
+    webDomain: appConfigExtra.webDomain,
+  },
+  firebase: {
+    appCheckDebugToken:
+      Platform.OS === "android"
+        ? process.env.EXPO_PUBLIC_FIREBASE_APP_CHECK_DEBUG_TOKEN_ANDROID
+        : process.env.EXPO_PUBLIC_FIREBASE_APP_CHECK_DEBUG_TOKEN_IOS,
+  },
+  sentry: {
+    dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
+  },
+  thirdweb: {
+    clientId: process.env.EXPO_PUBLIC_THIRDWEB_CLIENT_ID,
+  },
   privy: {
     appId: process.env.EXPO_PUBLIC_PRIVY_APP_ID,
     clientId: process.env.EXPO_PUBLIC_PRIVY_CLIENT_ID,
   },
-  thirdwebClientId: process.env.EXPO_PUBLIC_THIRDWEB_CLIENT_ID,
-  reactQueryEncryptionKey: process.env.EXPO_PUBLIC_SECURE_REACT_QUERY_ENCRYPTION_KEY,
-  reactQueryPersistCacheIsEnabled:
-    process.env.EXPO_PUBLIC_ENABLE_REACT_QUERY_PERSIST_CACHE !== "false",
-  appCheckDebugToken:
-    Platform.OS === "android"
-      ? process.env.EXPO_PUBLIC_FIREBASE_APP_CHECK_DEBUG_TOKEN_ANDROID
-      : process.env.EXPO_PUBLIC_FIREBASE_APP_CHECK_DEBUG_TOKEN_IOS,
+  evm: {
+    rpcEndpoint: process.env.EXPO_PUBLIC_EVM_RPC_ENDPOINT,
+  },
   xmtp: {
+    env: (process.env.EXPO_PUBLIC_XMTP_ENV || "local") as IXmtpEnv,
     maxMsUntilLogError: 3000,
   },
 } as const satisfies Partial<IConfig>
