@@ -75,6 +75,7 @@ const config = {
     "react/react-in-jsx-scope": "off",
     "react/jsx-key": "error",
     "react/jsx-no-bind": "off",
+    "react/jsx-no-target-blank": "off", // Was causing weird eslint issues
 
     "typescript-eslint/no-unused-vars": [
       "warn",
