@@ -1,6 +1,6 @@
 import type { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { z } from "zod"
-import { getCurrentUserQueryData } from "@/features/current-user/current-user.query"
+import { ensureCurrentUserQueryData } from "@/features/current-user/current-user.query"
 import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
 import { convosApi } from "@/utils/convos-api/convos-api-instance"
@@ -15,12 +15,31 @@ const ConversationMetadataSchema = z.object({
 
 export type IConversationMetadata = z.infer<typeof ConversationMetadataSchema>
 
-export async function getConversationMetadata(args: { xmtpConversationId: IXmtpConversationId }) {
-  const { xmtpConversationId } = args
+export type IGetConversationMetadataArgs = {
+  xmtpConversationId: IXmtpConversationId
+  clientInboxId: IXmtpInboxId
+}
+
+export async function getConversationMetadata(args: IGetConversationMetadataArgs) {
+  const { xmtpConversationId, clientInboxId } = args
 
   try {
+    const currentUser = await ensureCurrentUserQueryData()
+
+    if (!currentUser) {
+      throw new Error("No current user found")
+    }
+
+    const deviceIdentityId = currentUser.identities.find(
+      (identity) => identity.xmtpId === clientInboxId,
+    )?.id
+
+    if (!deviceIdentityId) {
+      throw new Error("No matching device identity found for the given inbox ID")
+    }
+
     const { data } = await convosApi.get<IConversationMetadata>(
-      `/api/v1/metadata/conversation/${xmtpConversationId}`,
+      `/api/v1/metadata/conversation/${deviceIdentityId}/${xmtpConversationId}`,
     )
 
     const parseResult = ConversationMetadataSchema.safeParse(data)
@@ -35,12 +54,6 @@ export async function getConversationMetadata(args: { xmtpConversationId: IXmtpC
 
     return data
   } catch (error) {
-    // Check if error is a 404 Not Found error
-    // if (error instanceof AxiosError && error.response?.status === 404) {
-    //   // If metadata doesn't exist (404), create it with default values
-    //   return createDefaultConversationMetadata({ xmtpConversationId })
-    // }
-
     // For other errors, rethrow
     throw error
   }
@@ -169,7 +182,7 @@ async function updateConversationMetadata(args: {
 }) {
   const { xmtpConversationId, clientInboxId, updates } = args
 
-  const currentUser = getCurrentUserQueryData()
+  const currentUser = await ensureCurrentUserQueryData()
 
   if (!currentUser) {
     throw new Error("No current user found")

@@ -1,6 +1,5 @@
 import { toHex } from "thirdweb"
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
-import { getStoredDeviceId } from "@/features/devices/device.storage"
 import { ensureXmtpInstallationQueryData } from "@/features/xmtp/xmtp-installations/xmtp-installation.query"
 import { signWithXmtpInstallationId } from "@/features/xmtp/xmtp-installations/xmtp-installations"
 import { ensureJwtQueryData } from "./jwt.query"
@@ -10,7 +9,6 @@ export const XMTP_INSTALLATION_ID_HEADER_KEY = "X-XMTP-InstallationId"
 export const XMTP_INBOX_ID_HEADER_KEY = "X-XMTP-InboxId"
 export const FIREBASE_APP_CHECK_HEADER_KEY = "X-Firebase-AppCheck"
 export const XMTP_SIGNATURE_HEADER_KEY = "X-XMTP-Signature"
-export const XMTP_DEVICE_ID_HEADER_KEY = "X-XMTP-DeviceId"
 
 // used for authenticated requests
 export const CONVOS_AUTH_TOKEN_HEADER_KEY = "X-Convos-AuthToken"
@@ -20,7 +18,6 @@ export type XmtpApiHeaders = {
   [XMTP_INBOX_ID_HEADER_KEY]: string
   [FIREBASE_APP_CHECK_HEADER_KEY]: string
   [XMTP_SIGNATURE_HEADER_KEY]: string
-  [XMTP_DEVICE_ID_HEADER_KEY]: string
 }
 
 export async function getConvosAuthenticationHeaders(): Promise<XmtpApiHeaders> {
@@ -38,8 +35,7 @@ export async function getConvosAuthenticationHeaders(): Promise<XmtpApiHeaders> 
   //   );
   // }
 
-  const [deviceId, installationId, rawAppCheckTokenSignature] = await Promise.all([
-    getStoredDeviceId(),
+  const [installationId, rawAppCheckTokenSignature] = await Promise.all([
     ensureXmtpInstallationQueryData({
       inboxId: currentSender.inboxId,
     }),
@@ -56,7 +52,6 @@ export async function getConvosAuthenticationHeaders(): Promise<XmtpApiHeaders> 
     [XMTP_INBOX_ID_HEADER_KEY]: currentSender.inboxId,
     [XMTP_SIGNATURE_HEADER_KEY]: appCheckTokenSignatureHexString,
     [FIREBASE_APP_CHECK_HEADER_KEY]: appCheckToken, // Disabled for now until we go live and it works with bun
-    [XMTP_DEVICE_ID_HEADER_KEY]: deviceId ?? "",
   }
 }
 

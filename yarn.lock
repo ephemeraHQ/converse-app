@@ -4573,7 +4573,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@expo/metro-runtime@npm:~4.0.0":
+"@expo/metro-runtime@npm:~4.0.0, @expo/metro-runtime@npm:~4.0.1":
   version: 4.0.1
   resolution: "@expo/metro-runtime@npm:4.0.1"
   peerDependencies:
@@ -10008,15 +10008,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-<<<<<<< HEAD
 "@xmtp/react-native-sdk@npm:^4.0.1":
   version: 4.0.1
   resolution: "@xmtp/react-native-sdk@npm:4.0.1"
-=======
-"@xmtp/react-native-sdk@github:xmtp/xmtp-react-native#np/custom-local-url":
-  version: 4.0.1
-  resolution: "@xmtp/react-native-sdk@https://github.com/xmtp/xmtp-react-native.git#commit=07863384c60f06c4e56ae51112bff617c16e7385"
->>>>>>> 5af2fcdd (wip)
   dependencies:
     "@changesets/changelog-git": "npm:^0.2.0"
     "@changesets/cli": "npm:^2.27.10"
@@ -10030,11 +10024,7 @@ __metadata:
     expo: "*"
     react: "*"
     react-native: "*"
-<<<<<<< HEAD
   checksum: 10c0/0bd81884f83a8bc2beb7decb82e06e1ac073ba7adb95455d586a6c3434201229211d5cdd0375e456fc775010635506be71ff21250f386d32e705b56c0cd75bcf
-=======
-  checksum: 10c0/627325c6c1bafc9bb4e279a21a5ed5ac698af2b35c7e8f11fc2f5b0723df705bd4ff0de45bba4a1378b4f4089b112ee0d26a99c4190251a4f05cc8b8dee9586f
->>>>>>> 5af2fcdd (wip)
   languageName: node
   linkType: hard
 
@@ -12107,11 +12097,7 @@ __metadata:
     "@walletconnect/react-native-compat": "npm:^2.19.0"
     "@welldone-software/why-did-you-render": "npm:^8.0.3"
     "@xmtp/content-type-primitives": "npm:^2.0.0"
-<<<<<<< HEAD
     "@xmtp/react-native-sdk": "npm:^4.0.1"
-=======
-    "@xmtp/react-native-sdk": "github:xmtp/xmtp-react-native#np/custom-local-url"
->>>>>>> 5af2fcdd (wip)
     "@xstate/react": "npm:^5.0.0"
     "@yornaath/batshit": "npm:^0.10.1"
     alchemy-sdk: "npm:^3.4.4"
@@ -12222,6 +12208,7 @@ __metadata:
     reassure: "npm:^1.2.1"
     rn-fetch-blob: "npm:^0.12.0"
     safe-buffer: "npm:^5.2.1"
+    tanstack-query-dev-tools-expo-plugin: "npm:^0.1.1"
     thirdweb: "npm:^5.90.2"
     typescript: "npm:^5.3.0"
     typescript-eslint: "npm:^8.13.0"

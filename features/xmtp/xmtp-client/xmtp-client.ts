@@ -116,7 +116,6 @@ export async function createXmtpClient(args: { inboxSigner: IXmtpSigner }) {
   // Store in map
   const inboxId = xmtpClient.inboxId as IXmtpInboxId
   xmtpClientsMap.set(inboxId, xmtpClient)
-  xmtpLogger.debug(`Created and stored XMTP client for inboxId: ${inboxId}`)
 
   return xmtpClient
 }

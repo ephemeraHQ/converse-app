@@ -1,4 +1,3 @@
-import { QueryObserver } from "@tanstack/react-query"
 import { useMultiInboxStore } from "@/features/authentication/multi-inbox.store"
 import {
   ensureAllowedConsentConversationsQueryData,
@@ -14,7 +13,7 @@ import { IXmtpConversationId, IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
 import { NotificationError } from "@/utils/error"
 import { notificationsLogger } from "@/utils/logger"
-import { reactQueryClient } from "@/utils/react-query/react-query.client"
+import { createQueryObserverWithPreviousData } from "@/utils/react-query/react-query.helpers"
 import {
   subscribeToNotificationTopicsWithMetadata,
   unsubscribeFromNotificationTopics,
@@ -22,22 +21,25 @@ import {
 
 export function setupConversationsNotificationsSubscriptions() {
   // Set up subscription for notifications permissions changes
-  const permissionsObserver = new QueryObserver(
-    reactQueryClient,
-    getNotificationsPermissionsQueryConfig(),
-  )
 
-  permissionsObserver.subscribe(({ data }) => {
-    notificationsLogger.debug("Notification permissions query observer triggered")
-    updateConversationSubscriptions()
+  createQueryObserverWithPreviousData({
+    queryOptions: getNotificationsPermissionsQueryConfig(),
+    observerCallbackFn: ({ data, previousData }) => {
+      if (data !== previousData) {
+        // notificationsLogger.debug("Notification permissions query observer triggered")
+        updateConversationSubscriptions()
+      }
+    },
   })
 
   // Set up subscription for multi-inbox store changes
   useMultiInboxStore.subscribe(
     (state) => state.senders,
-    () => {
-      notificationsLogger.debug("Multi-inbox senders store subscription triggered")
-      updateConversationSubscriptions()
+    (senders, previousSenders) => {
+      if (senders.length !== previousSenders.length) {
+        // notificationsLogger.debug("Multi-inbox senders store subscription triggered")
+        updateConversationSubscriptions()
+      }
     },
     {
       fireImmediately: true,
@@ -55,6 +57,8 @@ const observersMap = new Map<
 let previousSendersInboxIds: IXmtpInboxId[] = []
 
 async function updateConversationSubscriptions() {
+  notificationsLogger.debug("Updating conversation subscriptions")
+
   // Check if notifications permissions are granted
   const hasPushNotificationPermissions = await userHasGrantedNotificationsPermissions()
 

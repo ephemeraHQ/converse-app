@@ -12,6 +12,7 @@ import { useAddGroupMembersStore } from "@/features/groups/stores/add-group-memb
 import { useRouteParams, useRouter } from "@/navigation/use-navigation"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { captureErrorWithToast } from "@/utils/capture-error"
+import { GenericError } from "@/utils/error"
 
 export const AddGroupMembersConfirmButton = memo(function AddGroupMembersConfirmButton() {
   const { progress, height } = useReanimatedKeyboardAnimation()
@@ -48,9 +49,9 @@ export const AddGroupMembersConfirmButton = memo(function AddGroupMembersConfirm
         inboxIds: selectedInboxIds,
       })
     } catch (error) {
-      captureErrorWithToast(error, {
-        message: "Failed to add group members",
-      })
+      captureErrorWithToast(
+        new GenericError({ error, additionalMessage: "Failed to add group members" }),
+      )
     }
   }, [selectedInboxIds, addGroupMembers, group, router])
 

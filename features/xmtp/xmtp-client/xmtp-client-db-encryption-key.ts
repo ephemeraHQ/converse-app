@@ -2,18 +2,14 @@ import { getRandomBytesAsync } from "expo-crypto"
 import { XMTPError } from "@/utils/error"
 import { ILowercaseEthereumAddress } from "@/utils/evm/address"
 import { xmtpLogger } from "@/utils/logger"
-import {
-  deleteSecureItemAsync,
-  getSecureItemAsync,
-  setSecureItemAsync,
-} from "@/utils/storage/secure-storage"
+import { secureStorage } from "@/utils/storage/secure-storage"
 
 const DB_ENCRYPTION_KEY_STORAGE_KEY_STRING = "LIBXMTP_DB_ENCRYPTION_KEY"
 
 export async function cleanXmtpDbEncryptionKey(args: { ethAddress: ILowercaseEthereumAddress }) {
   const { ethAddress } = args
   const DB_ENCRYPTION_KEY = getXmtpDbEncryptionStorageKey({ ethAddress })
-  await deleteSecureItemAsync(DB_ENCRYPTION_KEY)
+  await secureStorage.deleteItem(DB_ENCRYPTION_KEY)
 }
 
 export async function getOrCreateXmtpDbEncryptionKey(args: {
@@ -27,7 +23,7 @@ export async function getOrCreateXmtpDbEncryptionKey(args: {
 
   try {
     // Check if key exists
-    const existingKey = await getSecureItemAsync(DB_ENCRYPTION_KEY_STORAGE_KEY)
+    const existingKey = await secureStorage.getItem(DB_ENCRYPTION_KEY_STORAGE_KEY)
     if (existingKey) {
       xmtpLogger.debug(`Found existing DB encryption key for ${ethAddress}`)
       return new Uint8Array(Buffer.from(existingKey, "base64"))
@@ -38,10 +34,10 @@ export async function getOrCreateXmtpDbEncryptionKey(args: {
     xmtpLogger.debug(
       `No existing DB encryption key found for ${ethAddress}, checking old storage...`,
     )
-    const oldExistingKey = await getSecureItemAsync(DB_ENCRYPTION_KEY_STORAGE_KEY_STRING)
+    const oldExistingKey = await secureStorage.getItem(DB_ENCRYPTION_KEY_STORAGE_KEY_STRING)
     if (oldExistingKey) {
       xmtpLogger.debug(`Found old DB encryption key`)
-      await setSecureItemAsync(DB_ENCRYPTION_KEY_STORAGE_KEY, oldExistingKey)
+      await secureStorage.setItem(DB_ENCRYPTION_KEY_STORAGE_KEY, oldExistingKey)
       return new Uint8Array(Buffer.from(oldExistingKey, "base64"))
     }
 
@@ -49,7 +45,7 @@ export async function getOrCreateXmtpDbEncryptionKey(args: {
     xmtpLogger.debug(
       `Can't find existing DB encryption key for ${ethAddress}, creating a new one...`,
     )
-    await setSecureItemAsync(
+    await secureStorage.setItem(
       DB_ENCRYPTION_KEY_STORAGE_KEY,
       Buffer.from(await getRandomBytesAsync(32)).toString("base64"),
     )

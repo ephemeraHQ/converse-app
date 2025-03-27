@@ -6,7 +6,6 @@ import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu"
 import { HeaderAction } from "@/design-system/Header/HeaderAction"
 import { HStack } from "@/design-system/HStack"
 import { iconRegistry } from "@/design-system/Icon/Icon"
-import { Text } from "@/design-system/Text"
 import { useSaveProfile } from "@/features/profiles/hooks/use-save-profile"
 import { useProfileMeStore, useProfileMeStoreValue } from "@/features/profiles/profile-me.store"
 import { getProfileQueryData } from "@/features/profiles/profiles.query"
@@ -145,8 +144,6 @@ const DoneAction = memo(function DoneAction({ inboxId }: { inboxId: IXmtpInboxId
         inboxId,
       })
 
-      // Only close edit mode and reset store after successful save
-      profileMeStore.getState().actions.setEditMode(false)
       profileMeStore.getState().actions.reset()
     } catch (err) {
       const error = err as any

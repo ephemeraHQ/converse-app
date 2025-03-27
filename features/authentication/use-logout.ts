@@ -16,16 +16,11 @@ export const useLogout = () => {
     async (args: { caller: string }) => {
       authLogger.debug(`Logging out called by ${args.caller}`)
 
+      // IMPORTANT: Order of operations is important here.
       try {
         useAuthenticationStore.getState().actions.setStatus("signedOut")
 
         const currentSender = getCurrentSender()
-
-        if (currentSender) {
-          logoutXmtpClient({
-            inboxId: currentSender.inboxId,
-          }).catch(captureError)
-        }
 
         // Clear both in-memory cache and persisted data
         reactQueryClient.getQueryCache().clear()
@@ -33,8 +28,14 @@ export const useLogout = () => {
         reactQueryClient.removeQueries()
         reactQueryMMKV.clearAll()
 
-        // Call this here for now since we can only have 1 identity
+        // TODO: Change this once we support multiple identities
         resetMultiInboxStore()
+
+        if (currentSender) {
+          logoutXmtpClient({
+            inboxId: currentSender.inboxId,
+          }).catch(captureError)
+        }
 
         await privyLogout()
 

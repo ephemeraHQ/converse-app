@@ -48,7 +48,7 @@ export const shared = {
   thirdwebClientId: process.env.EXPO_PUBLIC_THIRDWEB_CLIENT_ID,
   reactQueryEncryptionKey: process.env.EXPO_PUBLIC_SECURE_REACT_QUERY_ENCRYPTION_KEY,
   reactQueryPersistCacheIsEnabled:
-    process.env.EXPO_PUBLIC_ENABLE_REACT_QUERY_PERSIST_CACHE === "true",
+    process.env.EXPO_PUBLIC_ENABLE_REACT_QUERY_PERSIST_CACHE !== "false",
   appCheckDebugToken:
     Platform.OS === "android"
       ? process.env.EXPO_PUBLIC_FIREBASE_APP_CHECK_DEBUG_TOKEN_ANDROID

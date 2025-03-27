@@ -1,6 +1,6 @@
 import { z } from "zod"
+import { ApiError } from "@/utils/convos-api/convos-api-error"
 import { convosApi } from "@/utils/convos-api/convos-api-instance"
-import { ApiError } from "@/utils/error"
 import { AUTHENTICATE_ROUTE } from "./authentication.constants"
 
 const fetchJwtResponseSchema = z.object({

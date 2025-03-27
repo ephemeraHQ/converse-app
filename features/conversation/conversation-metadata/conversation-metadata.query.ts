@@ -14,7 +14,7 @@ type IArgs = {
 }
 
 function getConversationMetadataQueryFn({ xmtpConversationId, clientInboxId }: IArgs) {
-  return getConversationMetadata({ xmtpConversationId })
+  return getConversationMetadata({ xmtpConversationId, clientInboxId })
 }
 
 export function getConversationMetadataQueryOptions({ xmtpConversationId, clientInboxId }: IArgs) {

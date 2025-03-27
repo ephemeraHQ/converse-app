@@ -33,12 +33,10 @@ function createMMKVPersister(storage: MMKV): ReactQueryPersister {
           new ReactQueryPersistError({
             error,
             additionalMessage: "Failed to persist React Query client",
-          }),
-          {
-            extras: {
+            extra: {
               queries: client.clientState.queries.map((q) => q.queryKey.toString()).join(", "),
             },
-          },
+          }),
         )
       }
     },

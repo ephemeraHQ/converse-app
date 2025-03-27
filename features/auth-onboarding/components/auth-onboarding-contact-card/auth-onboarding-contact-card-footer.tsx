@@ -11,6 +11,7 @@ import { hydrateAuth } from "@/features/authentication/hydrate-auth"
 import { useMultiInboxStore } from "@/features/authentication/multi-inbox.store"
 import { useCreateUserMutation } from "@/features/current-user/create-user.mutation"
 import { captureErrorWithToast } from "@/utils/capture-error"
+import { GenericError } from "@/utils/error"
 import { waitUntilPromise } from "@/utils/wait-until-promise"
 import { getFirstZodValidationError, isZodValidationError } from "@/utils/zod"
 
@@ -77,9 +78,12 @@ export const AuthOnboardingContactCardFooter = memo(function AuthOnboardingConta
           type: "error",
         })
       } else {
-        captureErrorWithToast(error, {
-          message: "An unexpected error occurred. Please try again.",
-        })
+        captureErrorWithToast(
+          new GenericError({
+            error,
+            additionalMessage: "An unexpected error occurred. Please try again.",
+          }),
+        )
       }
     } finally {
       setPressedOnContinue(false)

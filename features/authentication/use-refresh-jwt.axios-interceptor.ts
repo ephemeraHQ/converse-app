@@ -4,9 +4,10 @@ import { getConvosAuthenticatedHeaders } from "@/features/authentication/authent
 import { refreshAndGetNewJwtQuery } from "@/features/authentication/jwt.query"
 import { useLogout } from "@/features/authentication/use-logout"
 import { captureError } from "@/utils/capture-error"
+import { ApiError } from "@/utils/convos-api/convos-api-error"
 import { apiLogger } from "@/utils/logger"
 import { convosApi } from "../../utils/convos-api/convos-api-instance"
-import { ApiError, AuthenticationError } from "../../utils/error"
+import { AuthenticationError, GenericError } from "../../utils/error"
 
 /**
  * Hook that sets up an axios interceptor to refresh JWT tokens when requests fail with 401
@@ -22,7 +23,7 @@ export const useRefreshJwtAxiosInterceptor = () => {
       try {
         await logout({ caller: "useRefreshJwtAxiosInterceptor" })
       } catch (error) {
-        captureError(error)
+        captureError(new AuthenticationError({ error, additionalMessage: "Error logging out" }))
       }
     }
 

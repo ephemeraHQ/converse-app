@@ -48,7 +48,12 @@ export function useNotificationListeners() {
             )
           }
         } catch (error) {
-          captureError(error)
+          captureError(
+            new NotificationError({
+              error,
+              additionalMessage: "Error handling notification tap",
+            }),
+          )
         }
       },
     )

@@ -1,14 +1,20 @@
-import { useMutation } from "@tanstack/react-query"
+import { MutationObserver, MutationOptions, QueryClient, useMutation } from "@tanstack/react-query"
 import { setCurrentUserQueryData } from "@/features/current-user/current-user.query"
 import { storeDeviceId } from "@/features/devices/device.storage"
 import { setProfileQueryData } from "@/features/profiles/profiles.query"
 import { captureError } from "@/utils/capture-error"
+import { reactQueryClient } from "@/utils/react-query/react-query.client"
 import { createUser, ICreateUserArgs } from "./create-user.api"
 
 export type ICreateUserMutationArgs = ICreateUserArgs
 
-export function useCreateUserMutation() {
-  return useMutation({
+export function getCreateUserMutationOptions(): MutationOptions<
+  Awaited<ReturnType<typeof createUser>>,
+  Error,
+  ICreateUserArgs
+> {
+  return {
+    mutationKey: ["createUser"],
     mutationFn: async (args: ICreateUserArgs) => {
       return createUser(args)
     },
@@ -45,7 +51,6 @@ export function useCreateUserMutation() {
     // },
 
     onSuccess: (data) => {
-      // Store the device ID
       storeDeviceId(data.device.id).catch(captureError)
 
       setCurrentUserQueryData({
@@ -68,5 +73,17 @@ export function useCreateUserMutation() {
         },
       })
     },
-  })
+  }
+}
+
+export function useCreateUserMutation() {
+  return useMutation(getCreateUserMutationOptions())
+}
+
+export async function createUserMutation(args: ICreateUserArgs) {
+  const createUserMutationObserver = new MutationObserver(
+    reactQueryClient,
+    getCreateUserMutationOptions(),
+  )
+  return createUserMutationObserver.mutate(args)
 }

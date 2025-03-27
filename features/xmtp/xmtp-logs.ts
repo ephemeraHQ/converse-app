@@ -2,7 +2,8 @@ import { Client } from "@xmtp/react-native-sdk"
 import * as RNFS from "react-native-fs"
 import { v4 as uuidv4 } from "uuid"
 import { captureError } from "@/utils/capture-error"
-import logger from "@/utils/logger"
+import { XMTPError } from "@/utils/error"
+import logger, { xmtpLogger } from "@/utils/logger"
 
 // Constants
 const LOG_FILE_EXTENSION = ".xmtp.log.txt"
@@ -35,7 +36,7 @@ async function hasEnoughStorageSpace() {
     const { freeSpace } = await RNFS.getFSInfo()
     return freeSpace > MIN_REQUIRED_STORAGE_BYTES
   } catch (error) {
-    captureError(error)
+    captureError(new XMTPError({ error, additionalMessage: "Error checking storage space" }))
     return true // Assume there's enough space if we can't check
   }
 }
@@ -57,10 +58,10 @@ async function cleanupOldLogFiles() {
     await Promise.all(filesToDelete.map((file) => RNFS.unlink(file.path)))
 
     if (filesToDelete.length > 0) {
-      logger.debug(`Cleaned up ${filesToDelete.length} old XMTP log files`)
+      xmtpLogger.debug(`Cleaned up ${filesToDelete.length} old XMTP log files`)
     }
   } catch (error) {
-    captureError(error)
+    captureError(new XMTPError({ error, additionalMessage: "Error cleaning up old log files" }))
   }
 }
 
@@ -76,7 +77,7 @@ async function shouldRotateLogFile() {
     const fileInfo = await RNFS.stat(state.currentLogPath)
     return fileInfo.size > MAX_LOG_FILE_SIZE_BYTES
   } catch (error) {
-    captureError(error)
+    captureError(new XMTPError({ error, additionalMessage: "Error checking log file size" }))
     return false
   }
 }
@@ -89,7 +90,7 @@ export async function startXmtpLogging() {
 
   // Check for available storage space
   if (!(await hasEnoughStorageSpace())) {
-    logger.warn("Not enough storage space available for XMTP logging")
+    xmtpLogger.warn("Not enough storage space available for XMTP logging")
     return
   }
 
@@ -119,16 +120,16 @@ export async function startXmtpLogging() {
 
       // Check if we still have enough storage space
       if (!(await hasEnoughStorageSpace())) {
-        logger.warn("Low storage space detected, stopping XMTP logging")
+        xmtpLogger.warn("Low storage space detected, stopping XMTP logging")
         stopXmtpLogging()
         return
       }
 
       const logs = (await Client.exportNativeLogs()) as string
       await RNFS.writeFile(state.currentLogPath, logs, LOG_FILE_ENCODING)
-      logger.debug("XMTP logs written to", state.currentLogPath)
+      xmtpLogger.debug("XMTP logs written to", state.currentLogPath)
     } catch (error) {
-      captureError(error)
+      captureError(new XMTPError({ error, additionalMessage: "Error writing XMTP logs" }))
     }
   }, LOGGING_INTERVAL_MS)
 }
@@ -137,7 +138,7 @@ export function stopXmtpLogging() {
   if (state.interval) {
     clearInterval(state.interval)
     state.interval = null
-    logger.debug("XMTP logging stopped")
+    xmtpLogger.debug("XMTP logging stopped")
   }
 }
 

@@ -7,12 +7,12 @@ import { AuthenticationError } from "@/utils/error"
 import { authLogger } from "@/utils/logger"
 
 export async function hydrateAuth() {
-  authLogger.debug("Hydrating auth")
+  authLogger.debug("Hydrating auth...")
 
   const currentSender = getCurrentSender()
 
   if (!currentSender) {
-    authLogger.debug("No current sender, setting status to signed out")
+    authLogger.debug("No current sender while hydrating auth so setting status to signed out...")
     useAuthenticationStore.getState().actions.setStatus("signedOut")
     return
   }
@@ -28,7 +28,7 @@ export async function hydrateAuth() {
     })
       .then((isValid) => {
         if (!isValid) {
-          authLogger.debug("Invalid XMTP installation, signing out")
+          authLogger.debug("Invalid XMTP installation while hydrating auth so signing out...")
           useAuthenticationStore.getState().actions.setStatus("signedOut")
         }
       })
@@ -37,12 +37,13 @@ export async function hydrateAuth() {
     captureError(
       new AuthenticationError({
         error,
-        additionalMessage: "Error while hydrating auth so signing out",
+        additionalMessage: "Error while hydrating auth so signing out...",
       }),
     )
     useAuthenticationStore.getState().actions.setStatus("signedOut")
     return
   }
 
+  authLogger.debug("Successfully hydrated auth and setting status to signed in...")
   useAuthenticationStore.getState().actions.setStatus("signedIn")
 }

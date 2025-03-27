@@ -12,6 +12,7 @@ import { supportedSocialProfiles } from "@/features/social-profiles/supported-so
 import { translate } from "@/i18n"
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme"
 import { captureErrorWithToast } from "@/utils/capture-error"
+import { GenericError } from "@/utils/error"
 
 type IProfileSocialsNamesProps = {
   inboxId: IXmtpInboxId
@@ -36,17 +37,17 @@ export function ProfileSocialsNames({ inboxId }: IProfileSocialsNamesProps) {
             Clipboard.setString(name)
             Alert.alert(translate("userProfile.copied"))
           } catch (error) {
-            captureErrorWithToast(error, {
-              message: "Error copying address",
-            })
+            captureErrorWithToast(
+              new GenericError({ error, additionalMessage: "Error copying address" }),
+            )
           }
         } else if (selectedIndex === 1) {
           try {
             Alert.alert("Work in progress")
           } catch (error) {
-            captureErrorWithToast(error, {
-              message: "Error removing wallet from inbox",
-            })
+            captureErrorWithToast(
+              new GenericError({ error, additionalMessage: "Error removing wallet from inbox" }),
+            )
           }
         }
       },

@@ -74,7 +74,7 @@ export function useSetupStreamingSubscriptions() {
         const newInboxIds = currentInboxIds.filter((inboxId) => !previousInboxIds.includes(inboxId))
 
         if (newInboxIds.length > 0) {
-          startStreaming(newInboxIds)
+          startStreaming(newInboxIds).catch(captureError)
         }
 
         // Stop streaming for removed senders
@@ -83,7 +83,7 @@ export function useSetupStreamingSubscriptions() {
         )
 
         if (removedInboxIds.length > 0) {
-          stopStreaming(removedInboxIds)
+          stopStreaming(removedInboxIds).catch(captureError)
         }
       },
       {
@@ -115,12 +115,14 @@ async function startStreaming(inboxIdsToStream: IXmtpInboxId[]) {
         store.actions.updateStreamingState(inboxId, {
           isStreamingConversations: false,
         })
-        captureError(error)
+        captureError(
+          new StreamError({ error, additionalMessage: "Error starting conversation stream" }),
+        )
       }
     }
 
     if (!streamingState?.isStreamingMessages) {
-      streamLogger.debug(`[Streaming] Starting messages stream for ${inboxId}`)
+      streamLogger.debug(`[Streaming] Starting messages stream for ${inboxId}...`)
       try {
         await startMessageStreaming({ clientInboxId: inboxId })
         store.actions.updateStreamingState(inboxId, {
@@ -130,7 +132,9 @@ async function startStreaming(inboxIdsToStream: IXmtpInboxId[]) {
         store.actions.updateStreamingState(inboxId, {
           isStreamingMessages: false,
         })
-        captureError(error)
+        captureError(
+          new StreamError({ error, additionalMessage: "Error starting messages stream" }),
+        )
       }
     }
 

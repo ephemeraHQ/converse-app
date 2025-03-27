@@ -19,6 +19,7 @@ import { useFocusRerender } from "@/hooks/use-focus-rerender"
 import { navigate } from "@/navigation/navigation.utils"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { captureError, captureErrorWithToast } from "@/utils/capture-error"
+import { GenericError } from "@/utils/error"
 import { ConversationListItem } from "./conversation-list-item"
 import { DeleteSwipeableAction } from "./conversation-list-item-swipeable/conversation-list-item-swipeable-delete-action"
 import { ToggleUnreadSwipeableAction } from "./conversation-list-item-swipeable/conversation-list-item-swipeable-toggle-read-action"
@@ -81,7 +82,7 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
     try {
       await (isDeleted ? restoreConversationAsync() : deleteDm())
     } catch (error) {
-      captureErrorWithToast(error)
+      captureErrorWithToast(new GenericError({ error, additionalMessage: "Error deleting dm" }))
     }
   }, [isDeleted, deleteDm, restoreConversationAsync])
 
@@ -89,7 +90,9 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
     try {
       await toggleReadStatusAsync()
     } catch (error) {
-      captureErrorWithToast(error)
+      captureErrorWithToast(
+        new GenericError({ error, additionalMessage: "Error toggling read status" }),
+      )
     }
   }, [toggleReadStatusAsync])
 

@@ -52,7 +52,9 @@ async function handleNewMessage(args: {
         message,
       })
     } catch (error) {
-      captureError(error)
+      captureError(
+        new StreamError({ error, additionalMessage: "Error handling new group updated message" }),
+      )
     }
   }
 
@@ -66,7 +68,7 @@ async function handleNewMessage(args: {
       })
     }
   } catch (error) {
-    captureError(error)
+    captureError(new StreamError({ error, additionalMessage: "Error handling new message" }))
   }
 
   try {
@@ -78,7 +80,9 @@ async function handleNewMessage(args: {
       },
     })
   } catch (error) {
-    captureError(error)
+    captureError(
+      new StreamError({ error, additionalMessage: "Error updating conversation query data" }),
+    )
   }
 }
 

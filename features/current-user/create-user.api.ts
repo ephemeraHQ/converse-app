@@ -6,8 +6,8 @@ import { getDeviceModelId, getDeviceOs } from "@/features/devices/devices.utils"
 import { ConvosProfileSchema, IConvosProfile } from "@/features/profiles/profiles.types"
 import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
+import { ApiError } from "@/utils/convos-api/convos-api-error"
 import { convosApi } from "@/utils/convos-api/convos-api-instance"
-import { ApiError } from "@/utils/error"
 import { IEthereumAddress } from "@/utils/evm/address"
 
 const createUserApiRequestBodySchema = z

@@ -17,18 +17,3 @@ export const deviceSchema = z.object({
 })
 
 export type IDevice = z.infer<typeof deviceSchema>
-
-export const DeviceInputSchema = z.object({
-  name: z.string().optional(),
-  os: DeviceOSSchema,
-  pushToken: z.string().optional(),
-  expoToken: z.string().optional(),
-})
-
-export type IDeviceInput = z.infer<typeof DeviceInputSchema>
-
-// Helper type for the relationship between devices and identities
-export type IDeviceIdentityRelation = {
-  deviceId: string
-  identityId: string
-}

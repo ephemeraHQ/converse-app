@@ -8,6 +8,7 @@ import { ensureProfileQueryData } from "@/features/profiles/profiles.query"
 import { doesSocialProfilesMatchTextQuery } from "@/features/profiles/utils/does-social-profiles-match-text-query"
 import { ensureSocialProfilesForAddressQuery } from "@/features/social-profiles/social-profiles.query"
 import { captureError } from "@/utils/capture-error"
+import { GenericError } from "@/utils/error"
 import { normalizeString } from "@/utils/str"
 
 export function getSearchExistingDmsQueryOptions(args: {
@@ -67,8 +68,8 @@ async function searchExistingDms(args: { searchQuery: string; inboxId: IXmtpInbo
         })
 
         return hasProfileMatch || hasSocialProfileMatch ? dm.xmtpId : null
-      } catch (e) {
-        captureError(e)
+      } catch (error) {
+        captureError(new GenericError({ error, additionalMessage: "Error searching existing dms" }))
         return null
       }
     }),

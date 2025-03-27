@@ -76,7 +76,6 @@ async function handleNotification(notification: Notifications.Notification) {
     }
 
     if (isNotificationExpoNewMessageNotification(notification)) {
-      console.log("notification.request.content:", notification.request.content)
       await maybeDisplayLocalNewMessageNotification({
         encryptedMessage: notification.request.content.data.idempotencyKey,
         topic: notification.request.content.data.contentTopic,
@@ -112,7 +111,7 @@ async function handleNotification(notification: Notifications.Notification) {
 }
 
 function handleSuccess(notificationId: string) {
-  notificationsLogger.debug(`Successfully displayed notification: ${notificationId}`)
+  // notificationsLogger.debug(`Successfully processed notification: ${notificationId}`)
 }
 
 function handleError(notificationId: string, error: Error) {

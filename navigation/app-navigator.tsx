@@ -108,22 +108,15 @@ export function AppNavigator() {
   }, [])
 
   return (
-    <>
-      <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
-        <NavigationContainer<NavigationParamList>
-          theme={navigationTheme}
-          linking={linking}
-          ref={navigationRef}
-          onUnhandledAction={() => {
-            // Since we're handling multiple navigators,
-            // let's silence errors when the action
-            // is not meant for this one
-          }}
-        >
-          <AppStacks />
-        </NavigationContainer>
-      </ThemeProvider>
-    </>
+    <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
+      <NavigationContainer<NavigationParamList>
+        theme={navigationTheme}
+        linking={linking}
+        ref={navigationRef}
+      >
+        <AppStacks />
+      </NavigationContainer>
+    </ThemeProvider>
   )
 }
 

@@ -1,19 +1,8 @@
 import { z } from "zod"
-import { DeviceOSSchema, deviceSchema, IDevice } from "@/features/devices/devices.types"
+import { deviceSchema, IDevice } from "@/features/devices/devices.types"
 import { captureError } from "@/utils/capture-error"
+import { handleApiError } from "@/utils/convos-api/convos-api-error"
 import { convosApi } from "@/utils/convos-api/convos-api-instance"
-
-// Schema for device data validation
-
-// Schema for device creation/update requests
-const DeviceInputSchema = z.object({
-  name: z.string().optional(),
-  os: DeviceOSSchema,
-  pushToken: z.string().optional(),
-  expoToken: z.string().optional(),
-})
-
-export type IDeviceInput = z.infer<typeof DeviceInputSchema>
 
 /**
  * Fetches a single device by ID
@@ -31,7 +20,7 @@ export async function fetchDevice(args: { userId: string; deviceId: string }) {
 
     return data
   } catch (error) {
-    throw error
+    handleApiError(error)
   }
 }
 
@@ -51,19 +40,29 @@ export async function fetchUserDevices(args: { userId: string }) {
 
     return data
   } catch (error) {
-    throw error
+    handleApiError(error)
   }
 }
 
 /**
  * Creates a new device
  */
-export async function createDevice(args: { userId: string; device: IDeviceInput }) {
+
+const deviceCreateInputSchema = deviceSchema.omit({
+  id: true,
+  userId: true,
+  createdAt: true,
+  updatedAt: true,
+})
+
+export type IDeviceCreateInput = z.infer<typeof deviceCreateInputSchema>
+
+export async function createDevice(args: { userId: string; device: IDeviceCreateInput }) {
   const { userId, device } = args
 
   try {
     // Validate the input data
-    const validatedData = DeviceInputSchema.parse(device)
+    const validatedData = deviceCreateInputSchema.parse(device)
 
     const { data } = await convosApi.post<IDevice>(`/api/v1/devices/${userId}`, validatedData)
 
@@ -74,23 +73,29 @@ export async function createDevice(args: { userId: string; device: IDeviceInput 
 
     return data
   } catch (error) {
-    throw error
+    handleApiError(error)
   }
 }
 
 /**
  * Updates an existing device
  */
+
+const deviceUpdateInputSchema = deviceSchema
+  .partial()
+  .omit({ id: true, userId: true, createdAt: true, updatedAt: true })
+
+type IDeviceUpdateInput = z.infer<typeof deviceUpdateInputSchema>
+
 export async function updateDevice(args: {
   userId: string
   deviceId: string
-  updates: IDeviceInput
+  updates: IDeviceUpdateInput
 }) {
   const { userId, deviceId, updates } = args
 
   try {
-    // Validate the update data
-    const validatedData = DeviceInputSchema.parse(updates)
+    const validatedData = deviceUpdateInputSchema.parse(updates)
 
     const { data } = await convosApi.put<IDevice>(
       `/api/v1/devices/${userId}/${deviceId}`,
@@ -104,6 +109,6 @@ export async function updateDevice(args: {
 
     return data
   } catch (error) {
-    throw error
+    handleApiError(error)
   }
 }

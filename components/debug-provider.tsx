@@ -178,7 +178,7 @@ function useShowDebugMenu() {
           try {
             await method()
           } catch (error) {
-            captureError(error)
+            captureError(new GenericError({ error, additionalMessage: "Error showing logs menu" }))
           }
         }
       },
@@ -244,7 +244,12 @@ function useShowDebugMenu() {
               .join("\n"),
           )
         } catch (error) {
-          captureError(error)
+          captureError(
+            new GenericError({
+              error,
+              additionalMessage: "Error checking notification permissions",
+            }),
+          )
           Alert.alert("Error", "Failed to check notification permissions")
         }
       },
@@ -254,7 +259,12 @@ function useShowDebugMenu() {
 
           Alert.alert("Permission Request Result", `Granted: ${result.granted ? "YES" : "NO"}`)
         } catch (error) {
-          captureError(error)
+          captureError(
+            new GenericError({
+              error,
+              additionalMessage: "Error requesting notification permissions",
+            }),
+          )
           Alert.alert("Error", "Failed to request notification permissions")
         }
       },
@@ -278,7 +288,12 @@ function useShowDebugMenu() {
                       "Push notification registration process completed successfully.",
                     )
                   } catch (error) {
-                    captureError(error)
+                    captureError(
+                      new GenericError({
+                        error,
+                        additionalMessage: "Error registering for push notifications",
+                      }),
+                    )
                     Alert.alert("Error", "Failed to register for push notifications")
                   }
                 },
@@ -286,7 +301,12 @@ function useShowDebugMenu() {
             ],
           )
         } catch (error) {
-          captureError(error)
+          captureError(
+            new GenericError({
+              error,
+              additionalMessage: "Error registering for push notifications",
+            }),
+          )
           Alert.alert("Error", "Failed to register for push notifications")
         }
       },
@@ -314,7 +334,12 @@ function useShowDebugMenu() {
             },
           ])
         } catch (error) {
-          captureError(error)
+          captureError(
+            new GenericError({
+              error,
+              additionalMessage: "Error getting badge count",
+            }),
+          )
           Alert.alert("Error", "Failed to get badge count")
         }
       },
@@ -337,7 +362,12 @@ function useShowDebugMenu() {
             },
           ])
         } catch (error) {
-          captureError(error)
+          captureError(
+            new GenericError({
+              error,
+              additionalMessage: "Error getting device token",
+            }),
+          )
           Alert.alert("Error", "Failed to get device token. Make sure permissions are granted.")
         }
       },
@@ -357,7 +387,12 @@ function useShowDebugMenu() {
             Alert.alert("Notification Categories", categoryDetails)
           }
         } catch (error) {
-          captureError(error)
+          captureError(
+            new GenericError({
+              error,
+              additionalMessage: "Error getting notification categories",
+            }),
+          )
           Alert.alert("Error", "Failed to get notification categories")
         }
       },
@@ -373,7 +408,12 @@ function useShowDebugMenu() {
           })
           Alert.alert("Notification Sent", "Test notification has been scheduled")
         } catch (error) {
-          captureError(error)
+          captureError(
+            new GenericError({
+              error,
+              additionalMessage: "Error sending test notification",
+            }),
+          )
           Alert.alert("Error", "Failed to schedule test notification")
         }
       },
@@ -400,7 +440,12 @@ function useShowDebugMenu() {
           try {
             await method()
           } catch (error) {
-            captureError(error)
+            captureError(
+              new GenericError({
+                error,
+                additionalMessage: "Error showing notifications menu",
+              }),
+            )
           }
         }
       },

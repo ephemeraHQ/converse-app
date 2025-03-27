@@ -9,6 +9,7 @@ import { ensureProfileQueryData } from "@/features/profiles/profiles.query"
 import { doesSocialProfilesMatchTextQuery } from "@/features/profiles/utils/does-social-profiles-match-text-query"
 import { ensureSocialProfilesForAddressQuery } from "@/features/social-profiles/social-profiles.query"
 import { captureError } from "@/utils/capture-error"
+import { GenericError } from "@/utils/error"
 import { normalizeString } from "@/utils/str"
 
 export async function searchExistingGroupsByGroupMembers(args: {
@@ -70,7 +71,12 @@ export async function searchExistingGroupsByGroupMembers(args: {
           matchingXmtpConversationIds.push(group.xmtpId)
         }
       } catch (error) {
-        captureError(error)
+        captureError(
+          new GenericError({
+            error,
+            additionalMessage: "Error searching existing groups by group members",
+          }),
+        )
       }
     }),
   )

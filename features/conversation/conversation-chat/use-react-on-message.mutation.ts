@@ -10,6 +10,7 @@ import { sendXmtpConversationMessage } from "@/features/xmtp/xmtp-conversations/
 import { IXmtpConversationId, IXmtpMessageId } from "@/features/xmtp/xmtp.types"
 import { captureErrorWithToast } from "@/utils/capture-error"
 import { getTodayNs } from "@/utils/date"
+import { GenericError } from "@/utils/error"
 import { Haptics } from "@/utils/haptics"
 import { IConversationMessageReactionContent } from "./conversation-message/conversation-message.types"
 
@@ -81,7 +82,9 @@ export function useReactOnMessage(props: { xmtpConversationId: IXmtpConversation
           },
         })
       } catch (error) {
-        captureErrorWithToast(error)
+        captureErrorWithToast(
+          new GenericError({ error, additionalMessage: "Error reacting on message" }),
+        )
       }
     },
     [reactOnMessageMutationAsync],

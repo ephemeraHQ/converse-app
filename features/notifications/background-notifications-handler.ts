@@ -1,9 +1,7 @@
+import * as Device from "expo-device"
 import * as Notifications from "expo-notifications"
 import * as TaskManager from "expo-task-manager"
-import {
-  IExpoBackgroundNotificationData,
-  IXmtpNewMessageBackgroundNotificationData,
-} from "@/features/notifications/notifications.types"
+import { IExpoBackgroundNotificationData } from "@/features/notifications/notifications.types"
 import { IXmtpConversationTopic } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
 import { NotificationError } from "@/utils/error"
@@ -28,7 +26,7 @@ TaskManager.defineTask(BACKGROUND_NOTIFICATION_TASK, async ({ data, error }) => 
 
     const backgroundNotificationData = data as IExpoBackgroundNotificationData
 
-    notificationsLogger.debug("Background notification task executed", {
+    notificationsLogger.debug("New background notification received", {
       backgroundNotificationData,
     })
 
@@ -47,12 +45,10 @@ TaskManager.defineTask(BACKGROUND_NOTIFICATION_TASK, async ({ data, error }) => 
       new NotificationError({
         error,
         additionalMessage: "Error in background notification task",
-      }),
-      {
-        extras: {
+        extra: {
           backgroundNotificationData: JSON.stringify(data || {}),
         },
-      },
+      }),
     )
   }
 })
@@ -63,6 +59,13 @@ TaskManager.defineTask(BACKGROUND_NOTIFICATION_TASK, async ({ data, error }) => 
  */
 export async function registerBackgroundNotificationTask() {
   try {
+    if (!Device.isDevice) {
+      notificationsLogger.debug(
+        "Skipping background notification task registration on simulator/emulator",
+      )
+      return
+    }
+
     await logRegisteredTasks()
 
     // Doing this for now to prevent duplicate registrations since we're still testing this feature

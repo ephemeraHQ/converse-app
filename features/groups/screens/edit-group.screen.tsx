@@ -22,6 +22,7 @@ import { useRouteParams, useRouter } from "@/navigation/use-navigation"
 import { $globalStyles } from "@/theme/styles"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { captureErrorWithToast } from "@/utils/capture-error"
+import { GenericError } from "@/utils/error"
 
 export const EditGroupScreen = memo(function EditGroupScreen(
   props: NativeStackScreenProps<NavigationParamList, "EditGroup">,
@@ -76,9 +77,7 @@ export const EditGroupScreen = memo(function EditGroupScreen(
 
       router.goBack()
     } catch (error) {
-      captureErrorWithToast(error, {
-        message: "Error updating group",
-      })
+      captureErrorWithToast(new GenericError({ error, additionalMessage: "Error updating group" }))
     }
   }, [router, updateGroupAsync, group])
 
@@ -149,9 +148,9 @@ const GroupAvatarEditor = memo(function GroupAvatarEditor() {
       const url = await addPFP()
       useEditGroupStore.getState().actions.imageUrl(url)
     } catch (error) {
-      captureErrorWithToast(error, {
-        message: "Error adding group avatar",
-      })
+      captureErrorWithToast(
+        new GenericError({ error, additionalMessage: "Error adding group avatar" }),
+      )
     }
   }, [addPFP])
 
