@@ -1,12 +1,4 @@
-import { ConversationNavParams } from "@/features/conversation/conversation-chat/conversation.nav"
-import { AddGroupMembersNavParams } from "@/features/groups/group-details/add-group-members/add-group-members.nav"
-import { GroupDetailsNavParams } from "@/features/groups/group-details/group-details.nav"
-import { GroupMembersListNavParams } from "@/features/groups/group-details/members-list/group-members-list.nav"
-// import {
-//   InviteUsersToExistingGroupNav,
-//   InviteUsersToExistingGroupParams,
-// } from "@/features/groups/invite-to-group/InviteUsersToExistingGroup.nav";
-import { ProfileNavParams } from "@/features/profiles/profile.nav"
+import { IXmtpConversationId, IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 
 export type NavigationParamList = {
   Idle: undefined
@@ -26,17 +18,30 @@ export type NavigationParamList = {
   Blocked: undefined
   Chats: undefined
   ChatsRequests: undefined
-  Conversation: ConversationNavParams
+  Conversation: {
+    xmtpConversationId?: IXmtpConversationId
+    composerTextPrefill?: string
+    searchSelectedUserInboxIds?: IXmtpInboxId[]
+    isNew?: boolean
+  }
   CreateConversation: undefined
-  GroupDetails: GroupDetailsNavParams
-  AddGroupMembers: AddGroupMembersNavParams
-  GroupMembersList: GroupMembersListNavParams
+  GroupDetails: {
+    xmtpConversationId: IXmtpConversationId
+  }
+  AddGroupMembers: {
+    xmtpConversationId: IXmtpConversationId
+  }
+  GroupMembersList: {
+    xmtpConversationId: IXmtpConversationId
+  }
 
   NewGroupSummary: undefined
   ConverseMatchMaker: undefined
   ShareProfile: undefined
   TopUp: undefined
-  Profile: ProfileNavParams
+  Profile: {
+    inboxId: IXmtpInboxId
+  }
   ProfileImportInfo: undefined
   // InviteUsersToExistingGroup: InviteUsersToExistingGroupParams;
   UserProfile: undefined

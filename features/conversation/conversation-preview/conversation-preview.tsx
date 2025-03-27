@@ -13,13 +13,13 @@ import { ConversationMessageReactions } from "@/features/conversation/conversati
 import { ConversationMessageTimestamp } from "@/features/conversation/conversation-chat/conversation-message/conversation-message-timestamp"
 import { ConversationMessageContextStoreProvider } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.store-context"
 import { IConversationMessage } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.types"
-import { conversationListDefaultProps } from "@/features/conversation/conversation-chat/conversation-messages-list.component"
 import { useConversationMessagesQuery } from "@/features/conversation/conversation-chat/conversation-messages.query"
 import { ConversationStoreProvider } from "@/features/conversation/conversation-chat/conversation.store-context"
 import { useConversationQuery } from "@/features/conversation/queries/conversation.query"
 import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 import { $globalStyles } from "@/theme/styles"
 import { useMessageHasReactions } from "../conversation-chat/conversation-message/hooks/use-message-has-reactions"
+import { conversationMessagesListDefaultProps } from "../conversation-chat/conversation-messages"
 
 type ConversationPreviewProps = {
   xmtpConversationId: IXmtpConversationId
@@ -62,7 +62,7 @@ export const ConversationPreview = ({ xmtpConversationId }: ConversationPreviewP
           <ConversationStoreProvider xmtpConversationId={xmtpConversationId}>
             {/* Using basic Flatlist instead of the Animated one to try to fix the context menu crashes https://github.com/dominicstop/react-native-ios-context-menu/issues/70 */}
             <FlatList
-              {...conversationListDefaultProps}
+              {...conversationMessagesListDefaultProps}
               // 15 is enough
               data={Object.values(messages?.byId ?? {}).slice(0, 15)}
               renderItem={({ item, index }) => {

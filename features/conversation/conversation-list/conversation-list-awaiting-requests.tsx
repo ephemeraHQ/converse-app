@@ -1,6 +1,6 @@
-import { useNavigation } from "@react-navigation/native"
+import { useFocusEffect, useNavigation } from "@react-navigation/native"
 import { useQueries } from "@tanstack/react-query"
-import React, { memo, useMemo } from "react"
+import React, { memo, useCallback, useMemo } from "react"
 import { Center } from "@/design-system/Center"
 import { AnimatedHStack, HStack } from "@/design-system/HStack"
 import { Image } from "@/design-system/image"
@@ -13,7 +13,7 @@ import {
 } from "@/features/conversation/conversation-list/conversation-list-item/conversation-list-item"
 import { getConversationMetadataQueryOptions } from "@/features/conversation/conversation-metadata/conversation-metadata.query"
 import { useConversationRequestsListItem } from "@/features/conversation/conversation-requests-list/use-conversation-requests-list-items"
-import { getConversationQueryData } from "@/features/conversation/queries/conversation.query"
+import { getConversationQueryOptions } from "@/features/conversation/queries/conversation.query"
 import { conversationIsUnreadForInboxId } from "@/features/conversation/utils/conversation-is-unread-by-current-account"
 import { useAppTheme } from "@/theme/use-app-theme"
 
@@ -22,51 +22,77 @@ export const ConversationListAwaitingRequests = memo(function ConversationListAw
   const navigation = useNavigation()
   const currentSender = useSafeCurrentSender()
 
-  const { likelyNotSpamConversationIds, isLoading: isLoadingUknownConversations } =
-    useConversationRequestsListItem()
+  const {
+    likelyNotSpamConversationIds,
+    isLoading: isLoadingUknownConversations,
+    refetch,
+  } = useConversationRequestsListItem()
 
-  const conversationsQueryResult = useQueries({
+  useFocusEffect(
+    useCallback(() => {
+      refetch()
+    }, [refetch]),
+  )
+
+  // Fetch metadata queries
+  const conversationsMetadataQueryResult = useQueries({
     queries: (likelyNotSpamConversationIds ?? []).map((conversationId) =>
       getConversationMetadataQueryOptions({
         clientInboxId: currentSender.inboxId,
         xmtpConversationId: conversationId,
       }),
     ),
-    combine: (queries) => {
-      const numberOfRequestsLikelyNotSpam = likelyNotSpamConversationIds.length
-
-      const hasUnreadMessages = queries.some((query, index) => {
-        if (!query.data) {
-          return false
-        }
-
-        const conversationId = likelyNotSpamConversationIds[index]
-        const conversation = getConversationQueryData({
-          clientInboxId: currentSender.inboxId,
-          xmtpConversationId: conversationId,
-        })
-
-        if (!conversation) {
-          return false
-        }
-
-        return conversationIsUnreadForInboxId({
-          lastMessageSent: conversation?.lastMessage?.sentNs ?? null,
-          lastMessageSenderInboxId: conversation?.lastMessage?.senderInboxId ?? null,
-          consumerInboxId: currentSender.inboxId,
-          markedAsUnread: query.data?.unread ?? false,
-          readUntil: query.data?.readUntil ? new Date(query.data.readUntil).getTime() : null,
-        })
-      })
-
-      return {
-        numberOfRequestsLikelyNotSpam,
-        hasUnreadMessages,
-      }
-    },
   })
 
-  const { numberOfRequestsLikelyNotSpam, hasUnreadMessages } = conversationsQueryResult
+  // Fetch conversation queries
+  const conversationQueries = useQueries({
+    queries: (likelyNotSpamConversationIds ?? []).map((conversationId) => ({
+      ...getConversationQueryOptions({
+        clientInboxId: currentSender.inboxId,
+        xmtpConversationId: conversationId,
+        caller: "ConversationListAwaitingRequests",
+      }),
+    })),
+  })
+
+  // Combine the results
+  const { numberOfRequestsLikelyNotSpam, hasUnreadMessages } = useMemo(() => {
+    const numberOfRequestsLikelyNotSpam = likelyNotSpamConversationIds.length
+
+    const hasUnreadMessages = conversationsMetadataQueryResult.some((metadataQuery, index) => {
+      if (!metadataQuery.data) {
+        return false
+      }
+
+      const conversationQuery = conversationQueries[index]
+
+      if (!conversationQuery.data) {
+        return false
+      }
+
+      return conversationIsUnreadForInboxId({
+        lastMessageSent: conversationQuery.data?.lastMessage?.sentNs ?? null,
+        lastMessageSenderInboxId: conversationQuery.data?.lastMessage?.senderInboxId ?? null,
+        consumerInboxId: currentSender.inboxId,
+        markedAsUnread: metadataQuery.data?.unread ?? false,
+        readUntil: metadataQuery.data?.readUntil
+          ? new Date(metadataQuery.data.readUntil).getTime()
+          : null,
+      })
+    })
+
+    return {
+      numberOfRequestsLikelyNotSpam,
+      hasUnreadMessages,
+    }
+  }, [
+    likelyNotSpamConversationIds,
+    // eslint-disable-next-line @tanstack/query/no-unstable-deps
+    conversationsMetadataQueryResult,
+    // eslint-disable-next-line @tanstack/query/no-unstable-deps
+    conversationQueries,
+    currentSender,
+  ])
 
   const title = useMemo(() => {
     return (

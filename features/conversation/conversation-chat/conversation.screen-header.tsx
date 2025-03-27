@@ -9,7 +9,7 @@ import { Text } from "@/design-system/Text"
 import { VStack } from "@/design-system/VStack"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { useConversationStore } from "@/features/conversation/conversation-chat/conversation.store-context"
-import { getConversationQueryData } from "@/features/conversation/queries/conversation.query"
+import { useConversationQuery } from "@/features/conversation/queries/conversation.query"
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm"
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group"
 import { useDmQuery } from "@/features/dm/dm.query"
@@ -27,9 +27,10 @@ export function useConversationScreenHeader() {
   const conversationStore = useConversationStore()
   const isCreatingNewConversation = conversationStore.getState().isCreatingNewConversation
   const currentSender = useSafeCurrentSender()
-  const conversation = getConversationQueryData({
+  const { data: conversation } = useConversationQuery({
     clientInboxId: currentSender.inboxId,
     xmtpConversationId: conversationStore.getState().xmtpConversationId!,
+    caller: "useConversationScreenHeader",
   })
 
   useHeader(

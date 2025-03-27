@@ -9,17 +9,24 @@ import {
   getPreferredDisplayName,
   getPreferredEthAddress,
 } from "@/features/preferred-display-info/preferred-display-info.utils"
-import { getProfileQueryData, useProfileQuery } from "@/features/profiles/profiles.query"
+import {
+  ensureProfileQueryData,
+  getProfileQueryData,
+  useProfileQuery,
+} from "@/features/profiles/profiles.query"
 import { useSocialProfilesForInboxId } from "@/features/social-profiles/hooks/use-social-profiles-for-inbox-id"
 import {
+  ensureSocialProfilesForAddressQuery,
   getSocialProfilesForEthAddressQueryData,
   useSocialProfilesForAddressQuery,
 } from "@/features/social-profiles/social-profiles.query"
 import {
+  ensureEthAddressesForXmtpInboxIdQueryData,
   getEthAddressesForXmtpInboxIdQueryData,
-  useEthAddressesForXmtpInboxId,
+  useEthAddressesForXmtpInboxIdQuery,
 } from "@/features/xmtp/xmtp-inbox-id/eth-addresses-for-xmtp-inbox-id.query"
 import {
+  ensureXmtpInboxIdFromEthAddressQueryData,
   getXmtpInboxIdFromEthAddressQueryData,
   getXmtpInboxIdFromEthAddressQueryOptions,
 } from "@/features/xmtp/xmtp-inbox-id/xmtp-inbox-id-from-eth-address.query"
@@ -52,7 +59,7 @@ export function usePreferredDisplayInfo(args: PreferredDisplayInfoArgs) {
 
   const inboxId = inboxIdArg ?? inboxIdFromEthAddress
 
-  const { data: ethAddressesForXmtpInboxId } = useEthAddressesForXmtpInboxId({
+  const { data: ethAddressesForXmtpInboxId } = useEthAddressesForXmtpInboxIdQuery({
     clientInboxId: currentSender.inboxId,
     inboxId,
   })
@@ -60,6 +67,7 @@ export function usePreferredDisplayInfo(args: PreferredDisplayInfoArgs) {
   // Get Convos profile data
   const { data: profile, isLoading: isLoadingProfile } = useProfileQuery({
     xmtpId: inboxId,
+    caller: "usePreferredDisplayInfo",
   })
 
   // Get social profiles data
@@ -157,6 +165,64 @@ export function getPreferredDisplayInfo(args: PreferredDisplayInfoArgs) {
     arr2: socialProfilesForEthAddress ?? [],
     compareObjects: (obj1, obj2) => obj1.type === obj2.type,
   })
+
+  const displayName = getPreferredDisplayName({
+    profile,
+    socialProfiles,
+    ethAddress,
+    inboxId,
+  })
+
+  const avatarUrl = getPreferredAvatarUrl({
+    profile,
+    socialProfiles,
+  })
+
+  const preferredEthAddress = getPreferredEthAddress({
+    profile,
+    socialProfiles,
+    ethAddress,
+  })
+
+  const preferredUsername = profile?.username
+
+  return {
+    displayName,
+    avatarUrl,
+    username: preferredUsername,
+    ethAddress: preferredEthAddress,
+  }
+}
+
+export async function ensurePreferredDisplayInfo(args: PreferredDisplayInfoArgs) {
+  const { inboxId: inboxIdArg, ethAddress: ethAddressArg } = args
+
+  const currentSender = getSafeCurrentSender()
+
+  let inboxId = inboxIdArg
+  let ethAddress = ethAddressArg
+
+  if (ethAddress && !inboxId) {
+    inboxId = await ensureXmtpInboxIdFromEthAddressQueryData({
+      clientInboxId: currentSender.inboxId,
+      targetEthAddress: ethAddressArg,
+    })
+  }
+
+  if (!ethAddress && inboxId) {
+    ethAddress = (
+      await ensureEthAddressesForXmtpInboxIdQueryData({
+        clientInboxId: currentSender.inboxId,
+        inboxId: inboxId,
+      })
+    )?.[0]
+  }
+
+  const profile =
+    inboxId &&
+    (await ensureProfileQueryData({ xmtpId: inboxId, caller: "ensurePreferredDisplayInfo" }))
+
+  const socialProfiles = ethAddress && (await ensureSocialProfilesForAddressQuery({ ethAddress }))
 
   const displayName = getPreferredDisplayName({
     profile,

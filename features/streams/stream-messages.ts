@@ -2,7 +2,7 @@ import { isGroupUpdatedMessage } from "@/features/conversation/conversation-chat
 import { addMessageToConversationMessagesQueryData } from "@/features/conversation/conversation-chat/conversation-messages.query"
 import { updateConversationQueryData } from "@/features/conversation/queries/conversation.query"
 import {
-  addGroupMemberToGroupQuery,
+  addGroupMemberToGroupQueryData,
   removeGroupMemberToGroupQuery,
   updateGroupQueryData,
 } from "@/features/groups/group.query"
@@ -41,7 +41,7 @@ async function handleNewMessage(args: {
 }) {
   const { clientInboxId, message } = args
 
-  streamLogger.debug(`[handleNewMessage] message: ${JSON.stringify(message)}`)
+  streamLogger.debug(`New message:`, message)
 
   const messageWasSentByCurrentUser = message.senderInboxId === clientInboxId
 
@@ -98,31 +98,23 @@ function handleNewGroupUpdatedMessage(args: {
   const { inboxId, message } = args
 
   for (const member of message.content.membersAdded) {
-    try {
-      addGroupMemberToGroupQuery({
-        clientInboxId: inboxId,
-        xmtpConversationId: message.xmtpConversationId,
-        member: {
-          inboxId: member.inboxId,
-          consentState: "unknown",
-          permission: "member",
-        },
-      })
-    } catch (error) {
-      captureError(error)
-    }
+    addGroupMemberToGroupQueryData({
+      clientInboxId: inboxId,
+      xmtpConversationId: message.xmtpConversationId,
+      member: {
+        inboxId: member.inboxId,
+        consentState: "unknown",
+        permission: "member",
+      },
+    }).catch(captureError)
   }
 
   for (const member of message.content.membersRemoved) {
-    try {
-      removeGroupMemberToGroupQuery({
-        clientInboxId: inboxId,
-        xmtpConversationId: message.xmtpConversationId,
-        memberInboxId: member.inboxId,
-      })
-    } catch (error) {
-      captureError(error)
-    }
+    removeGroupMemberToGroupQuery({
+      clientInboxId: inboxId,
+      xmtpConversationId: message.xmtpConversationId,
+      memberInboxId: member.inboxId,
+    }).catch(captureError)
   }
 
   // Process metadata changes (e.g., group name, image, description)

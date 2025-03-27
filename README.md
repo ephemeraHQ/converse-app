@@ -175,3 +175,7 @@ For more details on the deployment process, see the GitHub Actions workflows in 
 ## Troubleshoot
 
 If you're having trouble with installation or the build process, try running `yarn clean` to remove the build directories and reinstall dependencies.
+
+## Contributing
+
+See our [contribution guide](./CONTRIBUTING.md) to learn more about contributing to this project.

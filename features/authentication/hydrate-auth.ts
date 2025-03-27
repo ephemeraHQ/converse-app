@@ -3,6 +3,7 @@ import { getCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { ensureXmtpInstallationQueryData } from "@/features/xmtp/xmtp-installations/xmtp-installation.query"
 import { validateXmtpInstallation } from "@/features/xmtp/xmtp-installations/xmtp-installations"
 import { captureError } from "@/utils/capture-error"
+import { AuthenticationError } from "@/utils/error"
 import { authLogger } from "@/utils/logger"
 
 export async function hydrateAuth() {
@@ -25,14 +26,20 @@ export async function hydrateAuth() {
     validateXmtpInstallation({
       inboxId: currentSender.inboxId,
     })
-      .catch(function (error) {
-        captureError(error)
-        useAuthenticationStore.getState().actions.setStatus("signedOut")
-        return
+      .then((isValid) => {
+        if (!isValid) {
+          authLogger.debug("Invalid XMTP installation, signing out")
+          useAuthenticationStore.getState().actions.setStatus("signedOut")
+        }
       })
       .catch(captureError)
   } catch (error) {
-    captureError(error)
+    captureError(
+      new AuthenticationError({
+        error,
+        additionalMessage: "Error while hydrating auth so signing out",
+      }),
+    )
     useAuthenticationStore.getState().actions.setStatus("signedOut")
     return
   }

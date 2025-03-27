@@ -25,6 +25,7 @@ import {
 } from "@/components/snackbar/snackbar.constants"
 import { getNumberOfSnackbars, onSnackbarsChange } from "@/components/snackbar/snackbar.service"
 import { ISnackbar } from "@/components/snackbar/snackbar.types"
+import { useAnimatedKeyboard } from "@/hooks/use-animated-keyboard"
 import { useAppTheme } from "@/theme/use-app-theme"
 
 type SnackbarProps = {
@@ -37,6 +38,8 @@ export const Snackbar = memo(
     const { snackbar, onDismiss } = props
     const { theme } = useAppTheme()
     const { width: windowWidth } = useWindowDimensions()
+
+    const { progressAV, keyboardHeightAV } = useAnimatedKeyboard()
 
     const isFirstSnack = getNumberOfSnackbars() === 1
     const initialBottomPosition = isFirstSnack ? -SNACKBAR_HEIGHT / 2 : SNACKBAR_BOTTOM_OFFSET
@@ -113,7 +116,7 @@ export const Snackbar = memo(
 
     const containerAS = useAnimatedStyle(
       () => ({
-        bottom: bottomAV.value + theme.spacing.md,
+        bottom: bottomAV.value + theme.spacing.md + keyboardHeightAV.value,
         zIndex: withTiming(100 - snackbarIndexAV.value),
         // Animate shadow radius based on snackbar position in stack
         // - Starts at 16 for first snackbar and decreases by 2.5 for each subsequent one

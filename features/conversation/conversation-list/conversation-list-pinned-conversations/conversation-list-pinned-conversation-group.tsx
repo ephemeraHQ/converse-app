@@ -8,6 +8,7 @@ import { useGroupConversationContextMenuViewProps } from "@/features/conversatio
 import { IGroup } from "@/features/groups/group.types"
 import { useGroupName } from "@/features/groups/hooks/use-group-name"
 import { navigate } from "@/navigation/navigation.utils"
+import { captureError } from "@/utils/capture-error"
 import { ConversationListPinnedConversation } from "./conversation-list-pinned-conversation"
 import { PinnedConversationMessagePreview } from "./conversation-list-pinned-conversation-message-preview"
 
@@ -27,7 +28,7 @@ export const ConversationListPinnedConversationGroup = ({
   })
 
   const onPress = useCallback(() => {
-    navigate("Conversation", { xmtpConversationId: group.xmtpId })
+    navigate("Conversation", { xmtpConversationId: group.xmtpId }).catch(captureError)
   }, [group.xmtpId])
 
   const { groupName } = useGroupName({

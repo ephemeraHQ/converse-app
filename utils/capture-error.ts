@@ -1,7 +1,7 @@
 import { showSnackbar } from "@/components/snackbar/snackbar.service"
 import { ensureError, FeedbackError, GenericError } from "@/utils/error"
 import { logger } from "@/utils/logger"
-import { sentryTrackError } from "@/utils/sentry"
+import { sentryTrackError } from "./sentry/sentry-track-error"
 
 export async function captureError(
   error: unknown,
@@ -12,12 +12,10 @@ export async function captureError(
   try {
     const { extras } = options
 
-    if (__DEV__) {
-      if (extras) {
-        logger.error(error, extras)
-      } else {
-        logger.error(error)
-      }
+    if (extras) {
+      logger.error(error, extras)
+    } else {
+      logger.error(error)
     }
 
     if (error instanceof FeedbackError) {

@@ -42,3 +42,6 @@ export async function invalidateXmtpInboxIdFromEthAddressQuery(args: IStrictArgs
 export function getXmtpInboxIdFromEthAddressQueryData(args: IArgs) {
   return reactQueryClient.getQueryData(getXmtpInboxIdFromEthAddressQueryOptions(args).queryKey)
 }
+export function ensureXmtpInboxIdFromEthAddressQueryData(args: IArgs) {
+  return reactQueryClient.ensureQueryData(getXmtpInboxIdFromEthAddressQueryOptions(args))
+}

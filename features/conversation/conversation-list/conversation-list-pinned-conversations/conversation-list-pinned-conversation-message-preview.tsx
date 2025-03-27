@@ -1,7 +1,7 @@
 import { ViewStyle } from "react-native"
 import { AnimatedHStack, HStack } from "@/design-system/HStack"
 import { Text } from "@/design-system/Text"
-import { useMessagePlainText } from "@/features/conversation/conversation-list/hooks/use-message-plain-text"
+import { useMessageContentStringValue } from "@/features/conversation/conversation-list/hooks/use-message-content-string-value"
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme"
 import { captureError } from "@/utils/capture-error"
 import { IConversationMessage } from "../../conversation-chat/conversation-message/conversation-message.types"
@@ -15,7 +15,7 @@ export const PinnedConversationMessagePreview = (props: IPinnedConversationMessa
 
   const { themed, theme } = useAppTheme()
 
-  const textContent = useMessagePlainText(message)
+  const textContent = useMessageContentStringValue(message)
 
   if (!textContent) {
     captureError

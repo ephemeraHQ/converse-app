@@ -16,6 +16,10 @@ import {
   IConversationMessageText,
   IConversationMessageTextContent,
 } from "@/features/conversation/conversation-chat/conversation-message/conversation-message.types"
+import { hasProperty } from "@/utils/general"
+
+// Type-safe property keys
+export type KeyOf<T> = keyof T
 
 // Read receipt and group updates aren't "real" messages
 export function isAnActualMessage(message: IConversationMessage): message is IConversationMessage {
@@ -76,41 +80,68 @@ export function isMultiRemoteAttachmentMessage(
 export function messageContentIsStaticAttachment(
   content: IConversationMessageContent,
 ): content is IConversationMessageStaticAttachmentContent {
-  return content && typeof content === "object" && "attachment" in content
+  return (
+    hasProperty<IConversationMessageStaticAttachmentContent>(content, "filename") &&
+    !messageContentIsReply(content)
+  )
 }
 
 export function messageContentIsText(
   content: IConversationMessageContent,
 ): content is IConversationMessageTextContent {
-  return content && typeof content === "object" && "text" in content
+  return (
+    hasProperty<IConversationMessageTextContent>(content, "text") && !messageContentIsReply(content)
+  )
 }
 
 export function messageContentIsRemoteAttachment(
   content: IConversationMessageContent,
 ): content is IConversationMessageRemoteAttachmentContent {
-  return content && typeof content === "object" && "secret" in content && "url" in content
+  return (
+    hasProperty<IConversationMessageRemoteAttachmentContent>(content, "url") &&
+    !messageContentIsReply(content)
+  )
 }
 
 export function messageContentIsMultiRemoteAttachment(
   content: IConversationMessageContent,
 ): content is IConversationMessageMultiRemoteAttachmentContent {
-  return content && typeof content === "object" && "multiRemoteAttachment" in content
+  return (
+    hasProperty<IConversationMessageMultiRemoteAttachmentContent>(content, "attachments") &&
+    !messageContentIsReply(content)
+  )
 }
 
 export function messageContentIsReaction(
   content: IConversationMessageContent,
 ): content is IConversationMessageReactionContent {
-  return content && typeof content === "object" && "reaction" in content
+  return (
+    hasProperty<IConversationMessageReactionContent>(content, "schema") &&
+    hasProperty<IConversationMessageReactionContent>(content, "reference")
+  )
 }
 
 export function messageContentIsGroupUpdated(
   content: IConversationMessageContent,
 ): content is IConversationMessageGroupUpdatedContent {
-  return content && typeof content === "object" && "membersAdded" in content
+  return (
+    hasProperty<IConversationMessageGroupUpdatedContent>(content, "membersAdded") &&
+    !messageContentIsReply(content)
+  )
 }
 
 export function messageContentIsReply(
   content: IConversationMessageContent,
 ): content is IConversationMessageReplyContent {
-  return content && typeof content === "object" && "reply" in content
+  return hasProperty<IConversationMessageReplyContent>(content, "reference")
+}
+
+export function messageGroupUpdatedContentIsEmpty(
+  content: IConversationMessageGroupUpdatedContent,
+) {
+  return (
+    content.membersAdded.length === 0 &&
+    content.membersRemoved.length === 0 &&
+    content.metadataFieldsChanged.length === 0
+  )
 }

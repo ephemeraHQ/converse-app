@@ -7,7 +7,7 @@ import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.stor
 import { ConversationListItemSwipeable } from "@/features/conversation/conversation-list/conversation-list-item/conversation-list-item-swipeable/conversation-list-item-swipeable"
 import { useConversationIsUnread } from "@/features/conversation/conversation-list/hooks/use-conversation-is-unread"
 import { useDeleteGroup } from "@/features/conversation/conversation-list/hooks/use-delete-group"
-import { useMessagePlainText } from "@/features/conversation/conversation-list/hooks/use-message-plain-text"
+import { useMessageContentStringValue } from "@/features/conversation/conversation-list/hooks/use-message-content-string-value"
 import { useToggleReadStatus } from "@/features/conversation/conversation-list/hooks/use-toggle-read-status"
 import { useGroupQuery } from "@/features/groups/group.query"
 import { useGroupName } from "@/features/groups/hooks/use-group-name"
@@ -56,7 +56,7 @@ export const ConversationListItemGroup = memo(function ConversationListItemGroup
   // Subtitle
   const timestamp = group?.lastMessage?.sentNs ?? 0
   const timeToShow = getCompactRelativeTime(timestamp)
-  const messageText = useMessagePlainText(group?.lastMessage)
+  const messageText = useMessageContentStringValue(group?.lastMessage)
   const subtitle = timeToShow && messageText ? `${timeToShow} ${MIDDLE_DOT} ${messageText}` : ""
 
   const { toggleReadStatusAsync } = useToggleReadStatus({

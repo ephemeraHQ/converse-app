@@ -1,9 +1,9 @@
 import { IXmtpConversationId, IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import { queryOptions, skipToken } from "@tanstack/react-query"
-import { ensureConversationSyncAllQuery } from "@/features/conversation/queries/conversation-sync-all.query"
+import { refetchConversationSyncAllQuery } from "@/features/conversation/queries/conversation-sync-all.query"
 import { setConversationQueryData } from "@/features/conversation/queries/conversation.query"
 import { convertXmtpConversationToConvosConversation } from "@/features/conversation/utils/convert-xmtp-conversation-to-convos"
-import { getXmtpClientByInboxId } from "@/features/xmtp/xmtp-client/xmtp-client"
+import { getXmtpConversations } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-list"
 import { reactQueryClient } from "../../../utils/react-query/react-query.client"
 
 export type IUnknownConversationsQueryData = Awaited<
@@ -17,31 +17,17 @@ async function getUnknownConversationsQueryFn(args: { inboxId: IXmtpInboxId }) {
     throw new Error("InboxId is required")
   }
 
-  await ensureConversationSyncAllQuery({
+  await refetchConversationSyncAllQuery({
+    clientInboxId: inboxId,
+  })
+
+  const unknownConsentXmtpConversations = await getXmtpConversations({
     clientInboxId: inboxId,
     consentStates: ["unknown"],
   })
 
-  const client = await getXmtpClientByInboxId({
-    inboxId,
-  })
-
-  const xmtpConversations = await client.conversations.list(
-    {
-      isActive: true,
-      addedByInboxId: true,
-      name: true,
-      imageUrl: true,
-      consentState: true,
-      lastMessage: true,
-      description: true,
-    },
-    20, // For now we only fetch 20 until we have the right pagination system. At least people will be able to see their conversations
-    ["unknown"],
-  )
-
   const convosConversations = await Promise.all(
-    xmtpConversations.map(convertXmtpConversationToConvosConversation),
+    unknownConsentXmtpConversations.map(convertXmtpConversationToConvosConversation),
   )
 
   // For now conversations have all the same properties as one conversation

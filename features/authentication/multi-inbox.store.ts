@@ -3,9 +3,9 @@ import { logger } from "@utils/logger"
 import { create } from "zustand"
 import { createJSONStorage, persist, subscribeWithSelector } from "zustand/middleware"
 import { captureError } from "@/utils/capture-error"
-import { enhanceError } from "@/utils/error"
+import { GenericError } from "@/utils/error"
 import { IEthereumAddress } from "@/utils/evm/address"
-import { zustandMMKVStorage } from "@/utils/mmkv"
+import { zustandMMKVStorage } from "@/utils/zustand/zustand"
 
 export type CurrentSender = {
   ethereumAddress: IEthereumAddress
@@ -40,7 +40,7 @@ const initialState: IMultiInboxStoreState = {
 
 // Changing this will break existing users as the store won't be able to hydrate
 // So users will be logged out on new app load
-const STORE_NAME = "multi-inbox-store"
+const STORE_NAME = "multi-inbox-store-v1"
 
 // Helper to check if two senders are the same
 function isSameSender(a: CurrentSender, b: CurrentSender): boolean {
@@ -154,16 +154,17 @@ export const useMultiInboxStore = create<IMultiInboxStoreType>()(
         },
         onRehydrateStorage: () => (state, error) => {
           if (error) {
-            captureError(enhanceError(error, "Error during multi-inbox store hydration"))
-            return
+            captureError(
+              new GenericError({
+                error,
+                additionalMessage: "Error during multi-inbox store hydration",
+              }),
+            )
+          } else {
+            logger.debug(
+              `Multi-inbox store hydrated successfully: ${JSON.stringify(state, null, 2)}`,
+            )
           }
-          logger.debug(
-            `[useMultiInboxStore#onRehydrateStorage] State hydrated successfully: ${JSON.stringify(
-              state,
-              null,
-              2,
-            )}`,
-          )
         },
       },
     ),
@@ -181,7 +182,7 @@ export function getCurrentSender(): CurrentSender | undefined {
 export function getSafeCurrentSender(): CurrentSender {
   const currentSender = getCurrentSender()
   if (!currentSender) {
-    throw new Error("No current sender")
+    throw new Error("No current sender in getSafeCurrentSender")
   }
   return currentSender
 }
@@ -189,7 +190,7 @@ export function getSafeCurrentSender(): CurrentSender {
 export function useSafeCurrentSender(): CurrentSender {
   const currentSender = useCurrentSender()
   if (!currentSender) {
-    throw new Error("No current sender")
+    throw new Error("No current sender in useSafeCurrentSender")
   }
   return currentSender
 }

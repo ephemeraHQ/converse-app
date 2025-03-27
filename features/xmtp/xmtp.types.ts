@@ -71,6 +71,10 @@ export type IXmtpDecodedMessage =
   | IXmtpDecodedMultiRemoteAttachmentMessage
 
 // ===== Content Types =====
+/**
+ * NativeMessageContent is an object with specific fields for different content types
+ * Used for message content that will be sent directly to the XMTP SDK
+ */
 export type IXmtpDecodedMessageNativeContent = NativeMessageContent
 export type IXmtpTextContent = string
 export type IXmtpReactionContent = ReactionContent
@@ -102,6 +106,10 @@ export type IXmtpMessageDeliveryStatus =
 
 export const IXmtpMessageDeliveryStatusValues = MessageDeliveryStatus
 
-export type IXmtpConversationSendPayload = ConversationSendPayload<ISupportedXmtpCodecs>
+// We're not going to use strings as content types
+export type IXmtpConversationSendPayload = Exclude<
+  ConversationSendPayload<ISupportedXmtpCodecs>,
+  string
+>
 
 export type IXmtpMessageId = MessageId

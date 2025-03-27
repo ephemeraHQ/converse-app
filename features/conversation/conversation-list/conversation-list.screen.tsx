@@ -17,11 +17,13 @@ import {
   useGroupConversationContextMenuViewProps,
 } from "@/features/conversation/conversation-list/hooks/use-conversation-list-item-context-menu-props"
 import { usePinnedConversations } from "@/features/conversation/conversation-list/hooks/use-pinned-conversations"
-import { getConversationQueryData } from "@/features/conversation/queries/conversation.query"
+import { useConversationQuery } from "@/features/conversation/queries/conversation.query"
 import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group"
 import { isTempConversation } from "@/features/conversation/utils/is-temp-conversation"
 import { IDm } from "@/features/dm/dm.types"
 import { IGroup } from "@/features/groups/group.types"
+import { registerPushNotifications } from "@/features/notifications/notifications.service"
+import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 import { useMinimumLoadingTime } from "@/hooks/use-minimum-loading-time"
 import { NavigationParamList } from "@/navigation/navigation.types"
 import { $globalStyles } from "@/theme/styles"
@@ -31,7 +33,7 @@ import { ConversationListAwaitingRequests } from "./conversation-list-awaiting-r
 import { ConversationListEmpty } from "./conversation-list-empty"
 import { ConversationListStartNewConvoBanner } from "./conversation-list-start-new-convo-banner"
 import { useConversationListScreenHeader } from "./conversation-list.screen-header"
-import { useConversationListConversations } from "./use-conversation-list-conversations"
+import { useConversationListConversations } from "./hooks/use-conversation-list-conversations"
 
 type IConversationListProps = NativeStackScreenProps<NavigationParamList, "Chats">
 
@@ -49,6 +51,11 @@ export function ConversationListScreen(props: IConversationListProps) {
   const insets = useSafeAreaInsets()
 
   useConversationListScreenHeader()
+
+  // TODO, only request if we haven't yet.
+  useEffect(() => {
+    registerPushNotifications().catch(captureError)
+  }, [])
 
   // Let's prefetch the messages for all the conversations
   useEffect(() => {
@@ -93,35 +100,40 @@ export function ConversationListScreen(props: IConversationListProps) {
           ListEmptyComponent={<ConversationListEmpty />}
           ListHeaderComponent={<ListHeader />}
           onRefetch={handleRefresh}
-          onLayout={() => {}}
-          initialNumToRender={10} // 10 should be enough to cover the screen
-          layout={theme.animation.reanimatedLayoutSpringTransition}
           contentContainerStyle={{
-            flexGrow: 1, // For the empty state to be full screen
             // Little hack because we want ConversationListEmpty to be full screen when we have no conversations
             paddingBottom: conversationsIds && conversationsIds.length > 0 ? insets.bottom : 0,
           }}
-          renderConversation={({ item }) => {
-            const conversation = getConversationQueryData({
-              clientInboxId: currentSender.inboxId,
-              xmtpConversationId: item,
-            })
-
-            if (!conversation) {
-              return null
-            }
-
-            return isConversationGroup(conversation) ? (
-              <ConversationListItemGroupWrapper group={conversation} />
-            ) : (
-              <ConversationListItemDmWrapper dm={conversation} />
-            )
-          }}
+          renderConversation={({ item }) => <ConversationListItem xmtpConversationId={item} />}
         />
       )}
     </Screen>
   )
 }
+
+const ConversationListItem = memo(function ConversationListItem(props: {
+  xmtpConversationId: IXmtpConversationId
+}) {
+  const { xmtpConversationId } = props
+
+  const currentSender = useSafeCurrentSender()
+
+  const { data: conversation } = useConversationQuery({
+    clientInboxId: currentSender.inboxId,
+    xmtpConversationId,
+    caller: "ConversationListItem",
+  })
+
+  if (!conversation) {
+    return null
+  }
+
+  if (isConversationGroup(conversation)) {
+    return <ConversationListItemGroupWrapper group={conversation} />
+  }
+
+  return <ConversationListItemDmWrapper dm={conversation} />
+})
 
 const ConversationListItemDmWrapper = memo(function ConversationListItemDmWrapper(props: {
   dm: IDm

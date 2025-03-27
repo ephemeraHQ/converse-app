@@ -3,27 +3,39 @@ import { VStack } from "@design-system/VStack"
 import React, { memo, useCallback } from "react"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { ConversationComposerReplyPreview } from "@/features/conversation/conversation-chat/conversation-composer/conversation-composer-reply-preview"
+import { useConversationStore } from "@/features/conversation/conversation-chat/conversation.store-context"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { captureErrorWithToast } from "@/utils/capture-error"
 import { AddAttachmentButton } from "./conversation-composer-add-attachment-button"
 import { ConversationComposerAttachmentPreview } from "./conversation-composer-attachment-preview"
 import { SendButton } from "./conversation-composer-send-button"
 import { ConversationComposerTextInput } from "./conversation-composer-text-input"
-import { useConversationComposerSend } from "./use-conversation-composer-send"
+import {
+  useCreateConversationAndSend,
+  useSendToExistingConversation,
+} from "./use-conversation-composer-send"
 
 export const ConversationComposer = memo(function ConversationComposer() {
   const { theme } = useAppTheme()
   const insets = useSafeAreaInsets()
 
-  const { send } = useConversationComposerSend()
+  const conversationStore = useConversationStore()
+
+  const sendToExistingConversation = useSendToExistingConversation()
+  const createConversationAndSend = useCreateConversationAndSend()
 
   const handleSend = useCallback(async () => {
+    const { xmtpConversationId } = conversationStore.getState()
     try {
-      await send()
+      if (xmtpConversationId) {
+        await sendToExistingConversation()
+      } else {
+        await createConversationAndSend()
+      }
     } catch (error) {
       captureErrorWithToast(error, { message: "Failed to send message" })
     }
-  }, [send])
+  }, [sendToExistingConversation, createConversationAndSend, conversationStore])
 
   return (
     <VStack

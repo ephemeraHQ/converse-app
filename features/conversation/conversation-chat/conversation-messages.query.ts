@@ -1,14 +1,15 @@
-import { queryOptions, skipToken, useQuery } from "@tanstack/react-query"
-import { logger } from "@utils/logger"
+import { queryOptions, useQuery } from "@tanstack/react-query"
 import { isReactionMessage } from "@/features/conversation/conversation-chat/conversation-message/utils/conversation-message-assertions"
-import { ensureConversationSyncAllQuery } from "@/features/conversation/queries/conversation-sync-all.query"
 import { isTempConversation } from "@/features/conversation/utils/is-temp-conversation"
-import {
-  getXmtpConversationMessages,
-  isSupportedMessage,
-} from "@/features/xmtp/xmtp-messages/xmtp-messages"
+import { syncOneXmtpConversation } from "@/features/xmtp/xmtp-conversations/xmtp-conversations-sync"
+import { getXmtpConversationMessages } from "@/features/xmtp/xmtp-messages/xmtp-messages"
 import { IXmtpConversationId, IXmtpInboxId, IXmtpMessageId } from "@/features/xmtp/xmtp.types"
+import { Optional } from "@/types/general"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
+import {
+  prefetchReactQueryBetter,
+  refetchReactQueryBetter,
+} from "@/utils/react-query/react-query.helpers"
 import { getReactQueryKey } from "@/utils/react-query/react-query.utils"
 import { ensureConversationQueryData } from "../queries/conversation.query"
 import {
@@ -19,10 +20,16 @@ import { convertXmtpMessageToConvosMessage } from "./conversation-message/utils/
 
 export type ConversationMessagesQueryData = Awaited<ReturnType<typeof conversationMessagesQueryFn>>
 
-const conversationMessagesQueryFn = async (args: {
+type IArgs = {
   clientInboxId: IXmtpInboxId
   xmtpConversationId: IXmtpConversationId
-}) => {
+}
+
+type IArgsWithCaller = IArgs & {
+  caller: string
+}
+
+const conversationMessagesQueryFn = async (args: IArgs) => {
   const { clientInboxId, xmtpConversationId } = args
 
   if (!clientInboxId) {
@@ -43,17 +50,10 @@ const conversationMessagesQueryFn = async (args: {
     throw new Error("Conversation not found")
   }
 
-  // Do this instead
-  await ensureConversationSyncAllQuery({
+  await syncOneXmtpConversation({
     clientInboxId,
-    consentStates: ["allowed", "unknown", "denied"],
+    conversationId: conversation.xmtpId,
   })
-
-  // This seems slow
-  // await syncXmtpConversation({
-  //   clientInboxId,
-  //   conversationId: conversation.xmtpId,
-  // })
 
   const xmtpMessages = await getXmtpConversationMessages({
     clientInboxId,
@@ -61,37 +61,21 @@ const conversationMessagesQueryFn = async (args: {
     limit: 30, // Fetch limited messages for better performance until pagination is implemented
   })
 
-  const validMessages = xmtpMessages.filter(isSupportedMessage)
-
-  const convosMessages = validMessages.map(convertXmtpMessageToConvosMessage)
+  const convosMessages = xmtpMessages.map(convertXmtpMessageToConvosMessage)
 
   return processMessages({ newMessages: convosMessages })
 }
 
-export const useConversationMessagesQuery = (args: {
-  clientInboxId: IXmtpInboxId
-  xmtpConversationId: IXmtpConversationId
-  caller: string
-}) => {
+export const useConversationMessagesQuery = (args: IArgsWithCaller) => {
   return useQuery(getConversationMessagesQueryOptions(args))
 }
 
-export const getConversationMessagesQueryData = (args: {
-  clientInboxId: IXmtpInboxId
-  xmtpConversationId: IXmtpConversationId
-}) => {
+export const getConversationMessagesQueryData = (args: IArgs) => {
   return reactQueryClient.getQueryData(getConversationMessagesQueryOptions(args).queryKey)
 }
 
-export function refetchConversationMessages(args: {
-  clientInboxId: IXmtpInboxId
-  xmtpConversationId: IXmtpConversationId
-  caller: string
-}) {
-  logger.debug("[refetchConversationMessages] refetching messages")
-  return reactQueryClient.refetchQueries({
-    queryKey: getConversationMessagesQueryOptions(args).queryKey,
-  })
+export function refetchConversationMessagesQuery(args: IArgsWithCaller) {
+  return refetchReactQueryBetter(getConversationMessagesQueryOptions(args))
 }
 
 export const addMessageToConversationMessagesQueryData = (args: {
@@ -163,22 +147,12 @@ export function removeMessageToConversationMessagesQueryData(args: {
   )
 }
 
-export const prefetchConversationMessages = async (args: {
-  clientInboxId: IXmtpInboxId
-  xmtpConversationId: IXmtpConversationId
-  caller: string
-}) => {
-  return reactQueryClient.prefetchQuery(getConversationMessagesQueryOptions(args))
+export const prefetchConversationMessages = async (args: IArgsWithCaller) => {
+  return prefetchReactQueryBetter(getConversationMessagesQueryOptions(args))
 }
 
-export function getConversationMessagesQueryOptions(args: {
-  clientInboxId: IXmtpInboxId
-  xmtpConversationId: IXmtpConversationId
-  caller?: string // Optional because we don't want functions that just get or set query data to have to pass caller
-}) {
+export function getConversationMessagesQueryOptions(args: Optional<IArgsWithCaller, "caller">) {
   const { clientInboxId, xmtpConversationId, caller } = args
-
-  const enabled = Boolean(xmtpConversationId) && !isTempConversation(xmtpConversationId)
 
   return queryOptions({
     meta: {
@@ -189,22 +163,17 @@ export function getConversationMessagesQueryOptions(args: {
       clientInboxId,
       xmtpConversationId,
     }),
-    queryFn: enabled
-      ? () =>
-          conversationMessagesQueryFn({
-            clientInboxId,
-            xmtpConversationId,
-          })
-      : skipToken,
-    enabled,
+    queryFn: async () => {
+      return conversationMessagesQueryFn({
+        clientInboxId,
+        xmtpConversationId,
+      })
+    },
+    enabled: Boolean(xmtpConversationId) && !isTempConversation(xmtpConversationId),
   })
 }
 
-export function setConversationMessagesQueryData(args: {
-  clientInboxId: IXmtpInboxId
-  xmtpConversationId: IXmtpConversationId
-  data: IMessageAccumulator
-}) {
+export function setConversationMessagesQueryData(args: IArgs & { data: IMessageAccumulator }) {
   const { clientInboxId, xmtpConversationId, data } = args
   return reactQueryClient.setQueryData(
     getConversationMessagesQueryOptions({ clientInboxId, xmtpConversationId }).queryKey,
@@ -212,10 +181,7 @@ export function setConversationMessagesQueryData(args: {
   )
 }
 
-export function invalidateConversationMessagesQuery(args: {
-  clientInboxId: IXmtpInboxId
-  xmtpConversationId: IXmtpConversationId
-}) {
+export function invalidateConversationMessagesQuery(args: IArgs) {
   const { clientInboxId, xmtpConversationId } = args
   return reactQueryClient.invalidateQueries(
     getConversationMessagesQueryOptions({ clientInboxId, xmtpConversationId }),

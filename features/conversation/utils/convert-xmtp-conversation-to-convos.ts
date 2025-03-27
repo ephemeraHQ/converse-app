@@ -13,10 +13,18 @@ export async function convertXmtpConversationToConvosConversation(
 ): Promise<IConversation> {
   // Group conversation
   if (isXmtpConversationGroup(xmtpConversation)) {
-    const [members, creatorInboxId, consentState] = await Promise.all([
+    const [members, creatorInboxId, consentState, lastMessage] = await Promise.all([
       xmtpConversation.members(),
       xmtpConversation.creatorInboxId() as unknown as IXmtpInboxId,
       xmtpConversation.consentState(),
+      xmtpConversation.lastMessage ||
+        xmtpConversation
+          .messages({
+            limit: 1,
+          })
+          .then((messages) => {
+            return messages[0]
+          }),
     ])
 
     const addedByInboxId = xmtpConversation.addedByInboxId as unknown as IXmtpInboxId
@@ -36,16 +44,22 @@ export async function convertXmtpConversationToConvosConversation(
       creatorInboxId: creatorInboxId,
       addedByInboxId,
       createdAt: xmtpConversation.createdAt,
-      lastMessage: xmtpConversation.lastMessage
-        ? convertXmtpMessageToConvosMessage(xmtpConversation.lastMessage)
-        : undefined,
+      lastMessage: lastMessage ? convertXmtpMessageToConvosMessage(lastMessage) : undefined,
     } satisfies IGroup
   }
 
   // DM conversations
-  const [peerInboxId, consentState] = await Promise.all([
+  const [peerInboxId, consentState, lastMessage] = await Promise.all([
     xmtpConversation.peerInboxId() as unknown as IXmtpInboxId,
     xmtpConversation.consentState(),
+    xmtpConversation.lastMessage ||
+      xmtpConversation
+        .messages({
+          limit: 1,
+        })
+        .then((messages) => {
+          return messages[0]
+        }),
   ])
 
   return {
@@ -55,8 +69,6 @@ export async function convertXmtpConversationToConvosConversation(
     createdAt: xmtpConversation.createdAt,
     xmtpTopic: xmtpConversation.topic,
     consentState: convertConsentStateToXmtpConsentState(consentState),
-    lastMessage: xmtpConversation.lastMessage
-      ? convertXmtpMessageToConvosMessage(xmtpConversation.lastMessage)
-      : undefined,
+    lastMessage: lastMessage ? convertXmtpMessageToConvosMessage(lastMessage) : undefined,
   } satisfies IDm
 }

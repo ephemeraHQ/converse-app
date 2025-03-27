@@ -1,9 +1,15 @@
 import * as SplashScreen from "expo-splash-screen"
-import logger from "../logger"
+import { captureError } from "@/utils/capture-error"
+import { GenericError } from "@/utils/error"
 
 export function preventSplashScreenAutoHide() {
   return SplashScreen.preventAutoHideAsync().catch((e) => {
-    logger.error("Error preventing splash screen from auto hiding", e)
+    captureError(
+      new GenericError({
+        error: e,
+        additionalMessage: "Error preventing splash screen from auto hiding",
+      }),
+    )
     /* reloading the app might trigger some race conditions, ignore them */
   })
 }

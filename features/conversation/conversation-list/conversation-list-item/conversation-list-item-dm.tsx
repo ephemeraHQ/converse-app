@@ -9,7 +9,7 @@ import { RestoreSwipeableAction } from "@/features/conversation/conversation-lis
 import { useConversationIsDeleted } from "@/features/conversation/conversation-list/hooks/use-conversation-is-deleted"
 import { useConversationIsUnread } from "@/features/conversation/conversation-list/hooks/use-conversation-is-unread"
 import { useDeleteDm } from "@/features/conversation/conversation-list/hooks/use-delete-dm"
-import { useMessagePlainText } from "@/features/conversation/conversation-list/hooks/use-message-plain-text"
+import { useMessageContentStringValue } from "@/features/conversation/conversation-list/hooks/use-message-content-string-value"
 import { useRestoreConversation } from "@/features/conversation/conversation-list/hooks/use-restore-conversation"
 import { useToggleReadStatus } from "@/features/conversation/conversation-list/hooks/use-toggle-read-status"
 import { useDmQuery } from "@/features/dm/dm.query"
@@ -18,7 +18,7 @@ import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 import { useFocusRerender } from "@/hooks/use-focus-rerender"
 import { navigate } from "@/navigation/navigation.utils"
 import { useAppTheme } from "@/theme/use-app-theme"
-import { captureErrorWithToast } from "@/utils/capture-error"
+import { captureError, captureErrorWithToast } from "@/utils/capture-error"
 import { ConversationListItem } from "./conversation-list-item"
 import { DeleteSwipeableAction } from "./conversation-list-item-swipeable/conversation-list-item-swipeable-delete-action"
 import { ToggleUnreadSwipeableAction } from "./conversation-list-item-swipeable/conversation-list-item-swipeable-toggle-read-action"
@@ -49,7 +49,7 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
   // Status hooks
   const { isUnread } = useConversationIsUnread({ xmtpConversationId })
   const { isDeleted } = useConversationIsDeleted({ xmtpConversationId })
-  const messageText = useMessagePlainText(dm?.lastMessage)
+  const messageText = useMessageContentStringValue(dm?.lastMessage)
 
   // Action hooks
   const deleteDm = useDeleteDm({ xmtpConversationId })
@@ -74,7 +74,7 @@ export const ConversationListItemDm = memo(function ConversationListItemDm({
 
   // Handlers
   const onPress = useCallback(() => {
-    navigate("Conversation", { xmtpConversationId })
+    navigate("Conversation", { xmtpConversationId }).catch(captureError)
   }, [xmtpConversationId])
 
   const onLeftSwipe = useCallback(async () => {

@@ -1,5 +1,7 @@
 import { queryOptions, useQuery } from "@tanstack/react-query"
 import * as Linking from "expo-linking"
+import { captureError } from "@/utils/capture-error"
+import { GenericError } from "@/utils/error"
 import logger from "@/utils/logger"
 import { ISupportedWallet, supportedWallets } from "./supported-wallets"
 
@@ -38,15 +40,23 @@ async function getInstalledWallets(args: { supportedWallets: ISupportedWallet[] 
 
           return canOpen
         } catch (error) {
-          logger.error(
-            `[getInstalledWallets] Error checking if ${wallet.name} is installed: ${error}`,
+          captureError(
+            new GenericError({
+              error,
+              additionalMessage: `Error checking if ${wallet.name} is installed`,
+            }),
           )
           return false
         }
       }),
     )
   } catch (error) {
-    logger.error(`[getInstalledWallets] Error checking installed wallets: ${error}`)
+    captureError(
+      new GenericError({
+        error,
+        additionalMessage: "Error checking installed wallets",
+      }),
+    )
     installedWalletChecks = []
   }
 

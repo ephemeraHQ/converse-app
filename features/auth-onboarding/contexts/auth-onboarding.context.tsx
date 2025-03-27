@@ -27,7 +27,6 @@ type IAuthOnboardingContextType = {
   user: PrivyUser | null
   login: () => Promise<void>
   signup: () => Promise<void>
-  restart: () => void
 }
 
 type IAuthOnboardingContextProps = {
@@ -70,6 +69,7 @@ export const AuthOnboardingContextProvider = (props: IAuthOnboardingContextProps
       if (clientRef.current) {
         return clientRef.current
       }
+      // eslint-disable-next-line custom-plugin/require-promise-error-handling
       await new Promise((resolve) => setTimeout(resolve, 100))
     }
     throw new Error("Timeout waiting for smart wallet client")
@@ -81,24 +81,18 @@ export const AuthOnboardingContextProvider = (props: IAuthOnboardingContextProps
 
       // Step 1: Passkey login
       authLogger.debug(`[Passkey Login] Starting passkey authentication`)
-      const { data: user, error: loginError } = await tryCatch(
+
+      const { data: privyUser, error: passkeyLoginError } = await tryCatch(
         privyLoginWithPasskey({
           relyingParty: RELYING_PARTY,
         }),
       )
 
-      if (loginError) {
-        if (
-          loginError.message.includes("AuthenticationServices.AuthorizationError error 1001") ||
-          loginError.message.includes("UserCancelled")
-        ) {
-          return
-        }
-
-        throw loginError
+      if (passkeyLoginError) {
+        throw passkeyLoginError
       }
 
-      if (!user) {
+      if (!privyUser) {
         throw new Error("Passkey login failed")
       }
 
@@ -141,14 +135,26 @@ export const AuthOnboardingContextProvider = (props: IAuthOnboardingContextProps
 
       await hydrateAuth()
     } catch (error) {
+      logout({ caller: "AuthContextProvider.login" }).catch(captureError)
       useAuthOnboardingStore.getState().actions.reset()
-      captureErrorWithToast(error, {
-        message: "Failed to login with passkey",
-      })
+      if (
+        error instanceof Error &&
+        (error.message.includes("UserCancelled") ||
+          // Happens when we also cancel the passkey login
+          error.message.includes(
+            "(com.apple.AuthenticationServices.AuthorizationError error 1001.)",
+          ))
+      ) {
+        // User cancelled the passkey login
+      } else {
+        captureErrorWithToast(error, {
+          message: "Failed to login with passkey",
+        })
+      }
     } finally {
       useAuthOnboardingStore.getState().actions.setIsProcessingWeb3Stuff(false)
     }
-  }, [privyLoginWithPasskey])
+  }, [privyLoginWithPasskey, logout])
 
   const signup = useCallback(async () => {
     try {
@@ -161,13 +167,6 @@ export const AuthOnboardingContextProvider = (props: IAuthOnboardingContextProps
       )
 
       if (signupError) {
-        if (
-          signupError.message.includes("AuthenticationServices.AuthorizationError error 1001") ||
-          signupError.message.includes("UserCancelled")
-        ) {
-          return
-        }
-
         throw signupError
       }
 
@@ -219,20 +218,28 @@ export const AuthOnboardingContextProvider = (props: IAuthOnboardingContextProps
         inboxId: xmtpClient.inboxId as IXmtpInboxId,
       })
     } catch (error) {
+      logout({ caller: "AuthContextProvider.signup" }).catch(captureError)
       useAuthOnboardingStore.getState().actions.reset()
-      captureErrorWithToast(error, {
-        message: "Failed to sign up with passkey",
-      })
+      if (
+        error instanceof Error &&
+        (error.message.includes("UserCancelled") ||
+          // Happens when we also cancel the passkey registration
+          error.message.includes(
+            "(com.apple.AuthenticationServices.AuthorizationError error 1001.)",
+          ))
+      ) {
+        // User cancelled the passkey registration
+      } else {
+        captureErrorWithToast(error, {
+          message: "Failed to sign up with passkey",
+        })
+      }
     } finally {
       useAuthOnboardingStore.getState().actions.setIsProcessingWeb3Stuff(false)
     }
-  }, [createEmbeddedWallet, privySignupWithPasskey])
+  }, [createEmbeddedWallet, privySignupWithPasskey, logout])
 
-  const restart = useCallback(() => {
-    logout({ caller: "AuthContextProvider.restart" }).catch(captureError)
-  }, [logout])
-
-  const value = useMemo(() => ({ login, signup, restart, user }), [login, signup, restart, user])
+  const value = useMemo(() => ({ login, signup, user }), [login, signup, user])
 
   return <AuthOnboardingContext.Provider value={value}>{children}</AuthOnboardingContext.Provider>
 }

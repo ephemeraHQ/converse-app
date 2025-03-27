@@ -1,9 +1,12 @@
 import { useCallback } from "react"
-import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
+import {
+  getSafeCurrentSender,
+  useSafeCurrentSender,
+} from "@/features/authentication/multi-inbox.store"
 import { getConversationMetadataQueryData } from "@/features/conversation/conversation-metadata/conversation-metadata.query"
 import { useMarkConversationAsRead } from "@/features/conversation/hooks/use-mark-conversation-as-read"
 import { useMarkConversationAsUnread } from "@/features/conversation/hooks/use-mark-conversation-as-unread"
-import { getConversationQueryData } from "@/features/conversation/queries/conversation.query"
+import { useConversationQuery } from "@/features/conversation/queries/conversation.query"
 import { conversationIsUnreadForInboxId } from "@/features/conversation/utils/conversation-is-unread-by-current-account"
 import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 
@@ -19,14 +22,22 @@ export const useToggleReadStatus = ({ xmtpConversationId }: UseToggleReadStatusP
     xmtpConversationId,
   })
 
+  const currentSender = useSafeCurrentSender()
+
+  const { data: conversation } = useConversationQuery({
+    clientInboxId: currentSender.inboxId,
+    xmtpConversationId,
+    caller: "useToggleReadStatus",
+  })
+
   const toggleReadStatusAsync = useCallback(async () => {
     const currentSender = getSafeCurrentSender()
 
+    if (!conversation) {
+      throw new Error("Conversation not found")
+    }
+
     const conversationData = getConversationMetadataQueryData({
-      clientInboxId: currentSender.inboxId,
-      xmtpConversationId,
-    })
-    const conversation = getConversationQueryData({
       clientInboxId: currentSender.inboxId,
       xmtpConversationId,
     })
@@ -46,7 +57,7 @@ export const useToggleReadStatus = ({ xmtpConversationId }: UseToggleReadStatusP
     } else {
       await markAsUnreadAsync()
     }
-  }, [markAsReadAsync, markAsUnreadAsync, xmtpConversationId])
+  }, [markAsReadAsync, markAsUnreadAsync, xmtpConversationId, conversation])
 
   return { toggleReadStatusAsync }
 }

@@ -1,19 +1,19 @@
 import { MutationOptions, useMutation } from "@tanstack/react-query"
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
-import { markConversationMetadataAsRead } from "@/features/conversation/conversation-metadata/conversation-metadata.api"
+import {
+  IConversationMetadata,
+  markConversationMetadataAsRead,
+} from "@/features/conversation/conversation-metadata/conversation-metadata.api"
 import {
   getConversationMetadataQueryData,
   updateConversationMetadataQueryData,
 } from "@/features/conversation/conversation-metadata/conversation-metadata.query"
 import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
-import { formatDateForApi } from "@/utils/api/api.utils"
+import { formatDateForApi } from "@/utils/convos-api/convos-api.utils"
 
 // Define the type for the mutation context
 type MarkAsReadContext = {
-  previousData: {
-    readUntil?: string
-    unread?: boolean
-  } | null
+  previousData: IConversationMetadata | undefined
 }
 
 export function getMarkConversationAsReadMutationOptions(args: {
@@ -50,14 +50,8 @@ export function getMarkConversationAsReadMutationOptions(args: {
         },
       })
 
-      // Extract only the fields we need for rollback
       return {
-        previousData: previousData
-          ? {
-              readUntil: previousData.readUntil,
-              unread: previousData.unread,
-            }
-          : null,
+        previousData,
       }
     },
     onError: (error, _, context) => {

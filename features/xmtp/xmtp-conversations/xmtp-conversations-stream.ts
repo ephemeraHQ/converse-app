@@ -4,7 +4,7 @@ import { getXmtpClientByInboxId } from "../xmtp-client/xmtp-client"
 
 export async function streamConversations(args: {
   inboxId: IXmtpInboxId
-  onNewConversation: (conversation: IXmtpConversationWithCodecs) => void | Promise<void>
+  onNewConversation: (conversation: IXmtpConversationWithCodecs) => Promise<void>
 }) {
   const { inboxId, onNewConversation } = args
 
@@ -14,9 +14,7 @@ export async function streamConversations(args: {
 
   xmtpLogger.debug(`Started streaming conversations for ${inboxId}`)
 
-  await client.conversations.stream(async (conversation) => {
-    onNewConversation(conversation)
-  })
+  await client.conversations.stream(onNewConversation)
 }
 
 export async function stopStreamingConversations(args: { inboxId: IXmtpInboxId }) {

@@ -1,7 +1,7 @@
 import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
-import { zustandMMKVStorage } from "@utils/mmkv"
 import { createStore, useStore } from "zustand"
 import { createJSONStorage, persist, subscribeWithSelector } from "zustand/middleware"
+import { zustandMMKVStorage } from "@/utils/zustand/zustand"
 
 type IProfileMeStoreState = {
   editMode: boolean

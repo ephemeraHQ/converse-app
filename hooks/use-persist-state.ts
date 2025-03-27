@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { captureError } from "@/utils/capture-error"
-import storage from "@/utils/mmkv"
+import { storage } from "@/utils/storage/storage"
 
 export const usePersistState = (key: string) => {
   // Initialize state directly from storage

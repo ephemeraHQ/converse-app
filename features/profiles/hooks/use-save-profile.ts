@@ -7,6 +7,7 @@ import {
   setProfileQueryData,
 } from "@/features/profiles/profiles.query"
 import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
+import { captureError } from "@/utils/capture-error"
 
 type SaveProfileArgs = {
   profile: ProfileInput
@@ -64,7 +65,9 @@ export function useSaveProfile() {
     },
     onSettled: (_, __, variables) => {
       // Always invalidate the profile query to ensure fresh data
-      invalidateProfileQuery({ xmtpId: variables.inboxId })
+      invalidateProfileQuery({ xmtpId: variables.inboxId, caller: "useSaveProfile" }).catch(
+        captureError,
+      )
     },
   })
 

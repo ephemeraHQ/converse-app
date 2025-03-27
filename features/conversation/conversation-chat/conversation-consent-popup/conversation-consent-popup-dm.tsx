@@ -4,7 +4,6 @@ import { showActionSheet } from "@/components/action-sheet"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { useAllowDmMutation } from "@/features/consent/use-allow-dm.mutation"
 import { useDenyDmMutation } from "@/features/consent/use-deny-dm.mutation"
-import { getConversationQueryData } from "@/features/conversation/queries/conversation.query"
 import { useDmQuery } from "@/features/dm/dm.query"
 import { useRouter } from "@/navigation/use-navigation"
 import { captureErrorWithToast } from "@/utils/capture-error"
@@ -36,15 +35,6 @@ export function ConversationConsentPopupDm() {
       throw new Error("Dm not found")
     }
 
-    const conversation = getConversationQueryData({
-      clientInboxId: currentSenderInboxId,
-      xmtpConversationId,
-    })
-
-    if (!conversation) {
-      throw new Error("Conversation not found")
-    }
-
     showActionSheet({
       options: {
         options: [translate("Delete"), translate("Cancel")],
@@ -68,21 +58,12 @@ export function ConversationConsentPopupDm() {
         }
       },
     })
-  }, [navigation, denyDmConsentAsync, dm, xmtpConversationId, currentSenderInboxId])
+  }, [navigation, denyDmConsentAsync, dm, xmtpConversationId])
 
   const handleAccept = useCallback(async () => {
     try {
       if (!dm) {
         throw new Error("Dm not found")
-      }
-
-      const conversation = getConversationQueryData({
-        clientInboxId: currentSenderInboxId,
-        xmtpConversationId,
-      })
-
-      if (!conversation) {
-        throw new Error("Conversation not found")
       }
 
       await allowDmConsentAsync({
@@ -93,7 +74,7 @@ export function ConversationConsentPopupDm() {
         message: `Error consenting`,
       })
     }
-  }, [allowDmConsentAsync, dm, xmtpConversationId, currentSenderInboxId])
+  }, [allowDmConsentAsync, dm, xmtpConversationId])
 
   return (
     <ConversationConsentPopupContainer>

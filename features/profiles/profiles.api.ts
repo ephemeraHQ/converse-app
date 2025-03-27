@@ -1,7 +1,7 @@
 import { z } from "zod"
 import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
-import { api } from "@/utils/api/api"
 import { captureError } from "@/utils/capture-error"
+import { convosApi } from "@/utils/convos-api/convos-api-instance"
 import {
   ClaimProfileResponseSchema,
   ConvosProfileForInboxSchema,
@@ -87,7 +87,7 @@ export const updateProfile = async (args: { xmtpId: string; updates: ProfileUpda
     const validatedUpdates = ProfileUpdateRequestSchema.parse(updates)
 
     // Make the API call
-    const { data } = await api.put(`/api/v1/profiles/${xmtpId}`, validatedUpdates)
+    const { data } = await convosApi.put(`/api/v1/profiles/${xmtpId}`, validatedUpdates)
     return data
   } catch (error) {
     throw error
@@ -97,7 +97,7 @@ export const updateProfile = async (args: { xmtpId: string; updates: ProfileUpda
 export const fetchProfile = async (args: { xmtpId: IXmtpInboxId }) => {
   const { xmtpId } = args
 
-  const { data } = await api.get<IConvosProfileForInbox>(`/api/v1/profiles/${xmtpId}`)
+  const { data } = await convosApi.get<IConvosProfileForInbox>(`/api/v1/profiles/${xmtpId}`)
 
   const result = ConvosProfileForInboxSchema.safeParse(data)
   if (!result.success) {
@@ -112,7 +112,7 @@ export const fetchAllProfilesForUser = async (args: {
 }): Promise<IConvosProfileForInbox[]> => {
   const { convosUserId } = args
 
-  const { data } = await api.get(`/api/v1/profiles/user/${convosUserId}`)
+  const { data } = await convosApi.get(`/api/v1/profiles/user/${convosUserId}`)
 
   const result = z.array(ConvosProfileForInboxSchema).safeParse(data)
   if (!result.success) {
@@ -126,7 +126,7 @@ export const claimProfile = async (args: { profile: ClaimProfileRequest }) => {
   const { profile } = args
 
   try {
-    const { data } = await api.post("/api/profile/username", profile)
+    const { data } = await convosApi.post("/api/profile/username", profile)
     return ClaimProfileResponseSchema.parse(data)
   } catch (error) {
     throw error

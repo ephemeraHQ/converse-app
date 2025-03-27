@@ -151,6 +151,7 @@ export default (): ExpoConfig => {
         NSAppTransportSecurity: {
           NSAllowsLocalNetworking: true, // Not sure why
         },
+        UIBackgroundModes: ["remote-notification"],
       },
     },
     android: {
@@ -222,7 +223,12 @@ export default (): ExpoConfig => {
       ],
     },
     plugins: [
-      ["expo-notifications"],
+      [
+        "expo-notifications",
+        {
+          enableBackgroundRemoteNotifications: true,
+        },
+      ],
       ["expo-secure-store"],
       [
         "expo-local-authentication",

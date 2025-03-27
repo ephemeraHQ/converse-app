@@ -44,6 +44,7 @@ export async function searchExistingGroupsByGroupMembers(args: {
           ...otherMembersInboxIds.map(async (inboxId) => {
             const profile = await ensureProfileQueryData({
               xmtpId: inboxId,
+              caller: "SearchExistingGroupsByGroupMembers",
             })
 
             if (matchSorter([profile.name, profile.username], searchQuery).length > 0) {

@@ -1,4 +1,4 @@
-import { conversationMessages, findMessage } from "@xmtp/react-native-sdk"
+import { conversationMessages, findMessage, processMessage } from "@xmtp/react-native-sdk"
 import { config } from "@/config"
 import {
   ISupportedXmtpCodecs,
@@ -28,12 +28,21 @@ import {
   IXmtpMessageId,
 } from "../xmtp.types"
 
-export function isSupportedMessage(message: IXmtpDecodedMessage) {
+function isSupportedXmtpMessage(message: IXmtpDecodedMessage) {
   if (isXmtpReadReceiptContentType(message.contentTypeId)) {
     return false
   }
 
   return true
+}
+
+function xmtpMessageGroupUpdatedContentIsEmpty(message: IXmtpDecodedGroupUpdatedMessage) {
+  const content = message.content()
+  return (
+    content.membersAdded.length === 0 &&
+    content.membersRemoved.length === 0 &&
+    content.metadataFieldsChanged.length === 0
+  )
 }
 
 export async function getXmtpConversationMessages(args: {
@@ -67,7 +76,22 @@ export async function getXmtpConversationMessages(args: {
       )
     }
 
-    return messages
+    return messages.filter((message) => {
+      // Shouldn't need this but just to make sure
+      if (!isSupportedXmtpMessage(message)) {
+        return false
+      }
+
+      // For some reason, XMTP returns group updated messages with empty content...
+      if (
+        isXmtpGroupUpdatedContentType(message.contentTypeId) &&
+        xmtpMessageGroupUpdatedContentIsEmpty(message as IXmtpDecodedGroupUpdatedMessage)
+      ) {
+        return false
+      }
+
+      return true
+    })
   } catch (error) {
     throw new XMTPError({
       error,
@@ -104,6 +128,40 @@ export async function getXmtpConversationMessage(args: {
     throw new XMTPError({
       error,
       additionalMessage: `Error finding message ${messageId}`,
+    })
+  }
+}
+
+export async function decryptXmtpMessage(args: {
+  encryptedMessage: string
+  xmtpConversationId: IXmtpConversationId
+  clientInboxId: IXmtpInboxId
+}) {
+  const { encryptedMessage, xmtpConversationId, clientInboxId } = args
+
+  try {
+    const installationId = await ensureXmtpInstallationQueryData({
+      inboxId: clientInboxId,
+    })
+
+    const beforeMs = new Date().getTime()
+    const message = await processMessage(installationId, xmtpConversationId, encryptedMessage)
+    const afterMs = new Date().getTime()
+
+    const timeDiffMs = afterMs - beforeMs
+    if (timeDiffMs > config.xmtp.maxMsUntilLogError) {
+      captureError(
+        new XMTPError({
+          error: new Error(`Decrypting message took ${timeDiffMs}ms`),
+        }),
+      )
+    }
+
+    return message
+  } catch (error) {
+    throw new XMTPError({
+      error,
+      additionalMessage: `Error decrypting message for conversation ${xmtpConversationId}`,
     })
   }
 }

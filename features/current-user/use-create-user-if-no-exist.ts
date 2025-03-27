@@ -16,7 +16,7 @@ import { fetchCurrentUser } from "./current-user-api"
  * This handles edge cases like app closure during onboarding
  */
 export function useCreateUserIfNoExist() {
-  const { mutateAsync: createUser } = useCreateUserMutation()
+  const { mutateAsync: createUserAsync } = useCreateUserMutation()
 
   const { user: privyUser } = usePrivy()
   const { smartWalletClient } = useSmartWalletClient()
@@ -76,7 +76,7 @@ export function useCreateUserIfNoExist() {
               }
 
               // User doesn't exist in the backend, let's create it!
-              await createUser({
+              await createUserAsync({
                 inboxId: currentUser.inboxId,
                 privyUserId: privyUser.id,
                 smartContractWalletAddress: smartWalletClient.account.address as IEthereumAddress,
@@ -98,7 +98,7 @@ export function useCreateUserIfNoExist() {
     return () => {
       unsubscribe()
     }
-  }, [createUser, privyUser, smartWalletClient])
+  }, [createUserAsync, privyUser, smartWalletClient])
 }
 
 const firstNames = [

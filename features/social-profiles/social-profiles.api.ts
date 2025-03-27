@@ -1,6 +1,6 @@
 import { z } from "zod"
-import { api } from "@/utils/api/api"
 import { captureError } from "@/utils/capture-error"
+import { convosApi } from "@/utils/convos-api/convos-api-instance"
 import { IEthereumAddress } from "@/utils/evm/address"
 
 // Define the profile type enum to match backend
@@ -62,7 +62,9 @@ export type ISocialProfilesResponse = z.infer<typeof SocialProfilesResponseSchem
 export async function fetchSocialProfilesForAddress(args: { ethAddress: string }) {
   const { ethAddress } = args
 
-  const { data } = await api.get<ISocialProfilesResponse>(`/api/v1/lookup/address/${ethAddress}`)
+  const { data } = await convosApi.get<ISocialProfilesResponse>(
+    `/api/v1/lookup/address/${ethAddress}`,
+  )
 
   const response = SocialProfilesResponseSchema.safeParse(data)
 

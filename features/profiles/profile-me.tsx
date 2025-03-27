@@ -21,6 +21,7 @@ import { useAddPfp } from "@/hooks/use-add-pfp"
 import { translate } from "@/i18n"
 import { useRouter } from "@/navigation/use-navigation"
 import { useAppTheme } from "@/theme/use-app-theme"
+import { captureErrorWithToast } from "@/utils/capture-error"
 import { useCurrentSender } from "../authentication/multi-inbox.store"
 
 export function ProfileMe(props: { inboxId: IXmtpInboxId }) {
@@ -39,7 +40,7 @@ export function ProfileMe(props: { inboxId: IXmtpInboxId }) {
 
   const isMyProfile = useCurrentSender()?.inboxId === inboxId
 
-  const { data: profile } = useProfileQuery({ xmtpId: inboxId })
+  const { data: profile } = useProfileQuery({ xmtpId: inboxId, caller: "ProfileMe" })
 
   // Set up the screen header with edit functionality
   useProfileMeScreenHeader({ inboxId })
@@ -182,7 +183,7 @@ const EditableUsernameInput = memo(function EditableUsernameInput({
 }) {
   const { theme } = useAppTheme()
   const profileMeStore = useProfileMeStore(inboxId)
-  const { data: profile } = useProfileQuery({ xmtpId: inboxId })
+  const { data: profile } = useProfileQuery({ xmtpId: inboxId, caller: "ProfileMe" })
 
   const usernameDefaultTextValue = profile?.username || ""
 
@@ -228,7 +229,7 @@ const EditableDescriptionInput = memo(function EditableDescriptionInput({
 }) {
   const { theme } = useAppTheme()
   const profileMeStore = useProfileMeStore(inboxId)
-  const { data: profile } = useProfileQuery({ xmtpId: inboxId })
+  const { data: profile } = useProfileQuery({ xmtpId: inboxId, caller: "ProfileMe" })
 
   const descriptionDefaultTextValue = profile?.description || ""
 
@@ -259,7 +260,7 @@ const EditableProfileContactCardAvatar = memo(function EditableProfileContactCar
 }) {
   const { addPFP, asset, isUploading } = useAddPfp()
   const profileMeStore = useProfileMeStore(inboxId)
-  const { data: profile } = useProfileQuery({ xmtpId: inboxId })
+  const { data: profile } = useProfileQuery({ xmtpId: inboxId, caller: "ProfileMe" })
   const storeAvatar = useProfileMeStoreValue(inboxId, (state) => state.avatarUri)
 
   // Priority: local asset (during upload) > store avatar > profile avatar
@@ -270,9 +271,15 @@ const EditableProfileContactCardAvatar = memo(function EditableProfileContactCar
   }, [isUploading, profileMeStore])
 
   const addAvatar = useCallback(async () => {
-    const url = await addPFP()
-    if (url) {
-      profileMeStore.getState().actions.setAvatarUri(url)
+    try {
+      const url = await addPFP()
+      if (url) {
+        profileMeStore.getState().actions.setAvatarUri(url)
+      }
+    } catch (error) {
+      captureErrorWithToast(error, {
+        message: "Failed to add avatar",
+      })
     }
   }, [addPFP, profileMeStore])
 

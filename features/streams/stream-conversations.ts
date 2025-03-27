@@ -36,9 +36,7 @@ async function handleNewConversation(args: {
 }) {
   const { clientInboxId, conversation } = args
 
-  streamLogger.debug(
-    `[Stream] Received new conversation for ${clientInboxId}: ${conversation.xmtpTopic}`,
-  )
+  streamLogger.debug(`[Stream] Received new conversation for ${clientInboxId}:`, conversation)
 
   if (isConversationAllowed(conversation)) {
     addConversationToAllowedConsentConversationsQuery({

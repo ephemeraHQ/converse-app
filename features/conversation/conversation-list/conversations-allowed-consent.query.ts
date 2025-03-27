@@ -46,6 +46,10 @@ export const getAllowedConsentConversationsQueryOptions = (
   })
 }
 
+export function getAllowedConsentConversationsQueryObserver(args: IArgs) {
+  return new QueryObserver(reactQueryClient, getAllowedConsentConversationsQueryOptions(args))
+}
+
 export function fetchAllowedConsentConversationsQuery(args: IArgsWithCaller) {
   return reactQueryClient.fetchQuery(getAllowedConsentConversationsQueryOptions(args))
 }
@@ -111,7 +115,7 @@ const getAllowedConsentConversationsQueryFn = async (args: IArgs) => {
 
   await refetchConversationSyncAllQuery({
     clientInboxId,
-    consentStates: ["allowed"],
+    // consentStates: ["allowed"],
   })
 
   const xmtpConversations = await getXmtpConversations({

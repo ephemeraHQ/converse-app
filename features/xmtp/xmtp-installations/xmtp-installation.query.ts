@@ -20,11 +20,10 @@ export const getXmtpInstallationQueryOptions = (args: IArgs) => {
 
       return client.installationId
     },
+    meta: {
+      persist: false, // Not persisting until we verify it's safe
+    },
   })
-}
-
-export function getXmtpInstallationQueryData(args: IArgs) {
-  return reactQueryClient.getQueryData(getXmtpInstallationQueryOptions(args).queryKey)
 }
 
 export function ensureXmtpInstallationQueryData(args: IArgs) {

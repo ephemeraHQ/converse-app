@@ -1,44 +1,12 @@
-import { ConsentState, syncConversation, syncConversations } from "@xmtp/react-native-sdk"
+import { ConsentState, syncAllConversations, syncConversation } from "@xmtp/react-native-sdk"
 import { config } from "@/config"
+import { ensureXmtpInstallationQueryData } from "@/features/xmtp/xmtp-installations/xmtp-installation.query"
 import { IXmtpConversationId, IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
 import { XMTPError } from "@/utils/error"
 import { getXmtpClientByInboxId } from "../xmtp-client/xmtp-client"
 
-export async function syncAllXmtpConversations(args: {
-  clientInboxId: IXmtpInboxId
-  consentStates: ConsentState[]
-}) {
-  const { clientInboxId, consentStates } = args
-
-  try {
-    const client = await getXmtpClientByInboxId({
-      inboxId: clientInboxId,
-    })
-
-    const beforeSync = new Date().getTime()
-    await syncConversations(client.installationId)
-    const afterSync = new Date().getTime()
-
-    const timeDiff = afterSync - beforeSync
-    if (timeDiff > config.xmtp.maxMsUntilLogError) {
-      captureError(
-        new XMTPError({
-          error: new Error(
-            `Syncing conversations from network took ${timeDiff}ms for inboxId ${clientInboxId}`,
-          ),
-        }),
-      )
-    }
-  } catch (error) {
-    throw new XMTPError({
-      error,
-      additionalMessage: `Error syncing all conversations for inboxId ${clientInboxId} and consent states ${consentStates.map((c) => c.toString()).join(", ")}`,
-    })
-  }
-}
-
-export async function syncXmtpConversation(args: {
+export async function syncOneXmtpConversation(args: {
   clientInboxId: IXmtpInboxId
   conversationId: IXmtpConversationId
 }) {
@@ -67,6 +35,40 @@ export async function syncXmtpConversation(args: {
     throw new XMTPError({
       error,
       additionalMessage: `Error syncing conversation ${conversationId}`,
+    })
+  }
+}
+
+export async function syncAllXmtpConversations(args: {
+  clientInboxId: IXmtpInboxId
+  consentStates?: ConsentState[]
+}) {
+  const { clientInboxId, consentStates = ["allowed", "unknown", "denied"] } = args
+
+  try {
+    const installationId = await ensureXmtpInstallationQueryData({
+      inboxId: clientInboxId,
+    })
+
+    const start = new Date().getTime()
+    await syncAllConversations(installationId, consentStates)
+    const end = new Date().getTime()
+
+    const duration = end - start
+
+    if (duration > config.xmtp.maxMsUntilLogError) {
+      captureError(
+        new XMTPError({
+          error: new Error(
+            `Syncing conversations (${consentStates.join(", ")}) from network took ${duration}ms for inbox ${clientInboxId}`,
+          ),
+        }),
+      )
+    }
+  } catch (error) {
+    throw new XMTPError({
+      error,
+      additionalMessage: `Failed to sync conversations for inbox: ${clientInboxId}`,
     })
   }
 }

@@ -12,7 +12,6 @@ import { ConversationKeyboardFiller } from "@/features/conversation/conversation
 import { ConversationMessageContextMenu } from "@/features/conversation/conversation-chat/conversation-message/conversation-message-context-menu/conversation-message-context-menu"
 import { ConversationMessageContextMenuStoreProvider } from "@/features/conversation/conversation-chat/conversation-message/conversation-message-context-menu/conversation-message-context-menu.store-context"
 import { MessageReactionsDrawer } from "@/features/conversation/conversation-chat/conversation-message/conversation-message-reactions/conversation-message-reaction-drawer/conversation-message-reaction-drawer"
-import { getConversationMessagesQueryOptions } from "@/features/conversation/conversation-chat/conversation-messages.query"
 import { useConversationScreenHeader } from "@/features/conversation/conversation-chat/conversation.screen-header"
 import { ConversationCreateListResults } from "@/features/conversation/conversation-create/conversation-create-list-results"
 import { useConversationQuery } from "@/features/conversation/queries/conversation.query"
@@ -21,8 +20,7 @@ import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { NavigationParamList } from "@/navigation/navigation.types"
 import { $globalStyles } from "@/theme/styles"
 import { useAppTheme } from "@/theme/use-app-theme"
-import { useRefetchQueryOnRefocus } from "@/utils/react-query/use-refetch-query-on-focus"
-import { ConversationMessages } from "./conversation-messages.component"
+import { ConversationMessages } from "./conversation-messages"
 import {
   ConversationStoreProvider,
   useConversationStore,
@@ -71,15 +69,6 @@ const Content = memo(function Content() {
     xmtpConversationId: xmtpConversationId,
     caller: "Conversation screen",
   })
-
-  useRefetchQueryOnRefocus(
-    xmtpConversationId
-      ? getConversationMessagesQueryOptions({
-          clientInboxId: currentSender.inboxId,
-          xmtpConversationId,
-        }).queryKey
-      : undefined,
-  )
 
   useConversationScreenHeader()
 
@@ -155,14 +144,4 @@ const ConversationCreateSearchInputWrapper = memo(function ConversationCreateSea
       onSelectedInboxIdsChange={handleSelectedInboxIdsChange}
     />
   )
-})
-
-export const DmConversationEmpty = memo(function DmConversationEmpty() {
-  // Will never really be empty anyway because to create the DM conversation the user has to send a first message
-  return null
-})
-
-export const GroupConversationEmpty = memo(() => {
-  // Will never really be empty anyway becaue we have group updates
-  return null
 })

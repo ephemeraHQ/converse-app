@@ -1,4 +1,4 @@
-import mmkv from "@utils/mmkv"
+import { storage } from "../storage/storage"
 
 const FAVORITED_EMOJIS = "favoritedEmojis"
 
@@ -8,7 +8,7 @@ class FavoritedEmojis {
   emojis: string[] = []
   emojisSet: Set<string> = new Set()
   constructor() {
-    const savedEmojis = mmkv.getString(FAVORITED_EMOJIS)
+    const savedEmojis = storage.getString(FAVORITED_EMOJIS)
     if (savedEmojis) {
       this.emojis = JSON.parse(savedEmojis) as string[]
     } else {
@@ -25,14 +25,14 @@ class FavoritedEmojis {
     if (!this.emojisSet.has(emoji)) {
       this.emojis.unshift(emoji)
       this.emojis.pop()
-      mmkv.set(FAVORITED_EMOJIS, JSON.stringify(this.emojis))
+      storage.set(FAVORITED_EMOJIS, JSON.stringify(this.emojis))
     }
   }
 
   replaceEmoji(emoji: string, index: number) {
     if (!this.emojisSet.has(emoji)) {
       this.emojis[index] = emoji
-      mmkv.set(FAVORITED_EMOJIS, JSON.stringify(this.emojis))
+      storage.set(FAVORITED_EMOJIS, JSON.stringify(this.emojis))
     }
   }
 
