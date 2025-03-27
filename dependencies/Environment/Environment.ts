@@ -1,35 +1,35 @@
 export type Environment = {
   // Remove the joinGroupClient: JoinGroupClient;
-};
+}
 
 export const LiveEnvironment = (): Environment => ({
   // Remove the joinGroupClient: JoinGroupClient.live({ api }),
-});
+})
 
 export const QaEnvironment = (): Environment => ({
   // Remove the joinGroupClient: JoinGroupClient.live({ api }),
-});
+})
 
 export const UnimplementedEnvironment: Environment = {
   // Remove the joinGroupClient: JoinGroupClient.unimplemented(),
-};
+}
 
-const isTest = process.env.NODE_ENV === "test";
-const isLowerEnvBuild = false;
+const isTest = process.env.NODE_ENV === "test"
+const isLowerEnvBuild = false
 
 const getEnvironmentForFlavor = (): Environment => {
-  let result: Environment = UnimplementedEnvironment;
+  let result: Environment = UnimplementedEnvironment
 
   if (isLowerEnvBuild) {
-    result = QaEnvironment();
+    result = QaEnvironment()
   } else if (!isTest) {
-    result = LiveEnvironment();
+    result = LiveEnvironment()
   }
 
-  return result;
-};
+  return result
+}
 
-const EnvironmentForFlavor: Environment = getEnvironmentForFlavor();
+const EnvironmentForFlavor: Environment = getEnvironmentForFlavor()
 
 /**
  * The current environment instance.
@@ -45,4 +45,4 @@ const EnvironmentForFlavor: Environment = getEnvironmentForFlavor();
  *   });
  * }
  */
-export const Controlled: Environment = EnvironmentForFlavor;
+export const Controlled: Environment = EnvironmentForFlavor

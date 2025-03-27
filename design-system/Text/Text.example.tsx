@@ -1,10 +1,10 @@
-import { memo } from "react";
-import { useAppTheme } from "../../theme/use-app-theme";
-import { VStack } from "../VStack";
-import { Text } from "./Text";
+import { memo } from "react"
+import { useAppTheme } from "../../theme/use-app-theme"
+import { VStack } from "../VStack"
+import { Text } from "./Text"
 
 export const TextExample = memo(function TextExample() {
-  const { theme } = useAppTheme();
+  const { theme } = useAppTheme()
 
   return (
     <VStack
@@ -21,17 +21,11 @@ export const TextExample = memo(function TextExample() {
         </Text>
         <Text preset="bodyBold">Body Bold Preset - Emphasized content</Text>
         <Text preset="small">Small Preset - Less prominent information</Text>
-        <Text preset="smaller">
-          Smaller Preset - Fine print and subtle details
-        </Text>
-        <Text preset="smallerBold">
-          Smaller Bold Preset - Important fine print
-        </Text>
+        <Text preset="smaller">Smaller Preset - Fine print and subtle details</Text>
+        <Text preset="smallerBold">Smaller Bold Preset - Important fine print</Text>
         <Text preset="bigBold">Big Bold Preset - Strong emphasis</Text>
         <Text preset="formLabel">Form Label Preset - Input field labels</Text>
-        <Text preset="formHelper">
-          Form Helper Preset - Additional form context
-        </Text>
+        <Text preset="formHelper">Form Helper Preset - Additional form context</Text>
         <Text preset="emojiSymbol">👋</Text>
       </VStack>
 
@@ -105,5 +99,5 @@ export const TextExample = memo(function TextExample() {
         <Text preset="emojiSymbol">🎮 Gaming Mode</Text>
       </VStack>
     </VStack>
-  );
-});
+  )
+})

@@ -1,103 +1,113 @@
 export function isError(error: unknown): error is Error {
-  return error instanceof Error;
+  return error instanceof Error
 }
 
 export function ensureError(error: unknown): Error {
   if (error instanceof Error) {
-    return error;
+    return error
   }
   if (typeof error === "string") {
-    return new Error(error);
+    return new Error(error)
   }
   // If error is neither an instance of Error nor a string, create a generic error message
-  return new Error("Unknown error occurred");
+  return new Error("Unknown error occurred")
 }
 
-export function enhanceError(error: unknown, context: string): Error {
-  const originalError = ensureError(error);
-  originalError.message = `${context} - ${originalError.message}`;
-  return originalError;
-}
-
-export function ensureErrorHandler<T>(
-  handler: (error: Error) => T,
-): (error: unknown) => T {
-  return (error: unknown) => handler(ensureError(error));
+export function ensureErrorHandler<T>(handler: (error: Error) => T): (error: unknown) => T {
+  return (error: unknown) => handler(ensureError(error))
 }
 
 export class UserCancelledError extends Error {
   constructor(message: string) {
-    super(message);
-    this.name = "UserCancelledError";
+    super(message)
+    this.name = "UserCancelledError"
   }
 }
 
 type ErrorArgs = {
-  error: unknown;
-  additionalMessage?: string;
-};
+  error: unknown
+  additionalMessage?: string
+}
 
 class BaseError extends Error {
   constructor(prefix: string, args: ErrorArgs) {
-    const originalError = ensureError(args.error);
+    const originalError = ensureError(args.error)
     const message = args.additionalMessage
       ? prefix
         ? `${prefix} - ${args.additionalMessage} - ${originalError.message}`
         : `${args.additionalMessage} - ${originalError.message}`
       : prefix
         ? `${prefix} - ${originalError.message}`
-        : originalError.message;
+        : originalError.message
 
-    super(message);
-    this.name = this.constructor.name;
-    this.cause = args.error;
+    super(message)
+    this.name = this.constructor.name
+    this.cause = args.error
   }
 }
 
 export class GenericError extends BaseError {
   constructor(args: ErrorArgs) {
-    super("", args);
+    super("", args)
   }
 }
 
 export class HydrationError extends BaseError {
   constructor(args: ErrorArgs) {
-    super("[Hydration]", args);
+    super("[Hydration]", args)
   }
 }
 
 export class XMTPError extends BaseError {
   constructor(args: ErrorArgs) {
-    super("[XMTP SDK]", args);
+    super("[XMTP SDK]", args)
   }
 }
 
 export class StreamError extends BaseError {
   constructor(args: ErrorArgs) {
-    super("[Stream]", args);
+    super("[Stream]", args)
   }
 }
 
 export class AuthenticationError extends BaseError {
   constructor(args: ErrorArgs) {
-    super("[Authentication]", args);
+    super("[Authentication]", args)
   }
 }
 
 export class ApiError extends BaseError {
   constructor(args: ErrorArgs) {
-    super("[API]", args);
+    super("[API]", args)
   }
 }
 
 export class ReactQueryError extends BaseError {
   constructor(args: ErrorArgs) {
-    super("[React Query]", args);
+    super("[React Query]", args)
   }
 }
 
 export class FeedbackError extends BaseError {
   constructor(args: ErrorArgs) {
-    super("", args);
+    super("", args)
+  }
+}
+
+export class NotificationError extends BaseError {
+  constructor(args: ErrorArgs) {
+    super("[Notification]", args)
+  }
+}
+
+export class ReactQueryPersistError extends BaseError {
+  constructor(args: ErrorArgs) {
+    super("[React Query Persist]", args)
+  }
+}
+
+export class NavigationError extends BaseError {
+  constructor(args: ErrorArgs) {
+    super("[Navigation]", args)
   }
 }

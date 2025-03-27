@@ -1,39 +1,39 @@
-import { Button } from "@design-system/Button/Button";
-import { Text } from "@design-system/Text";
-import { useCallback } from "react";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useAppTheme } from "@/theme/use-app-theme";
-import { VStack } from "../VStack";
-import { useBottomSheetModalRef } from "./BottomSheet.utils";
-import { BottomSheetContentContainer } from "./BottomSheetContentContainer";
-import { BottomSheetFlatList } from "./BottomSheetFlatList";
-import { BottomSheetHeader } from "./BottomSheetHeader";
-import { BottomSheetModal } from "./BottomSheetModal";
+import { Button } from "@design-system/Button/Button"
+import { Text } from "@design-system/Text"
+import { useCallback } from "react"
+import { useSafeAreaInsets } from "react-native-safe-area-context"
+import { useAppTheme } from "@/theme/use-app-theme"
+import { VStack } from "../VStack"
+import { useBottomSheetModalRef } from "./BottomSheet.utils"
+import { BottomSheetContentContainer } from "./BottomSheetContentContainer"
+import { BottomSheetFlatList } from "./BottomSheetFlatList"
+import { BottomSheetHeader } from "./BottomSheetHeader"
+import { BottomSheetModal } from "./BottomSheetModal"
 
 export function BottomSheetExample() {
-  const { theme } = useAppTheme();
-  const basicBottomSheetRef = useBottomSheetModalRef();
-  const dynamicBottomSheetRef = useBottomSheetModalRef();
-  const listBottomSheetRef = useBottomSheetModalRef();
+  const { theme } = useAppTheme()
+  const basicBottomSheetRef = useBottomSheetModalRef()
+  const dynamicBottomSheetRef = useBottomSheetModalRef()
+  const listBottomSheetRef = useBottomSheetModalRef()
 
   const handleBasicPress = useCallback(() => {
-    basicBottomSheetRef.current?.present();
-  }, [basicBottomSheetRef]);
+    basicBottomSheetRef.current?.present()
+  }, [basicBottomSheetRef])
 
   const handleDynamicPress = useCallback(() => {
-    dynamicBottomSheetRef.current?.present();
-  }, [dynamicBottomSheetRef]);
+    dynamicBottomSheetRef.current?.present()
+  }, [dynamicBottomSheetRef])
 
   const handleListPress = useCallback(() => {
-    listBottomSheetRef.current?.present();
-  }, [listBottomSheetRef]);
+    listBottomSheetRef.current?.present()
+  }, [listBottomSheetRef])
 
   const data = Array.from({ length: 50 }, (_, i) => ({
     id: i,
     title: `Item ${i + 1}`,
-  }));
+  }))
 
-  const insets = useSafeAreaInsets();
+  const insets = useSafeAreaInsets()
 
   return (
     <VStack
@@ -82,20 +82,14 @@ export function BottomSheetExample() {
               paddingHorizontal: theme.spacing.md,
             }}
           >
-            <Text>
-              This bottom sheet has many snap points for fine-grained control
-            </Text>
+            <Text>This bottom sheet has many snap points for fine-grained control</Text>
           </VStack>
         </BottomSheetContentContainer>
       </BottomSheetModal>
 
       {/* Bottom Sheet with List */}
       <Button text="Bottom Sheet with List" onPress={handleListPress} />
-      <BottomSheetModal
-        topInset={insets.top}
-        ref={listBottomSheetRef}
-        snapPoints={["50%", "100%"]}
-      >
+      <BottomSheetModal topInset={insets.top} ref={listBottomSheetRef} snapPoints={["50%", "100%"]}>
         <BottomSheetHeader title="List Example" />
         <BottomSheetFlatList
           data={data}
@@ -114,5 +108,5 @@ export function BottomSheetExample() {
         />
       </BottomSheetModal>
     </VStack>
-  );
+  )
 }

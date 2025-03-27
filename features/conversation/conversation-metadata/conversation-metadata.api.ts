@@ -1,215 +1,196 @@
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import { z } from "zod";
-import { getCurrentUserQueryData } from "@/features/current-user/curent-user.query";
-import { getOrFetchConversation } from "@/queries/conversation-query";
-import { api } from "@/utils/api/api";
-import { captureError } from "@/utils/capture-error";
-import { enhanceError } from "@/utils/error";
+import type { IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import { z } from "zod"
+import { getCurrentUserQueryData } from "@/features/current-user/curent-user.query"
+import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
+import { captureError } from "@/utils/capture-error"
+import { convosApi } from "@/utils/convos-api/convos-api-instance"
 
 const ConversationMetadataSchema = z.object({
-  deleted: z.boolean(),
-  pinned: z.boolean(),
-  unread: z.boolean(),
-  readUntil: z.string().datetime().optional(),
+  deleted: z.boolean().optional(),
+  pinned: z.boolean().optional(),
+  unread: z.boolean().optional(),
+  readUntil: z.string().datetime().nullable().optional(),
   updatedAt: z.string().datetime(),
-});
+})
 
-export type IConversationMetadata = z.infer<typeof ConversationMetadataSchema>;
+export type IConversationMetadata = z.infer<typeof ConversationMetadataSchema>
 
-// export async function getConversationMetadatas(args: {
-//   account: string;
-//   topics: ConversationTopic[];
-// }) {
-//   const { account, topics } = args;
+export async function getConversationMetadata(args: { xmtpConversationId: IXmtpConversationId }) {
+  const { xmtpConversationId } = args
 
-//   const conversationIds = await Promise.all(
-//     topics.map((topic) => getConversationId({ account, topic }))
-//   );
+  try {
+    const { data } = await convosApi.get<IConversationMetadata>(
+      `/api/v1/metadata/conversation/${xmtpConversationId}`,
+    )
 
-//   const { data } = await api.post(`/api/v1/metadata/conversations`, {
-//     conversationIds,
-//   });
+    const parseResult = ConversationMetadataSchema.safeParse(data)
 
-//   const parseResult = z.record(ConversationMetadataSchema).safeParse(data);
-//   if (!parseResult.success) {
-//     captureError(
-//       new Error(
-//         `Failed to parse conversation metadatas response: ${JSON.stringify(
-//           parseResult.error
-//         )}`
-//       )
-//     );
-//   }
+    if (!parseResult.success) {
+      captureError(
+        new Error(
+          `Failed to parse conversation metadata response: ${JSON.stringify(parseResult.error)} with data: ${JSON.stringify(data)}`,
+        ),
+      )
+    }
 
-//   return data as Record<string, IConversationMetadata>;
-// }
+    return data
+  } catch (error) {
+    // Check if error is a 404 Not Found error
+    // if (error instanceof AxiosError && error.response?.status === 404) {
+    //   // If metadata doesn't exist (404), create it with default values
+    //   return createDefaultConversationMetadata({ xmtpConversationId })
+    // }
 
-export async function getConversationMetadata(args: {
-  account: string;
-  topic: ConversationTopic;
-}) {
-  const { account, topic } = args;
-  const conversationId = await getConversationId({ account, topic });
-
-  const { data } = await api.get<IConversationMetadata>(
-    `/api/v1/metadata/conversation/${conversationId}`,
-  );
-
-  const parseResult = ConversationMetadataSchema.safeParse(data);
-  if (!parseResult.success) {
-    captureError(
-      new Error(
-        `Failed to parse conversation metadata response: ${JSON.stringify(
-          parseResult.error,
-        )}`,
-      ),
-    );
+    // For other errors, rethrow
+    throw error
   }
-
-  return data;
 }
 
-export async function markConversationAsRead(args: {
-  account: string;
-  topic: ConversationTopic;
-  readUntil: string;
+/**
+ * Creates default metadata for a conversation when none exists (404 error case)
+ */
+// async function createDefaultConversationMetadata(args: {
+//   xmtpConversationId: IXmtpConversationId
+//   clientInboxId?: IXmtpInboxId
+// }) {
+//   const { xmtpConversationId, clientInboxId } = args
+
+//   // If clientInboxId is provided, use it. Otherwise, try to get the current inbox ID.
+//   let inboxId = clientInboxId
+//   if (!inboxId) {
+//     const currentSender = useMultiInboxStore.getState().currentSender
+//     if (!currentSender) {
+//       throw new Error("No current sender found to create conversation metadata")
+//     }
+//     inboxId = currentSender.inboxId
+//   }
+
+//   // Create metadata with default values
+//   return updateConversationMetadata({
+//     xmtpConversationId,
+//     clientInboxId: inboxId,
+//     updates: {
+//       deleted: false,
+//       pinned: false,
+//       unread: true,
+//     },
+//   })
+// }
+
+export async function markConversationMetadataAsRead(args: {
+  clientInboxId: IXmtpInboxId
+  xmtpConversationId: IXmtpConversationId
+  readUntil: string
 }) {
   return updateConversationMetadata({
-    account: args.account,
-    topic: args.topic,
+    clientInboxId: args.clientInboxId,
+    xmtpConversationId: args.xmtpConversationId,
     updates: {
       unread: false,
       readUntil: args.readUntil,
     },
-  });
+  })
 }
 
-export async function markConversationAsUnread(args: {
-  account: string;
-  topic: ConversationTopic;
+export async function markConversationMetadataAsUnread(args: {
+  clientInboxId: IXmtpInboxId
+  xmtpConversationId: IXmtpConversationId
 }) {
   return updateConversationMetadata({
-    account: args.account,
-    topic: args.topic,
+    clientInboxId: args.clientInboxId,
+    xmtpConversationId: args.xmtpConversationId,
     updates: {
       unread: true,
     },
-  });
+  })
 }
 
-export async function pinConversation(args: {
-  account: string;
-  topic: ConversationTopic;
+export async function pinConversationMetadata(args: {
+  clientInboxId: IXmtpInboxId
+  xmtpConversationId: IXmtpConversationId
 }) {
   return updateConversationMetadata({
-    account: args.account,
-    topic: args.topic,
+    clientInboxId: args.clientInboxId,
+    xmtpConversationId: args.xmtpConversationId,
     updates: {
       pinned: true,
     },
-  });
+  })
 }
 
-export async function unpinConversation(args: {
-  account: string;
-  topic: ConversationTopic;
+export async function unpinConversationMetadata(args: {
+  clientInboxId: IXmtpInboxId
+  xmtpConversationId: IXmtpConversationId
 }) {
   return updateConversationMetadata({
-    account: args.account,
-    topic: args.topic,
+    clientInboxId: args.clientInboxId,
+    xmtpConversationId: args.xmtpConversationId,
     updates: {
       pinned: false,
     },
-  });
+  })
 }
 
-export async function restoreConversation(args: {
-  account: string;
-  topic: ConversationTopic;
+export async function restoreConversationMetadata(args: {
+  clientInboxId: IXmtpInboxId
+  xmtpConversationId: IXmtpConversationId
 }) {
   return updateConversationMetadata({
-    account: args.account,
-    topic: args.topic,
+    clientInboxId: args.clientInboxId,
+    xmtpConversationId: args.xmtpConversationId,
     updates: {
       deleted: false,
     },
-  });
+  })
 }
 
-export async function deleteConversation(args: {
-  account: string;
-  topic: ConversationTopic;
+export async function deleteConversationMetadata(args: {
+  clientInboxId: IXmtpInboxId
+  xmtpConversationId: IXmtpConversationId
 }) {
   return updateConversationMetadata({
-    account: args.account,
-    topic: args.topic,
+    clientInboxId: args.clientInboxId,
+    xmtpConversationId: args.xmtpConversationId,
     updates: {
       deleted: true,
     },
-  });
-}
-
-/**
- * Helper functions
- */
-async function getConversationId(args: {
-  account: string;
-  topic: ConversationTopic;
-}) {
-  const conversation = await getOrFetchConversation({
-    account: args.account,
-    topic: args.topic,
-    caller: "conversation-metadata.api",
-  });
-
-  if (!conversation) {
-    throw new Error(`Conversation not found for topic: ${args.topic}`);
-  }
-
-  return conversation.id;
+  })
 }
 
 async function updateConversationMetadata(args: {
-  account: string;
-  topic: ConversationTopic;
+  xmtpConversationId: IXmtpConversationId
+  clientInboxId: IXmtpInboxId
   updates: {
-    pinned?: boolean;
-    unread?: boolean;
-    deleted?: boolean;
-    readUntil?: string;
-  };
+    pinned?: boolean
+    unread?: boolean
+    deleted?: boolean
+    readUntil?: string
+  }
 }) {
-  const { account, topic, updates } = args;
+  const { xmtpConversationId, clientInboxId, updates } = args
 
-  const conversationId = await getConversationId({ account, topic });
-
-  const currentUser = getCurrentUserQueryData();
+  const currentUser = getCurrentUserQueryData()
 
   if (!currentUser) {
-    throw new Error("No current user found");
+    throw new Error("No current user found")
   }
 
-  const { data } = await api.post<IConversationMetadata>(
-    `/api/v1/metadata/conversation`,
-    {
-      conversationId,
-      deviceIdentityId: currentUser.identities.find(
-        (identity) => identity.privyAddress === account,
-      )?.id,
-      ...updates,
-    },
-  );
+  const { data } = await convosApi.post<IConversationMetadata>(`/api/v1/metadata/conversation`, {
+    conversationId: xmtpConversationId,
+    deviceIdentityId: currentUser.identities.find((identity) => identity.xmtpId === clientInboxId)
+      ?.id,
+    ...updates,
+  })
 
-  const parseResult = ConversationMetadataSchema.safeParse(data);
+  const parseResult = ConversationMetadataSchema.safeParse(data)
+
   if (!parseResult.success) {
     captureError(
       new Error(
-        `Failed to parse metadata update response: ${JSON.stringify(
-          parseResult.error,
-        )}`,
+        `Failed to parse metadata update response: ${JSON.stringify(parseResult.error)} with data: ${JSON.stringify(data)}`,
       ),
-    );
+    )
   }
 
-  return data;
+  return data
 }

@@ -1,18 +1,18 @@
-import { Keyboard } from "react-native";
+import { Keyboard } from "react-native"
 
 export const executeAfterKeyboardClosed = (methodToExecute: () => void) => {
-  const isKeyboardVisible = Keyboard.isVisible();
+  const isKeyboardVisible = Keyboard.isVisible()
   if (isKeyboardVisible) {
     const subscription = Keyboard.addListener("keyboardDidHide", () => {
-      methodToExecute();
-      subscription.remove();
-    });
-    Keyboard.dismiss();
+      methodToExecute()
+      subscription.remove()
+    })
+    Keyboard.dismiss()
   } else {
-    methodToExecute();
+    methodToExecute()
   }
-};
+}
 
 export const dismissKeyboard = () => {
-  Keyboard.dismiss();
-};
+  Keyboard.dismiss()
+}

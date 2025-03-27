@@ -1,25 +1,25 @@
-import { ReactElement } from "react";
-import { TextStyle, View, ViewStyle } from "react-native";
-import { IPicto } from "@/components/Picto/Picto.types";
-import { translate } from "@/i18n";
-import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
-import { debugBorder } from "@/utils/debug-style";
-import { Icon } from "../Icon/Icon";
-import { Pressable } from "../Pressable";
-import { ITextProps, Text } from "../Text";
-import { ITouchableOpacityProps, TouchableOpacity } from "../TouchableOpacity";
+import { ReactElement } from "react"
+import { TextStyle, View, ViewStyle } from "react-native"
+import { IIconName } from "@/design-system/Icon/Icon.types"
+import { translate } from "@/i18n"
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme"
+import { Icon } from "../Icon/Icon"
+import { Pressable } from "../Pressable"
+import { ITextProps, Text } from "../Text"
+import { ITouchableOpacityProps, TouchableOpacity } from "../TouchableOpacity"
 
 type HeaderActionProps = {
-  backgroundColor?: string;
-  icon?: IPicto;
-  iconColor?: string;
-  text?: ITextProps["text"];
-  tx?: ITextProps["tx"];
-  txOptions?: ITextProps["txOptions"];
-  onPress?: ITouchableOpacityProps["onPress"];
-  ActionComponent?: ReactElement;
-  style?: ViewStyle;
-};
+  backgroundColor?: string
+  icon?: IIconName
+  iconColor?: string
+  text?: ITextProps["text"]
+  tx?: ITextProps["tx"]
+  txOptions?: ITextProps["txOptions"]
+  onPress?: ITouchableOpacityProps["onPress"]
+  ActionComponent?: ReactElement
+  style?: ViewStyle
+  disabled?: boolean
+}
 export function HeaderAction(props: HeaderActionProps) {
   const {
     backgroundColor,
@@ -31,25 +31,28 @@ export function HeaderAction(props: HeaderActionProps) {
     ActionComponent,
     iconColor,
     style,
-  } = props;
-  const { themed, theme } = useAppTheme();
+    disabled,
+  } = props
+  const { themed, theme } = useAppTheme()
 
-  const content = tx ? translate(tx, txOptions) : text;
+  const content = tx ? translate(tx, txOptions) : text
 
-  if (ActionComponent) return ActionComponent;
+  if (ActionComponent) return ActionComponent
+
+  const disabledStyle: ViewStyle = disabled ? { opacity: 0.7 } : {}
 
   if (content) {
     return (
       <TouchableOpacity
-        style={[themed([$actionTextContainer, { backgroundColor }]), style]}
+        style={[themed([$actionTextContainer, { backgroundColor }]), style, disabledStyle]}
         onPress={onPress}
-        disabled={!onPress}
+        disabled={disabled || !onPress}
         activeOpacity={0.8}
         hitSlop={theme.spacing.sm}
       >
         <Text preset="body" text={content} style={themed($actionText)} />
       </TouchableOpacity>
-    );
+    )
   }
 
   if (icon) {
@@ -57,19 +60,16 @@ export function HeaderAction(props: HeaderActionProps) {
       <Pressable
         // {...debugBorder()}
         onPress={onPress}
-        style={[themed([$actionIconContainer, { backgroundColor }]), style]}
+        disabled={disabled || !onPress}
+        style={[themed([$actionIconContainer, { backgroundColor }]), style, disabledStyle]}
         hitSlop={theme.spacing.sm}
       >
-        <Icon size={theme.iconSize.md} icon={icon} color={iconColor} />
+        <Icon size={theme.iconSize.lg} icon={icon} color={iconColor} />
       </Pressable>
-    );
+    )
   }
 
-  return (
-    <View
-      style={[themed($actionFillerContainer), { backgroundColor }, style]}
-    />
-  );
+  return <View style={[themed($actionFillerContainer), { backgroundColor }, style]} />
 }
 
 const $actionTextContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
@@ -78,11 +78,11 @@ const $actionTextContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   justifyContent: "center",
   paddingHorizontal: spacing.md,
   zIndex: 2,
-});
+})
 
 const $actionText: ThemedStyle<TextStyle> = ({ colors }) => ({
   color: colors.text.primary,
-});
+})
 
 const $actionIconContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   flexGrow: 0,
@@ -91,8 +91,8 @@ const $actionIconContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   height: spacing.xxl,
   width: spacing.xxl,
   zIndex: 2,
-});
+})
 
 const $actionFillerContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   width: spacing.xxs,
-});
+})

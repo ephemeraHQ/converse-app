@@ -1,37 +1,32 @@
-import { InboxId } from "@xmtp/react-native-sdk";
-import { normalizeTimestampToMs } from "@/utils/date";
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import { normalizeTimestampToMs } from "@/utils/date"
 
 export function conversationIsUnreadForInboxId(args: {
-  lastMessageSent: number | null;
-  lastMessageSenderInboxId: InboxId | null;
-  consumerInboxId: InboxId;
-  markedAsUnread: boolean | null;
-  readUntil: number | null;
+  lastMessageSent: number | null
+  lastMessageSenderInboxId: IXmtpInboxId | null
+  consumerInboxId: IXmtpInboxId
+  markedAsUnread: boolean | null
+  readUntil: number | null
 }) {
-  const {
-    lastMessageSent,
-    lastMessageSenderInboxId,
-    consumerInboxId,
-    markedAsUnread,
-    readUntil,
-  } = args;
+  const { lastMessageSent, lastMessageSenderInboxId, consumerInboxId, markedAsUnread, readUntil } =
+    args
 
   if (markedAsUnread) {
-    return true;
+    return true
   }
 
   // If the last message is from the current user, it's not unread
   if (lastMessageSenderInboxId === consumerInboxId) {
-    return false;
+    return false
   }
 
   if (!lastMessageSent) {
-    return false;
+    return false
   }
 
   if (!readUntil) {
-    return true;
+    return true
   }
 
-  return readUntil < normalizeTimestampToMs(lastMessageSent);
+  return readUntil < normalizeTimestampToMs(lastMessageSent)
 }

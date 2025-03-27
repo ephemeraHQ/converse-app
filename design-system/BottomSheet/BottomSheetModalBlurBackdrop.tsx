@@ -1,34 +1,34 @@
-import { BottomSheetBackdropProps, useBottomSheet } from "@gorhom/bottom-sheet";
-import React, { memo, useCallback } from "react";
-import { StyleSheet } from "react-native";
-import { interpolate, useAnimatedStyle } from "react-native-reanimated";
-import { BlurView } from "../BlurView";
-import { Pressable } from "../Pressable";
-import { AnimatedVStack } from "../VStack";
+import { BottomSheetBackdropProps, useBottomSheet } from "@gorhom/bottom-sheet"
+import React, { memo, useCallback } from "react"
+import { StyleSheet } from "react-native"
+import { interpolate, useAnimatedStyle } from "react-native-reanimated"
+import { BlurView } from "../BlurView"
+import { Pressable } from "../Pressable"
+import { AnimatedVStack } from "../VStack"
 
 type IBottomSheetBlurBackdropProps = BottomSheetBackdropProps & {
-  children?: React.ReactNode;
-  onPress?: () => void;
-};
+  children?: React.ReactNode
+  onPress?: () => void
+}
 
 export const BottomSheetBlurBackdrop = memo(function BottomSheetBlurBackdrop(
   props: IBottomSheetBlurBackdropProps,
 ) {
-  const { animatedIndex, style, children, onPress } = props;
+  const { animatedIndex, style, children, onPress } = props
 
-  const { close } = useBottomSheet();
+  const { close } = useBottomSheet()
 
   const containerAnimatedStyle = useAnimatedStyle(() => ({
     opacity: interpolate(animatedIndex.value, [0, 1], [0, 1], "clamp"),
-  }));
+  }))
 
   const handlePressBackdrop = useCallback(() => {
     if (onPress) {
-      onPress();
+      onPress()
     } else {
-      close();
+      close()
     }
-  }, [onPress, close]);
+  }, [onPress, close])
 
   return (
     <AnimatedVStack
@@ -51,5 +51,5 @@ export const BottomSheetBlurBackdrop = memo(function BottomSheetBlurBackdrop(
         </Pressable>
       </BlurView>
     </AnimatedVStack>
-  );
-});
+  )
+})

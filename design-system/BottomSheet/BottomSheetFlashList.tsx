@@ -1,3 +1,3 @@
-import { BottomSheetFlashList as GhoromBottomSheetFlashList } from "@gorhom/bottom-sheet";
+import { BottomSheetFlashList as GhoromBottomSheetFlashList } from "@gorhom/bottom-sheet"
 
-export const BottomSheetFlashList = GhoromBottomSheetFlashList;
+export const BottomSheetFlashList = GhoromBottomSheetFlashList

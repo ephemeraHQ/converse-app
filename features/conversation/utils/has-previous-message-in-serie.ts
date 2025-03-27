@@ -1,14 +1,14 @@
-import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types";
+import { IConversationMessage } from "../conversation-chat/conversation-message/conversation-message.types"
 
 type HasPreviousMessageInSeriesPayload = {
-  currentMessage?: IXmtpDecodedMessage;
-  previousMessage?: IXmtpDecodedMessage;
-};
+  currentMessage?: IConversationMessage
+  previousMessage?: IConversationMessage
+}
 
 export const hasPreviousMessageInSeries = ({
   currentMessage,
   previousMessage,
 }: HasPreviousMessageInSeriesPayload) => {
-  if (!previousMessage || !currentMessage) return false;
-  return previousMessage.senderInboxId === currentMessage.senderInboxId;
-};
+  if (!previousMessage || !currentMessage) return false
+  return previousMessage.senderInboxId === currentMessage.senderInboxId
+}

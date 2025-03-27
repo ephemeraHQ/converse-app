@@ -1,4 +1,4 @@
-import { darkPalette, lightPalette } from "./palette";
+import { darkPalette, lightPalette } from "./palette"
 
 export const colorsLight = {
   bubbles: {
@@ -74,8 +74,8 @@ export const colorsLight = {
       primaryAlpha60: darkPalette.alpha60,
     },
   },
-} as const;
+} as const
 
-export type IColorsKey = keyof typeof colorsLight;
+export type IColorsKey = keyof typeof colorsLight
 
-export type IColors = typeof colorsLight;
+export type IColors = typeof colorsLight

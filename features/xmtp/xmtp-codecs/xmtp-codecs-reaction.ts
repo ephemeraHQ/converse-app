@@ -1,4 +1,3 @@
-import { ReactionContent } from "@xmtp/react-native-sdk";
+import { ReactionContent } from "@xmtp/react-native-sdk"
 
-export const getReactionContent = (r: ReactionContent) =>
-  r.schema === "unicode" ? r.content : "?";
+export const getReactionContent = (r: ReactionContent) => (r.schema === "unicode" ? r.content : "?")

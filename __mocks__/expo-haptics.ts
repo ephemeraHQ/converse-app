@@ -18,21 +18,16 @@ enum NotificationFeedbackType {
   Error = "error",
 }
 
-const impactAsync = jest.fn(async (style: ImpactFeedbackStyle) => {});
-const notificationAsync = jest.fn(async (type: NotificationFeedbackType) => {});
+const impactAsync = jest.fn(async (style: ImpactFeedbackStyle) => {})
+const notificationAsync = jest.fn(async (type: NotificationFeedbackType) => {})
 
 const MockedExpoHaptics = {
   impactAsync,
   notificationAsync,
   ImpactFeedbackStyle,
   NotificationFeedbackType,
-};
+}
 
-export {
-  impactAsync,
-  notificationAsync,
-  ImpactFeedbackStyle,
-  NotificationFeedbackType,
-};
+export { impactAsync, notificationAsync, ImpactFeedbackStyle, NotificationFeedbackType }
 
-export default MockedExpoHaptics;
+export default MockedExpoHaptics

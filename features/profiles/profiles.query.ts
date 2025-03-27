@@ -1,63 +1,67 @@
-import {
-  queryOptions,
-  skipToken,
-  useQueries,
-  useQuery,
-} from "@tanstack/react-query";
-import { InboxId } from "@xmtp/react-native-sdk";
-import { fetchProfile } from "@/features/profiles/profiles.api";
-import { type IConvosProfileForInbox } from "@/features/profiles/profile.types";
-import { queryClient } from "@/queries/queryClient";
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import { queryOptions, skipToken, useQueries, useQuery } from "@tanstack/react-query"
+import { fetchProfile } from "@/features/profiles/profiles.api"
+import { Optional } from "@/types/general"
+import { reactQueryClient } from "@/utils/react-query/react-query.client"
 
-const profileQueryKey = ({ xmtpId }: { xmtpId: string }) =>
-  ["profile", xmtpId] as const;
+type IProfileQueryData = Awaited<ReturnType<typeof fetchProfile>>
 
-export const getProfileQueryConfig = ({
-  xmtpId,
-}: {
-  xmtpId: string | undefined;
-}) => {
-  const enabled = !!xmtpId;
+type IArgs = {
+  xmtpId: IXmtpInboxId | undefined
+}
+
+type IArgsWithCaller = IArgs & {
+  caller: string
+}
+
+export const getProfileQueryConfig = (args: Optional<IArgsWithCaller, "caller">) => {
+  const { xmtpId, caller } = args
+  const enabled = !!xmtpId
   return queryOptions({
-    enabled,
-    queryKey: profileQueryKey({ xmtpId: xmtpId! }),
-    queryFn: enabled ? () => fetchProfile({ xmtpId: xmtpId! }) : skipToken,
-  });
-};
-
-export const useProfileQuery = ({ xmtpId }: { xmtpId: string | undefined }) => {
-  return useQuery(getProfileQueryConfig({ xmtpId }));
-};
-
-export const setProfileQueryData = (args: {
-  xmtpId: string;
-  data: Partial<Omit<IConvosProfileForInbox, "updatedAt" | "createdAt">>;
-  updatedAt?: number;
-}) => {
-  const { xmtpId, data } = args;
-  return queryClient.setQueryData<Partial<IConvosProfileForInbox>>(
-    profileQueryKey({ xmtpId }),
-    {
-      ...data,
-      // updatedAt: updatedAt ? updatedAt.toString() : Date.now().toString(),
+    meta: {
+      caller,
     },
-  );
-};
+    enabled,
+    queryKey: ["profile", xmtpId],
+    queryFn: enabled ? () => fetchProfile({ xmtpId }) : skipToken,
+  })
+}
 
-export const ensureProfileQueryData = ({ xmtpId }: { xmtpId: string }) => {
-  return queryClient.ensureQueryData(getProfileQueryConfig({ xmtpId }));
-};
+export const useProfileQuery = (args: IArgsWithCaller) => {
+  return useQuery(getProfileQueryConfig(args))
+}
 
-export const invalidateProfileQuery = ({ xmtpId }: { xmtpId: string }) => {
-  queryClient.invalidateQueries({
-    queryKey: profileQueryKey({ xmtpId }),
-  });
-};
+export const setProfileQueryData = (args: IArgs & { data: IProfileQueryData }) => {
+  const { data } = args
+  return reactQueryClient.setQueryData(getProfileQueryConfig(args).queryKey, data)
+}
+
+export function updateProfileQueryData(args: IArgs & { data: Partial<IProfileQueryData> }) {
+  const { data } = args
+  return reactQueryClient.setQueryData(getProfileQueryConfig(args).queryKey, (oldData) => {
+    if (!oldData) {
+      return oldData
+    }
+    return {
+      ...oldData,
+      ...data,
+    }
+  })
+}
+export const ensureProfileQueryData = (args: IArgsWithCaller) => {
+  return reactQueryClient.ensureQueryData(getProfileQueryConfig(args))
+}
+
+export const invalidateProfileQuery = (args: IArgsWithCaller) => {
+  return reactQueryClient.invalidateQueries({
+    queryKey: getProfileQueryConfig(args).queryKey,
+  })
+}
 
 export const useProfilesQueries = ({
   xmtpInboxIds,
 }: {
-  xmtpInboxIds: string[] | undefined;
+  xmtpInboxIds: IXmtpInboxId[] | undefined
 }) => {
   return useQueries({
     queries: (xmtpInboxIds ?? []).map((xmtpInboxId) =>
@@ -69,9 +73,9 @@ export const useProfilesQueries = ({
       isError: results.some((result) => result.isError),
       error: results.find((result) => result.error)?.error,
     }),
-  });
-};
+  })
+}
 
-export const getProfileQueryData = ({ xmtpId }: { xmtpId: InboxId }) => {
-  return queryClient.getQueryData(getProfileQueryConfig({ xmtpId }).queryKey);
-};
+export const getProfileQueryData = (args: IArgs) => {
+  return reactQueryClient.getQueryData(getProfileQueryConfig(args).queryKey)
+}

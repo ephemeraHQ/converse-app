@@ -1,15 +1,15 @@
-import * as Updates from "expo-updates";
-import { memo, useMemo, useState } from "react";
-import { Button } from "@/design-system/Button/Button";
-import { SettingsList } from "@/design-system/settings-list/settings-list";
-import { ISettingsListRow } from "@/design-system/settings-list/settings-list.types";
-import { Text } from "@/design-system/Text";
-import { VStack } from "@/design-system/VStack";
-import { useUpdatesLogEntries } from "@/features/app-settings/hooks/use-updates-log-entries";
-import { useAppTheme } from "@/theme/use-app-theme";
+import * as Updates from "expo-updates"
+import { memo, useMemo, useState } from "react"
+import { Button } from "@/design-system/Button/Button"
+import { SettingsList } from "@/design-system/settings-list/settings-list"
+import { ISettingsListRow } from "@/design-system/settings-list/settings-list.types"
+import { Text } from "@/design-system/Text"
+import { VStack } from "@/design-system/VStack"
+import { useUpdatesLogEntries } from "@/features/app-settings/hooks/use-updates-log-entries"
+import { useAppTheme } from "@/theme/use-app-theme"
 
 export const OtaUpdatesList = memo(function OtaUpdatesList() {
-  const { theme } = useAppTheme();
+  const { theme } = useAppTheme()
   const {
     currentlyRunning,
     isUpdateAvailable,
@@ -21,36 +21,36 @@ export const OtaUpdatesList = memo(function OtaUpdatesList() {
     checkError,
     downloadError,
     initializationError,
-  } = Updates.useUpdates();
+  } = Updates.useUpdates()
 
-  const { data: logEntries = [] } = useUpdatesLogEntries();
+  const { data: logEntries = [] } = useUpdatesLogEntries()
 
-  const [checkUpdateError, setCheckUpdateError] = useState<Error | null>(null);
-  const [reloadError, setReloadError] = useState<Error | null>(null);
+  const [checkUpdateError, setCheckUpdateError] = useState<Error | null>(null)
+  const [reloadError, setReloadError] = useState<Error | null>(null)
 
   // Handle reload when update is available
   const handleReload = async () => {
     try {
-      setReloadError(null);
-      await Updates.reloadAsync();
+      setReloadError(null)
+      await Updates.reloadAsync()
     } catch (error) {
-      setReloadError(error as Error);
+      setReloadError(error as Error)
     }
-  };
+  }
 
   // Add check update function
   const handleCheckUpdate = async () => {
     try {
-      setCheckUpdateError(null);
-      const update = await Updates.checkForUpdateAsync();
+      setCheckUpdateError(null)
+      const update = await Updates.checkForUpdateAsync()
 
       if (update.isAvailable) {
-        await Updates.fetchUpdateAsync();
+        await Updates.fetchUpdateAsync()
       }
     } catch (error) {
-      setCheckUpdateError(error as Error);
+      setCheckUpdateError(error as Error)
     }
-  };
+  }
 
   const otaSettings = useMemo((): ISettingsListRow[] => {
     return [
@@ -202,7 +202,7 @@ export const OtaUpdatesList = memo(function OtaUpdatesList() {
       })),
     ]
       .flat()
-      .filter(Boolean);
+      .filter(Boolean)
   }, [
     currentlyRunning,
     isChecking,
@@ -217,7 +217,7 @@ export const OtaUpdatesList = memo(function OtaUpdatesList() {
     checkUpdateError,
     reloadError,
     logEntries,
-  ]);
+  ])
 
   return (
     <VStack>
@@ -244,14 +244,12 @@ export const OtaUpdatesList = memo(function OtaUpdatesList() {
             {"\n"}Status: {downloadedUpdate ? "Downloaded" : "Available"}
           </Text>
           <Button onPress={handleReload} disabled={!downloadedUpdate}>
-            {downloadedUpdate
-              ? "Reload App to Apply Update"
-              : "Downloading Update..."}
+            {downloadedUpdate ? "Reload App to Apply Update" : "Downloading Update..."}
           </Button>
         </VStack>
       )}
 
       <SettingsList rows={otaSettings} />
     </VStack>
-  );
-});
+  )
+})

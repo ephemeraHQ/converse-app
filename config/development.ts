@@ -1,5 +1,5 @@
-import { IConfig } from "@/config/config.types";
-import { shared } from "./shared";
+import { IConfig } from "@/config/config.types"
+import { shared } from "./shared"
 
 export const developmentConfig: IConfig = {
   ...shared,
@@ -9,9 +9,11 @@ export const developmentConfig: IConfig = {
   scheme: "converse-dev",
   websiteDomain: "dev.converse.xyz",
   usernameSuffix: ".conversedev.eth",
-  universalLinks: ["dev.converse.xyz/", "dev.getconverse.app/"].flatMap(
-    (domain) => [`https://${domain}`, `http://${domain}`, domain],
-  ),
+  universalLinks: ["dev.converse.xyz/", "dev.getconverse.app/"].flatMap((domain) => [
+    `https://${domain}`,
+    `http://${domain}`,
+    domain,
+  ]),
   evm: {
     rpcEndpoint: process.env.EXPO_PUBLIC_EVM_RPC_ENDPOINT,
     transactionChainId: "0x14a34", // Base Sepolia
@@ -22,6 +24,5 @@ export const developmentConfig: IConfig = {
       decimals: 6,
     },
   },
-  reactQueryEncryptionKey:
-    process.env.EXPO_PUBLIC_SECURE_REACT_QUERY_ENCRYPTION_KEY || "",
-} as const;
+  reactQueryEncryptionKey: process.env.EXPO_PUBLIC_SECURE_REACT_QUERY_ENCRYPTION_KEY || "",
+} as const

@@ -1,42 +1,38 @@
-import { create } from "zustand";
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import { create } from "zustand"
 
 type StreamingState = {
-  isStreamingConversations: boolean;
-  isStreamingMessages: boolean;
-  isStreamingConsent: boolean;
-};
+  isStreamingConversations: boolean
+  isStreamingMessages: boolean
+  isStreamingConsent: boolean
+}
 
 type State = {
-  accountStreamingStates: Record<string, StreamingState>;
-};
+  accountStreamingStates: Record<IXmtpInboxId, StreamingState>
+}
 
 type StoreActions = {
-  updateStreamingState: (
-    account: string,
-    updates: Partial<StreamingState>,
-  ) => void;
-  resetAccount: (account: string) => void;
-};
+  updateStreamingState: (inboxId: IXmtpInboxId, updates: Partial<StreamingState>) => void
+  resetAccount: (inboxId: IXmtpInboxId) => void
+}
 
-export const useStreamingStore = create<State & { actions: StoreActions }>(
-  (set) => ({
-    accountStreamingStates: {},
-    actions: {
-      updateStreamingState: (account, updates) =>
-        set((state) => ({
-          accountStreamingStates: {
-            ...state.accountStreamingStates,
-            [account]: {
-              ...state.accountStreamingStates[account],
-              ...updates,
-            },
+export const useStreamingStore = create<State & { actions: StoreActions }>((set) => ({
+  accountStreamingStates: {},
+  actions: {
+    updateStreamingState: (inboxId, updates) =>
+      set((state) => ({
+        accountStreamingStates: {
+          ...state.accountStreamingStates,
+          [inboxId]: {
+            ...state.accountStreamingStates[inboxId],
+            ...updates,
           },
-        })),
-      resetAccount: (account) =>
-        set((state) => {
-          const { [account]: _, ...rest } = state.accountStreamingStates;
-          return { accountStreamingStates: rest };
-        }),
-    },
-  }),
-);
+        },
+      })),
+    resetAccount: (inboxId) =>
+      set((state) => {
+        const { [inboxId]: _, ...rest } = state.accountStreamingStates
+        return { accountStreamingStates: rest }
+      }),
+  },
+}))

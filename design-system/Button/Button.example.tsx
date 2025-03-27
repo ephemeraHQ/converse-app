@@ -1,16 +1,16 @@
-import { VStack } from "@design-system/VStack";
-import { useAppTheme } from "@/theme/use-app-theme";
-import { Icon } from "../Icon/Icon";
-import { Button } from "./Button";
+import { VStack } from "@design-system/VStack"
+import { useAppTheme } from "@/theme/use-app-theme"
+import { Icon } from "../Icon/Icon"
+import { Button } from "./Button"
 
 type IExampleProps = {
-  onPress?: () => void;
-};
+  onPress?: () => void
+}
 
 export function ButtonExample(args: IExampleProps) {
-  const { onPress } = args;
+  const { onPress } = args
 
-  const { theme } = useAppTheme();
+  const { theme } = useAppTheme()
 
   return (
     <VStack
@@ -65,5 +65,5 @@ export function ButtonExample(args: IExampleProps) {
       {/* With Haptic Feedback */}
       <Button text="Haptic Button" withHapticFeedback onPress={onPress} />
     </VStack>
-  );
+  )
 }

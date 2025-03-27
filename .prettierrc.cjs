@@ -6,10 +6,10 @@ module.exports = {
   endOfLine: "lf",
   htmlWhitespaceSensitivity: "css",
   jsxSingleQuote: false,
-  printWidth: 80,
+  printWidth: 100,
   proseWrap: "preserve",
   quoteProps: "as-needed",
-  semi: true,
+  semi: false,
   singleAttributePerLine: false,
   singleQuote: false,
   tabWidth: 2,
@@ -27,4 +27,4 @@ module.exports = {
     "^[.]",
   ],
   importOrderTypeScriptVersion: "5.7.3",
-};
+}

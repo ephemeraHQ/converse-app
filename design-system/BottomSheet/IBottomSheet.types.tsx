@@ -1,5 +1,5 @@
-import { BottomSheetModalMethods as GorhomBottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
+import { BottomSheetModalMethods as GorhomBottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types"
 
-export type IBottomSheetModalRefType = GorhomBottomSheetModalMethods;
+export type IBottomSheetModalRefType = GorhomBottomSheetModalMethods
 
-export type IBottomSheetModalRef = React.RefObject<IBottomSheetModalRefType>;
+export type IBottomSheetModalRef = React.RefObject<IBottomSheetModalRefType>

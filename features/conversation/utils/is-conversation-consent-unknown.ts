@@ -1,7 +1,5 @@
-import { IXmtpConversationWithCodecs } from "@/features/xmtp/xmtp.types";
+import { IConversation } from "../conversation.types"
 
-export function isConversationConsentUnknown(
-  conversation: IXmtpConversationWithCodecs,
-) {
-  return conversation.state === "unknown";
+export function isConversationConsentUnknown(conversation: IConversation) {
+  return conversation.consentState === "unknown"
 }

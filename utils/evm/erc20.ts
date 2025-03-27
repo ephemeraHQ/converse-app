@@ -1,9 +1,9 @@
-import { ethers } from "ethers";
-import { isAddress } from "ethers/lib/utils";
-import { config } from "../../config";
-import erc20abi from "./abis/erc20.json";
-import { evmHelpers } from "./helpers";
-import provider from "./provider";
+import { ethers } from "ethers"
+import { isAddress } from "ethers/lib/utils"
+import { config } from "../../config"
+import erc20abi from "./abis/erc20.json"
+import { evmHelpers } from "./helpers"
+import provider from "./provider"
 
 export const TransferWithAuthorizationTypes = {
   TransferWithAuthorization: [
@@ -14,7 +14,7 @@ export const TransferWithAuthorizationTypes = {
     { name: "validBefore", type: "uint256" },
     { name: "nonce", type: "bytes32" },
   ],
-};
+}
 
 export async function getErc20BalanceForAddress(
   erc20ContractAddress: string,
@@ -22,15 +22,11 @@ export async function getErc20BalanceForAddress(
   provider: ethers.providers.Provider,
 ) {
   if (!isAddress(address)) {
-    return "0";
+    return "0"
   }
-  const contract = new ethers.Contract(
-    erc20ContractAddress,
-    erc20abi,
-    provider,
-  );
-  const balance = await contract.balanceOf(address);
-  return evmHelpers.hexToNumberString(balance);
+  const contract = new ethers.Contract(erc20ContractAddress, erc20abi, provider)
+  const balance = await contract.balanceOf(address)
+  return evmHelpers.hexToNumberString(balance)
 }
 
 /**
@@ -42,25 +38,18 @@ export async function getErc20Decimals(
   erc20ContractAddress: string,
   provider: ethers.providers.Provider,
 ) {
-  if (
-    erc20ContractAddress.toLowerCase() ===
-    config.evm.USDC.contractAddress.toLowerCase()
-  ) {
-    return config.evm.USDC.decimals;
+  if (erc20ContractAddress.toLowerCase() === config.evm.USDC.contractAddress.toLowerCase()) {
+    return config.evm.USDC.decimals
   }
-  const contract = new ethers.Contract(
-    erc20ContractAddress,
-    erc20abi,
-    provider,
-  );
-  let decimals;
+  const contract = new ethers.Contract(erc20ContractAddress, erc20abi, provider)
+  let decimals
   try {
-    decimals = await contract.decimals();
+    decimals = await contract.decimals()
   } catch (e) {
     /** Some ERC20 contracts do not have the right decimals method. Defaults to 18 */
-    return 18;
+    return 18
   }
-  return evmHelpers.toNumber(decimals);
+  return evmHelpers.toNumber(decimals)
 }
 
 /**
@@ -72,29 +61,25 @@ export async function getErc20TokenSymbol(
   erc20ContractAddress: string,
   provider: ethers.providers.Provider,
 ) {
-  const contract = new ethers.Contract(
-    erc20ContractAddress,
-    erc20abi,
-    provider,
-  );
-  let symbol;
+  const contract = new ethers.Contract(erc20ContractAddress, erc20abi, provider)
+  let symbol
   try {
-    symbol = await contract.symbol();
+    symbol = await contract.symbol()
   } catch (e) {
     /** Some ERC20 contracts, including DAI do not have the right symbol method. */
-    return null;
+    return null
   }
-  return symbol;
+  return symbol
 }
 
 export type TransferAuthorizationMessage = {
-  from: string;
-  to: string;
-  value: any;
-  validAfter: number;
-  validBefore: number;
-  nonce: string;
-};
+  from: string
+  to: string
+  value: any
+  validAfter: number
+  validBefore: number
+  nonce: string
+}
 
 /**
  * Computes the domain separator for a given ERC20 contract
@@ -109,29 +94,22 @@ const getDomain = async (
   erc20ContractAddress: string,
   provider: ethers.providers.Provider,
 ) => {
-  let version = "1";
-  let name = "";
-  if (
-    erc20ContractAddress.toLowerCase() ===
-    config.evm.USDC.contractAddress.toLowerCase()
-  ) {
+  let version = "1"
+  let name = ""
+  if (erc20ContractAddress.toLowerCase() === config.evm.USDC.contractAddress.toLowerCase()) {
     // Useful to gain a bit of precious time
-    version = config.evm.USDC.version;
-    name = config.evm.USDC.name;
+    version = config.evm.USDC.version
+    name = config.evm.USDC.name
   } else {
-    const contract = new ethers.Contract(
-      erc20ContractAddress,
-      erc20abi,
-      provider,
-    );
+    const contract = new ethers.Contract(erc20ContractAddress, erc20abi, provider)
     try {
-      version = await contract.version();
+      version = await contract.version()
     } catch (error) {
       console.warn(
         `We could not retrieve the version of ${erc20ContractAddress} using the version() method. Defaulting to ${version}`,
-      );
+      )
     }
-    name = await contract.name();
+    name = await contract.name()
   }
 
   // If we want to use Polygon Bridged USDC...
@@ -153,8 +131,8 @@ const getDomain = async (
     version,
     chainId,
     verifyingContract: ethers.utils.getAddress(erc20ContractAddress),
-  };
-};
+  }
+}
 
 export async function signTransferAuthorization(
   erc20ContractAddress: string,
@@ -162,10 +140,10 @@ export async function signTransferAuthorization(
   provider: ethers.providers.Provider,
   signer: ethers.Signer,
 ) {
-  const { chainId } = await provider.getNetwork();
-  const domain = await getDomain(chainId, erc20ContractAddress, provider);
+  const { chainId } = await provider.getNetwork()
+  const domain = await getDomain(chainId, erc20ContractAddress, provider)
   // @ts-expect-error Property '_signTypedData' does not exist on type 'Signer'.ts(2339)
-  return signer._signTypedData(domain, TransferWithAuthorizationTypes, message);
+  return signer._signTypedData(domain, TransferWithAuthorizationTypes, message)
 }
 
 export const getTransferAuthorization = async (
@@ -181,12 +159,12 @@ export const getTransferAuthorization = async (
     validAfter: 0,
     validBefore: Math.floor(Date.now() / 1000) + 3600,
     nonce: evmHelpers.randomHex(32),
-  };
+  }
   const signature = await signTransferAuthorization(
     erc20ContractAddress,
     authorizationMessage,
     provider,
     signer,
-  );
-  return { message: authorizationMessage, signature };
-};
+  )
+  return { message: authorizationMessage, signature }
+}

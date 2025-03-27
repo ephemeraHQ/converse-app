@@ -15,12 +15,12 @@ const ALLOWED_UNS_SUFFIXES = [
   ".anime",
   ".manga",
   ".binanceus",
-];
+]
 
 export const isUNSAddress = (address: string): boolean => {
   // Bail out early if empty string or a string without any dots
   if (!address || !address.includes(".")) {
-    return false;
+    return false
   }
-  return ALLOWED_UNS_SUFFIXES.some((suffix) => address.endsWith(suffix));
-};
+  return ALLOWED_UNS_SUFFIXES.some((suffix) => address.endsWith(suffix))
+}

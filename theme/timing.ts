@@ -6,6 +6,6 @@ export const timing = {
   xSlow: 1000,
   xxSlow: 2000,
   "3xSlow": 3000,
-};
+}
 
-export type Timing = typeof timing;
+export type Timing = typeof timing

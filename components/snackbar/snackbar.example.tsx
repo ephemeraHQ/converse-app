@@ -1,15 +1,15 @@
-import { Button } from "@design-system/Button/Button";
-import { VStack } from "@design-system/VStack";
-import { Image } from "expo-image";
-import { memo } from "react";
-import { Dimensions } from "react-native";
-import { showSnackbar } from "@/components/snackbar/snackbar.service";
-import { useAppTheme } from "@/theme/use-app-theme";
+import { Button } from "@design-system/Button/Button"
+import { VStack } from "@design-system/VStack"
+import { Image } from "expo-image"
+import { memo } from "react"
+import { Dimensions } from "react-native"
+import { showSnackbar } from "@/components/snackbar/snackbar.service"
+import { useAppTheme } from "@/theme/use-app-theme"
 
 export const SnackbarExample = memo(function SnackbarExample() {
-  const { theme } = useAppTheme();
+  const { theme } = useAppTheme()
 
-  const windowWidth = Dimensions.get("window").width;
+  const windowWidth = Dimensions.get("window").width
 
   return (
     <VStack style={{ rowGap: theme.spacing.lg }}>
@@ -87,5 +87,5 @@ export const SnackbarExample = memo(function SnackbarExample() {
         style={{ width: windowWidth - theme.spacing.lg * 2, height: 500 }}
       />
     </VStack>
-  );
-});
+  )
+})

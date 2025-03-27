@@ -9,7 +9,7 @@
 //  * and description (if available).
 //  *
 //  * @param {Object} props - The component props
-//  * @param {string} props.groupName - The name of the group
+//  * @param {string} props.name - The name of the group
 //  * @param {string} props.imageUrl - The URL of the group's avatar
 //  * @param {string} [props.description] - The group's description
 //  *

@@ -1,6 +1,7 @@
-import { ConversationTopic } from "@xmtp/react-native-sdk";
-import { TEMP_CONVERSATION_PREFIX } from "@/features/conversation/conversation-create/hooks/use-create-conversation-and-send-first-message";
+import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 
-export function isTempConversation(topic: ConversationTopic) {
-  return topic?.startsWith(TEMP_CONVERSATION_PREFIX);
+export const TEMP_CONVERSATION_PREFIX = "tmp-"
+
+export function isTempConversation(xmtpConversationId: IXmtpConversationId) {
+  return xmtpConversationId?.startsWith(TEMP_CONVERSATION_PREFIX)
 }

@@ -1,37 +1,45 @@
+import { LinkingOptions, NavigationContainer } from "@react-navigation/native"
+import { createNativeStackNavigator } from "@react-navigation/native-stack"
+import * as Linking from "expo-linking"
+import React, { memo, useEffect } from "react"
+import { config } from "@/config"
+import { AppSettingsScreen } from "@/features/app-settings/app-settings.screen"
+import { useIsCurrentVersionEnough } from "@/features/app-settings/hooks/use-is-current-version-enough"
+import { AuthOnboardingContactCardImportInfoScreen } from "@/features/auth-onboarding/screens/auth-onboarding-contact-card-import-info.screen"
+import { AuthScreen } from "@/features/auth-onboarding/screens/auth-onboarding.screen"
+import { useAuthenticationStore } from "@/features/authentication/authentication.store"
+import { hydrateAuth } from "@/features/authentication/hydrate-auth"
+import { useSignoutIfNoPrivyUser } from "@/features/authentication/use-logout-if-no-privy-user"
+import { useRefreshJwtAxiosInterceptor } from "@/features/authentication/use-refresh-jwt.axios-interceptor"
+import { BlockedConversationsScreen } from "@/features/blocked-conversations/blocked-conversations.screen"
+import { ConversationScreen } from "@/features/conversation/conversation-chat/conversation.screen"
+import { ConversationListScreen } from "@/features/conversation/conversation-list/conversation-list.screen"
+import { ConversationRequestsListScreen } from "@/features/conversation/conversation-requests-list/conversation-requests-list.screen"
+import { useCreateUserIfNoExist } from "@/features/current-user/use-create-user-if-no-exist"
+import { AddGroupMembersScreen } from "@/features/groups/group-details/add-group-members/add-group-members.screen"
+import { GroupDetailsScreen } from "@/features/groups/group-details/group-details.screen"
+import { GroupMembersListScreen } from "@/features/groups/group-details/members-list/group-members-list.screen"
 import {
-  ConversationNav,
-  ConversationScreenConfig,
-} from "@features/conversation/conversation.nav";
-import { LinkingOptions, NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import * as Linking from "expo-linking";
-import React, { useEffect } from "react";
-import { config } from "@/config";
-import { AppSettingsScreen } from "@/features/app-settings/app-settings.screen";
-import { useIsCurrentVersionEnough } from "@/features/app-settings/hooks/use-is-current-version-enough";
-import { useAuthStore } from "@/features/authentication/authentication.store";
-import { BlockedConversationsScreen } from "@/features/blocked-conversations/blocked-conversations.screen";
-import { ConversationListScreen } from "@/features/conversation-list/conversation-list.screen";
-import { ConversationRequestsListNav } from "@/features/conversation-requests-list/conversation-requests-list.nav";
-import { OnboardingContactCardScreen } from "@/features/onboarding/screens/onboarding-contact-card-screen";
-import { OnboardingWelcomeScreen } from "@/features/onboarding/screens/onboarding-welcome-screen";
-import {
-  ProfileNav,
-  ProfileScreenConfig,
-} from "@/features/profiles/profile.nav";
-import { NavigationParamList } from "@/navigation/navigation.types";
-import { navigationRef } from "@/navigation/navigation.utils";
-import { WebviewPreviewNav } from "@/screens/WebviewPreviewNav";
-import { useThemeProvider } from "@/theme/use-app-theme";
-import { captureError } from "@/utils/capture-error";
-import { useUpdateSentry } from "@/utils/sentry";
-import { hideSplashScreen } from "@/utils/splash/splash";
-import {
-  ShareProfileNav,
-  ShareProfileScreenConfig,
-} from "../screens/ShareProfileNav";
+  isConvosModifiedNotification,
+  isNotificationXmtpNewMessageNotification,
+} from "@/features/notifications/notification-assertions"
+import { useNotificationListeners } from "@/features/notifications/notifications-listeners"
+import { ProfileImportInfoScreen } from "@/features/profiles/profile-import-info.screen"
+import { ProfileScreen } from "@/features/profiles/profile.screen"
+import { getXmtpConversationIdFromXmtpTopic } from "@/features/xmtp/xmtp-conversations/xmtp-conversation"
+import { translate } from "@/i18n"
+import { NavigationParamList } from "@/navigation/navigation.types"
+import { navigate, navigationRef } from "@/navigation/navigation.utils"
+import { ShareProfileScreen } from "@/screens/ShareProfile"
+import { WebviewPreview } from "@/screens/WebviewPreview"
+import { useAppTheme, useThemeProvider } from "@/theme/use-app-theme"
+import { captureError } from "@/utils/capture-error"
+import { NotificationError } from "@/utils/error"
+import { notificationsLogger } from "@/utils/logger"
+import { useUpdateSentryUser } from "@/utils/sentry/sentry-identity"
+import { hideSplashScreen } from "@/utils/splash/splash"
 
-const prefix = Linking.createURL("/");
+const prefix = Linking.createURL("/")
 
 const linking: LinkingOptions<NavigationParamList> = {
   prefixes: [prefix, ...config.universalLinks],
@@ -39,27 +47,71 @@ const linking: LinkingOptions<NavigationParamList> = {
     initialRouteName: "Chats",
     screens: {
       Chats: "/",
-      Conversation: ConversationScreenConfig,
-      Profile: ProfileScreenConfig,
-      ShareProfile: ShareProfileScreenConfig,
+      Conversation: {
+        path: "/conversation",
+        parse: {
+          topic: decodeURIComponent,
+        },
+        stringify: {
+          topic: encodeURIComponent,
+        },
+      },
+      Profile: {
+        path: "/profile",
+      },
+      ShareProfile: {
+        path: "/shareProfile",
+      },
+      GroupDetails: {
+        path: "/group-details",
+        parse: {
+          xmtpConversationId: decodeURIComponent,
+        },
+        stringify: {
+          xmtpConversationId: encodeURIComponent,
+        },
+      },
+      AddGroupMembers: {
+        path: "/add-group-members",
+        parse: {
+          xmtpConversationId: decodeURIComponent,
+        },
+        stringify: {
+          xmtpConversationId: encodeURIComponent,
+        },
+      },
+      GroupMembersList: {
+        path: "/group-members-list",
+        parse: {
+          xmtpConversationId: decodeURIComponent,
+        },
+        stringify: {
+          xmtpConversationId: encodeURIComponent,
+        },
+      },
     },
   },
   // TODO: Fix this
   // getStateFromPath: getConverseStateFromPath("fullStackNavigation"),
   // TODO: Fix this
   // getInitialURL: () => null,
-};
+}
 
 export function AppNavigator() {
-  const {
-    themeScheme,
-    navigationTheme,
-    setThemeContextOverride,
-    ThemeProvider,
-  } = useThemeProvider();
+  const { themeScheme, navigationTheme, setThemeContextOverride, ThemeProvider } =
+    useThemeProvider()
 
-  useUpdateSentry();
-  useIsCurrentVersionEnough();
+  useUpdateSentryUser()
+  useIsCurrentVersionEnough()
+  useRefreshJwtAxiosInterceptor()
+  useSignoutIfNoPrivyUser()
+  useCreateUserIfNoExist()
+  useNotificationListeners()
+
+  // Hydrate auth when the app is loaded
+  useEffect(() => {
+    hydrateAuth().catch(captureError)
+  }, [])
 
   return (
     <>
@@ -78,23 +130,25 @@ export function AppNavigator() {
         </NavigationContainer>
       </ThemeProvider>
     </>
-  );
+  )
 }
 
-export const AppNativeStack = createNativeStackNavigator<NavigationParamList>();
+export const AppNativeStack = createNativeStackNavigator<NavigationParamList>()
 
-function AppStacks() {
-  const authStatus = useAuthStore((state) => state.status);
+const AppStacks = memo(function AppStacks() {
+  const { theme } = useAppTheme()
+
+  const authStatus = useAuthenticationStore((state) => state.status)
 
   useEffect(() => {
     if (authStatus !== "undetermined") {
-      hideSplashScreen().catch(captureError);
+      hideSplashScreen().catch(captureError)
     }
-  }, [authStatus]);
+  }, [authStatus])
 
-  const isUndetermined = authStatus === "undetermined";
-  const isOnboarding = authStatus === "onboarding";
-  const isSignedOut = authStatus === "signedOut";
+  const isUndetermined = authStatus === "undetermined"
+  // const isOnboarding = authStatus === "onboarding"
+  const isSignedOut = authStatus === "signedOut"
 
   return (
     <AppNativeStack.Navigator
@@ -114,26 +168,40 @@ function AppStacks() {
       ) : isSignedOut ? (
         <AppNativeStack.Group>
           <AppNativeStack.Screen
-            name="OnboardingWelcome"
-            component={OnboardingWelcomeScreen}
+            name="Auth"
+            component={AuthScreen}
             // Fade animation when transitioning to signed out state
             options={{ animation: "fade" }}
           />
-        </AppNativeStack.Group>
-      ) : isOnboarding ? (
-        <AppNativeStack.Group>
           <AppNativeStack.Screen
-            name="OnboardingCreateContactCard"
-            component={OnboardingContactCardScreen}
-            // Fade animation when transitioning to onboarding state
-            options={{ animation: "fade" }}
+            name="OnboardingCreateContactCardImportName"
+            component={AuthOnboardingContactCardImportInfoScreen}
+            options={{
+              presentation: "formSheet",
+              sheetAllowedDetents: [0.5],
+              // sheetCornerRadius: theme.borderRadius.sm, // Not sure why but adding this breaks the animation between different height transitions
+              contentStyle: {
+                backgroundColor: theme.colors.background.raised,
+              },
+            }}
           />
-          {/* <NativeStack.Screen
-            name="OnboardingNotifications"
-            component={OnboardingNotificationsScreen}
-          /> */}
         </AppNativeStack.Group>
       ) : (
+        //  : isOnboarding ? (
+        //   <AppNativeStack.Group>
+        //     <AppNativeStack.Screen
+        //       name="OnboardingCreateContactCard"
+        //       component={OnboardingContactCardScreen}
+        //       // Fade animation when transitioning to onboarding state
+        //       options={{ animation: "fade" }}
+        //     />
+
+        //     {/* <NativeStack.Screen
+        //       name="OnboardingNotifications"
+        //       component={OnboardingNotificationsScreen}
+        //     /> */}
+        //   </AppNativeStack.Group>
+        // )
         // Main app screens
         <AppNativeStack.Group>
           <AppNativeStack.Screen
@@ -142,26 +210,62 @@ function AppStacks() {
             // Fade animation when transitioning to authenticated state
             options={{ animation: "fade" }}
           />
+          <AppNativeStack.Screen name="Blocked" component={BlockedConversationsScreen} />
+          <AppNativeStack.Screen name="ChatsRequests" component={ConversationRequestsListScreen} />
           <AppNativeStack.Screen
-            name="Blocked"
-            component={BlockedConversationsScreen}
+            options={{
+              title: "",
+              headerTitle: translate("chat"),
+            }}
+            name="Conversation"
+            component={ConversationScreen}
           />
-          {ConversationRequestsListNav()}
-          {ConversationNav()}
-          {ShareProfileNav()}
-          {WebviewPreviewNav()}
-          {ProfileNav()}
           <AppNativeStack.Screen
-            name="AppSettings"
-            component={AppSettingsScreen}
+            options={{ presentation: "modal" }}
+            name="ShareProfile"
+            component={ShareProfileScreen}
           />
+          <AppNativeStack.Screen
+            options={{ presentation: "modal" }}
+            name="WebviewPreview"
+            component={WebviewPreview}
+          />
+          <AppNativeStack.Screen name="Profile" component={ProfileScreen} />
+          <AppNativeStack.Screen name="GroupDetails" component={GroupDetailsScreen} />
+          <AppNativeStack.Screen
+            options={{
+              title: translate("add_members"),
+            }}
+            name="AddGroupMembers"
+            component={AddGroupMembersScreen}
+          />
+          <AppNativeStack.Screen
+            options={{
+              title: translate("group_members"),
+            }}
+            name="GroupMembersList"
+            component={GroupMembersListScreen}
+          />
+          <AppNativeStack.Screen
+            name="ProfileImportInfo"
+            component={ProfileImportInfoScreen}
+            options={{
+              presentation: "formSheet",
+              sheetAllowedDetents: [0.5],
+              // sheetCornerRadius: theme.borderRadius.sm, // Not sure why but adding this breaks the animation between different height transitions
+              contentStyle: {
+                backgroundColor: theme.colors.background.raised,
+              },
+            }}
+          />
+          <AppNativeStack.Screen name="AppSettings" component={AppSettingsScreen} />
         </AppNativeStack.Group>
       )}
     </AppNativeStack.Navigator>
-  );
-}
+  )
+})
 
 // TODO: Maybe show animated splash screen or something
 function IdleScreen() {
-  return null;
+  return null
 }

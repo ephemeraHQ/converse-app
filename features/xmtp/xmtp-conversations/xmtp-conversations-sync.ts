@@ -1,61 +1,74 @@
-import { ConsentState, Conversation } from "@xmtp/react-native-sdk";
-import { captureError } from "@/utils/capture-error";
-import { XMTPError } from "@/utils/error";
-import { getXmtpClientByEthAddress } from "../xmtp-client/xmtp-client.service";
+import { ConsentState, syncAllConversations, syncConversation } from "@xmtp/react-native-sdk"
+import { config } from "@/config"
+import { ensureXmtpInstallationQueryData } from "@/features/xmtp/xmtp-installations/xmtp-installation.query"
+import { IXmtpConversationId, IXmtpInboxId } from "@/features/xmtp/xmtp.types"
+import { captureError } from "@/utils/capture-error"
+import { XMTPError } from "@/utils/error"
+import { getXmtpClientByInboxId } from "../xmtp-client/xmtp-client"
 
-export async function syncAllConversations(
-  ethAddress: string,
-  consentStates: ConsentState[],
-) {
+export async function syncOneXmtpConversation(args: {
+  clientInboxId: IXmtpInboxId
+  conversationId: IXmtpConversationId
+}) {
+  const { clientInboxId, conversationId } = args
+
+  const client = await getXmtpClientByInboxId({
+    inboxId: clientInboxId,
+  })
+
   try {
-    const client = await getXmtpClientByEthAddress({
-      ethAddress: ethAddress,
-    });
+    const beforeSync = new Date().getTime()
+    await syncConversation(client.installationId, conversationId)
+    const afterSync = new Date().getTime()
 
-    const beforeSync = new Date().getTime();
-    await client.conversations.syncAllConversations(consentStates);
-    const afterSync = new Date().getTime();
-
-    const timeDiff = afterSync - beforeSync;
-    if (timeDiff > 3000) {
+    const timeDiff = afterSync - beforeSync
+    if (timeDiff > config.xmtp.maxMsUntilLogError) {
       captureError(
         new XMTPError({
           error: new Error(
-            `Syncing conversations from network took ${timeDiff}ms for account ${ethAddress}`,
+            `Syncing conversation took ${timeDiff}ms for conversationId ${conversationId}`,
           ),
         }),
-      );
+      )
     }
   } catch (error) {
     throw new XMTPError({
       error,
-      additionalMessage: `Error syncing all conversations for account ${ethAddress} and consent states ${consentStates.map((c) => c.toString()).join(", ")}`,
-    });
+      additionalMessage: `Error syncing conversation ${conversationId}`,
+    })
   }
 }
 
-export async function syncConversation(args: { conversation: Conversation }) {
-  const { conversation } = args;
+export async function syncAllXmtpConversations(args: {
+  clientInboxId: IXmtpInboxId
+  consentStates?: ConsentState[]
+}) {
+  const { clientInboxId, consentStates = ["allowed", "unknown", "denied"] } = args
 
   try {
-    const beforeSync = new Date().getTime();
-    await conversation.sync();
-    const afterSync = new Date().getTime();
+    const installationId = await ensureXmtpInstallationQueryData({
+      inboxId: clientInboxId,
+    })
 
-    const timeDiff = afterSync - beforeSync;
-    if (timeDiff > 3000) {
+    const start = new Date().getTime()
+    await syncAllConversations(installationId, consentStates)
+    const end = new Date().getTime()
+
+    const duration = end - start
+
+    if (duration > config.xmtp.maxMsUntilLogError) {
       captureError(
         new XMTPError({
           error: new Error(
-            `Syncing conversation took ${timeDiff}ms for topic ${conversation.topic}`,
+            `Syncing conversations (${consentStates.join(", ")}) from network took ${duration}ms for inbox ${clientInboxId}`,
           ),
         }),
-      );
+      )
     }
   } catch (error) {
     throw new XMTPError({
       error,
-      additionalMessage: `Error syncing conversation ${conversation.topic}`,
-    });
+      additionalMessage: `Failed to sync conversations for inbox: ${clientInboxId}`,
+    })
   }
 }

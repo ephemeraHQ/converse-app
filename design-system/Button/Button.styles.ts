@@ -1,44 +1,30 @@
-import { TextStyle, ViewStyle } from "react-native";
-import {
-  flattenThemedStyles,
-  Theme,
-  ThemedStyle,
-} from "../../theme/use-app-theme";
-import { textPresets } from "./../Text/Text.presets";
-import { IButtonAction, IButtonSize, IButtonVariant } from "./Button.props";
+import { TextStyle, ViewStyle } from "react-native"
+import { flattenThemedStyles, Theme, ThemedStyle } from "../../theme/use-app-theme"
+import { textPresets } from "./../Text/Text.presets"
+import { IButtonAction, IButtonSize, IButtonVariant } from "./Button.props"
 
 type IButtonStyleProps = {
-  variant: IButtonVariant;
-  size: IButtonSize;
-  action: IButtonAction;
-  pressed?: boolean;
-  disabled?: boolean;
-};
+  variant: IButtonVariant
+  size: IButtonSize
+  action: IButtonAction
+  pressed?: boolean
+  disabled?: boolean
+}
 
-export const $buttonRightAccessoryStyle: ThemedStyle<ViewStyle> = ({
-  spacing,
-}) => ({
+export const $buttonRightAccessoryStyle: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   marginStart: spacing.xs,
   zIndex: 1,
-});
+})
 
-export const $buttonLeftAccessoryStyle: ThemedStyle<ViewStyle> = ({
-  spacing,
-}) => ({
+export const $buttonLeftAccessoryStyle: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   marginEnd: spacing.xs,
   zIndex: 1,
-});
+})
 
 export const getButtonViewStyle =
-  ({
-    variant,
-    size,
-    action,
-    pressed = false,
-    disabled = false,
-  }: IButtonStyleProps) =>
+  ({ variant, size, action, pressed = false, disabled = false }: IButtonStyleProps) =>
   (theme: Theme): ViewStyle => {
-    const { spacing, colors, borderRadius } = theme;
+    const { spacing, colors, borderRadius } = theme
 
     const style: ViewStyle = {
       flexDirection: "row",
@@ -46,11 +32,9 @@ export const getButtonViewStyle =
       alignItems: "center",
       borderRadius: borderRadius.sm,
       overflow: "hidden",
-      paddingVertical:
-        size === "md" || size === "sm" ? spacing.xxs : spacing.xs,
-      paddingHorizontal:
-        size === "md" || size === "sm" ? spacing.xs : spacing.sm,
-    };
+      paddingVertical: size === "md" || size === "sm" ? spacing.xxs : spacing.xs,
+      paddingHorizontal: size === "md" || size === "sm" ? spacing.xs : spacing.sm,
+    }
 
     // Special case for bare link text buttons - no padding or other decorations
     if (variant === "link.bare") {
@@ -59,103 +43,96 @@ export const getButtonViewStyle =
         alignItems: "center",
         justifyContent: "center",
         gap: spacing.xxs,
-      };
+      }
     }
 
     if (action === "primary") {
       switch (variant) {
         case "fill":
-          style.backgroundColor = colors.fill.primary;
+          style.backgroundColor = colors.fill.primary
           if (pressed) {
-            style.backgroundColor = colors.fill.secondary;
+            style.backgroundColor = colors.fill.secondary
           }
           if (disabled) {
-            style.backgroundColor = colors.fill.tertiary;
+            style.backgroundColor = colors.fill.tertiary
           }
-          break;
+          break
 
         case "outline":
-          style.borderWidth = 1;
-          style.borderColor = colors.border.secondary;
-          style.backgroundColor = "transparent";
+          style.borderWidth = 1
+          style.borderColor = colors.border.secondary
+          style.backgroundColor = "transparent"
           if (pressed) {
-            style.backgroundColor = colors.fill.minimal;
+            style.backgroundColor = colors.fill.minimal
           }
-          break;
+          break
 
         case "link":
         case "text":
-          style.backgroundColor = "transparent";
+          style.backgroundColor = "transparent"
           // Put back when we're done refactoring all the variant="text" button
           // if (pressed) {
           //   style.backgroundColor = colors.fill.minimal;
           // }
           // Temporary opacity change for the variant="text" button
           if (pressed) {
-            style.opacity = 0.8;
+            style.opacity = 0.8
           }
-          break;
+          break
 
         default:
-          break;
+          break
       }
     }
 
-    return style;
-  };
+    return style
+  }
 
 export const getButtonTextStyle =
-  ({
-    size,
-    variant,
-    action,
-    pressed = false,
-    disabled = false,
-  }: IButtonStyleProps) =>
+  ({ size, variant, action, pressed = false, disabled = false }: IButtonStyleProps) =>
   (theme: Theme): TextStyle => {
-    const { colors } = theme;
+    const { colors } = theme
 
     const style: TextStyle = {
       // ...(size === "sm" ? textPresets.title.flat(3) : textPresets.body.flat(3)),
       ...flattenThemedStyles({
-        styles:
-          size === "sm" || size === "md" ? textPresets.small : textPresets.body,
+        styles: size === "sm" || size === "md" ? textPresets.small : textPresets.body,
         theme,
       }),
       textAlign: "center",
       flexShrink: 1,
       flexGrow: 0,
       zIndex: 2,
-    };
+    }
 
     if (action === "primary") {
       switch (variant) {
         case "fill":
-          style.color = colors.text.inverted.primary;
-          break;
+          style.color = colors.text.inverted.primary
+          break
 
         case "outline":
-          style.color = colors.text.primary;
+          style.color = colors.text.primary
           if (disabled) {
-            style.color = colors.fill.tertiary;
+            style.color = colors.fill.tertiary
           }
-          break;
+          break
 
         case "link":
         case "text":
-          style.color = colors.text.primary;
+          style.color = colors.text.primary
           if (disabled) {
-            style.color = colors.fill.tertiary;
+            style.color = colors.fill.tertiary
           }
-          break;
+          break
 
         default:
-          break;
+          break
       }
     }
 
-    return style;
-  };
+    return style
+  }
 
 // Cursor query
 // Ok I'll tell you some styling instruction and please make sure the styles are done correctly. All of those are for action = primary. We don't have other styling yet for the action = danger. Also don,t forget the size (lg or md)

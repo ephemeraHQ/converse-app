@@ -1,110 +1,266 @@
-import { InboxId, Client as XmtpClient } from "@xmtp/react-native-sdk";
-import { getRandomBytesAsync } from "expo-crypto";
-import { config } from "@/config";
-import { XMTP_MAX_MS_UNTIL_LOG_ERROR } from "@/features/xmtp/utils/xmtp-logs";
-import { captureError } from "@/utils/capture-error";
-import { XMTPError } from "@/utils/error";
-import { getSecureItemAsync, setSecureItemAsync } from "@/utils/keychain";
-import { xmtpLogger } from "@/utils/logger";
 import {
-  ISupportedXmtpCodecs,
-  supportedXmtpCodecs,
-} from "../xmtp-codecs/xmtp-codecs";
-import { IXmtpClient, IXmtpSigner } from "../xmtp.types";
+  IXmtpClientWithCodecs,
+  IXmtpEnv,
+  IXmtpInboxId,
+  IXmtpSigner,
+} from "@features/xmtp/xmtp.types"
+import { PublicIdentity, Client as XmtpClient } from "@xmtp/react-native-sdk"
+import Constants from "expo-constants"
+import { config } from "@/config"
+import { useMultiInboxStore } from "@/features/authentication/multi-inbox.store"
+import {
+  cleanXmtpDbEncryptionKey,
+  getOrCreateXmtpDbEncryptionKey,
+} from "@/features/xmtp/xmtp-client/xmtp-client-db-encryption-key"
+import { ISupportedXmtpCodecs, supportedXmtpCodecs } from "@/features/xmtp/xmtp-codecs/xmtp-codecs"
+import { xmtpIdentityIsEthereumAddress } from "@/features/xmtp/xmtp-identifier/xmtp-identifier"
+import { captureError } from "@/utils/capture-error"
+import { XMTPError } from "@/utils/error"
+import { IEthereumAddress, lowercaseEthAddress } from "@/utils/evm/address"
+import { xmtpLogger } from "@/utils/logger"
+import { tryCatchWithDuration } from "@/utils/try-catch"
 
-export async function createXmtpClientInstance(args: {
-  inboxSigner: IXmtpSigner;
-}): Promise<IXmtpClient> {
-  const { inboxSigner } = args;
-  const startTime = Date.now();
+// A simple map to store XMTP clients by inboxId
+const xmtpClientsMap = new Map<IXmtpInboxId, IXmtpClientWithCodecs>()
 
-  xmtpLogger.debug(`Creating new XMTP client`);
+// Simple cache to prevent multiple builds for the same ethereum address
+const buildPromisesCache = new Map<IEthereumAddress, Promise<IXmtpClientWithCodecs>>()
+
+/**
+ * Gets an XMTP client by inboxId, building it if necessary
+ */
+export async function getXmtpClientByInboxId(args: { inboxId: IXmtpInboxId }) {
+  const { inboxId } = args
 
   try {
-    const client = await XmtpClient.create<ISupportedXmtpCodecs>(inboxSigner, {
-      env: config.xmtpEnv,
-      dbEncryptionKey: await getDbEncryptionKey(),
-      codecs: supportedXmtpCodecs,
-    });
-
-    const duration = Date.now() - startTime;
-    if (duration > XMTP_MAX_MS_UNTIL_LOG_ERROR) {
-      captureError(
-        new XMTPError({
-          error: new Error(`Creating XMTP client took ${duration}ms`),
-        }),
-      );
+    // Check if client already exists in map
+    const existingClient = xmtpClientsMap.get(inboxId)
+    if (existingClient) {
+      return existingClient
     }
 
-    return client;
+    // Try to get from store
+    const sender = useMultiInboxStore.getState().senders.find((s) => s.inboxId === inboxId)
+    if (!sender) {
+      throw new XMTPError({
+        error: new Error(`No sender found for inboxId: ${inboxId}`),
+      })
+    }
+
+    const client = await buildXmtpClientInstance({
+      ethereumAddress: sender.ethereumAddress,
+      inboxId,
+    })
+
+    // Store in map
+    xmtpClientsMap.set(inboxId, client)
+
+    return client
   } catch (error) {
     throw new XMTPError({
       error,
-      additionalMessage: "Failed to create XMTP client instance",
-    });
+      additionalMessage: `Failed to get XMTP client for inboxId: ${inboxId}`,
+    })
   }
 }
 
-export async function buildXmtpClientInstance(args: {
-  ethereumAddress: string;
-  inboxId?: InboxId;
-}): Promise<IXmtpClient> {
-  const { ethereumAddress, inboxId } = args;
-  const startTime = Date.now();
+/**
+ * Creates a new XMTP client using a signer
+ */
+export async function createXmtpClient(args: { inboxSigner: IXmtpSigner }) {
+  const { inboxSigner } = args
+
+  const identity = await inboxSigner.getIdentifier()
+
+  if (!xmtpIdentityIsEthereumAddress(identity)) {
+    throw new XMTPError({
+      error: new Error("Identifier is not an Ethereum address"),
+    })
+  }
+
+  const dbEncryptionKey = await getOrCreateXmtpDbEncryptionKey({
+    ethAddress: lowercaseEthAddress(identity.identifier),
+  })
+
+  xmtpLogger.debug(`Creating XMTP client instance...`)
+  const { data, error, durationMs } = await tryCatchWithDuration(
+    XmtpClient.create<ISupportedXmtpCodecs>(inboxSigner, {
+      env: getXmtpEnv(),
+      dbEncryptionKey,
+      codecs: supportedXmtpCodecs,
+    }),
+  )
+
+  if (error) {
+    throw new XMTPError({
+      error,
+      additionalMessage: "Failed to create XMTP client instance",
+    })
+  }
+
+  if (durationMs > config.xmtp.maxMsUntilLogError) {
+    captureError(
+      new XMTPError({
+        error: new Error(`Creating XMTP client took ${durationMs}ms`),
+      }),
+    )
+  }
+
+  const xmtpClient = data as IXmtpClientWithCodecs
+
+  xmtpLogger.debug(`Created XMTP client instance`)
+
+  // Store in map
+  const inboxId = xmtpClient.inboxId as IXmtpInboxId
+  xmtpClientsMap.set(inboxId, xmtpClient)
+  xmtpLogger.debug(`Created and stored XMTP client for inboxId: ${inboxId}`)
+
+  return xmtpClient
+}
+
+/**
+ * Builds an XMTP client instance using an ethereum address
+ */
+async function buildXmtpClientInstance(args: {
+  ethereumAddress: IEthereumAddress
+  inboxId?: IXmtpInboxId
+}) {
+  const { ethereumAddress, inboxId } = args
 
   try {
-    const client = await XmtpClient.build<ISupportedXmtpCodecs>(
-      ethereumAddress,
-      {
-        env: config.xmtpEnv,
-        codecs: supportedXmtpCodecs,
-        dbEncryptionKey: await getDbEncryptionKey(),
-      },
-      inboxId,
-    );
-
-    const duration = Date.now() - startTime;
-    if (duration > XMTP_MAX_MS_UNTIL_LOG_ERROR) {
-      captureError(
-        new XMTPError({
-          error: new Error(
-            `Building XMTP client took ${duration}ms for address: ${ethereumAddress}`,
-          ),
-        }),
-      );
+    // Check if there's already a build in progress for this address
+    const existingBuildPromise = buildPromisesCache.get(ethereumAddress)
+    if (existingBuildPromise) {
+      return existingBuildPromise
     }
 
-    return client;
+    // Create a new build promise
+    const buildPromise = (async () => {
+      try {
+        const startTime = Date.now()
+
+        const dbEncryptionKey = await getOrCreateXmtpDbEncryptionKey({
+          ethAddress: lowercaseEthAddress(ethereumAddress),
+        })
+
+        const client = await XmtpClient.build<ISupportedXmtpCodecs>(
+          new PublicIdentity(ethereumAddress, "ETHEREUM"),
+          {
+            env: getXmtpEnv(),
+            codecs: supportedXmtpCodecs,
+            dbEncryptionKey,
+          },
+          inboxId,
+        )
+
+        const duration = Date.now() - startTime
+        if (duration > config.xmtp.maxMsUntilLogError) {
+          captureError(
+            new XMTPError({
+              error: new Error(
+                `Building XMTP client took ${duration}ms for address: ${ethereumAddress}`,
+              ),
+            }),
+          )
+        }
+
+        return client as IXmtpClientWithCodecs
+      } finally {
+        // Always clean up the cache entry when done
+        buildPromisesCache.delete(ethereumAddress)
+      }
+    })()
+
+    // Store the promise in cache
+    buildPromisesCache.set(ethereumAddress, buildPromise)
+
+    xmtpLogger.debug(`Building XMTP client for address: ${ethereumAddress}`)
+
+    return buildPromise
   } catch (error) {
     throw new XMTPError({
       error,
       additionalMessage: `Failed to build XMTP client for address: ${ethereumAddress}`,
-    });
+    })
   }
 }
 
-async function getDbEncryptionKey() {
-  const DB_ENCRYPTION_KEY = "LIBXMTP_DB_ENCRYPTION_KEY";
+/**
+ * Logs out an XMTP client and properly cleans up resources
+ * If deleteDatabase is true, the local message database will be deleted
+ * Important: If the database is deleted, all message history will be lost
+ */
+export async function logoutXmtpClient(args: { inboxId: IXmtpInboxId; deleteDatabase?: boolean }) {
+  const { inboxId, deleteDatabase = false } = args
 
-  xmtpLogger.debug(`Getting DB encryption key`);
+  xmtpLogger.debug(`Logging out XMTP client for inboxId: ${inboxId}`)
 
   try {
-    const existingKey = await getSecureItemAsync(DB_ENCRYPTION_KEY);
+    // Get the client from the map
+    const xmtpClient = xmtpClientsMap.get(inboxId)
 
-    if (existingKey) {
-      xmtpLogger.debug(`Found existing DB encryption key`);
-      return new Uint8Array(Buffer.from(existingKey, "base64"));
+    const sender = useMultiInboxStore.getState().senders.find((s) => s.inboxId === inboxId)
+
+    if (xmtpClient) {
+      // If requested, delete the local database
+      if (deleteDatabase) {
+        xmtpLogger.debug(`Deleting local database for inboxId: ${inboxId}`)
+        await xmtpClient.deleteLocalDatabase()
+      }
+
+      // Drop the client from XMTP
+      xmtpLogger.debug(`Dropping client for inboxId: ${inboxId}`)
+      await XmtpClient.dropClient(xmtpClient.installationId)
+
+      // Remove from our local map
+      xmtpClientsMap.delete(inboxId)
+    } else {
+      xmtpLogger.debug(`No client found in map for inboxId: ${inboxId}`)
     }
 
-    xmtpLogger.debug(`Creating new DB encryption key`);
-    const newKey = Buffer.from(await getRandomBytesAsync(32));
-    await setSecureItemAsync(DB_ENCRYPTION_KEY, newKey.toString("base64"));
+    // Always clean up encryption key if we're deleting the database
+    if (deleteDatabase && sender) {
+      await cleanXmtpDbEncryptionKey({ ethAddress: lowercaseEthAddress(sender.ethereumAddress) })
+      xmtpLogger.debug(`Cleaned DB encryption key for address: ${sender.ethereumAddress}`)
+    }
 
-    return new Uint8Array(newKey);
+    xmtpLogger.debug(`Successfully logged out XMTP client for inboxId: ${inboxId}`)
   } catch (error) {
     throw new XMTPError({
       error,
-      additionalMessage: "Failed to get or create DB encryption key",
-    });
+      additionalMessage: `Failed to properly logout XMTP client for inboxId: ${inboxId}`,
+    })
   }
+}
+
+// Useful for debugging on physical devices
+function getXmtpEnv() {
+  let xmtpEnv = config.xmtpEnv
+
+  try {
+    if (config.xmtpEnv === "local") {
+      xmtpLogger.debug("Replacing localhost with device-accessible IP")
+
+      const hostIp = Constants.expoConfig?.hostUri?.split(":")[0]
+
+      if (!hostIp) {
+        throw new XMTPError({
+          error: new Error("No host IP found"),
+        })
+      }
+
+      xmtpEnv = `${hostIp}:caca` as IXmtpEnv
+    }
+  } catch (error) {
+    captureError(
+      new XMTPError({
+        error,
+        additionalMessage: "Failed to get XMTP environment",
+      }),
+    )
+  }
+
+  xmtpLogger.debug(`Using XMTP environment: ${xmtpEnv}`)
+
+  return xmtpEnv
 }

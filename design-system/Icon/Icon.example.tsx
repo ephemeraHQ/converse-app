@@ -1,16 +1,16 @@
-import { HStack } from "@design-system/HStack";
-import { Text } from "@design-system/Text";
-import { VStack } from "@design-system/VStack";
-import { ScrollView } from "react-native";
-import { useAppTheme } from "@/theme/use-app-theme";
-import { Icon, iconRegistry } from "./Icon";
+import { HStack } from "@design-system/HStack"
+import { Text } from "@design-system/Text"
+import { VStack } from "@design-system/VStack"
+import { ScrollView } from "react-native"
+import { useAppTheme } from "@/theme/use-app-theme"
+import { Icon, iconRegistry } from "./Icon"
 
 type IExampleProps = {
-  onPress?: () => void;
-};
+  onPress?: () => void
+}
 
 export function IconExample(args: IExampleProps) {
-  const { theme } = useAppTheme();
+  const { theme } = useAppTheme()
 
   return (
     <ScrollView>
@@ -60,5 +60,5 @@ export function IconExample(args: IExampleProps) {
         </VStack>
       </VStack>
     </ScrollView>
-  );
+  )
 }

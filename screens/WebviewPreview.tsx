@@ -1,7 +1,7 @@
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useEffect, useState } from "react";
-import { WebView } from "react-native-webview";
-import { NavigationParamList } from "@/navigation/navigation.types";
+import { NativeStackScreenProps } from "@react-navigation/native-stack"
+import { useEffect, useState } from "react"
+import { WebView } from "react-native-webview"
+import { NavigationParamList } from "@/navigation/navigation.types"
 
 export function WebviewPreview({
   route,
@@ -10,12 +10,12 @@ export function WebviewPreview({
   // was called AFTER the setAllowFileAccess method and first file
   // uri could not be loaded. That way we start with a blank screen and
   // immediatly after we load our local URI
-  const [uri, setUri] = useState("");
+  const [uri, setUri] = useState("")
   useEffect(() => {
     setImmediate(() => {
-      setUri(route.params.uri);
-    });
-  }, [route.params.uri]);
+      setUri(route.params.uri)
+    })
+  }, [route.params.uri])
 
   return (
     <WebView
@@ -28,5 +28,5 @@ export function WebviewPreview({
       allowFileAccess
       androidLayerType="hardware"
     />
-  );
+  )
 }

@@ -1,16 +1,16 @@
 import {
   BottomSheetBackdrop as GorhomBottomSheetBackdrop,
   BottomSheetBackdropProps as GorhomBottomSheetBackdropProps,
-} from "@gorhom/bottom-sheet";
-import { memo } from "react";
-import { useAppTheme } from "../../theme/use-app-theme";
+} from "@gorhom/bottom-sheet"
+import { memo } from "react"
+import { useAppTheme } from "../../theme/use-app-theme"
 
 export const BottomSheetBackdropOpacity = memo(function BackdropOpacity(
   props: GorhomBottomSheetBackdropProps,
 ) {
-  const { style, animatedIndex, animatedPosition, ...rest } = props;
+  const { style, animatedIndex, animatedPosition, ...rest } = props
 
-  const { theme } = useAppTheme();
+  const { theme } = useAppTheme()
 
   return (
     <GorhomBottomSheetBackdrop
@@ -22,5 +22,5 @@ export const BottomSheetBackdropOpacity = memo(function BackdropOpacity(
       style={style}
       {...rest}
     />
-  );
-});
+  )
+})

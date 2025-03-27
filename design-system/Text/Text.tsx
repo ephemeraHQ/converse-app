@@ -1,9 +1,9 @@
-import React from "react";
-import { Text as RNText, StyleProp, TextStyle } from "react-native";
-import { translate } from "../../i18n";
-import { useAppTheme } from "../../theme/use-app-theme";
-import { ITextProps } from "./Text.props";
-import { getTextStyle } from "./Text.utils";
+import React from "react"
+import { Text as RNText, StyleProp, TextStyle } from "react-native"
+import { translate } from "../../i18n"
+import { useAppTheme } from "../../theme/use-app-theme"
+import { ITextProps } from "./Text.props"
+import { getTextStyle } from "./Text.utils"
 
 export const Text = React.forwardRef<RNText, ITextProps>((props, ref) => {
   const {
@@ -18,12 +18,12 @@ export const Text = React.forwardRef<RNText, ITextProps>((props, ref) => {
     preset,
     inverted,
     ...rest
-  } = props;
+  } = props
 
-  const { themed } = useAppTheme();
+  const { themed } = useAppTheme()
 
-  const i18nText = tx && translate(tx, txOptions);
-  const content = i18nText || text || children;
+  const i18nText = tx && translate(tx, txOptions)
+  const content = i18nText || text || children
 
   const styles: StyleProp<TextStyle> = getTextStyle(themed, {
     weight,
@@ -32,7 +32,7 @@ export const Text = React.forwardRef<RNText, ITextProps>((props, ref) => {
     style: styleProp,
     preset,
     inverted,
-  });
+  })
 
   return (
     <RNText
@@ -43,7 +43,7 @@ export const Text = React.forwardRef<RNText, ITextProps>((props, ref) => {
     >
       {content}
     </RNText>
-  );
-});
+  )
+})
 
-Text.displayName = "Text";
+Text.displayName = "Text"

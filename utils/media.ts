@@ -1,9 +1,9 @@
-import Big from "big.js";
-import { ImageManipulator, SaveFormat } from "expo-image-manipulator";
-import * as ImagePicker from "expo-image-picker";
-import { Alert, Image, Linking } from "react-native";
-import { Nullable } from "../types/general";
-import logger from "./logger";
+import Big from "big.js"
+import { ImageManipulator, SaveFormat } from "expo-image-manipulator"
+import * as ImagePicker from "expo-image-picker"
+import { Alert, Image, Linking } from "react-native"
+import { Nullable } from "../types/general"
+import logger from "./logger"
 
 const imageMimeTypes = [
   "image/cgm",
@@ -54,7 +54,7 @@ const imageMimeTypes = [
   "image/vnd.wap.wbmp",
   "image/vnd.xiff",
   "image/vnd.zbrush.pcx",
-];
+]
 
 const audioMimeTypes = [
   "audio/1d-interleaved-parityfec",
@@ -198,7 +198,7 @@ const audioMimeTypes = [
   "audio/vnd.vmx.cvsd",
   "audio/vorbis",
   "audio/vorbis-config",
-];
+]
 
 const videoMimeTypes = [
   "application/vnd.apple.mpegurl",
@@ -279,153 +279,165 @@ const videoMimeTypes = [
   "video/vnd.sealedmedia.softseal.mov",
   "video/vnd.uvvu.mp4",
   "video/vnd.vivo",
-];
+]
 
-const allowedMimeTypes = [
-  ...imageMimeTypes,
-  ...audioMimeTypes,
-  ...videoMimeTypes,
-];
+const allowedMimeTypes = [...imageMimeTypes, ...audioMimeTypes, ...videoMimeTypes]
 
-export type AttachmentSelectedStatus =
-  | "picked"
-  | "error"
-  | "uploading"
-  | "uploaded"
-  | "sending";
+export type AttachmentSelectedStatus = "picked" | "error" | "uploading" | "uploaded" | "sending"
 
 export const isImageMimetype = (mimeType: Nullable<string>) =>
-  !!mimeType && imageMimeTypes.includes(mimeType.toLowerCase());
+  !!mimeType && imageMimeTypes.includes(mimeType.toLowerCase())
 export const isAudioMimeType = (mimeType: Nullable<string>) =>
-  !!mimeType && audioMimeTypes.includes(mimeType.toLowerCase());
+  !!mimeType && audioMimeTypes.includes(mimeType.toLowerCase())
 export const isVideoMimeType = (mimeType: Nullable<string>) =>
-  !!mimeType && videoMimeTypes.includes(mimeType.toLowerCase());
+  !!mimeType && videoMimeTypes.includes(mimeType.toLowerCase())
 export const isAllowedMimeType = (mimeType: Nullable<string>) =>
-  !!mimeType && allowedMimeTypes.includes(mimeType.toLowerCase());
+  !!mimeType && allowedMimeTypes.includes(mimeType.toLowerCase())
 
-export const getImageSize = (
-  imageURI: string,
-): Promise<{ width: number; height: number }> =>
+export const getImageSize = (imageURI: string): Promise<{ width: number; height: number }> =>
   new Promise((resolve, reject) => {
     Image.getSize(
       imageURI,
       (width, height) => {
-        resolve({ width, height });
+        resolve({ width, height })
       },
       (error: any) => {
-        reject(error);
+        reject(error)
       },
-    );
-  });
+    )
+  })
 
 const calculateImageOptiSize = (
   imageSize: {
-    width: number;
-    height: number;
+    width: number
+    height: number
   },
   avatar?: boolean,
 ) => {
-  const maxBig = avatar ? 400 : 1600;
-  const maxSmall = avatar ? 400 : 1200;
-  const isPortrait = imageSize.height > imageSize.width;
-  const biggestValue = new Big(isPortrait ? imageSize.height : imageSize.width);
-  const smallestValue = new Big(
-    isPortrait ? imageSize.width : imageSize.height,
-  );
-  const ratio1 = biggestValue.gt(maxBig)
-    ? biggestValue.div(maxBig)
-    : new Big(1);
-  const ratio2 = smallestValue.gt(maxSmall)
-    ? smallestValue.div(maxSmall)
-    : new Big(1);
-  const ratio = ratio1.gt(ratio2) ? ratio1 : ratio2;
+  const maxBig = avatar ? 400 : 1600
+  const maxSmall = avatar ? 400 : 1200
+  const isPortrait = imageSize.height > imageSize.width
+  const biggestValue = new Big(isPortrait ? imageSize.height : imageSize.width)
+  const smallestValue = new Big(isPortrait ? imageSize.width : imageSize.height)
+  const ratio1 = biggestValue.gt(maxBig) ? biggestValue.div(maxBig) : new Big(1)
+  const ratio2 = smallestValue.gt(maxSmall) ? smallestValue.div(maxSmall) : new Big(1)
+  const ratio = ratio1.gt(ratio2) ? ratio1 : ratio2
 
-  const newBiggestValue = biggestValue.div(ratio);
-  const newSmallestValue = smallestValue.div(ratio);
+  const newBiggestValue = biggestValue.div(ratio)
+  const newSmallestValue = smallestValue.div(ratio)
 
-  const big = newBiggestValue.toNumber();
-  const small = newSmallestValue.toNumber();
+  const big = newBiggestValue.toNumber()
+  const small = newSmallestValue.toNumber()
 
   return {
     width: isPortrait ? small : big,
     height: isPortrait ? big : small,
-  };
-};
+  }
+}
 
-export const compressAndResizeImage = async (
-  imageURI: string,
-  avatar?: boolean,
-) => {
-  const imageSize = await getImageSize(imageURI);
-  const newSize = calculateImageOptiSize(imageSize, avatar);
-  
+export const compressAndResizeImage = async (imageURI: string, avatar?: boolean) => {
+  const imageSize = await getImageSize(imageURI)
+  const newSize = calculateImageOptiSize(imageSize, avatar)
+
   logger.debug(
-    `[ImageUtils] Resizing and compressing image to ${newSize.height}x${newSize.width} (was ${imageSize.height}x${imageSize.width})`,
-  );
+    `Resizing and compressing image to ${newSize.height}x${newSize.width} (was ${imageSize.height}x${imageSize.width})`,
+  )
 
-  const context = ImageManipulator.manipulate(imageURI);
-  context.resize(newSize);
-  const image = await context.renderAsync();
+  const context = ImageManipulator.manipulate(imageURI)
+  context.resize(newSize)
+  const image = await context.renderAsync()
   const result = await image.saveAsync({
     base64: false,
     compress: avatar ? 0.6 : 0.3,
     format: SaveFormat.JPEG,
-  });
+  })
 
-  return result;
-};
+  return result
+}
 
-export const pickMediaFromLibrary = async (
-  options?: ImagePicker.ImagePickerOptions | undefined,
+export const pickSingleMediaFromLibrary = async (
+  options?: Omit<ImagePicker.ImagePickerOptions, "allowsMultipleSelection">,
 ) => {
   const mediaPicked = await ImagePicker.launchImageLibraryAsync({
-    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    mediaTypes: ["images"],
     quality: 1,
     base64: false,
     allowsMultipleSelection: false,
     ...options,
-  });
+  })
 
-  if (mediaPicked.canceled) return;
-  const asset = mediaPicked.assets?.[0];
-  if (!asset) return;
-  return asset;
-};
+  if (mediaPicked.canceled) {
+    return
+  }
+
+  const asset = mediaPicked.assets?.[0]
+
+  if (!asset) {
+    return
+  }
+
+  return asset
+}
+
+export async function pickMultipleMediaFromLibrary(
+  options?: Omit<ImagePicker.ImagePickerOptions, "allowsMultipleSelection">,
+) {
+  const mediaPicked = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ["images"],
+    allowsMultipleSelection: true,
+    quality: 1,
+    base64: false,
+    ...options,
+  })
+
+  if (mediaPicked.canceled) {
+    return
+  }
+
+  return mediaPicked.assets
+}
 
 export const takePictureFromCamera = async (
   options?: ImagePicker.ImagePickerOptions | undefined,
 ) => {
-  let cameraPermissions = await ImagePicker.getCameraPermissionsAsync();
+  let cameraPermissions = await ImagePicker.getCameraPermissionsAsync()
   if (!cameraPermissions?.granted && cameraPermissions?.canAskAgain) {
-    cameraPermissions = await ImagePicker.requestCameraPermissionsAsync();
+    cameraPermissions = await ImagePicker.requestCameraPermissionsAsync()
   }
   if (!cameraPermissions?.granted) {
-    Alert.alert(
-      "You need to grant Converse access to the camera before proceeding",
-      undefined,
-      [
-        {
-          text: "Settings",
-          isPreferred: true,
-          onPress: () => {
-            Linking.openSettings();
-          },
+    Alert.alert("You need to grant Converse access to the camera before proceeding", undefined, [
+      {
+        text: "Settings",
+        isPreferred: true,
+        onPress: () => {
+          Linking.openSettings()
         },
-        { text: "Close" },
-      ],
-    );
-    return;
+      },
+      { text: "Close" },
+    ])
+    return
   }
 
   const mediaPicked = await ImagePicker.launchCameraAsync({
-    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    mediaTypes: ["images"],
     quality: 1,
     base64: false,
     allowsEditing: false,
     ...options,
-  });
-  if (mediaPicked.canceled) return;
-  const asset = mediaPicked.assets?.[0];
-  if (!asset) return;
-  return asset;
-};
+  })
+  if (mediaPicked.canceled) return
+  const asset = mediaPicked.assets?.[0]
+  if (!asset) return
+  return asset
+}
+
+export function getMimeTypeFromAsset(asset: ImagePicker.ImagePickerAsset) {
+  let mimeType = asset.mimeType
+  if (!mimeType) {
+    const match = asset.uri.match(/data:(.*?);/)
+    if (match && match[1]) {
+      mimeType = match[1]
+    }
+  }
+  return mimeType ?? null
+}

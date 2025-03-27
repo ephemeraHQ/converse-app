@@ -1,23 +1,18 @@
-import {
-  queryOptions,
-  skipToken,
-  useQueries,
-  useQuery,
-} from "@tanstack/react-query";
-import { queryClient } from "@/queries/queryClient";
-import { IEthereumAddress, isEthereumAddress } from "@/utils/evm/address";
-import { fetchSocialProfilesForAddress } from "./social-profiles.api";
+import { IEthereumAddress, isEthereumAddress } from "@/utils/evm/address"
+import { reactQueryClient } from "@/utils/react-query/react-query.client"
+import { queryOptions, skipToken, useQueries, useQuery } from "@tanstack/react-query"
+import { fetchSocialProfilesForAddress } from "./social-profiles.api"
 
 type IArgs = {
-  ethAddress: IEthereumAddress | undefined;
-};
+  ethAddress: IEthereumAddress | undefined
+}
 
 type IStrictArgs = {
-  ethAddress: IEthereumAddress;
-};
+  ethAddress: IEthereumAddress
+}
 
 const getSocialProfilesForAddressQueryOptions = (args: IArgs) => {
-  const { ethAddress } = args;
+  const { ethAddress } = args
   return queryOptions({
     queryKey: ["social-profiles-for-eth-address", ethAddress ?? ""],
     queryFn:
@@ -25,21 +20,19 @@ const getSocialProfilesForAddressQueryOptions = (args: IArgs) => {
         ? () => {
             return fetchSocialProfilesForAddress({
               ethAddress,
-            });
+            })
           }
         : skipToken,
-    staleTime: 0,
-  });
-};
+    staleTime: 30 * 24 * 60 * 60 * 1000, // 30 days, it's very rare that we need to refetch this
+  })
+}
 
 export const useSocialProfilesForAddressQuery = (args: IArgs) => {
-  return useQuery(getSocialProfilesForAddressQueryOptions(args));
-};
+  return useQuery(getSocialProfilesForAddressQueryOptions(args))
+}
 
-export function useSocialProfilesForEthAddressQueries(args: {
-  ethAddresses: IEthereumAddress[];
-}) {
-  const { ethAddresses } = args;
+export function useSocialProfilesForEthAddressQueries(args: { ethAddresses: IEthereumAddress[] }) {
+  const { ethAddresses } = args
   return useQueries({
     queries: ethAddresses.map((ethAddress) =>
       getSocialProfilesForAddressQueryOptions({ ethAddress }),
@@ -50,27 +43,29 @@ export function useSocialProfilesForEthAddressQueries(args: {
       isError: results.some((result) => result.isError),
       error: results.find((result) => result.error)?.error,
     }),
-  });
+  })
 }
 
-export const ensureSocialProfilesForAddressQueryData = async (
-  args: IStrictArgs,
-) => {
-  return queryClient.ensureQueryData(
-    getSocialProfilesForAddressQueryOptions(args),
-  );
-};
+export const ensureSocialProfilesForAddressQuery = async (args: IStrictArgs) => {
+  return reactQueryClient.ensureQueryData(getSocialProfilesForAddressQueryOptions(args))
+}
 
 export async function ensureSocialProfilesForAddressesQuery(args: {
-  ethAddresses: IEthereumAddress[];
+  ethAddresses: IEthereumAddress[]
 }) {
   return (
     await Promise.all(
       args.ethAddresses.map((ethAddress) =>
-        queryClient.fetchQuery(
-          getSocialProfilesForAddressQueryOptions({ ethAddress }),
-        ),
+        reactQueryClient.fetchQuery(getSocialProfilesForAddressQueryOptions({ ethAddress })),
       ),
     )
-  ).flat();
+  ).flat()
+}
+
+export function prefetchSocialProfilesForAddress(args: { ethAddress: IEthereumAddress }) {
+  return reactQueryClient.prefetchQuery(getSocialProfilesForAddressQueryOptions(args))
+}
+
+export function getSocialProfilesForEthAddressQueryData(args: IStrictArgs) {
+  return reactQueryClient.getQueryData(getSocialProfilesForAddressQueryOptions(args).queryKey)
 }

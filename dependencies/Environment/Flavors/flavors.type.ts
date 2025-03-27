@@ -6,7 +6,6 @@ export const DependencyFlavors = {
   jest: "Jest Test Environment",
   detox: "Detox Test Environment",
   Unknown: "Unknown",
-} as const;
+} as const
 
-export type DependencyFlavor =
-  (typeof DependencyFlavors)[keyof typeof DependencyFlavors];
+export type DependencyFlavor = (typeof DependencyFlavors)[keyof typeof DependencyFlavors]

@@ -1,44 +1,44 @@
-import mmkv from "@utils/mmkv";
+import { storage } from "../storage/storage"
 
-const FAVORITED_EMOJIS = "favoritedEmojis";
+const FAVORITED_EMOJIS = "favoritedEmojis"
 
-const DEFAULT_EMOJIS = ["❤️", "👍", "👎", "😂", "🤔", "😲"];
+const DEFAULT_EMOJIS = ["❤️", "👍", "👎", "😂", "🤔", "😲"]
 
 class FavoritedEmojis {
-  emojis: string[] = [];
-  emojisSet: Set<string> = new Set();
+  emojis: string[] = []
+  emojisSet: Set<string> = new Set()
   constructor() {
-    const savedEmojis = mmkv.getString(FAVORITED_EMOJIS);
+    const savedEmojis = storage.getString(FAVORITED_EMOJIS)
     if (savedEmojis) {
-      this.emojis = JSON.parse(savedEmojis) as string[];
+      this.emojis = JSON.parse(savedEmojis) as string[]
     } else {
-      this.emojis = DEFAULT_EMOJIS;
+      this.emojis = DEFAULT_EMOJIS
     }
-    this.emojisSet = new Set(this.emojis);
+    this.emojisSet = new Set(this.emojis)
   }
 
   getEmojis() {
-    return this.emojis;
+    return this.emojis
   }
 
   pushEmoji(emoji: string) {
     if (!this.emojisSet.has(emoji)) {
-      this.emojis.unshift(emoji);
-      this.emojis.pop();
-      mmkv.set(FAVORITED_EMOJIS, JSON.stringify(this.emojis));
+      this.emojis.unshift(emoji)
+      this.emojis.pop()
+      storage.set(FAVORITED_EMOJIS, JSON.stringify(this.emojis))
     }
   }
 
   replaceEmoji(emoji: string, index: number) {
     if (!this.emojisSet.has(emoji)) {
-      this.emojis[index] = emoji;
-      mmkv.set(FAVORITED_EMOJIS, JSON.stringify(this.emojis));
+      this.emojis[index] = emoji
+      storage.set(FAVORITED_EMOJIS, JSON.stringify(this.emojis))
     }
   }
 
   isFavorite(emoji: string) {
-    return this.emojisSet.has(emoji);
+    return this.emojisSet.has(emoji)
   }
 }
 
-export const favoritedEmojis = new FavoritedEmojis();
+export const favoritedEmojis = new FavoritedEmojis()

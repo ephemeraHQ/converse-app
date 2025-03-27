@@ -1,10 +1,6 @@
-import { TextStyle } from "react-native";
-import { ThemedStyleArray } from "../../theme/use-app-theme";
-import {
-  textBaseStyle,
-  textFontWeightStyles,
-  textSizeStyles,
-} from "./Text.styles";
+import { TextStyle } from "react-native"
+import { ThemedStyleArray } from "../../theme/use-app-theme"
+import { textBaseStyle, textFontWeightStyles, textSizeStyles } from "./Text.styles"
 
 export type IPresets =
   | "title"
@@ -13,10 +9,11 @@ export type IPresets =
   | "small"
   | "smaller"
   | "smallerBold"
+  | "big"
   | "bigBold"
   | "formHelper"
   | "formLabel"
-  | "emojiSymbol";
+  | "emojiSymbol"
 
 export const textPresets: Record<IPresets, ThemedStyleArray<TextStyle>> = {
   title: [textBaseStyle, textSizeStyles.xl, textFontWeightStyles.bold],
@@ -30,6 +27,8 @@ export const textPresets: Record<IPresets, ThemedStyleArray<TextStyle>> = {
   smaller: [textBaseStyle, textSizeStyles.xxs],
 
   smallerBold: [textBaseStyle, textSizeStyles.xxs, textFontWeightStyles.bold],
+
+  big: [textBaseStyle, textSizeStyles.md],
 
   bigBold: [textBaseStyle, textFontWeightStyles.semiBold],
 
@@ -46,4 +45,4 @@ export const textPresets: Record<IPresets, ThemedStyleArray<TextStyle>> = {
   ],
 
   emojiSymbol: [textBaseStyle, { fontSize: 22, lineHeight: 28 }],
-};
+}

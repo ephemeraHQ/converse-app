@@ -1,30 +1,23 @@
-import { Haptics } from "@utils/haptics";
-import React, { useCallback } from "react";
+import { Haptics } from "@utils/haptics"
+import React, { useCallback } from "react"
 import {
   GestureResponderEvent,
   PressableStateCallbackType,
   StyleProp,
-  TextStyle,
   ViewStyle,
-} from "react-native";
-import { useAppTheme } from "../../theme/use-app-theme";
-import { Icon } from "../Icon/Icon";
-import { Pressable } from "../Pressable";
-import { IIconButtonProps } from "./IconButton.props";
-import {
-  getIconButtonViewStyle,
-  getIconProps,
-  getIconStyle,
-} from "./IconButton.styles";
+} from "react-native"
+import { useAppTheme } from "../../theme/use-app-theme"
+import { Icon } from "../Icon/Icon"
+import { Pressable } from "../Pressable"
+import { IIconButtonProps } from "./IconButton.props"
+import { getIconButtonViewStyle, getIconProps } from "./IconButton.styles"
 
-export const IconButton = React.forwardRef(function IconButton(
-  props: IIconButtonProps,
-  ref,
-) {
+export const IconButton = React.forwardRef(function IconButton(props: IIconButtonProps, ref) {
   const {
     icon,
     iconName,
     iconWeight,
+    iconSize,
     variant = "fill",
     size = "md",
     action = "primary",
@@ -33,11 +26,12 @@ export const IconButton = React.forwardRef(function IconButton(
     disabledStyle: disabledStyleOverride,
     disabled,
     withHaptics = true,
+    preventDoubleTap = false,
     onPress,
     ...rest
-  } = props;
+  } = props
 
-  const { theme, themed } = useAppTheme();
+  const { theme, themed } = useAppTheme()
 
   const viewStyle = useCallback(
     ({ pressed }: PressableStateCallbackType): StyleProp<ViewStyle> => [
@@ -64,23 +58,7 @@ export const IconButton = React.forwardRef(function IconButton(
       pressedStyleOverride,
       disabledStyleOverride,
     ],
-  );
-
-  const iconStyle = useCallback(
-    ({ pressed }: PressableStateCallbackType): StyleProp<TextStyle> =>
-      themed(
-        getIconStyle({
-          variant,
-          size,
-          action,
-          pressed,
-          disabled,
-        }),
-      ),
-    [themed, variant, size, action, disabled],
-  );
-
-  // For now until we fix Icon
+  )
 
   const iconProps = useCallback(
     ({ pressed }: PressableStateCallbackType) =>
@@ -94,21 +72,21 @@ export const IconButton = React.forwardRef(function IconButton(
         }),
       ),
     [themed, variant, size, action, disabled],
-  );
+  )
 
   const handlePress = useCallback(
     (e: GestureResponderEvent) => {
       if (disabled) {
-        return;
+        return
       }
 
       if (withHaptics) {
-        Haptics.softImpactAsync();
+        Haptics.softImpactAsync()
       }
-      onPress?.(e);
+      onPress?.(e)
     },
     [withHaptics, onPress, disabled],
-  );
+  )
 
   return (
     <Pressable
@@ -118,23 +96,24 @@ export const IconButton = React.forwardRef(function IconButton(
       disabled={disabled}
       onPress={handlePress}
       hitSlop={theme.spacing.xxs} // By default let's assume we want a small hitSlop
+      preventDoubleTap={preventDoubleTap}
       {...rest}
     >
       {({ pressed, hovered }) => {
         if (iconName) {
+          const { size, weight, color } = iconProps({ pressed, hovered })
           return (
             <Icon
-              ref={ref}
-              picto={iconName}
-              style={iconStyle({ pressed, hovered })}
-              weight={iconWeight}
-              {...iconProps({ pressed, hovered })}
+              icon={iconName}
+              color={color}
+              weight={iconWeight || weight}
+              size={iconSize || size}
             />
-          );
+          )
         }
 
-        return icon;
+        return icon
       }}
     </Pressable>
-  );
-});
+  )
+})

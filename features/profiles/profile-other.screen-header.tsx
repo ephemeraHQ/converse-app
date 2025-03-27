@@ -1,38 +1,41 @@
-import { InboxId } from "@xmtp/react-native-sdk";
-import { useCallback } from "react";
-import { Share, ViewStyle } from "react-native";
-import { config } from "@/config";
-import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu";
-import { HeaderAction } from "@/design-system/Header/HeaderAction";
-import { HStack } from "@/design-system/HStack";
-import { iconRegistry } from "@/design-system/Icon/Icon";
-import { Text } from "@/design-system/Text";
-import { translate } from "@/i18n";
-import { useHeader } from "@/navigation/use-header";
-import { useRouter } from "@/navigation/use-navigation";
-import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
-import { Haptics } from "@/utils/haptics";
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import { useCallback } from "react"
+import { Share, ViewStyle } from "react-native"
+import { config } from "@/config"
+import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu"
+import { HeaderAction } from "@/design-system/Header/HeaderAction"
+import { HStack } from "@/design-system/HStack"
+import { iconRegistry } from "@/design-system/Icon/Icon"
+import { Text } from "@/design-system/Text"
+import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
+import { translate } from "@/i18n"
+import { useHeader } from "@/navigation/use-header"
+import { useRouter } from "@/navigation/use-navigation"
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme"
+import { Haptics } from "@/utils/haptics"
 
-export function useProfileOtherScreenHeader({ inboxId }: { inboxId: InboxId }) {
-  const { theme, themed } = useAppTheme();
-  const router = useRouter();
+export function useProfileOtherScreenHeader({ inboxId }: { inboxId: IXmtpInboxId }) {
+  const { theme, themed } = useAppTheme()
+  const router = useRouter()
+
+  const { displayName } = usePreferredDisplayInfo({ inboxId })
 
   const handleChatPress = useCallback(() => {
-    router.push("Conversation", {
+    router.navigate("Conversation", {
       searchSelectedUserInboxIds: [inboxId],
-    });
-  }, [router, inboxId]);
+    })
+  }, [router, inboxId])
 
   const handleContextMenuAction = useCallback(
     async (actionId: string) => {
-      Haptics.selectionAsync();
+      Haptics.selectionAsync()
       switch (actionId) {
         case "share": {
-          const shareUrl = `${config.websiteDomain}/profile/${inboxId}`;
+          const shareUrl = `${config.websiteDomain}/profile/${inboxId}`
           await Share.share({
             message: shareUrl,
-          });
-          break;
+          })
+          break
         }
         // TODO: Update with new backend
         // case "block":
@@ -77,24 +80,18 @@ export function useProfileOtherScreenHeader({ inboxId }: { inboxId: InboxId }) {
       }
     },
     [inboxId],
-  );
+  )
 
   useHeader(
     {
       backgroundColor: theme.colors.background.surface,
       safeAreaEdges: ["top"],
-      titleComponent: (
-        <Text preset="body">
-          {router.canGoBack()
-            ? router.getState().routes[router.getState().routes.length - 2].name
-            : ""}
-        </Text>
-      ),
+      title: displayName,
       LeftActionComponent: (
         <HeaderAction
           icon="chevron.left"
           onPress={() => {
-            router.goBack();
+            router.goBack()
           }}
         />
       ),
@@ -135,19 +132,19 @@ export function useProfileOtherScreenHeader({ inboxId }: { inboxId: InboxId }) {
       ),
     },
     [router, theme, handleChatPress, handleContextMenuAction],
-  );
+  )
 }
 
 const $headerRightContainer: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   alignItems: "center",
   columnGap: spacing.xxs,
-});
+})
 
 const $chatIcon: ThemedStyle<ViewStyle> = () => ({
   marginBottom: 4, // Centers the square.and.pencil icon
-});
+})
 
 const $dropdownMenu: ThemedStyle<ViewStyle> = ({ spacing }) => ({
   paddingVertical: spacing.sm,
   paddingRight: spacing.xxxs,
-});
+})

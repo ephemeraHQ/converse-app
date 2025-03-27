@@ -1,11 +1,10 @@
-import { logger } from "@utils/logger";
-import { useMemo } from "react";
-import { SFSymbol } from "react-native-sfsymbols";
-import { useAppTheme } from "@/theme/use-app-theme";
-import { IIconName, IIconProps } from "./Icon.types";
+import { logger } from "@utils/logger"
+import { SFSymbol, SymbolView } from "expo-symbols"
+import { useAppTheme } from "@/theme/use-app-theme"
+import { IIconName, IIconProps } from "./Icon.types"
 
 // For now we don't have tpying for SFSymbols but we use a 1-1 with the key name
-export const iconRegistry: Record<IIconName, string> = {
+export const iconRegistry: Record<IIconName, SFSymbol> = {
   xmark: "xmark",
   "xmark.circle.fill": "xmark.circle.fill",
   plus: "plus",
@@ -73,58 +72,52 @@ export const iconRegistry: Record<IIconName, string> = {
   restore: "archivebox.circle.fill",
   biometric: "faceid",
   camera: "camera.fill",
-};
+  "contact-card": "person.text.rectangle",
+  "person-badge-key": "person.badge.key",
+}
 
 export function Icon(props: IIconProps) {
-  const { theme } = useAppTheme();
-
-  const defaultSize = useMemo(() => theme.iconSize.lg, [theme]);
-
-  const defaultColor = useMemo(() => theme.colors.fill.primary, [theme]);
+  const { theme } = useAppTheme()
 
   const {
     picto,
     icon,
     style,
-    size = defaultSize,
-    color = defaultColor,
+    size = theme.iconSize.lg,
+    color = theme.colors.fill.primary,
+    weight,
     ...rest
-  } = props;
+  } = props
 
   if (!icon && !picto) {
-    throw new Error("Either 'icon' or 'picto' must be provided");
+    throw new Error("Either 'icon' or 'picto' must be provided")
   }
 
   if (icon && picto) {
-    logger.warn(
-      "Both 'icon' and 'picto' provided, 'icon' will take precedence",
-    );
+    logger.warn("Both 'icon' and 'picto' provided, 'icon' will take precedence")
   }
 
-  const iconName = icon
-    ? iconRegistry[icon]
-    : picto
-      ? iconRegistry[picto]
-      : null;
+  const iconName = icon ? iconRegistry[icon] : picto ? iconRegistry[picto] : null
 
   if (!iconName) {
     logger.warn(
       `Invalid icon name: "${
         icon || picto
       }". Please check design-system/Icon/Icon.types.ts for valid options.`,
-    );
-    return null;
+    )
+    return null
   }
 
   return (
-    <SFSymbol
+    <SymbolView
       name={iconName}
-      color={color}
+      tintColor={color}
       size={size}
-      multicolor={false}
-      resizeMode="center"
-      style={[{ width: size, height: size }, style]}
+      scale="default"
+      weight={weight}
+      resizeMode="scaleAspectFit"
+      style={style}
       {...rest}
     />
-  );
+  )
 }

@@ -1,9 +1,28 @@
-import RNShare from "react-native-share";
+import * as Sharing from "expo-sharing"
 
-class Share {
-  open(payload: { title: string; url: string; type: string }) {
-    RNShare.open(payload);
-  }
+/**
+ * Check if sharing functionality is available on the device
+ */
+export const isShareAvailable = async () => {
+  return await Sharing.isAvailableAsync()
 }
 
-export default new Share();
+/**
+ * Share content using the native sharing dialog
+ */
+export const shareContent = async (args: { title: string; url: string; type: string }) => {
+  const { title, url, type } = args
+
+  // Check if sharing is available on the device
+  const isAvailable = await isShareAvailable()
+
+  if (!isAvailable) {
+    throw new Error("Sharing is not available on this device")
+  }
+
+  return Sharing.shareAsync(url, {
+    dialogTitle: title,
+    UTI: type, // Used for iOS
+    mimeType: type, // Used for Android
+  })
+}

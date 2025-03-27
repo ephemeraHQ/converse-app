@@ -1,12 +1,12 @@
 // While eslint-plugin-react-native fix to handle eslint flat config (https://github.com/Intellicode/eslint-plugin-react-native/issues/333#issuecomment-2150582430)
-import { fixupPluginRules } from "@eslint/compat";
-import pluginQuery from "@tanstack/eslint-plugin-query";
-import pluginImport from "eslint-plugin-import";
-import pluginReact from "eslint-plugin-react";
-import pluginReactHooks from "eslint-plugin-react-hooks";
-import pluginReactNative from "eslint-plugin-react-native";
-import tsESLint from "typescript-eslint";
-import customPlugin from "./custom-eslint-plugin/index.js";
+import { fixupPluginRules } from "@eslint/compat"
+import pluginQuery from "@tanstack/eslint-plugin-query"
+import pluginImport from "eslint-plugin-import"
+import pluginReact from "eslint-plugin-react"
+import pluginReactHooks from "eslint-plugin-react-hooks"
+import pluginReactNative from "eslint-plugin-react-native"
+import tsESLint from "typescript-eslint"
+import customPlugin from "./custom-eslint-plugin/index.js"
 
 /** @type {import('eslint').Linter.Config} */
 const config = {
@@ -50,6 +50,12 @@ const config = {
             name: "i18n-js",
             message: "Use @i18n app module instead.",
           },
+          {
+            name: "react-native-reanimated",
+            importNames: ["useAnimatedKeyboard"],
+            message:
+              "Do not use useAnimatedKeyboard from react-native-reanimated. Use our custom keyboard hook instead.",
+          },
         ],
       },
     ],
@@ -74,6 +80,7 @@ const config = {
       "warn",
       {
         vars: "all",
+        varsIgnorePattern: "^_",
         args: "none",
         ignoreRestSiblings: true,
       },
@@ -84,6 +91,7 @@ const config = {
 
     "padding-line-between-statements": "off",
     "custom-plugin/padding-before-react-hooks": "warn",
+    "custom-plugin/require-promise-error-handling": "warn",
   },
   settings: {
     "import/resolver": {
@@ -94,6 +102,6 @@ const config = {
       version: "detect",
     },
   },
-};
+}
 
-export default config;
+export default config

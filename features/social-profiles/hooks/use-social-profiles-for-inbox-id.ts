@@ -1,58 +1,56 @@
-import { InboxId } from "@xmtp/react-native-sdk";
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
 import {
   getSafeCurrentSender,
   useSafeCurrentSender,
-} from "@/features/authentication/multi-inbox.store";
+} from "@/features/authentication/multi-inbox.store"
 import {
   ensureSocialProfilesForAddressesQuery,
   useSocialProfilesForEthAddressQueries,
-} from "@/features/social-profiles/social-profiles.query";
+} from "@/features/social-profiles/social-profiles.query"
 import {
-  ensureEthAddressForXmtpInboxId,
-  useEthAddressesForXmtpInboxId,
-} from "@/features/xmtp/xmtp-inbox-id/eth-addresses-for-xmtp-inbox-id.query";
+  ensureEthAddressesForXmtpInboxIdQueryData,
+  useEthAddressesForXmtpInboxIdQuery,
+} from "@/features/xmtp/xmtp-inbox-id/eth-addresses-for-xmtp-inbox-id.query"
 
-export function useSocialProfilesForInboxId(args: {
-  inboxId: InboxId | undefined;
-}) {
-  const { inboxId } = args;
+export function useSocialProfilesForInboxId(args: { inboxId: IXmtpInboxId | undefined }) {
+  const { inboxId } = args
 
-  const currentSender = useSafeCurrentSender();
+  const currentSender = useSafeCurrentSender()
 
   const { data: ethAddresses, isLoading: isLoadingEthAddresses } =
-    useEthAddressesForXmtpInboxId({
+    useEthAddressesForXmtpInboxIdQuery({
       inboxId,
-      clientEthAddress: currentSender.ethereumAddress,
-    });
+      clientInboxId: currentSender.inboxId,
+    })
 
   const { data: socialProfiles, isLoading: isLoadingSocialProfiles } =
     useSocialProfilesForEthAddressQueries({
       ethAddresses: ethAddresses ?? [],
-    });
+    })
 
   return {
     data: socialProfiles.filter(Boolean).flat(),
     isLoading: isLoadingEthAddresses || isLoadingSocialProfiles,
-  };
+  }
 }
 
-export async function getSocialProfilesForInboxId(args: { inboxId: InboxId }) {
-  const { inboxId } = args;
+export async function getSocialProfilesForInboxId(args: { inboxId: IXmtpInboxId }) {
+  const { inboxId } = args
 
-  const currentSender = getSafeCurrentSender();
+  const currentSender = getSafeCurrentSender()
 
-  const ethAddresses = await ensureEthAddressForXmtpInboxId({
+  const ethAddresses = await ensureEthAddressesForXmtpInboxIdQueryData({
     inboxId,
-    clientEthAddress: currentSender.ethereumAddress,
-  });
+    clientInboxId: currentSender.inboxId,
+  })
 
   if (!ethAddresses) {
-    return [];
+    return []
   }
 
   const socialProfiles = await ensureSocialProfilesForAddressesQuery({
-    ethAddresses: ethAddresses,
-  });
+    ethAddresses: ethAddresses.map((ethAddress) => ethAddress),
+  })
 
-  return socialProfiles;
+  return socialProfiles
 }

@@ -1,62 +1,69 @@
-import { InboxId } from "@xmtp/react-native-sdk";
-import React, { memo, useCallback, useEffect, useState } from "react";
-import { Screen } from "@/components/screen/screen";
-import { SettingsList } from "@/design-system/settings-list/settings-list";
-import { useLogout } from "@/features/authentication/use-logout";
-import { ProfileContactCard } from "@/features/profiles/components/profile-contact-card/profile-contact-card";
-import { ProfileContactCardEditableAvatar } from "@/features/profiles/components/profile-contact-card/profile-contact-card-editable-avatar";
-import { ProfileContactCardEditableNameInput } from "@/features/profiles/components/profile-contact-card/profile-contact-card-editable-name-input";
-import { ProfileContactCardLayout } from "@/features/profiles/components/profile-contact-card/profile-contact-card-layout";
-import { ProfileSection } from "@/features/profiles/components/profile-section";
-import { ProfileSocialsNames } from "@/features/profiles/components/profile-social-names";
-import { useProfileMeScreenHeader } from "@/features/profiles/profile-me.screen-header";
-import {
-  useProfileMeStore,
-  useProfileMeStoreValue,
-} from "@/features/profiles/profile-me.store";
-import { useProfileQuery } from "@/features/profiles/profiles.query";
-import { validateProfileName } from "@/features/profiles/utils/validate-profile-name";
-import { useSocialProfilesForAddressQuery } from "@/features/social-profiles/social-profiles.query";
-import { useAddPfp } from "@/hooks/use-add-pfp";
-import { translate } from "@/i18n";
-import { useRouter } from "@/navigation/use-navigation";
-import { useAppTheme } from "@/theme/use-app-theme";
-import { useCurrentSender } from "../authentication/multi-inbox.store";
-import { TextField } from "@/design-system/TextField/TextField";
-import { VStack } from "@/design-system/VStack";
-import { Text } from "@/design-system/Text";
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import React, { memo, useCallback, useEffect, useState } from "react"
+import { useSafeAreaInsets } from "react-native-safe-area-context"
+import { Screen } from "@/components/screen/screen"
+import { SettingsList } from "@/design-system/settings-list/settings-list"
+import { Text } from "@/design-system/Text"
+import { TextField } from "@/design-system/TextField/TextField"
+import { VStack } from "@/design-system/VStack"
+import { useLogout } from "@/features/authentication/use-logout"
+import { ProfileContactCard } from "@/features/profiles/components/profile-contact-card/profile-contact-card"
+import { ProfileContactCardEditableAvatar } from "@/features/profiles/components/profile-contact-card/profile-contact-card-editable-avatar"
+import { ProfileContactCardEditableNameInput } from "@/features/profiles/components/profile-contact-card/profile-contact-card-editable-name-input"
+import { ProfileContactCardImportName } from "@/features/profiles/components/profile-contact-card/profile-contact-card-import-name"
+import { ProfileContactCardLayout } from "@/features/profiles/components/profile-contact-card/profile-contact-card-layout"
+import { ProfileSection } from "@/features/profiles/components/profile-section"
+import { ProfileSocialsNames } from "@/features/profiles/components/profile-social-names"
+import { useProfileMeScreenHeader } from "@/features/profiles/profile-me.screen-header"
+import { useProfileMeStore, useProfileMeStoreValue } from "@/features/profiles/profile-me.store"
+import { useProfileQuery } from "@/features/profiles/profiles.query"
+import { useAddPfp } from "@/hooks/use-add-pfp"
+import { translate } from "@/i18n"
+import { useRouter } from "@/navigation/use-navigation"
+import { useAppTheme } from "@/theme/use-app-theme"
+import { captureErrorWithToast } from "@/utils/capture-error"
+import { useCurrentSender } from "../authentication/multi-inbox.store"
 
-export function ProfileMe(props: { inboxId: InboxId }) {
-  const { inboxId } = props;
+export function ProfileMe(props: { inboxId: IXmtpInboxId }) {
+  const { inboxId } = props
 
-  const { theme } = useAppTheme();
+  const { theme } = useAppTheme()
 
-  const router = useRouter();
+  const router = useRouter()
 
-  const { logout } = useLogout();
+  const { logout } = useLogout()
+
+  const insets = useSafeAreaInsets()
 
   // Get the edit mode state from the store
-  const editMode = useProfileMeStoreValue(inboxId, (state) => state.editMode);
+  const editMode = useProfileMeStoreValue(inboxId, (state) => state.editMode)
 
-  const isMyProfile = useCurrentSender()?.inboxId === inboxId;
+  const isMyProfile = useCurrentSender()?.inboxId === inboxId
 
-  const { data: profile } = useProfileQuery({ xmtpId: inboxId });
-
-  const { data: socialProfiles } = useSocialProfilesForAddressQuery({
-    ethAddress: profile?.privyAddress,
-  });
+  const { data: profile } = useProfileQuery({ xmtpId: inboxId, caller: "ProfileMe" })
 
   // Set up the screen header with edit functionality
-  useProfileMeScreenHeader({ inboxId });
+  useProfileMeScreenHeader({ inboxId })
 
   return (
-    <Screen preset="fixed" backgroundColor={theme.colors.background.surface}>
-      <ProfileSection>
+    <Screen
+      preset="scroll"
+      backgroundColor={theme.colors.background.surface}
+      keyboardOffset={insets.bottom}
+      keyboardShouldPersistTaps="handled"
+    >
+      <ProfileSection
+        style={{
+          paddingHorizontal: 0, // Since the ProfileContactCardLayout already has margin for the shadow
+          paddingVertical: 0, // Since the ProfileContactCardLayout already has margin for the shadow
+        }}
+      >
         {/* Show editable avatar and name when in edit mode */}
         {editMode ? (
           <ProfileContactCardLayout
             avatar={<EditableProfileContactCardAvatar inboxId={inboxId} />}
             name={<EditableProfileContactCardNameInput inboxId={inboxId} />}
+            additionalOptions={<EditableProfileContactCardImportName inboxId={inboxId} />}
           />
         ) : (
           <ProfileContactCard inboxId={inboxId} />
@@ -81,17 +88,13 @@ export function ProfileMe(props: { inboxId: InboxId }) {
               <VStack style={{ rowGap: theme.spacing.md }}>
                 {profile.username && (
                   <VStack style={{ rowGap: theme.spacing.xxs }}>
-                    <Text preset="formLabel">
-                      {translate("Username")}
-                    </Text>
+                    <Text preset="formLabel">{translate("Username")}</Text>
                     <Text preset="body">{profile.username}</Text>
                   </VStack>
                 )}
                 {profile?.description && (
                   <VStack style={{ rowGap: theme.spacing.xxs }}>
-                    <Text preset="formLabel">
-                      {translate("About")}
-                    </Text>
+                    <Text preset="formLabel">{translate("About")}</Text>
                     <Text preset="body">{profile.description}</Text>
                   </VStack>
                 )}
@@ -99,9 +102,7 @@ export function ProfileMe(props: { inboxId: InboxId }) {
             </ProfileSection>
           ) : null}
 
-          {socialProfiles && (
-            <ProfileSocialsNames socialProfiles={socialProfiles} />
-          )}
+          <ProfileSocialsNames inboxId={inboxId} />
 
           {/* Only show settings when viewing your own profile and not in edit mode */}
           {isMyProfile && !editMode && (
@@ -111,7 +112,7 @@ export function ProfileMe(props: { inboxId: InboxId }) {
                   {
                     label: translate("Archive"),
                     onPress: () => {
-                      router.navigate("Blocked");
+                      router.navigate("Blocked")
                     },
                   },
                   /*{
@@ -123,7 +124,7 @@ export function ProfileMe(props: { inboxId: InboxId }) {
                     label: translate("Log out"),
                     isWarning: true,
                     onPress: () => {
-                      logout();
+                      logout({ caller: "ProfileMe" })
                     },
                   },
                 ]}
@@ -133,152 +134,160 @@ export function ProfileMe(props: { inboxId: InboxId }) {
         </>
       )}
     </Screen>
-  );
+  )
 }
 
-const EditableProfileContactCardNameInput = memo(
-  function EditableProfileContactCardNameInput({
-    inboxId,
-  }: {
-    inboxId: InboxId;
-  }) {
-    const profileMeStore = useProfileMeStore(inboxId);
+const EditableProfileContactCardNameInput = memo(function EditableProfileContactCardNameInput({
+  inboxId,
+}: {
+  inboxId: IXmtpInboxId
+}) {
+  const profileMeStore = useProfileMeStore(inboxId)
 
-    const nameDefaultTextValue = profileMeStore.getState().nameTextValue;
+  const nameDefaultTextValue = profileMeStore.getState().nameTextValue
 
-    const [nameValidationError, setNameValidationError] = useState<string>();
+  const isOnChainName = useProfileMeStoreValue(inboxId, (state) =>
+    state.nameTextValue?.includes("."),
+  )
 
-    const handleDisplayNameChange = useCallback(
-      (text: string) => {
-        const { isValid, error } = validateProfileName(text);
+  const [nameValidationError, setNameValidationError] = useState<string>()
 
-        if (!isValid) {
-          setNameValidationError(error);
-        } else {
-          setNameValidationError(undefined);
-        }
-
-        profileMeStore.getState().actions.setNameTextValue(text);
-      },
-      [profileMeStore],
-    );
-
-    return (
-      <ProfileContactCardEditableNameInput
-        defaultValue={nameDefaultTextValue}
-        onChangeText={handleDisplayNameChange}
-        status={nameValidationError ? "error" : undefined}
-        helper={nameValidationError}
-      />
-    );
-  },
-);
-
-const EditableUsernameInput = memo(
-  function EditableUsernameInput({
-    inboxId,
-  }: {
-    inboxId: InboxId;
-  }) {
-    const { theme } = useAppTheme();
-    const profileMeStore = useProfileMeStore(inboxId);
-    const { data: profile } = useProfileQuery({ xmtpId: inboxId });
-    
-    const usernameDefaultTextValue = profile?.username || "";
-    
-    const handleUsernameChange = useCallback(
-      (text: string) => {
-        profileMeStore.getState().actions.setUsernameTextValue(text);
-      },
-      [profileMeStore],
-    );
-
-    return (
-      <VStack style={{ rowGap: theme.spacing.xxs }}>
-        <TextField
-          label="convos.xyz/"
-          defaultValue={usernameDefaultTextValue}
-          onChangeText={handleUsernameChange}
-          helper={translate("Your unique sharable link")}
-        />
-      </VStack>
-    );
-  },
-);
-
-const EditableDescriptionInput = memo(
-  function EditableDescriptionInput({
-    inboxId,
-  }: {
-    inboxId: InboxId;
-  }) {
-    const { theme } = useAppTheme();
-    const profileMeStore = useProfileMeStore(inboxId);
-    const { data: profile } = useProfileQuery({ xmtpId: inboxId });
-    
-    const descriptionDefaultTextValue = profile?.description || "";
-    
-    const handleDescriptionChange = useCallback(
-      (text: string) => {
-        profileMeStore.getState().actions.setDescriptionTextValue(text);
-      },
-      [profileMeStore],
-    );
-
-    return (
-      <VStack style={{ rowGap: theme.spacing.xxs }}>
-        <TextField
-          defaultValue={descriptionDefaultTextValue}
-          onChangeText={handleDescriptionChange}
-          multiline
-          numberOfLines={3}
-          label={translate("About")}
-        />
-      </VStack>
-    );
-  },
-);
-
-const EditableProfileContactCardAvatar = memo(
-  function EditableProfileContactCardAvatar({ inboxId }: { inboxId: InboxId }) {
-    const { addPFP, asset, isUploading } = useAddPfp();
-    const profileMeStore = useProfileMeStore(inboxId);
-    const { data: profile } = useProfileQuery({ xmtpId: inboxId });
-    
-    // Determine which avatar to display with priority: store avatar > profile avatar
-    const storeAvatar = profileMeStore.getState().avatarUri;
-    const profileAvatar = profile?.avatar;
-    
-    // Create a display URI with a cache-busting parameter
-    const getDisplayUri = useCallback(() => {
-      // Priority: local asset (during upload) > store avatar > profile avatar
-      const sourceUri = asset?.uri || storeAvatar || profileAvatar;
-      
-      if (!sourceUri) {
-        return undefined;
+  const handleDisplayNameChange = useCallback(
+    (args: { text: string; error?: string }) => {
+      if (args.error) {
+        setNameValidationError(args.error)
+        profileMeStore.getState().actions.setNameTextValue("")
+      } else {
+        setNameValidationError(undefined)
       }
-      
-      return sourceUri;
-    }, [asset?.uri, storeAvatar, profileAvatar]);
+      profileMeStore.getState().actions.setNameTextValue(args.text)
+    },
+    [profileMeStore],
+  )
 
-    // Update upload status
-    useEffect(() => {
-      profileMeStore.getState().actions.setIsAvatarUploading(isUploading);
-    }, [isUploading, profileMeStore]);
+  return (
+    <ProfileContactCardEditableNameInput
+      defaultValue={nameDefaultTextValue}
+      onChangeText={handleDisplayNameChange}
+      status={nameValidationError ? "error" : undefined}
+      helper={nameValidationError}
+      isOnchainName={isOnChainName}
+    />
+  )
+})
 
-    const addAvatar = useCallback(async () => {
-      const url = await addPFP();
+const EditableUsernameInput = memo(function EditableUsernameInput({
+  inboxId,
+}: {
+  inboxId: IXmtpInboxId
+}) {
+  const { theme } = useAppTheme()
+  const profileMeStore = useProfileMeStore(inboxId)
+  const { data: profile } = useProfileQuery({ xmtpId: inboxId, caller: "ProfileMe" })
+
+  const usernameDefaultTextValue = profile?.username || ""
+
+  const handleUsernameChange = useCallback(
+    (text: string) => {
+      profileMeStore.getState().actions.setUsernameTextValue(text)
+    },
+    [profileMeStore],
+  )
+
+  return (
+    <VStack style={{ rowGap: theme.spacing.xxs }}>
+      <TextField
+        label="convos.xyz/"
+        defaultValue={usernameDefaultTextValue}
+        onChangeText={handleUsernameChange}
+        helper={translate("Your unique sharable link")}
+      />
+    </VStack>
+  )
+})
+
+const EditableProfileContactCardImportName = memo(function EditableProfileContactCardImportName({
+  inboxId,
+}: {
+  inboxId: IXmtpInboxId
+}) {
+  const router = useRouter()
+
+  return (
+    <ProfileContactCardImportName
+      onPress={() => {
+        router.navigate("ProfileImportInfo")
+      }}
+    />
+  )
+})
+
+const EditableDescriptionInput = memo(function EditableDescriptionInput({
+  inboxId,
+}: {
+  inboxId: IXmtpInboxId
+}) {
+  const { theme } = useAppTheme()
+  const profileMeStore = useProfileMeStore(inboxId)
+  const { data: profile } = useProfileQuery({ xmtpId: inboxId, caller: "ProfileMe" })
+
+  const descriptionDefaultTextValue = profile?.description || ""
+
+  const handleDescriptionChange = useCallback(
+    (text: string) => {
+      profileMeStore.getState().actions.setDescriptionTextValue(text)
+    },
+    [profileMeStore],
+  )
+
+  return (
+    <VStack style={{ rowGap: theme.spacing.xxs }}>
+      <TextField
+        defaultValue={descriptionDefaultTextValue}
+        onChangeText={handleDescriptionChange}
+        multiline
+        numberOfLines={3}
+        label={translate("About")}
+      />
+    </VStack>
+  )
+})
+
+const EditableProfileContactCardAvatar = memo(function EditableProfileContactCardAvatar({
+  inboxId,
+}: {
+  inboxId: IXmtpInboxId
+}) {
+  const { addPFP, asset, isUploading } = useAddPfp()
+  const profileMeStore = useProfileMeStore(inboxId)
+  const { data: profile } = useProfileQuery({ xmtpId: inboxId, caller: "ProfileMe" })
+  const storeAvatar = useProfileMeStoreValue(inboxId, (state) => state.avatarUri)
+
+  // Priority: local asset (during upload) > store avatar > profile avatar
+  const avatarUri = asset?.uri || storeAvatar || profile?.avatar
+
+  useEffect(() => {
+    profileMeStore.getState().actions.setIsAvatarUploading(isUploading)
+  }, [isUploading, profileMeStore])
+
+  const addAvatar = useCallback(async () => {
+    try {
+      const url = await addPFP()
       if (url) {
-        profileMeStore.getState().actions.setAvatarUri(url);
+        profileMeStore.getState().actions.setAvatarUri(url)
       }
-    }, [addPFP, profileMeStore]);
+    } catch (error) {
+      captureErrorWithToast(error, {
+        message: "Failed to add avatar",
+      })
+    }
+  }, [addPFP, profileMeStore])
 
-    return (
-      <ProfileContactCardEditableAvatar
-        avatarUri={getDisplayUri()}
-        avatarName={profile?.name}
-        onPress={addAvatar}
-      />
-    );
-  },
-);
+  return (
+    <ProfileContactCardEditableAvatar
+      avatarUri={avatarUri}
+      avatarName={profile?.name}
+      onPress={addAvatar}
+    />
+  )
+})

@@ -1,59 +1,52 @@
-import { useMutation } from "@tanstack/react-query";
-import { ConversationTopic } from "@xmtp/react-native-sdk";
-import {
-  getCurrentSenderEthAddress,
-  useCurrentSenderEthAddress,
-} from "@/features/authentication/multi-inbox.store";
-import { markConversationAsUnread } from "@/features/conversation/conversation-metadata/conversation-metadata.api";
+import { useMutation } from "@tanstack/react-query"
+import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
+import { markConversationMetadataAsUnread } from "@/features/conversation/conversation-metadata/conversation-metadata.api"
 import {
   getConversationMetadataQueryData,
   updateConversationMetadataQueryData,
-} from "@/features/conversation/conversation-metadata/conversation-metadata.query";
+} from "@/features/conversation/conversation-metadata/conversation-metadata.query"
+import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 
-export function useMarkConversationAsUnread(args: {
-  topic: ConversationTopic;
-}) {
-  const { topic } = args;
+export function useMarkConversationAsUnread(args: { xmtpConversationId: IXmtpConversationId }) {
+  const { xmtpConversationId } = args
 
-  const currentAccount = useCurrentSenderEthAddress()!;
+  const currentSender = useSafeCurrentSender()
 
   const { mutateAsync: markAsUnreadAsync } = useMutation({
     mutationFn: async () => {
-      await markConversationAsUnread({
-        account: currentAccount,
-        topic,
-      });
+      await markConversationMetadataAsUnread({
+        clientInboxId: currentSender.inboxId,
+        xmtpConversationId,
+      })
     },
     onMutate: () => {
-      const currentAccount = getCurrentSenderEthAddress()!;
       const previousData = getConversationMetadataQueryData({
-        account: currentAccount,
-        topic,
-      });
+        clientInboxId: currentSender.inboxId,
+        xmtpConversationId,
+      })
 
       updateConversationMetadataQueryData({
-        account: currentAccount,
-        topic,
+        clientInboxId: currentSender.inboxId,
+        xmtpConversationId,
         updateData: {
           unread: true,
         },
-      });
+      })
 
-      return { previousData };
+      return { previousData }
     },
-    onError: (error, _, context) => {
-      const currentAccount = getCurrentSenderEthAddress()!;
+    onError: (__, _, context) => {
       if (context?.previousData) {
         updateConversationMetadataQueryData({
-          account: currentAccount,
-          topic,
+          clientInboxId: currentSender.inboxId,
+          xmtpConversationId,
           updateData: context.previousData,
-        });
+        })
       }
     },
-  });
+  })
 
   return {
     markAsUnreadAsync,
-  };
+  }
 }

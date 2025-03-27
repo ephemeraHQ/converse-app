@@ -1,123 +1,110 @@
-import { useMutation } from "@tanstack/react-query";
-import {
-  ConversationId,
-  ConversationTopic,
-  InboxId,
-} from "@xmtp/react-native-sdk";
-import {
-  getCurrentSenderEthAddress,
-  useCurrentSenderEthAddress,
-} from "@/features/authentication/multi-inbox.store";
-import { updateConsentForGroupsForAccount } from "@/features/consent/update-consent-for-groups-for-account";
-import { updateInboxIdsConsentForAccount } from "@/features/consent/update-inbox-ids-consent-for-account";
-import {
-  IXmtpConversationWithCodecs,
-  IXmtpDmWithCodecs,
-} from "@/features/xmtp/xmtp.types";
-import { getConversationQueryData } from "@/queries/conversation-query";
+import { useMutation } from "@tanstack/react-query"
+import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import {
   addConversationToAllowedConsentConversationsQuery,
   removeConversationFromAllowedConsentConversationsQuery,
-} from "@/queries/conversations-allowed-consent-query";
+} from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import {
   addConversationToUnknownConsentConversationsQuery,
-  removeConversationFromUnknownConsentConversationsQueryData,
-} from "@/queries/conversations-unknown-consent-query";
-import { getDmQueryData, setDmQueryData } from "@/queries/useDmQuery";
-import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
+  removeConversationFromUnknownConsentConversationsQuery,
+} from "@/features/conversation/conversation-requests-list/conversations-unknown-consent.query"
+import { getDmQueryData, setDmQueryData } from "@/features/dm/dm.query"
+import { IXmtpConversationId, IXmtpInboxId } from "@/features/xmtp/xmtp.types"
+import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
+import {
+  setXmtpConsentStateForInboxId,
+  updateXmtpConsentForGroupsForInbox,
+} from "../xmtp/xmtp-consent/xmtp-consent"
 
 export function useDenyDmMutation() {
-  const currentAccount = useCurrentSenderEthAddress()!;
+  const currentSenderInboxId = useSafeCurrentSender().inboxId
 
   return useMutation({
     mutationFn: async (args: {
-      peerInboxId: InboxId;
-      conversationId: ConversationId;
-      topic: ConversationTopic;
+      peerInboxId: IXmtpInboxId
+      xmtpConversationId: IXmtpConversationId
     }) => {
-      const { peerInboxId, conversationId } = args;
-      if (!peerInboxId) {
-        throw new Error("Peer inbox id not found");
-      }
-      const currentAccount = getCurrentSenderEthAddress()!;
+      const { peerInboxId, xmtpConversationId } = args
+
       await Promise.all([
-        updateConsentForGroupsForAccount({
-          account: currentAccount,
-          groupIds: [conversationId],
-          consent: "deny",
+        updateXmtpConsentForGroupsForInbox({
+          clientInboxId: currentSenderInboxId,
+          groupIds: [xmtpConversationId],
+          consent: "denied",
         }),
-        updateInboxIdsConsentForAccount({
-          account: currentAccount,
-          inboxIds: [peerInboxId],
-          consent: "deny",
+        setXmtpConsentStateForInboxId({
+          peerInboxId,
+          consent: "denied",
         }),
-      ]);
+      ])
     },
-    onMutate: ({ topic, peerInboxId }) => {
-      const conversation = getConversationQueryData({
-        account: currentAccount,
-        topic,
-      });
+    onMutate: ({ xmtpConversationId }) => {
+      const conversation = getDmQueryData({
+        clientInboxId: currentSenderInboxId,
+        xmtpConversationId,
+      })
+
       if (conversation) {
         const updatedDm = updateObjectAndMethods(conversation, {
-          state: "denied",
-        });
+          consentState: "denied",
+        })
 
         setDmQueryData({
-          ethAccountAddress: currentAccount,
-          inboxId: peerInboxId,
-          dm: updatedDm as IXmtpDmWithCodecs,
-        });
+          clientInboxId: currentSenderInboxId,
+          xmtpConversationId,
+          dm: updatedDm,
+        })
 
         // Remove from main conversations list
         removeConversationFromAllowedConsentConversationsQuery({
-          account: currentAccount,
-          topic,
-        });
+          clientInboxId: currentSenderInboxId,
+          conversationId: xmtpConversationId,
+        })
 
         // Remove from requests
-        removeConversationFromUnknownConsentConversationsQueryData({
-          account: currentAccount,
-          topic,
-        });
+        removeConversationFromUnknownConsentConversationsQuery({
+          clientInboxId: currentSenderInboxId,
+          conversationId: xmtpConversationId,
+        })
 
-        return { previousDmConsent: conversation.state };
+        return { previousDmConsent: conversation.consentState }
       }
     },
-    onError: (error, { topic, peerInboxId }, context) => {
-      const { previousDmConsent } = context || {};
+    onError: (error, { xmtpConversationId }, context) => {
+      const { previousDmConsent } = context || {}
+
       if (previousDmConsent) {
         const dm = getDmQueryData({
-          ethAccountAddress: currentAccount,
-          inboxId: peerInboxId,
-        });
+          clientInboxId: currentSenderInboxId,
+          xmtpConversationId,
+        })
 
         if (!dm) {
-          return;
+          return
         }
 
         const previousDm = updateObjectAndMethods(dm, {
-          state: previousDmConsent,
-        });
+          consentState: previousDmConsent,
+        })
 
         setDmQueryData({
-          ethAccountAddress: currentAccount,
-          inboxId: peerInboxId,
+          xmtpConversationId,
+          clientInboxId: currentSenderInboxId,
           dm: previousDm,
-        });
+        })
 
         // Add back to main conversations list
         addConversationToAllowedConsentConversationsQuery({
-          account: currentAccount,
-          conversation: previousDm as IXmtpConversationWithCodecs,
-        });
+          clientInboxId: currentSenderInboxId,
+          conversationId: xmtpConversationId,
+        })
 
         // Add back to requests
         addConversationToUnknownConsentConversationsQuery({
-          account: currentAccount,
-          conversation: previousDm as IXmtpConversationWithCodecs,
-        });
+          clientInboxId: currentSenderInboxId,
+          conversationId: xmtpConversationId,
+        })
       }
     },
-  });
+  })
 }

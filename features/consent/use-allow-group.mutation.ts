@@ -1,95 +1,90 @@
-import { queryClient } from "@queries/queryClient";
-import {
-  MutationObserver,
-  MutationOptions,
-  useMutation,
-} from "@tanstack/react-query";
-import { getV3IdFromTopic } from "@utils/groupUtils/groupId";
-import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
-import { updateInboxIdsConsentForAccount } from "@/features/consent/update-inbox-ids-consent-for-account";
-import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group";
-import { IXmtpGroupWithCodecs } from "@/features/xmtp/xmtp.types";
+import { IXmtpConversationId, IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import { MutationObserver, MutationOptions, useMutation } from "@tanstack/react-query"
+import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import {
   addConversationToAllowedConsentConversationsQuery,
   removeConversationFromAllowedConsentConversationsQuery,
-} from "@/queries/conversations-allowed-consent-query";
+} from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
 import {
   addConversationToUnknownConsentConversationsQuery,
-  removeConversationFromUnknownConsentConversationsQueryData,
-} from "@/queries/conversations-unknown-consent-query";
+  removeConversationFromUnknownConsentConversationsQuery,
+} from "@/features/conversation/conversation-requests-list/conversations-unknown-consent.query"
+import { isConversationGroup } from "@/features/conversation/utils/is-conversation-group"
 import {
   getGroupQueryData,
   getOrFetchGroupQuery,
   setGroupQueryData,
-} from "@/queries/useGroupQuery";
-import { updateObjectAndMethods } from "@/utils/update-object-and-methods";
-import { MutationKeys } from "../../queries/MutationKeys";
-import { updateConsentForGroupsForAccount } from "./update-consent-for-groups-for-account";
+} from "@/features/groups/group.query"
+import { reactQueryClient } from "@/utils/react-query/react-query.client"
+import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
+import { IGroup } from "../groups/group.types"
+import {
+  setXmtpConsentStateForInboxId,
+  updateXmtpConsentForGroupsForInbox,
+} from "../xmtp/xmtp-consent/xmtp-consent"
 
 type IAllowGroupMutationOptions = {
-  account: string;
-  topic: ConversationTopic;
-};
+  clientInboxId: IXmtpInboxId
+  xmtpConversationId: IXmtpConversationId
+}
 
-type IAllowGroupReturnType = Awaited<ReturnType<typeof allowGroup>>;
+type IAllowGroupReturnType = Awaited<ReturnType<typeof allowGroup>>
 
 type IAllowGroupArgs = {
-  includeAddedBy?: boolean;
-  includeCreator?: boolean;
-  account: string;
-  topic: ConversationTopic;
-};
+  includeAddedBy?: boolean
+  includeCreator?: boolean
+  clientInboxId: IXmtpInboxId
+  xmtpConversationId: IXmtpConversationId
+}
 
 async function allowGroup({
   includeAddedBy,
   includeCreator,
-  account,
-  topic,
+  clientInboxId,
+  xmtpConversationId,
 }: IAllowGroupArgs) {
   const group = await getOrFetchGroupQuery({
-    account,
-    topic,
+    clientInboxId: getSafeCurrentSender().inboxId,
+    xmtpConversationId,
     caller: "allowGroup",
-  });
+  })
 
   if (!group) {
-    throw new Error("Group not found");
+    throw new Error("Group not found")
   }
 
   if (!isConversationGroup(group)) {
-    throw new Error("Group is not a valid group");
+    throw new Error("Group is not a valid group")
   }
 
-  const groupTopic = group.topic;
-  const groupCreator = await group.creatorInboxId();
+  const groupCreator = group.creatorInboxId
 
-  const inboxIdsToAllow: InboxId[] = [];
+  const inboxIdsToAllow: IXmtpInboxId[] = []
   if (includeAddedBy && group?.addedByInboxId) {
-    inboxIdsToAllow.push(group.addedByInboxId);
+    inboxIdsToAllow.push(group.addedByInboxId)
   }
 
   if (includeCreator && groupCreator) {
-    inboxIdsToAllow.push(groupCreator);
+    inboxIdsToAllow.push(groupCreator)
   }
 
   await Promise.all([
-    updateConsentForGroupsForAccount({
-      account,
-      groupIds: [getV3IdFromTopic(groupTopic)],
-      consent: "allow",
+    updateXmtpConsentForGroupsForInbox({
+      clientInboxId,
+      groupIds: [xmtpConversationId],
+      consent: "allowed",
     }),
     ...(inboxIdsToAllow.length > 0
       ? [
-          updateInboxIdsConsentForAccount({
-            account,
-            inboxIds: inboxIdsToAllow,
-            consent: "allow",
+          setXmtpConsentStateForInboxId({
+            peerInboxId: clientInboxId,
+            consent: "allowed",
           }),
         ]
       : []),
-  ]);
+  ])
 
-  return "allowed" as const;
+  return "allowed" as const
 }
 
 export const getAllowGroupMutationOptions = (
@@ -98,82 +93,81 @@ export const getAllowGroupMutationOptions = (
   IAllowGroupReturnType,
   unknown,
   IAllowGroupArgs,
-  { previousGroup: IXmtpGroupWithCodecs } | undefined
+  { previousGroup: IGroup } | undefined
 > => {
-  const { account, topic } = args;
+  const { xmtpConversationId } = args
+
   return {
-    mutationKey: [MutationKeys.ALLOW_GROUP, account, topic],
     mutationFn: allowGroup,
     onMutate: async (args) => {
-      const { account } = args;
+      const { clientInboxId } = args
 
-      const previousGroup = getGroupQueryData({ account, topic });
+      const previousGroup = getGroupQueryData({ clientInboxId, xmtpConversationId })
 
       if (!previousGroup) {
-        throw new Error("Previous group not found");
+        throw new Error("Previous group not found")
+      }
+
+      if (!isConversationGroup(previousGroup)) {
+        throw new Error("Previous conversation is not a group")
       }
 
       const updatedGroup = updateObjectAndMethods(previousGroup, {
-        state: "allowed",
-      });
+        consentState: "allowed",
+      })
 
-      setGroupQueryData({ account, topic, group: updatedGroup });
+      setGroupQueryData({ clientInboxId, xmtpConversationId, group: updatedGroup })
 
       // Remove from requests
-      removeConversationFromUnknownConsentConversationsQueryData({
-        account,
-        topic,
-      });
+      removeConversationFromUnknownConsentConversationsQuery({
+        clientInboxId,
+        conversationId: xmtpConversationId,
+      })
 
       // Add to main conversations list
       addConversationToAllowedConsentConversationsQuery({
-        account,
-        conversation: updatedGroup,
-      });
+        clientInboxId,
+        conversationId: xmtpConversationId,
+      })
 
-      return { previousGroup };
+      return { previousGroup }
     },
     onError: (_, variables, context) => {
       if (!context) {
-        return;
+        return
       }
 
-      const { account, topic } = variables;
+      const { clientInboxId, xmtpConversationId } = variables
 
       setGroupQueryData({
-        account,
-        topic,
+        clientInboxId,
+        xmtpConversationId,
         group: context.previousGroup,
-      });
+      })
 
       // Add back in requests
       addConversationToUnknownConsentConversationsQuery({
-        account,
-        conversation: context.previousGroup,
-      });
+        clientInboxId,
+        conversationId: xmtpConversationId,
+      })
 
       // Remove from main conversations list
       removeConversationFromAllowedConsentConversationsQuery({
-        account,
-        topic,
-      });
+        clientInboxId,
+        conversationId: xmtpConversationId,
+      })
     },
-  };
-};
+  }
+}
 
-export const createAllowGroupMutationObserver = (
-  args: IAllowGroupMutationOptions,
-) => {
+export const createAllowGroupMutationObserver = (args: IAllowGroupMutationOptions) => {
   const allowGroupMutationObserver = new MutationObserver(
-    queryClient,
+    reactQueryClient,
     getAllowGroupMutationOptions(args),
-  );
-  return allowGroupMutationObserver;
-};
+  )
+  return allowGroupMutationObserver
+}
 
-export const useAllowGroupMutation = (
-  account: string,
-  topic: ConversationTopic,
-) => {
-  return useMutation(getAllowGroupMutationOptions({ account, topic }));
-};
+export const useAllowGroupMutation = (args: IAllowGroupMutationOptions) => {
+  return useMutation(getAllowGroupMutationOptions(args))
+}

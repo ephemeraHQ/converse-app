@@ -1,11 +1,11 @@
-import React from "react";
-import { View } from "react-native";
-import { Icon } from "@/design-system/Icon/Icon";
-import { Chip, ChipAvatar, ChipIcon, ChipText } from "./chip";
+import React from "react"
+import { View } from "react-native"
+import { Icon } from "@/design-system/Icon/Icon"
+import { Chip, ChipAvatar, ChipIcon, ChipText } from "./chip"
 
 export default {
   title: "Design System/Chip",
-};
+}
 
 export function ChipExamples() {
   return (
@@ -50,12 +50,7 @@ export function ChipExamples() {
       </Chip>
 
       {/* Combination of multiple props */}
-      <Chip
-        variant="filled"
-        size="md"
-        isSelected
-        onPress={() => alert("Complex chip pressed!")}
-      >
+      <Chip variant="filled" size="md" isSelected onPress={() => alert("Complex chip pressed!")}>
         <ChipAvatar uri="https://example.com/avatar.jpg" name="Jane Smith" />
         <ChipIcon>
           <Icon icon="checkmark" size={16} />
@@ -63,5 +58,5 @@ export function ChipExamples() {
         <ChipText>Complex Chip</ChipText>
       </Chip>
     </View>
-  );
+  )
 }

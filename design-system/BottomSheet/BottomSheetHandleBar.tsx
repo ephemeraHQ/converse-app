@@ -1,18 +1,18 @@
 import {
   BottomSheetHandle as GorhomBottomSheetHandle,
   BottomSheetHandleProps as GorhomBottomSheetHandleProps,
-} from "@gorhom/bottom-sheet";
-import { memo } from "react";
-import { useAppTheme } from "../../theme/use-app-theme";
+} from "@gorhom/bottom-sheet"
+import { memo } from "react"
+import { useAppTheme } from "../../theme/use-app-theme"
 
 export const BottomSheetHandleBar = memo(function BottomSheetHandleBar(
   props: GorhomBottomSheetHandleProps & {
-    isAbsolute?: boolean;
+    isAbsolute?: boolean
   },
 ) {
-  const { isAbsolute, animatedIndex, animatedPosition } = props;
+  const { isAbsolute, animatedIndex, animatedPosition } = props
 
-  const { theme } = useAppTheme();
+  const { theme } = useAppTheme()
 
   return (
     <GorhomBottomSheetHandle
@@ -29,5 +29,5 @@ export const BottomSheetHandleBar = memo(function BottomSheetHandleBar(
         width: theme.spacing.xl,
       }}
     />
-  );
-});
+  )
+})

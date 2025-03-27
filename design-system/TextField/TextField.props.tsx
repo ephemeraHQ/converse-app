@@ -1,4 +1,4 @@
-import { ComponentType } from "react";
+import { ComponentType } from "react"
 import {
   ImageStyle,
   StyleProp,
@@ -6,90 +6,90 @@ import {
   TextProps,
   TextStyle,
   ViewStyle,
-} from "react-native";
-import { ITextProps } from "../Text/Text.props";
+} from "react-native"
+import { ITextProps } from "../Text/Text.props"
 
 export type TextFieldAccessoryProps = {
-  style: StyleProp<ViewStyle | TextStyle | ImageStyle>;
-  status: TextFieldProps["status"];
-  multiline: boolean;
-  editable: boolean;
-};
+  style: StyleProp<ViewStyle | TextStyle | ImageStyle>
+  status: TextFieldProps["status"]
+  multiline: boolean
+  editable: boolean
+}
 
 export type TextFieldProps = {
   /**
    * A style modifier for different input states.
    */
-  status?: "error" | "disabled";
+  status?: "error" | "disabled"
   /**
    * The label text to display if not using `labelTx`.
    */
-  label?: ITextProps["text"];
+  label?: ITextProps["text"]
   /**
    * Label text which is looked up via i18n.
    */
-  labelTx?: ITextProps["tx"];
+  labelTx?: ITextProps["tx"]
   /**
    * Optional label options to pass to i18n. Useful for interpolation
    * as well as explicitly setting locale or translation fallbacks.
    */
-  labelTxOptions?: ITextProps["txOptions"];
+  labelTxOptions?: ITextProps["txOptions"]
   /**
    * Pass any additional props directly to the label Text component.
    */
-  LabelTextProps?: TextProps;
+  LabelTextProps?: TextProps
   /**
    * The helper text to display if not using `helperTx`.
    */
-  helper?: ITextProps["text"];
+  helper?: ITextProps["text"]
   /**
    * Helper text which is looked up via i18n.
    */
-  helperTx?: ITextProps["tx"];
+  helperTx?: ITextProps["tx"]
   /**
    * Optional helper options to pass to i18n. Useful for interpolation
    * as well as explicitly setting locale or translation fallbacks.
    */
-  helperTxOptions?: ITextProps["txOptions"];
+  helperTxOptions?: ITextProps["txOptions"]
   /**
    * Pass any additional props directly to the helper Text component.
    */
-  HelperTextProps?: TextProps;
+  HelperTextProps?: TextProps
   /**
    * The placeholder text to display if not using `placeholderTx`.
    */
-  placeholder?: ITextProps["text"];
+  placeholder?: ITextProps["text"]
   /**
    * Placeholder text which is looked up via i18n.
    */
-  placeholderTx?: ITextProps["tx"];
+  placeholderTx?: ITextProps["tx"]
   /**
    * Optional placeholder options to pass to i18n. Useful for interpolation
    * as well as explicitly setting locale or translation fallbacks.
    */
-  placeholderTxOptions?: ITextProps["txOptions"];
+  placeholderTxOptions?: ITextProps["txOptions"]
   /**
    * Optional input style override.
    */
-  style?: StyleProp<TextStyle>;
+  style?: StyleProp<TextStyle>
   /**
    * Style overrides for the container
    */
-  containerStyle?: StyleProp<ViewStyle>;
+  containerStyle?: StyleProp<ViewStyle>
   /**
    * Style overrides for the input wrapper
    */
-  inputWrapperStyle?: StyleProp<ViewStyle>;
+  inputWrapperStyle?: StyleProp<ViewStyle>
   /**
    * An optional component to render on the right side of the input.
    * Example: `RightAccessory={(props) => <Icon icon="ladybug" containerStyle={props.style} color={props.editable ? colors.textDim : colors.text} />}`
    * Note: It is a good idea to memoize this.
    */
-  RightAccessory?: ComponentType<TextFieldAccessoryProps>;
+  RightAccessory?: ComponentType<TextFieldAccessoryProps>
   /**
    * An optional component to render on the left side of the input.
    * Example: `LeftAccessory={(props) => <Icon icon="ladybug" containerStyle={props.style} color={props.editable ? colors.textDim : colors.text} />}`
    * Note: It is a good idea to memoize this.
    */
-  LeftAccessory?: ComponentType<TextFieldAccessoryProps>;
-} & Omit<TextInputProps, "ref">;
+  LeftAccessory?: ComponentType<TextFieldAccessoryProps>
+} & Omit<TextInputProps, "ref">

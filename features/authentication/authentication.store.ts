@@ -1,17 +1,20 @@
-import { create } from "zustand";
+import { create } from "zustand"
+import { subscribeWithSelector } from "zustand/middleware"
 
-type IAuthStatus = "undetermined" | "onboarding" | "signedIn" | "signedOut";
+type IAuthStatus = "undetermined" | "onboarding" | "signedIn" | "signedOut"
 
-export type IAuthStore = {
-  status: IAuthStatus;
+type IAuthenticationStore = {
+  status: IAuthStatus
   actions: {
-    setStatus: (status: IAuthStatus) => void;
-  };
-};
+    setStatus: (status: IAuthStatus) => void
+  }
+}
 
-export const useAuthStore = create<IAuthStore>((set, get) => ({
-  status: "undetermined",
-  actions: {
-    setStatus: (status) => set({ status }),
-  },
-}));
+export const useAuthenticationStore = create<IAuthenticationStore>()(
+  subscribeWithSelector((set, get) => ({
+    status: "undetermined",
+    actions: {
+      setStatus: (status) => set({ status }),
+    },
+  })),
+)

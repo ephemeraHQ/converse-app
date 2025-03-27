@@ -1,56 +1,54 @@
 /**
  * Maybe need to move this file somewhere else? Not sure which specific feature it belongs to.
  */
-import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
-import { InboxId } from "@xmtp/react-native-sdk";
-import { queryClient } from "@/queries/queryClient";
-import { IEthereumAddress } from "@/utils/evm/address";
-import { getEthAddressesFromInboxIds } from "./eth-addresses-from-xmtp-inbox-id";
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import { queryOptions, skipToken, useQuery } from "@tanstack/react-query"
+import { reactQueryClient } from "@/utils/react-query/react-query.client"
+import { getReactQueryKey } from "@/utils/react-query/react-query.utils"
+import { getEthAddressesFromInboxIds } from "./eth-addresses-from-xmtp-inbox-id"
 
 type IArgs = {
-  clientEthAddress: string;
-  inboxId: InboxId | undefined;
-};
+  clientInboxId: IXmtpInboxId
+  inboxId: IXmtpInboxId | undefined
+}
 
 type IStrictArgs = {
-  clientEthAddress: IEthereumAddress;
-  inboxId: InboxId;
-};
+  clientInboxId: IXmtpInboxId
+  inboxId: IXmtpInboxId
+}
 
 export function getEthAddressesForXmtpInboxIdQueryOptions(args: IArgs) {
-  const { clientEthAddress, inboxId } = args;
+  const { clientInboxId, inboxId } = args
 
   return queryOptions({
-    queryKey: ["eth-addresses-for-xmtp-inbox-id", clientEthAddress, inboxId],
+    queryKey: getReactQueryKey({
+      baseStr: "eth-addresses-for-xmtp-inbox-id",
+      clientInboxId,
+      inboxId,
+    }),
     queryFn:
-      clientEthAddress && inboxId
+      clientInboxId && inboxId
         ? () => {
             return getEthAddressesFromInboxIds({
-              clientEthAddress,
+              clientInboxId,
               inboxIds: [inboxId],
-            });
+            })
           }
         : skipToken,
-  });
+  })
 }
 
-export function useEthAddressesForXmtpInboxId(args: IArgs) {
-  const { clientEthAddress, inboxId } = args;
-
-  return useQuery(
-    getEthAddressesForXmtpInboxIdQueryOptions({
-      clientEthAddress,
-      inboxId,
-    }),
-  );
+export function useEthAddressesForXmtpInboxIdQuery(args: IArgs) {
+  return useQuery(getEthAddressesForXmtpInboxIdQueryOptions(args))
 }
 
-export function ensureEthAddressForXmtpInboxId(args: IStrictArgs) {
-  const { clientEthAddress, inboxId } = args;
-  return queryClient.ensureQueryData(
-    getEthAddressesForXmtpInboxIdQueryOptions({
-      clientEthAddress,
-      inboxId,
-    }),
-  );
+export function ensureEthAddressesForXmtpInboxIdQueryData(args: IStrictArgs) {
+  return reactQueryClient.ensureQueryData(getEthAddressesForXmtpInboxIdQueryOptions(args))
+}
+
+export function invalidateEthAddressesForXmtpInboxIdQuery(args: IStrictArgs) {
+  return reactQueryClient.invalidateQueries(getEthAddressesForXmtpInboxIdQueryOptions(args))
+}
+export function getEthAddressesForXmtpInboxIdQueryData(args: IStrictArgs) {
+  return reactQueryClient.getQueryData(getEthAddressesForXmtpInboxIdQueryOptions(args).queryKey)
 }

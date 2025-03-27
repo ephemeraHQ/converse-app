@@ -2,6 +2,13 @@
 
 - When I ask you to "clean" a file, rewrite the content following the rules and best practices listed below.
 - When I ask you to "Make more readable", rewrite the content following the rules and best practices listed below and add some comments to explain the code. The comments need to be short and direct. Don't add comments when it's obvious what the code is doing. Also add some comments to explain why we are doing something in a certain way.
+- When I ask you to rename files, move files, or rename exports, ONLY perform the requested operation and update the corresponding import paths where needed. Do not modify any other logic or attempt to improve the code.
+- When I ask you to extract code into separate files or components, ONLY move the code as is - do not modify the logic, add new features, change styling, or create additional components. The goal is to maintain the exact same functionality while organizing it into separate files.
+- When extracting a component that wraps or customizes a base component into a new file, the new component name and file name should be derived from the parent file's name:
+  - Component name should be prefixed with the parent file's feature/context name (e.g., `ListItemWrapper` becomes `AddGroupMemberListItem` when extracted from `add-group-member.tsx`)
+  - File name should match the component name in kebab-case (e.g., `add-group-member-list-item.tsx`)
+  - The component's implementation should remain exactly the same, only the name changes
+- When I'm saying "Convo" or "Convos" it's the name of our app. It's not an abbreviation for Conversation
 
 ## Core Principles
 
@@ -11,20 +18,167 @@
 - Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError).
 - Don't create functions inside other functions unless specified.
 - Add clear, concise comments to explain non-obvious logic.
+- Keep comments minimal and focused on complex logic only. Don't add comments for obvious code or document parameters and return types that are already clear from the function signature.
 - Handle errors at the caller level unless logging is needed.
 - Minimize using external hooks inside custom hooks to prevent unnecessary rerenders.
 - Use Zod for external API response validation.
 - Keep files small and focused.
 - Use block-style if statements with curly braces instead of single-line statements.
+- Never make assumptions about library APIs - always verify in the official documentation for the major version being used.
 - Use logger for all logging operations:
 
 ```typescript
 // ❌ Bad: Single-line if statement
-if (isValid) return;
+if (isValid) return
 
 // ✅ Good: Block-style if statement
 if (isValid) {
-  return;
+  return
+}
+```
+
+## Code Comments
+
+- Keep comments minimal and focused on complex logic only.
+- Don't add comments for obvious code or document parameters and return types that are already clear from the function signature.
+- Add clear, concise comments to explain non-obvious logic or implementation decisions.
+- Use comments to explain "why" rather than "what" when the code itself clearly shows what it's doing.
+- Avoid verbose JSDoc-style documentation with @param and @returns when TypeScript types already provide this information.
+- Place comments directly above the specific line or block they explain, not at the function level unless explaining the function's overall purpose.
+
+```typescript
+// ❌ Bad: Excessive commenting with redundant information
+/**
+ * Check if a conversation exists with the given inboxId
+ * @param inboxId The inbox ID to check
+ * @returns Promise with { exists, conversationId } - where conversationId is set if exists is true
+ */
+async function doesConversationExist(inboxId: string) {
+  // Generic comment about implementation
+  const result = await db.query(...)
+  return result
+}
+
+// ✅ Good: Comments only where needed, directly above relevant code
+async function doesConversationExist(inboxId: string) {
+  // Using lightweight query that only checks existence for performance
+  const result = await db.query(`SELECT EXISTS(SELECT 1 FROM conversations WHERE inbox_id = $1)`, [inboxId])
+  return result
+}
+```
+
+## Function Decomposition
+
+- When I ask to decompose a complex function, break it down into smaller, well-named functions that:
+  - Have a clear, single responsibility
+  - Use descriptive names that explain what they do, not how they do it
+  - Have well-defined inputs and outputs
+  - Can be understood independently
+  - Are testable in isolation
+- Avoid excessive decomposition - don't create tiny functions (1-2 lines) unless they significantly improve readability
+- Place helper functions directly below the main function that uses them
+- Keep related functions together in the same file unless otherwise specified
+- The parent function should read like a story by calling these well-named functions in sequence
+
+```typescript
+// ❌ Bad: Complex monolithic function
+function processOrder(order: IOrder) {
+  // 50+ lines of complex logic with multiple responsibilities
+  // validation, calculation, database operations, notifications, etc.
+}
+
+// ✅ Good: Parent function with clear steps using helper functions
+function processOrder(args: { order: IOrder }) {
+  const { order } = args
+
+  const validatedOrder = validateOrder(order)
+  const calculatedTotals = calculateOrderTotals(validatedOrder)
+  const savedOrder = saveOrderToDatabase(calculatedTotals)
+  sendOrderConfirmationEmail(savedOrder)
+
+  return savedOrder
+}
+
+function validateOrder(order: IOrder) {
+  // Validation logic
+}
+
+function calculateOrderTotals(order: IOrder) {
+  // Calculation logic
+}
+
+function saveOrderToDatabase(order: IOrder) {
+  // Database logic
+}
+
+function sendOrderConfirmationEmail(order: IOrder) {
+  // Email sending logic
+}
+```
+
+## Imports
+
+- When importing types or functions from external libraries, rename them to clearly indicate their source.
+- Use the 'as' keyword to rename imports from third-party libraries.
+
+```typescript
+// ❌ Bad: Importing without renaming
+// ✅ Good: Renaming imports to indicate source
+import {
+  createWallet,
+  createWallet as createWalletThirdweb,
+  Wallet as ThirdwebWallet,
+  Wallet,
+} from "thirdweb/wallets"
+```
+
+## Code Organization
+
+- Place exported functions, components, and variables at the top of the file.
+- Place helper functions and non-exported components below the exported items.
+- Define types close to their implementation:
+  - Place type definitions directly above the function or component that uses them.
+  - Only place types at the top of the file if they're used in multiple places throughout the file.
+
+```typescript
+// ❌ Bad: Helper function above exported function
+function formatUserName(firstName: string, lastName: string) {
+  return `${firstName} ${lastName}`
+}
+
+export function UserProfile(args: { userId: string }) {
+  // Implementation
+}
+
+// ✅ Good: Exported function at the top, helper below
+export function UserProfile(args: { userId: string }) {
+  // Implementation using formatUserName
+}
+
+function formatUserName(firstName: string, lastName: string) {
+  return `${firstName} ${lastName}`
+}
+
+// ❌ Bad: Type definition far from implementation
+type IFormatOptions = {
+  uppercase: boolean
+  includeMiddleName: boolean
+}
+
+// Many lines of code...
+
+function formatName(args: { name: string; options: IFormatOptions }) {
+  // Implementation
+}
+
+// ✅ Good: Type definition close to implementation
+type IFormatOptions = {
+  uppercase: boolean
+  includeMiddleName: boolean
+}
+
+function formatName(args: { name: string; options: IFormatOptions }) {
+  // Implementation
 }
 ```
 
@@ -35,21 +189,25 @@ if (isValid) {
 - Avoid enums, use string literals instead.
 - Prefer type inference when possible.
 - Avoid explicit Promise return types - let TypeScript infer them.
+- Use functional components with TypeScript types.
+- Prefer inferring types if possible over explicit typing.
+- Prefer type assertions on return objects (`return {...} satisfies IType`) over function return type annotations (`function(): IType`) if we have to put a type because the inferring is not working well.
+- Avoid explicit return types on functions.
 
 ```typescript
 // ❌ Bad: Explicit Promise return types
 async function fetchUser(id: string): Promise<IUser> {
-  return api.getUser(id);
+  return api.getUser(id)
 }
 
 // ✅ Good: Let TypeScript infer the Promise return type
 async function fetchUser(id: string) {
-  return api.getUser(id);
+  return api.getUser(id)
 }
 
 // ✅ Good: Non-Promise return types are still fine to be explicit
 function calculateTotal(items: ICartItem[]): number {
-  return items.reduce((sum, item) => sum + item.price, 0);
+  return items.reduce((sum, item) => sum + item.price, 0)
 }
 ```
 
@@ -66,7 +224,7 @@ function sendMessage(recipientId: string, content: string) {
 
 // ✅ Good: Object parameters with destructuring
 function sendMessage(args: { recipientId: string; content: string }) {
-  const { recipientId, content } = args;
+  const { recipientId, content } = args
   // Function body
 }
 ```
@@ -78,9 +236,12 @@ function sendMessage(args: { recipientId: string; content: string }) {
 - Prefer early returns over ternaries.
 - Minimize useEffect usage.
 - Wrap components in memo() for performance.
+- This codebase uses React Native - follow all React Native best practices.
+- Never place hooks inside conditionals, loops, or nested functions - this violates React's Rules of Hooks.
+- Avoid using render functions (renderHeader, renderContent, etc.) within components. Instead, create separate component functions for each logical UI section.
 - For styling components, use the style prop with an object instead of direct props:
 
-```typescript
+````typescript
 // ❌ Bad: Using style props directly
 <HStack alignItems="center" gap={theme.spacing.sm}>
 
@@ -91,24 +252,320 @@ function sendMessage(args: { recipientId: string; content: string }) {
     gap: theme.spacing.sm,
   }}
 >
+
+## Styling Patterns
+
+- Use the dollar sign ($) prefix for style objects defined outside of components.
+- Use ThemedStyle<ViewStyle> for theme-dependent styles that need access to theme variables.
+- Extract complex styles outside the component with the $ prefix.
+- Use $globalStyles for common styling patterns that are reused across components.
+- Use inline styles for simple, one-off styling needs.
+- Append "Override" to style props that override default component styles.
+
+```typescript
+// ✅ Good: Use ThemedStyle for theme-dependent styles
+<VStack style={themed($container)} />
+
+const $container: ThemedStyle<ViewStyle> = ({ colors, spacing }) => ({
+  alignItems: "center",
+  justifyContent: "center",
+  paddingHorizontal: spacing.md,
+  backgroundColor: colors.background,
+  borderRadius: 8,
+});
+
+// ✅ Good: Use $globalStyles for common patterns
+<VStack style={[$globalStyles.center, $globalStyles.flex1]} />
+
+// ✅ Good: Combine global styles with component-specific styles
+<VStack style={[$globalStyles.center, $container]} />
+````
+
+- When accepting style overrides in component props, use consistent naming:
+
+```typescript
+type ComponentProps = {
+  style?: StyleProp<ViewStyle>;
+  containerStyle?: StyleProp<ViewStyle>;
+  contentStyle?: StyleProp<ViewStyle>;
+  // etc.
+}
+
+// Then in the component:
+<View style={[$defaultStyle, style]} />
+<View style={[$defaultContainerStyle, containerStyle]} />
+```
+
+## Design System Components
+
+- Use design system components instead of native components whenever possible.
+- Prefer specialized layout components over generic View components:
+  - Use `VStack` instead of `View` with `flexDirection: "column"`.
+  - Use `HStack` instead of `View` with `flexDirection: "row"`.
+  - Use `Center` instead of manually setting alignment and justification.
+  - Use `AnimatedVStack`, `AnimatedHStack`, and `AnimatedCenter` for animated components.
+
+```typescript
+// ❌ Bad: Using native components with manual styling
+<View style={{ flexDirection: "column", gap: 8 }}>
+  <View style={{ flexDirection: "row", alignItems: "center" }}>
+    <Text>Label</Text>
+    <TextInput />
+  </View>
+  <View style={{ alignItems: "center", justifyContent: "center" }}>
+    <Button title="Submit" />
+  </View>
+</View>
+
+// ✅ Good: Using design system components
+<VStack style={{ gap: 8 }}>
+  <HStack style={{ alignItems: "center" }}>
+    <Text>Label</Text>
+    <TextInput />
+  </HStack>
+  <Center>
+    <Button title="Submit" />
+  </Center>
+</VStack>
+```
+
+## Text Component Usage
+
+- Use the Text component's built-in presets instead of manually specifying font size, line height, or weight.
+- Avoid inline text styling for font properties that are already handled by presets.
+- Use the color prop to set text color instead of style overrides.
+- Only use custom text styles for rare cases where the existing presets don't meet the requirements.
+
+```typescript
+// ❌ Bad: Manually styling text properties
+<Text style={{ fontSize: 16, lineHeight: 20, fontWeight: "bold", color: colors.text.primary }}>
+  Hello World
+</Text>
+
+// ❌ Bad: Using React Native's Text component directly
+<RNText style={{ fontSize: 16, lineHeight: 20 }}>Hello World</RNText>
+
+// ✅ Good: Using Text component with presets
+<Text preset="body">Hello World</Text>
+
+// ✅ Good: Using Text component with color prop
+<Text preset="body" color="secondary">Hello World</Text>
+
+// ✅ Good: Using Text component with weight prop
+<Text preset="body" weight="bold">Hello World</Text>
+
+// ✅ Good: Using Text component with size prop when needed
+<Text preset="body" size="lg">Hello World</Text>
+```
+
+```typescript
+// ❌ Bad: Using render functions inside components
+export const ProfileScreen = memo(function ProfileScreen() {
+  const renderHeader = () => (
+    <Header title="Profile" />
+  )
+
+  const renderContent = () => (
+    <VStack>
+      <Avatar />
+      <Text>User Name</Text>
+    </VStack>
+  )
+
+  return (
+    <Screen>
+      {renderHeader()}
+      {renderContent()}
+    </Screen>
+  )
+})
+
+// ✅ Good: Using separate component functions
+export const ProfileScreen = memo(function ProfileScreen() {
+  return (
+    <Screen>
+      <ProfileHeader />
+      <ProfileContent />
+    </Screen>
+  )
+})
+
+const ProfileHeader = memo(function ProfileHeader() {
+  return <Header title="Profile" />
+})
+
+const ProfileContent = memo(function ProfileContent() {
+  return (
+    <VStack>
+      <Avatar />
+      <Text>User Name</Text>
+    </VStack>
+  )
+})
+```
+
+- Avoid creating unnecessary external prop type declarations when extending existing component props.
+- Create wrapper components by extending base components when adding consistent styling or behavior.
+
+```typescript
+// ❌ Bad: Unnecessary external prop type declaration
+type IConnectWalletButtonContainerProps = {
+  children: ReactNode;
+  style?: StyleProp<ViewStyle>;
+} & Omit<IVStackProps, 'children' | 'style'>;
+
+export const ConnectWalletButtonContainer = memo(
+  function ConnectWalletButtonContainer(props: IConnectWalletButtonContainerProps) {
+    const { children, style, ...rest } = props;
+    const { theme } = useAppTheme();
+
+    return (
+      <VStack
+        style={[
+          {
+            rowGap: theme.spacing.xxs,
+          },
+          style,
+        ]}
+        {...rest}
+      >
+        {children}
+      </VStack>
+    );
+  }
+);
+
+// ✅ Good: Directly use the base component's props
+export const ConnectWalletButtonContainer = memo(
+  function ConnectWalletButtonContainer(props: IVStackProps) {
+    const { children, style, ...rest } = props;
+    const { theme } = useAppTheme();
+
+    return (
+      <VStack
+        style={[
+          {
+            rowGap: theme.spacing.xxs,
+          },
+          style,
+        ]}
+        {...rest}
+      >
+        {children}
+      </VStack>
+    );
+  }
+);
+```
+
+- When extracting components or creating reusable components:
+  1. Always extend from existing design system components when possible
+  2. Directly use the base component's prop types (e.g., ITextProps, IVStackProps)
+  3. Only add default props/styling that are consistent across all uses
+  4. Use memo() for all extracted components
+  5. Use named exports
+  6. Keep a flat props structure - avoid creating new prop types unless absolutely necessary
+
+```typescript
+// ❌ Bad: Creating unnecessary prop types and complexity
+type ICustomTitleProps = {
+  text: string
+  style?: StyleProp<TextStyle>
+}
+
+export const CustomTitle = memo(function CustomTitle(props: ICustomTitleProps) {
+  const { text, style } = props
+  return <Text style={style}>{text}</Text>
+})
+
+// ✅ Good: Extending base component with its props
+export const CustomTitle = memo(function CustomTitle(props: ITextProps) {
+  return <Text preset="title" {...props} />
+})
+
+// ✅ Good: Adding default styling while maintaining prop flexibility
+export const CustomSubtitle = memo(function CustomSubtitle(props: ITextProps) {
+  return <Text preset="small" color="secondary" {...props} />
+})
 ```
 
 ## File Structure
 
 - Use lower-kebab-case for directories and files.
 - Import paths should start with @/.
-- Use descriptive suffixes for files.
+- Place files as close as possible to where they are used.
+- Follow the feature-based organization pattern.
+- Use descriptive suffixes for files that indicate their purpose.
 
 ```
 // ❌ Bad: Unclear names
 utils.ts
 types.ts
 
-// ✅ Good: Clear names with suffixes
+// ✅ Good: Clear names with feature prefix and purpose suffix
 profile.screen.tsx
-messages.queries.ts
+messages.query.ts
 auth.client.ts
 ```
+
+### Feature-Based Organization
+
+Organize code by features rather than technical concerns. Each feature should be self-contained with its own components, screens, utilities, etc.
+
+Feature directories may contain:
+
+- `components/` - UI components specific to the feature
+- `screens/` - Screen components for the feature
+- `navigation/` - Navigation-related code
+- `hooks/` - Custom hooks
+- `utils/` - Utility functions
+- `data/` - Data management
+- `clients/` - API clients
+- `queries/` - React Query related code
+- `types/` - TypeScript types
+- `actors/` - XState actors
+
+### File Naming Convention
+
+Name files with the feature name as prefix and a descriptive suffix indicating the file's purpose:
+
+```
+[featureName].screen.tsx
+[featureName].nav.tsx
+[featureName].store.ts
+[featureName].query.ts
+[featureName].utils.ts
+[featureName].types.ts
+[featureName].test.ts
+```
+
+Example structure:
+
+```
+features/
+└── accounts/
+    ├── components/
+    │   ├── account-card.component.tsx
+    │   └── account-settings.component.tsx
+    ├── screens/
+    │   └── accounts.screen.tsx
+    ├── navigation/
+    │   └── accounts.nav.tsx
+    ├── hooks/
+    │   └── accounts.hooks.ts
+    ├── utils/
+    │   └── accounts.utils.ts
+    ├── data/
+    ├── accounts.query.ts
+    └── accounts.types.ts
+```
+
+This organization ensures that:
+
+1. Related code stays together
+2. Files are easy to find based on their name
+3. The purpose of each file is clear from its suffix
+4. Features are modular and self-contained
 
 ## React Query Best Practices
 
@@ -118,18 +575,87 @@ auth.client.ts
 
 ```typescript
 // ❌ Bad: Direct key usage
-const { data } = useQuery(["messages", id]);
+const { data } = useQuery(["messages", id])
 
 // ✅ Good: Using query options
 export const getMessagesQueryOptions = (args: { id: string }) => {
-  const enabled = !!args.id;
+  const enabled = !!args.id
 
   return queryOptions({
-    queryKey: messagesQueryKey(args.id),
+    queryKey: ["get-message", arg.id],
     queryFn: enabled ? () => fetchMessages(args) : skipToken,
     enabled,
-  });
-};
+  })
+}
+```
+
+## Zustand Store Best Practices
+
+- Use Zustand stores to centralize state and actions, especially when passing many props between components.
+- Structure stores with a clear separation between state and actions:
+
+```typescript
+// ✅ Good: Clear separation of state and actions
+export const useCounterStore = create<ICounterStore>((set) => ({
+  // State
+  count: 0,
+  isLoading: false,
+
+  // Actions
+  actions: {
+    increment: () => set((state) => ({ count: state.count + 1 })),
+    decrement: () => set((state) => ({ count: state.count - 1 })),
+    reset: () => set({ count: 0 }),
+    fetchCount: async () => {
+      set({ isLoading: true })
+      try {
+        const count = await api.getCount()
+        set({ count, isLoading: false })
+      } catch (error) {
+        set({ isLoading: false })
+        throw new AppError({
+          error,
+          additionalMessage: "Failed to fetch count",
+        })
+      }
+    },
+  },
+}))
+```
+
+- Prefer using the store directly in components over prop drilling:
+
+```typescript
+// ❌ Bad: Prop drilling
+function ParentComponent() {
+  const count = useCounterStore((state) => state.count);
+  const increment = useCounterStore((state) => state.actions.increment);
+
+  return <ChildComponent count={count} increment={increment} />;
+}
+
+// ✅ Good: Direct store usage
+function ChildComponent() {
+  const count = useCounterStore((state) => state.count);
+  const { increment } = useCounterStore((state) => state.actions);
+
+  return (
+    <Button onPress={increment}>
+      Count: {count}
+    </Button>
+  );
+}
+```
+
+- Use selectors to minimize re-renders:
+
+```typescript
+// ❌ Bad: Getting the entire store
+const { count, actions } = useCounterStore()
+
+// ✅ Good: Using selectors for specific values
+const count = useCounterStore((state) => state.count)
+const { increment } = useCounterStore((state) => state.actions)
 ```
 
 ## Error Handling
@@ -143,29 +669,29 @@ export const getMessagesQueryOptions = (args: { id: string }) => {
 ```typescript
 // ❌ Bad: Catching and capturing error when we should throw
 try {
-  await sendMessage(content);
+  await sendMessage(content)
 } catch (error) {
-  captureError(new XMTPError({ error }));
+  captureError(new XMTPError({ error }))
 }
 
 // ❌ Bad: Catching error too early
 async function sendMessage(args: { content: string }) {
   try {
-    await xmtpClient.send(args.content);
+    await xmtpClient.send(args.content)
   } catch (error) {
-    captureError(new XMTPError({ error }));
+    captureError(new XMTPError({ error }))
   }
 }
 
 // ✅ Good: Throwing error for parent to handle
 async function sendMessage(args: { content: string }) {
   try {
-    await xmtpClient.send(args.content);
+    await xmtpClient.send(args.content)
   } catch (error) {
     throw new XMTPError({
       error,
       additionalMessage: "Failed to send message",
-    });
+    })
   }
 }
 
@@ -173,11 +699,32 @@ async function sendMessage(args: { content: string }) {
 function MessageComponent() {
   const sendMessage = async () => {
     try {
-      await messagingService.sendMessage({ content });
+      await messagingService.sendMessage({ content })
     } catch (error) {
       // Here we actually handle the error for the user
-      captureErrorWithToast(error);
+      captureErrorWithToast(error)
     }
-  };
+  }
 }
+```
+
+## Library Usage
+
+- Never assume the existence of functions, components, or features in third-party libraries.
+- Always verify API usage in the official documentation for the major version being used.
+- Check the package.json for the library version before implementing features.
+- When suggesting library usage:
+  1. First verify the library exists in package.json
+  2. Look up the documentation for that major version
+  3. Confirm the feature/API exists and understand its correct usage
+  4. Provide links to relevant documentation when suggesting library features
+- If a library feature's existence or behavior is uncertain, explicitly mention this and suggest verifying it first.
+- For React Native libraries, always check platform compatibility (iOS/Android support) before suggesting usage.
+
+```typescript
+// ❌ Bad: Assuming a library feature exists
+// ✅ Good: Verified in v3 documentation
+import { actualFunction, magicFunction } from "some-library"
+
+// From v3 docs: https://some-library.com/docs/v3/actualFunction
 ```

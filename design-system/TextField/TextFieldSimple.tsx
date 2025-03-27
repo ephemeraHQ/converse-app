@@ -1,28 +1,21 @@
-import { memo } from "react";
-import { useAppTheme } from "../../theme/use-app-theme";
-import { TextField } from "./TextField";
-import { TextFieldProps } from "./TextField.props";
+import { memo } from "react"
+import { useAppTheme } from "../../theme/use-app-theme"
+import { TextField } from "./TextField"
+import { TextFieldProps } from "./TextField.props"
 
-type ITextFieldSimpleSize = "md" | "lg";
+type ITextFieldSimpleSize = "md" | "lg"
 
 type ITextFieldSimpleProps = Omit<
   TextFieldProps,
-  | "label"
-  | "labelTx"
-  | "labelTxOptions"
-  | "helper"
-  | "helperTx"
-  | "helperTxOptions"
+  "label" | "labelTx" | "labelTxOptions" | "helper" | "helperTx" | "helperTxOptions"
 > & {
-  size?: ITextFieldSimpleSize;
-};
+  size?: ITextFieldSimpleSize
+}
 
-export const TextFieldSimple = memo(function TextFieldSimple(
-  props: ITextFieldSimpleProps,
-) {
-  const { theme } = useAppTheme();
+export const TextFieldSimple = memo(function TextFieldSimple(props: ITextFieldSimpleProps) {
+  const { theme } = useAppTheme()
 
-  const { size = "md", ...rest } = props;
+  const { size = "md", ...rest } = props
 
   return (
     <TextField
@@ -33,5 +26,5 @@ export const TextFieldSimple = memo(function TextFieldSimple(
       }}
       {...rest}
     />
-  );
-});
+  )
+})

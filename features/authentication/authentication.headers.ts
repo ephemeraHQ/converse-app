@@ -1,31 +1,30 @@
-import { toHex } from "viem";
-import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store";
-import { AuthenticationError } from "@/utils/error";
-import { logger } from "@/utils/logger";
-import { getXmtpClientByEthAddress } from "../xmtp/xmtp-client/xmtp-client.service";
-import { ensureJwtQueryData } from "./jwt.query";
+import { signWithInstallationKey } from "@xmtp/react-native-sdk"
+import { toHex } from "thirdweb"
+import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
+import { ensureXmtpInstallationQueryData } from "@/features/xmtp/xmtp-installations/xmtp-installation.query"
+import { ensureJwtQueryData } from "./jwt.query"
 
 // used for requests that are creating an authentication token
-export const XMTP_INSTALLATION_ID_HEADER_KEY = "X-XMTP-InstallationId";
-export const XMTP_INBOX_ID_HEADER_KEY = "X-XMTP-InboxId";
-export const FIREBASE_APP_CHECK_HEADER_KEY = "X-Firebase-AppCheck";
-export const XMTP_SIGNATURE_HEADER_KEY = "X-XMTP-Signature";
+export const XMTP_INSTALLATION_ID_HEADER_KEY = "X-XMTP-InstallationId"
+export const XMTP_INBOX_ID_HEADER_KEY = "X-XMTP-InboxId"
+export const FIREBASE_APP_CHECK_HEADER_KEY = "X-Firebase-AppCheck"
+export const XMTP_SIGNATURE_HEADER_KEY = "X-XMTP-Signature"
 
 // used for authenticated requests
-export const CONVOS_AUTH_TOKEN_HEADER_KEY = "X-Convos-AuthToken";
+export const CONVOS_AUTH_TOKEN_HEADER_KEY = "X-Convos-AuthToken"
 
 export type XmtpApiHeaders = {
-  [XMTP_INSTALLATION_ID_HEADER_KEY]: string;
-  [XMTP_INBOX_ID_HEADER_KEY]: string;
-  [FIREBASE_APP_CHECK_HEADER_KEY]: string;
-  [XMTP_SIGNATURE_HEADER_KEY]: string;
-};
+  [XMTP_INSTALLATION_ID_HEADER_KEY]: string
+  [XMTP_INBOX_ID_HEADER_KEY]: string
+  [FIREBASE_APP_CHECK_HEADER_KEY]: string
+  [XMTP_SIGNATURE_HEADER_KEY]: string
+}
 
 export async function getConvosAuthenticationHeaders(): Promise<XmtpApiHeaders> {
-  const currentEthereumAddress = getSafeCurrentSender().ethereumAddress;
+  const currentSender = getSafeCurrentSender()
 
   // Disabled for now until we go live and it works with bun
-  const appCheckToken = "123";
+  const appCheckToken = "123"
   // const appCheckToken = await tryGetAppCheckToken();
   // if (!appCheckToken) {
   //   logger.error(
@@ -36,29 +35,19 @@ export async function getConvosAuthenticationHeaders(): Promise<XmtpApiHeaders> 
   //   );
   // }
 
-  const inboxClient = await getXmtpClientByEthAddress({
-    ethAddress: currentEthereumAddress,
-  });
+  const installationId = await ensureXmtpInstallationQueryData({
+    inboxId: currentSender.inboxId,
+  })
 
-  if (!inboxClient) {
-    throw new AuthenticationError({
-      error: new Error(
-        "[getConvosAuthenticationHeaders] No inbox client found for account",
-      ),
-      additionalMessage: "failed to generate headers",
-    });
-  }
-
-  const rawAppCheckTokenSignature =
-    await inboxClient.signWithInstallationKey(appCheckToken);
-  const appCheckTokenSignatureHexString = toHex(rawAppCheckTokenSignature);
+  const rawAppCheckTokenSignature = await signWithInstallationKey(installationId, appCheckToken)
+  const appCheckTokenSignatureHexString = toHex(rawAppCheckTokenSignature)
 
   return {
-    [XMTP_INSTALLATION_ID_HEADER_KEY]: inboxClient.installationId,
-    [XMTP_INBOX_ID_HEADER_KEY]: inboxClient.inboxId,
+    [XMTP_INSTALLATION_ID_HEADER_KEY]: installationId,
+    [XMTP_INBOX_ID_HEADER_KEY]: currentSender.inboxId,
     [XMTP_SIGNATURE_HEADER_KEY]: appCheckTokenSignatureHexString,
     [FIREBASE_APP_CHECK_HEADER_KEY]: appCheckToken, // Disabled for now until we go live and it works with bun
-  };
+  }
 }
 
 /**
@@ -71,8 +60,8 @@ export async function getConvosAuthenticationHeaders(): Promise<XmtpApiHeaders> 
  * Privy passkeys. See authentication.readme.md for more details.
  */
 export async function getConvosAuthenticatedHeaders() {
-  const jwt = await ensureJwtQueryData();
+  const jwt = await ensureJwtQueryData()
   return {
     [CONVOS_AUTH_TOKEN_HEADER_KEY]: jwt,
-  };
+  }
 }

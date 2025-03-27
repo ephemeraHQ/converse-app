@@ -35,6 +35,6 @@ export const spacing = {
     medium: 24,
     large: 40,
   },
-} as const;
+} as const
 
-export type ISpacing = typeof spacing;
+export type ISpacing = typeof spacing

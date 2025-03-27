@@ -7,19 +7,12 @@ module.exports = {
     ],
   ],
   plugins: [
-    ["@babel/plugin-proposal-decorators", { version: "legacy" }],
-    "@babel/plugin-proposal-export-namespace-from",
-    "@babel/plugin-transform-flow-strip-types", // For privy (phone country selector)
-    ["@babel/plugin-transform-class-properties", { loose: true }], // For privy
-    ["@babel/plugin-transform-private-methods", { loose: true }], // For privy
+    // https://github.com/kuatsu/react-native-boost
+    ["react-native-boost/plugin"],
     [
       "module-resolver",
       {
         alias: {
-          "fast-text-encoding": "text-encoding",
-          crypto: "crypto-browserify",
-          "react-native-webview": "react-native-webview/src/index.ts",
-
           // Folder aliases
           "@": "./",
           "@components": "./components",
@@ -44,9 +37,4 @@ module.exports = {
     ],
     "react-native-reanimated/plugin",
   ],
-  env: {
-    production: {
-      plugins: ["transform-remove-console", "react-native-paper/babel"],
-    },
-  },
-};
+}

@@ -1,39 +1,54 @@
-import { Platform } from "react-native";
-import { ConversationNavParams } from "@/features/conversation/conversation.nav";
-// import {
-//   InviteUsersToExistingGroupNav,
-//   InviteUsersToExistingGroupParams,
-// } from "@/features/groups/invite-to-group/InviteUsersToExistingGroup.nav";
-import { ProfileNavParams } from "@/features/profiles/profile.nav";
+import { IXmtpConversationId, IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 
 export type NavigationParamList = {
-  Idle: undefined;
+  Idle: undefined
 
-  // Auth / Onboarding
-  OnboardingWelcome: undefined;
-  OnboardingCreateContactCard: undefined;
-  OnboardingNotifications: undefined;
-  OnboardingGetStarted: undefined;
+  // Auth
+  Auth: undefined
+
+  // Onboarding
+  OnboardingWelcome: undefined
+  OnboardingCreateContactCard: undefined
+  OnboardingCreateContactCardImportName: undefined
+  OnboardingNotifications: undefined
+  OnboardingGetStarted: undefined
 
   // Main
-  FakeScreen: undefined;
-  Blocked: undefined;
-  Chats: undefined;
-  ChatsRequests: undefined;
-  Conversation: ConversationNavParams;
-  CreateConversation: undefined;
+  FakeScreen: undefined
+  Blocked: undefined
+  Chats: undefined
+  ChatsRequests: undefined
+  Conversation: {
+    xmtpConversationId?: IXmtpConversationId
+    composerTextPrefill?: string
+    searchSelectedUserInboxIds?: IXmtpInboxId[]
+    isNew?: boolean
+  }
+  CreateConversation: undefined
+  GroupDetails: {
+    xmtpConversationId: IXmtpConversationId
+  }
+  AddGroupMembers: {
+    xmtpConversationId: IXmtpConversationId
+  }
+  GroupMembersList: {
+    xmtpConversationId: IXmtpConversationId
+  }
 
-  NewGroupSummary: undefined;
-  ConverseMatchMaker: undefined;
-  ShareProfile: undefined;
-  TopUp: undefined;
-  Profile: ProfileNavParams;
+  NewGroupSummary: undefined
+  ConverseMatchMaker: undefined
+  ShareProfile: undefined
+  TopUp: undefined
+  Profile: {
+    inboxId: IXmtpInboxId
+  }
+  ProfileImportInfo: undefined
   // InviteUsersToExistingGroup: InviteUsersToExistingGroupParams;
-  UserProfile: undefined;
+  UserProfile: undefined
 
   // UI Tests
-  Examples: undefined;
+  Examples: undefined
 
-  AppSettings: undefined;
-  WebviewPreview: { uri: string };
-};
+  AppSettings: undefined
+  WebviewPreview: { uri: string }
+}

@@ -1,112 +1,115 @@
-import { getAllowedConsentConversationsQueryData } from "@/queries/conversations-allowed-consent-query";
-import { XMTPError } from "@/utils/error";
-import { xmtpLogger } from "@/utils/logger";
-import { getXmtpClientByEthAddress } from "../xmtp-client/xmtp-client.service";
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import { config } from "@/config"
+import { getAllowedConsentConversationsQueryData } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
+import { XMTPError } from "@/utils/error"
+import { xmtpLogger } from "@/utils/logger"
+import { getXmtpClientByInboxId } from "../xmtp-client/xmtp-client"
 
-export const streamConsent = async (account: string) => {
-  const client = await getXmtpClientByEthAddress({
-    ethAddress: account,
-  });
+export const streamXmtpConsent = async (args: { inboxId: IXmtpInboxId }) => {
+  const { inboxId } = args
 
-  xmtpLogger.debug(`Streaming consent for ${client.address}`);
+  xmtpLogger.debug(`Streaming consent for ${inboxId}`)
+
+  const client = await getXmtpClientByInboxId({
+    inboxId,
+  })
 
   try {
     await client.preferences.streamConsent(async () => {
-      xmtpLogger.debug(`Consent has been updated for ${client.address}`);
+      xmtpLogger.debug(`Consent has been updated for ${inboxId}`)
 
       const conversations = getAllowedConsentConversationsQueryData({
-        account,
-      });
+        clientInboxId: inboxId,
+      })
 
       // TODO: Consent Has Been Updated, resubscribe to notifications
       if (!conversations) {
-        return;
+        return
       }
-    });
+    })
   } catch (error) {
     throw new XMTPError({
       error,
       additionalMessage: "Failed to stream consent",
-    });
+    })
   }
-};
+}
 
-export const stopStreamingConsent = async (account: string) => {
-  const client = await getXmtpClientByEthAddress({
-    ethAddress: account,
-  });
+export const stopStreamingConsent = async (args: { inboxId: IXmtpInboxId }) => {
+  const { inboxId } = args
 
-  xmtpLogger.debug(`Stopping consent stream for ${client.address}`);
+  const client = await getXmtpClientByInboxId({
+    inboxId,
+  })
+
+  xmtpLogger.debug(`Stopping consent stream for ${inboxId}`)
 
   try {
-    const startTime = Date.now();
-    await client.preferences.cancelStreamConsent();
-    const duration = Date.now() - startTime;
+    const startTime = Date.now()
+    await client.preferences.cancelStreamConsent()
+    const duration = Date.now() - startTime
 
-    if (duration > 3000) {
+    if (duration > config.xmtp.maxMsUntilLogError) {
       xmtpLogger.warn(`Canceling consent stream took longer than expected`, {
         duration,
-        address: client.address,
-      });
+        inboxId,
+      })
     }
 
-    xmtpLogger.debug(`Stopped consent stream for ${client.address}`);
+    xmtpLogger.debug(`Stopped consent stream for ${inboxId}`)
   } catch (error) {
     throw new XMTPError({
       error,
       additionalMessage: "Failed to stop consent stream",
-    });
+    })
   }
-};
+}
 
-export const streamPreferences = async (account: string) => {
-  const client = await getXmtpClientByEthAddress({
-    ethAddress: account,
-  });
+// export const streamPreferences = async (account: string) => {
+//   const client = await getXmtpClientByEthAddress({
+//     ethAddress: account,
+//   })
 
-  xmtpLogger.debug(`Streaming preferences for ${client.address}`);
+//   xmtpLogger.debug(`Streaming preferences for ${client.address}`)
 
-  try {
-    await client.preferences.streamPreferenceUpdates(async (preference) => {
-      xmtpLogger.debug(`Preference updated for ${client.address}`, {
-        preference,
-      });
-    });
-  } catch (error) {
-    throw new XMTPError({
-      error,
-      additionalMessage: "Failed to stream preferences",
-    });
-  }
-};
+//   try {
+//     await client.preferences.streamPreferenceUpdates(async (preference) => {
+//       xmtpLogger.debug(`Preference updated for ${client.address}`, {
+//         preference,
+//       })
+//     })
+//   } catch (error) {
+//     throw new XMTPError({
+//       error,
+//       additionalMessage: "Failed to stream preferences",
+//     })
+//   }
+// }
 
-export const stopStreamingPreferences = async (account: string) => {
-  const client = await getXmtpClientByEthAddress({
-    ethAddress: account,
-  });
+// export const stopStreamingPreferences = async (account: string) => {
+//   const client = await getXmtpClientByEthAddress({
+//     ethAddress: account,
+//   })
 
-  xmtpLogger.debug(`Stopping preferences stream for ${client.address}`);
+//   xmtpLogger.debug(`Stopping preferences stream for ${client.address}`)
 
-  try {
-    const startTime = Date.now();
-    await client.preferences.cancelStreamPreferenceUpdates();
-    const duration = Date.now() - startTime;
+//   try {
+//     const startTime = Date.now()
+//     await client.preferences.cancelStreamPreferenceUpdates()
+//     const duration = Date.now() - startTime
 
-    if (duration > 3000) {
-      xmtpLogger.warn(
-        `Canceling preferences stream took longer than expected`,
-        {
-          duration,
-          address: client.address,
-        },
-      );
-    }
+//     if (duration > config.xmtp.maxMsUntilLogError) {
+//       xmtpLogger.warn(`Canceling preferences stream took longer than expected`, {
+//         duration,
+//         address: client.address,
+//       })
+//     }
 
-    xmtpLogger.debug(`Stopped preferences stream for ${client.address}`);
-  } catch (error) {
-    throw new XMTPError({
-      error,
-      additionalMessage: "Failed to stop preferences stream",
-    });
-  }
-};
+//     xmtpLogger.debug(`Stopped preferences stream for ${client.address}`)
+//   } catch (error) {
+//     throw new XMTPError({
+//       error,
+//       additionalMessage: "Failed to stop preferences stream",
+//     })
+//   }
+// }

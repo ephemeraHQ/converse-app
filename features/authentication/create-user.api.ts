@@ -1,11 +1,14 @@
-import { z } from "zod";
-import { profileValidationSchema } from "@/features/profiles/schemas/profile-validation.schema";
-import { api } from "@/utils/api/api";
-import { handleApiError } from "@/utils/api/api.error";
-import { buildDeviceMetadata } from "@/utils/device-metadata";
+import { z } from "zod"
+import { profileValidationSchema } from "@/features/profiles/schemas/profile-validation.schema"
+import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
+import { captureError } from "@/utils/capture-error"
+import { convosApi } from "@/utils/convos-api/convos-api-instance"
+import { buildDeviceMetadata } from "@/utils/device-metadata"
+import { ApiError } from "@/utils/error"
+import { IEthereumAddress } from "@/utils/evm/address"
 
-const deviceOSEnum = z.enum(["android", "ios", "web"]);
-const createUserRequestSchema = z
+const deviceOSEnum = z.enum(["android", "ios", "web"])
+const createUserApiRequestBodySchema = z
   .object({
     privyUserId: z.string(),
     device: z.object({
@@ -22,9 +25,9 @@ const createUserRequestSchema = z
       avatar: true,
     }),
   })
-  .strict();
+  .strict()
 
-const createUserResponseSchema = z.object({
+const createUserApiResponseSchema = z.object({
   id: z.string(),
   privyUserId: z.string(),
   device: z.object({
@@ -34,8 +37,8 @@ const createUserResponseSchema = z.object({
   }),
   identity: z.object({
     id: z.string(),
-    privyAddress: z.string(),
-    xmtpId: z.string(),
+    privyAddress: z.custom<IEthereumAddress>(),
+    xmtpId: z.custom<IXmtpInboxId>(),
   }),
   profile: z.object({
     id: z.string(),
@@ -44,21 +47,21 @@ const createUserResponseSchema = z.object({
     description: z.string().nullable(),
     avatar: z.string().nullable().optional(),
   }),
-});
+})
 
-type CreateUserResponse = z.infer<typeof createUserResponseSchema>;
+type CreateUserResponse = z.infer<typeof createUserApiResponseSchema>
 
 export const createUser = async (args: {
-  privyUserId: string;
-  smartContractWalletAddress: string;
-  inboxId: string;
+  privyUserId: string
+  smartContractWalletAddress: string
+  inboxId: IXmtpInboxId
   profile: {
-    name: string;
-    username: string;
-    avatar?: string;
-  };
-}): Promise<CreateUserResponse> => {
-  const { privyUserId, smartContractWalletAddress, inboxId, profile } = args;
+    name: string
+    username: string
+    avatar?: string
+  }
+}) => {
+  const { privyUserId, smartContractWalletAddress, inboxId, profile } = args
 
   try {
     const requestPayload = {
@@ -69,30 +72,35 @@ export const createUser = async (args: {
         xmtpId: inboxId,
       },
       profile,
-    };
-
-    const validationResult = createUserRequestSchema.safeParse(requestPayload);
-    if (!validationResult.success) {
-      throw new Error(
-        `Invalid request data: ${validationResult.error.message}`,
-      );
     }
 
-    const response = await api.post<CreateUserResponse>(
+    const validationResult = createUserApiRequestBodySchema.safeParse(requestPayload)
+
+    if (!validationResult.success) {
+      throw new Error(`Invalid request body: ${validationResult.error.message}`)
+    }
+
+    const apiResponse = await convosApi.post<CreateUserResponse>(
       "/api/v1/users",
       validationResult.data,
-    );
+    )
 
-    // Validate the response
-    const responseValidation = createUserResponseSchema.safeParse(response.data);
+    const responseValidation = createUserApiResponseSchema.safeParse(apiResponse.data)
+
     if (!responseValidation.success) {
-      throw new Error(
-        `Invalid response data: ${responseValidation.error.message}`,
-      );
+      captureError(
+        new ApiError({
+          error: responseValidation.error,
+          additionalMessage: "Invalid create user response data",
+        }),
+      )
     }
 
-    return responseValidation.data;
+    return apiResponse.data
   } catch (error) {
-    throw handleApiError(error, "createUser");
+    throw new ApiError({
+      error,
+      additionalMessage: "Failed to create user",
+    })
   }
-};
+}

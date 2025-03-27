@@ -4,8 +4,8 @@ export const iconSize = {
   sm: 16,
   md: 24,
   lg: 32,
-} as const;
+} as const
 
-export type IIconSizeKey = keyof typeof iconSize;
+export type IIconSizeKey = keyof typeof iconSize
 
-export type IIconSize = typeof iconSize;
+export type IIconSize = typeof iconSize

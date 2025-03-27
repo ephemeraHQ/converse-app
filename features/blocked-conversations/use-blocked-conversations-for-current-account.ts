@@ -1,40 +1,50 @@
-import { useQueries } from "@tanstack/react-query";
-import { useMemo } from "react";
-import { useCurrentSenderEthAddress } from "@/features/authentication/multi-inbox.store";
-import { getConversationMetadataQueryOptions } from "@/features/conversation/conversation-metadata/conversation-metadata.query";
-import { isConversationDenied } from "@/features/conversation/utils/is-conversation-denied";
-import { useAllowedConsentConversationsQuery } from "@/queries/conversations-allowed-consent-query";
+import { useQueries } from "@tanstack/react-query"
+import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
+import { useAllowedConsentConversationsQuery } from "@/features/conversation/conversation-list/conversations-allowed-consent.query"
+import { getConversationMetadataQueryOptions } from "@/features/conversation/conversation-metadata/conversation-metadata.query"
+import { getConversationQueryOptions } from "@/features/conversation/queries/conversation.query"
+import { isConversationDenied } from "@/features/conversation/utils/is-conversation-denied"
 
 export const useBlockedConversationsForCurrentAccount = () => {
-  const currentAccount = useCurrentSenderEthAddress();
+  const currentSender = useSafeCurrentSender()
 
-  const { data } = useAllowedConsentConversationsQuery({
-    account: currentAccount!,
+  const { data: conversationIds } = useAllowedConsentConversationsQuery({
+    clientInboxId: currentSender.inboxId,
     caller: "useBlockedConversationsForCurrentAccount",
-  });
+  })
 
-  const conversationsMetadataQueries = useQueries({
-    queries: (data ?? []).map((conversation) =>
-      getConversationMetadataQueryOptions({
-        account: currentAccount!,
-        topic: conversation.topic,
+  // Create an array of metadata query configs and conversation query configs
+  const metadataQueries = useQueries({
+    queries: (conversationIds ?? []).map((conversationId) => ({
+      ...getConversationMetadataQueryOptions({
+        clientInboxId: currentSender.inboxId,
+        xmtpConversationId: conversationId,
       }),
-    ),
-  });
+    })),
+  })
 
-  const blockedConversations = useMemo(() => {
-    if (!data) return [];
+  const conversationQueries = useQueries({
+    queries: (conversationIds ?? []).map((conversationId) => ({
+      ...getConversationQueryOptions({
+        clientInboxId: currentSender.inboxId,
+        xmtpConversationId: conversationId,
+        caller: "useBlockedConversationsForCurrentAccount",
+      }),
+    })),
+  })
 
-    return data.filter((conversation, index) => {
-      const query = conversationsMetadataQueries[index];
-      return (
-        // Include deleted conversations
-        query?.data?.deleted ||
-        // Include denied conversations
-        isConversationDenied(conversation)
-      );
-    });
-  }, [data, conversationsMetadataQueries]);
+  // Find blocked conversations by comparing both query results
+  const blockedConversationIds = (conversationIds ?? []).filter((conversationId, index) => {
+    const metadataQuery = metadataQueries[index]
+    const conversationQuery = conversationQueries[index]
 
-  return { data: blockedConversations };
-};
+    return (
+      metadataQuery.data?.deleted ||
+      (conversationQuery.data && isConversationDenied(conversationQuery.data))
+    )
+  })
+
+  return {
+    data: blockedConversationIds,
+  }
+}

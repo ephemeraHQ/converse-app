@@ -1,54 +1,67 @@
-import { queryOptions, skipToken } from "@tanstack/react-query";
-import type { ConversationTopic } from "@xmtp/react-native-sdk";
-import { getConversationMetadata } from "@/features/conversation/conversation-metadata/conversation-metadata.api";
-import { conversationMetadataQueryKey } from "@/queries/QueryKeys";
-import { queryClient } from "../../../queries/queryClient";
+import type { IXmtpConversationId, IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import { queryOptions } from "@tanstack/react-query"
+import { AxiosError } from "axios"
+import { getConversationMetadata } from "@/features/conversation/conversation-metadata/conversation-metadata.api"
+import { isTempConversation } from "@/features/conversation/utils/is-temp-conversation"
+import { getReactQueryKey } from "@/utils/react-query/react-query.utils"
+import { reactQueryClient } from "../../../utils/react-query/react-query.client"
 
-export type IConversationMetadataQueryData = Awaited<
-  ReturnType<typeof getConversationMetadata>
->;
+export type IConversationMetadataQueryData = Awaited<ReturnType<typeof getConversationMetadata>>
 
 type IArgs = {
-  account: string;
-  topic: ConversationTopic;
-};
-
-export function getConversationMetadataQueryOptions({ account, topic }: IArgs) {
-  const enabled = !!topic && !!account;
-  return queryOptions({
-    queryKey: conversationMetadataQueryKey(account, topic),
-    queryFn: enabled
-      ? () => getConversationMetadata({ account, topic })
-      : skipToken,
-    enabled,
-  });
+  xmtpConversationId: IXmtpConversationId
+  clientInboxId: IXmtpInboxId
 }
 
-export function prefetchConversationMetadataQuery(
-  account: string,
-  topic: ConversationTopic,
-) {
-  return queryClient.prefetchQuery(
-    getConversationMetadataQueryOptions({ account, topic }),
-  );
+function getConversationMetadataQueryFn({ xmtpConversationId, clientInboxId }: IArgs) {
+  return getConversationMetadata({ xmtpConversationId })
+}
+
+export function getConversationMetadataQueryOptions({ xmtpConversationId, clientInboxId }: IArgs) {
+  const enabled = !!xmtpConversationId && !isTempConversation(xmtpConversationId)
+  return queryOptions({
+    queryKey: getReactQueryKey({
+      baseStr: "conversation-metadata",
+      xmtpConversationId,
+      clientInboxId,
+    }),
+    queryFn: () => getConversationMetadataQueryFn({ xmtpConversationId, clientInboxId }),
+    enabled,
+    // Retry only for specific types of errors, not for 404 which is handled by our API layer
+    retry: (failureCount, error) => {
+      // Don't retry 404 errors as they're handled by getConversationMetadata
+      if (error instanceof AxiosError && error.response?.status === 404) {
+        return false
+      }
+
+      // Retry other errors up to 3 times
+      return failureCount < 3
+    },
+  })
+}
+
+export function prefetchConversationMetadataQuery(args: IArgs) {
+  const { xmtpConversationId, clientInboxId } = args
+  return reactQueryClient.prefetchQuery(
+    getConversationMetadataQueryOptions({ xmtpConversationId, clientInboxId }),
+  )
 }
 
 export const getConversationMetadataQueryData = (args: IArgs) => {
-  const { account, topic } = args;
-  return queryClient.getQueryData(
-    getConversationMetadataQueryOptions({ account, topic }).queryKey,
-  );
-};
+  const { xmtpConversationId, clientInboxId } = args
+  return reactQueryClient.getQueryData(
+    getConversationMetadataQueryOptions({ xmtpConversationId, clientInboxId }).queryKey,
+  )
+}
 
 export function updateConversationMetadataQueryData(
   args: IArgs & { updateData: Partial<IConversationMetadataQueryData> },
 ) {
-  const { updateData, account, topic } = args;
-  queryClient.setQueryData(
-    getConversationMetadataQueryOptions({ account, topic }).queryKey,
+  const { updateData, xmtpConversationId, clientInboxId } = args
+  reactQueryClient.setQueryData(
+    getConversationMetadataQueryOptions({ xmtpConversationId, clientInboxId }).queryKey,
     (previousData) => ({
-      account: args.account,
-      topic: args.topic,
+      xmtpConversationId: args.xmtpConversationId,
       deleted: false,
       pinned: false,
       unread: false,
@@ -56,7 +69,7 @@ export function updateConversationMetadataQueryData(
       ...(previousData ?? {}),
       ...updateData,
     }),
-  );
+  )
 }
 
 // TODO: Add back later when we're back at optimizing queries

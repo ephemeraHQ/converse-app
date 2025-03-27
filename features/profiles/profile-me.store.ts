@@ -1,34 +1,30 @@
-import { zustandMMKVStorage } from "@utils/mmkv";
-import { InboxId } from "@xmtp/react-native-sdk";
-import { createStore, useStore } from "zustand";
-import {
-  createJSONStorage,
-  persist,
-  subscribeWithSelector,
-} from "zustand/middleware";
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import { createStore, useStore } from "zustand"
+import { createJSONStorage, persist, subscribeWithSelector } from "zustand/middleware"
+import { zustandMMKVStorage } from "@/utils/zustand/zustand"
 
 type IProfileMeStoreState = {
-  editMode: boolean;
-  nameTextValue: string;
-  usernameTextValue: string;
-  descriptionTextValue: string;
-  avatarUri?: string;
-  isAvatarUploading: boolean;
-};
+  editMode: boolean
+  nameTextValue: string | undefined
+  usernameTextValue: string | undefined
+  descriptionTextValue: string | undefined
+  avatarUri?: string
+  isAvatarUploading: boolean
+}
 
 type IProfileMeStoreActions = {
-  setEditMode: (editMode: boolean) => void;
-  setNameTextValue: (nameTextValue: string) => void;
-  setUsernameTextValue: (usernameTextValue: string) => void;
-  setDescriptionTextValue: (descriptionTextValue: string) => void;
-  setAvatarUri: (avatarUri?: string) => void;
-  setIsAvatarUploading: (isUploading: boolean) => void;
-  reset: () => void;
-};
+  setEditMode: (editMode: boolean) => void
+  setNameTextValue: (nameTextValue: string) => void
+  setUsernameTextValue: (usernameTextValue: string) => void
+  setDescriptionTextValue: (descriptionTextValue: string) => void
+  setAvatarUri: (avatarUri?: string) => void
+  setIsAvatarUploading: (isUploading: boolean) => void
+  reset: () => void
+}
 
 export type IProfileMeStore = IProfileMeStoreState & {
-  actions: IProfileMeStoreActions;
-};
+  actions: IProfileMeStoreActions
+}
 
 const DEFAULT_STATE: IProfileMeStoreState = {
   editMode: false,
@@ -37,14 +33,14 @@ const DEFAULT_STATE: IProfileMeStoreState = {
   descriptionTextValue: "",
   avatarUri: undefined,
   isAvatarUploading: false,
-};
-
-function getProfileMeStorageKey(inboxId: InboxId) {
-  return `profile-me-${inboxId}`;
 }
 
-function createProfileMeStore(inboxId: InboxId) {
-  const storageKey = getProfileMeStorageKey(inboxId);
+function getProfileMeStorageKey(inboxId: IXmtpInboxId) {
+  return `profile-me-${inboxId}`
+}
+
+function createProfileMeStore(inboxId: IXmtpInboxId) {
+  const storageKey = getProfileMeStorageKey(inboxId)
 
   return createStore<IProfileMeStore>()(
     subscribeWithSelector(
@@ -59,9 +55,9 @@ function createProfileMeStore(inboxId: InboxId) {
             setAvatarUri: (avatarUri) => set({ avatarUri }),
             setIsAvatarUploading: (isAvatarUploading) => set({ isAvatarUploading }),
             reset: () => {
-              set(DEFAULT_STATE);
+              set(DEFAULT_STATE)
               // Clear persisted data
-              zustandMMKVStorage.removeItem(storageKey);
+              zustandMMKVStorage.removeItem(storageKey)
             },
           },
         }),
@@ -79,22 +75,22 @@ function createProfileMeStore(inboxId: InboxId) {
         },
       ),
     ),
-  );
+  )
 }
 
 // Store instances cache
-const stores: Record<InboxId, ReturnType<typeof createProfileMeStore>> = {};
+const stores: Record<IXmtpInboxId, ReturnType<typeof createProfileMeStore>> = {}
 
 /**
  * Creates and manages a profile me store for a specific inbox
  * @param inboxId - The ID of the inbox to create/retrieve the store for
  * @returns A Zustand store instance for the specified inbox
  */
-export function useProfileMeStore(inboxId: InboxId) {
+export function useProfileMeStore(inboxId: IXmtpInboxId) {
   if (!stores[inboxId]) {
-    stores[inboxId] = createProfileMeStore(inboxId);
+    stores[inboxId] = createProfileMeStore(inboxId)
   }
-  return stores[inboxId];
+  return stores[inboxId]
 }
 
 /**
@@ -104,9 +100,9 @@ export function useProfileMeStore(inboxId: InboxId) {
  * @returns Selected state from the store
  */
 export function useProfileMeStoreValue<T>(
-  inboxId: InboxId,
+  inboxId: IXmtpInboxId,
   selector: (state: IProfileMeStore) => T,
 ): T {
-  const store = useProfileMeStore(inboxId);
-  return useStore(store, selector);
+  const store = useProfileMeStore(inboxId)
+  return useStore(store, selector)
 }

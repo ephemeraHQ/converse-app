@@ -1,31 +1,33 @@
-import { queryOptions } from "@tanstack/react-query";
-import { queryClient } from "@/queries/queryClient";
-import { fetchCurrentUser, ICurrentUser } from "./current-user-api";
+import { queryOptions } from "@tanstack/react-query"
+import { reactQueryClient } from "@/utils/react-query/react-query.client"
+import { getReactQueryKey } from "@/utils/react-query/react-query.utils"
+import { fetchCurrentUser, ICurrentUser } from "./current-user-api"
 
-const currentUserQueryKey = () => ["current-user"] as const;
+export function getCurrentUserQueryOptions(args?: { caller?: string }) {
+  const { caller } = args ?? {}
 
-export function getCurrentUserQueryOptions() {
   return queryOptions({
-    queryKey: currentUserQueryKey(),
+    meta: {
+      caller,
+    },
+    queryKey: getReactQueryKey({
+      baseStr: "current-user",
+    }),
     queryFn: fetchCurrentUser,
-  });
+  })
 }
 
 export function setCurrentUserQueryData(args: { user: ICurrentUser }) {
-  const { user } = args;
-  return queryClient.setQueryData(getCurrentUserQueryOptions().queryKey, user);
+  const { user } = args
+  return reactQueryClient.setQueryData(getCurrentUserQueryOptions().queryKey, user)
 }
 
 export function invalidateCurrentUserQuery() {
-  return queryClient.invalidateQueries({
+  return reactQueryClient.invalidateQueries({
     queryKey: getCurrentUserQueryOptions().queryKey,
-  });
+  })
 }
 
 export function getCurrentUserQueryData() {
-  return queryClient.getQueryData(getCurrentUserQueryOptions().queryKey);
-}
-
-export function ensureCurrentUserQueryData() {
-  return queryClient.ensureQueryData(getCurrentUserQueryOptions());
+  return reactQueryClient.getQueryData(getCurrentUserQueryOptions().queryKey)
 }

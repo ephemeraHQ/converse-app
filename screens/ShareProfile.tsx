@@ -1,58 +1,49 @@
-import { useHeaderHeight } from "@react-navigation/elements";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { shortAddress } from "@utils/strings/shortAddress";
-import React, { useState } from "react";
-import { Platform, Share, View } from "react-native";
-import QRCode from "react-native-qrcode-svg";
-import { Avatar } from "@/components/avatar";
-import Button from "@/components/Button/Button";
-import { Screen } from "@/components/screen/screen";
-import { config } from "@/config";
-import { Text } from "@/design-system/Text";
-import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store";
-import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info";
-import { translate } from "@/i18n";
-import { NavigationParamList } from "@/navigation/navigation.types";
-import { useHeader } from "@/navigation/use-header";
-import { useAppTheme } from "@/theme/use-app-theme";
+import { useHeaderHeight } from "@react-navigation/elements"
+import { NativeStackScreenProps } from "@react-navigation/native-stack"
+import { shortAddress } from "@utils/strings/shortAddress"
+import React, { useState } from "react"
+import { Platform, Share, View } from "react-native"
+import QRCode from "react-native-qrcode-svg"
+import { Avatar } from "@/components/avatar"
+import Button from "@/components/Button/Button"
+import { Screen } from "@/components/screen/screen"
+import { config } from "@/config"
+import { Text } from "@/design-system/Text"
+import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
+import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
+import { translate } from "@/i18n"
+import { NavigationParamList } from "@/navigation/navigation.types"
+import { useHeader } from "@/navigation/use-header"
+import { useAppTheme } from "@/theme/use-app-theme"
 
-type IShareProfileScreenProps = NativeStackScreenProps<
-  NavigationParamList,
-  "ShareProfile"
->;
+type IShareProfileScreenProps = NativeStackScreenProps<NavigationParamList, "ShareProfile">
 
-export function ShareProfileScreen({
-  route,
-  navigation,
-}: IShareProfileScreenProps) {
-  const { theme } = useAppTheme();
-  const { inboxId } = useSafeCurrentSender();
-  const headerHeight = useHeaderHeight();
-  const [copiedLink, setCopiedLink] = useState(false);
+export function ShareProfileScreen({ route, navigation }: IShareProfileScreenProps) {
+  const { theme } = useAppTheme()
+  const { inboxId } = useSafeCurrentSender()
+  const headerHeight = useHeaderHeight()
+  const [copiedLink, setCopiedLink] = useState(false)
 
   const { displayName, avatarUrl } = usePreferredDisplayInfo({
     inboxId,
-  });
+  })
 
-  const profileUrl = `https://${config.websiteDomain}/dm/${
-    displayName || shortAddress(inboxId)
-  }`;
+  const profileUrl = `https://${config.websiteDomain}/dm/${displayName || shortAddress(inboxId)}`
 
-  const shareDict =
-    Platform.OS === "ios" ? { url: profileUrl } : { message: profileUrl };
+  const shareDict = Platform.OS === "ios" ? { url: profileUrl } : { message: profileUrl }
 
   const shareButtonText = copiedLink
     ? translate("share_profile.link_copied")
-    : translate("share_profile.copy_link");
+    : translate("share_profile.copy_link")
 
   useHeader({
     title: "Share Profile",
     onBack: () => navigation.goBack(),
-  });
+  })
 
   async function handleShare() {
-    await Share.share(shareDict);
-    setCopiedLink(true);
+    await Share.share(shareDict)
+    setCopiedLink(true)
   }
 
   return (
@@ -64,11 +55,7 @@ export function ShareProfileScreen({
         }}
       >
         <View style={{ alignItems: "center" }}>
-          <Avatar
-            uri={avatarUrl}
-            name={displayName}
-            style={{ alignSelf: "center" }}
-          />
+          <Avatar uri={avatarUrl} name={displayName} style={{ alignSelf: "center" }} />
           <Text
             preset="title"
             style={{
@@ -125,5 +112,5 @@ export function ShareProfileScreen({
         <View style={{ height: headerHeight }} />
       </View>
     </Screen>
-  );
+  )
 }

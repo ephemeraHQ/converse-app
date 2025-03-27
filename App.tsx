@@ -1,98 +1,81 @@
-import { configure as configureCoinbase } from "@coinbase/wallet-mobile-sdk";
-import { BottomSheetModalProvider } from "@design-system/BottomSheet/BottomSheetModalProvider";
-import { useReactQueryDevTools } from "@dev-plugins/react-query";
-import { ActionSheetProvider } from "@expo/react-native-action-sheet";
-import { PrivyProvider } from "@privy-io/expo";
-import { SmartWalletsProvider } from "@privy-io/expo/smart-wallets";
-import { queryClient } from "@queries/queryClient";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { useCoinbaseWalletListener } from "@utils/coinbaseWallet";
-import { ActionSheet } from "@/components/action-sheet";
-import { DebugProvider } from "@/components/debug-provider";
-import { Snackbars } from "@/components/snackbar/snackbars";
-import { useHydrateAuth } from "@/features/authentication/use-hydrate-auth";
-import { useLogoutOnJwtRefreshError } from "@/features/authentication/use-logout-on-jwt-refresh-error";
-import { useSetupStreamingSubscriptions } from "@/features/streams/streams";
-import { $globalStyles } from "@/theme/styles";
-import { useThemeProvider } from "@/theme/use-app-theme";
-import "expo-dev-client";
-import React, { useEffect } from "react";
-import { Platform } from "react-native";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { KeyboardProvider } from "react-native-keyboard-controller";
-import { Provider as PaperProvider } from "react-native-paper";
-import { DevToolsBubble } from "react-native-react-query-devtools";
-import {
-  configureReanimatedLogger,
-  ReanimatedLogLevel,
-} from "react-native-reanimated";
-import { ThirdwebProvider } from "thirdweb/react";
-import { config } from "./config";
-import { useMonitorNetworkConnectivity } from "./dependencies/NetworkMonitor/use-monitor-network-connectivity";
-import { AppNavigator } from "./navigation/app-navigator";
-import "./utils/ignore-logs";
-import { sentryInit } from "./utils/sentry";
-import { preventSplashScreenAutoHide } from "./utils/splash/splash";
+import { BottomSheetModalProvider } from "@design-system/BottomSheet/BottomSheetModalProvider"
+import { useReactQueryDevTools } from "@dev-plugins/react-query"
+import { ActionSheetProvider } from "@expo/react-native-action-sheet"
+import { Chain, PrivyProvider } from "@privy-io/expo"
+import { SmartWalletsProvider } from "@privy-io/expo/smart-wallets"
+import { ActionSheet } from "@/components/action-sheet"
+import { DebugProvider } from "@/components/debug-provider"
+import { Snackbars } from "@/components/snackbar/snackbars"
+import { useSetupStreamingSubscriptions } from "@/features/streams/streams"
+import { useCoinbaseWalletListener } from "@/features/wallets/utils/coinbase-wallet"
+import { $globalStyles } from "@/theme/styles"
+import { useThemeProvider } from "@/theme/use-app-theme"
+import { useCachedResources } from "@/utils/cache-resources"
+import { reactQueryClient } from "@/utils/react-query/react-query.client"
+import "expo-dev-client"
+import React from "react"
+import { GestureHandlerRootView } from "react-native-gesture-handler"
+import { KeyboardProvider } from "react-native-keyboard-controller"
+import { SafeAreaProvider } from "react-native-safe-area-context"
+import { ThirdwebProvider } from "thirdweb/react"
+import { base } from "viem/chains"
+// import { DevToolsBubble } from "react-native-react-query-devtools"
+import { captureError } from "@/utils/capture-error"
+import { setupConvosApi } from "@/utils/convos-api/convos-api-init"
+import { ReactQueryPersistProvider } from "@/utils/react-query/react-query-persist-provider"
+import { config } from "./config"
+import { useMonitorNetworkConnectivity } from "./dependencies/NetworkMonitor/use-monitor-network-connectivity"
+import { registerBackgroundNotificationTask } from "./features/notifications/background-notification-handler"
+import { setupConversationsNotificationsSubscriptions } from "./features/notifications/notifications-conversations-subscriptions"
+import { configureForegroundNotificationBehavior } from "./features/notifications/notifications-init"
+import { AppNavigator } from "./navigation/app-navigator"
+import "./utils/ignore-logs"
+import { sentryInit } from "./utils/sentry/sentry-init"
+import { preventSplashScreenAutoHide } from "./utils/splash/splash"
 
-!!preventSplashScreenAutoHide && preventSplashScreenAutoHide();
+preventSplashScreenAutoHide()
+sentryInit()
+setupConvosApi()
+configureForegroundNotificationBehavior()
+setupConversationsNotificationsSubscriptions()
+registerBackgroundNotificationTask().catch(captureError)
 
-// This is the default configuration
-configureReanimatedLogger({
-  level: ReanimatedLogLevel.warn,
-  strict: /*
- Ignores the following warning: 
-   "[Reanimated] Reading from `value` during component render. Please ensure that you do not access the `value` property or use `get` method of a shared value while React is rendering a component.",
-todo investigate
+const baseMainnetOverride: Chain = {
+  ...base,
+  rpcUrls: {
+    ...base.rpcUrls,
+    default: {
+      http: [config.evm.rpcEndpoint],
+    },
+  },
+}
 
-  */ false,
-});
-
-sentryInit();
-
-configureCoinbase({
-  callbackURL: new URL(`https://${config.websiteDomain}/coinbase`),
-  hostURL: new URL("https://wallet.coinbase.com/wsegue"),
-  hostPackageName: "org.toshi",
-});
-
-const coinbaseUrl = new URL(`https://${config.websiteDomain}/coinbase`);
+// For now let's just be on mainnet. Easier to debug
+const supportedChains = [baseMainnetOverride] as [Chain, ...Chain[]]
 
 export function App() {
-  useLogoutOnJwtRefreshError();
-  useMonitorNetworkConnectivity();
-  useHydrateAuth();
-  useReactQueryDevTools(queryClient);
-  useSetupStreamingSubscriptions();
+  useMonitorNetworkConnectivity()
+  useReactQueryDevTools(reactQueryClient)
+  useSetupStreamingSubscriptions()
+  useCachedResources()
+  useCoinbaseWalletListener()
 
-  const { themeScheme, setThemeContextOverride, ThemeProvider } =
-    useThemeProvider();
-
-  useEffect(() => {
-    // Disabled for now until we go live and it works with bun
-    // setupAppAttest();
-  }, []);
-
-  useCoinbaseWalletListener(true, coinbaseUrl);
+  const { themeScheme, setThemeContextOverride, ThemeProvider } = useThemeProvider()
 
   return (
-    // <PersistQueryClientProvider
-    //   client={queryClient}
-    //   persistOptions={{
-    //     persister: reactQueryPersister,
-    //     maxAge: DEFAULT_GC_TIME,
-    //   }}
-    // >
-    <QueryClientProvider client={queryClient}>
+    <ReactQueryPersistProvider>
+      {/* <QueryClientProvider client={reactQueryClient}> */}
       <PrivyProvider
         appId={config.privy.appId}
         clientId={config.privy.clientId}
+        supportedChains={supportedChains}
       >
         <SmartWalletsProvider>
           <ThirdwebProvider>
-            <AppKeyboardProvider>
-              <ActionSheetProvider>
-                <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
-                  <PaperProvider>
+            <SafeAreaProvider>
+              <KeyboardProvider>
+                <ActionSheetProvider>
+                  <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
                     <GestureHandlerRootView style={$globalStyles.flex1}>
                       <DebugProvider>
                         <BottomSheetModalProvider>
@@ -100,23 +83,18 @@ export function App() {
                           <AppNavigator />
                           {/* </AuthenticateWithPasskeyProvider> */}
                           {/* {__DEV__ && <DevToolsBubble />} */}
-                          <ActionSheet />
                           <Snackbars />
+                          <ActionSheet />
                         </BottomSheetModalProvider>
                       </DebugProvider>
                     </GestureHandlerRootView>
-                  </PaperProvider>
-                </ThemeProvider>
-              </ActionSheetProvider>
-            </AppKeyboardProvider>
+                  </ThemeProvider>
+                </ActionSheetProvider>
+              </KeyboardProvider>
+            </SafeAreaProvider>
           </ThirdwebProvider>
         </SmartWalletsProvider>
       </PrivyProvider>
-    </QueryClientProvider>
-    // </PersistQueryClientProvider>
-  );
+    </ReactQueryPersistProvider>
+  )
 }
-
-// On Android we use the default keyboard "animation"
-const AppKeyboardProvider =
-  Platform.OS === "ios" ? KeyboardProvider : React.Fragment;

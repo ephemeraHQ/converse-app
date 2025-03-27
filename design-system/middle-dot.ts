@@ -1,1 +1,1 @@
-export const MIDDLE_DOT = "\u00B7";
+export const MIDDLE_DOT = "\u00B7"

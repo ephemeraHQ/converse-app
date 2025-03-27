@@ -1,4 +1,4 @@
-import type { Config } from "jest";
+import type { Config } from "jest"
 
 /**
  * Jest configuration for Expo projects with environment
@@ -87,7 +87,7 @@ const config: Config = {
    * Won't transform: "lodash", "moment"
    */
   transformIgnorePatterns: [
-    "node_modules/(?!((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|rn-fetch-blob|@xmtp|uuid))",
+    "node_modules/(?!((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|rn-fetch-blob|@xmtp|uuid))",
   ],
 
   /**
@@ -100,6 +100,6 @@ const config: Config = {
    * but before tests are run.
    */
   setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
-};
+}
 
-export default config;
+export default config

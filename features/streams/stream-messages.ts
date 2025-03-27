@@ -1,142 +1,145 @@
-import { ConversationTopic, GroupUpdatedContent } from "@xmtp/react-native-sdk";
-import { addConversationMessageQuery } from "@/features/conversation/conversation-messages.query";
-import { streamAllMessages } from "@/features/xmtp/xmtp-messages/xmtp-messages-stream";
-import { IXmtpDecodedMessage } from "@/features/xmtp/xmtp.types";
-import { updateConversationQueryData } from "@/queries/conversation-query";
-import { updateConversationInAllowedConsentConversationsQueryData } from "@/queries/conversations-allowed-consent-query";
-import { refetchGroupMembersQuery } from "@/queries/useGroupMembersQuery";
-import { captureError } from "@/utils/capture-error";
-import { StreamError } from "@/utils/error";
-import { streamLogger } from "@/utils/logger";
+import { isGroupUpdatedMessage } from "@/features/conversation/conversation-chat/conversation-message/utils/conversation-message-assertions"
+import { addMessageToConversationMessagesQueryData } from "@/features/conversation/conversation-chat/conversation-messages.query"
+import { updateConversationQueryData } from "@/features/conversation/queries/conversation.query"
+import {
+  addGroupMemberToGroupQueryData,
+  removeGroupMemberToGroupQuery,
+  updateGroupQueryData,
+} from "@/features/groups/group.query"
+import { IGroup } from "@/features/groups/group.types"
+import { streamAllMessages } from "@/features/xmtp/xmtp-messages/xmtp-messages-stream"
+import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
+import { captureError } from "@/utils/capture-error"
+import { StreamError } from "@/utils/error"
+import { streamLogger } from "@/utils/logger"
+import {
+  IConversationMessage,
+  IConversationMessageGroupUpdated,
+} from "../conversation/conversation-chat/conversation-message/conversation-message.types"
+import { convertXmtpMessageToConvosMessage } from "../conversation/conversation-chat/conversation-message/utils/convert-xmtp-message-to-convos-message"
 
-export async function startMessageStreaming(args: { account: string }) {
-  const { account } = args;
+export async function startMessageStreaming(args: { clientInboxId: IXmtpInboxId }) {
+  const { clientInboxId } = args
 
   try {
     await streamAllMessages({
-      account,
-      onNewMessage: (message) => handleNewMessage({ account, message }),
-    });
+      inboxId: clientInboxId,
+      onNewMessage: (message) =>
+        handleNewMessage({ clientInboxId, message: convertXmtpMessageToConvosMessage(message) }),
+    })
   } catch (error) {
     throw new StreamError({
       error,
-      additionalMessage: `Failed to stream messages for ${account}`,
-    });
+      additionalMessage: `Failed to stream messages for ${clientInboxId}`,
+    })
   }
 }
 
 async function handleNewMessage(args: {
-  account: string;
-  message: IXmtpDecodedMessage;
+  clientInboxId: IXmtpInboxId
+  message: IConversationMessage
 }) {
-  const { account, message } = args;
+  const { clientInboxId, message } = args
 
-  streamLogger.debug(`[handleNewMessage] message: ${JSON.stringify(message)}`);
+  streamLogger.debug(`New message:`, message)
 
-  if (message.contentTypeId.includes("group_updated")) {
+  const messageWasSentByCurrentUser = message.senderInboxId === clientInboxId
+
+  if (isGroupUpdatedMessage(message)) {
     try {
       handleNewGroupUpdatedMessage({
-        account,
-        topic: message.topic,
+        inboxId: clientInboxId,
         message,
-      });
+      })
     } catch (error) {
-      captureError(error);
+      captureError(error)
     }
   }
 
   try {
-    addConversationMessageQuery({
-      account,
-      topic: message.topic as ConversationTopic,
-      message,
-    });
+    // Because we handle the message sent by current user with optimistic update, we don't need to update the query cache
+    if (!messageWasSentByCurrentUser) {
+      addMessageToConversationMessagesQueryData({
+        clientInboxId,
+        xmtpConversationId: message.xmtpConversationId,
+        message,
+      })
+    }
   } catch (error) {
-    captureError(error);
+    captureError(error)
   }
 
   try {
     updateConversationQueryData({
-      account,
-      topic: message.topic as ConversationTopic,
+      clientInboxId,
+      xmtpConversationId: message.xmtpConversationId,
       conversationUpdate: {
         lastMessage: message,
       },
-    });
+    })
   } catch (error) {
-    captureError(error);
-  }
-
-  try {
-    updateConversationInAllowedConsentConversationsQueryData({
-      account,
-      topic: message.topic as ConversationTopic,
-      conversationUpdate: {
-        lastMessage: message,
-      },
-    });
-  } catch (error) {
-    captureError(error);
+    captureError(error)
   }
 }
 
-const METADATA_FIELD_MAP = {
+// XMTP doesn't have typing yet
+const METADATA_FIELD_MAP: Record<string, keyof IGroup> = {
   group_name: "name",
-  group_image_url_square: "imageUrlSquare",
+  group_image_url_square: "imageUrl",
   description: "description",
-} as const;
+} as const
 
-type MetadataField = keyof typeof METADATA_FIELD_MAP;
+type MetadataField = keyof typeof METADATA_FIELD_MAP
 
 function handleNewGroupUpdatedMessage(args: {
-  account: string;
-  topic: ConversationTopic;
-  message: IXmtpDecodedMessage;
+  inboxId: IXmtpInboxId
+  message: IConversationMessageGroupUpdated
 }) {
-  const { account, topic, message } = args;
+  const { inboxId, message } = args
 
-  // Early return if not a group update message
-  if (!message.contentTypeId.includes("group_updated")) return;
-  const content = message.content() as GroupUpdatedContent;
+  for (const member of message.content.membersAdded) {
+    addGroupMemberToGroupQueryData({
+      clientInboxId: inboxId,
+      xmtpConversationId: message.xmtpConversationId,
+      member: {
+        inboxId: member.inboxId,
+        consentState: "unknown",
+        permission: "member",
+      },
+    }).catch(captureError)
+  }
 
-  // Handle member changes by refetching the group members
-  if (content.membersAdded.length > 0 || content.membersRemoved.length > 0) {
-    refetchGroupMembersQuery({ account, topic }).catch(captureError);
-    return;
+  for (const member of message.content.membersRemoved) {
+    removeGroupMemberToGroupQuery({
+      clientInboxId: inboxId,
+      xmtpConversationId: message.xmtpConversationId,
+      memberInboxId: member.inboxId,
+    }).catch(captureError)
   }
 
   // Process metadata changes (e.g., group name, image, description)
-  if (content.metadataFieldsChanged.length > 0) {
-    content.metadataFieldsChanged.forEach((field) => {
-      const fieldName = field.fieldName as MetadataField;
+  if (message.content.metadataFieldsChanged.length > 0) {
+    message.content.metadataFieldsChanged.forEach((field) => {
+      const fieldName = field.fieldName as MetadataField
 
       // Validate that the field is supported
       if (!(fieldName in METADATA_FIELD_MAP)) {
-        captureError(
-          new Error(`Unsupported metadata field name: ${fieldName}`),
-        );
-        return;
+        captureError(new Error(`Unsupported metadata field name: ${fieldName}`))
+        return
       }
 
       // Map the field name to our internal property name and update if there's a new value
-      const updateKey = METADATA_FIELD_MAP[fieldName];
+      const updateKey = METADATA_FIELD_MAP[fieldName]
       if (updateKey && field.newValue) {
-        const update = { [updateKey]: field.newValue };
+        const update = { [updateKey]: field.newValue }
 
-        // Update both the individual conversation and conversations list queries
-        updateConversationQueryData({
-          account,
-          topic,
-          conversationUpdate: update,
-        });
-
-        updateConversationInAllowedConsentConversationsQueryData({
-          account,
-          topic,
-          conversationUpdate: update,
-        });
+        updateGroupQueryData({
+          clientInboxId: inboxId,
+          xmtpConversationId: message.xmtpConversationId,
+          updates: update,
+        })
       }
-    });
-    return;
+    })
+    return
   }
 }

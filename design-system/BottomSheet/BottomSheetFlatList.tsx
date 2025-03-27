@@ -1,3 +1,3 @@
-import { BottomSheetFlatList as GhoromBottomSheetFlatList } from "@gorhom/bottom-sheet";
+import { BottomSheetFlatList as GhoromBottomSheetFlatList } from "@gorhom/bottom-sheet"
 
-export const BottomSheetFlatList = GhoromBottomSheetFlatList;
+export const BottomSheetFlatList = GhoromBottomSheetFlatList

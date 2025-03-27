@@ -1,25 +1,21 @@
-import { Icon } from "@design-system/Icon/Icon";
-import { Text } from "@design-system/Text/Text";
-import { VStack } from "@design-system/VStack";
-import { TextStyle } from "react-native";
-import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme";
-import { Header } from "./Header";
+import { Icon } from "@design-system/Icon/Icon"
+import { Text } from "@design-system/Text/Text"
+import { VStack } from "@design-system/VStack"
+import { TextStyle } from "react-native"
+import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme"
+import { Header } from "./Header"
 
 type IExampleProps = {
-  onPress?: () => void;
-};
+  onPress?: () => void
+}
 
 export function HeaderExample(args: IExampleProps) {
-  const { onPress } = args;
+  const { onPress } = args
 
   return (
     <VStack>
       {/* Basic Header */}
-      <Header
-        title="Basic Header"
-        onLeftPress={onPress}
-        onRightPress={onPress}
-      />
+      <Header title="Basic Header" onLeftPress={onPress} onRightPress={onPress} />
 
       {/* Header with title and left icon */}
       <Header title="Header with Text" leftIcon="chevron.left" />
@@ -45,50 +41,41 @@ export function HeaderExample(args: IExampleProps) {
         onRightPress={onPress}
       />
     </VStack>
-  );
+  )
 }
 
 function CustomTitle() {
-  const { themed } = useAppTheme();
-  return (
-    <Text style={themed($headerTextStyle)}>Custom Header Title Component</Text>
-  );
+  const { themed } = useAppTheme()
+  return <Text style={themed($headerTextStyle)}>Custom Header Title Component</Text>
 }
 
 function CustomLeftAction() {
-  const { theme, themed } = useAppTheme();
+  const { theme, themed } = useAppTheme()
   return (
-    <Text
-      style={themed($sideTextStyle({ hasLeftText: true, hasRightText: false }))}
-    >
+    <Text style={themed($sideTextStyle({ hasLeftText: true, hasRightText: false }))}>
       <Icon size={theme.iconSize.lg} icon="chevron.left" />
     </Text>
-  );
+  )
 }
 
 function CustomRightAction() {
-  const { theme, themed } = useAppTheme();
+  const { theme, themed } = useAppTheme()
   return (
-    <Text
-      style={themed($sideTextStyle({ hasLeftText: false, hasRightText: true }))}
-    >
+    <Text style={themed($sideTextStyle({ hasLeftText: false, hasRightText: true }))}>
       <Icon size={theme.iconSize.lg} icon="chevron.right" />
     </Text>
-  );
+  )
 }
 
 const $headerTextStyle: ThemedStyle<TextStyle> = ({ colors }) => ({
   fontWeight: "bold",
   color: colors.text.primary,
-});
+})
 
 const $sideTextStyle =
-  (props: {
-    hasLeftText: boolean;
-    hasRightText: boolean;
-  }): ThemedStyle<TextStyle> =>
+  (props: { hasLeftText: boolean; hasRightText: boolean }): ThemedStyle<TextStyle> =>
   ({ spacing, colors }) => ({
     color: colors.text.secondary,
     marginTop: spacing.xxxs,
     marginHorizontal: props.hasLeftText && props.hasRightText ? spacing.sm : 0,
-  });
+  })

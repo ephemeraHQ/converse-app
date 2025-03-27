@@ -1,26 +1,22 @@
-import {
-  KeyboardState,
-  runOnJS,
-  useAnimatedKeyboard,
-  useAnimatedReaction,
-} from "react-native-reanimated";
+import { runOnJS, useAnimatedReaction } from "react-native-reanimated"
+import { useAnimatedKeyboard } from "@/hooks/use-animated-keyboard"
 
 type IKeyboardHandlersArgs = {
-  onKeyboardOpen: () => void;
-  onKeyboardClose: () => void;
-};
+  onKeyboardOpen: () => void
+  onKeyboardClose: () => void
+}
 
 export function useKeyboardHandlers(args: IKeyboardHandlersArgs) {
-  const { state } = useAnimatedKeyboard();
+  const { progressAV } = useAnimatedKeyboard()
 
   useAnimatedReaction(
-    () => state.value,
-    (state) => {
-      if (state === KeyboardState.OPEN) {
-        runOnJS(args.onKeyboardOpen)();
-      } else if (state === KeyboardState.CLOSED) {
-        runOnJS(args.onKeyboardClose)();
+    () => progressAV.value,
+    (progress) => {
+      if (progress === 1) {
+        runOnJS(args.onKeyboardOpen)()
+      } else if (progress === 0) {
+        runOnJS(args.onKeyboardClose)()
       }
     },
-  );
+  )
 }

@@ -1,62 +1,23 @@
-import { ConversationTopic, InboxId } from "@xmtp/react-native-sdk";
-import {
-  getCurrentSenderEthAddress,
-  getSafeCurrentSender,
-} from "@/features/authentication/multi-inbox.store";
-import {
-  ensureDmPeerInboxIdQueryData,
-  getDmPeerInboxIdQueryData,
-} from "@/queries/use-dm-peer-inbox-id-query";
-import {
-  ensureGroupMembersQueryData,
-  getGroupMembersQueryData,
-} from "@/queries/useGroupMembersQuery";
+import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
+import { getDmQueryData } from "@/features/dm/dm.query"
+import { getGroupQueryData } from "@/features/groups/group.query"
+import { IXmtpConversationId, IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 
 export function inboxIdIsPartOfConversationUsingCacheData(args: {
-  inboxId: InboxId;
-  conversationTopic: ConversationTopic;
+  inboxId: IXmtpInboxId
+  xmtpConversationId: IXmtpConversationId
 }) {
-  const { inboxId, conversationTopic } = args;
+  const { inboxId, xmtpConversationId } = args
 
-  const members = getGroupMembersQueryData({
-    account: getSafeCurrentSender().ethereumAddress,
-    topic: conversationTopic,
-  });
+  const group = getGroupQueryData({
+    clientInboxId: getSafeCurrentSender().inboxId,
+    xmtpConversationId,
+  })
 
-  const peerInboxId = getDmPeerInboxIdQueryData({
-    account: getSafeCurrentSender().ethereumAddress,
-    topic: conversationTopic,
-  });
+  const dm = getDmQueryData({
+    clientInboxId: getSafeCurrentSender().inboxId,
+    xmtpConversationId,
+  })
 
-  return (
-    peerInboxId === inboxId ||
-    members?.ids.some((_inboxId) => _inboxId === inboxId)
-  );
-}
-
-export async function inboxIdIsPartOfConversationUsingEnsure(args: {
-  inboxId: InboxId;
-  conversationTopic: ConversationTopic;
-}) {
-  const { inboxId, conversationTopic } = args;
-
-  const account = getSafeCurrentSender().ethereumAddress;
-
-  const [members, peerInboxId] = await Promise.all([
-    ensureGroupMembersQueryData({
-      caller: "inboxIdIsPartOfConversationUsingEnsure",
-      account: account,
-      topic: conversationTopic,
-    }),
-    ensureDmPeerInboxIdQueryData({
-      caller: "inboxIdIsPartOfConversationUsingEnsure",
-      account: account,
-      topic: conversationTopic,
-    }),
-  ]);
-
-  return (
-    peerInboxId === inboxId ||
-    members?.ids.some((_inboxId) => _inboxId === inboxId)
-  );
+  return dm?.peerInboxId === inboxId || group?.members?.ids.some((_inboxId) => _inboxId === inboxId)
 }

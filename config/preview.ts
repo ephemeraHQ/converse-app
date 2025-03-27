@@ -1,6 +1,6 @@
-import { Platform } from "react-native";
-import { IConfig } from "@/config/config.types";
-import { shared } from "./shared";
+import { Platform } from "react-native"
+import { IConfig } from "@/config/config.types"
+import { shared } from "./shared"
 
 export const previewConfig: IConfig = {
   ...shared,
@@ -13,9 +13,11 @@ export const previewConfig: IConfig = {
   scheme: "converse-preview",
   websiteDomain: "preview.converse.xyz",
   usernameSuffix: ".conversedev.eth",
-  universalLinks: ["preview.converse.xyz/", "preview.getconverse.app/"].flatMap(
-    (domain) => [`https://${domain}`, `http://${domain}`, domain],
-  ),
+  universalLinks: ["preview.converse.xyz/", "preview.getconverse.app/"].flatMap((domain) => [
+    `https://${domain}`,
+    `http://${domain}`,
+    domain,
+  ]),
   evm: {
     rpcEndpoint: process.env.EXPO_PUBLIC_EVM_RPC_ENDPOINT,
     transactionChainId: "0x14a34", // Base Sepolia
@@ -26,4 +28,4 @@ export const previewConfig: IConfig = {
       decimals: 6,
     },
   },
-} as const;
+} as const

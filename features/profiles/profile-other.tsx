@@ -1,36 +1,31 @@
-import { InboxId } from "@xmtp/react-native-sdk";
-import { memo } from "react";
-import { Screen } from "@/components/screen/screen";
-import { ProfileContactCard } from "@/features/profiles/components/profile-contact-card/profile-contact-card";
-import { ProfileSection } from "@/features/profiles/components/profile-section";
-import { ProfileSocialsNames } from "@/features/profiles/components/profile-social-names";
-import { useProfileOtherScreenHeader } from "@/features/profiles/profile-other.screen-header";
-import { useProfileQuery } from "@/features/profiles/profiles.query";
-import { useSocialProfilesForAddressQuery } from "@/features/social-profiles/social-profiles.query";
-import { useAppTheme } from "@/theme/use-app-theme";
+import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
+import { memo } from "react"
+import { Screen } from "@/components/screen/screen"
+import { ProfileContactCard } from "@/features/profiles/components/profile-contact-card/profile-contact-card"
+import { ProfileSection } from "@/features/profiles/components/profile-section"
+import { ProfileSocialsNames } from "@/features/profiles/components/profile-social-names"
+import { useProfileOtherScreenHeader } from "@/features/profiles/profile-other.screen-header"
+import { useAppTheme } from "@/theme/use-app-theme"
 
-export const ProfileOther = memo(function (props: { inboxId: InboxId }) {
-  const { inboxId } = props;
+export const ProfileOther = memo(function (props: { inboxId: IXmtpInboxId }) {
+  const { inboxId } = props
 
-  const { theme } = useAppTheme();
+  const { theme } = useAppTheme()
 
-  useProfileOtherScreenHeader({ inboxId });
-
-  const { data: profile } = useProfileQuery({ xmtpId: inboxId });
-
-  const { data: socialProfiles } = useSocialProfilesForAddressQuery({
-    ethAddress: profile?.privyAddress,
-  });
+  useProfileOtherScreenHeader({ inboxId })
 
   return (
     <Screen preset="fixed" backgroundColor={theme.colors.background.surface}>
-      <ProfileSection>
+      <ProfileSection
+        style={{
+          paddingHorizontal: 0, // Since the ProfileContactCardLayout already has margin for the shadow
+          paddingVertical: 0, // Since the ProfileContactCardLayout already has margin for the shadow
+        }}
+      >
         <ProfileContactCard inboxId={inboxId} />
       </ProfileSection>
 
-      {socialProfiles && (
-        <ProfileSocialsNames socialProfiles={socialProfiles} />
-      )}
+      <ProfileSocialsNames inboxId={inboxId} />
     </Screen>
-  );
-});
+  )
+})

@@ -1,13 +1,13 @@
-import { IIconName } from "@design-system/Icon/Icon.types";
-import { ComponentType } from "react";
+import { IIconName } from "@design-system/Icon/Icon.types"
+import { ComponentType } from "react"
 import {
   PressableStateCallbackType,
   PressableProps as RNPressableProps,
   StyleProp,
   TextStyle,
   ViewStyle,
-} from "react-native";
-import { ITextProps } from "../Text";
+} from "react-native"
+import { ITextProps } from "../Text"
 
 export type IButtonVariant =
   | "outline"
@@ -17,102 +17,102 @@ export type IButtonVariant =
   /** @deprecated */
   | "secondary"
   | "secondary-danger"
-  | "text";
+  | "text"
 
-export type IButtonSize = "sm" | "md" | "lg";
+export type IButtonSize = "sm" | "md" | "lg"
 
-export type IButtonAction = "primary" | "danger";
+export type IButtonAction = "primary" | "danger"
 
 export type IButtonAccessoryProps = {
-  style: StyleProp<any>;
-  pressableState: PressableStateCallbackType;
-  disabled?: boolean;
-};
+  style: StyleProp<any>
+  pressableState: PressableStateCallbackType
+  disabled?: boolean
+}
 
 export type IButtonProps = {
   /**
    * Text which is looked up via i18n.
    */
-  tx?: ITextProps["tx"];
+  tx?: ITextProps["tx"]
   /**
    * The text to display if not using `tx` or nested components.
    */
-  text?: ITextProps["text"];
+  text?: ITextProps["text"]
   /**
    * Optional options to pass to i18n. Useful for interpolation
    * as well as explicitly setting locale or translation fallbacks.
    */
-  txOptions?: ITextProps["txOptions"];
+  txOptions?: ITextProps["txOptions"]
   /**
    * An optional style override useful for padding & margin.
    */
-  style?: StyleProp<ViewStyle>;
+  style?: StyleProp<ViewStyle>
   /**
    * An optional style override for the "pressed" state.
    */
-  pressedStyle?: StyleProp<ViewStyle>;
+  pressedStyle?: StyleProp<ViewStyle>
   /**
    * An optional style override for the button text.
    */
-  textStyle?: StyleProp<TextStyle>;
+  textStyle?: StyleProp<TextStyle>
   /**
    * An optional style override for the button text when in the "pressed" state.
    */
-  pressedTextStyle?: StyleProp<TextStyle>;
+  pressedTextStyle?: StyleProp<TextStyle>
   /**
    * An optional style override for the button text when in the "disabled" state.
    */
-  disabledTextStyle?: StyleProp<TextStyle>;
+  disabledTextStyle?: StyleProp<TextStyle>
   /**
    * One of the different types of button variants.
    */
-  variant?: IButtonVariant;
+  variant?: IButtonVariant
   /**
    * The action style of the button.
    */
-  action?: IButtonAction;
+  action?: IButtonAction
   /**
    * An optional component to render on the right side of the text.
    * Example: `RightAccessory={(props) => <View {...props} />}`
    */
-  RightAccessory?: ComponentType<IButtonAccessoryProps>;
+  RightAccessory?: ComponentType<IButtonAccessoryProps>
   /**
    * An optional component to render on the left side of the text.
    * Example: `LeftAccessory={(props) => <View {...props} />}`
    */
-  LeftAccessory?: ComponentType<IButtonAccessoryProps>;
+  LeftAccessory?: ComponentType<IButtonAccessoryProps>
   /**
    * Children components.
    */
-  children?: React.ReactNode;
+  children?: React.ReactNode
   /**
    * disabled prop, accessed directly for declarative styling reasons.
    * https://reactnative.dev/docs/pressable#disabled
    */
-  disabled?: boolean;
+  disabled?: boolean
   /**
    * An optional style override for the disabled state
    */
-  disabledStyle?: StyleProp<ViewStyle>;
+  disabledStyle?: StyleProp<ViewStyle>
   /**
    * An optional size for the button.
    */
-  size?: IButtonSize;
+  size?: IButtonSize
   /**
    * Whether the button is loading.
    */
-  loading?: boolean;
+  loading?: boolean
   /**
    * Whether the button should trigger a haptic feedback.
    */
-  withHapticFeedback?: boolean;
+  withHapticFeedback?: boolean
   /**
    * Replace the deprecated `picto` prop.
    */
-  icon?: IIconName;
+  icon?: IIconName
 
   /** @deprecated use text instead */
-  title?: string;
+  title?: string
   /** @deprecated use icon instead */
-  picto?: IIconName;
-} & RNPressableProps;
+  picto?: IIconName
+} & RNPressableProps
