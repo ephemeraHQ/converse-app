@@ -24034,6 +24034,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"tanstack-query-dev-tools-expo-plugin@npm:^0.1.1":
+  version: 0.1.1
+  resolution: "tanstack-query-dev-tools-expo-plugin@npm:0.1.1"
+  dependencies:
+    "@expo/metro-runtime": "npm:~4.0.1"
+    expo-device: "npm:~7.0.2"
+  peerDependencies:
+    "@tanstack/react-query": ^4.0.0 || ^5.0.0
+    expo: "*"
+  checksum: 10c0/7d48a45dd432edffc011502bc8f1b07912d7d089ee06295df8e427ed300d2994f710fcacb578d87038da3ff062ef60ca3a5e904cae075ced52c41a5fb1484a40
+  languageName: node
+  linkType: hard
+
 "tapable@npm:^2.2.0":
   version: 2.2.1
   resolution: "tapable@npm:2.2.1"
