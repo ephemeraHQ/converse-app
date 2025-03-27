@@ -16,20 +16,20 @@ export const useLogout = () => {
     async (args: { caller: string }) => {
       authLogger.debug(`Logging out called by ${args.caller}`)
 
-      // IMPORTANT: Order of operations is important here.
+      // TODO: Might need to fix the order of operations here
       try {
         useAuthenticationStore.getState().actions.setStatus("signedOut")
 
         const currentSender = getCurrentSender()
+
+        // TODO: Change this once we support multiple identities
+        resetMultiInboxStore()
 
         // Clear both in-memory cache and persisted data
         reactQueryClient.getQueryCache().clear()
         reactQueryClient.clear()
         reactQueryClient.removeQueries()
         reactQueryMMKV.clearAll()
-
-        // TODO: Change this once we support multiple identities
-        resetMultiInboxStore()
 
         if (currentSender) {
           logoutXmtpClient({

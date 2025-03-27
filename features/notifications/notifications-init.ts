@@ -100,13 +100,13 @@ async function handleNotification(notification: Notifications.Notification) {
         error,
       }),
     )
-  } finally {
-    // Let's always show the notification anyway
-    return {
-      shouldShowAlert: true,
-      shouldPlaySound: true,
-      shouldSetBadge: true,
-    }
+  }
+
+  // Let's always show the notification anyway
+  return {
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
   }
 }
 

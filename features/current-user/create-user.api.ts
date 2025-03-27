@@ -25,6 +25,7 @@ const createUserApiRequestBodySchema = z
       name: true,
       username: true,
       avatar: true,
+      description: true,
     }),
   })
   .strict()

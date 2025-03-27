@@ -49,7 +49,7 @@ export const GroupMembersListScreen = memo(function GroupMembersListScreen(
     return null
   }
 
-  if (isGroupLoading) {
+  if (!group) {
     return (
       <Screen preset="fixed">
         <EmptyState

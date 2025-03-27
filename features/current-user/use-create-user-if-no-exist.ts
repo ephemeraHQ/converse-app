@@ -130,46 +130,43 @@ async function startFlow(args: {
 
   const { data: currentUser, error: fetchCurrentUserError } = await tryCatch(fetchCurrentUser())
 
-  if (fetchCurrentUserError) {
-    if (
-      fetchCurrentUserError instanceof AxiosError &&
-      fetchCurrentUserError?.response?.status !== 404
-    ) {
-      throw new AuthenticationError({
-        error: fetchCurrentUserError,
-        additionalMessage: "Failed to fetch current user",
-      })
-    }
+  // User exists, ensure device setup
+  if (currentUser) {
+    authLogger.debug("User exists, ensuring device and identities are created")
+    return makeSureDeviceAndIdentitiesAreCreated({
+      userId: currentUser.id,
+    })
+  }
 
-    authLogger.debug("User doesn't exist in the backend, let's create it...")
+  // User doesn't exist, create new user
+  if (
+    (fetchCurrentUserError &&
+      fetchCurrentUserError instanceof AxiosError &&
+      fetchCurrentUserError?.response?.status === 404) ||
+    !currentUser
+  ) {
+    authLogger.debug("User doesn't exist in the backend, creating new user...")
 
     const currentSender = getSafeCurrentSender()
-
-    // User doesn't exist in the backend, let's create it
     const createdUser = await createUserMutation({
       inboxId: currentSender.inboxId,
-      privyUserId: privyUserId,
+      privyUserId,
       smartContractWalletAddress: smartWalletClientAddress,
       profile: getRandomProfile(),
     })
 
-    authLogger.debug("User/Profile now created in the backend")
+    authLogger.debug("User/Profile created in backend")
 
     await makeSureDeviceAndIdentitiesAreCreated({
       userId: createdUser.id,
     })
-  } else if (currentUser) {
-    currentUser
+    return
   }
 
-  if (currentUser) {
-    authLogger.debug(
-      "User already exists in the backend, let's make sure device and identities are created...",
-    )
-    await makeSureDeviceAndIdentitiesAreCreated({
-      userId: currentUser.id,
-    })
-  }
+  throw new AuthenticationError({
+    error: fetchCurrentUserError,
+    additionalMessage: "Failed to fetch current user",
+  })
 }
 
 /**

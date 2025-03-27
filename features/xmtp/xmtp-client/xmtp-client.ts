@@ -195,16 +195,26 @@ async function buildXmtpClientInstance(args: {
  * If deleteDatabase is true, the local message database will be deleted
  * Important: If the database is deleted, all message history will be lost
  */
-export async function logoutXmtpClient(args: { inboxId: IXmtpInboxId; deleteDatabase?: boolean }) {
-  const { inboxId, deleteDatabase = false } = args
+export async function logoutXmtpClient(
+  args:
+    | {
+        inboxId: IXmtpInboxId
+        ethAddress: IEthereumAddress
+        deleteDatabase: true
+      }
+    | {
+        inboxId: IXmtpInboxId
+        ethAddress?: never
+        deleteDatabase?: false
+      },
+) {
+  const { inboxId, ethAddress, deleteDatabase = false } = args
 
   xmtpLogger.debug(`Logging out XMTP client for inboxId: ${inboxId}`)
 
   try {
     // Get the client from the map
     const xmtpClient = xmtpClientsMap.get(inboxId)
-
-    const sender = useMultiInboxStore.getState().senders.find((s) => s.inboxId === inboxId)
 
     if (xmtpClient) {
       // If requested, delete the local database
@@ -224,9 +234,9 @@ export async function logoutXmtpClient(args: { inboxId: IXmtpInboxId; deleteData
     }
 
     // Always clean up encryption key if we're deleting the database
-    if (deleteDatabase && sender) {
-      await cleanXmtpDbEncryptionKey({ ethAddress: lowercaseEthAddress(sender.ethereumAddress) })
-      xmtpLogger.debug(`Cleaned DB encryption key for address: ${sender.ethereumAddress}`)
+    if (deleteDatabase && ethAddress) {
+      await cleanXmtpDbEncryptionKey({ ethAddress: lowercaseEthAddress(ethAddress) })
+      xmtpLogger.debug(`Cleaned DB encryption key for address: ${ethAddress}`)
     }
 
     xmtpLogger.debug(`Successfully logged out XMTP client for inboxId: ${inboxId}`)
