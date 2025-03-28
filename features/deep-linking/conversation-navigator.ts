@@ -1,10 +1,10 @@
 import { useCallback } from "react"
 import { useNavigation } from "@react-navigation/native"
 import { captureError } from "@/utils/capture-error"
+import { GenericError } from "@/utils/error"
 import { IXmtpInboxId, IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 import { logger } from "@/utils/logger"
 import { checkConversationExists } from "./conversation-links"
-import { GenericError } from "@/utils/generic-error"
 
 /**
  * Custom hook to handle conversation deep links
@@ -57,7 +57,7 @@ export function useConversationDeepLinkHandler() {
         new GenericError({
           error,
           additionalMessage: `Failed to handle conversation deep link for inboxId: ${inboxId}`,
-          additionalData: { inboxId }
+          extra: { inboxId }
         })
       )
     }
