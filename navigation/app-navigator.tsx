@@ -32,11 +32,19 @@ import { useAppTheme, useThemeProvider } from "@/theme/use-app-theme"
 import { captureError } from "@/utils/capture-error"
 import { useUpdateSentryUser } from "@/utils/sentry/sentry-identity"
 import { hideSplashScreen } from "@/utils/splash/splash"
+// import { ShareProfileNav, ShareProfileScreenConfig } from "../screens/ShareProfileNav"
+import { getStateFromPath } from "@/features/deep-linking/navigation-handlers"
 
-const scheme = Linking.createURL("/")
+const prefix = Linking.createURL("/")
+const schemes = [prefix, ...config.app.universalLinks]
+
+// Add custom app URL schemes for each environment
+if (config.app.scheme) {
+  schemes.push(`${config.app.scheme}://`)
+}
 
 const linking: LinkingOptions<NavigationParamList> = {
-  prefixes: [scheme, ...config.app.universalLinks],
+  prefixes: schemes,
   config: {
     initialRouteName: "Chats",
     screens: {
@@ -85,10 +93,7 @@ const linking: LinkingOptions<NavigationParamList> = {
       },
     },
   },
-  // TODO: Fix this
-  // getStateFromPath: getConverseStateFromPath("fullStackNavigation"),
-  // TODO: Fix this
-  // getInitialURL: () => null,
+  getStateFromPath,
 }
 
 export function AppNavigator() {
