@@ -1,5 +1,4 @@
 // helpful medium article: https://medium.com/@vibhavguria07/level-up-your-app-security-implementing-firebase-app-check-in-react-native-9c7409d56504
-// dashboards: https://console.firebase.google.com/u/0/project/converse-appcheck/appcheck/products
 // setup instructions: https://rnfirebase.io/app-check/usage
 import { firebase } from "@react-native-firebase/app-check"
 import { config } from "@/config"
@@ -15,11 +14,6 @@ export const tryGetAppCheckToken = async ({
   extraSecurity?: boolean
 } = {}): Promise<string | undefined> => {
   try {
-    // App Check FAQ:
-    // Do we need/want to use the limited use token?
-
-    // What endpoints are protected with app check?
-    // @see https://github.com/ephemeraHQ/converse-backend/blob/main/api/middlewares.ts#L27
     const appCheckTokenResult = extraSecurity
       ? await appCheck.getLimitedUseToken()
       : await appCheck.getToken()
