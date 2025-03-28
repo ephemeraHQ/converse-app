@@ -9,5 +9,5 @@ export enum ONBOARDING_ENTERING_DELAY {
   SIXTH = 500,
 }
 
-export const RPID = config.websiteDomain
+export const RPID = config.app.webDomain
 export const RELYING_PARTY = `https://${RPID}`

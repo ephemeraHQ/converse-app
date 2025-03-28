@@ -6,26 +6,19 @@
  * Maybe not since it's used by many crypto libs
  * https://github.com/expo/expo/issues/29026#issuecomment-2173524698
  */
-const {
-  createRunOncePlugin,
-  withAppBuildGradle,
-} = require("@expo/config-plugins");
-const {
-  mergeContents,
-} = require("@expo/config-plugins/build/utils/generateCode");
+const { createRunOncePlugin, withAppBuildGradle } = require("@expo/config-plugins")
+const { mergeContents } = require("@expo/config-plugins/build/utils/generateCode")
 
-const withFixedConverseAndroidDependencies = (config) => {
+const withFixedConvosAndroidDependencies = (config) => {
   return withAppBuildGradle(config, (config) => {
     if (config.modResults.contents) {
-      config.modResults.contents = setBouncyCastleVersion(
-        config.modResults.contents
-      );
+      config.modResults.contents = setBouncyCastleVersion(config.modResults.contents)
     }
-    return config;
-  });
-};
+    return config
+  })
+}
 
-const TAG = "converse-android-dependencies-fix";
+const TAG = "convos-android-dependencies-fix"
 
 const setBouncyCastleVersion = (src) => {
   const configurationFix = `
@@ -39,7 +32,7 @@ const setBouncyCastleVersion = (src) => {
         }
     }
   }
-  `;
+  `
 
   const mergeResults = mergeContents({
     tag: TAG,
@@ -48,13 +41,13 @@ const setBouncyCastleVersion = (src) => {
     anchor: /android {/gm,
     offset: 1,
     comment: `// `,
-  });
+  })
 
-  return mergeResults.contents;
-};
+  return mergeResults.contents
+}
 
 module.exports = createRunOncePlugin(
-  withFixedConverseAndroidDependencies,
-  "withFixedConverseAndroidDependencies",
-  "1.0.0"
-);
+  withFixedConvosAndroidDependencies,
+  "withFixedConvosAndroidDependencies",
+  "1.0.0",
+)

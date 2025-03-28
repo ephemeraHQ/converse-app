@@ -44,7 +44,7 @@ export function useIsCurrentVersionEnough() {
         })
 
         return isVersionGreaterOrEqual({
-          currentVersion: config.appVersion,
+          currentVersion: config.app.version,
           minimumVersion,
         })
       },
@@ -62,7 +62,7 @@ export function useIsCurrentVersionEnough() {
       Alert.alert("Version is out of date", "Please update to the latest version", [
         {
           text: "Update",
-          onPress: () => openLink({ url: config.appStoreUrl }),
+          onPress: () => openLink({ url: config.app.storeUrl }),
         },
       ])
     }

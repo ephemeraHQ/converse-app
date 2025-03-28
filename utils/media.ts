@@ -405,7 +405,7 @@ export const takePictureFromCamera = async (
     cameraPermissions = await ImagePicker.requestCameraPermissionsAsync()
   }
   if (!cameraPermissions?.granted) {
-    Alert.alert("You need to grant Converse access to the camera before proceeding", undefined, [
+    Alert.alert("You need to grant Convos access to the camera before proceeding", undefined, [
       {
         text: "Settings",
         isPreferred: true,

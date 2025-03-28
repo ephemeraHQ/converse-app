@@ -3,7 +3,7 @@ import * as RNFS from "react-native-fs"
 import { v4 as uuidv4 } from "uuid"
 import { captureError } from "@/utils/capture-error"
 import { XMTPError } from "@/utils/error"
-import logger, { xmtpLogger } from "@/utils/logger"
+import { xmtpLogger } from "@/utils/logger"
 
 // Constants
 const LOG_FILE_EXTENSION = ".xmtp.log.txt"

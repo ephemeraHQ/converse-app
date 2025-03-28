@@ -16,7 +16,7 @@ const resolveRequestWithPackageExports = (context, moduleName, platform) => {
   return context.resolveRequest(context, moduleName, platform)
 }
 
-const converseMetroConfig = {
+const metroConfig = {
   ...defaultConfig,
   resolver: {
     ...defaultConfig.resolver,
@@ -33,4 +33,4 @@ const converseMetroConfig = {
   },
 }
 
-module.exports = converseMetroConfig
+module.exports = metroConfig

@@ -33,10 +33,10 @@ import { captureError } from "@/utils/capture-error"
 import { useUpdateSentryUser } from "@/utils/sentry/sentry-identity"
 import { hideSplashScreen } from "@/utils/splash/splash"
 
-const prefix = Linking.createURL("/")
+const scheme = Linking.createURL("/")
 
 const linking: LinkingOptions<NavigationParamList> = {
-  prefixes: [prefix, ...config.universalLinks],
+  prefixes: [scheme, ...config.app.universalLinks],
   config: {
     initialRouteName: "Chats",
     screens: {

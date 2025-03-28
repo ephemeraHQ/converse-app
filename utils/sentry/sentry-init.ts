@@ -6,7 +6,7 @@ import { getEnv, isDev } from "@/utils/getEnv"
 
 export function sentryInit() {
   Sentry.init({
-    dsn: config.sentryDSN,
+    dsn: config.sentry.dsn,
     debug: false,
     enabled: !__DEV__,
     environment: getEnv(),

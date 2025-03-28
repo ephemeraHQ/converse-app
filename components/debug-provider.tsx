@@ -89,7 +89,7 @@ function useShowDebugMenu() {
       "Start new log session": rotateLoggingFile,
       "Share current session logs": async () => {
         shareContent({
-          title: translate("debug.converse_log_session"),
+          title: "Convos current logs",
           url: `file://${loggingFilePath}`,
           type: "text/plain",
         }).catch(captureError)
@@ -110,7 +110,7 @@ function useShowDebugMenu() {
           return Alert.alert("No previous session logging file found")
         }
         shareContent({
-          title: translate("debug.converse_log_session"),
+          title: "Convos previous logs",
           url: `file://${previousLoggingFile}`,
           type: "text/plain",
         }).catch(captureError)
@@ -566,7 +566,7 @@ function useShowDebugMenu() {
 
     showActionSheet({
       options: {
-        title: `Converse v${config.appVersion}`,
+        title: `Convos v${config.app.version}`,
         options,
         cancelButtonIndex: options.indexOf("Cancel"),
       },

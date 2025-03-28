@@ -69,43 +69,10 @@ jobs:
             echo "has_native_changes=false" >> $GITHUB_OUTPUT
           fi
 
-  bump-version:
+  ios-build:
     needs: [check-changes]
     if: needs.check-changes.outputs.has_native_changes == 'true'
     runs-on: ubuntu-latest
-    outputs:
-      new_version: ${{ steps.get_version.outputs.new_version }}
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.PAT_GITHUB }}
-
-      - name: Configure Git
-        run: |
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
-
-      - name: Increment version
-        run: |
-          npm version patch --no-git-tag-version -m "chore: increment patch version [skip ci]"
-          NEW_VERSION=$(node -p "require('./package.json').version")
-          git add package.json
-          git commit -m "chore: bump version to ${NEW_VERSION} [skip ci]"
-
-      - name: Get new version
-        id: get_version
-        run: echo "new_version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
-
-      - name: Push version bump
-        run: |
-          git push https://${{ secrets.PAT_GITHUB }}@github.com/${{ github.repository }}.git HEAD:main
-
-  ios-build:
-    needs: [check-changes, bump-version]
-    if: needs.check-changes.outputs.has_native_changes == 'true'
-    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
@@ -114,10 +81,6 @@ jobs:
           token: ${{ secrets.PAT_GITHUB }}
           ref: main
           fetch-depth: 0
-
-      # To get the incremented version number
-      - name: Pull latest changes
-        run: git pull origin main
 
       - name: Setup node
         uses: actions/setup-node@v4
@@ -146,17 +109,14 @@ jobs:
 
       - name: Build and submit to store
         run: |
-          export SENTRY_AUTH_TOKEN=$(eas env:get --variable-name=SENTRY_AUTH_TOKEN --variable-environment=preview | tr -d ' ' | cut -d'=' -f2) 
-          eas build --platform ios --profile preview --non-interactive --auto-submit
+          eas build --platform ios --profile preview --non-interactive --auto-submit --environment=preview
 
       - name: Resolve Sentry Issues
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_USER_AUTH_TOKEN }} # SENTRY_AUTH_TOKEN from expo can't have permissions to do this issues resolving
         run: |
-          sentry-cli issues resolve --all --project convos-mobile-app --org converse-app
+          eas env:exec --environment preview 'sentry-cli issues resolve --all --project convos-react-native --org convos'
 
   android-build:
-    needs: [check-changes, bump-version]
+    needs: [check-changes]
     if: needs.check-changes.outputs.has_native_changes == 'true'
     runs-on: ubuntu-latest
 
@@ -167,10 +127,6 @@ jobs:
           token: ${{ secrets.PAT_GITHUB }}
           ref: main
           fetch-depth: 0
-
-      # To get the incremented version number
-      - name: Pull latest changes
-        run: git pull origin main
 
       - name: Setup node
         uses: actions/setup-node@v4
@@ -199,14 +155,11 @@ jobs:
 
       - name: Build and submit to store
         run: |
-          export SENTRY_AUTH_TOKEN=$(eas env:get --variable-name=SENTRY_AUTH_TOKEN --variable-environment=preview | tr -d ' ' | cut -d'=' -f2) 
-          eas build --platform android --profile preview --non-interactive --auto-submit
+          eas build --platform android --profile preview --non-interactive --auto-submit --environment=preview
 
       - name: Resolve Sentry Issues
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_USER_AUTH_TOKEN }} # SENTRY_AUTH_TOKEN from expo can't have permissions to do this issues resolving
         run: |
-          sentry-cli issues resolve --all --project convos-mobile-app --org converse-app
+          eas env:exec --environment preview 'sentry-cli issues resolve --all --project convos-react-native --org convos'
 
   ota-update:
     needs: [check-changes]
@@ -246,15 +199,12 @@ jobs:
 
       - name: Run EAS Update
         run: |
-          eas update --channel=preview --message "${{ needs.check-changes.outputs.commit_message }}" --non-interactive
+          eas update --channel=preview --message "${{ needs.check-changes.outputs.commit_message }}" --non-interactive --environment=preview
 
       - name: Upload Sourcemaps to Sentry
         run: |
-          export SENTRY_AUTH_TOKEN=$(eas env:get --variable-name=SENTRY_AUTH_TOKEN --variable-environment=preview | tr -d ' ' | cut -d'=' -f2)
-          npx sentry-expo-upload-sourcemaps dist
+          eas env:exec --environment preview 'npx sentry-expo-upload-sourcemaps dist'
 
       - name: Resolve Sentry Issues
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_USER_AUTH_TOKEN }} # SENTRY_AUTH_TOKEN from expo can't have permissions to do this issues resolving
         run: |
-          sentry-cli issues resolve --all --project convos-mobile-app --org converse-app
+          eas env:exec --environment preview 'sentry-cli issues resolve --all --project convos-react-native --org convos'

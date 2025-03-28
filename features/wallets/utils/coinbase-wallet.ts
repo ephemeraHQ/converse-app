@@ -3,7 +3,7 @@ import { useEffect } from "react"
 import { Linking } from "react-native"
 import { config } from "@/config"
 
-const coinbaseCallbackUrl = new URL(`https://app.converse.xyz/coinbase`)
+export const coinbaseCallbackUrl = new URL(`https://${config.app.webDomain}/coinbase`)
 
 /**
  * Coinbase wallet works differently than the other wallets. It requires UniversalLinks to be set up.
@@ -13,13 +13,13 @@ export function useCoinbaseWalletListener() {
   useEffect(() => {
     const sub = Linking.addEventListener("url", ({ url }) => {
       const incomingUrl = new URL(url)
+
       if (
         incomingUrl.host === coinbaseCallbackUrl.host &&
         incomingUrl.protocol === coinbaseCallbackUrl.protocol &&
         incomingUrl.hostname === coinbaseCallbackUrl.hostname
       ) {
-        // @ts-expect-error - Passing a URL object to handleResponse crashes the function
-        handleResponse(url)
+        handleResponse(incomingUrl)
       }
     })
     return () => sub?.remove()
@@ -27,7 +27,7 @@ export function useCoinbaseWalletListener() {
 }
 
 configureCoinbase({
-  callbackURL: new URL(`https://${config.websiteDomain}/coinbase`),
+  callbackURL: coinbaseCallbackUrl,
   hostURL: new URL("https://wallet.coinbase.com/wsegue"),
   hostPackageName: "org.toshi",
 })

@@ -60,7 +60,7 @@ export async function navigate<T extends keyof NavigationParamList>(
 }
 export const getSchemedURLFromUniversalURL = (url: string) => {
   // Handling universal links by saving a schemed URI
-  for (const prefix of config.universalLinks) {
+  for (const prefix of config.app.universalLinks) {
     if (url.startsWith(prefix)) {
       return Linking.createURL(url.replace(prefix, ""))
     }
@@ -69,7 +69,7 @@ export const getSchemedURLFromUniversalURL = (url: string) => {
 }
 
 const isDMLink = (url: string) => {
-  for (const prefix of config.universalLinks) {
+  for (const prefix of config.app.universalLinks) {
     if (url.startsWith(prefix)) {
       const path = url.slice(prefix.length)
       if (path.toLowerCase().startsWith("dm/")) {
@@ -81,7 +81,7 @@ const isDMLink = (url: string) => {
 }
 
 const isGroupLink = (url: string) => {
-  for (const prefix of config.universalLinks) {
+  for (const prefix of config.app.universalLinks) {
     if (url.startsWith(prefix)) {
       const path = url.slice(prefix.length)
       if (path.toLowerCase().startsWith("group/")) {

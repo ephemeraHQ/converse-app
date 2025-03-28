@@ -42,7 +42,7 @@ export let loggingFilePath = ""
 async function initLogFile() {
   const tempDir = RNFS.TemporaryDirectoryPath
   const separator = Platform.OS === "windows" ? "\\" : "/"
-  loggingFilePath = `${tempDir}${tempDir.endsWith(separator) ? "" : separator}${uuidv4()}.converse.log.txt`
+  loggingFilePath = `${tempDir}${tempDir.endsWith(separator) ? "" : separator}${uuidv4()}.convos.log.txt`
 
   const appVersion = Constants.expoConfig?.version
   const buildNumber =
@@ -52,7 +52,7 @@ async function initLogFile() {
 
   await RNFS.writeFile(
     loggingFilePath,
-    `Converse ${Platform.OS} logs - v${appVersion} (${buildNumber})\n\n`,
+    `Convos ${Platform.OS} logs - v${appVersion} (${buildNumber})\n\n`,
   )
 }
 
@@ -67,13 +67,13 @@ export async function getPreviousSessionLoggingFile() {
   const tempDir = RNFS.TemporaryDirectoryPath
   const files = await RNFS.readDir(tempDir)
   const logFiles = files
-    .filter((file) => file.name.endsWith(".converse.log.txt"))
+    .filter((file) => file.name.endsWith(".convos.log.txt"))
     .sort((a, b) => (b.mtime?.getTime() ?? 0) - (a.mtime?.getTime() ?? 0))
 
   return logFiles[1]?.path ?? null
 }
 
-const converseTransport: transportFunctionType = async (props: {
+const convosTransport: transportFunctionType = async (props: {
   msg: string
   rawMsg: unknown
   level: { severity: number; text: string }
@@ -96,7 +96,7 @@ const activeColorScheme =
 
 const baseLogger = RNLogger.createLogger({
   severity: "debug",
-  transport: converseTransport,
+  transport: convosTransport,
   transportOptions: {
     colors: activeColorScheme,
   },
