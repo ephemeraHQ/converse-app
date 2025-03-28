@@ -53,7 +53,7 @@ export const fr = {
       username: {
         placeholder: "Nom d'utilisateur",
       },
-      usernameSuffix: ".converse.xyz",
+      usernameSuffix: ".convos.xyz",
       displayName: {
         placeholder: "Entrez votre nom",
         errors: {
@@ -69,9 +69,9 @@ export const fr = {
       usernameLength: "Votre nom d'utilisateur doit comporter entre 3 et 30 caractères",
     },
     converseProfiles:
-      "Réclamez votre identité dans l'espace de noms ENS de Converse. Ce nom sera publiquement consultable.",
+      "Réclamez votre identité dans l'espace de noms ENS de Convos. Ce nom sera publiquement consultable.",
     instructions:
-      "Réclamez votre identité dans l'espace de noms ENS de Converse. Ce nom sera publiquement consultable.",
+      "Réclamez votre identité dans l'espace de noms ENS de Convos. Ce nom sera publiquement consultable.",
     loadingSentences: {
       claimingIdentity: "Réclamation de votre identité",
       connectingENS: "Connexion à ENS",
@@ -205,7 +205,7 @@ export const fr = {
     backButton: "Retour",
     alreadyConnected: {
       title: "Déjà connecté",
-      message: "Ce compte est déjà connecté à Converse.",
+      message: "Ce compte est déjà connecté à Convos.",
     },
   },
   onboarding_error: "Une erreur s'est produite lors de votre connexion. Veuillez réessayer.",
@@ -234,7 +234,7 @@ export const fr = {
   new_account: "Nouveau compte",
   add_an_account: "Ajouter un compte",
   group_info: "Informations sur le groupe",
-  converse_match_maker: "Converse Match Maker",
+  converse_match_maker: "Convos Match Maker",
   today: "Aujourd'hui",
   yesterday: "Hier",
   member_count: "{{count}} membre",
@@ -277,7 +277,7 @@ export const fr = {
     "La résolution de l'identité {{identity}} a pris trop de temps. Veuillez vérifier votre connexion et réessayer",
   identity_not_yet_xmtp_title: "N'utilise pas encore XMTP",
   identity_not_yet_xmtp:
-    "{{identity}} n'utilise pas encore XMTP. Dites-lui de télécharger l'application sur converse.xyz et de se connecter avec son portefeuille",
+    "{{identity}} n'utilise pas encore XMTP. Dites-lui de télécharger l'application sur convos.xyz et de se connecter avec son portefeuille",
 
   attachment_not_found: "Impossible de trouver la pièce jointe",
   // Conversation Context Menu
@@ -320,7 +320,7 @@ export const fr = {
   disconnect_delete_local_data: "Se déconnecter et supprimer les données locales",
   disconnect_this_account: "Se déconnecter de ce compte",
   disconnect_account_description:
-    "Vos discussions de groupe seront chiffrées et sauvegardées sur votre appareil jusqu'à ce que vous supprimiez Converse. Vos messages privés seront sauvegardés par le réseau XMTP.",
+    "Vos discussions de groupe seront chiffrées et sauvegardées sur votre appareil jusqu'à ce que vous supprimiez Convos. Vos messages privés seront sauvegardés par le réseau XMTP.",
   your_profile_page: "Votre page de profil",
   copy_wallet_address: "Copier l'adresse du portefeuille",
   attachment_message_error_download: "Impossible de télécharger la pièce jointe",
@@ -391,7 +391,7 @@ export const fr = {
     create: "Créer",
     add_members: "Ajouter des membres",
     new_chat: "Nouvelle conversation",
-    invite_to_converse: "Invitez-les à Converse",
+    invite_to_converse: "Invitez-les à Convos",
   },
 
   // Wallet selector
@@ -441,13 +441,13 @@ export const fr = {
   connectWithYourNetwork: "Trouvez vos amis",
   shareYourQRCode: "Partagez votre code QR",
   moveOrConnect:
-    "Déplacez une conversation vers Converse,\nou connectez-vous avec quelqu'un de nouveau.",
+    "Déplacez une conversation vers Convos,\nou connectez-vous avec quelqu'un de nouveau.",
   findContacts: "Voici quelques contacts recommandés en fonction\nde votre activité on-chain",
   copyShareLink: "Copier le lien de partage",
-  alphaTestTitle: "Aidez à façonner l'avenir de Converse !",
+  alphaTestTitle: "Aidez à façonner l'avenir de Convos !",
   alphaTestDescription:
-    "Partagez vos retours et vos idées avec l'équipe Converse et les autres testeurs alpha.",
-  joinAlphaGroup: "Rejoindre le groupe VIP Alpha de Converse",
+    "Partagez vos retours et vos idées avec l'équipe Convos et les autres testeurs alpha.",
+  joinAlphaGroup: "Rejoindre le groupe VIP Alpha de Convos",
   linkCopied: "Lien copié",
 
   // Transactional frames
@@ -475,7 +475,7 @@ export const fr = {
     "Cette chaîne n'est pas prise en charge par votre portefeuille",
 
   // New Conversation
-  cannot_be_added_to_group_yet: "{{name}} doit mettre à jour Converse pour être ajouté à un groupe",
+  cannot_be_added_to_group_yet: "{{name}} doit mettre à jour Convos pour être ajouté à un groupe",
   add: "Ajouter",
   add_loading: "Ajout en cours...",
   chat: "Discuter",
@@ -531,7 +531,7 @@ export const fr = {
   },
 
   initial_load: {
-    title: "Bienvenue sur Converse !",
+    title: "Bienvenue sur Convos !",
     subtitle: "Nous vérifions si vous possédez déjà des conversations sur le réseau XMTP.",
   },
 
@@ -575,9 +575,9 @@ export const fr = {
   },
 
   debug: {
-    converse_log_session: "Session de journalisation Converse",
+    converse_log_session: "Session de journalisation Convos",
     libxmtp_log_session: "Session de journalisation LibXMTP",
-    converse_version: "Converse v{{version}} ({{buildNumber}})",
+    converse_version: "Convos v{{version}} ({{buildNumber}})",
   },
 
   file_preview: "Aperçu du fichier",

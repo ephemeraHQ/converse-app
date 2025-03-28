@@ -1,5 +1,5 @@
 {
-  "name": "converse",
+  "name": "convos",
   "version": "2.2.72",
   "private": true,
   "scripts": {
@@ -23,8 +23,8 @@
     "ios:preview:device:clean": "EXPO_ENV=preview yarn env:pull:preview && yarn clean:ios && yarn ios:device",
     "lint": "eslint --max-warnings 2500",
     "lint:errors": "eslint --quiet",
-    "start": "expo start --scheme=converse-dev",
-    "start:preview": "EXPO_ENV=preview expo start --scheme=converse-preview",
+    "start": "expo start --scheme=convos-dev",
+    "start:preview": "EXPO_ENV=preview expo start --scheme=convos-preview",
     "test": "echo \"➜ Running tests...\" && jest --testPathIgnorePatterns='.*\\.perf-test\\.tsx$'",
     "test-deep-linking": "node scripts/test-deep-linking.js",
     "test:perf": "echo \"➜ Running tests with performance...\" && echo \"➜ Capturing performance tests...\" && yarn reassure && echo \"➜ Running current performance tests...\"",
@@ -158,6 +158,7 @@
     "react-native-webview": "13.12.5",
     "rn-fetch-blob": "^0.12.0",
     "safe-buffer": "^5.2.1",
+    "tanstack-query-dev-tools-expo-plugin": "^0.1.1",
     "thirdweb": "^5.90.2",
     "uuid": "^9.0.1",
     "viem": "^2.22.7",

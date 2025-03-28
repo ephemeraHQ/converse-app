@@ -34,11 +34,12 @@ export type NavigationParamList = {
   GroupMembersList: {
     xmtpConversationId: IXmtpConversationId
   }
+  EditGroup: {
+    xmtpConversationId: IXmtpConversationId
+  }
 
   NewGroupSummary: undefined
-  ConverseMatchMaker: undefined
   ShareProfile: undefined
-  TopUp: undefined
   Profile: {
     inboxId: IXmtpInboxId
   }

@@ -13,6 +13,7 @@ import { usePersistState } from "@/hooks/use-persist-state"
 import { getCurrentRoute } from "@/navigation/navigation.utils"
 import { useRouter } from "@/navigation/use-navigation"
 import { captureErrorWithToast } from "@/utils/capture-error"
+import { GenericError } from "@/utils/error"
 import { IEthereumAddress } from "@/utils/evm/address"
 import { shortAddress } from "@/utils/strings/shortAddress"
 import {
@@ -85,9 +86,9 @@ export const ConnectWalletRotateInbox = memo(function ConnectWalletRotateInbox(
 
       setHasRotatedWalletAddress("true")
     } catch (error) {
-      captureErrorWithToast(error, {
-        message: "Error creating new inbox ID",
-      })
+      captureErrorWithToast(
+        new GenericError({ error, additionalMessage: "Error creating new inbox ID" }),
+      )
     }
   }, [activeWallet, smartWalletClient, setHasRotatedWalletAddress])
 

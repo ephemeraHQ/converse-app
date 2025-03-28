@@ -1,6 +1,6 @@
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { getDmQueryData } from "@/features/dm/dm.query"
-import { getGroupQueryData } from "@/features/groups/group.query"
+import { getGroupQueryData } from "@/features/groups/queries/group.query"
 import { IXmtpConversationId, IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 
 export function inboxIdIsPartOfConversationUsingCacheData(args: {

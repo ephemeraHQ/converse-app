@@ -41,7 +41,7 @@ export type TextFieldProps = {
   /**
    * The helper text to display if not using `helperTx`.
    */
-  helper?: ITextProps["text"]
+  helper?: ITextProps["text"] | React.ReactNode
   /**
    * Helper text which is looked up via i18n.
    */

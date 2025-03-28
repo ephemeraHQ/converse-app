@@ -13,7 +13,7 @@ export const reactQueryClient = new QueryClient({
       context: unknown,
       mutation: Mutation<unknown, unknown, unknown, unknown>,
     ) => {
-      const extras: Record<string, string | number> = {
+      const extra: Record<string, string | number> = {
         mutationKey: mutation.options.mutationKey
           ? JSON.stringify(mutation.options.mutationKey)
           : "",
@@ -26,20 +26,21 @@ export const reactQueryClient = new QueryClient({
       }
 
       if (mutation.meta?.caller) {
-        extras.caller = mutation.meta.caller as string
+        extra.caller = mutation.meta.caller as string
       }
 
       if (variables) {
-        extras.variables = JSON.stringify(variables)
+        extra.variables = JSON.stringify(variables)
       }
 
       // Wrap the error in ReactQueryError
       const wrappedError = new ReactQueryError({
         error,
         additionalMessage: `Mutation failed: ${mutation.options.mutationKey ?? "unknown"}`,
+        extra,
       })
 
-      captureError(wrappedError, { extras })
+      captureError(wrappedError)
     },
   }),
   queryCache: new QueryCache({
@@ -53,7 +54,7 @@ export const reactQueryClient = new QueryClient({
       )
     },
     onError: (error: Error, query) => {
-      const extras: Record<string, string | number> = {
+      const extra: Record<string, string | number> = {
         queryKey: JSON.stringify(query.queryKey),
         ...(error instanceof AxiosError && {
           apiErrorStatus: error.response?.status,
@@ -64,16 +65,16 @@ export const reactQueryClient = new QueryClient({
       }
 
       if (query.meta?.caller) {
-        extras.caller = query.meta.caller as string
+        extra.caller = query.meta.caller as string
       }
 
       // Wrap the error in ReactQueryError
       const wrappedError = new ReactQueryError({
         error,
-        additionalMessage: `Query failed`,
+        extra,
       })
 
-      captureError(wrappedError, { extras })
+      captureError(wrappedError)
     },
   }),
 

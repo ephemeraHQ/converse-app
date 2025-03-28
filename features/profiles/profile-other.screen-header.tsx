@@ -6,7 +6,6 @@ import { DropdownMenu } from "@/design-system/dropdown-menu/dropdown-menu"
 import { HeaderAction } from "@/design-system/Header/HeaderAction"
 import { HStack } from "@/design-system/HStack"
 import { iconRegistry } from "@/design-system/Icon/Icon"
-import { Text } from "@/design-system/Text"
 import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
 import { translate } from "@/i18n"
 import { useHeader } from "@/navigation/use-header"
@@ -31,7 +30,7 @@ export function useProfileOtherScreenHeader({ inboxId }: { inboxId: IXmtpInboxId
       Haptics.selectionAsync()
       switch (actionId) {
         case "share": {
-          const shareUrl = `${config.websiteDomain}/profile/${inboxId}`
+          const shareUrl = `${config.app.webDomain}/profile/${inboxId}`
           await Share.share({
             message: shareUrl,
           })

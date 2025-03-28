@@ -94,7 +94,9 @@ export function AddAttachmentButton() {
         store.getState().updateMediaPreviewStatus(mediaURI, "error")
         // Remove media preview
         store.getState().removeComposerMediaPreview(mediaURI)
-        captureErrorWithToast(error)
+        captureErrorWithToast(
+          new GenericError({ error, additionalMessage: "Failed to add attachment" }),
+        )
       }
     },
     [store],

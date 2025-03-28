@@ -3,23 +3,13 @@ name: Production Deployment
 on:
   workflow_dispatch:
     inputs:
-      deployment_type:
-        description: "Deployment type (build/update)"
+      force_native_build:
+        description: "Force native build"
+        type: boolean
+        default: false
         required: true
-        type: choice
-        options:
-          - auto
-          - build
-          - update
 
-# We need to ensure only one workflow runs at a time and wait for any in-progress workflows to complete.
-# This is critical because:
-# 1. If we merge multiple PRs to main (preview env), each triggers a preview deployment that may increment versions
-# 2. When we then deploy to production, we must wait for all  deployments to finish
-# 3. Otherwise, we might miss version increments and deploy the wrong build
-# Example: PR1 with native changes merged to main -> PR1's preview deploy starts incrementing version ->
-# If prod deploy starts before PR1's preview deploy finishes, we'll merge main to production with old version ->
-# This causes prod to do EAS update when it should have done EAS build with version increment
+# Ensure only one workflow runs at a time
 concurrency:
   group: "deployment"
   cancel-in-progress: false
@@ -29,39 +19,33 @@ permissions:
   id-token: write
 
 jobs:
-  check-deployment-type:
+  check-changes:
     runs-on: ubuntu-latest
     outputs:
-      versions_match: ${{ steps.version-compare.outputs.versions_match }}
-      deployment_type: ${{ steps.determine-deployment.outputs.type }}
+      has_native_changes: ${{ steps.check-changes.outputs.has_native_changes }}
 
     steps:
-      # Verify that the required Expo token is available
-      - name: Check for EXPO_TOKEN
-        run: |
-          if [ -z "${{ secrets.EXPO_TOKEN }}" ]; then
-            echo "You must provide an EXPO_TOKEN secret"
-            exit 1
-          fi
-
-      # Get the code from the repository
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0 # Need full history to compare branches
           token: ${{ secrets.PAT_GITHUB }}
 
-      # Check if the versions in main and production branches match
-      - name: Compare versions with main
-        id: version-compare
+      - name: Check for native changes
+        id: check-changes
         run: |
-          git fetch origin main
-          MAIN_VERSION=$(git show origin/main:package.json | jq -r .version)
-          PROD_VERSION=$(jq -r .version package.json)
-          if [ "$MAIN_VERSION" != "$PROD_VERSION" ]; then
-            echo "versions_match=false" >> $GITHUB_OUTPUT
+          if [[ "${{ github.event.inputs.force_native_build }}" == "true" ]]; then
+            echo "has_native_changes=true" >> $GITHUB_OUTPUT
           else
-            echo "versions_match=true" >> $GITHUB_OUTPUT
+            # Get the merge base between main and production
+            MERGE_BASE=$(git merge-base origin/main origin/production)
+            
+            # Check for native changes between merge base and main
+            if git diff --name-only $MERGE_BASE origin/main | grep -E "package.json|app.config.ts|patches/|google-services/|yarn.lock|eas.json"; then
+              echo "has_native_changes=true" >> $GITHUB_OUTPUT
+            else
+              echo "has_native_changes=false" >> $GITHUB_OUTPUT
+            fi
           fi
 
       - name: Merge main into production
@@ -73,22 +57,9 @@ jobs:
           git merge origin/main -m "feat: Merge main into production for deployment"
           git push origin production
 
-      - name: Determine deployment type
-        id: determine-deployment
-        run: |
-          if [ "${{ inputs.deployment_type }}" = "auto" ]; then
-            if [ "${{ steps.version-compare.outputs.versions_match }}" = "true" ]; then
-              echo "type=update" >> $GITHUB_OUTPUT
-            else
-              echo "type=build" >> $GITHUB_OUTPUT
-            fi
-          else
-            echo "type=${{ inputs.deployment_type }}" >> $GITHUB_OUTPUT
-          fi
-
   ios-build:
-    needs: check-deployment-type
-    if: needs.check-deployment-type.outputs.deployment_type == 'build'
+    needs: [check-changes]
+    if: needs.check-changes.outputs.has_native_changes == 'true'
     runs-on: ubuntu-latest
 
     steps:
@@ -96,6 +67,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.PAT_GITHUB }}
+          ref: production
 
       - name: Setup node
         uses: actions/setup-node@v4
@@ -117,14 +89,19 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
           packager: yarn
           eas-cache: true
-          patch-watchers: true # Prevents ENOSPC errors on Ubuntu runners
+          patch-watchers: true
 
       - name: Build iOS production
-        run: eas build --platform ios --profile production --non-interactive --auto-submit
+        run: |
+          eas build --platform ios --profile production --non-interactive --auto-submit --environment=production
+
+      - name: Resolve Sentry Issues
+        run: |
+          eas env:exec --environment production 'sentry-cli issues resolve --all --project convos-react-native --org convos'
 
   android-build:
-    needs: check-deployment-type
-    if: needs.check-deployment-type.outputs.deployment_type == 'build'
+    needs: [check-changes]
+    if: needs.check-changes.outputs.has_native_changes == 'true'
     runs-on: ubuntu-latest
 
     steps:
@@ -132,6 +109,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.PAT_GITHUB }}
+          ref: production
 
       - name: Setup node
         uses: actions/setup-node@v4
@@ -153,15 +131,19 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
           packager: yarn
           eas-cache: true
-          patch-watchers: true # Prevents ENOSPC errors on Ubuntu runners
+          patch-watchers: true
 
       - name: Build Android production
         run: |
-          eas build --platform android --profile production --non-interactive --auto-submit
+          eas build --platform android --profile production --non-interactive --auto-submit --environment=production
+
+      - name: Resolve Sentry Issues
+        run: |
+          eas env:exec --environment production 'sentry-cli issues resolve --all --project convos-react-native --org convos'
 
   ota-update:
-    needs: check-deployment-type
-    if: needs.check-deployment-type.outputs.deployment_type == 'update'
+    needs: [check-changes]
+    if: needs.check-changes.outputs.has_native_changes == 'false'
     runs-on: ubuntu-latest
 
     steps:
@@ -169,6 +151,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.PAT_GITHUB }}
+          ref: production
 
       - name: Setup node
         uses: actions/setup-node@v4
@@ -190,36 +173,16 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
           packager: yarn
           eas-cache: true
-          patch-watchers: true # Prevents ENOSPC errors on Ubuntu runners
+          patch-watchers: true
 
       - name: Run EAS Update
         run: |
-          eas update --channel=production --message "Github action production deployment" --non-interactive
+          eas update --channel=production --message "Production deployment" --non-interactive --environment=production
 
-      - name: Upload source maps
+      - name: Upload Sourcemaps to Sentry
         run: |
-          export SENTRY_AUTH_TOKEN=$(eas env:get --variable-name=SENTRY_AUTH_TOKEN --variable-environment=production | tr -d ' ' | cut -d'=' -f2)
-          npx sentry-expo-upload-sourcemaps dist
+          eas env:exec --environment production 'npx sentry-expo-upload-sourcemaps dist'
 
-  finalize-deployment:
-    needs: [check-deployment-type, ios-build, android-build, ota-update]
-    runs-on: ubuntu-latest
-    if: always()
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.PAT_GITHUB }}
-
-      - name: Configure Git
+      - name: Resolve Sentry Issues
         run: |
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
-
-      - name: Finalize merge
-        run: |
-          echo "Deployment successful, finalizing merge..."
-          git fetch origin main
-          git merge origin/main -m "feat: Production deployment"
-          git push origin production
+          eas env:exec --environment production 'sentry-cli issues resolve --all --project convos-react-native --org convos'

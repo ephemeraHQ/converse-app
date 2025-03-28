@@ -4,6 +4,7 @@ import { getUnknownConsentConversationsQueryOptions } from "@/features/conversat
 import { getMessageSpamScore } from "@/features/conversation/conversation-requests-list/utils/get-message-spam-score"
 import { ensureConversationQueryData } from "@/features/conversation/queries/conversation.query"
 import { captureError } from "@/utils/capture-error"
+import { GenericError } from "@/utils/error"
 import { ensureMessageContentStringValue } from "../conversation-list/hooks/use-message-content-string-value"
 
 export function useConversationRequestsListItem() {
@@ -53,7 +54,7 @@ export function useConversationRequestsListItem() {
           const isSpam = spamScore !== 0
           return isSpam
         } catch (error) {
-          captureError(error)
+          captureError(new GenericError({ error, additionalMessage: "Error checking spam score" }))
           return true
         }
       },

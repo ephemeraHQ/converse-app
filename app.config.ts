@@ -4,11 +4,9 @@ import { version } from "./package.json"
 type Environment = "development" | "preview" | "production"
 
 type EnvironmentConfig = {
-  scheme: string
-  androidPackage: string
-  appDomainConverse: string
-  appDomainGetConverse: string
   appName: string
+  scheme: string
+  webDomain: string
   icon: string
   ios: {
     bundleIdentifier: string
@@ -19,93 +17,78 @@ type EnvironmentConfig = {
     package: string
     googleServicesFile: string
   }
-  alchemyApiKey: string
 }
 
-// Type assertion for process.env to include our Expo public variables
-const env = process.env as {
-  EXPO_PUBLIC_ALCHEMY_API_KEY?: string
-  EXPO_ENV?: string
+export type IExpoAppConfigExtra = {
+  webDomain: string
+  expoEnv: Environment
+  eas: {
+    projectId: string
+  }
+}
+
+type ICustomExpoConfig = ExpoConfig & {
+  extra: IExpoAppConfigExtra
 }
 
 const settings: Record<Environment, EnvironmentConfig> = {
   development: {
-    scheme: "converse-dev",
+    scheme: "convos-dev",
     ios: {
-      bundleIdentifier: "com.converse.dev",
-      associatedDomains: [
-        "applinks:dev.converse.xyz",
-        "applinks:dev.getconverse.app",
-        "webcredentials:dev.converse.xyz",
-      ],
+      bundleIdentifier: "com.convos.dev",
+      associatedDomains: ["applinks:dev.convos.org", "webcredentials:dev.convos.org"],
       googleServicesFile: "./google-services/ios/development.plist",
     },
     android: {
-      package: "com.converse.dev",
+      package: "com.convos.dev",
       googleServicesFile: "./google-services/android/development.json",
     },
-    androidPackage: "com.converse.dev",
-    appDomainConverse: "dev.converse.xyz",
-    appDomainGetConverse: "dev.getconverse.app",
-    appName: "Converse DEV",
+    webDomain: "dev.convos.org",
+    appName: "Convos Dev",
     icon: "./assets/icon-preview.png",
-    alchemyApiKey: env.EXPO_PUBLIC_ALCHEMY_API_KEY || "",
   },
   preview: {
-    scheme: "converse-preview",
+    scheme: "convos-preview",
     ios: {
-      bundleIdentifier: "com.converse.preview",
-      associatedDomains: [
-        "applinks:preview.converse.xyz",
-        "applinks:preview.getconverse.app",
-        "webcredentials:preview.converse.xyz",
-      ],
+      bundleIdentifier: "com.convos.preview",
+      associatedDomains: ["applinks:preview.convos.org", "webcredentials:preview.convos.org"],
       googleServicesFile: "./google-services/ios/preview.plist",
     },
     android: {
-      package: "com.converse.preview",
+      package: "com.convos.preview",
       googleServicesFile: "./google-services/android/preview.json",
     },
-    androidPackage: "com.converse.preview",
-    appDomainConverse: "preview.converse.xyz",
-    appDomainGetConverse: "preview.getconverse.app",
-    appName: "Converse PREVIEW",
+    webDomain: "preview.convos.org",
+    appName: "Convos Preview",
     icon: "./assets/icon-preview.png",
-    alchemyApiKey: env.EXPO_PUBLIC_ALCHEMY_API_KEY || "",
   },
   production: {
-    scheme: "converse",
+    scheme: "convos",
     ios: {
-      bundleIdentifier: "com.converse.native",
-      associatedDomains: [
-        "applinks:converse.xyz",
-        "applinks:getconverse.app",
-        "webcredentials:converse.xyz",
-      ],
+      bundleIdentifier: "com.convos.prod",
+      associatedDomains: ["applinks:convos.org", "webcredentials:convos.org"],
       googleServicesFile: "./google-services/ios/production.plist",
     },
     android: {
-      package: "com.converse.prod",
+      package: "com.convos.prod",
       googleServicesFile: "./google-services/android/production.json",
     },
-    androidPackage: "com.converse.prod",
-    appDomainConverse: "converse.xyz",
-    appDomainGetConverse: "getconverse.app",
-    appName: "Converse",
+    webDomain: "convos.org",
+    appName: "Convos",
     icon: "./assets/icon.png",
-    alchemyApiKey: env.EXPO_PUBLIC_ALCHEMY_API_KEY || "",
   },
 }
 
-export default (): ExpoConfig => {
+export default () => {
   const expoEnv = (process.env.EXPO_ENV || "development") as Environment
   const config = settings[expoEnv]
 
+  // Add "as CustomExpoConfig" here to type the entire config object
   return {
     name: config.appName,
     scheme: config.scheme,
-    owner: "converse",
-    slug: "converse",
+    owner: "ephemera",
+    slug: "convos",
     orientation: "portrait",
     icon: config.icon,
     userInterfaceStyle: "automatic",
@@ -115,12 +98,13 @@ export default (): ExpoConfig => {
       policy: "appVersion",
     },
     updates: {
-      url: "https://u.expo.dev/49a65fae-3895-4487-8e8a-5bd8bee3a401",
+      url: "https://u.expo.dev/f9089dfa-8871-4aff-93ea-da08af0370d2",
     },
     extra: {
+      webDomain: config.webDomain,
       expoEnv,
       eas: {
-        projectId: "49a65fae-3895-4487-8e8a-5bd8bee3a401",
+        projectId: "f9089dfa-8871-4aff-93ea-da08af0370d2",
       },
     },
     ios: {
@@ -161,7 +145,7 @@ export default (): ExpoConfig => {
         {
           action: "VIEW",
           category: ["DEFAULT", "BROWSABLE"],
-          data: [{ scheme: config.scheme }, { scheme: config.androidPackage }],
+          data: [{ scheme: config.scheme }, { scheme: config.android.package }],
         },
         {
           autoVerify: true,
@@ -170,53 +154,28 @@ export default (): ExpoConfig => {
           data: [
             {
               scheme: "https",
-              host: config.appDomainGetConverse,
-              pathPrefix: "/dm",
-            },
-            {
-              scheme: "https",
-              host: config.appDomainConverse,
-              pathPrefix: "/dm",
-            },
-            {
-              scheme: "https",
-              host: config.appDomainGetConverse,
-              pathPrefix: "/group-invite",
-            },
-            {
-              scheme: "https",
-              host: config.appDomainConverse,
-              pathPrefix: "/group-invite",
-            },
-            {
-              scheme: "https",
-              host: config.appDomainGetConverse,
-              pathPrefix: "/group",
-            },
-            {
-              scheme: "https",
-              host: config.appDomainConverse,
-              pathPrefix: "/group",
-            },
-            {
-              scheme: "https",
-              host: config.appDomainGetConverse,
+              host: config.webDomain,
               pathPrefix: "/coinbase",
             },
             {
               scheme: "https",
-              host: config.appDomainConverse,
-              pathPrefix: "/coinbase",
+              host: config.webDomain,
+              pathPrefix: "/",
             },
             {
               scheme: "https",
-              host: config.appDomainGetConverse,
-              pathPrefix: "/desktopconnect",
+              host: config.webDomain,
+              pathPrefix: "/dm",
             },
             {
               scheme: "https",
-              host: config.appDomainConverse,
-              pathPrefix: "/desktopconnect",
+              host: config.webDomain,
+              pathPrefix: "/group-invite",
+            },
+            {
+              scheme: "https",
+              host: config.webDomain,
+              pathPrefix: "/group",
             },
           ],
         },
@@ -348,8 +307,8 @@ export default (): ExpoConfig => {
       [
         "@sentry/react-native/expo",
         {
-          organization: "converse-app",
-          project: "convos-mobile-app",
+          organization: "ephemera",
+          project: "convos-react-native",
           url: "https://sentry.io/",
         },
       ],
@@ -357,5 +316,5 @@ export default (): ExpoConfig => {
       ["@react-native-firebase/app-check"],
       "./scripts/android/build/android-deps-expo-plugin.js",
     ],
-  }
+  } as ICustomExpoConfig
 }

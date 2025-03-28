@@ -6,6 +6,7 @@ import { disconnectActiveWallet } from "@/features/wallets/connect-wallet/connec
 import { useConnectWalletStore } from "@/features/wallets/connect-wallet/connect-wallet.store"
 import { useRouter } from "@/navigation/use-navigation"
 import { captureError } from "@/utils/capture-error"
+import { ConnectWalletError } from "@/utils/error"
 import { IEthereumAddress } from "@/utils/evm/address"
 import { shortAddress } from "@/utils/strings/shortAddress"
 import {
@@ -70,7 +71,12 @@ export const ConnectWalletChooseName = memo(function ConnectWalletChooseName(
                   await disconnectActiveWallet()
                 } catch (error) {
                   router.goBack()
-                  captureError(error)
+                  captureError(
+                    new ConnectWalletError({
+                      error,
+                      additionalMessage: "Error disconnecting wallet",
+                    }),
+                  )
                 }
               }}
             />
@@ -112,7 +118,12 @@ export const ConnectWalletChooseName = memo(function ConnectWalletChooseName(
                 await disconnectActiveWallet()
               } catch (error) {
                 router.goBack()
-                captureError(error)
+                captureError(
+                  new ConnectWalletError({
+                    error,
+                    additionalMessage: "Error disconnecting wallet",
+                  }),
+                )
               }
             }}
           />

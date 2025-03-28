@@ -4,6 +4,7 @@ import { subscribeWithSelector } from "zustand/middleware"
 import { findConversationByInboxIds } from "@/features/conversation/utils/find-conversations-by-inbox-ids"
 import { IXmtpConversationId, IXmtpInboxId, IXmtpMessageId } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
+import { GenericError } from "@/utils/error"
 import { getSafeCurrentSender } from "../../authentication/multi-inbox.store"
 
 type IConversationStoreProps = {
@@ -51,7 +52,7 @@ export const ConversationStoreProvider = memo(
             xmtpConversationId: conversation?.xmtpId ?? null,
           })
         } catch (error) {
-          captureError(error)
+          captureError(new GenericError({ error, additionalMessage: "Error finding conversation" }))
         }
       })
     }, [])

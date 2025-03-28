@@ -17,15 +17,17 @@ import React from "react"
 import { GestureHandlerRootView } from "react-native-gesture-handler"
 import { KeyboardProvider } from "react-native-keyboard-controller"
 import { SafeAreaProvider } from "react-native-safe-area-context"
+// import { useSyncQueries } from "tanstack-query-dev-tools-expo-plugin"
 import { ThirdwebProvider } from "thirdweb/react"
 import { base } from "viem/chains"
 // import { DevToolsBubble } from "react-native-react-query-devtools"
+import { ConditionalWrapper } from "@/components/conditional-wrapper"
 import { captureError } from "@/utils/capture-error"
 import { setupConvosApi } from "@/utils/convos-api/convos-api-init"
 import { ReactQueryPersistProvider } from "@/utils/react-query/react-query-persist-provider"
 import { config } from "./config"
 import { useMonitorNetworkConnectivity } from "./dependencies/NetworkMonitor/use-monitor-network-connectivity"
-import { registerBackgroundNotificationTask } from "./features/notifications/background-notification-handler"
+import { registerBackgroundNotificationTask } from "./features/notifications/background-notifications-handler"
 import { setupConversationsNotificationsSubscriptions } from "./features/notifications/notifications-conversations-subscriptions"
 import { configureForegroundNotificationBehavior } from "./features/notifications/notifications-init"
 import { AppNavigator } from "./navigation/app-navigator"
@@ -60,6 +62,9 @@ export function App() {
   useCachedResources()
   useCoinbaseWalletListener()
 
+  // Seems to be slowing the app. Need to investigate
+  // useSyncQueries({ queryClient: reactQueryClient })
+
   const { themeScheme, setThemeContextOverride, ThemeProvider } = useThemeProvider()
 
   return (
@@ -77,7 +82,10 @@ export function App() {
                 <ActionSheetProvider>
                   <ThemeProvider value={{ themeScheme, setThemeContextOverride }}>
                     <GestureHandlerRootView style={$globalStyles.flex1}>
-                      <DebugProvider>
+                      <ConditionalWrapper
+                        condition={config.debugMenu}
+                        wrapper={(children) => <DebugProvider>{children}</DebugProvider>}
+                      >
                         <BottomSheetModalProvider>
                           {/* <AuthenticateWithPasskeyProvider> */}
                           <AppNavigator />
@@ -86,7 +94,7 @@ export function App() {
                           <Snackbars />
                           <ActionSheet />
                         </BottomSheetModalProvider>
-                      </DebugProvider>
+                      </ConditionalWrapper>
                     </GestureHandlerRootView>
                   </ThemeProvider>
                 </ActionSheetProvider>

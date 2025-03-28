@@ -1,4 +1,10 @@
-import { QueryOptions, UseQueryOptions } from "@tanstack/react-query"
+import {
+  QueryKey,
+  QueryObserver,
+  QueryObserverResult,
+  QueryOptions,
+  UseQueryOptions,
+} from "@tanstack/react-query"
 import { queryLogger } from "@/utils/logger"
 import { reactQueryClient } from "./react-query.client"
 
@@ -105,4 +111,53 @@ export function refetchReactQueryBetter<T>(args: UseQueryOptions<T>) {
     return Promise.resolve()
   }
   return reactQueryClient.refetchQueries(args)
+}
+
+/**
+ * Creates a query observer that tracks previous data and provides it in the callback
+ * This is useful for detecting changes between query updates
+ */
+export function createQueryObserverWithPreviousData<
+  TQueryFnData = unknown,
+  TError = Error,
+  TData = TQueryFnData,
+  TQueryKey extends QueryKey = QueryKey,
+>(args: {
+  queryOptions: UseQueryOptions<TQueryFnData, TError, TData, TQueryKey>
+  observerCallbackFn: (
+    result: QueryObserverResult<TData, TError> & { previousData: TData | undefined },
+  ) => void
+}) {
+  const { queryOptions, observerCallbackFn } = args
+
+  let previousData: TData | undefined
+
+  // Create the observer
+  const observer = new QueryObserver<TQueryFnData, TError, TData, TQueryFnData, TQueryKey>(
+    reactQueryClient,
+    queryOptions,
+  )
+
+  // Create a wrapper for the subscription callback that includes previous data
+  const subscription = observer.subscribe((result) => {
+    const enhancedResult = {
+      ...result,
+      previousData,
+    }
+
+    observerCallbackFn(enhancedResult)
+
+    // Only update previous data if we have new data
+    if (result.data !== undefined) {
+      previousData = result.data
+    }
+  })
+
+  // Return the observer and a function to unsubscribe
+  return {
+    observer,
+    unsubscribe: subscription,
+    getCurrentData: () => observer.getCurrentResult().data,
+    getPreviousData: () => previousData,
+  }
 }

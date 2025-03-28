@@ -1,14 +1,14 @@
 import * as Sentry from "@sentry/react-native"
-import { QueryObserver } from "@tanstack/react-query"
 import { useEffect } from "react"
 import { useCurrentSender } from "@/features/authentication/multi-inbox.store"
 import {
   getCurrentUserQueryData,
   getCurrentUserQueryOptions,
-} from "@/features/current-user/curent-user.query"
+} from "@/features/current-user/current-user.query"
 import { getProfileQueryConfig, getProfileQueryData } from "@/features/profiles/profiles.query"
 import { sentryLogger } from "@/utils/logger"
-import { reactQueryClient } from "@/utils/react-query/react-query.client"
+import { isEqual } from "@/utils/objects"
+import { createQueryObserverWithPreviousData } from "@/utils/react-query/react-query.helpers"
 
 export function useUpdateSentryUser() {
   const currentSender = useCurrentSender()
@@ -18,19 +18,33 @@ export function useUpdateSentryUser() {
       return
     }
 
-    // Track user changes with QueryObserver
-    const userQueryObserver = new QueryObserver(
-      reactQueryClient,
-      getCurrentUserQueryOptions({ caller: "useUpdateSentryUser" }),
-    )
+    // Track user changes with createQueryObserverWithPreviousData
+    const { unsubscribe: unsubscribeFromUserQueryObserver } = createQueryObserverWithPreviousData({
+      queryOptions: getCurrentUserQueryOptions({ caller: "useUpdateSentryUser" }),
+      observerCallbackFn: (result) => {
+        if (isEqual(result.data, result.previousData)) {
+          return
+        }
 
-    // Track profile changes with QueryObserver
-    const profileQueryObserver = new QueryObserver(
-      reactQueryClient,
-      getProfileQueryConfig({
-        xmtpId: currentSender.inboxId,
-      }),
-    )
+        updateSentryIdentity()
+      },
+    })
+
+    // Track profile changes with createQueryObserverWithPreviousData
+    const { unsubscribe: unsubscribeFromProfileQueryObserver } =
+      createQueryObserverWithPreviousData({
+        queryOptions: getProfileQueryConfig({
+          xmtpId: currentSender.inboxId,
+          caller: "useUpdateSentryUser",
+        }),
+        observerCallbackFn: (result) => {
+          if (isEqual(result.data, result.previousData)) {
+            return
+          }
+
+          updateSentryIdentity()
+        },
+      })
 
     // Function to update Sentry user identity with latest data
     const updateSentryIdentity = () => {
@@ -47,25 +61,12 @@ export function useUpdateSentryUser() {
       sentryIdentifyUser({
         userId: currentUser.id,
         username: currentProfile?.username,
+        privyUserId: currentProfile?.privyAddress,
       })
     }
 
     // Initial identity update if data is available
     updateSentryIdentity()
-
-    // Subscribe to user query changes
-    const unsubscribeFromUserQueryObserver = userQueryObserver.subscribe((result) => {
-      if (result.data) {
-        updateSentryIdentity()
-      }
-    })
-
-    // Subscribe to profile query changes
-    const unsubscribeFromProfileQueryObserver = profileQueryObserver.subscribe((result) => {
-      if (result.data) {
-        updateSentryIdentity()
-      }
-    })
 
     return () => {
       unsubscribeFromUserQueryObserver()
@@ -74,14 +75,21 @@ export function useUpdateSentryUser() {
   }, [currentSender])
 }
 
-export function sentryIdentifyUser(args: { userId?: string; username?: string }) {
+export function sentryIdentifyUser(args: {
+  userId?: string
+  username?: string
+  privyUserId?: string
+}) {
   sentryLogger.debug("Identifying user", {
     userId: args.userId,
     username: args.username,
+    privyUserId: args.privyUserId,
   })
 
   Sentry.setUser({
-    ...(args.userId && { id: args.userId }),
-    ...(args.username && { username: args.username }),
+    id: args.userId, // Main user ID
+    username: args.username,
+    // Add custom attributes
+    privyUserId: args.privyUserId, // Custom attribute for Privy user ID
   })
 }

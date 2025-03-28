@@ -20,6 +20,7 @@ import {
 } from "@/features/preferred-display-info/use-preferred-display-info"
 import { usePreferredDisplayInfoBatch } from "@/features/preferred-display-info/use-preferred-display-info-batch"
 import { captureError } from "@/utils/capture-error"
+import { GenericError } from "@/utils/error"
 import { IConversationMessage } from "../../conversation-chat/conversation-message/conversation-message.types"
 
 export function getMessageContentStringValue(args: {
@@ -231,7 +232,12 @@ export function useMessageContentStringValue(message: IConversationMessage | und
         removedMemberDisplayInfos,
       })
     } catch (error) {
-      captureError(error)
+      captureError(
+        new GenericError({
+          error,
+          additionalMessage: "Error getting message content string value",
+        }),
+      )
       return ""
     }
   }, [message, initiatorDisplayName, addedMemberDisplayInfos, removedMemberDisplayInfos])

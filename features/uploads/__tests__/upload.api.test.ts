@@ -20,7 +20,7 @@ test.todo("test upload file")
 
 // jest.mock("@/config", () => ({
 //   config: {
-//     bundleId: "com.converse.dev",
+//     bundleId: "com.convos.dev",
 //     apiUrl: API_BASE_URL,
 //   },
 // }));

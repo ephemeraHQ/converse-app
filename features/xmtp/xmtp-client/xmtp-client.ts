@@ -1,9 +1,4 @@
-import {
-  IXmtpClientWithCodecs,
-  IXmtpEnv,
-  IXmtpInboxId,
-  IXmtpSigner,
-} from "@features/xmtp/xmtp.types"
+import { IXmtpClientWithCodecs, IXmtpInboxId, IXmtpSigner } from "@features/xmtp/xmtp.types"
 import { PublicIdentity, Client as XmtpClient } from "@xmtp/react-native-sdk"
 import Constants from "expo-constants"
 import { config } from "@/config"
@@ -85,9 +80,12 @@ export async function createXmtpClient(args: { inboxSigner: IXmtpSigner }) {
   xmtpLogger.debug(`Creating XMTP client instance...`)
   const { data, error, durationMs } = await tryCatchWithDuration(
     XmtpClient.create<ISupportedXmtpCodecs>(inboxSigner, {
-      env: getXmtpEnv(),
+      env: config.xmtp.env,
       dbEncryptionKey,
       codecs: supportedXmtpCodecs,
+      ...(config.xmtp.env === "local" && {
+        customLocalUrl: getXmtpLocalUrl(),
+      }),
     }),
   )
 
@@ -113,7 +111,6 @@ export async function createXmtpClient(args: { inboxSigner: IXmtpSigner }) {
   // Store in map
   const inboxId = xmtpClient.inboxId as IXmtpInboxId
   xmtpClientsMap.set(inboxId, xmtpClient)
-  xmtpLogger.debug(`Created and stored XMTP client for inboxId: ${inboxId}`)
 
   return xmtpClient
 }
@@ -146,9 +143,12 @@ async function buildXmtpClientInstance(args: {
         const client = await XmtpClient.build<ISupportedXmtpCodecs>(
           new PublicIdentity(ethereumAddress, "ETHEREUM"),
           {
-            env: getXmtpEnv(),
+            env: config.xmtp.env,
             codecs: supportedXmtpCodecs,
             dbEncryptionKey,
+            ...(config.xmtp.env === "local" && {
+              customLocalUrl: getXmtpLocalUrl(),
+            }),
           },
           inboxId,
         )
@@ -190,16 +190,26 @@ async function buildXmtpClientInstance(args: {
  * If deleteDatabase is true, the local message database will be deleted
  * Important: If the database is deleted, all message history will be lost
  */
-export async function logoutXmtpClient(args: { inboxId: IXmtpInboxId; deleteDatabase?: boolean }) {
-  const { inboxId, deleteDatabase = false } = args
+export async function logoutXmtpClient(
+  args:
+    | {
+        inboxId: IXmtpInboxId
+        ethAddress: IEthereumAddress
+        deleteDatabase: true
+      }
+    | {
+        inboxId: IXmtpInboxId
+        ethAddress?: never
+        deleteDatabase?: false
+      },
+) {
+  const { inboxId, ethAddress, deleteDatabase = false } = args
 
   xmtpLogger.debug(`Logging out XMTP client for inboxId: ${inboxId}`)
 
   try {
     // Get the client from the map
     const xmtpClient = xmtpClientsMap.get(inboxId)
-
-    const sender = useMultiInboxStore.getState().senders.find((s) => s.inboxId === inboxId)
 
     if (xmtpClient) {
       // If requested, delete the local database
@@ -219,9 +229,9 @@ export async function logoutXmtpClient(args: { inboxId: IXmtpInboxId; deleteData
     }
 
     // Always clean up encryption key if we're deleting the database
-    if (deleteDatabase && sender) {
-      await cleanXmtpDbEncryptionKey({ ethAddress: lowercaseEthAddress(sender.ethereumAddress) })
-      xmtpLogger.debug(`Cleaned DB encryption key for address: ${sender.ethereumAddress}`)
+    if (deleteDatabase && ethAddress) {
+      await cleanXmtpDbEncryptionKey({ ethAddress: lowercaseEthAddress(ethAddress) })
+      xmtpLogger.debug(`Cleaned DB encryption key for address: ${ethAddress}`)
     }
 
     xmtpLogger.debug(`Successfully logged out XMTP client for inboxId: ${inboxId}`)
@@ -234,33 +244,16 @@ export async function logoutXmtpClient(args: { inboxId: IXmtpInboxId; deleteData
 }
 
 // Useful for debugging on physical devices
-function getXmtpEnv() {
-  let xmtpEnv = config.xmtpEnv
+function getXmtpLocalUrl() {
+  const hostIp = Constants.expoConfig?.hostUri?.split(":")[0]
 
-  try {
-    if (config.xmtpEnv === "local") {
-      xmtpLogger.debug("Replacing localhost with device-accessible IP")
-
-      const hostIp = Constants.expoConfig?.hostUri?.split(":")[0]
-
-      if (!hostIp) {
-        throw new XMTPError({
-          error: new Error("No host IP found"),
-        })
-      }
-
-      xmtpEnv = `${hostIp}:caca` as IXmtpEnv
-    }
-  } catch (error) {
-    captureError(
-      new XMTPError({
-        error,
-        additionalMessage: "Failed to get XMTP environment",
-      }),
-    )
+  if (!hostIp) {
+    throw new XMTPError({
+      error: new Error("No host IP found"),
+      additionalMessage: "Failed to get device IP for local XMTP environment",
+    })
   }
 
-  xmtpLogger.debug(`Using XMTP environment: ${xmtpEnv}`)
-
-  return xmtpEnv
+  // XMTP SDK actually wants the host IP and not the full url
+  return hostIp
 }

@@ -8,6 +8,9 @@ import {
 } from "@/features/conversation/conversation-chat/conversation-message/utils/conversation-message-assertions"
 import { convertXmtpMessageToConvosMessage } from "@/features/conversation/conversation-chat/conversation-message/utils/convert-xmtp-message-to-convos-message"
 import { ensureConversationQueryData } from "@/features/conversation/queries/conversation.query"
+import { ensureCurrentUserQueryData } from "@/features/current-user/current-user.query"
+import { updateDevice } from "@/features/devices/devices.api"
+import { ensureUserDeviceQueryData } from "@/features/devices/user-device.query"
 import { ensureNotificationsPermissions } from "@/features/notifications/notifications-permissions.query"
 import { registerNotificationInstallation } from "@/features/notifications/notifications.api"
 import { INotificationMessageDataConverted } from "@/features/notifications/notifications.types"
@@ -17,12 +20,19 @@ import { ensureXmtpInstallationQueryData } from "@/features/xmtp/xmtp-installati
 import { decryptXmtpMessage } from "@/features/xmtp/xmtp-messages/xmtp-messages"
 import { IXmtpConversationTopic } from "@/features/xmtp/xmtp.types"
 import { getCurrentRoute } from "@/navigation/navigation.utils"
-import { GenericError, NotificationError } from "@/utils/error"
+import { NotificationError } from "@/utils/error"
 import { notificationsLogger } from "@/utils/logger"
 import { ensureMessageContentStringValue } from "../conversation/conversation-list/hooks/use-message-content-string-value"
 
 // Full flow
 export async function registerPushNotifications() {
+  const errors: NotificationError[] = []
+
+  const [deviceToken, expoToken] = await Promise.all([
+    getDevicePushNotificationsToken(),
+    getExpoPushNotificationsToken(),
+  ])
+
   try {
     const result = await requestNotificationsPermissions()
 
@@ -30,34 +40,95 @@ export async function registerPushNotifications() {
       throw new Error("Notifications permissions not granted")
     }
 
-    const token = await getPushNotificationsToken()
+    const currentUser = await ensureCurrentUserQueryData()
 
+    if (!currentUser) {
+      throw new NotificationError({
+        error: "No current user found to register push notifications",
+      })
+    }
+
+    const currentDevice = await ensureUserDeviceQueryData({
+      userId: currentUser.id,
+    })
+
+    if (!currentDevice) {
+      throw new NotificationError({
+        error: "No current device found to register push notifications",
+      })
+    }
+
+    await updateDevice({
+      userId: currentUser.id,
+      deviceId: currentDevice.id,
+      updates: {
+        expoToken,
+        pushToken: deviceToken,
+      },
+    })
+  } catch (error) {
+    errors.push(
+      new NotificationError({
+        error,
+        additionalMessage: "Error updating device with push tokens",
+      }),
+    )
+  }
+
+  try {
     const currentSender = getSafeCurrentSender()
-
     const installationId = await ensureXmtpInstallationQueryData({
       inboxId: currentSender.inboxId,
     })
 
-    notificationsLogger.debug("Registering notification installation...")
     await registerNotificationInstallation({
       installationId,
       deliveryMechanism: {
         deliveryMechanismType: {
           case: "apnsDeviceToken",
-          value: token,
+          value: deviceToken,
         },
       },
     })
-    notificationsLogger.debug("Notification installation registered")
   } catch (error) {
+    errors.push(
+      new NotificationError({
+        error,
+        additionalMessage: "Error registering notification installation",
+      }),
+    )
+  }
+
+  if (errors.length > 0) {
     throw new NotificationError({
-      error,
-      additionalMessage: "Error registering notification installation",
+      error: errors,
+      additionalMessage: "Errors occurred while registering push notifications",
     })
   }
 }
 
-export async function getPushNotificationsToken() {
+export async function getExpoPushNotificationsToken() {
+  try {
+    if (!Device.isDevice) {
+      throw new Error("Must use physical device for push notifications")
+    }
+
+    if (!(await userHasGrantedNotificationsPermissions())) {
+      throw new Error("Notifications permissions not granted")
+    }
+
+    const data = await Notifications.getExpoPushTokenAsync()
+
+    return data.data as string
+  } catch (error) {
+    throw new NotificationError({
+      error,
+      additionalMessage: "Failed to get Expo push token",
+    })
+  }
+}
+
+export async function getDevicePushNotificationsToken() {
   try {
     if (!Device.isDevice) {
       throw new Error("Must use physical")
@@ -79,7 +150,7 @@ export async function getPushNotificationsToken() {
     token = data.data as string
     return token
   } catch (error) {
-    throw new GenericError({
+    throw new NotificationError({
       error,
       additionalMessage: "Error getting device push token",
     })
@@ -131,11 +202,13 @@ export async function maybeDisplayLocalNewMessageNotification(args: {
 }) {
   try {
     const { encryptedMessage, topic } = args
-
+    notificationsLogger.debug("Processing notification with topic:", topic)
     const xmtpConversationId = getXmtpConversationIdFromXmtpTopic(topic)
+    notificationsLogger.debug("Extracted conversation ID:", xmtpConversationId)
 
     // Check if the user is already in this conversation
     const currentRoute = getCurrentRoute()
+
     if (
       currentRoute?.name === "Conversation" &&
       currentRoute.params.xmtpConversationId === xmtpConversationId
@@ -144,11 +217,22 @@ export async function maybeDisplayLocalNewMessageNotification(args: {
       return
     }
 
-    const conversation = await ensureConversationQueryData({
-      clientInboxId: getSafeCurrentSender().inboxId,
-      xmtpConversationId,
-      caller: "notifications-foreground-handler",
-    })
+    const clientInboxId = getSafeCurrentSender().inboxId
+
+    notificationsLogger.debug("Fetching conversation and decrypting message...")
+    const [conversation, xmtpDecryptedMessage] = await Promise.all([
+      ensureConversationQueryData({
+        clientInboxId,
+        xmtpConversationId,
+        caller: "notifications-foreground-handler",
+      }),
+      decryptXmtpMessage({
+        encryptedMessage,
+        xmtpConversationId,
+        clientInboxId,
+      }),
+    ])
+    notificationsLogger.debug("Decrypted message:", xmtpDecryptedMessage)
 
     if (!conversation) {
       throw new NotificationError({
@@ -156,21 +240,20 @@ export async function maybeDisplayLocalNewMessageNotification(args: {
       })
     }
 
-    const xmtpDecryptedMessage = await decryptXmtpMessage({
-      encryptedMessage,
-      xmtpConversationId: conversation.xmtpId,
-      clientInboxId: getSafeCurrentSender().inboxId,
-    })
-
     const convoMessage = convertXmtpMessageToConvosMessage(xmtpDecryptedMessage)
 
-    const messageContentString = await ensureMessageContentStringValue(convoMessage)
+    notificationsLogger.debug("Fetching message content and sender info...")
+    const [messageContentString, { displayName: senderDisplayName }] = await Promise.all([
+      ensureMessageContentStringValue(convoMessage),
+      ensurePreferredDisplayInfo({
+        inboxId: convoMessage.senderInboxId,
+      }),
+    ])
+    notificationsLogger.debug("Message content:", messageContentString)
+    notificationsLogger.debug("Sender display name:", senderDisplayName)
 
-    const { displayName: senderDisplayName } = await ensurePreferredDisplayInfo({
-      inboxId: convoMessage.senderInboxId,
-    })
-
-    return displayLocalNotification({
+    notificationsLogger.debug("Displaying local notification...")
+    await displayLocalNotification({
       content: {
         title: senderDisplayName,
         body: messageContentString,
@@ -200,10 +283,12 @@ export async function maybeDisplayLocalNewMessageNotification(args: {
       },
       trigger: null, // Show immediately
     })
+
+    notificationsLogger.debug("Local notification displayed")
   } catch (error) {
     throw new NotificationError({
       error,
-      additionalMessage: "Error displaying local new message notification",
+      additionalMessage: `Error displaying local new message notification with args: ${JSON.stringify(args)}`,
     })
   }
 }

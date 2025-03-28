@@ -7,11 +7,12 @@ import {
   getConversationMetadataQueryData,
   updateConversationMetadataQueryData,
 } from "@/features/conversation/conversation-metadata/conversation-metadata.query"
-import { getGroupQueryData } from "@/features/groups/group.query"
+import { getGroupQueryData } from "@/features/groups/queries/group.query"
 import { updateXmtpConsentForGroupsForInbox } from "@/features/xmtp/xmtp-consent/xmtp-consent"
 import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 import { translate } from "@/i18n"
 import { captureErrorWithToast } from "@/utils/capture-error"
+import { GenericError } from "@/utils/error"
 
 export const useDeleteGroup = (args: { xmtpConversationId: IXmtpConversationId }) => {
   const { xmtpConversationId } = args
@@ -65,7 +66,9 @@ export const useDeleteGroup = (args: { xmtpConversationId: IXmtpConversationId }
           try {
             await deleteGroupAsync()
           } catch (error) {
-            captureErrorWithToast(error)
+            captureErrorWithToast(
+              new GenericError({ error, additionalMessage: "Error deleting group" }),
+            )
           }
         },
       },
@@ -80,7 +83,9 @@ export const useDeleteGroup = (args: { xmtpConversationId: IXmtpConversationId }
               consent: "denied",
             })
           } catch (error) {
-            captureErrorWithToast(error)
+            captureErrorWithToast(
+              new GenericError({ error, additionalMessage: "Error deleting group" }),
+            )
           }
         },
       },

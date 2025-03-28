@@ -211,3 +211,7 @@ export function useAllInboxIds() {
 export function resetMultiInboxStore() {
   useMultiInboxStore.getState().actions.reset()
 }
+
+export function getMultiInboxStoreSenders() {
+  return useMultiInboxStore.getState().senders
+}

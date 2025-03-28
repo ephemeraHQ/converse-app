@@ -8,6 +8,7 @@ import { getXmtpSigner } from "@/features/xmtp/xmtp-signer/get-xmtp-signer"
 import { useRouter } from "@/navigation/use-navigation"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { captureError, captureErrorWithToast } from "@/utils/capture-error"
+import { ConnectWalletError } from "@/utils/error"
 import { IEthereumAddress } from "@/utils/evm/address"
 import { shortAddress } from "@/utils/strings/shortAddress"
 import {
@@ -66,9 +67,9 @@ export const ConnectWalletLinkToInbox = memo(function ConnectWalletLinkToInbox(
         targetEthAddress: walletAccount.address as IEthereumAddress,
       }).catch(captureError)
     } catch (error) {
-      captureErrorWithToast(error, {
-        message: "Error linking wallet to inbox",
-      })
+      captureErrorWithToast(
+        new ConnectWalletError({ error, additionalMessage: "Error linking wallet to inbox" }),
+      )
     }
   }, [activeWallet])
 

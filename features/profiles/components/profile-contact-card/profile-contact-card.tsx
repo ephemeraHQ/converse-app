@@ -4,8 +4,12 @@ import { Text } from "@/design-system/Text"
 import { VStack } from "@/design-system/VStack"
 import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
 import { ProfileContactCardLayout } from "@/features/profiles/components/profile-contact-card/profile-contact-card-layout"
+import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { useAppTheme } from "@/theme/use-app-theme"
-import { IProfileContactCardProps } from "../../profile.types"
+
+type IProfileContactCardProps = {
+  inboxId: IXmtpInboxId
+}
 
 /**
  * Generic profile contact card that we'll use for both my profile and other profiles

@@ -12,6 +12,7 @@ import {
   isXmtpTextContentType,
 } from "@/features/xmtp/xmtp-codecs/xmtp-codecs"
 import { ensureXmtpInstallationQueryData } from "@/features/xmtp/xmtp-installations/xmtp-installation.query"
+import { logErrorIfXmtpRequestTookTooLong } from "@/features/xmtp/xmtp.helpers"
 import { captureError } from "@/utils/capture-error"
 import { XMTPError } from "@/utils/error"
 import {
@@ -114,14 +115,10 @@ export async function getXmtpConversationMessage(args: {
     const message = await findMessage(installationId, messageId)
     const afterMs = new Date().getTime()
 
-    const timeDiffMs = afterMs - beforeMs
-    if (timeDiffMs > config.xmtp.maxMsUntilLogError) {
-      captureError(
-        new XMTPError({
-          error: new Error(`Finding message ${messageId} took ${timeDiffMs}ms`),
-        }),
-      )
-    }
+    logErrorIfXmtpRequestTookTooLong({
+      durationMs: afterMs - beforeMs,
+      xmtpFunctionName: `findMessage`,
+    })
 
     return message
   } catch (error) {

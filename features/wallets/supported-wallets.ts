@@ -1,6 +1,6 @@
 import { Platform } from "react-native"
 import { WalletId as ThirdwebWalletId } from "thirdweb/wallets"
-import { config } from "@/config"
+import { coinbaseCallbackUrl } from "@/features/wallets/utils/coinbase-wallet"
 
 // Define specific wallet ID constants tied to thirdweb's WalletId type
 export const WALLET_ID: Record<string, ThirdwebWalletId> = {
@@ -58,7 +58,7 @@ export const supportedWallets: ISupportedWallet[] = [
         ? "https://apps.apple.com/us/app/coinbase-wallet-nfts-crypto/id1278383455"
         : "https://play.google.com/store/apps/details?id=org.toshi",
     mobileConfig: {
-      callbackURL: `https://${config.websiteDomain}/coinbase`,
+      callbackURL: coinbaseCallbackUrl.toString(),
     },
   },
   {

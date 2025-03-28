@@ -19,6 +19,7 @@ import { createXmtpClient } from "@/features/xmtp/xmtp-client/xmtp-client"
 import { validateXmtpInstallation } from "@/features/xmtp/xmtp-installations/xmtp-installations"
 import { IXmtpInboxId } from "@/features/xmtp/xmtp.types"
 import { captureError, captureErrorWithToast } from "@/utils/capture-error"
+import { AuthenticationError } from "@/utils/error"
 import { IEthereumAddress } from "@/utils/evm/address"
 import { authLogger } from "@/utils/logger"
 import { tryCatch } from "@/utils/try-catch"
@@ -147,9 +148,9 @@ export const AuthOnboardingContextProvider = (props: IAuthOnboardingContextProps
       ) {
         // User cancelled the passkey login
       } else {
-        captureErrorWithToast(error, {
-          message: "Failed to login with passkey",
-        })
+        captureErrorWithToast(
+          new AuthenticationError({ error, additionalMessage: "Failed to login with passkey" }),
+        )
       }
     } finally {
       useAuthOnboardingStore.getState().actions.setIsProcessingWeb3Stuff(false)
@@ -230,9 +231,9 @@ export const AuthOnboardingContextProvider = (props: IAuthOnboardingContextProps
       ) {
         // User cancelled the passkey registration
       } else {
-        captureErrorWithToast(error, {
-          message: "Failed to sign up with passkey",
-        })
+        captureErrorWithToast(
+          new AuthenticationError({ error, additionalMessage: "Failed to sign up with passkey" }),
+        )
       }
     } finally {
       useAuthOnboardingStore.getState().actions.setIsProcessingWeb3Stuff(false)

@@ -24,14 +24,11 @@ export function ShareProfileScreen({ route, navigation }: IShareProfileScreenPro
   const headerHeight = useHeaderHeight()
   const [copiedLink, setCopiedLink] = useState(false)
 
-  const { username,displayName, avatarUrl } = usePreferredDisplayInfo({
+  const { username, displayName, avatarUrl } = usePreferredDisplayInfo({
     inboxId,
   })
-
-  // TODO: Use the new share profile URL
-  const profileUrl = `https://${inboxId}.${config.websiteDomain}`
-  // const profileUrl = inboxId;
-  // converse-dev://louis16pro0505
+  
+  const profileUrl = `https://${username || inboxId}.${config.app.webDomain}`
 
   const shareDict = Platform.OS === "ios" ? { url: profileUrl } : { message: profileUrl }
 

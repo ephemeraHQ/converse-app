@@ -12,6 +12,7 @@ import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 import { translate } from "@/i18n"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { captureErrorWithToast } from "@/utils/capture-error"
+import { GenericError } from "@/utils/error"
 import { Haptics } from "@/utils/haptics"
 import { usePinOrUnpinConversation } from "./use-pin-or-unpin-conversation"
 
@@ -120,7 +121,9 @@ function useConversationContextMenuPinItem(args: {
       try {
         await pinOrUnpinConversationAsync()
       } catch (error) {
-        captureErrorWithToast(error)
+        captureErrorWithToast(
+          new GenericError({ error, additionalMessage: "Error pinning conversation" }),
+        )
       }
     },
   } satisfies IUseContextMenuItemArgs
@@ -176,9 +179,7 @@ function useGroupDeleteMenuItem({
     try {
       await deleteGroup()
     } catch (error) {
-      captureErrorWithToast(error, {
-        message: "Error deleting group",
-      })
+      captureErrorWithToast(new GenericError({ error, additionalMessage: "Error deleting group" }))
     }
   }, [deleteGroup])
 
@@ -195,9 +196,9 @@ function useDmDeleteMenuItem({ xmtpConversationId }: { xmtpConversationId: IXmtp
     try {
       deleteDm()
     } catch (error) {
-      captureErrorWithToast(error, {
-        message: "Error deleting conversation",
-      })
+      captureErrorWithToast(
+        new GenericError({ error, additionalMessage: "Error deleting conversation" }),
+      )
     }
   }, [deleteDm])
 

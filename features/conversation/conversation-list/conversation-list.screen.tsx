@@ -29,6 +29,7 @@ import { NavigationParamList } from "@/navigation/navigation.types"
 import { $globalStyles } from "@/theme/styles"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { captureError } from "@/utils/capture-error"
+import { GenericError } from "@/utils/error"
 import { ConversationListAwaitingRequests } from "./conversation-list-awaiting-requests"
 import { ConversationListEmpty } from "./conversation-list-empty"
 import { ConversationListStartNewConvoBanner } from "./conversation-list-start-new-convo-banner"
@@ -52,7 +53,6 @@ export function ConversationListScreen(props: IConversationListProps) {
 
   useConversationListScreenHeader()
 
-  // TODO, only request if we haven't yet.
   useEffect(() => {
     registerPushNotifications().catch(captureError)
   }, [])
@@ -77,7 +77,7 @@ export function ConversationListScreen(props: IConversationListProps) {
     try {
       await refetchConversations()
     } catch (error) {
-      captureError(error)
+      captureError(new GenericError({ error, additionalMessage: "Error refreshing conversations" }))
     }
   }, [refetchConversations])
 

@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { useSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
-import { useGroupNameMutation } from "@/features/groups/group-name.mutation"
-import { getGroupQueryOptions } from "@/features/groups/group.query"
+import { getGroupQueryOptions } from "@/features/groups/queries/group.query"
 import { getPreferredDisplayInfo } from "@/features/preferred-display-info/use-preferred-display-info"
 import { usePreferredDisplayInfoBatch } from "@/features/preferred-display-info/use-preferred-display-info-batch"
 import { IXmtpConversationId, IXmtpInboxId } from "@/features/xmtp/xmtp.types"
@@ -42,15 +41,9 @@ export const useGroupName = (args: { xmtpConversationId: IXmtpConversationId }) 
     (profile) => profile?.displayName || "",
   )
 
-  const { mutateAsync } = useGroupNameMutation({
-    clientInboxId: currentSenderInboxId,
-    xmtpConversationId,
-  })
-
   return {
     groupName: group?.name || getGroupNameForMemberNames({ names: memberPreferedDisplayNames }),
     isLoading: isLoadingGroup || preferredDisplayData.some((profile) => profile.isLoading),
-    updateGroupName: mutateAsync,
   }
 }
 

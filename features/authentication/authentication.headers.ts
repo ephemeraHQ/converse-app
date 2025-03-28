@@ -1,7 +1,7 @@
-import { signWithInstallationKey } from "@xmtp/react-native-sdk"
 import { toHex } from "thirdweb"
 import { getSafeCurrentSender } from "@/features/authentication/multi-inbox.store"
 import { ensureXmtpInstallationQueryData } from "@/features/xmtp/xmtp-installations/xmtp-installation.query"
+import { signWithXmtpInstallationId } from "@/features/xmtp/xmtp-installations/xmtp-installations"
 import { ensureJwtQueryData } from "./jwt.query"
 
 // used for requests that are creating an authentication token
@@ -35,11 +35,16 @@ export async function getConvosAuthenticationHeaders(): Promise<XmtpApiHeaders> 
   //   );
   // }
 
-  const installationId = await ensureXmtpInstallationQueryData({
-    inboxId: currentSender.inboxId,
-  })
+  const [installationId, rawAppCheckTokenSignature] = await Promise.all([
+    ensureXmtpInstallationQueryData({
+      inboxId: currentSender.inboxId,
+    }),
+    signWithXmtpInstallationId({
+      clientInboxId: currentSender.inboxId,
+      message: appCheckToken,
+    }),
+  ])
 
-  const rawAppCheckTokenSignature = await signWithInstallationKey(installationId, appCheckToken)
   const appCheckTokenSignatureHexString = toHex(rawAppCheckTokenSignature)
 
   return {
