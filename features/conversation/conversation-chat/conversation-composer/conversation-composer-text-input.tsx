@@ -1,6 +1,11 @@
 import { textSizeStyles } from "@design-system/Text/Text.styles"
 import React, { memo, useCallback, useEffect, useRef } from "react"
-import { Platform, TextInput as RNTextInput } from "react-native"
+import {
+  NativeSyntheticEvent,
+  Platform,
+  TextInput as RNTextInput,
+  TextInputKeyPressEventData,
+} from "react-native"
 import { TextInput } from "@/design-system/text-input"
 import { useConversationComposerIsEnabled } from "@/features/conversation/conversation-chat/conversation-composer/hooks/conversation-composer-is-enabled"
 import { useAppTheme } from "@/theme/use-app-theme"
@@ -58,20 +63,17 @@ export const ConversationComposerTextInput = memo(function ConversationComposerT
           // Because we input container to be exactly 36 pixels and borderWidth add with total height in react-native
           theme.borderWidth.sm,
       }}
-      onKeyPress={(event: any) => {
-        // Maybe want a better check here, but web/tablet is not the focus right now
-        if (Platform.OS !== "web") {
-          return
-        }
+      onKeyPress={(event: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
+        // Only handle Enter key on macOS
+        if (Platform.OS === "macos") {
+          const hasModifier =
+            // @ts-ignore - macOS keyboard events have modifier properties
+            event.nativeEvent.shiftKey || event.nativeEvent.altKey || event.nativeEvent.metaKey
 
-        if (
-          event.nativeEvent.key === "Enter" &&
-          !event.altKey &&
-          !event.metaKey &&
-          !event.shiftKey
-        ) {
-          event.preventDefault()
-          onSubmitEditing()
+          if (!hasModifier) {
+            event.preventDefault()
+            onSubmitEditing()
+          }
         }
       }}
       editable={isEnabled}

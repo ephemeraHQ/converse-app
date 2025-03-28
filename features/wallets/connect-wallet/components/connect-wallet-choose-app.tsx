@@ -8,6 +8,7 @@ import { useInstalledWalletsQuery } from "@/features/wallets/installed-wallets.q
 import { ISupportedWallet, supportedWallets } from "@/features/wallets/supported-wallets"
 import { useRouter } from "@/navigation/use-navigation"
 import { captureErrorWithToast } from "@/utils/capture-error"
+import { GenericError } from "@/utils/error"
 import { openLink } from "@/utils/linking"
 import {
   ConnectWalletHeader,
@@ -108,9 +109,9 @@ const InstalledWalletItem = memo(function InstalledWalletItem(props: IInstalledW
       const connectedWallet = await connectWallet(wallet)
       store.actions.setActiveWallet(connectedWallet)
     } catch (error) {
-      captureErrorWithToast(error, {
-        message: `Error connecting ${wallet.name} wallet`,
-      })
+      captureErrorWithToast(
+        new GenericError({ error, additionalMessage: `Error connecting ${wallet.name} wallet` }),
+      )
     } finally {
       store.actions.setWalletIdThatIsConnecting(undefined)
     }

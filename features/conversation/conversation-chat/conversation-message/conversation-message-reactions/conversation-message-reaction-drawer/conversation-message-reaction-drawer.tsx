@@ -17,6 +17,7 @@ import { useCurrentXmtpConversationIdSafe } from "@/features/conversation/conver
 import { useRemoveReactionOnMessage } from "@/features/conversation/conversation-chat/use-remove-reaction-on-message.mutation"
 import { ThemedStyle, useAppTheme } from "@/theme/use-app-theme"
 import { captureErrorWithToast } from "@/utils/capture-error"
+import { GenericError } from "@/utils/error"
 import {
   closeMessageReactionsDrawer,
   conversationMessageDrawerBottomSheetRef,
@@ -89,9 +90,9 @@ const BottomSheetContent = memo(function BottomSheetContent() {
         })
         closeMessageReactionsDrawer()
       } catch (error) {
-        captureErrorWithToast(error, {
-          message: "Failed to remove reaction",
-        })
+        captureErrorWithToast(
+          new GenericError({ error, additionalMessage: "Failed to remove reaction" }),
+        )
       }
     },
     [messageId, removeReactionFromMessage],

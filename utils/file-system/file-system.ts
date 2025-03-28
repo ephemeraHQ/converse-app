@@ -64,7 +64,7 @@ export async function calculateFileDigest(path: string): Promise<string> {
     const data = await RNFetchBlob.fs.readFile(normalizedPath, "base64")
     const buffer = Buffer.from(data, "base64")
     const hash = crypto.createHash("sha256")
-    hash.update(buffer.buffer)
+    hash.update(buffer.toString("binary"))
     return hash.digest("hex")
   } catch (error) {
     console.error("Error calculating file digest:", error)

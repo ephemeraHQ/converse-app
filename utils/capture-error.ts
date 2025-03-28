@@ -1,19 +1,12 @@
 import { showSnackbar } from "@/components/snackbar/snackbar.service"
-import { ensureError, FeedbackError, GenericError } from "@/utils/error"
+import { BaseError, ensureError, FeedbackError, GenericError } from "@/utils/error"
 import { logger } from "@/utils/logger"
 import { sentryTrackError } from "./sentry/sentry-track-error"
 
-export async function captureError(
-  error: unknown,
-  options: {
-    extras?: Record<string, string | number>
-  } = {},
-) {
+export async function captureError(error: BaseError) {
   try {
-    const { extras } = options
-
-    if (extras) {
-      logger.error(error, extras)
+    if (error.extra) {
+      logger.error(error, error.extra)
     } else {
       logger.error(error)
     }
@@ -24,9 +17,7 @@ export async function captureError(
 
     sentryTrackError({
       error: ensureError(error),
-      extras: {
-        ...extras,
-      },
+      extras: error.extra,
     })
   } catch (error) {
     sentryTrackError({
@@ -39,7 +30,7 @@ export async function captureError(
 }
 
 export function captureErrorWithToast(
-  error: unknown,
+  error: BaseError,
   options?: {
     message?: string
   },
@@ -48,7 +39,7 @@ export function captureErrorWithToast(
 
   captureError(error)
 
-  const snackMessage = message || (error as Error)?.message || "Something went wrong"
+  const snackMessage = message || error?.message || "Something went wrong"
 
   showSnackbar({
     message: snackMessage,
@@ -56,7 +47,7 @@ export function captureErrorWithToast(
   })
 }
 
-export function captureErrorWithFriendlyToast(error: unknown) {
+export function captureErrorWithFriendlyToast(error: BaseError) {
   captureErrorWithToast(error, {
     message: "Something went wrong",
   })

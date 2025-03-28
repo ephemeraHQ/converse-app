@@ -1,4 +1,3 @@
-import { useFocusEffect } from "@react-navigation/native"
 import React, { memo, ReactElement, useCallback, useEffect, useMemo, useRef } from "react"
 import { FlatList, NativeScrollEvent, NativeSyntheticEvent, Platform } from "react-native"
 import Animated, { AnimatedProps, FadeInDown, useAnimatedRef } from "react-native-reanimated"
@@ -23,10 +22,12 @@ import { IConversation } from "@/features/conversation/conversation.types"
 import { useMarkConversationAsRead } from "@/features/conversation/hooks/use-mark-conversation-as-read"
 import { isConversationAllowed } from "@/features/conversation/utils/is-conversation-allowed"
 import { isConversationDm } from "@/features/conversation/utils/is-conversation-dm"
+import { useBetterFocusEffect } from "@/hooks/use-better-focus-effect"
 import { $globalStyles } from "@/theme/styles"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { captureError } from "@/utils/capture-error"
 import { convertNanosecondsToMilliseconds } from "@/utils/date"
+import { GenericError } from "@/utils/error"
 import { CONVERSATION_LIST_REFRESH_THRESHOLD } from "../conversation-list/conversation-list.contstants"
 import { ConversationMessageHighlighted } from "./conversation-message/conversation-message-highlighted"
 import { IConversationMessage } from "./conversation-message/conversation-message.types"
@@ -57,7 +58,7 @@ export const ConversationMessages = memo(function ConversationMessages(props: {
     caller: "Conversation Messages",
   })
 
-  useFocusEffect(
+  useBetterFocusEffect(
     useCallback(() => {
       refetchMessages().catch(captureError)
     }, [refetchMessages]),
@@ -90,8 +91,10 @@ export const ConversationMessages = memo(function ConversationMessages(props: {
     try {
       refreshingRef.current = true
       await refetchMessages()
-    } catch (e) {
-      captureError(e)
+    } catch (error) {
+      captureError(
+        new GenericError({ error, additionalMessage: "Error refreshing conversation messages" }),
+      )
     } finally {
       refreshingRef.current = false
     }

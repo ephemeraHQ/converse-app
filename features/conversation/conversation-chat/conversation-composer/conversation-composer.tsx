@@ -6,6 +6,7 @@ import { ConversationComposerReplyPreview } from "@/features/conversation/conver
 import { useConversationStore } from "@/features/conversation/conversation-chat/conversation.store-context"
 import { useAppTheme } from "@/theme/use-app-theme"
 import { captureErrorWithToast } from "@/utils/capture-error"
+import { GenericError } from "@/utils/error"
 import { AddAttachmentButton } from "./conversation-composer-add-attachment-button"
 import { ConversationComposerAttachmentPreview } from "./conversation-composer-attachment-preview"
 import { SendButton } from "./conversation-composer-send-button"
@@ -33,7 +34,9 @@ export const ConversationComposer = memo(function ConversationComposer() {
         await createConversationAndSend()
       }
     } catch (error) {
-      captureErrorWithToast(error, { message: "Failed to send message" })
+      captureErrorWithToast(
+        new GenericError({ error, additionalMessage: "Failed to send message" }),
+      )
     }
   }, [sendToExistingConversation, createConversationAndSend, conversationStore])
 

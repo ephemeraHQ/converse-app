@@ -1,4 +1,4 @@
-import { useFocusEffect, useNavigation } from "@react-navigation/native"
+import { useNavigation } from "@react-navigation/native"
 import { useQueries } from "@tanstack/react-query"
 import React, { memo, useCallback, useMemo } from "react"
 import { Center } from "@/design-system/Center"
@@ -15,6 +15,7 @@ import { getConversationMetadataQueryOptions } from "@/features/conversation/con
 import { useConversationRequestsListItem } from "@/features/conversation/conversation-requests-list/use-conversation-requests-list-items"
 import { getConversationQueryOptions } from "@/features/conversation/queries/conversation.query"
 import { conversationIsUnreadForInboxId } from "@/features/conversation/utils/conversation-is-unread-by-current-account"
+import { useBetterFocusEffect } from "@/hooks/use-better-focus-effect"
 import { useAppTheme } from "@/theme/use-app-theme"
 
 export const ConversationListAwaitingRequests = memo(function ConversationListAwaitingRequests() {
@@ -28,7 +29,7 @@ export const ConversationListAwaitingRequests = memo(function ConversationListAw
     refetch,
   } = useConversationRequestsListItem()
 
-  useFocusEffect(
+  useBetterFocusEffect(
     useCallback(() => {
       refetch()
     }, [refetch]),

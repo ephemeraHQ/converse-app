@@ -12,6 +12,7 @@ import { useGroupName } from "@/features/groups/hooks/use-group-name"
 import { groupRemoveRestoreHandler } from "@/features/groups/utils/groupActionHandlers"
 import { useRouter } from "@/navigation/use-navigation"
 import { captureErrorWithToast } from "@/utils/capture-error"
+import { GenericError } from "@/utils/error"
 import { useCurrentXmtpConversationIdSafe } from "../conversation.store-context"
 
 export function ConversationConsentPopupGroup() {
@@ -47,9 +48,7 @@ export function ConversationConsentPopupGroup() {
         includeAddedBy: false,
       })
     } catch (error) {
-      captureErrorWithToast(error, {
-        message: `Failed to allow group`,
-      })
+      captureErrorWithToast(new GenericError({ error, additionalMessage: `Failed to allow group` }))
     }
   }, [allowGroup])
 

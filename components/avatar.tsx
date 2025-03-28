@@ -12,7 +12,7 @@ export type IAvatarProps = {
   name: Nullable<string>
   source?: Nullable<string | ImageSourcePropType>
   uri?: Nullable<string> // Kept for backward compatibility
-  size?: "sm" | "md" | "lg" | "xl"
+  size?: "sm" | "md" | "lg" | "xl" | "xxl"
   sizeNumber?: number
   style?: StyleProp<ViewStyle>
 }
@@ -36,6 +36,7 @@ export const Avatar = memo(function Avatar({
       md: theme.avatarSize.md,
       lg: theme.avatarSize.lg,
       xl: theme.avatarSize.xl,
+      xxl: theme.avatarSize.xxl,
     }[size]
 
   // Use source if provided, otherwise fall back to uri for backward compatibility

@@ -23,6 +23,7 @@ import { getXmtpConversationMessage } from "@/features/xmtp/xmtp-messages/xmtp-m
 import { IXmtpConversationId, IXmtpInboxId, IXmtpMessageId } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
 import { getTodayNs } from "@/utils/date"
+import { GenericError } from "@/utils/error"
 import { getRandomId } from "@/utils/general"
 import { reactQueryClient } from "@/utils/react-query/react-query.client"
 import { updateObjectAndMethods } from "@/utils/update-object-and-methods"
@@ -186,7 +187,12 @@ export function useSendMessage() {
                 realMessage: result.sentMessages[index],
               })
             } catch (error) {
-              captureError(error)
+              captureError(
+                new GenericError({
+                  error,
+                  additionalMessage: "Error replacing optimistic message with real one",
+                }),
+              )
               hasError = true
             }
           })

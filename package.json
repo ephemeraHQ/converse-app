@@ -158,6 +158,7 @@
     "react-native-webview": "13.12.5",
     "rn-fetch-blob": "^0.12.0",
     "safe-buffer": "^5.2.1",
+    "tanstack-query-dev-tools-expo-plugin": "^0.1.1",
     "thirdweb": "^5.90.2",
     "uuid": "^9.0.1",
     "viem": "^2.22.7",

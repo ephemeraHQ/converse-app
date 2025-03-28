@@ -11,6 +11,7 @@ import { getMessageFromConversationSafe } from "@/features/conversation/conversa
 import { useReactOnMessage } from "@/features/conversation/conversation-chat/use-react-on-message.mutation"
 import { useRemoveReactionOnMessage } from "@/features/conversation/conversation-chat/use-remove-reaction-on-message.mutation"
 import { captureErrorWithToast } from "@/utils/capture-error"
+import { GenericError } from "@/utils/error"
 import { useCurrentXmtpConversationId } from "../conversation.store-context"
 import { getCurrentUserAlreadyReactedOnMessage } from "./utils/get-current-user-already-reacted-on-message"
 
@@ -53,7 +54,9 @@ export const ConversationMessageGestures = memo(function ConversationMessageGest
           }),
         })
       } catch (error) {
-        captureErrorWithToast(error)
+        captureErrorWithToast(
+          new GenericError({ error, additionalMessage: "Error showing context menu" }),
+        )
       }
     },
     [messageContextMenuStore, messageStore, contextMenuExtra, xmtpConversationId],

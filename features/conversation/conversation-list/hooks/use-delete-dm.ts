@@ -13,6 +13,7 @@ import { usePreferredDisplayInfo } from "@/features/preferred-display-info/use-p
 import { IXmtpConversationId } from "@/features/xmtp/xmtp.types"
 import { translate } from "@/i18n"
 import { captureErrorWithToast } from "@/utils/capture-error"
+import { GenericError } from "@/utils/error"
 
 export const useDeleteDm = ({
   xmtpConversationId,
@@ -76,7 +77,9 @@ export const useDeleteDm = ({
           try {
             await deleteDmAsync()
           } catch (error) {
-            captureErrorWithToast(error)
+            captureErrorWithToast(
+              new GenericError({ error, additionalMessage: "Error deleting dm" }),
+            )
           }
         },
       },
@@ -90,7 +93,9 @@ export const useDeleteDm = ({
               xmtpConversationId,
             })
           } catch (error) {
-            captureErrorWithToast(error)
+            captureErrorWithToast(
+              new GenericError({ error, additionalMessage: "Error deleting dm" }),
+            )
           }
         },
       },

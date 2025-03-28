@@ -1,5 +1,5 @@
 import { IXmtpInboxId } from "@features/xmtp/xmtp.types"
-import { IConvosProfileForInbox } from "@/features/profiles/profile.types"
+import { IConvosProfile } from "@/features/profiles/profiles.types"
 import { ISocialProfile } from "@/features/social-profiles/social-profiles.api"
 import { Nullable } from "@/types/general"
 import { IEthereumAddress } from "@/utils/evm/address"
@@ -9,7 +9,7 @@ import { shortAddress } from "@/utils/strings/shortAddress"
  * Gets the preferred display name based on available profile data
  */
 export function getPreferredDisplayName(args: {
-  profile: Nullable<IConvosProfileForInbox>
+  profile: Nullable<IConvosProfile>
   socialProfiles: Nullable<ISocialProfile[]>
   ethAddress: Nullable<IEthereumAddress>
   inboxId: Nullable<IXmtpInboxId>
@@ -29,7 +29,7 @@ export function getPreferredDisplayName(args: {
  * Gets the preferred avatar URL based on available profile data
  */
 export function getPreferredAvatarUrl(args: {
-  profile: Nullable<IConvosProfileForInbox>
+  profile: Nullable<IConvosProfile>
   socialProfiles: Nullable<ISocialProfile[]>
 }): string | undefined {
   const { profile, socialProfiles } = args
@@ -45,7 +45,7 @@ export function getPreferredAvatarUrl(args: {
  * Gets the preferred Ethereum address based on available data
  */
 export function getPreferredEthAddress(args: {
-  profile: Nullable<IConvosProfileForInbox>
+  profile: Nullable<IConvosProfile>
   socialProfiles: Nullable<ISocialProfile[]>
   ethAddress: Nullable<IEthereumAddress>
 }): Nullable<IEthereumAddress> {

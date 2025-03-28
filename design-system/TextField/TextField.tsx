@@ -67,6 +67,11 @@ export const TextField = forwardRef(function TextField(
     $inputStyleOverride,
   ]
 
+  const $helperContainerStyle: ThemedStyle<ViewStyle> = ({ spacing }) => ({
+    marginTop: spacing.xxxs,
+    paddingHorizontal: spacing.xs,
+  })
+
   const $helperStyles = [
     $helperStyle,
     status === "error" && { color: theme.colors.global.caution },
@@ -141,14 +146,20 @@ export const TextField = forwardRef(function TextField(
       </HStack>
 
       {!!(helper || helperTx) && (
-        <Text
-          preset="formHelper"
-          text={helper}
-          tx={helperTx}
-          txOptions={helperTxOptions}
-          {...HelperTextProps}
-          style={themed($helperStyles)}
-        />
+        <VStack style={themed($helperContainerStyle)}>
+          {typeof helper === "string" ? (
+            <Text
+              preset="formHelper"
+              text={helper}
+              tx={helperTx}
+              txOptions={helperTxOptions}
+              {...HelperTextProps}
+              style={themed($helperStyles)}
+            />
+          ) : (
+            helper
+          )}
+        </VStack>
       )}
     </TouchableOpacity>
   )
@@ -177,9 +188,8 @@ const $inputWrapperStyle: ThemedStyle<ViewStyle> = ({
   paddingVertical: spacing.xxs,
 })
 
-const $helperStyle: ThemedStyle<TextStyle> = ({ spacing }) => ({
-  marginTop: spacing.xxxs,
-  paddingHorizontal: spacing.xs,
+const $helperStyle: ThemedStyle<TextStyle> = () => ({
+  // Only text-specific styles here
 })
 
 const $rightAccessoryStyle: ThemedStyle<ViewStyle> = ({ spacing }) => ({

@@ -6,10 +6,12 @@ import { showSnackbar } from "@/components/snackbar/snackbar.service"
 import { VStack } from "@/design-system/VStack"
 import { OnboardingFooter } from "@/features/auth-onboarding/components/onboarding-footer"
 import { useAuthOnboardingStore } from "@/features/auth-onboarding/stores/auth-onboarding.store"
+import { IPrivyUserId } from "@/features/authentication/authentication.types"
 import { hydrateAuth } from "@/features/authentication/hydrate-auth"
 import { useMultiInboxStore } from "@/features/authentication/multi-inbox.store"
-import { useCreateUserMutation } from "@/features/current-user/use-create-user"
+import { useCreateUserMutation } from "@/features/current-user/create-user.mutation"
 import { captureErrorWithToast } from "@/utils/capture-error"
+import { GenericError } from "@/utils/error"
 import { waitUntilPromise } from "@/utils/wait-until-promise"
 import { getFirstZodValidationError, isZodValidationError } from "@/utils/zod"
 
@@ -49,12 +51,13 @@ export const AuthOnboardingContactCardFooter = memo(function AuthOnboardingConta
 
       await createUserAsync({
         inboxId: currentSender.inboxId,
-        privyUserId: privyUser.id,
+        privyUserId: privyUser.id as IPrivyUserId,
         smartContractWalletAddress: currentSender.ethereumAddress,
         profile: {
           name: store.name,
           username: store.username,
-          ...(store.avatar && { avatar: store.avatar }),
+          avatar: store.avatar ?? null,
+          description: null, // For now there's no field for description in the onboarding
         },
       })
 
@@ -75,9 +78,12 @@ export const AuthOnboardingContactCardFooter = memo(function AuthOnboardingConta
           type: "error",
         })
       } else {
-        captureErrorWithToast(error, {
-          message: "An unexpected error occurred. Please try again.",
-        })
+        captureErrorWithToast(
+          new GenericError({
+            error,
+            additionalMessage: "An unexpected error occurred. Please try again.",
+          }),
+        )
       }
     } finally {
       setPressedOnContinue(false)

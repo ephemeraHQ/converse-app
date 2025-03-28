@@ -3,6 +3,7 @@ import mime from "mime"
 import RNFS from "react-native-fs"
 import { IXmtpMessageId } from "@/features/xmtp/xmtp.types"
 import { captureError } from "@/utils/capture-error"
+import { GenericError } from "@/utils/error"
 import { moveFileAndReplaceIfExist } from "@/utils/file-system/file-system"
 import { getImageSize, isImageMimetype } from "@/utils/media"
 import { LocalAttachmentMetadata } from "./conversation-attachments.types"
@@ -27,7 +28,9 @@ export const getStoredRemoteAttachment = async (messageId: string) => {
     const fileExists = await RNFS.exists(attachmentPath)
     return fileExists ? metadata : undefined
   } catch (error) {
-    captureError(error)
+    captureError(
+      new GenericError({ error, additionalMessage: "Error getting stored remote attachment" }),
+    )
   }
 }
 

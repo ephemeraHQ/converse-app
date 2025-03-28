@@ -19,7 +19,7 @@ export function useNotificationListeners() {
     // Listen for notifications while app is in foreground
     foregroundNotificationListener.current = Notifications.addNotificationReceivedListener(
       (notification) => {
-        notificationsLogger.debug(`Foreground notification displayed:`, notification)
+        // notificationsLogger.debug(`Handling foreground notification:`, notification)
       },
     )
 
@@ -48,7 +48,12 @@ export function useNotificationListeners() {
             )
           }
         } catch (error) {
-          captureError(error)
+          captureError(
+            new NotificationError({
+              error,
+              additionalMessage: "Error handling notification tap",
+            }),
+          )
         }
       },
     )
