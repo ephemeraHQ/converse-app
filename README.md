@@ -1,5 +1,10 @@
 # Converse
 
+![Status](https://img.shields.io/badge/Deprecated-brown)
+
+> [!CAUTION]
+> The Converse repository has been deprecated. All new work is being done in the [Convos app](https://github.com/ephemeraHQ/convos-app) repository.
+
 ## Setup
 
 ### Environment
